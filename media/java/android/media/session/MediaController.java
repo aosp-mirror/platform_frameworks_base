@@ -117,7 +117,7 @@ public final class MediaController {
      * @param token The token for the session.
      */
     public MediaController(@NonNull Context context, @NonNull MediaSession.Token token) {
-        this(context, token.getBinder());
+        this(context, token.getControllerLink());
     }
 
     /**

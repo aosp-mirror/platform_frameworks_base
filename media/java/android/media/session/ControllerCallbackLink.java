@@ -254,7 +254,7 @@ public final class ControllerCallbackLink implements Parcelable {
 
         @Override
         public void notifyPlaybackStateChanged(PlaybackState state) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPlaybackStateChanged(state);
@@ -265,7 +265,7 @@ public final class ControllerCallbackLink implements Parcelable {
 
         @Override
         public void notifyMetadataChanged(MediaMetadata metadata) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onMetadataChanged(metadata);
@@ -276,7 +276,7 @@ public final class ControllerCallbackLink implements Parcelable {
 
         @Override
         public void notifyQueueChanged(List<QueueItem> queue) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onQueueChanged(queue);
@@ -287,7 +287,7 @@ public final class ControllerCallbackLink implements Parcelable {
 
         @Override
         public void notifyQueueTitleChanged(CharSequence title) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onQueueTitleChanged(title);
@@ -303,7 +303,7 @@ public final class ControllerCallbackLink implements Parcelable {
 
         @Override
         public void notifyVolumeInfoChanged(PlaybackInfo info) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onVolumeInfoChanged(info);
@@ -312,7 +312,7 @@ public final class ControllerCallbackLink implements Parcelable {
             }
         }
 
-        private void ensureMediasControlPermission() {
+        private void ensureMediaControlPermission() {
             // Allow API calls from the System UI
             if (mContext.checkCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
                     == PackageManager.PERMISSION_GRANTED) {
