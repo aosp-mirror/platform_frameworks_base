@@ -921,7 +921,6 @@ Landroid/os/PowerManager;->isLightDeviceIdleMode()Z
 Landroid/os/PowerManager;->mService:Landroid/os/IPowerManager;
 Landroid/os/PowerManager;->validateWakeLockParameters(ILjava/lang/String;)V
 Landroid/os/PowerManager;->wakeUp(JLjava/lang/String;)V
-Landroid/os/Process;->BLUETOOTH_UID:I
 Landroid/os/Process;->DRM_UID:I
 Landroid/os/Process;->getFreeMemory()J
 Landroid/os/Process;->getParentPid(I)I
@@ -948,10 +947,8 @@ Landroid/os/Process;->PROC_TERM_MASK:I
 Landroid/os/Process;->PROC_ZERO_TERM:I
 Landroid/os/Process;->readProcFile(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z
 Landroid/os/Process;->readProcLines(Ljava/lang/String;[Ljava/lang/String;[J)V
-Landroid/os/Process;->ROOT_UID:I
 Landroid/os/Process;->setArgV0(Ljava/lang/String;)V
 Landroid/os/Process;->setProcessGroup(II)V
-Landroid/os/Process;->SHELL_UID:I
 Landroid/os/Process;->VPN_UID:I
 Landroid/os/Process;->WIFI_UID:I
 Landroid/os/RecoverySystem;->verifyPackageCompatibility(Ljava/io/InputStream;)Z
