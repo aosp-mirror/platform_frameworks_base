@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.os.SystemProperties;
+import android.sysprop.CryptoProperties;
 
 /**
  * This is a cache of various ro.* properties so that they can be read just once
@@ -61,7 +62,7 @@ public class RoSystemProperties {
 
     // ------ ro.crypto.* -------- //
     public static final String CRYPTO_STATE = SystemProperties.get("ro.crypto.state");
-    public static final String CRYPTO_TYPE = SystemProperties.get("ro.crypto.type");
+    public static final String CRYPTO_TYPE = CryptoProperties.type().orElse("");
     // These are pseudo-properties
     public static final boolean CRYPTO_ENCRYPTABLE =
             !CRYPTO_STATE.isEmpty() && !"unsupported".equals(CRYPTO_STATE);
