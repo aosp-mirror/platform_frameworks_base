@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION;
+
 import android.app.ActivityManager;
 import android.app.job.JobParameters;
 import android.content.Context;
@@ -578,7 +580,7 @@ public abstract class BatteryStats implements Parcelable {
             return ActivityManager.PROCESS_STATE_NONEXISTENT;
         } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
             return Uid.PROCESS_STATE_TOP;
-        } else if (procState == ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+        } else if (ActivityManager.isForegroundService(procState)) {
             // State when app has put itself in the foreground.
             return Uid.PROCESS_STATE_FOREGROUND_SERVICE;
         } else if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
@@ -818,7 +820,9 @@ public abstract class BatteryStats implements Parcelable {
          * is not attributed to any non-critical process states.
          */
         public static final int[] CRITICAL_PROC_STATES = {
-            PROCESS_STATE_TOP, PROCESS_STATE_FOREGROUND_SERVICE, PROCESS_STATE_FOREGROUND
+                PROCESS_STATE_TOP,
+                PROCESS_STATE_FOREGROUND_SERVICE_LOCATION, PROCESS_STATE_FOREGROUND_SERVICE,
+                PROCESS_STATE_FOREGROUND
         };
 
         public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);

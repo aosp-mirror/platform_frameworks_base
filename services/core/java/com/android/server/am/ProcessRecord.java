@@ -31,6 +31,7 @@ import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Binder;
 import android.os.Debug;
@@ -169,6 +170,7 @@ final class ProcessRecord implements WindowProcessListener {
     private boolean mHasClientActivities;  // Are there any client services with activities?
     boolean hasStartedServices; // Are there any started services running in this process?
     private boolean mHasForegroundServices; // Running any services that are foreground?
+    private int mFgServiceTypes; // Type of foreground service, if there is a foreground service.
     private boolean mHasForegroundActivities; // Running any activities that are foreground?
     boolean repForegroundActivities; // Last reported foreground activities.
     boolean systemNoUi;         // This is a system process, but not currently showing UI.
@@ -1051,13 +1053,19 @@ final class ProcessRecord implements WindowProcessListener {
         return mRequiredAbi;
     }
 
-    void setHasForegroundServices(boolean hasForegroundServices) {
+    void setHasForegroundServices(boolean hasForegroundServices, int fgServiceTypes) {
         mHasForegroundServices = hasForegroundServices;
+        mFgServiceTypes = fgServiceTypes;
         mWindowProcessController.setHasForegroundServices(hasForegroundServices);
     }
 
     boolean hasForegroundServices() {
         return mHasForegroundServices;
+    }
+
+    boolean hasLocationForegroundServices() {
+        return mHasForegroundServices
+                && (mFgServiceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) != 0;
     }
 
     void setHasForegroundActivities(boolean hasForegroundActivities) {

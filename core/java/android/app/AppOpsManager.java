@@ -41,9 +41,9 @@ import android.os.RemoteException;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import android.util.SparseArray;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
@@ -216,6 +216,7 @@ public class AppOpsManager {
     @IntDef(flag = true, prefix = { "UID_STATE_" }, value = {
             UID_STATE_PERSISTENT,
             UID_STATE_TOP,
+            UID_STATE_FOREGROUND_SERVICE_LOCATION,
             UID_STATE_FOREGROUND_SERVICE,
             UID_STATE_FOREGROUND,
             UID_STATE_BACKGROUND,
@@ -246,18 +247,26 @@ public class AppOpsManager {
     public static final int UID_STATE_TOP = 1;
 
     /**
+     * Metrics about an op when its uid is running a foreground service with location type.
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 2;
+
+    /**
      * Metrics about an op when its uid is running a foreground service.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_FOREGROUND_SERVICE = 2;
+    public static final int UID_STATE_FOREGROUND_SERVICE = 3;
 
     /**
      * Last UID state in which we don't restrict what an op can do.
      * @hide
      */
-    public static final int UID_STATE_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
+    public static final int UID_STATE_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE_LOCATION;
 
     /**
      * Metrics about an op when its uid is in the foreground for any other reasons.
@@ -265,7 +274,7 @@ public class AppOpsManager {
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_FOREGROUND = 3;
+    public static final int UID_STATE_FOREGROUND = 4;
 
     /**
      * Metrics about an op when its uid is in the background for any reason.
@@ -273,7 +282,7 @@ public class AppOpsManager {
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_BACKGROUND = 4;
+    public static final int UID_STATE_BACKGROUND = 5;
 
     /**
      * Metrics about an op when its uid is cached.
@@ -281,13 +290,13 @@ public class AppOpsManager {
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_CACHED = 5;
+    public static final int UID_STATE_CACHED = 6;
 
     /**
      * Number of uid states we track.
      * @hide
      */
-    public static final int _NUM_UID_STATE = 6;
+    public static final int _NUM_UID_STATE = 7;
 
     // when adding one of these:
     //  - increment _NUM_OP
@@ -3250,6 +3259,7 @@ public class AppOpsManager {
          *
          * @param uidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          *
@@ -3300,6 +3310,7 @@ public class AppOpsManager {
          *
          * @param uidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          *
@@ -3350,6 +3361,7 @@ public class AppOpsManager {
          *
          * @param uidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          *
@@ -4765,6 +4777,9 @@ public class AppOpsManager {
             }
             case UID_STATE_TOP: {
                 return "UID_STATE_TOP";
+            }
+            case UID_STATE_FOREGROUND_SERVICE_LOCATION: {
+                return "UID_STATE_FOREGROUND_SERVICE_LOCATION";
             }
             case UID_STATE_FOREGROUND_SERVICE: {
                 return "UID_STATE_FOREGROUND_SERVICE";
