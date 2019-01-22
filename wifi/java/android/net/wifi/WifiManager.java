@@ -3717,10 +3717,8 @@ public class WifiManager {
      * @param SSID, in the format of WifiConfiguration's SSID.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.NETWORK_SETTINGS,
-            android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK
     })
     public void disableEphemeralNetwork(String SSID) {
