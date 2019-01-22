@@ -54,6 +54,7 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libnativehelper \
     libpackagelistparser \
     libpcre2 \
+    libprocessgroup \
     libselinux \
     libui \
     libutils \
