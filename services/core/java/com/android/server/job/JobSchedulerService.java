@@ -443,6 +443,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "qc_window_size_rare_ms";
         private static final String KEY_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS =
                 "qc_max_execution_time_ms";
+        private static final String KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE =
+                "qc_max_job_count_active";
+        private static final String KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING =
+                "qc_max_job_count_working";
+        private static final String KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT =
+                "qc_max_job_count_frequent";
+        private static final String KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE =
+                "qc_max_job_count_rare";
+        private static final String KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME =
+                "qc_max_count_per_allowed_time";
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
@@ -479,6 +489,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                 24 * 60 * 60 * 1000L; // 24 hours
         private static final long DEFAULT_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS =
                 4 * 60 * 60 * 1000L; // 4 hours
+        private static final int DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE =
+                200; // 1200/hr
+        private static final int DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING =
+                1200; // 600/hr
+        private static final int DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT =
+                1800; // 225/hr
+        private static final int DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE =
+                2400; // 100/hr
+        private static final int DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME = 20;
 
         /**
          * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
@@ -682,6 +701,41 @@ public class JobSchedulerService extends com.android.server.SystemService
         public long QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS =
                 DEFAULT_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS;
 
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE =
+                DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE;
+
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING =
+                DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING;
+
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT =
+                DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT;
+
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE =
+                DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE;
+
+        /**
+         * The maximum number of jobs that can run within the past
+         * {@link #QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS}.
+         */
+        public int QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME =
+                DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME;
+
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
         void updateConstantsLocked(String value) {
@@ -767,6 +821,21 @@ public class JobSchedulerService extends com.android.server.SystemService
             QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS = mParser.getDurationMillis(
                     KEY_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS,
                     DEFAULT_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS);
+            QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE = mParser.getInt(
+                    KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE,
+                    DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE);
+            QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING = mParser.getInt(
+                    KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING,
+                    DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING);
+            QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT = mParser.getInt(
+                    KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT,
+                    DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT);
+            QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE = mParser.getInt(
+                    KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE,
+                    DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE);
+            QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME = mParser.getInt(
+                    KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME,
+                    DEFAULT_QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME);
         }
 
         void dump(IndentingPrintWriter pw) {
@@ -823,6 +892,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS).println();
             pw.printPair(KEY_QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS,
                     QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE).println();
+            pw.printPair(KEY_QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME).println();
             pw.decreaseIndent();
         }
 
@@ -872,6 +951,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS);
             proto.write(ConstantsProto.QuotaController.MAX_EXECUTION_TIME_MS,
                     QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_ACTIVE,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_WORKING,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_FREQUENT,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_RARE,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_PER_ALLOWED_TIME,
+                    QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME);
             proto.end(qcToken);
 
             proto.end(token);
