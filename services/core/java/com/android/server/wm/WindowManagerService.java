@@ -1846,9 +1846,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             if (mAccessibilityController != null) {
                 WindowState window = mWindowMap.get(token);
-                //TODO (multidisplay): Magnification is supported only for the default display.
-                if (window != null && window.getDisplayId() == DEFAULT_DISPLAY) {
-                    mAccessibilityController.onRectangleOnScreenRequestedLocked(rectangle);
+                if (window != null) {
+                    mAccessibilityController.onRectangleOnScreenRequestedLocked(
+                            window.getDisplayId(), rectangle);
                 }
             }
         }
@@ -2237,8 +2237,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mDestroying = true;
             win.destroySurface(false, stopped);
         }
-        // TODO(multidisplay): Magnification is supported only for the default display.
-        if (mAccessibilityController != null && win.getDisplayId() == DEFAULT_DISPLAY) {
+        if (mAccessibilityController != null) {
             mAccessibilityController.onWindowTransitionLocked(win, transit);
         }
 
@@ -6823,10 +6822,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setMagnificationSpec(MagnificationSpec spec) {
+        public void setMagnificationSpec(int displayId, MagnificationSpec spec) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController != null) {
-                    mAccessibilityController.setMagnificationSpecLocked(spec);
+                    mAccessibilityController.setMagnificationSpecLocked(displayId, spec);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
                 }
@@ -6837,10 +6836,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setForceShowMagnifiableBounds(boolean show) {
+        public void setForceShowMagnifiableBounds(int displayId, boolean show) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController != null) {
-                    mAccessibilityController.setForceShowMagnifiableBoundsLocked(show);
+                    mAccessibilityController.setForceShowMagnifiableBoundsLocked(displayId, show);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
                 }
@@ -6848,10 +6847,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void getMagnificationRegion(@NonNull Region magnificationRegion) {
+        public void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController != null) {
-                    mAccessibilityController.getMagnificationRegionLocked(magnificationRegion);
+                    mAccessibilityController.getMagnificationRegionLocked(displayId,
+                            magnificationRegion);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
                 }
@@ -6879,16 +6879,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setMagnificationCallbacks(@Nullable MagnificationCallbacks callbacks) {
+        public boolean setMagnificationCallbacks(int displayId,
+                @Nullable MagnificationCallbacks callbacks) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController == null) {
                     mAccessibilityController = new AccessibilityController(
                             WindowManagerService.this);
                 }
-                mAccessibilityController.setMagnificationCallbacksLocked(callbacks);
+                boolean result = mAccessibilityController.setMagnificationCallbacksLocked(
+                        displayId, callbacks);
                 if (!mAccessibilityController.hasCallbacksLocked()) {
                     mAccessibilityController = null;
                 }
+                return result;
             }
         }
 
@@ -7267,8 +7270,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }, false /* traverseTopToBottom */);
     }
 
-    public void applyMagnificationSpec(MagnificationSpec spec) {
-        getDefaultDisplayContentLocked().applyMagnificationSpec(spec);
+    /** Called from Accessibility Controller to apply magnification spec */
+    public void applyMagnificationSpecLocked(int displayId, MagnificationSpec spec) {
+        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+        if (displayContent != null) {
+            displayContent.applyMagnificationSpec(spec);
+        }
     }
 
     SurfaceControl.Builder makeSurfaceBuilder(SurfaceSession s) {

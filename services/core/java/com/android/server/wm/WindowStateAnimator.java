@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
@@ -1308,9 +1307,7 @@ class WindowStateAnimator {
             transit = WindowManagerPolicy.TRANSIT_SHOW;
         }
         applyAnimationLocked(transit, true);
-        //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null
-                && mWin.getDisplayId() == DEFAULT_DISPLAY) {
+        if (mService.mAccessibilityController != null) {
             mService.mAccessibilityController.onWindowTransitionLocked(mWin, transit);
         }
     }

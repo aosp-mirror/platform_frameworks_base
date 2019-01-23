@@ -26,16 +26,19 @@ import static com.android.server.testutils.TestUtils.strictMock;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Message;
 import android.util.DebugUtils;
 import android.view.InputDevice;
@@ -104,14 +107,9 @@ public class MagnificationGestureHandlerTest {
     public static final float DEFAULT_X = 301;
     public static final float DEFAULT_Y = 299;
 
+    private static final int DISPLAY_0 = 0;
+
     private Context mContext;
-    final AccessibilityManagerService mMockAms = mock(AccessibilityManagerService.class);
-    final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
-    final MessageCapturingHandler mMessageCapturingHandler =
-            new MessageCapturingHandler(null);
-    final ValueAnimator mMockValueAnimator = mock(ValueAnimator.class);
-    MagnificationController.SettingsBridge mMockSettingsBridge =
-            mock(MagnificationController.SettingsBridge.class);
     MagnificationController mMagnificationController;
 
     private OffsettableClock mClock;
@@ -123,18 +121,26 @@ public class MagnificationGestureHandlerTest {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
-        mMagnificationController = new MagnificationController(mContext, mMockAms, new Object(),
-                mMessageCapturingHandler, mMockWindowManager, mMockValueAnimator,
-                mMockSettingsBridge) {
+        final MagnificationController.ControllerContext mockController =
+                mock(MagnificationController.ControllerContext.class);
+        final WindowManagerInternal mockWindowManager = mock(WindowManagerInternal.class);
+        when(mockController.getContext()).thenReturn(mContext);
+        when(mockController.getAms()).thenReturn(mock(AccessibilityManagerService.class));
+        when(mockController.getWindowManager()).thenReturn(mockWindowManager);
+        when(mockController.getHandler()).thenReturn(new Handler(mContext.getMainLooper()));
+        when(mockController.newValueAnimator()).thenReturn(new ValueAnimator());
+        when(mockController.getAnimationDuration()).thenReturn(1000L);
+        when(mockWindowManager.setMagnificationCallbacks(eq(DISPLAY_0), any())).thenReturn(true);
+        mMagnificationController = new MagnificationController(mockController, new Object()) {
             @Override
-            public boolean magnificationRegionContains(float x, float y) {
+            public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;
             }
 
             @Override
-            void setForceShowMagnifiableBounds(boolean show) {}
+            void setForceShowMagnifiableBounds(int displayId, boolean show) {}
         };
-        mMagnificationController.register();
+        mMagnificationController.register(DISPLAY_0);
         mClock = new OffsettableClock.Stopped();
 
         boolean detectTripleTap = true;
@@ -144,7 +150,7 @@ public class MagnificationGestureHandlerTest {
 
     @After
     public void tearDown() {
-        mMagnificationController.unregister();
+        mMagnificationController.unregister(DISPLAY_0);
     }
 
     @NonNull
@@ -509,7 +515,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     private boolean isZoomed() {
-        return mMgh.mMagnificationController.isMagnifying();
+        return mMgh.mMagnificationController.isMagnifying(DISPLAY_0);
     }
 
     private int tapCount() {
