@@ -23,10 +23,4 @@
                     android:topRightRadius="@dimen/corner_size"/>
         </shape>
     </item>
-    <item android:gravity="bottom">
-        <shape>
-            <size android:height="1dp"/>
-            <solid android:color="?android:attr/textColorSecondary" />
-        </shape>
-    </item>
 </layer-list>

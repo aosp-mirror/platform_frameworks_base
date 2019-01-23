@@ -2356,5 +2356,12 @@
     <!-- Text used for content description of settings button in the header of expanded bubble
          view. [CHAR_LIMIT=NONE] -->
     <string name="bubbles_settings_button_description">Open notification settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+    <!-- Text for asking the user whether bubbles (floating app content) should be enabled for an
+         app. [CHAR LIMIT=NONE] -->
+    <string name="bubbles_prompt">Allow bubbles from this app?</string>
+    <!-- Text used for button allowing user to opt out of bubbles [CHAR LIMIT=20] -->
+    <string name="no_bubbles">Block</string>
+    <!-- Text used for button allowing user to approve / enable bubbles [CHAR LIMIT=20] -->
+    <string name="yes_bubbles">Allow</string>
 
 </resources>
