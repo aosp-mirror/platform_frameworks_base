@@ -55,11 +55,11 @@ public class LooperStatsService extends Binder {
             "debug.sys.looper_stats_enabled";
     private static final int DEFAULT_SAMPLING_INTERVAL = 100;
     private static final int DEFAULT_ENTRIES_SIZE_CAP = 2000;
-    private static final boolean DEFAULT_ENABLED = false;
+    private static final boolean DEFAULT_ENABLED = true;
 
     private final Context mContext;
     private final LooperStats mStats;
-    private boolean mEnabled = false;
+    private boolean mEnabled = DEFAULT_ENABLED;
 
     private LooperStatsService(Context context, LooperStats stats) {
         this.mContext = context;
