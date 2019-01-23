@@ -93,6 +93,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
@@ -8585,17 +8586,46 @@ public class TelephonyManager {
     }
 
 
-    /** @hide */
-    public String getLocaleFromDefaultSim() {
+    /**
+     * Returns a well-formed IETF BCP 47 language tag representing the locale from the SIM, e.g,
+     * en-US. Returns {@code null} if no locale could be derived from subscriptions.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @see Locale#toLanguageTag()
+     * @see Locale#forLanguageTag(String)
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable public String getSimLocale() {
         try {
             final ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getLocaleFromDefaultSim();
+                return telephony.getSimLocaleForSubscriber(getSubId());
             }
         } catch (RemoteException ex) {
         }
         return null;
     }
+
+    /**
+     * TODO delete after SuW migrates to new API.
+     * @hide
+     */
+    public String getLocaleFromDefaultSim() {
+        try {
+            final ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getSimLocaleForSubscriber(getSubId());
+            }
+        } catch (RemoteException ex) {
+        }
+        return null;
+    }
+
 
     /**
      * Requests the modem activity info. The recipient will place the result
