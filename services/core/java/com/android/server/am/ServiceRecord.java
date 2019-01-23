@@ -16,10 +16,8 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.procstats.ServiceState;
-import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.LocalServices;
-import com.android.server.notification.NotificationManagerInternal;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -44,6 +42,11 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+
+import com.android.internal.app.procstats.ServiceState;
+import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.LocalServices;
+import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 
@@ -51,9 +54,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 /**
  * A running application service.
@@ -114,6 +114,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     long executingStart;    // start time of last execute request.
     boolean createdFromFg;  // was this service last created due to a foreground process call?
     int crashCount;         // number of times proc has crashed with service running
+    int lastKnownOomAdj;    // last known OOM adjustment for process (used if ProcessRecord is null)
     int totalRestartCount;  // number of times we have had to restart.
     int restartCount;       // number of restarts performed in a row.
     long restartDelay;      // delay until next restart attempt.

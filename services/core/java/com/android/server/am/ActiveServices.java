@@ -82,6 +82,7 @@ import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
 
 import com.android.internal.R;
+import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -167,6 +168,8 @@ public final class ActiveServices {
 
     /** Temporary list for holding the results of calls to {@link #collectPackageServicesLocked} */
     private ArrayList<ServiceRecord> mTmpCollectionResults = null;
+
+    private int mNumServiceRestarts = 0;
 
     /**
      * For keeping ActiveForegroundApps retaining state while the screen is off.
@@ -2327,19 +2330,50 @@ public final class ActiveServices {
                 r.restartDelay = mAm.mConstants.BOUND_SERVICE_CRASH_RESTART_DURATION
                         * (r.crashCount - 1);
             } else {
-                // If it has been a "reasonably long time" since the service
-                // was started, then reset our restart duration back to
-                // the beginning, so we don't infinitely increase the duration
-                // on a service that just occasionally gets killed (which is
-                // a normal case, due to process being killed to reclaim memory).
-                if (now > (r.restartTime+resetTime)) {
-                    r.restartCount = 1;
-                    r.restartDelay = minDuration;
-                } else {
-                    r.restartDelay *= mAm.mConstants.SERVICE_RESTART_DURATION_FACTOR;
-                    if (r.restartDelay < minDuration) {
+                mNumServiceRestarts++;
+                if (!mAm.mConstants.FLAG_USE_MEM_AWARE_SERVICE_RESTARTS) {
+                    // If it has been a "reasonably long time" since the service
+                    // was started, then reset our restart duration back to
+                    // the beginning, so we don't infinitely increase the duration
+                    // on a service that just occasionally gets killed (which is
+                    // a normal case, due to process being killed to reclaim memory).
+                    if (now > (r.restartTime + resetTime)) {
+                        r.restartCount = 1;
                         r.restartDelay = minDuration;
+                    } else {
+                        r.restartDelay *= mAm.mConstants.SERVICE_RESTART_DURATION_FACTOR;
+                        if (r.restartDelay < minDuration) {
+                            r.restartDelay = minDuration;
+                        }
                     }
+                } else {
+                    // The service will be restarted based on the last known oom_adj value
+                    // for the process when it was destroyed. A higher oom_adj value
+                    // means that the service will be restarted quicker.
+                    // If the service seems to keep crashing, the service restart counter will be
+                    // incremented and the restart delay will have an exponential backoff.
+                    final int lastOomAdj = r.app == null ? r.lastKnownOomAdj : r.app.setAdj;
+                    if (r.restartCount > 1) {
+                        r.restartDelay *= mAm.mConstants.SERVICE_RESTART_DURATION_FACTOR;
+                        if (r.restartDelay < minDuration) {
+                            r.restartDelay = minDuration;
+                        }
+                    } else {
+                        if (lastOomAdj <= ProcessList.VISIBLE_APP_ADJ) {
+                            r.restartDelay = 1 * 1000; // 1 second
+                        } else if (lastOomAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
+                            r.restartDelay = 2 * 1000; // 2 seconds
+                        } else if (lastOomAdj <= ProcessList.SERVICE_ADJ) {
+                            r.restartDelay = 5 * 1000; // 5 seconds
+                        } else if (lastOomAdj <= ProcessList.PREVIOUS_APP_ADJ) {
+                            r.restartDelay = 10 * 1000; // 10 seconds
+                        } else {
+                            r.restartDelay = 20 * 1000; // 20 seconds
+                        }
+                    }
+                    // If the last time the service restarted was more than a minute ago,
+                    // reset the service restart count, otherwise increment by one.
+                    r.restartCount = (now > (r.restartTime + resetTime)) ? 1 : (r.restartCount + 1);
                 }
             }
 
@@ -2347,21 +2381,7 @@ public final class ActiveServices {
 
             // Make sure that we don't end up restarting a bunch of services
             // all at the same time.
-            boolean repeat;
-            do {
-                repeat = false;
-                final long restartTimeBetween = mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN;
-                for (int i=mRestartingServices.size()-1; i>=0; i--) {
-                    ServiceRecord r2 = mRestartingServices.get(i);
-                    if (r2 != r && r.nextRestartTime >= (r2.nextRestartTime-restartTimeBetween)
-                            && r.nextRestartTime < (r2.nextRestartTime+restartTimeBetween)) {
-                        r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
-                        r.restartDelay = r.nextRestartTime - now;
-                        repeat = true;
-                        break;
-                    }
-                }
-            } while (repeat);
+            ensureSpacedServiceRestarts(r, now);
 
         } else {
             // Persistent processes are immediately restarted, so there is no
@@ -2389,6 +2409,24 @@ public final class ActiveServices {
                 r.userId, r.shortInstanceName, r.restartDelay);
 
         return canceled;
+    }
+
+    private void ensureSpacedServiceRestarts(ServiceRecord r, long now) {
+        boolean repeat;
+        do {
+            repeat = false;
+            final long restartTimeBetween = mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN;
+            for (int i = mRestartingServices.size() - 1; i >= 0; i--) {
+                ServiceRecord r2 = mRestartingServices.get(i);
+                if (r2 != r && r.nextRestartTime >= (r2.nextRestartTime - restartTimeBetween)
+                        && r.nextRestartTime < (r2.nextRestartTime + restartTimeBetween)) {
+                    r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
+                    r.restartDelay = r.nextRestartTime - now;
+                    repeat = true;
+                    break;
+                }
+            }
+        } while (repeat);
     }
 
     final void performServiceRestartLocked(ServiceRecord r) {
@@ -2463,6 +2501,26 @@ public final class ActiveServices {
         if (!whileRestarting && mRestartingServices.contains(r)) {
             // If waiting for a restart, then do nothing.
             return null;
+        }
+
+        // If the service is restarting, check the memory pressure - if it's low or critical, then
+        // further delay the restart because it will most likely get killed again; if the pressure
+        // is not low or critical, continue restarting.
+        if (mAm.mConstants.FLAG_USE_MEM_AWARE_SERVICE_RESTARTS && whileRestarting) {
+            final int memLevel = mAm.getMemoryTrimLevel();
+            if (memLevel >= ProcessStats.ADJ_MEM_FACTOR_LOW) {
+                final long now = SystemClock.uptimeMillis();
+                // Delay the restart based on the current memory pressure
+                // Default delay duration is 5 seconds
+                r.restartDelay = memLevel * mAm.mConstants.SERVICE_RESTART_DELAY_DURATION;
+                r.nextRestartTime = now + r.restartDelay;
+                ensureSpacedServiceRestarts(r, now);
+                mAm.mHandler.removeCallbacks(r.restarter);
+                mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
+                Slog.w(TAG, "Delaying restart of crashed service " + r.shortInstanceName
+                        + " in " + r.restartDelay + "ms due to continued memory pressure");
+                return null;
+            }
         }
 
         if (DEBUG_SERVICE) {
@@ -3579,6 +3637,7 @@ public final class ActiveServices {
                     || !mAm.mUserController.isUserRunning(sr.userId, 0)) {
                 bringDownServiceLocked(sr);
             } else {
+                sr.lastKnownOomAdj = app.setAdj;
                 boolean canceled = scheduleServiceRestartLocked(sr, true);
 
                 // Should the service remain running?  Note that in the
