@@ -481,7 +481,7 @@ public final class MediaSession {
          * @hide
          */
         @SystemApi
-        ControllerLink getControllerLink() {
+        public ControllerLink getControllerLink() {
             return mControllerLink;
         }
 

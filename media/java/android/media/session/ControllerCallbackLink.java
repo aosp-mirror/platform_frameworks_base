@@ -315,12 +315,6 @@ public final class ControllerCallbackLink implements Parcelable {
         }
 
         private void ensureMediaControlPermission() {
-            // Allow API calls from the System UI
-            if (mContext.checkCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
-                    == PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-
             // Check if it's system server or has MEDIA_CONTENT_CONTROL.
             // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
             // check here.
