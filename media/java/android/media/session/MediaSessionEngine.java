@@ -989,10 +989,8 @@ public final class MediaSessionEngine implements AutoCloseable {
     public static final class CallbackStub extends SessionCallbackLink.CallbackStub {
         private WeakReference<MediaSessionEngine> mSessionImpl;
 
-        private static RemoteUserInfo createRemoteUserInfo(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            return new RemoteUserInfo(packageName, pid, uid,
-                    caller != null ? caller.getBinder() : null);
+        private static RemoteUserInfo createRemoteUserInfo(String packageName, int pid, int uid) {
+            return new RemoteUserInfo(packageName, pid, uid);
         }
 
         public CallbackStub() {
@@ -1003,7 +1001,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller, String command, Bundle args, ResultReceiver cb) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchCommand(createRemoteUserInfo(packageName, pid, uid, caller),
+                sessionImpl.dispatchCommand(createRemoteUserInfo(packageName, pid, uid),
                         command, args, cb);
             }
         }
@@ -1015,7 +1013,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             try {
                 if (sessionImpl != null) {
                     sessionImpl.dispatchMediaButton(
-                            createRemoteUserInfo(packageName, pid, uid, null), mediaButtonIntent);
+                            createRemoteUserInfo(packageName, pid, uid), mediaButtonIntent);
                 }
             } finally {
                 if (cb != null) {
@@ -1029,7 +1027,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller, Intent mediaButtonIntent) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchMediaButton(createRemoteUserInfo(packageName, pid, uid, caller),
+                sessionImpl.dispatchMediaButton(createRemoteUserInfo(packageName, pid, uid),
                         mediaButtonIntent);
             }
         }
@@ -1039,7 +1037,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchPrepare(createRemoteUserInfo(packageName, pid, uid, caller));
+                sessionImpl.dispatchPrepare(createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1050,7 +1048,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchPrepareFromMediaId(
-                        createRemoteUserInfo(packageName, pid, uid, caller), mediaId, extras);
+                        createRemoteUserInfo(packageName, pid, uid), mediaId, extras);
             }
         }
 
@@ -1061,7 +1059,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchPrepareFromSearch(
-                        createRemoteUserInfo(packageName, pid, uid, caller), query, extras);
+                        createRemoteUserInfo(packageName, pid, uid), query, extras);
             }
         }
 
@@ -1071,7 +1069,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchPrepareFromUri(
-                        createRemoteUserInfo(packageName, pid, uid, caller), uri, extras);
+                        createRemoteUserInfo(packageName, pid, uid), uri, extras);
             }
         }
 
@@ -1080,7 +1078,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchPlay(createRemoteUserInfo(packageName, pid, uid, caller));
+                sessionImpl.dispatchPlay(createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1091,7 +1089,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchPlayFromMediaId(
-                        createRemoteUserInfo(packageName, pid, uid, caller), mediaId, extras);
+                        createRemoteUserInfo(packageName, pid, uid), mediaId, extras);
             }
         }
 
@@ -1102,7 +1100,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchPlayFromSearch(
-                        createRemoteUserInfo(packageName, pid, uid, caller), query, extras);
+                        createRemoteUserInfo(packageName, pid, uid), query, extras);
             }
         }
 
@@ -1112,7 +1110,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchPlayFromUri(
-                        createRemoteUserInfo(packageName, pid, uid, caller), uri, extras);
+                        createRemoteUserInfo(packageName, pid, uid), uri, extras);
             }
         }
 
@@ -1122,7 +1120,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchSkipToItem(
-                        createRemoteUserInfo(packageName, pid, uid, caller), id);
+                        createRemoteUserInfo(packageName, pid, uid), id);
             }
         }
 
@@ -1131,7 +1129,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchPause(createRemoteUserInfo(packageName, pid, uid, caller));
+                sessionImpl.dispatchPause(createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1140,7 +1138,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchStop(createRemoteUserInfo(packageName, pid, uid, caller));
+                sessionImpl.dispatchStop(createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1149,7 +1147,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchNext(createRemoteUserInfo(packageName, pid, uid, caller));
+                sessionImpl.dispatchNext(createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1158,7 +1156,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchPrevious(createRemoteUserInfo(packageName, pid, uid, caller));
+                sessionImpl.dispatchPrevious(createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1168,7 +1166,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchFastForward(
-                        createRemoteUserInfo(packageName, pid, uid, caller));
+                        createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1177,7 +1175,7 @@ public final class MediaSessionEngine implements AutoCloseable {
                 ControllerCallbackLink caller) {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
-                sessionImpl.dispatchRewind(createRemoteUserInfo(packageName, pid, uid, caller));
+                sessionImpl.dispatchRewind(createRemoteUserInfo(packageName, pid, uid));
             }
         }
 
@@ -1187,7 +1185,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchSeekTo(
-                        createRemoteUserInfo(packageName, pid, uid, caller), pos);
+                        createRemoteUserInfo(packageName, pid, uid), pos);
             }
         }
 
@@ -1197,7 +1195,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchRate(
-                        createRemoteUserInfo(packageName, pid, uid, caller), rating);
+                        createRemoteUserInfo(packageName, pid, uid), rating);
             }
         }
 
@@ -1207,7 +1205,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchCustomAction(
-                        createRemoteUserInfo(packageName, pid, uid, caller), action, args);
+                        createRemoteUserInfo(packageName, pid, uid), action, args);
             }
         }
 
@@ -1217,7 +1215,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchAdjustVolume(
-                        createRemoteUserInfo(packageName, pid, uid, caller), direction);
+                        createRemoteUserInfo(packageName, pid, uid), direction);
             }
         }
 
@@ -1227,7 +1225,7 @@ public final class MediaSessionEngine implements AutoCloseable {
             MediaSessionEngine sessionImpl = mSessionImpl.get();
             if (sessionImpl != null) {
                 sessionImpl.dispatchSetVolumeTo(
-                        createRemoteUserInfo(packageName, pid, uid, caller), value);
+                        createRemoteUserInfo(packageName, pid, uid), value);
             }
         }
 
