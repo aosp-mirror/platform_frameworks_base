@@ -3210,12 +3210,14 @@ package android.location {
     method public int getQuality();
     method public float getSmallestDisplacement();
     method public android.os.WorkSource getWorkSource();
+    method public boolean isLocationSettingsIgnored();
     method public boolean isLowPowerMode();
     method public android.location.LocationRequest setExpireAt(long);
     method public android.location.LocationRequest setExpireIn(long);
     method public android.location.LocationRequest setFastestInterval(long);
     method public void setHideFromAppOps(boolean);
     method public android.location.LocationRequest setInterval(long);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
     method public android.location.LocationRequest setLowPowerMode(boolean);
     method public android.location.LocationRequest setNumUpdates(int);
     method public android.location.LocationRequest setProvider(String);

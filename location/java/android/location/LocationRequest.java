@@ -16,6 +16,8 @@
 
 package android.location;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -161,6 +163,7 @@ public final class LocationRequest implements Parcelable {
     private WorkSource mWorkSource = null;
     @UnsupportedAppUsage
     private boolean mHideFromAppOps = false; // True if this request shouldn't be counted by AppOps
+    private boolean mLocationSettingsIgnored = false;
 
     @UnsupportedAppUsage
     private String mProvider = LocationManager.FUSED_PROVIDER;
@@ -261,6 +264,7 @@ public final class LocationRequest implements Parcelable {
         mWorkSource = src.mWorkSource;
         mHideFromAppOps = src.mHideFromAppOps;
         mLowPowerMode = src.mLowPowerMode;
+        mLocationSettingsIgnored = src.mLocationSettingsIgnored;
     }
 
     /**
@@ -372,6 +376,32 @@ public final class LocationRequest implements Parcelable {
     @SystemApi
     public boolean isLowPowerMode() {
         return mLowPowerMode;
+    }
+
+    /**
+     * Requests that user location settings be ignored in order to satisfy this request. This API
+     * is only for use in extremely rare scenarios where it is appropriate to ignore user location
+     * settings, such as a user initiated emergency (dialing 911 for instance).
+     *
+     * @param locationSettingsIgnored Whether to ignore location settings
+     * @return the same object, so that setters can be chained
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @SystemApi
+    public LocationRequest setLocationSettingsIgnored(boolean locationSettingsIgnored) {
+        mLocationSettingsIgnored = locationSettingsIgnored;
+        return this;
+    }
+
+    /**
+     * Returns true if location settings will be ignored in order to satisfy this request.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isLocationSettingsIgnored() {
+        return mLocationSettingsIgnored;
     }
 
     /**
