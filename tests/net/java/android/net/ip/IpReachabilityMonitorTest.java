@@ -16,11 +16,10 @@
 
 package android.net.ip;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
 import android.os.Handler;
@@ -45,6 +44,7 @@ public class IpReachabilityMonitorTest {
     @Mock IpReachabilityMonitor.Callback mCallback;
     @Mock IpReachabilityMonitor.Dependencies mDependencies;
     @Mock SharedLog mLog;
+    @Mock Context mContext;
     Handler mHandler;
 
     @Before
@@ -56,7 +56,8 @@ public class IpReachabilityMonitorTest {
 
     IpReachabilityMonitor makeMonitor() {
         final InterfaceParams ifParams = new InterfaceParams("fake0", 1, null);
-        return new IpReachabilityMonitor(ifParams, mHandler, mLog, mCallback, null, mDependencies);
+        return new IpReachabilityMonitor(
+                mContext, ifParams, mHandler, mLog, mCallback, false, mDependencies);
     }
 
     @Test
