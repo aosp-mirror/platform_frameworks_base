@@ -3981,6 +3981,7 @@ package android.net {
   }
 
   public class ConnectivityManager {
+    method public boolean getAvoidBadWifi();
     method @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS) public String getCaptivePortalServerUrl();
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void setAirplaneMode(boolean);
