@@ -133,15 +133,17 @@ std::string CommandTestFixture::GetDefaultManifest() {
   return manifest_file;
 }
 
-void CommandTestFixture::AssertLoadXml(LoadedApk *apk, const android::StringPiece &xml_path,
+std::unique_ptr<io::IData> CommandTestFixture::OpenFileAsData(LoadedApk* apk,
+                                                              const android::StringPiece& path) {
+  return apk
+      ->GetFileCollection()
+      ->FindFile(path)
+      ->OpenAsData();
+}
+
+void CommandTestFixture::AssertLoadXml(LoadedApk* apk, const io::IData* data,
                                        android::ResXMLTree *out_tree) {
   ASSERT_THAT(apk, Ne(nullptr));
-
-  io::IFile* file = apk->GetFileCollection()->FindFile(xml_path);
-  ASSERT_THAT(file, Ne(nullptr));
-
-  std::unique_ptr<io::IData> data = file->OpenAsData();
-  ASSERT_THAT(data, Ne(nullptr));
 
   out_tree->setTo(data->data(), data->size());
   ASSERT_THAT(out_tree->getError(), Eq(android::OK));

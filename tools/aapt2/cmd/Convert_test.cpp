@@ -53,7 +53,11 @@ TEST_F(ConvertTest, RemoveRawXmlStrings) {
   // Load the binary xml tree
   android::ResXMLTree tree;
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_convert_apk, &diag);
-  AssertLoadXml(apk.get(), "res/xml/test.xml", &tree);
+
+  std::unique_ptr<io::IData> data = OpenFileAsData(apk.get(), "res/xml/test.xml");
+  ASSERT_THAT(data, Ne(nullptr));
+
+  AssertLoadXml(apk.get(), data.get(), &tree);
 
   // Check that the raw string index has not been assigned
   EXPECT_THAT(tree.getAttributeValueStringID(0), Eq(-1));
@@ -87,7 +91,11 @@ TEST_F(ConvertTest, KeepRawXmlStrings) {
   // Load the binary xml tree
   android::ResXMLTree tree;
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_convert_apk, &diag);
-  AssertLoadXml(apk.get(), "res/xml/test.xml", &tree);
+
+  std::unique_ptr<io::IData> data = OpenFileAsData(apk.get(), "res/xml/test.xml");
+  ASSERT_THAT(data, Ne(nullptr));
+
+  AssertLoadXml(apk.get(), data.get(), &tree);
 
   // Check that the raw string index has been set to the correct string pool entry
   int32_t raw_index = tree.getAttributeValueStringID(0);
