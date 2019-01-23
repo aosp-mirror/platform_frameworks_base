@@ -65,16 +65,6 @@ public class BitmapShader extends Shader {
         return nativeCreate(nativeMatrix, mBitmap, mTileX, mTileY);
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected Shader copy() {
-        final BitmapShader copy = new BitmapShader(mBitmap, mTileX, mTileY);
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
     private static native long nativeCreate(long nativeMatrix, Bitmap bitmap,
             int shaderTileModeX, int shaderTileModeY);
 }

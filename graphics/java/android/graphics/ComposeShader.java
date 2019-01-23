@@ -87,17 +87,6 @@ public class ComposeShader extends Shader {
         }
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected Shader copy() {
-        final ComposeShader copy = new ComposeShader(
-                mShaderA.copy(), mShaderB.copy(), mPorterDuffMode);
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
     private static native long nativeCreate(long nativeMatrix,
             long nativeShaderA, long nativeShaderB, int porterDuffMode);
 }

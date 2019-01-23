@@ -136,17 +136,6 @@ public class SweepGradient extends Shader {
                 colorSpace().getNativeInstance());
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected Shader copy() {
-        final SweepGradient copy = new SweepGradient(mCx, mCy, mColorLongs,
-                mPositions, colorSpace());
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
     private static native long nativeCreate(long matrix, float x, float y,
             long[] colors, float[] positions, long colorSpaceHandle);
 }

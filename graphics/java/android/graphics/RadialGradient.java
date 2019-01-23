@@ -154,17 +154,6 @@ public class RadialGradient extends Shader {
                 colorSpace().getNativeInstance());
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected Shader copy() {
-        final RadialGradient copy = new RadialGradient(mX, mY, mRadius, mColorLongs,
-                    mPositions, mTileMode, colorSpace());
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
     private static native long nativeCreate(long matrix, float x, float y, float radius,
             @ColorLong long[] colors, float[] positions, int tileMode, long colorSpaceHandle);
 }
