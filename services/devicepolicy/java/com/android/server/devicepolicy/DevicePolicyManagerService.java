@@ -70,6 +70,7 @@ import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AF
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
+import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
@@ -6362,7 +6363,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void forceWipeUser(int userId, String wipeReasonForUser) {
+    private void forceWipeUser(int userId, String wipeReasonForUser, boolean wipeSilently) {
         boolean success = false;
         try {
             IActivityManager am = mInjector.getIActivityManager();
@@ -6373,7 +6374,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             success = mUserManagerInternal.removeUserEvenWhenDisallowed(userId);
             if (!success) {
                 Slog.w(LOG_TAG, "Couldn't remove user " + userId);
-            } else if (isManagedProfile(userId) && !TextUtils.isEmpty(wipeReasonForUser)) {
+            } else if (isManagedProfile(userId) && !wipeSilently) {
                 sendWipeProfileNotification(wipeReasonForUser);
             }
         } catch (RemoteException re) {
@@ -6388,6 +6389,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkStringNotEmpty(wipeReasonForUser, "wipeReasonForUser is null or empty");
         enforceFullCrossUsersPermission(mInjector.userHandleGetCallingUserId());
 
         final ActiveAdmin admin;
@@ -6447,7 +6449,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         internalReason,
                         /*wipeEuicc=*/ (flags & WIPE_EUICC) != 0);
             } else {
-                forceWipeUser(userId, wipeReasonForUser);
+                forceWipeUser(userId, wipeReasonForUser, (flags & WIPE_SILENTLY) != 0);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);

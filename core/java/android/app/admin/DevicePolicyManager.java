@@ -3955,6 +3955,10 @@ public class DevicePolicyManager {
      */
     public static final int WIPE_EUICC = 0x0004;
 
+    /**
+     * Flag for {@link #wipeData(int)}: won't show reason for wiping to the user.
+     */
+    public static final int WIPE_SILENTLY = 0x0008;
 
     /**
      * Ask that all user data be wiped. If called as a secondary user, the user will be removed and
@@ -3966,9 +3970,10 @@ public class DevicePolicyManager {
      * be able to call this method; if it has not, a security exception will be thrown.
      *
      * @param flags Bit mask of additional options: currently supported flags are
-     *            {@link #WIPE_EXTERNAL_STORAGE} and {@link #WIPE_RESET_PROTECTION_DATA}.
+     *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
+     *            {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
      * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
+     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      */
     public void wipeData(int flags) {
         throwIfParentInstance("wipeData");
@@ -3988,16 +3993,21 @@ public class DevicePolicyManager {
      * be able to call this method; if it has not, a security exception will be thrown.
      *
      * @param flags Bit mask of additional options: currently supported flags are
-     *            {@link #WIPE_EXTERNAL_STORAGE} and {@link #WIPE_RESET_PROTECTION_DATA}.
+     *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA} and
+     *            {@link #WIPE_EUICC}.
      * @param reason a string that contains the reason for wiping data, which can be
-     *            presented to the user. If the string is null or empty, user won't be notified.
+     *            presented to the user.
      * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
-     * @throws IllegalArgumentException if the input reason string is null or empty.
+     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
+     * @throws IllegalArgumentException if the input reason string is null or empty, or if
+     *            {@link #WIPE_SILENTLY} is set.
      */
-    public void wipeData(int flags, CharSequence reason) {
+    public void wipeData(int flags, @NonNull CharSequence reason) {
         throwIfParentInstance("wipeData");
-        wipeDataInternal(flags, reason != null ? reason.toString() : null);
+        Preconditions.checkNotNull(reason, "reason string is null");
+        Preconditions.checkStringNotEmpty(reason, "reason string is empty");
+        Preconditions.checkArgument((flags & WIPE_SILENTLY) == 0, "WIPE_SILENTLY cannot be set");
+        wipeDataInternal(flags, reason.toString());
     }
 
     /**
@@ -4008,7 +4018,7 @@ public class DevicePolicyManager {
      * @see #wipeData(int, CharSequence)
      * @hide
      */
-    private void wipeDataInternal(int flags, String wipeReasonForUser) {
+    private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser) {
         if (mService != null) {
             try {
                 mService.wipeDataWithReason(flags, wipeReasonForUser);
