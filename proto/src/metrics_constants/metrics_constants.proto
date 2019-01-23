@@ -4064,6 +4064,8 @@ message MetricsEvent {
     // - AUTOFILL_INVALID_DATASET_AUTHENTICATION
     // NOTE: starting on OS Q, it also added the following fields:
     // Tag FIELD_AUTOFILL_TEXT_LEN: length of the error message provided by the service
+    // Tag FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS: number of requests made to the augmented
+    //     autofill service
     AUTOFILL_REQUEST = 907;
 
     // Tag of a field for a package of an autofill service
@@ -6838,6 +6840,20 @@ message MetricsEvent {
     // OPEN: Settings > Display > Adaptive sleep
     // OS: Q
     SETTINGS_ADAPTIVE_SLEEP = 1628;
+    
+    // The autofill system made request to the system-provided augmented autofill service.
+    // OS: Q
+    // Package: Package of app that is autofilled
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SERVICE: Package of the augmented autofill service that processed the
+    // request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_AUGMENTED_REQUEST = 1629;
+
+    // Tag of a field for the number of augmented autofill requests in a session
+    // OS: Q
+    FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS = 1630;
 
     // Tagged data for SMART_REPLY_VISIBLE and NOTIFICATION_ITEM_ACTION.
     // The UI location of the notification containing the smart suggestions.
