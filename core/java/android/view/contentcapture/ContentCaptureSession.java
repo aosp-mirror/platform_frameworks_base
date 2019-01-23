@@ -15,8 +15,8 @@
  */
 package android.view.contentcapture;
 
-import static android.view.contentcapture.ContentCaptureManager.DEBUG;
-import static android.view.contentcapture.ContentCaptureManager.VERBOSE;
+import static android.view.contentcapture.ContentCaptureHelper.DEBUG;
+import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -246,7 +246,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public final void destroy() {
         synchronized (mLock) {
             if (mDestroyed) {
-                Log.e(TAG, "destroy(" + mId + "): already destroyed");
+                if (DEBUG) Log.d(TAG, "destroy(" + mId + "): already destroyed");
                 return;
             }
             mDestroyed = true;

@@ -15,6 +15,8 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
@@ -56,10 +58,6 @@ public final class ContentCaptureManager {
      * Timeout for calls to system_server.
      */
     private static final int SYNC_CALLS_TIMEOUT_MS = 5000;
-
-    // TODO(b/121044306): define a way to dynamically set them(for example, using settings?)
-    static final boolean VERBOSE = false;
-    static final boolean DEBUG = true; // STOPSHIP if not set to false
 
     private final Object mLock = new Object();
 
