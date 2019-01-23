@@ -950,6 +950,17 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="allowEmbedded" format="boolean" />
 
+    <!-- @hide @SystemApi Specifies whether this {@link android.app.Activity} should be shown on
+         top of the lock screen whenever the lockscreen is up and this activity has another
+         activity behind it with the {@link android.R.attr#showWhenLocked} attribute set. That
+         is, this activity is only visible on the lock screen if there is another activity with
+         the {@link android.R.attr#showWhenLocked} attribute visible at the same time on the
+         lock screen. A use case for this is permission dialogs, that should only be visible on
+         the lock screen if their requesting activity is also visible.
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="inheritShowWhenLocked" format="boolean" />
+
     <!-- Descriptive text for the associated data. -->
     <attr name="description" format="reference" />
 
@@ -2415,18 +2426,6 @@
         <attr name="showForAllUsers" />
 
         <attr name="showWhenLocked" />
-        <!-- @hide @SystemApi Specifies whether this {@link android.app.Activity} should be shown on
-             top of the lock screen whenever the lockscreen is up and this activity has another
-             activity behind it with the {@link android.R.attr#showWhenLocked} attribute set. That
-             is, this activity is only visible on the lock screen if there is another activity with
-             the {@link android.R.attr#showWhenLocked} attribute visible at the same time on the
-             lock screen. A use case for this is permission dialogs, that should only be visible on
-             the lock screen if their requesting activity is also visible.
-
-         The default value of this attribute is <code>false</code>. -->
-    <attr name="inheritShowWhenLocked" format="boolean" />
-
-
         <attr name="inheritShowWhenLocked" />
         <attr name="turnScreenOn" />
 
