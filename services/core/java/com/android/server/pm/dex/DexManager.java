@@ -235,7 +235,7 @@ public class DexManager {
                     continue;
                 }
 
-                mDexLogger.record(loaderUserId, dexPath, searchResult.mOwningPackageName,
+                mDexLogger.recordDex(loaderUserId, dexPath, searchResult.mOwningPackageName,
                         loadingAppInfo.packageName);
 
                 if (classLoaderContexts != null) {
