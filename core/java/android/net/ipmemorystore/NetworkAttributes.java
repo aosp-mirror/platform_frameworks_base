@@ -252,6 +252,12 @@ public class NetworkAttributes {
         }
     }
 
+    /** @hide */
+    public boolean isEmpty() {
+        return (null == assignedV4Address) && (null == groupHint)
+                && (null == dnsAddresses) && (null == mtu);
+    }
+
     @Override
     public boolean equals(@Nullable final Object o) {
         if (!(o instanceof NetworkAttributes)) return false;
