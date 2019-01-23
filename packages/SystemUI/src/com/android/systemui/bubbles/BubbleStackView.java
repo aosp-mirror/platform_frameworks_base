@@ -478,22 +478,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             final PendingIntent intent = mExpandedBubble.getAppOverlayIntent();
             mExpandedViewContainer.setHeaderText(intent.getIntent().getComponent().toShortString());
             mExpandedViewContainer.setExpandedView(expandedView);
-            expandedView.setCallback(new ActivityView.StateCallback() {
-                @Override
-                public void onActivityViewReady(ActivityView view) {
-                    Log.d(TAG, "onActivityViewReady("
-                            + mExpandedBubble.getEntry().key + "): " + view);
-                    view.startActivity(intent);
-                }
-
-                @Override
-                public void onActivityViewDestroyed(ActivityView view) {
-                    NotificationEntry entry = mExpandedBubble != null
-                            ? mExpandedBubble.getEntry() : null;
-                    Log.d(TAG, "onActivityViewDestroyed(key="
-                            + ((entry != null) ? entry.key : "(none)") + "): " + view);
-                }
-            });
         } else {
             // Bubble with notification view expanded state
             ExpandableNotificationRow row = mExpandedBubble.getRowView();

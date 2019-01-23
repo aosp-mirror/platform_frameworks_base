@@ -60,6 +60,8 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
     private NotificationEntry mEntry;
     private PendingIntent mAppOverlayIntent;
     private ActivityView mActivityView;
+    private boolean mActivityViewReady;
+    private boolean mActivityViewStarted;
 
     public BubbleView(Context context) {
         this(context, null);
@@ -192,10 +194,10 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
                         fraction = showDot ? fraction : 1 - fraction;
                         mBadgedImageView.setDotScale(fraction);
                     }).withEndAction(() -> {
-                        if (!showDot) {
-                            mBadgedImageView.setShowDot(false);
-                        }
-                    }).start();
+                if (!showDot) {
+                    mBadgedImageView.setShowDot(false);
+                }
+            }).start();
         }
     }
 
@@ -232,8 +234,21 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
      */
     public ActivityView getActivityView() {
         if (mActivityView == null) {
-            mActivityView = new ActivityView(mContext);
+            mActivityView = new ActivityView(mContext, null /* attrs */, 0 /* defStyle */,
+                    true /* singleTaskInstance */);
             Log.d(TAG, "[getActivityView] created: " + mActivityView);
+            mActivityView.setCallback(new ActivityView.StateCallback() {
+                @Override
+                public void onActivityViewReady(ActivityView view) {
+                    mActivityViewReady = true;
+                    mActivityView.startActivity(mAppOverlayIntent);
+                }
+
+                @Override
+                public void onActivityViewDestroyed(ActivityView view) {
+                    mActivityViewReady = false;
+                }
+            });
         }
         return mActivityView;
     }
@@ -245,22 +260,20 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
         if (mActivityView == null) {
             return;
         }
-        // HACK: Only release if initialized. There's no way to know if the ActivityView has
-        // been initialized. Calling release() if it hasn't been initialized will crash.
-
+        if (!mActivityViewReady) {
+            // release not needed, never initialized?
+            mActivityView = null;
+            return;
+        }
+        // HACK: release() will crash if the view is not attached.
         if (!mActivityView.isAttachedToWindow()) {
-            // HACK: release() will crash if the view is not attached.
-
             mActivityView.setVisibility(View.GONE);
             tmpParent.addView(mActivityView, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
         }
-        try {
-            mActivityView.release();
-        } catch (IllegalStateException ex) {
-            Log.e(TAG, "ActivityView either already released, or not yet initialized.", ex);
-        }
+
+        mActivityView.release();
 
         ((ViewGroup) mActivityView.getParent()).removeView(mActivityView);
         mActivityView = null;
