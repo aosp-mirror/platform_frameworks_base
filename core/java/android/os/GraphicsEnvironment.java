@@ -23,9 +23,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.gamedriver.GameDriverProto.Blacklist;
+import android.gamedriver.GameDriverProto.Blacklists;
 import android.opengl.EGL14;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
+
+import com.android.framework.protobuf.InvalidProtocolBufferException;
 
 import dalvik.system.VMRuntime;
 
@@ -62,6 +67,8 @@ public class GraphicsEnvironment {
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
+    private static final String GAME_DRIVER_BLACKLIST_FLAG = "blacklist";
+    private static final int BASE64_FLAGS = Base64.NO_PADDING | Base64.NO_WRAP;
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -480,6 +487,24 @@ public class GraphicsEnvironment {
             return;
         }
 
+        ApplicationInfo driverInfo;
+        try {
+            driverInfo = context.getPackageManager().getApplicationInfo(driverPackageName,
+                    PackageManager.MATCH_SYSTEM_ONLY);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
+            return;
+        }
+
+        // O drivers are restricted to the sphal linker namespace, so don't try to use
+        // packages unless they declare they're compatible with that restriction.
+        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+            if (DEBUG) {
+                Log.w(TAG, "updated driver package is not known to be compatible with O");
+            }
+            return;
+        }
+
         // To minimize risk of driver updates crippling the device beyond user repair, never use an
         // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
         // were tested thoroughly with the pre-installed driver.
@@ -491,7 +516,7 @@ public class GraphicsEnvironment {
 
         // GUP_DEV_ALL_APPS
         // 0: Default (Invalid values fallback to default as well)
-        // 1: All apps use Game Update Package
+        // 1: All apps use Game Driver
         // 2: All apps use system graphics driver
         int gupDevAllApps = coreSettings.getInt(Settings.Global.GUP_DEV_ALL_APPS, 0);
         if (gupDevAllApps == 2) {
@@ -510,33 +535,45 @@ public class GraphicsEnvironment {
                 }
                 return;
             }
+            boolean isDevOptIn = getGlobalSettingsString(coreSettings,
+                                                         Settings.Global.GUP_DEV_OPT_IN_APPS)
+                              .contains(ai.packageName);
 
-            if (!getGlobalSettingsString(coreSettings, Settings.Global.GUP_DEV_OPT_IN_APPS)
-                            .contains(ai.packageName)
-                    && !onWhitelist(context, driverPackageName, ai.packageName)) {
+            if (!isDevOptIn && !onWhitelist(context, driverPackageName, ai.packageName)) {
                 if (DEBUG) {
                     Log.w(TAG, ai.packageName + " is not on the whitelist.");
                 }
                 return;
             }
-        }
 
-        ApplicationInfo driverInfo;
-        try {
-            driverInfo = context.getPackageManager().getApplicationInfo(driverPackageName,
-                    PackageManager.MATCH_SYSTEM_ONLY);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
-            return;
-        }
-
-        // O drivers are restricted to the sphal linker namespace, so don't try to use
-        // packages unless they declare they're compatible with that restriction.
-        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
-            if (DEBUG) {
-                Log.w(TAG, "updated driver package is not known to be compatible with O");
+            if (!isDevOptIn) {
+                // At this point, the application is on the whitelist only, check whether it's
+                // on the blacklist, terminate early when it's on the blacklist.
+                try {
+                    // TODO(b/121350991) Switch to DeviceConfig with property listener.
+                    String base64String = coreSettings.getString(Settings.Global.GUP_BLACKLIST);
+                    if (base64String != null && !base64String.isEmpty()) {
+                        Blacklists blacklistsProto = Blacklists.parseFrom(
+                                Base64.decode(base64String, BASE64_FLAGS));
+                        List<Blacklist> blacklists = blacklistsProto.getBlacklistsList();
+                        long driverVersionCode = driverInfo.longVersionCode;
+                        for (Blacklist blacklist : blacklists) {
+                            if (blacklist.getVersionCode() == driverVersionCode) {
+                                for (String packageName : blacklist.getPackageNamesList()) {
+                                    if (packageName == ai.packageName) {
+                                        return;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } catch (InvalidProtocolBufferException e) {
+                    if (DEBUG) {
+                        Log.w(TAG, "Can't parse blacklist, skip and continue...");
+                    }
+                }
             }
-            return;
         }
 
         String abi = chooseAbi(driverInfo);
