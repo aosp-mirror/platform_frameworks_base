@@ -1129,7 +1129,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
          * In this case, we grant a uri permission, even if the ContentProvider does not normally
          * grant uri permissions.
          */
-        boolean specialCrossUserGrant = UserHandle.getUserId(targetUid) != grantUri.sourceUserId
+        boolean specialCrossUserGrant = targetUid >= 0
+                && UserHandle.getUserId(targetUid) != grantUri.sourceUserId
                 && checkHoldingPermissionsInternal(pm, pi, grantUri, callingUid,
                 modeFlags, false /*without considering the uid permissions*/);
 
