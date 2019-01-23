@@ -284,6 +284,8 @@ int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer
     // The table might be modified by below code.
     auto converted_table = apk->GetResourceTable();
 
+    std::unordered_set<std::string> files_written;
+
     // Resources
     for (const auto& package : converted_table->packages) {
       for (const auto& type : package->types) {
@@ -297,10 +299,14 @@ int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer
                 return 1;
               }
 
-              if (!serializer->SerializeFile(file, output_writer)) {
-                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                                 << "failed to serialize file " << *file->path);
-                return 1;
+              // Only serialize if we haven't seen this file before
+              if (files_written.insert(*file->path).second) {
+                if (!serializer->SerializeFile(file, output_writer)) {
+                  context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                       << "failed to serialize file "
+                                                       << *file->path);
+                  return 1;
+                }
               }
             } // file
           } // config_value
