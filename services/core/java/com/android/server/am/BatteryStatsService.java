@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.app.ActivityManager;
 import android.app.job.JobProtoEnums;
 import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -46,6 +47,7 @@ import android.os.connectivity.WifiBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
 import android.os.health.UidHealthStats;
+import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
@@ -1649,6 +1651,25 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             writer.writeUid(uidWriter, mStats, uid);
         }
         return new HealthStatsParceler(uidWriter);
+    }
+
+    /**
+     * Delay for sending ACTION_CHARGING after device is plugged in.
+     *
+     * @hide
+     */
+    public boolean setChargingStateUpdateDelayMillis(int delayMillis) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER, null);
+        final long ident = Binder.clearCallingIdentity();
+
+        try {
+            final ContentResolver contentResolver = mContext.getContentResolver();
+            return Settings.Global.putLong(contentResolver,
+                    Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
+                    delayMillis);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
 }
