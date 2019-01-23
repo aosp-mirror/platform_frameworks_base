@@ -79,23 +79,27 @@ public class BugreportManager {
          * Called when taking bugreport resulted in an error.
          *
          * @param errorCode the error that occurred. Possible values are
-         *     {@code BUGREPORT_ERROR_INVALID_INPUT}, {@code BUGREPORT_ERROR_RUNTIME}.
+         *     {@code BUGREPORT_ERROR_INVALID_INPUT},
+         *     {@code BUGREPORT_ERROR_RUNTIME},
+         *     {@code BUGREPORT_ERROR_USER_DENIED_CONSENT}.
          */
         void onError(@BugreportErrorCode int errorCode);
 
         /**
-         * Called when taking bugreport finishes successfully
-         *
-         * @param durationMs time capturing bugreport took in milliseconds
-         * @param title title for the bugreport; helpful in reminding the user why they took it
-         * @param description detailed description for the bugreport
+         * Called when taking bugreport finishes successfully.
          */
-        void onFinished(long durationMs, @NonNull String title,
-                @NonNull String description);
+        void onFinished();
     }
 
     /**
-     * Starts a bugreport asynchronously.
+     * Starts a bugreport.
+     *
+     * <p>This starts a bugreport in the background. However the call itself can take several
+     * seconds to return in the worst case. {@code listener} will receive progress and status
+     * updates.
+     *
+     * <p>The bugreport artifacts will be copied over to the given file descriptors only if the
+     * user consents to sharing with the calling app.
      *
      * @param bugreportFd file to write the bugreport. This should be opened in write-only,
      *     append mode.
@@ -107,7 +111,7 @@ public class BugreportManager {
     @RequiresPermission(android.Manifest.permission.DUMP)
     public void startBugreport(@NonNull FileDescriptor bugreportFd,
             @Nullable FileDescriptor screenshotFd,
-            @NonNull BugreportParams params, @Nullable BugreportListener listener) {
+            @NonNull BugreportParams params, @NonNull BugreportListener listener) {
         // TODO(b/111441001): Enforce android.Manifest.permission.DUMP if necessary.
         DumpstateListener dsListener = new DumpstateListener(listener);
 
@@ -116,6 +120,18 @@ public class BugreportManager {
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(), bugreportFd, screenshotFd,
                     params.getMode(), dsListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Cancels a currently running bugreport.
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void cancelBugreport() {
+        try {
+            mBinder.cancelBugreport();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -145,9 +161,13 @@ public class BugreportManager {
         }
 
         @Override
-        public void onFinished(long durationMs, String title, String description)
-                throws RemoteException {
-            mListener.onFinished(durationMs, title, description);
+        public void onFinished() throws RemoteException {
+            try {
+                mListener.onFinished();
+            } finally {
+                // The bugreport has finished. Let's shutdown the service to minimize its footprint.
+                cancelBugreport();
+            }
         }
 
         // Old methods; should go away
