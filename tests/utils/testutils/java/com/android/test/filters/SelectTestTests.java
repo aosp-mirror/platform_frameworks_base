@@ -190,21 +190,22 @@ public class SelectTestTests {
 
     @Test
     public void testSelectClassAndSamePackage() {
-        final Filter filter = mBuilder.withSelectTest(CLASS_A1, CLASS_A2, PACKAGE_A,
-                CLASS_C5, CLASS_C6, PACKAGE_C).build();
-        acceptTests(filter, TEST_PACKAGE_A, TEST_PACKAGE_C);
+        final Filter filter = mBuilder.withSelectTest(
+                CLASS_A1, PACKAGE_A, CLASS_B3, PACKAGE_C, CLASS_C5).build();
+        acceptTests(filter, TEST_PACKAGE_A, TEST_CLASS_B3, TEST_PACKAGE_C);
     }
 
     @Test
     public void testSelectMethodAndSameClass() {
-        final Filter filter = mBuilder.withSelectTest(METHOD_A1K, METHOD_A1L, METHOD_A2M, CLASS_A1,
-                CLASS_B3, METHOD_B3P, METHOD_B3Q, METHOD_B4R).build();
+        final Filter filter = mBuilder.withSelectTest(
+                METHOD_A1K, METHOD_A2M, CLASS_A1, CLASS_B3, METHOD_B3P, METHOD_B4R).build();
         acceptTests(filter, TEST_CLASS_A1, TEST_METHOD_A2M, TEST_CLASS_B3, TEST_METHOD_B4R);
     }
 
     @Test
     public void testSelectMethodAndSamePackage() {
-        final Filter filter = mBuilder.withSelectTest(METHOD_A1K, METHOD_A1L, METHOD_A2M, PACKAGE_A,
+        final Filter filter = mBuilder.withSelectTest(
+                METHOD_A1K, METHOD_A1L, METHOD_A2M, PACKAGE_A,
                 PACKAGE_C, METHOD_C5W, METHOD_C5X, METHOD_C6Y).build();
         acceptTests(filter, TEST_PACKAGE_A, TEST_PACKAGE_C);
     }
