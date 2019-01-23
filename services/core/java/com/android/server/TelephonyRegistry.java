@@ -206,9 +206,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private Map<Integer, List<EmergencyNumber>> mEmergencyNumberList;
 
-    private CallQuality mCallQuality;
+    private CallQuality mCallQuality = new CallQuality();
 
-    private CallAttributes mCallAttributes;
+    private CallAttributes mCallAttributes = new CallAttributes(new PreciseCallState(),
+            TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
 
     private int[] mSrvccState;
 

@@ -92,6 +92,10 @@ public final class CallQuality implements Parcelable {
         mCodecType = in.readInt();
     }
 
+    /** @hide **/
+    public CallQuality() {
+    }
+
     /**
      * Constructor.
      *
