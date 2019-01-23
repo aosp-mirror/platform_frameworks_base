@@ -90,6 +90,7 @@ import com.android.server.display.ColorDisplayService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
+import com.android.server.gpu.GpuService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
@@ -810,6 +811,11 @@ public final class SystemServer {
         // Service to capture bugreports.
         traceBeginAndSlog("StartBugreportManagerService");
         mSystemServiceManager.startService(BugreportManagerService.class);
+        traceEnd();
+
+        // Serivce for GPU and GPU driver.
+        traceBeginAndSlog("GpuService");
+        mSystemServiceManager.startService(GpuService.class);
         traceEnd();
     }
 

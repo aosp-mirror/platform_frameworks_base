@@ -34,14 +34,11 @@ import com.android.framework.protobuf.InvalidProtocolBufferException;
 
 import dalvik.system.VMRuntime;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,7 +60,6 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
-    private static final String GAME_DRIVER_WHITELIST_FILENAME = "whitelist.txt";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
@@ -553,8 +549,9 @@ public class GraphicsEnvironment {
             boolean isOptIn =
                     getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
                             .contains(ai.packageName);
-
-            if (!isOptIn && !onWhitelist(context, driverPackageName, ai.packageName)) {
+            if (!isOptIn
+                    && !getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_WHITELIST)
+                        .contains(ai.packageName)) {
                 if (DEBUG) {
                     Log.w(TAG, ai.packageName + " is not on the whitelist.");
                 }
@@ -645,31 +642,6 @@ public class GraphicsEnvironment {
             return ai.secondaryCpuAbi;
         }
         return null;
-    }
-
-    private static boolean onWhitelist(Context context, String driverPackageName,
-            String applicationPackageName) {
-        try {
-            Context driverContext = context.createPackageContext(driverPackageName,
-                                                                 Context.CONTEXT_RESTRICTED);
-            AssetManager assets = driverContext.getAssets();
-            InputStream stream = assets.open(GAME_DRIVER_WHITELIST_FILENAME);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-            for (String packageName; (packageName = reader.readLine()) != null; ) {
-                if (packageName.equals(applicationPackageName)) {
-                    return true;
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            if (DEBUG) {
-                Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
-            }
-        } catch (IOException e) {
-            if (DEBUG) {
-                Log.w(TAG, "Failed to load whitelist driver package, abort.");
-            }
-        }
-        return false;
     }
 
     private static native int getCanLoadSystemLibraries();
