@@ -772,6 +772,11 @@ package android.media.audiofx {
     field public static final java.util.UUID EFFECT_TYPE_NULL;
   }
 
+  public static class AudioEffect.Descriptor {
+    ctor public AudioEffect.Descriptor(android.os.Parcel);
+    method public void writeToParcel(android.os.Parcel);
+  }
+
   public static interface AudioEffect.OnParameterChangeListener {
     method public void onParameterChange(android.media.audiofx.AudioEffect, int, byte[], byte[]);
   }
