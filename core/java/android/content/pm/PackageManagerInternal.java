@@ -628,4 +628,9 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean hasSignatureCapability(int serverUid, int clientUid,
             @PackageParser.SigningDetails.CertCapabilities int capability);
+
+    /**
+     * Ask the package manager to compile layouts in the given package.
+     */
+    public abstract boolean compileLayouts(String packageName);
 }
