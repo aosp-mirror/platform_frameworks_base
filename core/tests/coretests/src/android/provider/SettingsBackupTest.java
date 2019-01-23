@@ -388,8 +388,6 @@ public class SettingsBackupTest {
                     Settings.Global.POLICY_CONTROL,
                     Settings.Global.POWER_MANAGER_CONSTANTS,
                     Settings.Global.PREFERRED_NETWORK_MODE,
-                    Settings.Global.PRIV_APP_OOB_ENABLED,
-                    Settings.Global.PRIV_APP_OOB_LIST,
                     Settings.Global.PRIVATE_DNS_DEFAULT_MODE,
                     Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED,
                     Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED,

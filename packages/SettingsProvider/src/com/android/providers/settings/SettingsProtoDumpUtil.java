@@ -1109,9 +1109,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.POWER_MANAGER_CONSTANTS,
                 GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.PRIV_APP_OOB_ENABLED,
-                GlobalSettingsProto.PRIV_APP_OOB_ENABLED);
 
         final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,

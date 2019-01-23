@@ -121,6 +121,19 @@ public final class DeviceConfig {
         String PROPERTY_RAMPING_RINGER_DURATION = "ramping_duration";
     }
 
+    /**
+     * Namespace for Full Stack Integrity to run privileged apps only in JIT mode. The flag applies
+     * at process start, so reboot is a way to bring the device to a clean state.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface FsiBoot {
+        String NAMESPACE = "fsi_boot";
+        String OOB_ENABLED = "oob_enabled";
+        String OOB_WHITELIST = "oob_whitelist";
+    }
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =

@@ -9452,23 +9452,6 @@ public final class Settings {
                 "hdmi_control_auto_device_off_enabled";
 
         /**
-         * If <b>true</b>, enables out-of-the-box execution for priv apps.
-         * Default: false
-         * Values: 0 = false, 1 = true
-         *
-         * @hide
-         */
-        public static final String PRIV_APP_OOB_ENABLED = "priv_app_oob_enabled";
-
-        /**
-         * Comma separated list of privileged package names, which will be running out-of-box APK.
-         * Default: "ALL"
-         *
-         * @hide
-         */
-        public static final String PRIV_APP_OOB_LIST = "priv_app_oob_list";
-
-        /**
          * The interval in milliseconds at which location requests will be throttled when they are
          * coming from the background.
          *
