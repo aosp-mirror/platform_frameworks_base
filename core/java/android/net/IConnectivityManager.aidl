@@ -165,6 +165,7 @@ interface IConnectivityManager
     void setAvoidUnvalidated(in Network network);
     void startCaptivePortalApp(in Network network);
 
+    boolean getAvoidBadWifi();
     int getMultipathPreference(in Network Network);
 
     NetworkRequest getDefaultRequest();
