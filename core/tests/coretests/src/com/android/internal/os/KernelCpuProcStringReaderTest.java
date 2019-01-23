@@ -299,9 +299,10 @@ public class KernelCpuProcStringReaderTest {
             assertTrue(mTestFile.delete());
             try (BufferedWriter w = Files.newBufferedWriter(mTestFile.toPath())) {
                 w.write(data1);
-                modify.countDown();
             } catch (Throwable e) {
                 errs.add(e);
+            } finally {
+                modify.countDown();
             }
         }, 600, TimeUnit.MILLISECONDS);
 

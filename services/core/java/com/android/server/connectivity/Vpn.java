@@ -60,7 +60,6 @@ import android.net.NetworkMisc;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
-import android.net.Uri;
 import android.net.VpnService;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
@@ -71,7 +70,6 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -100,6 +98,8 @@ import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -120,8 +120,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import libcore.io.IoUtils;
 
 /**
  * @hide
@@ -346,8 +344,15 @@ public class Vpn {
      *
      * @return {@code true} if VPN lockdown is enabled.
      */
-    public boolean getLockdown() {
+    public synchronized boolean getLockdown() {
         return mLockdown;
+    }
+
+    /**
+     * Returns whether VPN is configured as always-on.
+     */
+    public synchronized boolean getAlwaysOn() {
+        return mAlwaysOn;
     }
 
     /**

@@ -34,7 +34,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
@@ -68,12 +67,11 @@ public final class MediaController {
     private static final int MSG_UPDATE_EXTRAS = 7;
     private static final int MSG_DESTROYED = 8;
 
-    private final ISessionController mSessionBinder;
+    private final ControllerLink mSessionBinder;
 
     private final MediaSession.Token mToken;
     private final Context mContext;
-    private final ControllerCallbackLink mCbStub =
-            new ControllerCallbackLink(new CallbackStub(this));
+    private final ControllerCallbackLink mCbStub;
     private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
     private final Object mLock = new Object();
 
@@ -84,12 +82,11 @@ public final class MediaController {
     private final TransportControls mTransportControls;
 
     /**
-     * Call for creating a MediaController directly from a binder. Should only
+     * Call for creating a MediaController directly from a controller link. Should only
      * be used by framework code.
-     *
      * @hide
      */
-    public MediaController(Context context, ISessionController sessionBinder) {
+    public MediaController(Context context, ControllerLink sessionBinder) {
         if (sessionBinder == null) {
             throw new IllegalArgumentException("Session token cannot be null");
         }
@@ -100,6 +97,17 @@ public final class MediaController {
         mTransportControls = new TransportControls();
         mToken = new MediaSession.Token(sessionBinder);
         mContext = context;
+        mCbStub = new ControllerCallbackLink(context, new CallbackStub(this));
+    }
+
+    /**
+     * Call for creating a MediaController directly from a binder. Should only
+     * be used by framework code.
+     * @hide
+     * TODO: remove this constructor
+     */
+    public MediaController(Context context, ISessionController sessionBinder) {
+        this(context, new ControllerLink(sessionBinder.asBinder()));
     }
 
     /**
@@ -109,7 +117,7 @@ public final class MediaController {
      * @param token The token for the session.
      */
     public MediaController(@NonNull Context context, @NonNull MediaSession.Token token) {
-        this(context, token.getBinder());
+        this(context, token.getControllerLink());
     }
 
     /**
@@ -158,7 +166,7 @@ public final class MediaController {
         try {
             return mSessionBinder.sendMediaButton(mContext.getPackageName(), mCbStub,
                     asSystemService, keyEvent);
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             // System is dead. =(
         }
         return false;
@@ -195,7 +203,7 @@ public final class MediaController {
                     mSessionBinder.adjustVolume(mContext.getPackageName(),
                             mContext.getOpPackageName(), mCbStub, true, direction,
                             AudioManager.FLAG_SHOW_UI);
-                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
                     Log.wtf(TAG, "Error calling adjustVolumeBy", e);
                 }
             }
@@ -209,7 +217,7 @@ public final class MediaController {
                     //       AppOpsManager usages.
                     mSessionBinder.adjustVolume(mContext.getPackageName(),
                             mContext.getOpPackageName(), mCbStub, true, 0, flags);
-                } catch (RemoteException e) {
+                } catch (RuntimeException e) {
                     Log.wtf(TAG, "Error calling adjustVolumeBy", e);
                 }
             }
@@ -224,7 +232,7 @@ public final class MediaController {
     public @Nullable PlaybackState getPlaybackState() {
         try {
             return mSessionBinder.getPlaybackState();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getPlaybackState.", e);
             return null;
         }
@@ -238,7 +246,7 @@ public final class MediaController {
     public @Nullable MediaMetadata getMetadata() {
         try {
             return mSessionBinder.getMetadata();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getMetadata.", e);
             return null;
         }
@@ -253,7 +261,7 @@ public final class MediaController {
     public @Nullable List<MediaSession.QueueItem> getQueue() {
         try {
             return mSessionBinder.getQueue();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getQueue.", e);
         }
         return null;
@@ -265,7 +273,7 @@ public final class MediaController {
     public @Nullable CharSequence getQueueTitle() {
         try {
             return mSessionBinder.getQueueTitle();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getQueueTitle", e);
         }
         return null;
@@ -277,7 +285,7 @@ public final class MediaController {
     public @Nullable Bundle getExtras() {
         try {
             return mSessionBinder.getExtras();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getExtras", e);
         }
         return null;
@@ -300,7 +308,7 @@ public final class MediaController {
     public int getRatingType() {
         try {
             return mSessionBinder.getRatingType();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getRatingType.", e);
             return Rating.RATING_NONE;
         }
@@ -314,7 +322,7 @@ public final class MediaController {
     public @MediaSession.SessionFlags long getFlags() {
         try {
             return mSessionBinder.getFlags();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getFlags.", e);
         }
         return 0;
@@ -328,7 +336,7 @@ public final class MediaController {
     public @Nullable PlaybackInfo getPlaybackInfo() {
         try {
             return mSessionBinder.getVolumeAttributes();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getAudioInfo.", e);
         }
         return null;
@@ -343,7 +351,7 @@ public final class MediaController {
     public @Nullable PendingIntent getSessionActivity() {
         try {
             return mSessionBinder.getLaunchPendingIntent();
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling getPendingIntent.", e);
         }
         return null;
@@ -376,7 +384,7 @@ public final class MediaController {
             //       AppOpsManager usages.
             mSessionBinder.setVolumeTo(mContext.getPackageName(), mContext.getOpPackageName(),
                     mCbStub, value, flags);
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling setVolumeTo.", e);
         }
     }
@@ -401,7 +409,7 @@ public final class MediaController {
             //       AppOpsManager usages.
             mSessionBinder.adjustVolume(mContext.getPackageName(), mContext.getOpPackageName(),
                     mCbStub, false, direction, flags);
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
         }
     }
@@ -467,7 +475,7 @@ public final class MediaController {
         }
         try {
             mSessionBinder.sendCommand(mContext.getPackageName(), mCbStub, command, args, cb);
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.d(TAG, "Dead object in sendCommand.", e);
         }
     }
@@ -481,7 +489,7 @@ public final class MediaController {
         if (mPackageName == null) {
             try {
                 mPackageName = mSessionBinder.getPackageName();
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.d(TAG, "Dead object in getPackageName.", e);
             }
         }
@@ -498,7 +506,7 @@ public final class MediaController {
         if (mTag == null) {
             try {
                 mTag = mSessionBinder.getTag();
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.d(TAG, "Dead object in getTag.", e);
             }
         }
@@ -508,7 +516,7 @@ public final class MediaController {
     /*
      * @hide
      */
-    ISessionController getSessionBinder() {
+    ControllerLink getSessionBinder() {
         return mSessionBinder;
     }
 
@@ -518,7 +526,7 @@ public final class MediaController {
     @UnsupportedAppUsage
     public boolean controlsSameSession(MediaController other) {
         if (other == null) return false;
-        return mSessionBinder.asBinder() == other.getSessionBinder().asBinder();
+        return mSessionBinder.getBinder() == other.getSessionBinder().getBinder();
     }
 
     private void addCallbackLocked(Callback cb, Handler handler) {
@@ -532,9 +540,9 @@ public final class MediaController {
 
         if (!mCbRegistered) {
             try {
-                mSessionBinder.registerCallbackListener(mContext.getPackageName(), mCbStub);
+                mSessionBinder.registerCallback(mContext.getPackageName(), mCbStub);
                 mCbRegistered = true;
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.e(TAG, "Dead object in registerCallback", e);
             }
         }
@@ -552,8 +560,8 @@ public final class MediaController {
         }
         if (mCbRegistered && mCallbacks.size() == 0) {
             try {
-                mSessionBinder.unregisterCallbackListener(mCbStub);
-            } catch (RemoteException e) {
+                mSessionBinder.unregisterCallback(mCbStub);
+            } catch (RuntimeException e) {
                 Log.e(TAG, "Dead object in removeCallbackLocked");
             }
             mCbRegistered = false;
@@ -680,7 +688,7 @@ public final class MediaController {
         public void prepare() {
             try {
                 mSessionBinder.prepare(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling prepare.", e);
             }
         }
@@ -705,7 +713,7 @@ public final class MediaController {
             try {
                 mSessionBinder.prepareFromMediaId(mContext.getPackageName(), mCbStub, mediaId,
                         extras);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling prepare(" + mediaId + ").", e);
             }
         }
@@ -732,7 +740,7 @@ public final class MediaController {
             try {
                 mSessionBinder.prepareFromSearch(mContext.getPackageName(), mCbStub, query,
                         extras);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling prepare(" + query + ").", e);
             }
         }
@@ -756,7 +764,7 @@ public final class MediaController {
             }
             try {
                 mSessionBinder.prepareFromUri(mContext.getPackageName(), mCbStub, uri, extras);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling prepare(" + uri + ").", e);
             }
         }
@@ -767,7 +775,7 @@ public final class MediaController {
         public void play() {
             try {
                 mSessionBinder.play(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling play.", e);
             }
         }
@@ -787,7 +795,7 @@ public final class MediaController {
             try {
                 mSessionBinder.playFromMediaId(mContext.getPackageName(), mCbStub, mediaId,
                         extras);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling play(" + mediaId + ").", e);
             }
         }
@@ -809,7 +817,7 @@ public final class MediaController {
             }
             try {
                 mSessionBinder.playFromSearch(mContext.getPackageName(), mCbStub, query, extras);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling play(" + query + ").", e);
             }
         }
@@ -828,7 +836,7 @@ public final class MediaController {
             }
             try {
                 mSessionBinder.playFromUri(mContext.getPackageName(), mCbStub, uri, extras);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling play(" + uri + ").", e);
             }
         }
@@ -840,7 +848,7 @@ public final class MediaController {
         public void skipToQueueItem(long id) {
             try {
                 mSessionBinder.skipToQueueItem(mContext.getPackageName(), mCbStub, id);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling skipToItem(" + id + ").", e);
             }
         }
@@ -852,7 +860,7 @@ public final class MediaController {
         public void pause() {
             try {
                 mSessionBinder.pause(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling pause.", e);
             }
         }
@@ -864,7 +872,7 @@ public final class MediaController {
         public void stop() {
             try {
                 mSessionBinder.stop(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling stop.", e);
             }
         }
@@ -877,7 +885,7 @@ public final class MediaController {
         public void seekTo(long pos) {
             try {
                 mSessionBinder.seekTo(mContext.getPackageName(), mCbStub, pos);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling seekTo.", e);
             }
         }
@@ -889,7 +897,7 @@ public final class MediaController {
         public void fastForward() {
             try {
                 mSessionBinder.fastForward(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling fastForward.", e);
             }
         }
@@ -900,7 +908,7 @@ public final class MediaController {
         public void skipToNext() {
             try {
                 mSessionBinder.next(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling next.", e);
             }
         }
@@ -912,7 +920,7 @@ public final class MediaController {
         public void rewind() {
             try {
                 mSessionBinder.rewind(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling rewind.", e);
             }
         }
@@ -923,7 +931,7 @@ public final class MediaController {
         public void skipToPrevious() {
             try {
                 mSessionBinder.previous(mContext.getPackageName(), mCbStub);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling previous.", e);
             }
         }
@@ -938,7 +946,7 @@ public final class MediaController {
         public void setRating(Rating rating) {
             try {
                 mSessionBinder.rate(mContext.getPackageName(), mCbStub, rating);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.wtf(TAG, "Error calling rate.", e);
             }
         }
@@ -973,7 +981,7 @@ public final class MediaController {
             }
             try {
                 mSessionBinder.sendCustomAction(mContext.getPackageName(), mCbStub, action, args);
-            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
                 Log.d(TAG, "Dead object in sendCustomAction.", e);
             }
         }

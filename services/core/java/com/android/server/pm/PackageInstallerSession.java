@@ -992,8 +992,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Read transfers from the original owner stay open, but as the session's data
         // cannot be modified anymore, there is no leak of information. For staged sessions,
-        // further validation may be performed by the staging manager.
+        // further validation is performed by the staging manager.
         if (!params.isMultiPackage) {
+            if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                // For APEX, validation is done by StagingManager post-commit.
+                return;
+            }
             final PackageInfo pkgInfo = mPm.getPackageInfo(
                     params.appPackageName, PackageManager.GET_SIGNATURES
                             | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
@@ -1001,16 +1005,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             resolveStageDirLocked();
 
             try {
-                if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
-                    // TODO(b/118865310): Remove this when APEX validation is done via
-                    //                    StagingManager.
-                    validateApexInstallLocked(pkgInfo);
-                } else {
-                    // Verify that stage looks sane with respect to existing application.
-                    // This currently only ensures packageName, versionCode, and certificate
-                    // consistency.
-                    validateApkInstallLocked(pkgInfo);
-                }
+                validateApkInstallLocked(pkgInfo);
             } catch (PackageManagerException e) {
                 throw e;
             } catch (Throwable e) {
@@ -1299,54 +1294,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return SystemProperties.getBoolean(PROPERTY_NAME_INHERIT_NATIVE, true) &&
                 params.mode == SessionParams.MODE_INHERIT_EXISTING &&
                 (params.installFlags & PackageManager.DONT_KILL_APP) != 0;
-    }
-
-    @GuardedBy("mLock")
-    private void validateApexInstallLocked(@Nullable PackageInfo pkgInfo)
-            throws PackageManagerException {
-        mResolvedStagedFiles.clear();
-        mResolvedInheritedFiles.clear();
-
-        try {
-            resolveStageDirLocked();
-        } catch (IOException e) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                "Failed to resolve stage location", e);
-        }
-
-        final File[] addedFiles = mResolvedStageDir.listFiles(sAddedFilter);
-        if (ArrayUtils.isEmpty(addedFiles)) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
-        }
-
-        if (addedFiles.length > 1) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                "Only one APEX file at a time might be installed");
-        }
-        File addedFile = addedFiles[0];
-        final ApkLite apk;
-        try {
-            apk = PackageParser.parseApkLite(
-                addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
-        } catch (PackageParserException e) {
-            throw PackageManagerException.from(e);
-        }
-
-        mPackageName = apk.packageName;
-        mVersionCode = apk.getLongVersionCode();
-        mSigningDetails = apk.signingDetails;
-        mResolvedBaseFile = addedFile;
-
-        // STOPSHIP: Ensure that we remove the non-staged version of APEX installs in production
-        // because we currently do not verify that signatures are consistent with the previously
-        // installed version in that case.
-        //
-        // When that happens, this hack can be reverted and we can rely on APEXd to map between
-        // APEX files and their package names instead of parsing it out of the AndroidManifest
-        // such as here.
-        if (params.appPackageName == null) {
-            params.appPackageName = mPackageName;
-        }
     }
 
     /**
@@ -1911,22 +1858,30 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void addChildSessionId(int sessionId) {
-        final PackageInstallerSession session = mSessionProvider.getSession(sessionId);
-        if (session == null) {
+    public void addChildSessionId(int childSessionId) {
+        final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
+        if (childSession == null) {
             throw new RemoteException("Unable to add child.",
-                    new PackageManagerException("Child session " + sessionId + " does not exist"),
+                    new PackageManagerException("Child session " + childSessionId
+                            + " does not exist"),
+                    false, true).rethrowAsRuntimeException();
+        }
+        // Session groups must be consistent wrt to isStaged parameter. Non-staging session
+        // cannot be grouped with staging sessions.
+        if (this.params.isStaged ^ childSession.params.isStaged) {
+            throw new RemoteException("Unable to add child.",
+                    new PackageManagerException("Child session " + childSessionId
+                            + " and parent session " + this.sessionId + " do not have consistent"
+                            + " staging session settings."),
                     false, true).rethrowAsRuntimeException();
         }
         synchronized (mLock) {
-            final int indexOfSession = mChildSessionIds.indexOfKey(sessionId);
+            final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
             if (indexOfSession >= 0) {
                 return;
             }
-            session.setParentSessionId(this.sessionId);
-            // TODO: sanity check, if parent session is staged then child session should be
-            //       marked as staged.
-            addChildSessionIdInternal(sessionId);
+            childSession.setParentSessionId(this.sessionId);
+            addChildSessionIdInternal(childSessionId);
         }
     }
 
@@ -2055,6 +2010,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** {@hide} */
     boolean isStagedSessionFailed() {
         return mStagedSessionFailed;
+    }
+
+    /** {@hide} */
+    @StagedSessionErrorCode int getStagedSessionErrorCode() {
+        return mStagedSessionErrorCode;
     }
 
     private void destroyInternal() {
@@ -2221,35 +2181,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         out.endTag(null, TAG_SESSION);
     }
 
-    private static String[] readGrantedRuntimePermissions(XmlPullParser in)
-            throws IOException, XmlPullParserException {
-        List<String> permissions = null;
-
-        final int outerDepth = in.getDepth();
-        int type;
-        while ((type = in.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || in.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
-                String permission = readStringAttribute(in, ATTR_NAME);
-                if (permissions == null) {
-                    permissions = new ArrayList<>();
-                }
-                permissions.add(permission);
-            }
-        }
-
-        if (permissions == null) {
-            return null;
-        }
-
-        String[] permissionsArray = new String[permissions.size()];
-        permissions.toArray(permissionsArray);
-        return permissionsArray;
-    }
-
     // Sanity check to be performed when the session is restored from an external file. Only one
     // of the session states should be true, or none of them.
     private static boolean isStagedSessionStateValid(boolean isReady, boolean isApplied,
@@ -2273,8 +2204,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @param sessionProvider
      * @return The newly created session
      */
-    // TODO(patb,109941548): modify readFromXml to consume to the next tag session tag so we
-    //                       can have a complete session for the constructor
     public static PackageInstallerSession readFromXml(@NonNull XmlPullParser in,
             @NonNull PackageInstallerService.InternalCallback callback, @NonNull Context context,
             @NonNull PackageManagerService pm, Looper installerThread,
@@ -2314,8 +2243,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
         params.installReason = readIntAttribute(in, ATTR_INSTALL_REASON);
 
-        params.grantedRuntimePermissions = readGrantedRuntimePermissions(in);
-
         final File appIconFile = buildAppIconFile(sessionId, sessionsDir);
         if (appIconFile.exists()) {
             params.appIcon = BitmapFactory.decodeFile(appIconFile.getAbsolutePath());
@@ -2324,16 +2251,51 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isReady = readBooleanAttribute(in, ATTR_IS_READY);
         final boolean isFailed = readBooleanAttribute(in, ATTR_IS_FAILED);
         final boolean isApplied = readBooleanAttribute(in, ATTR_IS_APPLIED);
-        final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE);
+        final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE,
+                SessionInfo.NO_ERROR);
 
         if (!isStagedSessionStateValid(isReady, isApplied, isFailed)) {
             throw new IllegalArgumentException("Can't restore staged session with invalid state.");
         }
 
+        // Parse sub tags of this session, typically used for repeated values / arrays.
+        // Sub tags can come in any order, therefore we need to keep track of what we find while
+        // parsing and only set the right values at the end.
+
+        // Store the current depth. We should stop parsing when we reach an end tag at the same
+        // depth.
+        List<String> permissions = new ArrayList<>();
+        List<Integer> childSessionIds = new ArrayList<>();
+        int outerDepth = in.getDepth();
+        int type;
+        while ((type = in.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || in.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
+                permissions.add(readStringAttribute(in, ATTR_NAME));
+            }
+            if (TAG_CHILD_SESSION.equals(in.getName())) {
+                childSessionIds.add(readIntAttribute(in, ATTR_SESSION_ID, SessionInfo.INVALID_ID));
+            }
+        }
+
+        if (permissions.size() > 0) {
+            params.grantedRuntimePermissions = permissions.stream().toArray(String[]::new);
+        }
+
+        int[] childSessionIdsArray;
+        if (childSessionIds.size() > 0) {
+            childSessionIdsArray = childSessionIds.stream().mapToInt(i -> i).toArray();
+        } else {
+            childSessionIdsArray = EMPTY_CHILD_SESSION_ARRAY;
+        }
+
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerPackageName,
                 installerUid, params, createdMillis, stageDir, stageCid, prepared, sealed,
-                EMPTY_CHILD_SESSION_ARRAY, parentSessionId, isReady, isFailed, isApplied,
+                childSessionIdsArray, parentSessionId, isReady, isFailed, isApplied,
                 stagedSessionErrorCode);
     }
 

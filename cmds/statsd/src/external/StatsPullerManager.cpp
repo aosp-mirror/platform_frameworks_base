@@ -131,9 +131,12 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // battery_voltage
         {android::util::BATTERY_VOLTAGE,
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
-        // battery_voltage
+        // battery_level
         {android::util::BATTERY_LEVEL,
          {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
+        // battery_cycle_count
+        {android::util::BATTERY_CYCLE_COUNT,
+         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
          {.additiveFields = {4, 5, 6, 7, 8, 9},

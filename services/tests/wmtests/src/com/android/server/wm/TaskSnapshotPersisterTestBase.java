@@ -53,7 +53,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     public void setUp() {
         final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
         mTestUserId = um.getUserHandle();
-        mPersister = new TaskSnapshotPersister(userId -> FILES_DIR);
+        mPersister = new TaskSnapshotPersister(mWm, userId -> FILES_DIR);
         mLoader = new TaskSnapshotLoader(mPersister);
         mPersister.start();
     }

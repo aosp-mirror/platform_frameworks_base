@@ -16,35 +16,41 @@
 
 package android.media.session;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.MediaMetadata;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession.QueueItem;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 
 import java.util.List;
 
 /**
  * Handles incoming commands to {@link MediaController.Callback}.
- * <p>
- * This API is not generally intended for third party application developers.
+ * @hide
  */
+@SystemApi
 public final class ControllerCallbackLink implements Parcelable {
+    final Context mContext;
     final CallbackStub mCallbackStub;
     final ISessionControllerCallback mIControllerCallback;
 
     /**
      * Constructor for stub (Callee)
-     * @hide
      */
-    @SystemApi
-    public ControllerCallbackLink(@NonNull CallbackStub callbackStub) {
+    public ControllerCallbackLink(@NonNull Context context, @NonNull CallbackStub callbackStub) {
+        mContext = context;
         mCallbackStub = callbackStub;
         mIControllerCallback = new CallbackStubProxy();
     }
@@ -52,14 +58,16 @@ public final class ControllerCallbackLink implements Parcelable {
     /**
      * Constructor for interface (Caller)
      */
-    ControllerCallbackLink(Parcel in) {
+    public ControllerCallbackLink(IBinder binder) {
+        mContext = null;
         mCallbackStub = null;
-        mIControllerCallback = ISessionControllerCallback.Stub.asInterface(in.readStrongBinder());
+        mIControllerCallback = ISessionControllerCallback.Stub.asInterface(binder);
     }
 
     /**
      * Notify controller that the connected session is destroyed.
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifySessionDestroyed() {
         try {
             mIControllerCallback.notifySessionDestroyed();
@@ -74,6 +82,7 @@ public final class ControllerCallbackLink implements Parcelable {
      * @param event the name of the event
      * @param extras the extras included with the event
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyEvent(@NonNull String event, @Nullable Bundle extras) {
         try {
             mIControllerCallback.notifyEvent(event, extras);
@@ -87,6 +96,7 @@ public final class ControllerCallbackLink implements Parcelable {
      *
      * @param state the new playback state
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyPlaybackStateChanged(@Nullable PlaybackState state) {
         try {
             mIControllerCallback.notifyPlaybackStateChanged(state);
@@ -100,6 +110,7 @@ public final class ControllerCallbackLink implements Parcelable {
      *
      * @param metadata the new metadata
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyMetadataChanged(@Nullable MediaMetadata metadata) {
         try {
             mIControllerCallback.notifyMetadataChanged(metadata);
@@ -113,6 +124,7 @@ public final class ControllerCallbackLink implements Parcelable {
      *
      * @param queue the new queue
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyQueueChanged(@Nullable List<QueueItem> queue) {
         try {
             mIControllerCallback.notifyQueueChanged(queue);
@@ -126,6 +138,7 @@ public final class ControllerCallbackLink implements Parcelable {
      *
      * @param title the new queue title
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyQueueTitleChanged(@Nullable CharSequence title) {
         try {
             mIControllerCallback.notifyQueueTitleChanged(title);
@@ -139,6 +152,7 @@ public final class ControllerCallbackLink implements Parcelable {
      *
      * @param extras the new extras
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyExtrasChanged(@Nullable Bundle extras) {
         try {
             mIControllerCallback.notifyExtrasChanged(extras);
@@ -152,6 +166,7 @@ public final class ControllerCallbackLink implements Parcelable {
      *
      * @param info the new playback info
      */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyVolumeInfoChanged(@NonNull PlaybackInfo info) {
         try {
             mIControllerCallback.notifyVolumeInfoChanged(info);
@@ -180,7 +195,7 @@ public final class ControllerCallbackLink implements Parcelable {
             new Parcelable.Creator<ControllerCallbackLink>() {
         @Override
         public ControllerCallbackLink createFromParcel(Parcel in) {
-            return new ControllerCallbackLink(in);
+            return new ControllerCallbackLink(in.readStrongBinder());
         }
 
         @Override
@@ -191,9 +206,7 @@ public final class ControllerCallbackLink implements Parcelable {
 
     /**
      * Class for Stub implementation
-     * @hide
      */
-    @SystemApi
     public abstract static class CallbackStub {
         /** Stub method for ISessionControllerCallback.notifySessionDestroyed */
         public void onSessionDestroyed() {
@@ -241,22 +254,46 @@ public final class ControllerCallbackLink implements Parcelable {
 
         @Override
         public void notifyPlaybackStateChanged(PlaybackState state) {
-            mCallbackStub.onPlaybackStateChanged(state);
+            ensureMediaControlPermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mCallbackStub.onPlaybackStateChanged(state);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void notifyMetadataChanged(MediaMetadata metadata) {
-            mCallbackStub.onMetadataChanged(metadata);
+            ensureMediaControlPermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mCallbackStub.onMetadataChanged(metadata);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void notifyQueueChanged(List<QueueItem> queue) {
-            mCallbackStub.onQueueChanged(queue);
+            ensureMediaControlPermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mCallbackStub.onQueueChanged(queue);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
         public void notifyQueueTitleChanged(CharSequence title) {
-            mCallbackStub.onQueueTitleChanged(title);
+            ensureMediaControlPermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mCallbackStub.onQueueTitleChanged(title);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
@@ -266,7 +303,31 @@ public final class ControllerCallbackLink implements Parcelable {
 
         @Override
         public void notifyVolumeInfoChanged(PlaybackInfo info) {
-            mCallbackStub.onVolumeInfoChanged(info);
+            ensureMediaControlPermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mCallbackStub.onVolumeInfoChanged(info);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        private void ensureMediaControlPermission() {
+            // Allow API calls from the System UI
+            if (mContext.checkCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
+            // Check if it's system server or has MEDIA_CONTENT_CONTROL.
+            // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
+            // check here.
+            if (getCallingUid() == Process.SYSTEM_UID || mContext.checkCallingPermission(
+                    android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            throw new SecurityException("Must hold the MEDIA_CONTENT_CONTROL permission.");
         }
     }
 }

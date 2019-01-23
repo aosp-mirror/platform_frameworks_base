@@ -310,7 +310,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             in.setInput(fis, StandardCharsets.UTF_8.name());
 
             int type;
-            PackageInstallerSession currentSession = null;
             while ((type = in.next()) != END_DOCUMENT) {
                 if (type == START_TAG) {
                     final String tag = in.getName();
@@ -320,9 +319,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             session = PackageInstallerSession.readFromXml(in, mInternalCallback,
                                     mContext, mPm, mInstallThread.getLooper(), mStagingManager,
                                     mSessionsDir, this);
-                            currentSession = session;
                         } catch (Exception e) {
-                            currentSession = null;
                             Slog.e(TAG, "Could not read session", e);
                             continue;
                         }
@@ -347,10 +344,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             addHistoricalSessionLocked(session);
                         }
                         mAllocatedSessions.put(session.sessionId, true);
-                    } else if (currentSession != null
-                            && PackageInstallerSession.TAG_CHILD_SESSION.equals(tag)) {
-                        currentSession.addChildSessionIdInternal(
-                                PackageInstallerSession.readChildSessionIdFromXml(in));
                     }
                 }
             }
@@ -1132,6 +1125,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         public void onStagedSessionChanged(PackageInstallerSession session) {
             writeSessionsAsync();
+            // TODO(b/118865310): don't send broadcast if system is not ready.
             mPm.sendSessionUpdatedBroadcast(session.generateInfo(false), session.userId);
         }
 

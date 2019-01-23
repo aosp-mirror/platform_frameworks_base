@@ -39,28 +39,29 @@ import java.util.Objects;
 public class TranslatingCursor extends CrossProcessCursorWrapper {
     public static class Config {
         public final Uri baseUri;
-        public final String idColumn;
-        public final String[] filePathColumns;
+        public final String auxiliaryColumn;
+        public final String[] translateColumns;
 
-        public Config(Uri baseUri, String idColumn, String... filePathColumns) {
+        public Config(Uri baseUri, String auxiliaryColumn, String... translateColumns) {
             this.baseUri = baseUri;
-            this.idColumn = idColumn;
-            this.filePathColumns = filePathColumns;
+            this.auxiliaryColumn = auxiliaryColumn;
+            this.translateColumns = translateColumns;
         }
     }
 
     public interface Translator {
-        String translate(String data, long id);
+        String translate(String data, int auxiliaryColumnIndex,
+                String matchingColumn, Cursor cursor);
     }
 
     private final @NonNull Config mConfig;
     private final @NonNull Translator mTranslator;
     private final boolean mDropLast;
 
-    private final int mIdIndex;
-    private final int[] mFilePathColIndices;
+    private final int mAuxiliaryColumnIndex;
+    private final int[] mTranslateColumnIndices;
 
-    private TranslatingCursor(@NonNull Cursor cursor, @NonNull Config config,
+    public TranslatingCursor(@NonNull Cursor cursor, @NonNull Config config,
             @NonNull Translator translator, boolean dropLast) {
         super(cursor);
 
@@ -68,10 +69,10 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
         mTranslator = Objects.requireNonNull(translator);
         mDropLast = dropLast;
 
-        mIdIndex = cursor.getColumnIndexOrThrow(config.idColumn);
-        mFilePathColIndices = new int[config.filePathColumns.length];
-        for (int i = mFilePathColIndices.length - 1; i >= 0; --i) {
-            mFilePathColIndices[i] = cursor.getColumnIndex(config.filePathColumns[i]);
+        mAuxiliaryColumnIndex = cursor.getColumnIndexOrThrow(config.auxiliaryColumn);
+        mTranslateColumnIndices = new int[config.translateColumns.length];
+        for (int i = 0; i < mTranslateColumnIndices.length; ++i) {
+            mTranslateColumnIndices[i] = cursor.getColumnIndex(config.translateColumns[i]);
         }
     }
 
@@ -97,26 +98,27 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
             SQLiteQueryBuilder qb, SQLiteDatabase db, String[] projectionIn, String selection,
             String[] selectionArgs, String groupBy, String having, String sortOrder, String limit,
             CancellationSignal signal) {
-        final boolean requestedId = ArrayUtils.isEmpty(projectionIn)
-                || ArrayUtils.contains(projectionIn, config.idColumn);
-        final boolean requestedData = ArrayUtils.isEmpty(projectionIn)
-                || ArrayUtils.containsAny(projectionIn, config.filePathColumns);
+        final boolean requestedAuxiliaryColumn = ArrayUtils.isEmpty(projectionIn)
+                || ArrayUtils.contains(projectionIn, config.auxiliaryColumn);
+        final boolean requestedTranslateColumns = ArrayUtils.isEmpty(projectionIn)
+                || ArrayUtils.containsAny(projectionIn, config.translateColumns);
 
-        // If caller didn't request data, we have nothing to redirect
-        if (!requestedData || !ContentResolver.DEPRECATE_DATA_COLUMNS) {
+        // If caller didn't request any columns that need to be translated,
+        // we have nothing to redirect
+        if (!requestedTranslateColumns) {
             return qb.query(db, projectionIn, selection, selectionArgs,
                     groupBy, having, sortOrder, limit, signal);
         }
 
-        // If caller didn't request id, we need to splice it in
-        if (!requestedId) {
+        // If caller didn't request auxiliary column, we need to splice it in
+        if (!requestedAuxiliaryColumn) {
             projectionIn = ArrayUtils.appendElement(String.class, projectionIn,
-                    config.idColumn);
+                    config.auxiliaryColumn);
         }
 
         final Cursor c = qb.query(db, projectionIn, selection, selectionArgs,
                 groupBy, having, sortOrder);
-        return new TranslatingCursor(c, config, translator, !requestedId);
+        return new TranslatingCursor(c, config, translator, !requestedAuxiliaryColumn);
     }
 
     @Override
@@ -139,7 +141,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public double getDouble(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             throw new IllegalArgumentException();
         } else {
             return super.getDouble(columnIndex);
@@ -148,7 +150,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public float getFloat(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             throw new IllegalArgumentException();
         } else {
             return super.getFloat(columnIndex);
@@ -157,7 +159,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public int getInt(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             throw new IllegalArgumentException();
         } else {
             return super.getInt(columnIndex);
@@ -166,7 +168,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public long getLong(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             throw new IllegalArgumentException();
         } else {
             return super.getLong(columnIndex);
@@ -175,7 +177,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public short getShort(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             throw new IllegalArgumentException();
         } else {
             return super.getShort(columnIndex);
@@ -184,8 +186,9 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public String getString(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
-            return mTranslator.translate(super.getString(columnIndex), super.getLong(mIdIndex));
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
+            return mTranslator.translate(super.getString(columnIndex),
+                    mAuxiliaryColumnIndex, getColumnName(columnIndex), this);
         } else {
             return super.getString(columnIndex);
         }
@@ -193,7 +196,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public void copyStringToBuffer(int columnIndex, CharArrayBuffer buffer) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             throw new IllegalArgumentException();
         } else {
             super.copyStringToBuffer(columnIndex, buffer);
@@ -202,7 +205,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public byte[] getBlob(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             throw new IllegalArgumentException();
         } else {
             return super.getBlob(columnIndex);
@@ -211,7 +214,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public int getType(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             return Cursor.FIELD_TYPE_STRING;
         } else {
             return super.getType(columnIndex);
@@ -220,7 +223,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
 
     @Override
     public boolean isNull(int columnIndex) {
-        if (ArrayUtils.contains(mFilePathColIndices, columnIndex)) {
+        if (ArrayUtils.contains(mTranslateColumnIndices, columnIndex)) {
             return getString(columnIndex) == null;
         } else {
             return super.isNull(columnIndex);

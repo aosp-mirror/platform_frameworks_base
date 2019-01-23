@@ -35,5 +35,4 @@ parcelable LinkPropertiesParcelable {
     int mtu;
     String tcpBufferSizes;
     IpPrefixParcelable nat64Prefix;
-    LinkPropertiesParcelable[] stackedLinks;
 }

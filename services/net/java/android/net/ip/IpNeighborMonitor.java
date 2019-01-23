@@ -16,9 +16,10 @@
 
 package android.net.ip;
 
-import static android.net.netlink.NetlinkConstants.hexify;
 import static android.net.netlink.NetlinkConstants.RTM_DELNEIGH;
+import static android.net.netlink.NetlinkConstants.hexify;
 import static android.net.netlink.NetlinkConstants.stringForNlMsgType;
+import static android.net.util.SocketUtils.makeNetlinkSocketAddress;
 
 import android.net.MacAddress;
 import android.net.netlink.NetlinkErrorMessage;
@@ -26,13 +27,11 @@ import android.net.netlink.NetlinkMessage;
 import android.net.netlink.NetlinkSocket;
 import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdMsg;
-import android.net.netlink.StructNlMsgHdr;
 import android.net.util.PacketReader;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.system.ErrnoException;
-import android.system.NetlinkSocketAddress;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
@@ -149,15 +148,12 @@ public class IpNeighborMonitor extends PacketReader {
 
         try {
             fd = NetlinkSocket.forProto(OsConstants.NETLINK_ROUTE);
-            Os.bind(fd, (SocketAddress)(new NetlinkSocketAddress(0, OsConstants.RTMGRP_NEIGH)));
-            Os.connect(fd, (SocketAddress)(new NetlinkSocketAddress(0, 0)));
+            Os.bind(fd, makeNetlinkSocketAddress(0, OsConstants.RTMGRP_NEIGH));
+            NetlinkSocket.connectToKernel(fd);
 
             if (VDBG) {
-                final NetlinkSocketAddress nlAddr = (NetlinkSocketAddress) Os.getsockname(fd);
-                Log.d(TAG, "bound to sockaddr_nl{"
-                        + BitUtils.uint32(nlAddr.getPortId()) + ", "
-                        + nlAddr.getGroupsMask()
-                        + "}");
+                final SocketAddress nlAddr = Os.getsockname(fd);
+                Log.d(TAG, "bound to sockaddr_nl{" + nlAddr.toString() + "}");
             }
         } catch (ErrnoException|SocketException e) {
             logError("Failed to create rtnetlink socket", e);

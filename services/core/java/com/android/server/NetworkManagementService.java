@@ -39,14 +39,6 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 
-import static com.android.server.NetworkManagementService.NetdResponseCode.ClatdStatusResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceGetCfgResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.IpFwdStatusResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetherDnsFwdTgtListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetherInterfaceListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetherStatusResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetheringStatsListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 

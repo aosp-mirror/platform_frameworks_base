@@ -217,7 +217,10 @@ public final class WindowInsets {
         return typeInsetMap;
     }
 
-    private static void assignCompatInsets(Insets[] typeInsetMap, Rect insets) {
+    /**
+     * @hide
+     */
+    static void assignCompatInsets(Insets[] typeInsetMap, Rect insets) {
         typeInsetMap[indexOf(TOP_BAR)] = Insets.of(0, insets.top, 0, 0);
         typeInsetMap[indexOf(SIDE_BARS)] = Insets.of(insets.left, 0, insets.right, insets.bottom);
     }

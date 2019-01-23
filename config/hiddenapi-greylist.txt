@@ -462,6 +462,8 @@ Landroid/hardware/input/IInputManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/input/IInputManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/input/IInputManager;
 Landroid/hardware/input/IInputManager$Stub;->TRANSACTION_injectInputEvent:I
 Landroid/hardware/input/IInputManager;->injectInputEvent(Landroid/view/InputEvent;I)Z
+Landroid/hardware/location/IActivityRecognitionHardwareClient$Stub;-><init>()V
+Landroid/hardware/location/IActivityRecognitionHardwareClient;->onAvailabilityChanged(ZLandroid/hardware/location/IActivityRecognitionHardware;)V
 Landroid/hardware/location/IContextHubService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/location/IContextHubService;
 Landroid/hardware/usb/IUsbManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/usb/IUsbManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/usb/IUsbManager;
@@ -921,7 +923,6 @@ Landroid/os/PowerManager;->isLightDeviceIdleMode()Z
 Landroid/os/PowerManager;->mService:Landroid/os/IPowerManager;
 Landroid/os/PowerManager;->validateWakeLockParameters(ILjava/lang/String;)V
 Landroid/os/PowerManager;->wakeUp(JLjava/lang/String;)V
-Landroid/os/Process;->BLUETOOTH_UID:I
 Landroid/os/Process;->DRM_UID:I
 Landroid/os/Process;->getFreeMemory()J
 Landroid/os/Process;->getParentPid(I)I
@@ -948,10 +949,8 @@ Landroid/os/Process;->PROC_TERM_MASK:I
 Landroid/os/Process;->PROC_ZERO_TERM:I
 Landroid/os/Process;->readProcFile(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z
 Landroid/os/Process;->readProcLines(Ljava/lang/String;[Ljava/lang/String;[J)V
-Landroid/os/Process;->ROOT_UID:I
 Landroid/os/Process;->setArgV0(Ljava/lang/String;)V
 Landroid/os/Process;->setProcessGroup(II)V
-Landroid/os/Process;->SHELL_UID:I
 Landroid/os/Process;->VPN_UID:I
 Landroid/os/Process;->WIFI_UID:I
 Landroid/os/RecoverySystem;->verifyPackageCompatibility(Ljava/io/InputStream;)Z
@@ -993,8 +992,6 @@ Landroid/os/ServiceManager;->sServiceManager:Landroid/os/IServiceManager;
 Landroid/os/ServiceManagerNative;->asInterface(Landroid/os/IBinder;)Landroid/os/IServiceManager;
 Landroid/os/ServiceManagerProxy;->getService(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/os/ServiceManagerProxy;->mRemote:Landroid/os/IBinder;
-Landroid/os/ServiceSpecificException;-><init>(ILjava/lang/String;)V
-Landroid/os/ServiceSpecificException;->errorCode:I
 Landroid/os/SharedMemory;->getFd()I
 Landroid/os/ShellCommand;->peekNextArg()Ljava/lang/String;
 Landroid/os/StatFs;->mStat:Landroid/system/StructStatVfs;
@@ -1419,11 +1416,6 @@ Landroid/service/euicc/IGetEuiccProfileInfoListCallback;->onComplete(Landroid/se
 Landroid/service/euicc/IRetainSubscriptionsForFactoryResetCallback;->onComplete(I)V
 Landroid/service/euicc/ISwitchToSubscriptionCallback;->onComplete(I)V
 Landroid/service/euicc/IUpdateSubscriptionNicknameCallback;->onComplete(I)V
-Landroid/service/media/IMediaBrowserServiceCallbacks$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/media/IMediaBrowserServiceCallbacks;
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnect(Ljava/lang/String;Landroid/media/session/MediaSession$Token;Landroid/os/Bundle;)V
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnectFailed()V
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onLoadChildren(Ljava/lang/String;Landroid/content/pm/ParceledListSlice;)V
-Landroid/service/media/IMediaBrowserServiceCallbacks;->onLoadChildrenWithOptions(Ljava/lang/String;Landroid/content/pm/ParceledListSlice;Landroid/os/Bundle;)V
 Landroid/service/notification/INotificationListener$Stub;-><init>()V
 Landroid/service/persistentdata/IPersistentDataBlockService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/persistentdata/IPersistentDataBlockService;
 Landroid/service/vr/IVrManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/vr/IVrManager;

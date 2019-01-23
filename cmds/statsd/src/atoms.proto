@@ -91,7 +91,7 @@ message Atom {
         ChargingStateChanged charging_state_changed = 31;
         PluggedStateChanged plugged_state_changed = 32;
         InteractiveStateChanged interactive_state_changed = 33;
-        // 34 is available
+        TouchEventReported touch_event_reported = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
         WifiLockStateChanged wifi_lock_state_changed = 37;
@@ -193,6 +193,16 @@ message Atom {
         LowStorageStateChanged low_storage_state_changed = 130;
         GnssNfwNotificationReported gnss_nfw_notification_reported = 131;
         GnssConfigurationReported gnss_configuration_reported = 132;
+        UsbPortOverheatEvent usb_port_overheat_event_reported = 133;
+        NfcErrorOccurred nfc_error_occurred = 134;
+        NfcStateChanged nfc_state_changed = 135;
+        NfcBeamOccurred nfc_beam_occurred = 136;
+        NfcCardemulationOccurred nfc_cardemulation_occurred = 137;
+        NfcTagOccurred nfc_tag_occurred = 138;
+        NfcHceTransactionOccurred nfc_hce_transaction_occurred = 139;
+        SeStateChanged se_state_changed = 140;
+        SeOmapiReported se_omapi_reported = 141;
+        BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported = 142;
     }
 
     // Pulled events will start at field 10000.
@@ -243,6 +253,7 @@ message Atom {
         ProcessMemoryHighWaterMark process_memory_high_water_mark = 10042;
         BatteryLevel battery_level = 10043;
         BuildInformation build_information = 10044;
+        BatteryCycleCount battery_cycle_count = 10045;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -1735,6 +1746,33 @@ message SettingsUIChanged {
 }
 
 /**
+ * Logs basic timing information about touch events.
+ * Reported at most every 5 minutes while device is being interacted with.
+ *
+ * Logged from:
+ *   frameworks/native/services/inputflinger
+ */
+message TouchEventReported {
+    /**
+     * The fields latency_{min|max|mean|stdev} represent minimum, maximum, mean,
+     * and the standard deviation of latency between the kernel and framework
+     * for touchscreen events. The units are microseconds.
+     *
+     * The number is measured as the difference between the time at which
+     * the input event was received in the evdev driver,
+     * and the time at which the input event was received in EventHub.
+     */
+    // Minimum value
+    optional float latency_min_micros = 1;
+    // Maximum value
+    optional float latency_max_micros = 2;
+    // Average value
+    optional float latency_mean_micros = 3;
+    // Standard deviation
+    optional float latency_stdev_micros = 4;
+}
+
+/**
  * Logs that a setting was updated.
  * Logged from:
  *   frameworks/base/packages/SettingsProvider/src/com/android/providers/settings/SettingsState.java
@@ -2466,6 +2504,37 @@ message BinaryPushStateChanged {
         REBOOT_DONE = 6;
     }
     optional State state = 3;
+}
+
+/** Represents USB port overheat event. */
+message UsbPortOverheatEvent {
+    /* Temperature of USB port at USB plug event, in 1/10ths of degree C. */
+    optional int32 plug_temperature_deci_c = 1;
+
+    /* Maximum temperature of USB port during overheat event, in 1/10ths of degree C. */
+    optional int32 max_temperature_deci_c = 2;
+
+    /* Time between USB plug event and overheat threshold trip, in seconds. */
+    optional int32 time_to_overheat_secs = 3;
+
+    /* Time between overheat threshold trip and hysteresis, in seconds. */
+    optional int32 time_to_hysteresis_secs = 4;
+
+    /* Time between hysteresis and active mitigation ending, in seconds. */
+    optional int32 time_to_inactive_secs = 5;
+};
+
+/**
+ * Logs total effective full charge and discharge cycles on a battery.
+ * Here are some examples of one effective cycle:
+ *   1) the battery charges from 0% to 100% and drains back to 0%,
+ *   2) charging from 50% to 100% and draining back to 50% twice.
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message BatteryCycleCount {
+    /* Number of total charge and discharge cycles on the system battery. */
+    optional int32 cycle_count = 1;
 }
 
 /*
@@ -4262,4 +4331,149 @@ message GnssConfigurationReported {
     // non-framework location access permission. The package names are concatenated in one string
     // with spaces as separators.
     optional string enabled_proxy_app_package_name_list = 13;
+}
+
+/**
+ * Logs when a NFC device's error occurred.
+ * Logged from:
+ *     system/nfc/src/nfc/nfc/nfc_ncif.cc
+ *     packages/apps/Nfc/src/com/android/nfc/cardemulation/AidRoutingManager.java
+ */
+message NfcErrorOccurred {
+  enum Type {
+    UNKNOWN = 0;
+    CMD_TIMEOUT = 1;
+    ERROR_NOTIFICATION = 2;
+    AID_OVERFLOW = 3;
+  }
+  optional Type type = 1;
+  // If it's nci cmd timeout, log the timeout command.
+  optional uint32 nci_cmd = 2;
+
+  optional uint32 error_ntf_status_code = 3;
+}
+
+/**
+ * Logs when a NFC device's state changed event
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/NfcService.java
+ */
+message NfcStateChanged {
+  enum State {
+    UNKNOWN = 0;
+    OFF = 1;
+    ON = 2;
+    ON_LOCKED = 3; // Secure Nfc enabled.
+    CRASH_RESTART = 4; // NfcService watchdog timeout restart.
+  }
+  optional State state = 1;
+}
+
+/**
+ * Logs when a NFC Beam Transaction occurred.
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/P2pLinkManager.java
+ */
+message NfcBeamOccurred {
+  enum Operation {
+      UNKNOWN = 0;
+      SEND = 1;
+      RECEIVE = 2;
+  }
+  optional Operation operation = 1;
+}
+
+/**
+ * Logs when a NFC Card Emulation Transaction occurred.
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/cardemulation/HostEmulationManager.java
+ *     packages/apps/Nfc/src/com/android/nfc/cardemulation/HostNfcFEmulationManager.java
+ */
+message NfcCardemulationOccurred {
+  enum Category {
+      UNKNOWN = 0;
+      HCE_PAYMENT = 1;
+      HCE_OTHER = 2;
+      OFFHOST = 3;
+  }
+  // Transaction belongs to HCE payment or HCE other category, or offhost.
+  optional Category category = 1;
+  // SeName from transaction: SIMx, eSEx, HCE, HCEF.
+  optional string se_name = 2;
+}
+
+/**
+ * Logs when a NFC Tag event occurred.
+ * Logged from:
+ *     packages/apps/Nfc/src/com/android/nfc/NfcDispatcher.java
+ */
+message NfcTagOccurred {
+  enum Type {
+      UNKNOWN = 0;
+      URL = 1;
+      BT_PAIRING = 2;
+      PROVISION = 3;
+      WIFI_CONNECT = 4;
+      APP_LAUNCH = 5;
+      OTHERS = 6;
+  }
+  optional Type type = 1;
+}
+
+/**
+ * Logs when Hce transaction triggered
+ * Logged from:
+ *     system/nfc/src/nfc/nfc/nfc_ncif.cc
+ */
+message NfcHceTransactionOccurred {
+    // The latency period(in microseconds) it took for the first HCE data
+    // exchange.
+    optional uint32 latency_micros = 1;
+}
+
+/**
+ * Logs when SecureElement state event changed
+ * Logged from:
+ *     packages/apps/SecureElement/src/com/android/se/Terminal.java
+ */
+message SeStateChanged {
+  enum State {
+    UNKNOWN = 0;
+    INITIALIZED = 1;
+    DISCONNECTED = 2;
+    CONNECTED = 3;
+    HALCRASH = 4;
+  }
+  optional State state = 1;
+
+  optional string state_change_reason = 2;
+  // SIMx or eSEx.
+  optional string terminal = 3;
+}
+
+/**
+ * Logs when Omapi API used
+ * Logged from:
+ *     packages/apps/SecureElement/src/com/android/se/Terminal.java
+ */
+message SeOmapiReported {
+  enum Operation {
+    UNKNOWN = 0;
+    OPEN_CHANNEL = 1;
+  }
+  optional Operation operation = 1;
+  // SIMx or eSEx.
+  optional string terminal = 2;
+
+  optional string packageName = 3;
+}
+
+/**
+  * Logs the dispatch latencey of a broadcast during processing of BOOT_COMPLETED.
+  * The dispatch latencey is the dispatchClockTime - enqueueClockTime.
+  * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/BroadcastQueue.java
+  */
+message BroadcastDispatchLatencyReported {
+  optional int64 dispatch_latency_millis = 1;
 }

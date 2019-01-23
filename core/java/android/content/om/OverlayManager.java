@@ -54,6 +54,7 @@ public class OverlayManager {
         this(context, IOverlayManager.Stub.asInterface(
             ServiceManager.getService(Context.OVERLAY_SERVICE)));
     }
+
     /**
      * Request that an overlay package is enabled and any other overlay packages with the same
      * target package and category are disabled.
@@ -69,6 +70,26 @@ public class OverlayManager {
             int userId) {
         try {
             return mService.setEnabledExclusiveInCategory(packageName, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request that an overlay package is enabled.
+     *
+     * @param packageName the name of the overlay package to enable.
+     * @param enable {@code false} if the overlay should be turned off.
+     * @param userId The user for which to change the overlay.
+     * @return true if the system successfully registered the request, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean setEnabled(@Nullable final String packageName, final boolean enable,
+            int userId) {
+        try {
+            return mService.setEnabled(packageName, enable, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

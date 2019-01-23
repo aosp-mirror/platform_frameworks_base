@@ -1845,6 +1845,7 @@
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
   <java-symbol type="array" name="config_notificationFallbackVibePattern" />
   <java-symbol type="bool" name="config_useAttentionLight" />
+  <java-symbol type="bool" name="config_adaptive_sleep_available" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
   <java-symbol type="bool" name="config_smart_battery_available" />
@@ -1853,6 +1854,7 @@
   <java-symbol type="bool" name="config_enableNightMode" />
   <java-symbol type="bool" name="config_tintNotificationActionButtons" />
   <java-symbol type="bool" name="config_dozeAfterScreenOffByDefault" />
+  <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
   <java-symbol type="bool" name="config_enableHardwareFlpOverlay" />
   <java-symbol type="bool" name="config_enableGeocoderOverlay" />
@@ -2021,6 +2023,7 @@
   <java-symbol type="string" name="car_mode_disable_notification_title" />
   <java-symbol type="string" name="chooser_wallpaper" />
   <java-symbol type="string" name="config_datause_iface" />
+  <java-symbol type="string" name="config_activityRecognitionHardwarePackageName" />
   <java-symbol type="string" name="config_fusedLocationProviderPackageName" />
   <java-symbol type="string" name="config_hardwareFlpPackageName" />
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
@@ -3031,6 +3034,7 @@
   <java-symbol type="drawable" name="ic_doc_generic" />
 
   <java-symbol type="bool" name="config_setColorTransformAccelerated" />
+  <java-symbol type="bool" name="config_setColorTransformAcceleratedPerLayer" />
   <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
   <java-symbol type="bool" name="config_nightDisplayAvailable" />
   <java-symbol type="bool" name="config_allowDisablingAssistDisclosure" />
@@ -3540,4 +3544,7 @@
   <java-symbol type="bool" name="config_silenceSensorAvailable" />
 
   <java-symbol type="bool" name="config_zramWriteback" />
+
+  <!-- For CBRS -->
+  <java-symbol type="bool" name="config_cbrs_supported" />
 </resources>

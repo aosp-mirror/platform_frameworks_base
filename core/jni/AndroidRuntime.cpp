@@ -101,6 +101,7 @@ extern int register_android_hardware_SoundTrigger(JNIEnv *env);
 extern int register_android_hardware_UsbDevice(JNIEnv *env);
 extern int register_android_hardware_UsbDeviceConnection(JNIEnv *env);
 extern int register_android_hardware_UsbRequest(JNIEnv *env);
+extern int register_android_hardware_location_ActivityRecognitionHardware(JNIEnv* env);
 
 extern int register_android_media_AudioEffectDescriptor(JNIEnv *env);
 extern int register_android_media_AudioRecord(JNIEnv *env);
@@ -130,6 +131,7 @@ extern int register_android_content_res_ApkAssets(JNIEnv* env);
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_CanvasProperty(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
+extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
 extern int register_android_graphics_FontFamily(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
@@ -1360,6 +1362,9 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_VintfRuntimeInfo),
     REG_JNI(register_android_nio_utils),
     REG_JNI(register_android_graphics_Canvas),
+    // This needs to be before register_android_graphics_Graphics, or the latter
+    // will not be able to find the jmethodID for ColorSpace.get().
+    REG_JNI(register_android_graphics_ColorSpace),
     REG_JNI(register_android_graphics_Graphics),
     REG_JNI(register_android_view_DisplayEventReceiver),
     REG_JNI(register_android_view_RenderNode),
@@ -1456,6 +1461,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_hardware_UsbDevice),
     REG_JNI(register_android_hardware_UsbDeviceConnection),
     REG_JNI(register_android_hardware_UsbRequest),
+    REG_JNI(register_android_hardware_location_ActivityRecognitionHardware),
     REG_JNI(register_android_media_AudioEffectDescriptor),
     REG_JNI(register_android_media_AudioSystem),
     REG_JNI(register_android_media_AudioRecord),

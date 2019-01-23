@@ -56,6 +56,9 @@ public class InsetsController implements WindowInsetsController {
 
     private final Runnable mAnimCallback;
 
+    private final Rect mLastLegacyContentInsets = new Rect();
+    private final Rect mLastLegacyStableInsets = new Rect();
+
     public InsetsController(ViewRootImpl viewRoot) {
         mViewRoot = viewRoot;
         mAnimCallback = () -> {
@@ -70,6 +73,7 @@ public class InsetsController implements WindowInsetsController {
             }
             WindowInsets insets = state.calculateInsets(mFrame, mLastInsets.isRound(),
                     mLastInsets.shouldAlwaysConsumeNavBar(), mLastInsets.getDisplayCutout(),
+                    mLastLegacyContentInsets, mLastLegacyStableInsets,
                     null /* typeSideMap */);
             mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets);
         };
@@ -102,8 +106,12 @@ public class InsetsController implements WindowInsetsController {
      */
     @VisibleForTesting
     public WindowInsets calculateInsets(boolean isScreenRound,
-            boolean alwaysConsumeNavBar, DisplayCutout cutout) {
+            boolean alwaysConsumeNavBar, DisplayCutout cutout, Rect legacyContentInsets,
+            Rect legacyStableInsets) {
+        mLastLegacyContentInsets.set(legacyContentInsets);
+        mLastLegacyStableInsets.set(legacyStableInsets);
         mLastInsets = mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout,
+                legacyContentInsets, legacyStableInsets,
                 null /* typeSideMap */);
         return mLastInsets;
     }

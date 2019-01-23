@@ -15,6 +15,8 @@
  */
 package android.os;
 
+import android.annotation.SystemApi;
+
 /**
  * An exception specific to a service.
  *
@@ -28,6 +30,7 @@ package android.os;
  *
  * @hide
  */
+@SystemApi
 public class ServiceSpecificException extends RuntimeException {
     public final int errorCode;
 

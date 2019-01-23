@@ -27,14 +27,14 @@ import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.ControllerCallbackLink;
-import android.media.session.ISession;
-import android.media.session.ISessionController;
+import android.media.session.ControllerLink;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.QueueItem;
 import android.media.session.PlaybackState;
 import android.media.session.SessionCallbackLink;
+import android.media.session.SessionLink;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -77,8 +77,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final int mUserId;
     private final String mPackageName;
     private final String mTag;
-    private final ControllerStub mController;
-    private final SessionStub mSession;
+    private final ControllerLink mController;
+    private final SessionLink mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService.ServiceImpl mService;
     private final Context mContext;
@@ -127,8 +127,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mUserId = userId;
         mPackageName = ownerPackageName;
         mTag = tag;
-        mController = new ControllerStub();
-        mSession = new SessionStub();
+        mController = new ControllerLink(new ControllerStub());
+        mSession = new SessionLink(new SessionStub());
         mSessionCb = new SessionCb(cb);
         mService = service;
         mContext = mService.getContext();
@@ -139,20 +139,20 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the binder for the {@link MediaSession}.
+     * Get the session link for the {@link MediaSession}.
      *
-     * @return The session binder apps talk to.
+     * @return The session link apps talk to.
      */
-    public ISession getSessionBinder() {
+    public SessionLink getSessionBinder() {
         return mSession;
     }
 
     /**
-     * Get the binder for the {@link MediaController}.
+     * Get the controller link for the {@link MediaController}.
      *
-     * @return The controller binder apps talk to.
+     * @return The controller link apps talk to.
      */
-    public ISessionController getControllerBinder() {
+    public ControllerLink getControllerLink() {
         return mController;
     }
 
@@ -642,7 +642,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mDestroyed) {
                 return;
             }
-            PlaybackInfo info = mController.getVolumeAttributes();
+            PlaybackInfo info = getVolumeAttributes();
             for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
                 ControllerCallbackLinkHolder holder = mControllerCallbackHolders.get(i);
                 try {
@@ -750,6 +750,25 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return -1;
     }
 
+    private PlaybackInfo getVolumeAttributes() {
+        int volumeType;
+        AudioAttributes attributes;
+        synchronized (mLock) {
+            if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
+                int current = mOptimisticVolume != -1 ? mOptimisticVolume : mCurrentVolume;
+                return new PlaybackInfo(mVolumeType, mVolumeControlType, mMaxVolume, current,
+                        mAudioAttrs);
+            }
+            volumeType = mVolumeType;
+            attributes = mAudioAttrs;
+        }
+        int stream = AudioAttributes.toLegacyStreamType(attributes);
+        int max = mAudioManager.getStreamMaxVolume(stream);
+        int current = mAudioManager.getStreamVolume(stream);
+        return new PlaybackInfo(volumeType, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max,
+                current, attributes);
+    }
+
     private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
         @Override
         public void run() {
@@ -761,9 +780,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     };
 
-    private final class SessionStub extends ISession.Stub {
+    private final class SessionStub extends SessionLink.SessionStub {
         @Override
-        public void destroy() {
+        public void destroySession() {
             final long token = Binder.clearCallingIdentity();
             try {
                 mService.destroySession(MediaSessionRecord.this);
@@ -779,7 +798,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public ISessionController getController() {
+        public ControllerLink getController() {
             return mController;
         }
 
@@ -798,8 +817,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void setFlags(int flags) {
             if ((flags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-                int pid = getCallingPid();
-                int uid = getCallingUid();
+                int pid = Binder.getCallingPid();
+                int uid = Binder.getCallingUid();
                 mService.enforcePhoneStatePermission(pid, uid);
             }
             mFlags = flags;
@@ -1183,7 +1202,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
-    class ControllerStub extends ISessionController.Stub {
+    class ControllerStub extends ControllerLink.ControllerStub {
         @Override
         public void sendCommand(String packageName, ControllerCallbackLink caller,
                 String command, Bundle args, ResultReceiver cb) {
@@ -1199,7 +1218,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void registerCallbackListener(String packageName, ControllerCallbackLink cb) {
+        public void registerCallback(String packageName, ControllerCallbackLink cb) {
             synchronized (mLock) {
                 // If this session is already destroyed tell the caller and
                 // don't add them.
@@ -1223,7 +1242,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void unregisterCallbackListener(ControllerCallbackLink cb) {
+        public void unregisterCallback(ControllerCallbackLink cb) {
             synchronized (mLock) {
                 int index = getControllerHolderIndexForCb(cb);
                 if (index != -1) {
@@ -1257,22 +1276,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public PlaybackInfo getVolumeAttributes() {
-            int volumeType;
-            AudioAttributes attributes;
-            synchronized (mLock) {
-                if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
-                    int current = mOptimisticVolume != -1 ? mOptimisticVolume : mCurrentVolume;
-                    return new PlaybackInfo(mVolumeType, mVolumeControlType, mMaxVolume, current,
-                            mAudioAttrs);
-                }
-                volumeType = mVolumeType;
-                attributes = mAudioAttrs;
-            }
-            int stream = AudioAttributes.toLegacyStreamType(attributes);
-            int max = mAudioManager.getStreamMaxVolume(stream);
-            int current = mAudioManager.getStreamVolume(stream);
-            return new PlaybackInfo(volumeType, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max,
-                    current, attributes);
+            return MediaSessionRecord.this.getVolumeAttributes();
         }
 
         @Override
@@ -1448,11 +1452,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public int getRatingType() {
             return mRatingType;
-        }
-
-        @Override
-        public boolean isTransportControlEnabled() {
-            return MediaSessionRecord.this.isTransportControlEnabled();
         }
     }
 

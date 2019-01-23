@@ -191,6 +191,10 @@ java_defaults {
         "core/java/android/hardware/input/IInputDevicesChangedListener.aidl",
         "core/java/android/hardware/input/ITabletModeChangedListener.aidl",
         "core/java/android/hardware/iris/IIrisService.aidl",
+        "core/java/android/hardware/location/IActivityRecognitionHardware.aidl",
+        "core/java/android/hardware/location/IActivityRecognitionHardwareClient.aidl",
+        "core/java/android/hardware/location/IActivityRecognitionHardwareSink.aidl",
+        "core/java/android/hardware/location/IActivityRecognitionHardwareWatcher.aidl",
         "core/java/android/hardware/location/IGeofenceHardware.aidl",
         "core/java/android/hardware/location/IGeofenceHardwareCallback.aidl",
         "core/java/android/hardware/location/IGeofenceHardwareMonitorCallback.aidl",
@@ -207,7 +211,6 @@ java_defaults {
         "core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl",
         "core/java/android/hardware/usb/IUsbManager.aidl",
         "core/java/android/hardware/usb/IUsbSerialReader.aidl",
-        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/IConnectivityManager.aidl",
         "core/java/android/hardware/ISensorPrivacyListener.aidl",
         "core/java/android/hardware/ISensorPrivacyManager.aidl",
@@ -762,8 +765,6 @@ java_defaults {
     required: [
         // TODO: remove gps_debug when the build system propagates "required" properly.
         "gps_debug.conf",
-        // Loaded with System.loadLibrary by android.view.textclassifier
-        "libmedia2_jni",
     ],
 
     dxflags: [
@@ -884,6 +885,7 @@ aidl_interface {
     srcs: [
         "core/java/android/net/ApfCapabilitiesParcelable.aidl",
         "core/java/android/net/DhcpResultsParcelable.aidl",
+        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/INetworkMonitor.aidl",
         "core/java/android/net/INetworkMonitorCallbacks.aidl",
         "core/java/android/net/IIpMemoryStore.aidl",

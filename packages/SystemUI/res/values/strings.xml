@@ -150,6 +150,9 @@
     <!-- Option to always allow USB debugging from the attached computer -->
     <string name="usb_debugging_always">Always allow from this computer</string>
 
+    <!-- Button label for confirming acceptance of enabling USB debugging [CHAR LIMIT=15] -->
+    <string name="usb_debugging_allow">Allow</string>
+
     <!-- Title of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
     <string name="usb_debugging_secondary_user_title">USB debugging not allowed</string>
 

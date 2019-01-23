@@ -622,7 +622,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     .append(KEY_PREFIX_FQDN)
                     .append(config.FQDN).toString();
         } else {
-            return getKey(config.SSID, config.BSSID, getSecurity(config));
+            return getKey(removeDoubleQuotes(config.SSID), config.BSSID, getSecurity(config));
         }
     }
 
@@ -1555,7 +1555,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     mOsuFailure = mContext.getString(
                             R.string.osu_failure_provisioning_not_available);
                     break;
-                case OSU_FAILURE_INVALID_SERVER_URL:
+                case OSU_FAILURE_INVALID_URL_FORMAT_FOR_OSU:
                     mOsuFailure = mContext.getString(R.string.osu_failure_invalid_server_url);
                     break;
                 case OSU_FAILURE_UNEXPECTED_COMMAND_TYPE:

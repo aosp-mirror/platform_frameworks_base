@@ -69,13 +69,13 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
+    private final WindowManager.LayoutParams mLpChanged;
+    private final boolean mKeyguardScreenRotation;
     private ViewGroup mStatusBarView;
     private WindowManager.LayoutParams mLp;
-    private WindowManager.LayoutParams mLpChanged;
     private boolean mHasTopUi;
     private boolean mHasTopUiChanged;
     private int mBarHeight;
-    private final boolean mKeyguardScreenRotation;
     private float mScreenBrightnessDoze;
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
@@ -97,6 +97,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
+        mLpChanged = new WindowManager.LayoutParams();
         Dependency.get(StatusBarStateController.class).addCallback(
                 mStateListener, StatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         Dependency.get(ConfigurationController.class).addCallback(this);
@@ -138,7 +139,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mStatusBarView = statusBarView;
         mBarHeight = barHeight;
         mWindowManager.addView(mStatusBarView, mLp);
-        mLpChanged = new WindowManager.LayoutParams();
         mLpChanged.copyFrom(mLp);
         onThemeChanged();
     }
@@ -228,7 +228,9 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private void applyHeight(State state) {
         boolean expanded = isExpanded(state);
         if (state.forcePluginOpen) {
-            mListener.setWouldOtherwiseCollapse(expanded);
+            if (mListener != null) {
+                mListener.setWouldOtherwiseCollapse(expanded);
+            }
             expanded = true;
         }
         if (expanded) {
@@ -247,7 +249,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
 
     private void applyFitsSystemWindows(State state) {
         boolean fitsSystemWindows = !state.isKeyguardShowingAndNotOccluded();
-        if (mStatusBarView.getFitsSystemWindows() != fitsSystemWindows) {
+        if (mStatusBarView != null && mStatusBarView.getFitsSystemWindows() != fitsSystemWindows) {
             mStatusBarView.setFitsSystemWindows(fitsSystemWindows);
             mStatusBarView.requestApplyInsets();
         }
@@ -289,7 +291,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         applyBrightness(state);
         applyHasTopUi(state);
         applyNotTouchable(state);
-        if (mLp.copyFrom(mLpChanged) != 0) {
+        if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
         if (mHasTopUi != mHasTopUiChanged) {

@@ -18,8 +18,10 @@ package com.android.systemui.doze;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +36,8 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dock.DockManager;
+import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
@@ -59,6 +63,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     private WakeLock mWakeLock;
     private Instrumentation mInstrumentation;
     private AlarmManager mAlarmManager;
+    private DockManagerFake mDockManagerFake;
 
     @BeforeClass
     public static void setupSuite() {
@@ -76,9 +81,12 @@ public class DozeTriggersTest extends SysuiTestCase {
         mParameters = DozeConfigurationUtil.createMockParameters();
         mSensors = new FakeSensorManager(mContext);
         mWakeLock = new WakeLockFake();
+        mDockManagerFake = spy(new DockManagerFake());
+        mContext.putComponent(DockManager.class, mDockManagerFake);
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, mConfig, mParameters,
-                mSensors, Handler.createAsync(Looper.myLooper()), mWakeLock, true);
+                mSensors, Handler.createAsync(Looper.myLooper()), mWakeLock, true,
+                mDockManagerFake);
     }
 
     @Test
@@ -100,6 +108,40 @@ public class DozeTriggersTest extends SysuiTestCase {
         mSensors.getMockProximitySensor().sendProximityResult(true); /* Far */
 
         verify(mMachine).requestPulse(anyInt());
+    }
+
+    @Test
+    public void testDockEventListener_registerAndUnregister() {
+        mTriggers.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
+
+        verify(mDockManagerFake).addListener(any());
+
+        mTriggers.transitionTo(DozeMachine.State.DOZE, DozeMachine.State.FINISH);
+
+        verify(mDockManagerFake).removeListener(any());
+    }
+
+    @Test
+    public void testOnSensor_whenUndockedWithNearAndDoubleTapScreen_shouldNotWakeUp() {
+        mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
+
+        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
+                false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
+                null /* rawValues */);
+
+        verify(mMachine, never()).wakeUp();
+    }
+
+    @Test
+    public void testOnSensor_whenDockedWithNearAndDoubleTapScreen_shouldWakeUp() {
+        doReturn(true).when(mDockManagerFake).isDocked();
+        mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
+
+        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
+                false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
+                null /* rawValues */);
+
+        verify(mMachine).wakeUp();
     }
 
 }

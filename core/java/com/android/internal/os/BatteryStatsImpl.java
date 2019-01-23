@@ -87,6 +87,10 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -187,18 +191,19 @@ public class BatteryStatsImpl extends BatteryStats {
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
 
     @VisibleForTesting
-    protected KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
+    protected KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader =
+            new KernelCpuUidUserSysTimeReader(true);
     @VisibleForTesting
     protected KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
     @VisibleForTesting
-    protected KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader =
-            new KernelUidCpuFreqTimeReader();
+    protected KernelCpuUidFreqTimeReader mCpuUidFreqTimeReader =
+            new KernelCpuUidFreqTimeReader(true);
     @VisibleForTesting
-    protected KernelUidCpuActiveTimeReader mKernelUidCpuActiveTimeReader =
-            new KernelUidCpuActiveTimeReader();
+    protected KernelCpuUidActiveTimeReader mCpuUidActiveTimeReader =
+            new KernelCpuUidActiveTimeReader(true);
     @VisibleForTesting
-    protected KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
-            new KernelUidCpuClusterTimeReader();
+    protected KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader =
+            new KernelCpuUidClusterTimeReader(true);
     @VisibleForTesting
     protected KernelSingleUidTimeReader mKernelSingleUidTimeReader;
 
@@ -248,9 +253,9 @@ public class BatteryStatsImpl extends BatteryStats {
     /** Last time that RPM stats were updated by updateRpmStatsLocked. */
     private long mLastRpmStatsUpdateTimeMs = -RPM_STATS_UPDATE_FREQ_MS;
     /**
-     * Use a queue to delay removing UIDs from {@link KernelUidCpuTimeReader},
-     * {@link KernelUidCpuActiveTimeReader}, {@link KernelUidCpuClusterTimeReader},
-     * {@link KernelUidCpuFreqTimeReader} and from the Kernel.
+     * Use a queue to delay removing UIDs from {@link KernelCpuUidUserSysTimeReader},
+     * {@link KernelCpuUidActiveTimeReader}, {@link KernelCpuUidClusterTimeReader},
+     * {@link KernelCpuUidFreqTimeReader} and from the Kernel.
      *
      * Isolated and invalid UID info must be removed to conserve memory. However, STATSD and
      * Batterystats both need to access UID cpu time. To resolve this race condition, only
@@ -281,22 +286,22 @@ public class BatteryStatsImpl extends BatteryStats {
 
         void remove() {
             if (startUid == endUid) {
-                mKernelUidCpuTimeReader.removeUid(startUid);
-                mKernelUidCpuFreqTimeReader.removeUid(startUid);
+                mCpuUidUserSysTimeReader.removeUid(startUid);
+                mCpuUidFreqTimeReader.removeUid(startUid);
                 if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-                    mKernelUidCpuActiveTimeReader.removeUid(startUid);
-                    mKernelUidCpuClusterTimeReader.removeUid(startUid);
+                    mCpuUidActiveTimeReader.removeUid(startUid);
+                    mCpuUidClusterTimeReader.removeUid(startUid);
                 }
                 if (mKernelSingleUidTimeReader != null) {
                     mKernelSingleUidTimeReader.removeUid(startUid);
                 }
                 mNumUidsRemoved++;
             } else if (startUid < endUid) {
-                mKernelUidCpuFreqTimeReader.removeUidsInRange(startUid, endUid);
-                mKernelUidCpuTimeReader.removeUidsInRange(startUid, endUid);
+                mCpuUidFreqTimeReader.removeUidsInRange(startUid, endUid);
+                mCpuUidUserSysTimeReader.removeUidsInRange(startUid, endUid);
                 if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-                    mKernelUidCpuActiveTimeReader.removeUidsInRange(startUid, endUid);
-                    mKernelUidCpuClusterTimeReader.removeUidsInRange(startUid, endUid);
+                    mCpuUidActiveTimeReader.removeUidsInRange(startUid, endUid);
+                    mCpuUidClusterTimeReader.removeUidsInRange(startUid, endUid);
                 }
                 if (mKernelSingleUidTimeReader != null) {
                     mKernelSingleUidTimeReader.removeUidsInRange(startUid, endUid);
@@ -496,7 +501,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             final SparseArray<long[]> allUidCpuFreqTimesMs =
-                    mKernelUidCpuFreqTimeReader.getAllUidCpuFreqTimeMs();
+                    mCpuUidFreqTimeReader.getAllUidCpuFreqTimeMs();
             // If the KernelSingleUidTimeReader has stale cpu times, then we shouldn't try to
             // compute deltas since it might result in mis-attributing cpu times to wrong states.
             if (mIsPerProcessStateCpuDataStale) {
@@ -553,16 +558,16 @@ public class BatteryStatsImpl extends BatteryStats {
                 return false;
             }
             if (mCpuFreqs == null) {
-                mCpuFreqs = mKernelUidCpuFreqTimeReader.readFreqs(mPowerProfile);
+                mCpuFreqs = mCpuUidFreqTimeReader.readFreqs(mPowerProfile);
             }
             if (mCpuFreqs != null) {
                 mKernelSingleUidTimeReader = new KernelSingleUidTimeReader(mCpuFreqs.length);
             } else {
-                mPerProcStateCpuTimesAvailable = mKernelUidCpuFreqTimeReader.allUidTimesAvailable();
+                mPerProcStateCpuTimesAvailable = mCpuUidFreqTimeReader.allUidTimesAvailable();
                 return false;
             }
         }
-        mPerProcStateCpuTimesAvailable = mKernelUidCpuFreqTimeReader.allUidTimesAvailable()
+        mPerProcStateCpuTimesAvailable = mCpuUidFreqTimeReader.allUidTimesAvailable()
                 && mKernelSingleUidTimeReader.singleUidCpuTimesAvailable();
         return true;
     }
@@ -11926,7 +11931,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if (mCpuFreqs == null) {
-            mCpuFreqs = mKernelUidCpuFreqTimeReader.readFreqs(mPowerProfile);
+            mCpuFreqs = mCpuUidFreqTimeReader.readFreqs(mPowerProfile);
         }
 
         // Calculate the wakelocks we have to distribute amongst. The system is excluded as it is
@@ -11952,12 +11957,12 @@ public class BatteryStatsImpl extends BatteryStats {
         // When the battery is not on, we don't attribute the cpu times to any timers but we still
         // need to take the snapshots.
         if (!onBattery) {
-            mKernelUidCpuTimeReader.readDelta(null);
-            mKernelUidCpuFreqTimeReader.readDelta(null);
+            mCpuUidUserSysTimeReader.readDelta(null);
+            mCpuUidFreqTimeReader.readDelta(null);
             mNumAllUidCpuTimeReads += 2;
             if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-                mKernelUidCpuActiveTimeReader.readDelta(null);
-                mKernelUidCpuClusterTimeReader.readDelta(null);
+                mCpuUidActiveTimeReader.readDelta(null);
+                mCpuUidClusterTimeReader.readDelta(null);
                 mNumAllUidCpuTimeReads += 2;
             }
             for (int cluster = mKernelCpuSpeedReaders.length - 1; cluster >= 0; --cluster) {
@@ -11967,7 +11972,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         mUserInfoProvider.refreshUserIds();
-        final SparseLongArray updatedUids = mKernelUidCpuFreqTimeReader.perClusterTimesAvailable()
+        final SparseLongArray updatedUids = mCpuUidFreqTimeReader.perClusterTimesAvailable()
                 ? null : new SparseLongArray();
         readKernelUidCpuTimesLocked(partialTimersToConsider, updatedUids, onBattery);
         // updatedUids=null means /proc/uid_time_in_state provides snapshots of per-cluster cpu
@@ -12084,18 +12089,20 @@ public class BatteryStatsImpl extends BatteryStats {
         final int numWakelocks = partialTimers == null ? 0 : partialTimers.size();
         final long startTimeMs = mClocks.uptimeMillis();
 
-        mKernelUidCpuTimeReader.readDelta((uid, userTimeUs, systemTimeUs) -> {
+        mCpuUidUserSysTimeReader.readDelta((uid, timesUs) -> {
+            long userTimeUs = timesUs[0], systemTimeUs = timesUs[1];
+
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 // This could happen if the isolated uid mapping was removed before that process
                 // was actually killed.
-                mKernelUidCpuTimeReader.removeUid(uid);
+                mCpuUidUserSysTimeReader.removeUid(uid);
                 Slog.d(TAG, "Got readings for an isolated uid with no mapping: " + uid);
                 return;
             }
             if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
                 Slog.d(TAG, "Got readings for an invalid user's uid " + uid);
-                mKernelUidCpuTimeReader.removeUid(uid);
+                mCpuUidUserSysTimeReader.removeUid(uid);
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
@@ -12189,21 +12196,21 @@ public class BatteryStatsImpl extends BatteryStats {
     public void readKernelUidCpuFreqTimesLocked(@Nullable ArrayList<StopwatchTimer> partialTimers,
             boolean onBattery, boolean onBatteryScreenOff) {
         final boolean perClusterTimesAvailable =
-                mKernelUidCpuFreqTimeReader.perClusterTimesAvailable();
+                mCpuUidFreqTimeReader.perClusterTimesAvailable();
         final int numWakelocks = partialTimers == null ? 0 : partialTimers.size();
         final int numClusters = mPowerProfile.getNumCpuClusters();
         mWakeLockAllocationsUs = null;
         final long startTimeMs = mClocks.uptimeMillis();
-        mKernelUidCpuFreqTimeReader.readDelta((uid, cpuFreqTimeMs) -> {
+        mCpuUidFreqTimeReader.readDelta((uid, cpuFreqTimeMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
-                mKernelUidCpuFreqTimeReader.removeUid(uid);
+                mCpuUidFreqTimeReader.removeUid(uid);
                 Slog.d(TAG, "Got freq readings for an isolated uid with no mapping: " + uid);
                 return;
             }
             if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
                 Slog.d(TAG, "Got freq readings for an invalid user's uid " + uid);
-                mKernelUidCpuFreqTimeReader.removeUid(uid);
+                mCpuUidFreqTimeReader.removeUid(uid);
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
@@ -12307,16 +12314,16 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public void readKernelUidCpuActiveTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
-        mKernelUidCpuActiveTimeReader.readDelta((uid, cpuActiveTimesMs) -> {
+        mCpuUidActiveTimeReader.readDelta((uid, cpuActiveTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
-                mKernelUidCpuActiveTimeReader.removeUid(uid);
+                mCpuUidActiveTimeReader.removeUid(uid);
                 Slog.w(TAG, "Got active times for an isolated uid with no mapping: " + uid);
                 return;
             }
             if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
                 Slog.w(TAG, "Got active times for an invalid user's uid " + uid);
-                mKernelUidCpuActiveTimeReader.removeUid(uid);
+                mCpuUidActiveTimeReader.removeUid(uid);
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
@@ -12336,16 +12343,16 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public void readKernelUidCpuClusterTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
-        mKernelUidCpuClusterTimeReader.readDelta((uid, cpuClusterTimesMs) -> {
+        mCpuUidClusterTimeReader.readDelta((uid, cpuClusterTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
-                mKernelUidCpuClusterTimeReader.removeUid(uid);
+                mCpuUidClusterTimeReader.removeUid(uid);
                 Slog.w(TAG, "Got cluster times for an isolated uid with no mapping: " + uid);
                 return;
             }
             if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
                 Slog.w(TAG, "Got cluster times for an invalid user's uid " + uid);
-                mKernelUidCpuClusterTimeReader.removeUid(uid);
+                mCpuUidClusterTimeReader.removeUid(uid);
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
@@ -13344,7 +13351,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = false;
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
         private static final long DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS = 5_000;
-        private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 10_000;
+        private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 1_000;
         private static final long DEFAULT_UID_REMOVE_DELAY_MS = 5L * 60L * 1000L;
         private static final long DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS = 600_000;
         private static final long DEFAULT_BATTERY_LEVEL_COLLECTION_DELAY_MS = 300_000;
@@ -13357,7 +13364,9 @@ public class BatteryStatsImpl extends BatteryStats {
         public boolean TRACK_CPU_TIMES_BY_PROC_STATE = DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE;
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
         public long PROC_STATE_CPU_TIMES_READ_DELAY_MS = DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS;
-        public long KERNEL_UID_READERS_THROTTLE_TIME = DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME;
+        /* Do not set default value for KERNEL_UID_READERS_THROTTLE_TIME. Need to trigger an
+         * update when startObserving. */
+        public long KERNEL_UID_READERS_THROTTLE_TIME;
         public long UID_REMOVE_DELAY_MS = DEFAULT_UID_REMOVE_DELAY_MS;
         public long EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS
                 = DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS;
@@ -13464,11 +13473,11 @@ public class BatteryStatsImpl extends BatteryStats {
         private void updateKernelUidReadersThrottleTime(long oldTimeMs, long newTimeMs) {
             KERNEL_UID_READERS_THROTTLE_TIME = newTimeMs;
             if (oldTimeMs != newTimeMs) {
-                mKernelUidCpuTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
-                mKernelUidCpuFreqTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
-                mKernelUidCpuActiveTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
-                mKernelUidCpuClusterTimeReader
-                        .setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
+                mCpuUidUserSysTimeReader.setThrottle(KERNEL_UID_READERS_THROTTLE_TIME);
+                mCpuUidFreqTimeReader.setThrottle(KERNEL_UID_READERS_THROTTLE_TIME);
+                mCpuUidActiveTimeReader.setThrottle(KERNEL_UID_READERS_THROTTLE_TIME);
+                mCpuUidClusterTimeReader
+                        .setThrottle(KERNEL_UID_READERS_THROTTLE_TIME);
             }
         }
 

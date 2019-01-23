@@ -24,7 +24,6 @@ import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.LinkProperties.ProvisioningChange;
 import android.net.Network;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
@@ -343,7 +342,7 @@ public class IpClient extends StateMachine {
     private static final int CMD_START                            = 3;
     private static final int CMD_CONFIRM                          = 4;
     private static final int EVENT_PRE_DHCP_ACTION_COMPLETE       = 5;
-    // Sent by NetlinkTracker to communicate netlink events.
+    // Triggered by NetlinkTracker to communicate netlink events.
     private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 6;
     private static final int CMD_UPDATE_TCP_BUFFER_SIZES          = 7;
     private static final int CMD_UPDATE_HTTP_PROXY                = 8;
@@ -359,6 +358,9 @@ public class IpClient extends StateMachine {
     private static final int CMD_JUMP_RUNNING_TO_STOPPING         = 101;
     private static final int CMD_JUMP_STOPPING_TO_STOPPED         = 102;
 
+    // IpClient shares a handler with DhcpClient: commands must not overlap
+    public static final int DHCPCLIENT_CMD_BASE = 1000;
+
     private static final int MAX_LOG_RECORDS = 500;
     private static final int MAX_PACKET_RECORDS = 100;
 
@@ -370,6 +372,11 @@ public class IpClient extends StateMachine {
     private static final String CLAT_PREFIX = "v4-";
 
     private static final int IMMEDIATE_FAILURE_DURATION = 0;
+
+    private static final int PROV_CHANGE_STILL_NOT_PROVISIONED = 1;
+    private static final int PROV_CHANGE_LOST_PROVISIONING = 2;
+    private static final int PROV_CHANGE_GAINED_PROVISIONING = 3;
+    private static final int PROV_CHANGE_STILL_PROVISIONED = 4;
 
     private final State mStoppedState = new StoppedState();
     private final State mStoppingState = new StoppingState();
@@ -429,6 +436,9 @@ public class IpClient extends StateMachine {
             return NetdService.getInstance();
         }
 
+        /**
+         * Get interface parameters for the specified interface.
+         */
         public InterfaceParams getInterfaceParams(String ifname) {
             return InterfaceParams.getByName(ifname);
         }
@@ -446,7 +456,9 @@ public class IpClient extends StateMachine {
             INetworkManagementService nwService) {
         this(context, ifName, callback, new Dependencies() {
             @Override
-            public INetworkManagementService getNMS() { return nwService; }
+            public INetworkManagementService getNMS() {
+                return nwService;
+            }
         });
     }
 
@@ -474,7 +486,7 @@ public class IpClient extends StateMachine {
 
         // TODO: Consider creating, constructing, and passing in some kind of
         // InterfaceController.Dependencies class.
-        mInterfaceCtrl = new InterfaceController(mInterfaceName, mNwService, deps.getNetd(), mLog);
+        mInterfaceCtrl = new InterfaceController(mInterfaceName, deps.getNetd(), mLog);
 
         mNetlinkTracker = new NetlinkTracker(
                 mInterfaceName,
@@ -493,7 +505,7 @@ public class IpClient extends StateMachine {
                     return;
                 }
 
-                final String msg = "interfaceAdded(" + iface +")";
+                final String msg = "interfaceAdded(" + iface + ")";
                 logMsg(msg);
             }
 
@@ -511,13 +523,13 @@ public class IpClient extends StateMachine {
                     return;
                 }
 
-                final String msg = "interfaceRemoved(" + iface +")";
+                final String msg = "interfaceRemoved(" + iface + ")";
                 logMsg(msg);
             }
 
             private void logMsg(String msg) {
                 Log.d(mTag, msg);
-                getHandler().post(() -> { mLog.log("OBSERVED " + msg); });
+                getHandler().post(() -> mLog.log("OBSERVED " + msg));
             }
         };
 
@@ -590,10 +602,12 @@ public class IpClient extends StateMachine {
     }
 
     private void configureAndStartStateMachine() {
+        // CHECKSTYLE:OFF IndentationCheck
         addState(mStoppedState);
         addState(mStartedState);
             addState(mRunningState, mStartedState);
         addState(mStoppingState);
+        // CHECKSTYLE:ON IndentationCheck
 
         setInitialState(mStoppedState);
 
@@ -676,18 +690,34 @@ public class IpClient extends StateMachine {
         startProvisioning(new android.net.shared.ProvisioningConfiguration());
     }
 
+    /**
+     * Stop this IpClient.
+     *
+     * <p>This does not shut down the StateMachine itself, which is handled by {@link #shutdown()}.
+     */
     public void stop() {
         sendMessage(CMD_STOP);
     }
 
+    /**
+     * Confirm the provisioning configuration.
+     */
     public void confirmConfiguration() {
         sendMessage(CMD_CONFIRM);
     }
 
+    /**
+     * For clients using {@link ProvisioningConfiguration.Builder#withPreDhcpAction()}, must be
+     * called after {@link IIpClientCallbacks#onPreDhcpAction} to indicate that DHCP is clear to
+     * proceed.
+     */
     public void completedPreDhcpAction() {
         sendMessage(EVENT_PRE_DHCP_ACTION_COMPLETE);
     }
 
+    /**
+     * Indicate that packet filter read is complete.
+     */
     public void readPacketFilterComplete(byte[] data) {
         sendMessage(EVENT_READ_PACKET_FILTER_COMPLETE, data);
     }
@@ -720,6 +750,9 @@ public class IpClient extends StateMachine {
         sendMessage(CMD_SET_MULTICAST_FILTER, enabled);
     }
 
+    /**
+     * Dump logs of this IpClient.
+     */
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         if (args != null && args.length > 0 && DUMP_ARG_CONFIRM.equals(args[0])) {
             // Execute confirmConfiguration() and take no further action.
@@ -885,18 +918,18 @@ public class IpClient extends StateMachine {
     // object that is a correct and complete assessment of what changed, taking
     // account of the asymmetries described in the comments in this function.
     // Then switch to using it everywhere (IpReachabilityMonitor, etc.).
-    private ProvisioningChange compareProvisioning(LinkProperties oldLp, LinkProperties newLp) {
-        ProvisioningChange delta;
+    private int compareProvisioning(LinkProperties oldLp, LinkProperties newLp) {
+        int delta;
         InitialConfiguration config = mConfiguration != null ? mConfiguration.mInitialConfig : null;
         final boolean wasProvisioned = isProvisioned(oldLp, config);
         final boolean isProvisioned = isProvisioned(newLp, config);
 
         if (!wasProvisioned && isProvisioned) {
-            delta = ProvisioningChange.GAINED_PROVISIONING;
+            delta = PROV_CHANGE_GAINED_PROVISIONING;
         } else if (wasProvisioned && isProvisioned) {
-            delta = ProvisioningChange.STILL_PROVISIONED;
+            delta = PROV_CHANGE_STILL_PROVISIONED;
         } else if (!wasProvisioned && !isProvisioned) {
-            delta = ProvisioningChange.STILL_NOT_PROVISIONED;
+            delta = PROV_CHANGE_STILL_NOT_PROVISIONED;
         } else {
             // (wasProvisioned && !isProvisioned)
             //
@@ -908,7 +941,7 @@ public class IpClient extends StateMachine {
             // that to be a network without DNS servers and connect anyway.
             //
             // See the comment below.
-            delta = ProvisioningChange.LOST_PROVISIONING;
+            delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
         final boolean lostIPv6 = oldLp.isIPv6Provisioned() && !newLp.isIPv6Provisioned();
@@ -944,7 +977,7 @@ public class IpClient extends StateMachine {
         // delta will never be LOST_PROVISIONING. So check for loss of
         // provisioning here too.
         if (lostIPv4Address || (lostIPv6 && !ignoreIPv6ProvisioningLoss)) {
-            delta = ProvisioningChange.LOST_PROVISIONING;
+            delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
         // Additionally:
@@ -953,28 +986,34 @@ public class IpClient extends StateMachine {
         // IPv6 default route then also consider the loss of that default route
         // to be a loss of provisioning. See b/27962810.
         if (oldLp.hasGlobalIPv6Address() && (lostIPv6Router && !ignoreIPv6ProvisioningLoss)) {
-            delta = ProvisioningChange.LOST_PROVISIONING;
+            delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
         return delta;
     }
 
-    private void dispatchCallback(ProvisioningChange delta, LinkProperties newLp) {
+    private void dispatchCallback(int delta, LinkProperties newLp) {
         switch (delta) {
-            case GAINED_PROVISIONING:
-                if (DBG) { Log.d(mTag, "onProvisioningSuccess()"); }
+            case PROV_CHANGE_GAINED_PROVISIONING:
+                if (DBG) {
+                    Log.d(mTag, "onProvisioningSuccess()");
+                }
                 recordMetric(IpManagerEvent.PROVISIONING_OK);
                 mCallback.onProvisioningSuccess(newLp);
                 break;
 
-            case LOST_PROVISIONING:
-                if (DBG) { Log.d(mTag, "onProvisioningFailure()"); }
+            case PROV_CHANGE_LOST_PROVISIONING:
+                if (DBG) {
+                    Log.d(mTag, "onProvisioningFailure()");
+                }
                 recordMetric(IpManagerEvent.PROVISIONING_FAIL);
                 mCallback.onProvisioningFailure(newLp);
                 break;
 
             default:
-                if (DBG) { Log.d(mTag, "onLinkPropertiesChange()"); }
+                if (DBG) {
+                    Log.d(mTag, "onLinkPropertiesChange()");
+                }
                 mCallback.onLinkPropertiesChange(newLp);
                 break;
         }
@@ -983,7 +1022,7 @@ public class IpClient extends StateMachine {
     // Updates all IpClient-related state concerned with LinkProperties.
     // Returns a ProvisioningChange for possibly notifying other interested
     // parties that are not fronted by IpClient.
-    private ProvisioningChange setLinkProperties(LinkProperties newLp) {
+    private int setLinkProperties(LinkProperties newLp) {
         if (mApfFilter != null) {
             mApfFilter.setLinkProperties(newLp);
         }
@@ -991,10 +1030,10 @@ public class IpClient extends StateMachine {
             mIpReachabilityMonitor.updateLinkProperties(newLp);
         }
 
-        ProvisioningChange delta = compareProvisioning(mLinkProperties, newLp);
+        int delta = compareProvisioning(mLinkProperties, newLp);
         mLinkProperties = new LinkProperties(newLp);
 
-        if (delta == ProvisioningChange.GAINED_PROVISIONING) {
+        if (delta == PROV_CHANGE_GAINED_PROVISIONING) {
             // TODO: Add a proper ProvisionedState and cancel the alarm in
             // its enter() method.
             mProvisioningTimeoutAlarm.cancel();
@@ -1090,17 +1129,17 @@ public class IpClient extends StateMachine {
         if (Objects.equals(newLp, mLinkProperties)) {
             return true;
         }
-        final ProvisioningChange delta = setLinkProperties(newLp);
+        final int delta = setLinkProperties(newLp);
         if (sendCallbacks) {
             dispatchCallback(delta, newLp);
         }
-        return (delta != ProvisioningChange.LOST_PROVISIONING);
+        return (delta != PROV_CHANGE_LOST_PROVISIONING);
     }
 
     private void handleIPv4Success(DhcpResults dhcpResults) {
         mDhcpResults = new DhcpResults(dhcpResults);
         final LinkProperties newLp = assembleLinkProperties();
-        final ProvisioningChange delta = setLinkProperties(newLp);
+        final int delta = setLinkProperties(newLp);
 
         if (DBG) {
             Log.d(mTag, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
@@ -1118,7 +1157,9 @@ public class IpClient extends StateMachine {
         // any addresses upon entry to StoppedState.
         mInterfaceCtrl.clearIPv4Address();
         mDhcpResults = null;
-        if (DBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
+        if (DBG) {
+            Log.d(mTag, "onNewDhcpResults(null)");
+        }
         mCallback.onNewDhcpResults(null);
 
         handleProvisioningFailure();
@@ -1126,7 +1167,7 @@ public class IpClient extends StateMachine {
 
     private void handleProvisioningFailure() {
         final LinkProperties newLp = assembleLinkProperties();
-        ProvisioningChange delta = setLinkProperties(newLp);
+        int delta = setLinkProperties(newLp);
         // If we've gotten here and we're still not provisioned treat that as
         // a total loss of provisioning.
         //
@@ -1135,12 +1176,12 @@ public class IpClient extends StateMachine {
         // timeout expired.
         //
         // Regardless: GAME OVER.
-        if (delta == ProvisioningChange.STILL_NOT_PROVISIONED) {
-            delta = ProvisioningChange.LOST_PROVISIONING;
+        if (delta == PROV_CHANGE_STILL_NOT_PROVISIONED) {
+            delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
         dispatchCallback(delta, newLp);
-        if (delta == ProvisioningChange.LOST_PROVISIONING) {
+        if (delta == PROV_CHANGE_LOST_PROVISIONING) {
             transitionTo(mStoppingState);
         }
     }
@@ -1171,9 +1212,9 @@ public class IpClient extends StateMachine {
     }
 
     private boolean startIPv6() {
-        return mInterfaceCtrl.setIPv6PrivacyExtensions(true) &&
-               mInterfaceCtrl.setIPv6AddrGenModeIfSupported(mConfiguration.mIPv6AddrGenMode) &&
-               mInterfaceCtrl.enableIPv6();
+        return mInterfaceCtrl.setIPv6PrivacyExtensions(true)
+                && mInterfaceCtrl.setIPv6AddrGenModeIfSupported(mConfiguration.mIPv6AddrGenMode)
+                && mInterfaceCtrl.enableIPv6();
     }
 
     private boolean applyInitialConfig(InitialConfiguration config) {
@@ -1191,10 +1232,10 @@ public class IpClient extends StateMachine {
             // settings observer to watch for update and re-program these
             // parameters (Q: is this level of dynamic updatability really
             // necessary or does reading from settings at startup suffice?).
-            final int NUM_SOLICITS = 5;
-            final int INTER_SOLICIT_INTERVAL_MS = 750;
+            final int numSolicits = 5;
+            final int interSolicitIntervalMs = 750;
             setNeighborParameters(mDependencies.getNetd(), mInterfaceName,
-                    NUM_SOLICITS, INTER_SOLICIT_INTERVAL_MS);
+                    numSolicits, interSolicitIntervalMs);
         } catch (Exception e) {
             mLog.e("Failed to adjust neighbor parameters", e);
             // Carry on using the system defaults (currently: 3, 1000);
@@ -1341,8 +1382,8 @@ public class IpClient extends StateMachine {
             mStartTimeMillis = SystemClock.elapsedRealtime();
 
             if (mConfiguration.mProvisioningTimeoutMs > 0) {
-                final long alarmTime = SystemClock.elapsedRealtime() +
-                        mConfiguration.mProvisioningTimeoutMs;
+                final long alarmTime = SystemClock.elapsedRealtime()
+                        + mConfiguration.mProvisioningTimeoutMs;
                 mProvisioningTimeoutAlarm.schedule(alarmTime);
             }
 
@@ -1397,8 +1438,7 @@ public class IpClient extends StateMachine {
         }
 
         private boolean readyToProceed() {
-            return (!mLinkProperties.hasIPv4Address() &&
-                    !mLinkProperties.hasGlobalIPv6Address());
+            return (!mLinkProperties.hasIPv4Address() && !mLinkProperties.hasGlobalIPv6Address());
         }
     }
 
@@ -1449,7 +1489,7 @@ public class IpClient extends StateMachine {
             if (mConfiguration.mUsingMultinetworkPolicyTracker) {
                 mMultinetworkPolicyTracker = new MultinetworkPolicyTracker(
                         mContext, getHandler(),
-                        () -> { mLog.log("OBSERVED AvoidBadWifi changed"); });
+                        () -> mLog.log("OBSERVED AvoidBadWifi changed"));
                 mMultinetworkPolicyTracker.start();
             }
 
@@ -1510,8 +1550,8 @@ public class IpClient extends StateMachine {
             if (!mDhcpActionInFlight) {
                 mCallback.onPreDhcpAction();
                 mDhcpActionInFlight = true;
-                final long alarmTime = SystemClock.elapsedRealtime() +
-                        mConfiguration.mRequestedPreDhcpActionMs;
+                final long alarmTime = SystemClock.elapsedRealtime()
+                        + mConfiguration.mRequestedPreDhcpActionMs;
                 mDhcpActionTimeoutAlarm.schedule(alarmTime);
             }
         }
@@ -1613,7 +1653,7 @@ public class IpClient extends StateMachine {
                         mDhcpClient.sendMessage(DhcpClient.EVENT_LINKADDRESS_CONFIGURED);
                     } else {
                         logError("Failed to set IPv4 address.");
-                        dispatchCallback(ProvisioningChange.LOST_PROVISIONING,
+                        dispatchCallback(PROV_CHANGE_LOST_PROVISIONING,
                                 new LinkProperties(mLinkProperties));
                         transitionTo(mStoppingState);
                     }
@@ -1680,16 +1720,18 @@ public class IpClient extends StateMachine {
     }
 
     private static void setNeighborParameters(
-            INetd netd, String ifName, int num_solicits, int inter_solicit_interval_ms)
+            INetd netd, String ifName, int numSolicits, int interSolicitIntervalMs)
             throws RemoteException, IllegalArgumentException {
         Preconditions.checkNotNull(netd);
         Preconditions.checkArgument(!TextUtils.isEmpty(ifName));
-        Preconditions.checkArgument(num_solicits > 0);
-        Preconditions.checkArgument(inter_solicit_interval_ms > 0);
+        Preconditions.checkArgument(numSolicits > 0);
+        Preconditions.checkArgument(interSolicitIntervalMs > 0);
 
         for (int family : new Integer[]{INetd.IPV4, INetd.IPV6}) {
-            netd.setProcSysNet(family, INetd.NEIGH, ifName, "retrans_time_ms", Integer.toString(inter_solicit_interval_ms));
-            netd.setProcSysNet(family, INetd.NEIGH, ifName, "ucast_solicit", Integer.toString(num_solicits));
+            netd.setProcSysNet(family, INetd.NEIGH, ifName, "retrans_time_ms",
+                    Integer.toString(interSolicitIntervalMs));
+            netd.setProcSysNet(family, INetd.NEIGH, ifName, "ucast_solicit",
+                    Integer.toString(numSolicits));
         }
     }
 
@@ -1718,7 +1760,7 @@ public class IpClient extends StateMachine {
     static <T> T find(Iterable<T> coll, Predicate<T> fn) {
         for (T t: coll) {
             if (fn.test(t)) {
-              return t;
+                return t;
             }
         }
         return null;

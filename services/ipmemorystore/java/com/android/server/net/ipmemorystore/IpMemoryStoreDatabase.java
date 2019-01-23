@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,12 +134,14 @@ public class IpMemoryStoreDatabase {
         }
 
         /** Called when the database is created */
+        @Override
         public void onCreate(@NonNull final SQLiteDatabase db) {
             db.execSQL(NetworkAttributesContract.CREATE_TABLE);
             db.execSQL(PrivateDataContract.CREATE_TABLE);
         }
 
         /** Called when the database is upgraded */
+        @Override
         public void onUpgrade(@NonNull final SQLiteDatabase db, final int oldVersion,
                 final int newVersion) {
             // No upgrade supported yet.
@@ -149,6 +151,7 @@ public class IpMemoryStoreDatabase {
         }
 
         /** Called when the database is downgraded */
+        @Override
         public void onDowngrade(@NonNull final SQLiteDatabase db, final int oldVersion,
                 final int newVersion) {
             // Downgrades always nuke all data and recreate an empty table.
@@ -247,7 +250,9 @@ public class IpMemoryStoreDatabase {
         // result here. 0 results means the key was not found.
         if (cursor.getCount() != 1) return EXPIRY_ERROR;
         cursor.moveToFirst();
-        return cursor.getLong(0); // index in the EXPIRY_COLUMN array
+        final long result = cursor.getLong(0); // index in the EXPIRY_COLUMN array
+        cursor.close();
+        return result;
     }
 
     static final int RELEVANCE_ERROR = -1; // Legal values for relevance are positive
@@ -321,6 +326,8 @@ public class IpMemoryStoreDatabase {
         final byte[] dnsAddressesBlob =
                 getBlob(cursor, NetworkAttributesContract.COLNAME_DNSADDRESSES);
         final int mtu = getInt(cursor, NetworkAttributesContract.COLNAME_MTU, -1);
+        cursor.close();
+
         if (0 != assignedV4AddressInt) {
             builder.setAssignedV4Address(NetworkUtils.intToInet4AddressHTH(assignedV4AddressInt));
         }
@@ -353,7 +360,9 @@ public class IpMemoryStoreDatabase {
         // get more than one result here. 0 results means the key was not found.
         if (cursor.getCount() != 1) return null;
         cursor.moveToFirst();
-        return cursor.getBlob(0); // index in the DATA_COLUMN array
+        final byte[] result = cursor.getBlob(0); // index in the DATA_COLUMN array
+        cursor.close();
+        return result;
     }
 
     // Helper methods

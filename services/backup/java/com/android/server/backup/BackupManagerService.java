@@ -124,6 +124,11 @@ public class BackupManagerService {
      */
     @VisibleForTesting
     protected void startServiceForUser(int userId) {
+        if (mServiceUsers.get(userId) != null) {
+            Slog.i(TAG, "userId " + userId + " already started, so not starting again");
+            return;
+        }
+
         UserBackupManagerService userBackupManagerService =
                 UserBackupManagerService.createAndInitializeService(
                         userId, mContext, mTrampoline, mTransportWhitelist);
@@ -155,7 +160,12 @@ public class BackupManagerService {
         }
     }
 
-    SparseArray<UserBackupManagerService> getServiceUsers() {
+    /**
+     *  Returns a lst of users currently unlocked that have a
+     *  {@link UserBackupManagerService} registered.
+     */
+    @VisibleForTesting
+    public SparseArray<UserBackupManagerService> getServiceUsers() {
         return mServiceUsers;
     }
 

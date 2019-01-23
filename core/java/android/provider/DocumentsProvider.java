@@ -37,6 +37,7 @@ import static android.provider.DocumentsContract.isTreeUri;
 
 import android.Manifest;
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AuthenticationRequiredException;
 import android.content.ClipDescription;
@@ -62,6 +63,8 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
@@ -693,8 +696,10 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see DocumentsContract#EXTRA_ERROR
      */
     @SuppressWarnings("unused")
-    public Cursor querySearchDocuments(String rootId, String[] projection, Bundle queryArgs)
-            throws FileNotFoundException {
+    public Cursor querySearchDocuments(@NonNull String rootId, @Nullable String[] projection,
+            @NonNull Bundle queryArgs) throws FileNotFoundException {
+        Preconditions.checkNotNull(rootId, "rootId can not be null");
+        Preconditions.checkNotNull(queryArgs, "queryArgs can not be null");
         return querySearchDocuments(rootId, DocumentsContract.getSearchDocumentsQuery(queryArgs),
                 projection);
     }
@@ -732,7 +737,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @return a Bundle of Bundles.
      * @see DocumentsContract#getDocumentMetadata(ContentResolver, Uri)
      */
-    public @Nullable Bundle getDocumentMetadata(String documentId)
+    public @Nullable Bundle getDocumentMetadata(@NonNull String documentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Metadata not supported");
     }

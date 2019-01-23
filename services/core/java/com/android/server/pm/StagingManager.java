@@ -41,7 +41,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class handles staged install sessions, i.e. install sessions that require packages to
@@ -126,12 +128,24 @@ public class StagingManager {
         return false;
     }
 
-    private static boolean submitSessionToApexService(int sessionId, ApexInfoList apexInfoList) {
+    private static boolean submitSessionToApexService(@NonNull PackageInstallerSession session,
+                                                      List<PackageInstallerSession> childSessions,
+                                                      ApexInfoList apexInfoList) {
+        return sendSubmitStagedSessionRequest(
+                session.sessionId,
+                childSessions != null
+                        ? childSessions.stream().mapToInt(s -> s.sessionId).toArray() :
+                        new int[]{},
+                apexInfoList);
+    }
+
+    private static boolean sendSubmitStagedSessionRequest(
+            int sessionId, int[] childSessionIds, ApexInfoList apexInfoList) {
         final IApexService apex = IApexService.Stub.asInterface(
                 ServiceManager.getService("apexservice"));
         boolean success;
         try {
-            success = apex.submitStagedSession(sessionId, new int[0], apexInfoList);
+            success = apex.submitStagedSession(sessionId, childSessionIds, apexInfoList);
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to contact apexservice", re);
             return false;
@@ -139,31 +153,49 @@ public class StagingManager {
         return success;
     }
 
+    private static boolean isApexSession(@NonNull PackageInstallerSession session) {
+        return (session.params.installFlags & PackageManager.INSTALL_APEX) != 0;
+    }
+
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
         boolean success = true;
-        if ((session.params.installFlags & PackageManager.INSTALL_APEX) != 0) {
 
-            final ApexInfoList apexInfoList = new ApexInfoList();
+        final ApexInfoList apexInfoList = new ApexInfoList();
+        // APEX checks. For single-package sessions, check if they contain an APEX. For
+        // multi-package sessions, find all the child sessions that contain an APEX.
+        if (!session.isMultiPackage()
+                && isApexSession(session)) {
+            success = submitSessionToApexService(session, null, apexInfoList);
+        } else if (session.isMultiPackage()) {
+            List<PackageInstallerSession> childSessions =
+                    Arrays.stream(session.getChildSessionIds())
+                            // Retrieve cached sessions matching ids.
+                            .mapToObj(i -> mStagedSessions.get(i))
+                            // Filter only the ones containing APEX.
+                            .filter(childSession -> isApexSession(childSession))
+                            .collect(Collectors.toList());
+            if (!childSessions.isEmpty()) {
+                success = submitSessionToApexService(session, childSessions, apexInfoList);
+            } // else this is a staged multi-package session with no APEX files.
+        }
 
-            if (!submitSessionToApexService(session.sessionId, apexInfoList)) {
-                success = false;
-            } else {
-                // For APEXes, we validate the signature here before we mark the session as ready,
-                // so we fail the session early if there is a signature mismatch. For APKs, the
-                // signature verification will be done by the package manager at the point at which
-                // it applies the staged install.
-                //
-                // TODO: Decide whether we want to fail fast by detecting signature mismatches right
-                // away.
-                for (ApexInfo apexPackage : apexInfoList.apexInfos) {
-                    if (!validateApexSignatureLocked(apexPackage.packagePath,
-                            apexPackage.packageName)) {
-                        success = false;
-                        break;
-                    }
+        if (success && (apexInfoList.apexInfos.length > 0)) {
+            // For APEXes, we validate the signature here before we mark the session as ready,
+            // so we fail the session early if there is a signature mismatch. For APKs, the
+            // signature verification will be done by the package manager at the point at which
+            // it applies the staged install.
+            //
+            // TODO: Decide whether we want to fail fast by detecting signature mismatches for APKs,
+            // right away.
+            for (ApexInfo apexPackage : apexInfoList.apexInfos) {
+                if (!validateApexSignatureLocked(apexPackage.packagePath,
+                        apexPackage.packageName)) {
+                    success = false;
+                    break;
                 }
             }
         }
+
         if (success) {
             session.setStagedSessionReady();
         } else {
@@ -206,15 +238,59 @@ public class StagingManager {
         }
     }
 
-    void abortSession(@NonNull PackageInstallerSession sessionInfo) {
-        updateStoredSession(sessionInfo);
+    void abortSession(@NonNull PackageInstallerSession session) {
         synchronized (mStagedSessions) {
-            mStagedSessions.remove(sessionInfo.sessionId);
+            updateStoredSession(session);
+            mStagedSessions.remove(session.sessionId);
         }
     }
 
+    @GuardedBy("mStagedSessions")
+    private boolean isMultiPackageSessionComplete(@NonNull PackageInstallerSession session) {
+        // This method assumes that the argument is either a parent session of a multi-package
+        // i.e. isMultiPackage() returns true, or that it is a child session, i.e.
+        // hasParentSessionId() returns true.
+        if (session.isMultiPackage()) {
+            // Parent session of a multi-package group. Check that we restored all the children.
+            for (int childSession : session.getChildSessionIds()) {
+                if (mStagedSessions.get(childSession) == null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        if (session.hasParentSessionId()) {
+            PackageInstallerSession parent = mStagedSessions.get(session.getParentSessionId());
+            if (parent == null) {
+                return false;
+            }
+            return isMultiPackageSessionComplete(parent);
+        }
+        Slog.wtf(TAG, "Attempting to restore an invalid multi-package session.");
+        return false;
+    }
+
     void restoreSession(@NonNull PackageInstallerSession session) {
-        updateStoredSession(session);
+        PackageInstallerSession sessionToResume = session;
+        synchronized (mStagedSessions) {
+            mStagedSessions.append(session.sessionId, session);
+            // For multi-package sessions, we don't know in which order they will be restored. We
+            // need to wait until we have restored all the session in a group before restoring them.
+            if (session.isMultiPackage() || session.hasParentSessionId()) {
+                if (!isMultiPackageSessionComplete(session)) {
+                    // Still haven't recovered all sessions of the group, return.
+                    return;
+                }
+                // Group recovered, find the parent if necessary and resume the installation.
+                if (session.hasParentSessionId()) {
+                    sessionToResume = mStagedSessions.get(session.getParentSessionId());
+                }
+            }
+        }
+        checkStateAndResume(sessionToResume);
+    }
+
+    private void checkStateAndResume(@NonNull PackageInstallerSession session) {
         // Check the state of the session and decide what to do next.
         if (session.isStagedSessionFailed() || session.isStagedSessionApplied()) {
             // Final states, nothing to do.
@@ -227,6 +303,8 @@ public class StagingManager {
         } else {
             // Session had already being marked ready. Start the checks to verify if there is any
             // follow-up work.
+            // TODO(b/118865310): should this be synchronous to ensure it completes before
+            //                    systemReady() finishes?
             mBgHandler.post(() -> resumeSession(session));
         }
     }

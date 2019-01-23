@@ -202,7 +202,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
                                           jint desiredWidth, jint desiredHeight, jobject jsubset,
                                           jboolean requireMutable, jint allocator,
                                           jboolean requireUnpremul, jboolean preferRamOverQuality,
-                                          jboolean asAlphaMask, jobject jcolorSpace) {
+                                          jboolean asAlphaMask, jlong colorSpaceHandle) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
     SkAndroidCodec* codec = decoder->mCodec.get();
     const SkISize desiredSize = SkISize::Make(desiredWidth, desiredHeight);
@@ -256,7 +256,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         // This is currently the only way to know that we should decode to F16.
         colorType = codec->computeOutputColorType(colorType);
     }
-    sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(env, jcolorSpace);
+    sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
     colorSpace = codec->computeOutputColorSpace(colorType, colorSpace);
     decodeInfo = decodeInfo.makeColorType(colorType).makeColorSpace(colorSpace);
 
@@ -508,7 +508,7 @@ static const JNINativeMethod gImageDecoderMethods[] = {
     { "nCreate",        "([BIILandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
     { "nCreate",        "(Ljava/io/InputStream;[BLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
     { "nCreate",        "(Ljava/io/FileDescriptor;Landroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
-    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;ZIILandroid/graphics/Rect;ZIZZZLandroid/graphics/ColorSpace;)Landroid/graphics/Bitmap;",
+    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;ZIILandroid/graphics/Rect;ZIZZZJ)Landroid/graphics/Bitmap;",
                                                                  (void*) ImageDecoder_nDecodeBitmap },
     { "nGetSampledSize","(JI)Landroid/util/Size;",               (void*) ImageDecoder_nGetSampledSize },
     { "nGetPadding",    "(JLandroid/graphics/Rect;)V",           (void*) ImageDecoder_nGetPadding },

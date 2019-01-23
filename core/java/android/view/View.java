@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
 import static java.lang.Math.max;
@@ -5123,7 +5124,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sAcceptZeroSizeDragShadow = targetSdkVersion < Build.VERSION_CODES.P;
 
-            sBrokenInsetsDispatch = !ViewRootImpl.USE_NEW_INSETS
+            sBrokenInsetsDispatch = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
                     || targetSdkVersion < Build.VERSION_CODES.Q;
 
             sCompatibilityDone = true;
@@ -8226,7 +8227,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ul>
      */
     public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
-        onProvideStructure(structure, VIEW_STRUCTURE_FOR_CONTENT_CAPTURE, flags);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                    "onProvideContentCaptureStructure() for " + getClass().getSimpleName());
+        }
+        try {
+            onProvideStructure(structure, VIEW_STRUCTURE_FOR_CONTENT_CAPTURE, flags);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
     }
 
     /** @hide */
@@ -9016,6 +9025,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ol>
      */
     private void notifyAppearedOrDisappearedForContentCaptureIfNeeded(boolean appeared) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                    "notifyContentCapture(" + appeared + ") for " + getClass().getSimpleName());
+        }
+        try {
+            notifyAppearedOrDisappearedForContentCaptureIfNeededNoTrace(appeared);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+    }
+
+    private void notifyAppearedOrDisappearedForContentCaptureIfNeededNoTrace(boolean appeared) {
         // First check if context has client, so it saves a service lookup when it doesn't
         if (!mContext.isContentCaptureSupported()) return;
 

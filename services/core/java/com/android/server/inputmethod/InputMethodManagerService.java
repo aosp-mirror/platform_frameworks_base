@@ -1607,7 +1607,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // 1) it comes from the system process
     // 2) the calling process' user id is identical to the current user id IMMS thinks.
     @GuardedBy("mMethodMap")
-    private boolean calledFromValidUserLocked(boolean allowCrossProfileAccess) {
+    private boolean calledFromValidUserLocked() {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(uid);
         if (DEBUG) {
@@ -1623,7 +1623,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (userId == mSettings.getCurrentUserId()) {
             return true;
         }
-        if (allowCrossProfileAccess && mSettings.isCurrentProfile(userId)) {
+        if (!PER_PROFILE_IME_ENABLED && mSettings.isCurrentProfile(userId)) {
             return true;
         }
 
@@ -2651,7 +2651,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -2736,7 +2736,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -2845,7 +2845,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             int unverifiedTargetSdkVersion) {
         final int callingUserId = UserHandle.getCallingUserId();
         final int userId;
-        if (PER_PROFILE_IME_ENABLED && attribute != null && attribute.targetInputMethodUser != null
+        if (attribute != null && attribute.targetInputMethodUser != null
                 && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
             mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "Using EditorInfo.user requires INTERACT_ACROSS_USERS_FULL.");
@@ -2862,9 +2862,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         InputBindResult res = null;
         synchronized (mMethodMap) {
-            // Needs to check the validity before clearing calling identity
-            // Note that cross-profile access is always allowed here to allow profile-switching.
-            final boolean calledFromValidUser = calledFromValidUserLocked(true);
             final int windowDisplayId =
                     mWindowManagerInternal.getDisplayIdForWindow(windowToken);
             final long ident = Binder.clearCallingIdentity();
@@ -2908,10 +2905,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return InputBindResult.NOT_IME_TARGET_WINDOW;
                 }
 
-                if (!calledFromValidUser) {
+                // cross-profile access is always allowed here to allow profile-switching.
+                if (!mSettings.isCurrentProfile(userId)) {
                     Slog.w(TAG, "A background user is requesting window. Hiding IME.");
-                    Slog.w(TAG, "If you want to interect with IME, you need "
-                            + "android.permission.INTERACT_ACROSS_USERS_FULL");
+                    Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
+                            + " a background user, use EditorInfo.targetInputMethodUser with"
+                            + " INTERACT_ACROSS_USERS_FULL permission.");
                     hideCurrentInputLocked(0, null);
                     return InputBindResult.INVALID_USER;
                 }
@@ -3088,7 +3087,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void showInputMethodPickerFromClient(
             IInputMethodClient client, int auxiliarySubtypeMode) {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return;
             }
             if(!canShowInputMethodPickerLocked(client)) {
@@ -3160,7 +3159,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethodClient client, String inputMethodId) {
         synchronized (mMethodMap) {
             // TODO(yukawa): Should we verify the display ID?
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return;
             }
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
@@ -3275,7 +3274,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public InputMethodSubtype getLastInputMethodSubtype() {
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return null;
             }
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
@@ -3313,7 +3312,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return;
             }
             if (!mSystemReady) {
@@ -4159,7 +4158,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         synchronized (mMethodMap) {
             // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return null;
             }
             return getCurrentInputMethodSubtypeLocked();
@@ -4209,7 +4208,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
         synchronized (mMethodMap) {
             // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked(!PER_PROFILE_IME_ENABLED)) {
+            if (!calledFromValidUserLocked()) {
                 return false;
             }
             if (subtype != null && mCurMethodId != null) {

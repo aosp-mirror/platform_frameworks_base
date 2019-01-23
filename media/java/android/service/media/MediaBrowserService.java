@@ -25,21 +25,18 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
+import android.media.MediaParceledListSlice;
 import android.media.browse.MediaBrowser;
 import android.media.browse.MediaBrowserUtils;
 import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
+import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.media.session.MediaSessionManager;
-import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.service.media.IMediaBrowserService;
-import android.service.media.IMediaBrowserServiceCallbacks;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -672,8 +669,8 @@ public abstract class MediaBrowserService extends Service {
      */
     private void performLoadChildren(final String parentId, final ConnectionRecord connection,
             final Bundle options) {
-        final Result<List<MediaBrowser.MediaItem>> result
-                = new Result<List<MediaBrowser.MediaItem>>(parentId) {
+        final Result<List<MediaBrowser.MediaItem>> result =
+                new Result<List<MediaBrowser.MediaItem>>(parentId) {
             @Override
             void onResultSent(List<MediaBrowser.MediaItem> list, @ResultFlags int flag) {
                 if (mConnections.get(connection.callbacks.asBinder()) != connection) {
@@ -686,9 +683,9 @@ public abstract class MediaBrowserService extends Service {
 
                 List<MediaBrowser.MediaItem> filteredList =
                         (flag & RESULT_FLAG_OPTION_NOT_HANDLED) != 0
-                        ? applyOptions(list, options) : list;
-                final ParceledListSlice<MediaBrowser.MediaItem> pls =
-                        filteredList == null ? null : new ParceledListSlice<>(filteredList);
+                                ? applyOptions(list, options) : list;
+                final MediaParceledListSlice<MediaBrowser.MediaItem> pls =
+                        filteredList == null ? null : new MediaParceledListSlice<>(filteredList);
                 try {
                     connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
                 } catch (RemoteException ex) {

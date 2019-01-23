@@ -64,6 +64,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.ThreadLocalWorkSource;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -1131,23 +1132,23 @@ class AlarmManagerService extends SystemService {
         final IBinder mListener;
         final WorkSource mWorkSource;
         final int mUid;
+        final int mCreatorUid;
         final String mTag;
         final BroadcastStats mBroadcastStats;
         final FilterStats mFilterStats;
         final int mAlarmType;
 
-        InFlight(AlarmManagerService service, PendingIntent pendingIntent, IAlarmListener listener,
-                WorkSource workSource, int uid, String alarmPkg, int alarmType, String tag,
-                long nowELAPSED) {
-            mPendingIntent = pendingIntent;
+        InFlight(AlarmManagerService service, Alarm alarm, long nowELAPSED) {
+            mPendingIntent = alarm.operation;
             mWhenElapsed = nowELAPSED;
-            mListener = listener != null ? listener.asBinder() : null;
-            mWorkSource = workSource;
-            mUid = uid;
-            mTag = tag;
-            mBroadcastStats = (pendingIntent != null)
-                    ? service.getStatsLocked(pendingIntent)
-                    : service.getStatsLocked(uid, alarmPkg);
+            mListener = alarm.listener != null ? alarm.listener.asBinder() : null;
+            mWorkSource = alarm.workSource;
+            mUid = alarm.uid;
+            mCreatorUid = alarm.creatorUid;
+            mTag = alarm.statsTag;
+            mBroadcastStats = (alarm.operation != null)
+                    ? service.getStatsLocked(alarm.operation)
+                    : service.getStatsLocked(alarm.uid, alarm.packageName);
             FilterStats fs = mBroadcastStats.filterStats.get(mTag);
             if (fs == null) {
                 fs = new FilterStats(mBroadcastStats, mTag);
@@ -1155,7 +1156,7 @@ class AlarmManagerService extends SystemService {
             }
             fs.lastTime = nowELAPSED;
             mFilterStats = fs;
-            mAlarmType = alarmType;
+            mAlarmType = alarm.type;
         }
 
         @Override
@@ -1165,6 +1166,7 @@ class AlarmManagerService extends SystemService {
                     + ", when=" + mWhenElapsed
                     + ", workSource=" + mWorkSource
                     + ", uid=" + mUid
+                    + ", creatorUid=" + mCreatorUid
                     + ", tag=" + mTag
                     + ", broadcastStats=" + mBroadcastStats
                     + ", filterStats=" + mFilterStats
@@ -3811,12 +3813,10 @@ class AlarmManagerService extends SystemService {
 
     /**
      * Attribute blame for a WakeLock.
-     * @param pi PendingIntent to attribute blame to if ws is null.
      * @param ws WorkSource to attribute blame.
-     * @param knownUid attribution uid; < 0 if we need to derive it from the PendingIntent sender
+     * @param knownUid attribution uid; < 0 values are ignored.
      */
-    void setWakelockWorkSource(PendingIntent pi, WorkSource ws, int type, String tag,
-            int knownUid, boolean first) {
+    void setWakelockWorkSource(WorkSource ws, int knownUid, String tag, boolean first) {
         try {
             mWakeLock.setHistoryTag(first ? tag : null);
 
@@ -3825,11 +3825,8 @@ class AlarmManagerService extends SystemService {
                 return;
             }
 
-            final int uid = (knownUid >= 0)
-                    ? knownUid
-                    : ActivityManager.getService().getUidForIntentSender(pi.getTarget());
-            if (uid >= 0) {
-                mWakeLock.setWorkSource(new WorkSource(uid));
+            if (knownUid >= 0) {
+                mWakeLock.setWorkSource(new WorkSource(knownUid));
                 return;
             }
         } catch (Exception e) {
@@ -3837,6 +3834,14 @@ class AlarmManagerService extends SystemService {
 
         // Something went wrong; fall back to attributing the lock to the OS
         mWakeLock.setWorkSource(null);
+    }
+
+    private static int getAlarmAttributionUid(Alarm alarm) {
+        if (alarm.workSource != null && !alarm.workSource.isEmpty()) {
+            return alarm.workSource.getAttributionUid();
+        }
+
+        return alarm.creatorUid;
     }
 
     @VisibleForTesting
@@ -4285,8 +4290,8 @@ class AlarmManagerService extends SystemService {
                 // the next of our alarms is now in flight.  reattribute the wakelock.
                 if (mInFlight.size() > 0) {
                     InFlight inFlight = mInFlight.get(0);
-                    setWakelockWorkSource(inFlight.mPendingIntent, inFlight.mWorkSource,
-                            inFlight.mAlarmType, inFlight.mTag, -1, false);
+                    setWakelockWorkSource(inFlight.mWorkSource, inFlight.mCreatorUid, inFlight.mTag,
+                            false);
                 } else {
                     // should never happen
                     mLog.w("Alarm wakelock still held but sent queue empty");
@@ -4369,64 +4374,70 @@ class AlarmManagerService extends SystemService {
          */
         @GuardedBy("mLock")
         public void deliverLocked(Alarm alarm, long nowELAPSED, boolean allowWhileIdle) {
-            if (alarm.operation != null) {
-                // PendingIntent alarm
-                mSendCount++;
+            final long workSourceToken = ThreadLocalWorkSource.setUid(
+                    getAlarmAttributionUid(alarm));
+            try {
+                if (alarm.operation != null) {
+                    // PendingIntent alarm
+                    mSendCount++;
 
-                try {
-                    alarm.operation.send(getContext(), 0,
-                            mBackgroundIntent.putExtra(
-                                    Intent.EXTRA_ALARM_COUNT, alarm.count),
-                                    mDeliveryTracker, mHandler, null,
-                                    allowWhileIdle ? mIdleOptions : null);
-                } catch (PendingIntent.CanceledException e) {
-                    if (alarm.repeatInterval > 0) {
-                        // This IntentSender is no longer valid, but this
-                        // is a repeating alarm, so toss it
-                        removeImpl(alarm.operation, null);
+                    try {
+                        alarm.operation.send(getContext(), 0,
+                                mBackgroundIntent.putExtra(
+                                        Intent.EXTRA_ALARM_COUNT, alarm.count),
+                                mDeliveryTracker, mHandler, null,
+                                allowWhileIdle ? mIdleOptions : null);
+                    } catch (PendingIntent.CanceledException e) {
+                        if (alarm.repeatInterval > 0) {
+                            // This IntentSender is no longer valid, but this
+                            // is a repeating alarm, so toss it
+                            removeImpl(alarm.operation, null);
+                        }
+                        // No actual delivery was possible, so the delivery tracker's
+                        // 'finished' callback won't be invoked.  We also don't need
+                        // to do any wakelock or stats tracking, so we have nothing
+                        // left to do here but go on to the next thing.
+                        mSendFinishCount++;
+                        return;
                     }
-                    // No actual delivery was possible, so the delivery tracker's
-                    // 'finished' callback won't be invoked.  We also don't need
-                    // to do any wakelock or stats tracking, so we have nothing
-                    // left to do here but go on to the next thing.
-                    mSendFinishCount++;
-                    return;
-                }
-            } else {
-                // Direct listener callback alarm
-                mListenerCount++;
+                } else {
+                    // Direct listener callback alarm
+                    mListenerCount++;
 
-                if (RECORD_ALARMS_IN_HISTORY) {
-                    if (alarm.listener == mTimeTickTrigger) {
-                        mTickHistory[mNextTickHistory++] = nowELAPSED;
-                        if (mNextTickHistory >= TICK_HISTORY_DEPTH) {
-                            mNextTickHistory = 0;
+                    if (RECORD_ALARMS_IN_HISTORY) {
+                        if (alarm.listener == mTimeTickTrigger) {
+                            mTickHistory[mNextTickHistory++] = nowELAPSED;
+                            if (mNextTickHistory >= TICK_HISTORY_DEPTH) {
+                                mNextTickHistory = 0;
+                            }
                         }
                     }
-                }
 
-                try {
-                    if (DEBUG_LISTENER_CALLBACK) {
-                        Slog.v(TAG, "Alarm to uid=" + alarm.uid
-                                + " listener=" + alarm.listener.asBinder());
+                    try {
+                        if (DEBUG_LISTENER_CALLBACK) {
+                            Slog.v(TAG, "Alarm to uid=" + alarm.uid
+                                    + " listener=" + alarm.listener.asBinder());
+                        }
+                        alarm.listener.doAlarm(this);
+                        mHandler.sendMessageDelayed(
+                                mHandler.obtainMessage(AlarmHandler.LISTENER_TIMEOUT,
+                                        alarm.listener.asBinder()),
+                                mConstants.LISTENER_TIMEOUT);
+                    } catch (Exception e) {
+                        if (DEBUG_LISTENER_CALLBACK) {
+                            Slog.i(TAG, "Alarm undeliverable to listener "
+                                    + alarm.listener.asBinder(), e);
+                        }
+                        // As in the PendingIntent.CanceledException case, delivery of the
+                        // alarm was not possible, so we have no wakelock or timeout or
+                        // stats management to do.  It threw before we posted the delayed
+                        // timeout message, so we're done here.
+                        mListenerFinishCount++;
+                        return;
                     }
-                    alarm.listener.doAlarm(this);
-                    mHandler.sendMessageDelayed(
-                            mHandler.obtainMessage(AlarmHandler.LISTENER_TIMEOUT,
-                                    alarm.listener.asBinder()),
-                            mConstants.LISTENER_TIMEOUT);
-                } catch (Exception e) {
-                    if (DEBUG_LISTENER_CALLBACK) {
-                        Slog.i(TAG, "Alarm undeliverable to listener "
-                                + alarm.listener.asBinder(), e);
-                    }
-                    // As in the PendingIntent.CanceledException case, delivery of the
-                    // alarm was not possible, so we have no wakelock or timeout or
-                    // stats management to do.  It threw before we posted the delayed
-                    // timeout message, so we're done here.
-                    mListenerFinishCount++;
-                    return;
                 }
+            } finally {
+                ThreadLocalWorkSource.restore(workSourceToken);
             }
 
             // The alarm is now in flight; now arrange wakelock and stats tracking
@@ -4434,15 +4445,11 @@ class AlarmManagerService extends SystemService {
                 Slog.d(TAG, "mBroadcastRefCount -> " + (mBroadcastRefCount + 1));
             }
             if (mBroadcastRefCount == 0) {
-                setWakelockWorkSource(alarm.operation, alarm.workSource,
-                        alarm.type, alarm.statsTag, (alarm.operation == null) ? alarm.uid : -1,
-                        true);
+                setWakelockWorkSource(alarm.workSource, alarm.creatorUid, alarm.statsTag, true);
                 mWakeLock.acquire();
                 mHandler.obtainMessage(AlarmHandler.REPORT_ALARMS_ACTIVE, 1).sendToTarget();
             }
-            final InFlight inflight = new InFlight(AlarmManagerService.this,
-                    alarm.operation, alarm.listener, alarm.workSource, alarm.uid,
-                    alarm.packageName, alarm.type, alarm.statsTag, nowELAPSED);
+            final InFlight inflight = new InFlight(AlarmManagerService.this, alarm, nowELAPSED);
             mInFlight.add(inflight);
             mBroadcastRefCount++;
             if (allowWhileIdle) {

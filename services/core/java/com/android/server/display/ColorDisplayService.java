@@ -28,6 +28,7 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UserIdInt;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -51,6 +52,7 @@ import android.provider.Settings.Secure;
 import android.provider.Settings.System;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 
@@ -866,6 +868,12 @@ public final class ColorDisplayService extends SystemService {
         if (mDisplayWhiteBalanceListener != null && oldActivated != activated) {
             mDisplayWhiteBalanceListener.onDisplayWhiteBalanceStatusChanged(activated);
         }
+
+        // If disabled, clear the tint. If enabled, do nothing more here and let the next
+        // temperature update set the correct tint.
+        if (!activated) {
+            applyTint(mDisplayWhiteBalanceTintController, false);
+        }
     }
 
     private boolean isDisplayWhiteBalanceSettingEnabled() {
@@ -876,6 +884,21 @@ public final class ColorDisplayService extends SystemService {
     private boolean isDeviceColorManagedInternal() {
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         return dtm.isDeviceColorManaged();
+    }
+
+    private int getTransformCapabilitiesInternal() {
+        int availabilityFlags = ColorDisplayManager.CAPABILITY_NONE;
+        if (SurfaceControl.getProtectedContentSupport()) {
+            availabilityFlags |= ColorDisplayManager.CAPABILITY_PROTECTED_CONTENT;
+        }
+        final Resources res = getContext().getResources();
+        if (res.getBoolean(R.bool.config_setColorTransformAccelerated)) {
+            availabilityFlags |= ColorDisplayManager.CAPABILITY_HARDWARE_ACCELERATION_GLOBAL;
+        }
+        if (res.getBoolean(R.bool.config_setColorTransformAcceleratedPerLayer)) {
+            availabilityFlags |= ColorDisplayManager.CAPABILITY_HARDWARE_ACCELERATION_PER_APP;
+        }
+        return availabilityFlags;
     }
 
     /**
@@ -1226,10 +1249,10 @@ public final class ColorDisplayService extends SystemService {
          * Adds a {@link WeakReference<ColorTransformController>} for a newly started activity, and
          * invokes {@link ColorTransformController#applyAppSaturation(float[], float[])} if needed.
          */
-        public boolean attachColorTransformController(String packageName, int uid,
+        public boolean attachColorTransformController(String packageName, @UserIdInt int userId,
                 WeakReference<ColorTransformController> controller) {
             return mAppSaturationController
-                    .addColorTransformController(packageName, uid, controller);
+                    .addColorTransformController(packageName, userId, controller);
         }
     }
 
@@ -1313,6 +1336,18 @@ public final class ColorDisplayService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return setAppSaturationLevelInternal(packageName, level);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        public int getTransformCapabilities() {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to query transform capabilities");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getTransformCapabilitiesInternal();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

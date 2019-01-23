@@ -16,27 +16,27 @@
 
 package android.net.ip;
 
-import static android.system.OsConstants.*;
+import static android.net.util.SocketUtils.makePacketSocketAddress;
+import static android.system.OsConstants.AF_PACKET;
+import static android.system.OsConstants.ARPHRD_ETHER;
+import static android.system.OsConstants.ETH_P_ALL;
+import static android.system.OsConstants.SOCK_RAW;
 
 import android.net.NetworkUtils;
-import android.net.util.PacketReader;
 import android.net.util.ConnectivityPacketSummary;
 import android.net.util.InterfaceParams;
+import android.net.util.PacketReader;
 import android.os.Handler;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.PacketSocketAddress;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.LocalLog;
+import android.util.Log;
 
-import libcore.io.IoBridge;
 import libcore.util.HexEncoding;
 
 import java.io.FileDescriptor;
-import java.io.InterruptedIOException;
 import java.io.IOException;
-import java.net.SocketException;
 
 
 /**
@@ -103,7 +103,7 @@ public class ConnectivityPacketTracker {
             try {
                 s = Os.socket(AF_PACKET, SOCK_RAW, 0);
                 NetworkUtils.attachControlPacketFilter(s, ARPHRD_ETHER);
-                Os.bind(s, new PacketSocketAddress((short) ETH_P_ALL, mInterface.index));
+                Os.bind(s, makePacketSocketAddress((short) ETH_P_ALL, mInterface.index));
             } catch (ErrnoException | IOException e) {
                 logError("Failed to create packet tracking socket: ", e);
                 closeFd(s);

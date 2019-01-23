@@ -27,7 +27,9 @@ import android.app.AppOpsManager.UidState;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.Message;
 import android.os.Process;
@@ -38,6 +40,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.Xml;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.AtomicDirectory;
 import com.android.internal.os.BackgroundThread;
@@ -45,6 +48,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -59,10 +63,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -105,6 +111,7 @@ import java.util.concurrent.TimeUnit;
 // TODO (bug:122218838): Validate changed time is handled correctly
 final class HistoricalRegistry {
     private static final boolean DEBUG = false;
+    private static final boolean KEEP_WTF_LOG = Build.IS_DEBUGGABLE;
 
     private static final String LOG_TAG = HistoricalRegistry.class.getSimpleName();
 
@@ -123,7 +130,7 @@ final class HistoricalRegistry {
     private static final int MSG_WRITE_PENDING_HISTORY = 1;
 
     // See mMode
-    private static final int DEFAULT_MODE = AppOpsManager.HISTORICAL_MODE_DISABLED;
+    private static final int DEFAULT_MODE = AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE;
 
     // See mBaseSnapshotInterval
     private static final long DEFAULT_SNAPSHOT_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(15);
@@ -131,11 +138,13 @@ final class HistoricalRegistry {
     // See mIntervalCompressionMultiplier
     private static final long DEFAULT_COMPRESSION_STEP = 10;
 
+    private static final String HISTORY_FILE_SUFFIX = ".xml";
+
     /**
      * Whether history is enabled.
      */
     @GuardedBy("mInMemoryLock")
-    private int mMode = AppOpsManager.HISTORICAL_MODE_DISABLED;
+    private int mMode = AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE;
 
     /**
      * This granularity has been chosen to allow clean delineation for intervals
@@ -172,10 +181,16 @@ final class HistoricalRegistry {
     HistoricalRegistry(@NonNull Object lock) {
         mInMemoryLock = lock;
         if (mMode != AppOpsManager.HISTORICAL_MODE_DISABLED) {
-            synchronized (mInMemoryLock) {
-                // When starting always adjust history to now.
-                mPendingHistoryOffsetMillis = System.currentTimeMillis()
-                        - mPersistence.getLastPersistTimeMillisDLocked();
+            synchronized (mOnDiskLock) {
+                synchronized (mInMemoryLock) {
+                    // When starting always adjust history to now.
+                    final long lastPersistTimeMills =
+                            mPersistence.getLastPersistTimeMillisDLocked();
+                    if (lastPersistTimeMills > 0) {
+                        mPendingHistoryOffsetMillis =
+                                System.currentTimeMillis() - lastPersistTimeMills;
+                    }
+                }
             }
         }
     }
@@ -236,8 +251,8 @@ final class HistoricalRegistry {
                 + "=" + setting + " resetting!");
     }
 
-    void dump(String prefix, PrintWriter pw,  int filterUid,
-            String filterPackage, int filterOp) {
+    void dump(String prefix, PrintWriter pw, int filterUid,
+              String filterPackage, int filterOp) {
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 pw.println();
@@ -522,6 +537,7 @@ final class HistoricalRegistry {
             persistPendingHistory(pendingWrites);
         }
     }
+
     private void persistPendingHistory(@NonNull List<HistoricalOps> pendingWrites) {
         synchronized (mOnDiskLock) {
             BackgroundThread.getHandler().removeMessages(MSG_WRITE_PENDING_HISTORY);
@@ -574,8 +590,6 @@ final class HistoricalRegistry {
 
         private static final String LOG_TAG = Persistence.class.getSimpleName();
 
-        private static final String HISTORY_FILE_SUFFIX = ".xml";
-
         private static final String TAG_HISTORY = "history";
         private static final String TAG_OPS = "ops";
         private static final String TAG_UID = "uid";
@@ -603,7 +617,7 @@ final class HistoricalRegistry {
         }
 
         private final AtomicDirectory mHistoricalAppOpsDir = new AtomicDirectory(
-                new File(new File(Environment.getDataSystemDeDirectory(), "appops"), "history"));
+                new File(new File(Environment.getDataSystemDirectory(), "appops"), "history"));
 
         private File generateFile(@NonNull File baseDir, int depth) {
             final long globalBeginMillis = computeGlobalIntervalBeginMillis(depth);
@@ -622,10 +636,20 @@ final class HistoricalRegistry {
             try {
                 final File newBaseDir = mHistoricalAppOpsDir.startWrite();
                 final File oldBaseDir = mHistoricalAppOpsDir.getBackupDirectory();
-                handlePersistHistoricalOpsRecursiveDLocked(newBaseDir, oldBaseDir, ops, 0);
+                final HistoricalFilesInvariant filesInvariant;
+                if (DEBUG) {
+                    filesInvariant = new HistoricalFilesInvariant();
+                    filesInvariant.startTracking(oldBaseDir);
+                }
+                final Set<String> oldFileNames = getHistoricalFileNames(oldBaseDir);
+                handlePersistHistoricalOpsRecursiveDLocked(newBaseDir, oldBaseDir, ops,
+                        oldFileNames,  0);
+                if (DEBUG) {
+                    filesInvariant.stopTracking(newBaseDir);
+                }
                 mHistoricalAppOpsDir.finishWrite();
             } catch (Throwable t) {
-                Slog.wtf(LOG_TAG, "Failed to write historical app ops, restoring backup", t);
+                wtf("Failed to write historical app ops, restoring backup", t, null);
                 mHistoricalAppOpsDir.failWrite();
             }
         }
@@ -649,15 +673,23 @@ final class HistoricalRegistry {
         }
 
         long getLastPersistTimeMillisDLocked() {
+            File baseDir = null;
             try {
-                final File baseDir = mHistoricalAppOpsDir.startRead();
-                final File file = generateFile(baseDir, 0);
-                if (file.exists()) {
-                    return file.lastModified();
+                baseDir = mHistoricalAppOpsDir.startRead();
+                final File[] files = baseDir.listFiles();
+                if (files != null && files.length > 0) {
+                    final Set<File> historyFiles = new ArraySet<>();
+                    Collections.addAll(historyFiles, files);
+                    for (int i = 0;; i++) {
+                        final File file = generateFile(baseDir, i);
+                        if (historyFiles.contains(file)) {
+                            return file.lastModified();
+                        }
+                    }
                 }
                 mHistoricalAppOpsDir.finishRead();
-            } catch (IOException e) {
-                Slog.wtf("Error reading historical app ops. Deleting history.", e);
+            } catch (Throwable e) {
+                wtf("Error reading historical app ops. Deleting history.", e, baseDir);
                 mHistoricalAppOpsDir.delete();
             }
             return 0;
@@ -680,27 +712,27 @@ final class HistoricalRegistry {
         private @Nullable LinkedList<HistoricalOps> collectHistoricalOpsBaseDLocked(
                 int filterUid, @NonNull String filterPackageName, @Nullable String[] filterOpNames,
                 long filterBeginTimeMillis, long filterEndTimeMillis) {
+            File baseDir = null;
             try {
-                final File baseDir = mHistoricalAppOpsDir.startRead();
-                final File[] files = baseDir.listFiles();
-                if (files == null) {
-                    return null;
+                baseDir = mHistoricalAppOpsDir.startRead();
+                final HistoricalFilesInvariant filesInvariant;
+                if (DEBUG) {
+                    filesInvariant = new HistoricalFilesInvariant();
+                    filesInvariant.startTracking(baseDir);
                 }
-                final ArraySet<File> historyFiles = new ArraySet<>(files.length);
-                for (File file : files) {
-                    if (file.isFile() && file.getName().endsWith(HISTORY_FILE_SUFFIX)) {
-                        historyFiles.add(file);
-                    }
-                }
+                final Set<String> historyFiles = getHistoricalFileNames(baseDir);
                 final long[] globalContentOffsetMillis = {0};
                 final LinkedList<HistoricalOps> ops = collectHistoricalOpsRecursiveDLocked(
                         baseDir, filterUid, filterPackageName, filterOpNames, filterBeginTimeMillis,
                         filterEndTimeMillis, globalContentOffsetMillis, null /*outOps*/,
                         0 /*depth*/, historyFiles);
+                if (DEBUG) {
+                    filesInvariant.stopTracking(baseDir);
+                }
                 mHistoricalAppOpsDir.finishRead();
                 return ops;
-            } catch (IOException | XmlPullParserException e) {
-                Slog.wtf("Error reading historical app ops. Deleting history.", e);
+            } catch (Throwable t) {
+                wtf("Error reading historical app ops. Deleting history.", t, baseDir);
                 mHistoricalAppOpsDir.delete();
             }
             return null;
@@ -711,7 +743,7 @@ final class HistoricalRegistry {
                 @Nullable String[] filterOpNames, long filterBeginTimeMillis,
                 long filterEndTimeMillis, @NonNull long[] globalContentOffsetMillis,
                 @Nullable LinkedList<HistoricalOps> outOps, int depth,
-                @NonNull ArraySet<File> historyFiles)
+                @NonNull Set<String> historyFiles)
                 throws IOException, XmlPullParserException {
             final long previousIntervalEndMillis = (long) Math.pow(mIntervalCompressionMultiplier,
                     depth) * mBaseSnapshotInterval;
@@ -761,17 +793,9 @@ final class HistoricalRegistry {
             return outOps;
         }
 
-        private boolean createHardLinkToExistingFile(@NonNull File fromFile, @NonNull File toFile)
-                throws IOException {
-            if (!fromFile.exists()) {
-                return false;
-            }
-            Files.createLink(toFile.toPath(), fromFile.toPath());
-            return true;
-        }
-
         private void handlePersistHistoricalOpsRecursiveDLocked(@NonNull File newBaseDir,
-                @NonNull File oldBaseDir, @Nullable List<HistoricalOps> passedOps, int depth)
+                @NonNull File oldBaseDir, @Nullable List<HistoricalOps> passedOps,
+                @NonNull Set<String> oldFileNames, int depth)
                 throws IOException, XmlPullParserException {
             final long previousIntervalEndMillis = (long) Math.pow(mIntervalCompressionMultiplier,
                     depth) * mBaseSnapshotInterval;
@@ -779,12 +803,15 @@ final class HistoricalRegistry {
                     depth + 1) * mBaseSnapshotInterval;
 
             if (passedOps == null || passedOps.isEmpty()) {
-                // If there is an old file we need to copy it over to the new state.
-                final File oldFile = generateFile(oldBaseDir, depth);
-                final File newFile = generateFile(newBaseDir, depth);
-                if (createHardLinkToExistingFile(oldFile, newFile)) {
+                if (!oldFileNames.isEmpty()) {
+                    // If there is an old file we need to copy it over to the new state.
+                    final File oldFile = generateFile(oldBaseDir, depth);
+                    if (oldFileNames.remove(oldFile.getName())) {
+                        final File newFile = generateFile(newBaseDir, depth);
+                        Files.createLink(newFile.toPath(), oldFile.toPath());
+                    }
                     handlePersistHistoricalOpsRecursiveDLocked(newBaseDir, oldBaseDir,
-                            passedOps, depth + 1);
+                            passedOps, oldFileNames, depth + 1);
                 }
                 return;
             }
@@ -900,9 +927,11 @@ final class HistoricalRegistry {
                 enforceOpsWellFormed(overflowedOps);
             }
 
+            final File newFile = generateFile(newBaseDir, depth);
+            oldFileNames.remove(newFile.getName());
+
             if (persistedOps != null) {
                 normalizeSnapshotForSlotDuration(persistedOps, slotDurationMillis);
-                final File newFile = generateFile(newBaseDir, depth);
                 writeHistoricalOpsDLocked(persistedOps, intervalOverflowMillis, newFile);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Persisted at depth: " + depth
@@ -912,7 +941,7 @@ final class HistoricalRegistry {
             }
 
             handlePersistHistoricalOpsRecursiveDLocked(newBaseDir, oldBaseDir,
-                    overflowedOps, depth + 1);
+                    overflowedOps, oldFileNames, depth + 1);
         }
 
         private @NonNull List<HistoricalOps> readHistoricalOpsLocked(File baseDir,
@@ -920,11 +949,11 @@ final class HistoricalRegistry {
                 @Nullable String filterPackageName, @Nullable String[] filterOpNames,
                 long filterBeginTimeMillis, long filterEndTimeMillis,
                 @Nullable long[] cumulativeOverflowMillis, int depth,
-                @NonNull ArraySet<File> historyFiles)
+                @NonNull Set<String> historyFiles)
                 throws IOException, XmlPullParserException {
             final File file = generateFile(baseDir, depth);
             if (historyFiles != null) {
-                historyFiles.remove(file);
+                historyFiles.remove(file.getName());
             }
             if (filterBeginTimeMillis >= filterEndTimeMillis
                     || filterEndTimeMillis < intervalBeginMillis) {
@@ -1085,7 +1114,7 @@ final class HistoricalRegistry {
                 throws IOException, XmlPullParserException {
             final int op = XmlUtils.readIntAttribute(parser, ATTR_NAME);
             if (filterOpNames != null && !ArrayUtils.contains(filterOpNames,
-                    AppOpsManager.opToName(op))) {
+                    AppOpsManager.opToPublicName(op))) {
                 XmlUtils.skipCurrentTag(parser);
                 return null;
             }
@@ -1364,6 +1393,61 @@ final class HistoricalRegistry {
             }
             return builder.toString();
         }
+
+        private static Set<String> getHistoricalFileNames(@NonNull File historyDir)  {
+            final File[] files = historyDir.listFiles();
+            if (files == null) {
+                return Collections.emptySet();
+            }
+            final ArraySet<String> fileNames = new ArraySet<>(files.length);
+            for (File file : files) {
+                fileNames.add(file.getName());
+
+            }
+            return fileNames;
+        }
+    }
+
+    private static class HistoricalFilesInvariant {
+        private final @NonNull List<File> mBeginFiles = new ArrayList<>();
+
+        public void startTracking(@NonNull File folder) {
+            final File[] files = folder.listFiles();
+            if (files != null) {
+                Collections.addAll(mBeginFiles, files);
+            }
+        }
+
+        public void stopTracking(@NonNull File folder) {
+            final List<File> endFiles = new ArrayList<>();
+            final File[] files = folder.listFiles();
+            if (files != null) {
+                Collections.addAll(endFiles, files);
+            }
+            final long beginOldestFileOffsetMillis = getOldestFileOffsetMillis(mBeginFiles);
+            final long endOldestFileOffsetMillis = getOldestFileOffsetMillis(endFiles);
+            if (endOldestFileOffsetMillis < beginOldestFileOffsetMillis) {
+                final String message = "History loss detected!"
+                        + "\nold files: " + mBeginFiles;
+                wtf(message, null, folder);
+                throw new IllegalStateException(message);
+            }
+        }
+
+        private static long getOldestFileOffsetMillis(@NonNull List<File> files) {
+            if (files.isEmpty()) {
+                return 0;
+            }
+            String longestName = files.get(0).getName();
+            final int fileCount = files.size();
+            for (int i = 1; i < fileCount; i++) {
+                final File file = files.get(i);
+                if (file.getName().length() > longestName.length()) {
+                    longestName = file.getName();
+                }
+            }
+            return Long.parseLong(longestName.replace(HISTORY_FILE_SUFFIX, ""));
+        }
     }
 
     private final class StringDumpVisitor implements AppOpsManager.HistoricalOpsVisitor {
@@ -1490,6 +1574,32 @@ final class HistoricalRegistry {
                 if (printedUidState) {
                     mWriter.println("");
                 }
+            }
+        }
+    }
+
+    private static void wtf(@Nullable String message, @Nullable Throwable t,
+            @Nullable File storage) {
+        Slog.wtf(LOG_TAG, message, t);
+        if (KEEP_WTF_LOG) {
+            try {
+                final File file = new File(new File(Environment.getDataSystemDirectory(), "appops"),
+                        "wtf" + TimeUtils.formatForLogging(System.currentTimeMillis()));
+                if (file.createNewFile()) {
+                    try (PrintWriter writer = new PrintWriter(file)) {
+                        if (t != null) {
+                            writer.append('\n').append(t.toString());
+                        }
+                        writer.append('\n').append(Debug.getCallers(10));
+                        if (storage != null) {
+                            writer.append("\nfiles: " + Arrays.toString(storage.listFiles()));
+                        } else {
+                            writer.append("\nfiles: none");
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                /* ignore */
             }
         }
     }

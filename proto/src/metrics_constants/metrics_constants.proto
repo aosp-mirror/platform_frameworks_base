@@ -73,6 +73,10 @@ message MetricsEvent {
 
     // The view switched to summary mode (most relevant for notifications)
     TYPE_COLLAPSE = 14;
+
+    // The notification was adjusted by the assistant. Enum value is
+    // out of sequence due to b/122737498.
+    TYPE_NOTIFICATION_ASSISTANT_ADJUSTMENT = 1573;
   }
 
   // Types of alerts, as bit field values
@@ -230,6 +234,17 @@ message MetricsEvent {
     BLOCKING_HELPER_CLICK_ALERT_ME = 6;
     // "undo" was clicked (enables the user to undo "stop notification" action).
     BLOCKING_HELPER_CLICK_UNDO = 7;
+  }
+
+  // The (visual) location of a Notification.
+  enum NotificationLocation {
+    LOCATION_UNKNOWN = 0;
+    LOCATION_FIRST_HEADS_UP = 1; // visible heads-up
+    LOCATION_HIDDEN_TOP = 2; // hidden/scrolled away on the top
+    LOCATION_MAIN_AREA = 3; // visible in the shade
+    LOCATION_BOTTOM_STACK_PEEKING = 4; // in the bottom stack, and peeking
+    LOCATION_BOTTOM_STACK_HIDDEN = 5; // in the bottom stack, and hidden
+    LOCATION_GONE = 6; // the view isn't laid out at all
   }
 
   // Known visual elements: views or controls.
@@ -4049,6 +4064,8 @@ message MetricsEvent {
     // - AUTOFILL_INVALID_DATASET_AUTHENTICATION
     // NOTE: starting on OS Q, it also added the following fields:
     // Tag FIELD_AUTOFILL_TEXT_LEN: length of the error message provided by the service
+    // Tag FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS: number of requests made to the augmented
+    //     autofill service
     AUTOFILL_REQUEST = 907;
 
     // Tag of a field for a package of an autofill service
@@ -6819,6 +6836,31 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     MOBILE_NETWORK_LIST = 1627;
+
+    // OPEN: Settings > Display > Adaptive sleep
+    // OS: Q
+    SETTINGS_ADAPTIVE_SLEEP = 1628;
+    
+    // Tagged data for SMART_REPLY_VISIBLE and NOTIFICATION_ITEM_ACTION.
+    // The UI location of the notification containing the smart suggestions.
+    // This is a NotificationLocation object (see the NotificationLocation
+    // enum).
+    // OS: Q
+    NOTIFICATION_LOCATION = 1629;
+
+    // The autofill system made request to the system-provided augmented autofill service.
+    // OS: Q
+    // Package: Package of app that is autofilled
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SERVICE: Package of the augmented autofill service that processed the
+    // request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_AUGMENTED_REQUEST = 1630;
+
+    // Tag of a field for the number of augmented autofill requests in a session
+    // OS: Q
+    FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS = 1631;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.

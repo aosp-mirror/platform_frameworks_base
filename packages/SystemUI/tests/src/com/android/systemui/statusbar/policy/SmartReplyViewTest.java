@@ -96,6 +96,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     @Mock private SmartReplyController mLogger;
     private NotificationEntry mEntry;
     private Notification mNotification;
+    @Mock private SmartReplyConstants mConstants;
 
     @Mock ActivityStarter mActivityStarter;
     @Mock HeadsUpManager mHeadsUpManager;
@@ -108,10 +109,14 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mDependency.get(KeyguardDismissUtil.class).setDismissHandler(action -> action.onDismiss());
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectTestDependency(ActivityStarter.class, mActivityStarter);
+        mDependency.injectTestDependency(SmartReplyConstants.class, mConstants);
 
         mContainer = new View(mContext, null);
         mView = SmartReplyView.inflate(mContext, null);
 
+        // Any number of replies are fine.
+        when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(0);
+        when(mConstants.getMaxSqueezeRemeasureAttempts()).thenReturn(3);
 
         final Resources res = mContext.getResources();
         mSingleLinePaddingHorizontal = res.getDimensionPixelSize(
@@ -403,7 +408,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     }
 
     private void setSmartReplies(CharSequence[] choices) {
-        setSmartReplies(choices, false);
+        setSmartReplies(choices, false /* fromAssistant */);
     }
 
     private void setSmartReplies(CharSequence[] choices, boolean fromAssistant) {
@@ -440,9 +445,14 @@ public class SmartReplyViewTest extends SysuiTestCase {
     }
 
     private void setSmartRepliesAndActions(CharSequence[] choices, String[] actionTitles) {
-        setSmartReplies(choices);
+        setSmartRepliesAndActions(choices, actionTitles, false /* fromAssistant */);
+    }
+
+    private void setSmartRepliesAndActions(
+            CharSequence[] choices, String[] actionTitles, boolean fromAssistant) {
+        setSmartReplies(choices, fromAssistant);
         mView.addSmartActions(
-                new SmartReplyView.SmartActions(createActions(actionTitles), false),
+                new SmartReplyView.SmartActions(createActions(actionTitles), fromAssistant),
                 mLogger,
                 mEntry,
                 mHeadsUpManager);
@@ -942,5 +952,79 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertReplyButtonShownWithEqualMeasures(
                 expectedView.getChildAt(3), mView.getChildAt(4)); // a1
         assertReplyButtonHidden(mView.getChildAt(5)); // long action
+    }
+
+    @Test
+    public void testMeasure_minNumSystemGeneratedSmartReplies_notEnoughReplies() {
+        when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(3);
+
+        // Add 2 replies when the minimum is 3 -> we should end up with 0 replies.
+        String[] choices = new String[] {"reply1", "reply2"};
+        String[] actions = new String[] {"action1"};
+
+        ViewGroup expectedView = buildExpectedView(new String[] {}, 1,
+                createActions(new String[] {"action1"}));
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions, true /* fromAssistant */);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        // smart replies
+        assertReplyButtonHidden(mView.getChildAt(0));
+        assertReplyButtonHidden(mView.getChildAt(1));
+        // smart actions
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testMeasure_minNumSystemGeneratedSmartReplies_enoughReplies() {
+        when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(2);
+
+        // Add 2 replies when the minimum is 3 -> we should end up with 0 replies.
+        String[] choices = new String[] {"reply1", "reply2"};
+        String[] actions = new String[] {"action1"};
+
+        ViewGroup expectedView = buildExpectedView(new String[] {"reply1", "reply2"}, 1,
+                createActions(new String[] {"action1"}));
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions, true /* fromAssistant */);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        // smart replies
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
+        // smart actions
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(2));
+    }
+
+    /**
+     * Ensure actions that are squeezed when shown together with smart replies are unsqueezed if the
+     * replies are never added (because of the SmartReplyConstants.getMinNumSystemGeneratedReplies()
+     * flag).
+     */
+    @Test
+    public void testMeasure_minNumSystemGeneratedSmartReplies_unSqueezeActions() {
+        when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(2);
+
+        // Add 2 replies when the minimum is 3 -> we should end up with 0 replies.
+        String[] choices = new String[] {"This is a very long two-line reply."};
+        String[] actions = new String[] {"Short action"};
+
+        // The action should be displayed on one line only - since it fits!
+        ViewGroup expectedView = buildExpectedView(new String[] {}, 1 /* lineCount */,
+                createActions(new String[] {"Short action"}));
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setSmartRepliesAndActions(choices, actions, true /* fromAssistant */);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        // smart replies
+        assertReplyButtonHidden(mView.getChildAt(0));
+        // smart actions
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(1));
     }
 }

@@ -29,6 +29,10 @@ import org.junit.Test;
  */
 @SmallTest
 public class WifiNetworkSuggestionTest {
+    private static final int TEST_UID = 45677;
+    private static final int TEST_UID_OTHER = 45673;
+    private static final String TEST_PACKAGE_NAME = "com.test.packagename";
+    private static final String TEST_PACKAGE_NAME_OTHER = "com.test.packagenameother";
     private static final String TEST_SSID = "\"Test123\"";
     private static final String TEST_BSSID = "12:12:12:12:12:12";
     private static final String TEST_SSID_1 = "\"Test1234\"";
@@ -43,7 +47,7 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, true, 0);
+                new WifiNetworkSuggestion(configuration, false, true, TEST_UID, TEST_PACKAGE_NAME);
 
         Parcel parcelW = Parcel.obtain();
         suggestion.writeToParcel(parcelW, 0);
@@ -77,14 +81,16 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, true, false, 0);
+                new WifiNetworkSuggestion(configuration, true, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.BSSID = TEST_BSSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, true, 0);
+                new WifiNetworkSuggestion(configuration1, false, true, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         assertEquals(suggestion, suggestion1);
     }
@@ -99,13 +105,15 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, 0);
+                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID_1;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, false, 0);
+                new WifiNetworkSuggestion(configuration1, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
     }
@@ -121,13 +129,15 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, 0);
+                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, false, 0);
+                new WifiNetworkSuggestion(configuration1, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
     }
@@ -142,13 +152,15 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, 0);
+                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, false, 0);
+                new WifiNetworkSuggestion(configuration1, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
     }
@@ -163,10 +175,31 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, 0);
+                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME);
 
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration, false, false, 1);
+                new WifiNetworkSuggestion(configuration, false, false, TEST_UID_OTHER,
+                        TEST_PACKAGE_NAME);
+
+        assertNotEquals(suggestion, suggestion1);
+    }
+
+    /**
+     * Check NetworkSuggestion equals returns {@code false} for 2 network suggestions with the same
+     * SSID, BSSID and key mgmt, but different package name.
+     */
+    @Test
+    public void testWifiNetworkSuggestionEqualsFailsWhenPackageNameIsDifferent() {
+        WifiConfiguration configuration = new WifiConfiguration();
+        configuration.SSID = TEST_SSID;
+        configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        WifiNetworkSuggestion suggestion =
+                new WifiNetworkSuggestion(configuration, false, false, TEST_UID, TEST_PACKAGE_NAME);
+
+        WifiNetworkSuggestion suggestion1 =
+                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                        TEST_PACKAGE_NAME_OTHER);
 
         assertNotEquals(suggestion, suggestion1);
     }

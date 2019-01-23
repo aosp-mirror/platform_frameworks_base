@@ -771,7 +771,9 @@ public abstract class Context {
      * <p>
      * This is not generally intended for third party application developers.
      */
-    public abstract String getOpPackageName();
+    public String getOpPackageName() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
@@ -2980,9 +2982,11 @@ public abstract class Context {
      *
      * @see #bindService
      */
-    public abstract boolean bindIsolatedService(@RequiresPermission Intent service,
+    public boolean bindIsolatedService(@RequiresPermission Intent service,
             @NonNull ServiceConnection conn, @BindServiceFlags int flags,
-            @NonNull String instanceName);
+            @NonNull String instanceName) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
@@ -3037,8 +3041,10 @@ public abstract class Context {
      *                   a related groups -- higher importance values will be killed before
      *                   lower ones.
      */
-    public abstract void updateServiceGroup(@NonNull ServiceConnection conn, int group,
-            int importance);
+    public void updateServiceGroup(@NonNull ServiceConnection conn, int group,
+            int importance) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Disconnect from an application service.  You will no longer receive

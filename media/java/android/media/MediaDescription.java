@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 /**
  * A simple set of metadata for a media item suitable for display. This can be
@@ -122,9 +123,9 @@ public class MediaDescription implements Parcelable {
 
     private MediaDescription(Parcel in) {
         mMediaId = in.readString();
-        mTitle = in.readCharSequence();
-        mSubtitle = in.readCharSequence();
-        mDescription = in.readCharSequence();
+        mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mIcon = in.readParcelable(null);
         mIconUri = in.readParcelable(null);
         mExtras = in.readBundle();
@@ -210,9 +211,9 @@ public class MediaDescription implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mMediaId);
-        dest.writeCharSequence(mTitle);
-        dest.writeCharSequence(mSubtitle);
-        dest.writeCharSequence(mDescription);
+        TextUtils.writeToParcel(mTitle, dest, 0);
+        TextUtils.writeToParcel(mSubtitle, dest, 0);
+        TextUtils.writeToParcel(mDescription, dest, 0);
         dest.writeParcelable(mIcon, flags);
         dest.writeParcelable(mIconUri, flags);
         dest.writeBundle(mExtras);

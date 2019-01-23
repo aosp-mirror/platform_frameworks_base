@@ -86,6 +86,23 @@ public final class DeviceConfig {
     @SystemApi
     public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
 
+    /**
+     * Namespace for all netd related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+
+    /**
+     * Namespace for features related to the ExtServices Notification Assistant.
+     * These features are applied immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_NOTIFICATION_ASSISTANT = "notification_assistant";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =

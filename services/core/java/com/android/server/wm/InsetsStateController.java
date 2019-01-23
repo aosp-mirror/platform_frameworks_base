@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.ViewRootImpl.sNewInsetsMode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -160,7 +163,7 @@ class InsetsStateController {
     }
 
     private void onControlChanged(int type, @Nullable WindowState win) {
-        if (!ViewRootImpl.USE_NEW_INSETS) {
+        if (sNewInsetsMode == NEW_INSETS_MODE_NONE) {
             return;
         }
         final WindowState previous = mTypeWinControlMap.get(type);

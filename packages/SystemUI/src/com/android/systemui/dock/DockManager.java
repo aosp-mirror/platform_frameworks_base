@@ -48,6 +48,11 @@ public interface DockManager {
      */
     void removeListener(DockEventListener callback);
 
+    /**
+    * Returns true if the device is in docking state.
+    */
+    boolean isDocked();
+
     /** Callback for receiving dock events */
     interface DockEventListener {
         /**

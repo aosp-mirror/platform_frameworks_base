@@ -22,10 +22,8 @@ import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
-import android.hardware.biometrics.BiometricSourceType;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
-import android.app.UserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -41,6 +39,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
+import android.hardware.biometrics.BiometricSourceType;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -72,13 +71,15 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+
 
 /**
  * Manages trust agents and trust listeners.
@@ -119,7 +120,7 @@ public class TrustManagerService extends SystemService {
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
     private static final String TRUST_TIMEOUT_ALARM_TAG = "TrustManagerService.trustTimeoutForUser";
-    private static final long TRUST_TIMEOUT_IN_MILLIS = 20 * 1000; //4 * 60 * 60 * 1000;
+    private static final long TRUST_TIMEOUT_IN_MILLIS = 4 * 60 * 60 * 1000;
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();

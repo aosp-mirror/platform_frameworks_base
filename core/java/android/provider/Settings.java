@@ -3300,6 +3300,14 @@ public final class Settings {
         public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
 
         /**
+         * Control whether to enable adaptive sleep mode.
+         * @hide
+         */
+        public static final String ADAPTIVE_SLEEP = "adaptive_sleep";
+
+        private static final Validator ADAPTIVE_SLEEP_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated This functionality is no longer available as of
@@ -4232,6 +4240,7 @@ public final class Settings {
             SCREEN_BRIGHTNESS_MODE,
             SCREEN_AUTO_BRIGHTNESS_ADJ,
             SCREEN_BRIGHTNESS_FOR_VR,
+            ADAPTIVE_SLEEP,
             VIBRATE_INPUT_DEVICES,
             MODE_RINGER_STREAMS_AFFECTED,
             TEXT_AUTO_REPLACE,
@@ -4307,6 +4316,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FOR_VR);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_MODE);
+            PUBLIC_SETTINGS.add(ADAPTIVE_SLEEP);
             PUBLIC_SETTINGS.add(MODE_RINGER_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(MUTE_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(VIBRATE_ON);
@@ -4411,6 +4421,7 @@ public final class Settings {
             VALIDATORS.put(SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_FOR_VR, SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_MODE, SCREEN_BRIGHTNESS_MODE_VALIDATOR);
+            VALIDATORS.put(ADAPTIVE_SLEEP, ADAPTIVE_SLEEP_VALIDATOR);
             VALIDATORS.put(MODE_RINGER_STREAMS_AFFECTED, MODE_RINGER_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(MUTE_STREAMS_AFFECTED, MUTE_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(VIBRATE_ON, VIBRATE_ON_VALIDATOR);
@@ -13917,11 +13928,12 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * enabled                         (boolean)
-         * requires_targeting_p            (boolean)
-         * max_squeeze_remeasure_attempts  (int)
-         * edit_choices_before_sending     (boolean)
-         * show_in_heads_up                (boolean)
+         * enabled                           (boolean)
+         * requires_targeting_p              (boolean)
+         * max_squeeze_remeasure_attempts    (int)
+         * edit_choices_before_sending       (boolean)
+         * show_in_heads_up                  (boolean)
+         * min_num_system_generated_replies  (int)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
          * @hide
@@ -14143,7 +14155,7 @@ public final class Settings {
          *     intervalMultiplier    (int)
          * </pre>
          *
-         * Ex: "enabled=true,baseIntervalMillis=1000,intervalMultiplier=10"
+         * Ex: "mode=HISTORICAL_MODE_ENABLED_ACTIVE,baseIntervalMillis=1000,intervalMultiplier=10"
          *
          * @see #APPOP_HISTORY_MODE
          * @see #APPOP_HISTORY_BASE_INTERVAL_MILLIS

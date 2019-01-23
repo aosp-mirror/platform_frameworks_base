@@ -25,11 +25,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import java.util.ArrayList;
-import java.util.List;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Playback state for a {@link MediaSession}. This includes a state like
@@ -318,7 +318,7 @@ public final class PlaybackState implements Parcelable {
         mActions = in.readLong();
         mCustomActions = in.createTypedArrayList(CustomAction.CREATOR);
         mActiveItemId = in.readLong();
-        mErrorMessage = in.readCharSequence();
+        mErrorMessage = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mExtras = in.readBundle();
     }
 
@@ -353,7 +353,7 @@ public final class PlaybackState implements Parcelable {
         dest.writeLong(mActions);
         dest.writeTypedList(mCustomActions);
         dest.writeLong(mActiveItemId);
-        dest.writeCharSequence(mErrorMessage);
+        TextUtils.writeToParcel(mErrorMessage, dest, 0);
         dest.writeBundle(mExtras);
     }
 

@@ -45,6 +45,7 @@
 #include <meminfo/sysmeminfo.h>
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>
+#include <android-base/strings.h>
 #include "android_os_Debug.h"
 
 namespace android
@@ -231,244 +232,162 @@ static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_me
     return err;
 }
 
-static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
-{
-    char line[1024];
-    int len, nameLen;
-    bool skip, done = false;
-
-    unsigned pss = 0, swappable_pss = 0, rss = 0;
-    float sharing_proportion = 0.0;
-    unsigned shared_clean = 0, shared_dirty = 0;
-    unsigned private_clean = 0, private_dirty = 0;
-    unsigned swapped_out = 0, swapped_out_pss = 0;
-    bool is_swappable = false;
-    unsigned temp;
-
-    uint64_t start;
-    uint64_t end = 0;
-    uint64_t prevEnd = 0;
-    char* name;
-    int name_pos;
-
-    int whichHeap = HEAP_UNKNOWN;
-    int subHeap = HEAP_UNKNOWN;
-    int prevHeap = HEAP_UNKNOWN;
-
-    *foundSwapPss = false;
-
-    if(fgets(line, sizeof(line), fp) == 0) return;
-
-    while (!done) {
-        prevHeap = whichHeap;
-        prevEnd = end;
-        whichHeap = HEAP_UNKNOWN;
-        subHeap = HEAP_UNKNOWN;
-        skip = false;
-        is_swappable = false;
-
-        len = strlen(line);
-        if (len < 1) return;
-        line[--len] = 0;
-
-        if (sscanf(line, "%" SCNx64 "-%" SCNx64 " %*s %*x %*x:%*x %*d%n", &start, &end, &name_pos) != 2) {
-            skip = true;
-        } else {
-            while (isspace(line[name_pos])) {
-                name_pos += 1;
-            }
-            name = line + name_pos;
-            nameLen = strlen(name);
-            // Trim the end of the line if it is " (deleted)".
-            const char* deleted_str = " (deleted)";
-            if (nameLen > (int)strlen(deleted_str) &&
-                strcmp(name+nameLen-strlen(deleted_str), deleted_str) == 0) {
-                nameLen -= strlen(deleted_str);
-                name[nameLen] = '\0';
-            }
-            if ((strstr(name, "[heap]") == name)) {
-                whichHeap = HEAP_NATIVE;
-            } else if (strncmp(name, "[anon:libc_malloc]", 18) == 0) {
-                whichHeap = HEAP_NATIVE;
-            } else if (strncmp(name, "[stack", 6) == 0) {
-                whichHeap = HEAP_STACK;
-            } else if (nameLen > 3 && strcmp(name+nameLen-3, ".so") == 0) {
-                whichHeap = HEAP_SO;
-                is_swappable = true;
-            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".jar") == 0) {
-                whichHeap = HEAP_JAR;
-                is_swappable = true;
-            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".apk") == 0) {
-                whichHeap = HEAP_APK;
-                is_swappable = true;
-            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".ttf") == 0) {
-                whichHeap = HEAP_TTF;
-                is_swappable = true;
-            } else if ((nameLen > 4 && strstr(name, ".dex") != NULL) ||
-                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
-                whichHeap = HEAP_DEX;
-                subHeap = HEAP_DEX_APP_DEX;
-                is_swappable = true;
-            } else if (nameLen > 5 && strcmp(name+nameLen-5, ".vdex") == 0) {
-                whichHeap = HEAP_DEX;
-                // Handle system@framework@boot* and system/framework/boot*
-                if (strstr(name, "@boot") != NULL || strstr(name, "/boot") != NULL) {
-                    subHeap = HEAP_DEX_BOOT_VDEX;
-                } else {
-                    subHeap = HEAP_DEX_APP_VDEX;
-                }
-                is_swappable = true;
-            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".oat") == 0) {
-                whichHeap = HEAP_OAT;
-                is_swappable = true;
-            } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
-                whichHeap = HEAP_ART;
-                // Handle system@framework@boot* and system/framework/boot*
-                if (strstr(name, "@boot") != NULL || strstr(name, "/boot") != NULL) {
-                    subHeap = HEAP_ART_BOOT;
-                } else {
-                    subHeap = HEAP_ART_APP;
-                }
-                is_swappable = true;
-            } else if (strncmp(name, "/dev/", 5) == 0) {
-                whichHeap = HEAP_UNKNOWN_DEV;
-                if (strncmp(name, "/dev/kgsl-3d0", 13) == 0) {
-                    whichHeap = HEAP_GL_DEV;
-                } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
-                    whichHeap = HEAP_CURSOR;
-                } else if (strncmp(name, "/dev/ashmem", 11)) {
-                    whichHeap = HEAP_ASHMEM;
-                }
-            } else if (strncmp(name, "[anon:", 6) == 0) {
-                whichHeap = HEAP_UNKNOWN;
-                if (strncmp(name, "[anon:dalvik-", 13) == 0) {
-                    whichHeap = HEAP_DALVIK_OTHER;
-                    if (strstr(name, "[anon:dalvik-LinearAlloc") == name) {
-                        subHeap = HEAP_DALVIK_OTHER_LINEARALLOC;
-                    } else if ((strstr(name, "[anon:dalvik-alloc space") == name) ||
-                               (strstr(name, "[anon:dalvik-main space") == name)) {
-                        // This is the regular Dalvik heap.
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_NORMAL;
-                    } else if (strstr(name, "[anon:dalvik-large object space") == name ||
-                               strstr(name, "[anon:dalvik-free list large object space")
-                                   == name) {
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_LARGE;
-                    } else if (strstr(name, "[anon:dalvik-non moving space") == name) {
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_NON_MOVING;
-                    } else if (strstr(name, "[anon:dalvik-zygote space") == name) {
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_ZYGOTE;
-                    } else if (strstr(name, "[anon:dalvik-indirect ref") == name) {
-                        subHeap = HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE;
-                    } else if (strstr(name, "[anon:dalvik-jit-code-cache") == name ||
-                               strstr(name, "[anon:dalvik-data-code-cache") == name) {
-                        subHeap = HEAP_DALVIK_OTHER_CODE_CACHE;
-                    } else if (strstr(name, "[anon:dalvik-CompilerMetadata") == name) {
-                        subHeap = HEAP_DALVIK_OTHER_COMPILER_METADATA;
-                    } else {
-                        subHeap = HEAP_DALVIK_OTHER_ACCOUNTING;  // Default to accounting.
-                    }
-                }
-            } else if (nameLen > 0) {
-                whichHeap = HEAP_UNKNOWN_MAP;
-            } else if (start == prevEnd && prevHeap == HEAP_SO) {
-                // bss section of a shared library.
-                whichHeap = HEAP_SO;
-            }
-        }
-
-        //ALOGI("native=%d dalvik=%d sqlite=%d: %s\n", isNativeHeap, isDalvikHeap,
-        //    isSqliteHeap, line);
-
-        shared_clean = 0;
-        shared_dirty = 0;
-        private_clean = 0;
-        private_dirty = 0;
-        swapped_out = 0;
-        swapped_out_pss = 0;
-
-        while (true) {
-            if (fgets(line, 1024, fp) == 0) {
-                done = true;
-                break;
-            }
-
-            if (line[0] == 'S' && sscanf(line, "Size: %d kB", &temp) == 1) {
-                /* size = temp; */
-            } else if (line[0] == 'R' && sscanf(line, "Rss: %d kB", &temp) == 1) {
-                rss = temp;
-            } else if (line[0] == 'P' && sscanf(line, "Pss: %d kB", &temp) == 1) {
-                pss = temp;
-            } else if (line[0] == 'S' && sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
-                shared_clean = temp;
-            } else if (line[0] == 'S' && sscanf(line, "Shared_Dirty: %d kB", &temp) == 1) {
-                shared_dirty = temp;
-            } else if (line[0] == 'P' && sscanf(line, "Private_Clean: %d kB", &temp) == 1) {
-                private_clean = temp;
-            } else if (line[0] == 'P' && sscanf(line, "Private_Dirty: %d kB", &temp) == 1) {
-                private_dirty = temp;
-            } else if (line[0] == 'R' && sscanf(line, "Referenced: %d kB", &temp) == 1) {
-                /* referenced = temp; */
-            } else if (line[0] == 'S' && sscanf(line, "Swap: %d kB", &temp) == 1) {
-                swapped_out = temp;
-            } else if (line[0] == 'S' && sscanf(line, "SwapPss: %d kB", &temp) == 1) {
-                *foundSwapPss = true;
-                swapped_out_pss = temp;
-            } else if (sscanf(line, "%" SCNx64 "-%" SCNx64 " %*s %*x %*x:%*x %*d", &start, &end) == 2) {
-                // looks like a new mapping
-                // example: "10000000-10001000 ---p 10000000 00:00 0"
-                break;
-            }
-        }
-
-        if (!skip) {
-            if (is_swappable && (pss > 0)) {
-                sharing_proportion = 0.0;
-                if ((shared_clean > 0) || (shared_dirty > 0)) {
-                    sharing_proportion = (pss - private_clean
-                            - private_dirty)/(shared_clean+shared_dirty);
-                }
-                swappable_pss = (sharing_proportion*shared_clean) + private_clean;
-            } else
-                swappable_pss = 0;
-
-            stats[whichHeap].pss += pss;
-            stats[whichHeap].swappablePss += swappable_pss;
-            stats[whichHeap].rss += rss;
-            stats[whichHeap].privateDirty += private_dirty;
-            stats[whichHeap].sharedDirty += shared_dirty;
-            stats[whichHeap].privateClean += private_clean;
-            stats[whichHeap].sharedClean += shared_clean;
-            stats[whichHeap].swappedOut += swapped_out;
-            stats[whichHeap].swappedOutPss += swapped_out_pss;
-            if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER ||
-                    whichHeap == HEAP_DEX || whichHeap == HEAP_ART) {
-                stats[subHeap].pss += pss;
-                stats[subHeap].swappablePss += swappable_pss;
-                stats[subHeap].rss += rss;
-                stats[subHeap].privateDirty += private_dirty;
-                stats[subHeap].sharedDirty += shared_dirty;
-                stats[subHeap].privateClean += private_clean;
-                stats[subHeap].sharedClean += shared_clean;
-                stats[subHeap].swappedOut += swapped_out;
-                stats[subHeap].swappedOutPss += swapped_out_pss;
-            }
-        }
-    }
-}
-
 static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
 {
     *foundSwapPss = false;
+    uint64_t prev_end = 0;
+    int prev_heap = HEAP_UNKNOWN;
 
     std::string smaps_path = base::StringPrintf("/proc/%d/smaps", pid);
-    UniqueFile fp = MakeUniqueFile(smaps_path.c_str(), "re");
-    if (fp == nullptr) return;
+    auto vma_scan = [&](const meminfo::Vma& vma) {
+        int which_heap = HEAP_UNKNOWN;
+        int sub_heap = HEAP_UNKNOWN;
+        bool is_swappable = false;
+        std::string name;
+        if (base::EndsWith(vma.name, " (deleted)")) {
+            name = vma.name.substr(0, vma.name.size() - strlen(" (deleted)"));
+        } else {
+            name = vma.name;
+        }
 
-    read_mapinfo(fp.get(), stats, foundSwapPss);
+        uint32_t namesz = name.size();
+        if (base::StartsWith(name, "[heap]")) {
+            which_heap = HEAP_NATIVE;
+        } else if (base::StartsWith(name, "[anon:libc_malloc]")) {
+            which_heap = HEAP_NATIVE;
+        } else if (base::StartsWith(name, "[stack")) {
+            which_heap = HEAP_NATIVE;
+        } else if (base::EndsWith(name, ".so")) {
+            which_heap = HEAP_SO;
+            is_swappable = true;
+        } else if (base::EndsWith(name, ".jar")) {
+            which_heap = HEAP_JAR;
+            is_swappable = true;
+        } else if (base::EndsWith(name, ".apk")) {
+            which_heap = HEAP_APK;
+            is_swappable = true;
+        } else if (base::EndsWith(name, ".ttf")) {
+            which_heap = HEAP_TTF;
+            is_swappable = true;
+        } else if ((base::EndsWith(name, ".odex")) ||
+                (namesz > 4 && strstr(name.c_str(), ".dex") != nullptr)) {
+            which_heap = HEAP_DEX;
+            sub_heap = HEAP_DEX_APP_DEX;
+            is_swappable = true;
+        } else if (base::EndsWith(name, ".vdex")) {
+            which_heap = HEAP_DEX;
+            // Handle system@framework@boot and system/framework/boot
+            if ((strstr(name.c_str(), "@boot") != nullptr) ||
+                    (strstr(name.c_str(), "/boot"))) {
+                sub_heap = HEAP_DEX_BOOT_VDEX;
+            } else {
+                sub_heap = HEAP_DEX_APP_VDEX;
+            }
+            is_swappable = true;
+        } else if (base::EndsWith(name, ".oat")) {
+            which_heap = HEAP_OAT;
+            is_swappable = true;
+        } else if (base::EndsWith(name, ".art")) {
+            which_heap = HEAP_ART;
+            // Handle system@framework@boot* and system/framework/boot*
+            if ((strstr(name.c_str(), "@boot") != nullptr) ||
+                    (strstr(name.c_str(), "/boot"))) {
+                sub_heap = HEAP_DEX_BOOT_VDEX;
+            } else {
+                sub_heap = HEAP_DEX_APP_VDEX;
+            }
+            is_swappable = true;
+        } else if (base::StartsWith(name, "/dev/")) {
+            which_heap = HEAP_UNKNOWN_DEV;
+            if (base::StartsWith(name, "/dev/kgsl-3d0")) {
+                which_heap = HEAP_GL_DEV;
+            } else if (base::StartsWith(name, "/dev/ashmem/CursorWindow")) {
+                which_heap = HEAP_CURSOR;
+            } else if (base::StartsWith(name, "/dev/ashmem")) {
+                which_heap = HEAP_ASHMEM;
+            }
+        } else if (base::StartsWith(name, "[anon:")) {
+            which_heap = HEAP_UNKNOWN;
+            if (base::StartsWith(name, "[anon:dalvik-")) {
+                which_heap = HEAP_DALVIK_OTHER;
+                if (base::StartsWith(name, "[anon:dalvik-LinearAlloc")) {
+                    sub_heap = HEAP_DALVIK_OTHER_LINEARALLOC;
+                } else if (base::StartsWith(name, "[anon:dalvik-alloc space") ||
+                        base::StartsWith(name, "[anon:dalvik-main space")) {
+                    // This is the regular Dalvik heap.
+                    which_heap = HEAP_DALVIK;
+                    sub_heap = HEAP_DALVIK_NORMAL;
+                } else if (base::StartsWith(name,
+                            "[anon:dalvik-large object space") ||
+                        base::StartsWith(
+                            name, "[anon:dalvik-free list large object space")) {
+                    which_heap = HEAP_DALVIK;
+                    sub_heap = HEAP_DALVIK_LARGE;
+                } else if (base::StartsWith(name, "[anon:dalvik-non moving space")) {
+                    which_heap = HEAP_DALVIK;
+                    sub_heap = HEAP_DALVIK_NON_MOVING;
+                } else if (base::StartsWith(name, "[anon:dalvik-zygote space")) {
+                    which_heap = HEAP_DALVIK;
+                    sub_heap = HEAP_DALVIK_ZYGOTE;
+                } else if (base::StartsWith(name, "[anon:dalvik-indirect ref")) {
+                    sub_heap = HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE;
+                } else if (base::StartsWith(name, "[anon:dalvik-jit-code-cache") ||
+                        base::StartsWith(name, "[anon:dalvik-data-code-cache")) {
+                    sub_heap = HEAP_DALVIK_OTHER_CODE_CACHE;
+                } else if (base::StartsWith(name, "[anon:dalvik-CompilerMetadata")) {
+                    sub_heap = HEAP_DALVIK_OTHER_COMPILER_METADATA;
+                } else {
+                    sub_heap = HEAP_DALVIK_OTHER_ACCOUNTING;  // Default to accounting.
+                }
+            }
+        } else if (namesz > 0) {
+            which_heap = HEAP_UNKNOWN_MAP;
+        } else if (vma.start == prev_end && prev_heap == HEAP_SO) {
+            // bss section of a shared library
+            which_heap = HEAP_SO;
+        }
+
+        prev_end = vma.end;
+        prev_heap = which_heap;
+
+        const meminfo::MemUsage& usage = vma.usage;
+        if (usage.swap_pss > 0 && *foundSwapPss != true) {
+            *foundSwapPss = true;
+        }
+
+        uint64_t swapable_pss = 0;
+        if (is_swappable && (usage.pss > 0)) {
+            float sharing_proportion = 0.0;
+            if ((usage.shared_clean > 0) || (usage.shared_dirty > 0)) {
+                sharing_proportion = (usage.pss - usage.uss) / (usage.shared_clean + usage.shared_dirty);
+            }
+            swapable_pss = (sharing_proportion * usage.shared_clean) + usage.private_clean;
+        }
+
+        stats[which_heap].pss += usage.pss;
+        stats[which_heap].swappablePss += swapable_pss;
+        stats[which_heap].rss += usage.rss;
+        stats[which_heap].privateDirty += usage.private_dirty;
+        stats[which_heap].sharedDirty += usage.shared_dirty;
+        stats[which_heap].privateClean += usage.private_clean;
+        stats[which_heap].sharedClean += usage.shared_clean;
+        stats[which_heap].swappedOut += usage.swap;
+        stats[which_heap].swappedOutPss += usage.swap_pss;
+        if (which_heap == HEAP_DALVIK || which_heap == HEAP_DALVIK_OTHER ||
+                which_heap == HEAP_DEX || which_heap == HEAP_ART) {
+            stats[sub_heap].pss += usage.pss;
+            stats[sub_heap].swappablePss += swapable_pss;
+            stats[sub_heap].rss += usage.rss;
+            stats[sub_heap].privateDirty += usage.private_dirty;
+            stats[sub_heap].sharedDirty += usage.shared_dirty;
+            stats[sub_heap].privateClean += usage.private_clean;
+            stats[sub_heap].sharedClean += usage.shared_clean;
+            stats[sub_heap].swappedOut += usage.swap;
+            stats[sub_heap].swappedOutPss += usage.swap_pss;
+        }
+    };
+
+    meminfo::ForEachVmaFromFile(smaps_path, vma_scan);
 }
 
 static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,

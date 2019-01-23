@@ -18,6 +18,7 @@ package android.media.session;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.media.MediaMetadata;
+import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.session.ControllerCallbackLink;
 import android.media.session.MediaController;
@@ -39,9 +40,8 @@ interface ISessionController {
             String command, in Bundle args, in ResultReceiver cb);
     boolean sendMediaButton(String packageName, in ControllerCallbackLink caller,
             boolean asSystemService, in KeyEvent mediaButton);
-    void registerCallbackListener(String packageName, in ControllerCallbackLink cb);
-    void unregisterCallbackListener(in ControllerCallbackLink cb);
-    boolean isTransportControlEnabled();
+    void registerCallback(String packageName, in ControllerCallbackLink cb);
+    void unregisterCallback(in ControllerCallbackLink cb);
     String getPackageName();
     String getTag();
     PendingIntent getLaunchPendingIntent();
@@ -81,7 +81,7 @@ interface ISessionController {
             String action, in Bundle args);
     MediaMetadata getMetadata();
     PlaybackState getPlaybackState();
-    List<MediaSession.QueueItem> getQueue();
+    MediaParceledListSlice getQueue();
     CharSequence getQueueTitle();
     Bundle getExtras();
     int getRatingType();

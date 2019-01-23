@@ -163,13 +163,16 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
-     * If set to true, the view system will switch from using rectangles retrieved from window to
+     * If set to 2, the view system will switch from using rectangles retrieved from window to
      * dispatch to the view hierarchy to using {@link InsetsController}, that derives the insets
      * directly from the full configuration, enabling richer information about the insets state, as
      * well as new APIs to control it frame-by-frame, and synchronize animations with it.
      * <p>
-     * Only switch this to true once the new insets system is productionized and the old APIs are
+     * Only set this to 2 once the new insets system is productionized and the old APIs are
      * fully migrated over.
+     * <p>
+     * If set to 1, this will switch to a mode where we only use the new approach for IME, but not
+     * for the status/navigation bar.
      */
     private static final String USE_NEW_INSETS_PROPERTY = "persist.wm.new_insets";
 
@@ -177,8 +180,26 @@ public final class ViewRootImpl implements ViewParent,
      * @see #USE_NEW_INSETS_PROPERTY
      * @hide
      */
-    public static final boolean USE_NEW_INSETS =
-            SystemProperties.getBoolean(USE_NEW_INSETS_PROPERTY, false);
+    public static final int sNewInsetsMode =
+            SystemProperties.getInt(USE_NEW_INSETS_PROPERTY, 0);
+
+    /**
+     * @see #USE_NEW_INSETS_PROPERTY
+     * @hide
+     */
+    public static final int NEW_INSETS_MODE_NONE = 0;
+
+    /**
+     * @see #USE_NEW_INSETS_PROPERTY
+     * @hide
+     */
+    public static final int NEW_INSETS_MODE_IME = 1;
+
+    /**
+     * @see #USE_NEW_INSETS_PROPERTY
+     * @hide
+     */
+    public static final int NEW_INSETS_MODE_FULL = 2;
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -1367,7 +1388,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void notifyInsetsChanged() {
-        if (!USE_NEW_INSETS) {
+        if (sNewInsetsMode == NEW_INSETS_MODE_NONE) {
             return;
         }
         mApplyInsetsRequested = true;
@@ -1855,10 +1876,11 @@ public final class ViewRootImpl implements ViewParent,
             }
             contentInsets = ensureInsetsNonNegative(contentInsets, "content");
             stableInsets = ensureInsetsNonNegative(stableInsets, "stable");
-            if (USE_NEW_INSETS) {
+            if (sNewInsetsMode != NEW_INSETS_MODE_NONE) {
                 mLastWindowInsets = mInsetsController.calculateInsets(
                         mContext.getResources().getConfiguration().isScreenRound(),
-                        mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
+                        mAttachInfo.mAlwaysConsumeNavBar, displayCutout,
+                        contentInsets, stableInsets);
             } else {
                 mLastWindowInsets = new WindowInsets(contentInsets, stableInsets,
                         mContext.getResources().getConfiguration().isScreenRound(),

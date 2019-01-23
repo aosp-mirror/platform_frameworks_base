@@ -100,12 +100,27 @@ public:
             int srcStride, int x, int y, int width, int height,
             SkBitmap* dstBitmap);
 
-    static skcms_TransferFunction getNativeTransferParameters(JNIEnv* env, jobject transferParams);
-    static skcms_Matrix3x3 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50);
-    static sk_sp<SkColorSpace> getNativeColorSpace(JNIEnv* env, jobject colorSpace);
+    /**
+     * Convert the native SkColorSpace retrieved from ColorSpace.Rgb.getNativeInstance().
+     *
+     * This will never throw an Exception. If the ColorSpace is one that Skia cannot
+     * use, ColorSpace.Rgb.getNativeInstance() would have thrown an Exception. It may,
+     * however, be nullptr, which may be acceptable.
+     */
+    static sk_sp<SkColorSpace> getNativeColorSpace(jlong colorSpaceHandle);
 
     static jobject getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
             SkColorType decodeColorType);
+
+    /**
+     * Convert from a Java @ColorLong to an SkColor4f that Skia can use directly.
+     *
+     * This ignores the encoded ColorSpace, besides checking to see if it is sRGB,
+     * which is encoded differently. The color space should be passed down separately
+     * via ColorSpace#getNativeInstance(), and converted with getNativeColorSpace(),
+     * above.
+     */
+    static SkColor4f convertColorLong(jlong color);
 };
 
 class HeapAllocator : public SkBRDAllocator {

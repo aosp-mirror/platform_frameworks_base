@@ -161,8 +161,9 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private Insets getInsetsFromState(InsetsState state, Rect frame,
             @Nullable @InsetSide SparseIntArray typeSideMap) {
         return state.calculateInsets(frame, false /* isScreenRound */,
-                false /* alwaysConsumerNavBar */, null /* displayCutout */, typeSideMap)
-                .getInsets(mTypes);
+                false /* alwaysConsumerNavBar */, null /* displayCutout */,
+                null /* legacyContentInsets */, null /* legacyStableInsets */, typeSideMap)
+               .getInsets(mTypes);
     }
 
     private Insets sanitize(Insets insets) {

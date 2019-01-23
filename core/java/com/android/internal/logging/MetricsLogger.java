@@ -25,7 +25,13 @@ import android.view.View;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
- * Log all the things.
+ * Writes sysui_multi_event records to the system event log.
+ *
+ * Prefer the methods write(LogMaker), or count() or histogram(). Replace legacy methods with
+ * their current equivalents when the opportunity arises.
+ *
+ * This class is a lightweight dependency barrier - it is cheap and easy to construct.
+ * Logging is also cheap, so it is not normally necessary to move logging off of the UI thread.
  *
  * @hide
  */
@@ -52,6 +58,7 @@ public class MetricsLogger {
     public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;
     public static final int LOGTAG = EventLogTags.SYSUI_MULTI_ACTION;
 
+    /** Write an event log record, consisting of content.serialize(). */
     @UnsupportedAppUsage
     public void write(LogMaker content) {
         if (content.getType() == MetricsEvent.TYPE_UNKNOWN) {
@@ -60,128 +67,145 @@ public class MetricsLogger {
         saveLog(content);
     }
 
+    /** Add an integer value to the monotonically increasing counter with the given name. */
+    public void count(String name, int value) {
+        saveLog(new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
+                .setCounterName(name)
+                .setCounterValue(value));
+    }
+
+    /** Increment the bucket with the integer label on the histogram with the given name. */
+    public void histogram(String name, int bucket) {
+        // see LogHistogram in system/core/libmetricslogger/metrics_logger.cpp
+        saveLog(new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
+                .setCounterName(name)
+                .setCounterBucket(bucket)
+                .setCounterValue(1));
+    }
+
+    /* Legacy logging methods follow.  These are all simple shorthands and can be replaced
+     * with an equivalent write(). */
+
+    /** Logs an OPEN event on the category.
+     *  Equivalent to write(new LogMaker(category).setType(MetricsEvent.TYPE_OPEN)) */
     public void visible(int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");
         }
-        EventLogTags.writeSysuiViewVisibility(category, 100);
         saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_OPEN));
     }
 
+    /** Logs a CLOSE event on the category.
+     *  Equivalent to write(new LogMaker(category).setType(MetricsEvent.TYPE_CLOSE)) */
     public void hidden(int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");
         }
-        EventLogTags.writeSysuiViewVisibility(category, 0);
         saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_CLOSE));
     }
 
-    public void visibility(int category, boolean visibile)
+    /** Logs an OPEN or CLOSE event on the category, depending on visible.
+     *  Equivalent to write(new LogMaker(category)
+     *                     .setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)) */
+    public void visibility(int category, boolean visible)
             throws IllegalArgumentException {
-        if (visibile) {
+        if (visible) {
             visible(category);
         } else {
             hidden(category);
         }
     }
 
+    /** Logs an OPEN or CLOSE event on the category, depending on vis.
+     *  Equivalent to write(new LogMaker(category)
+                           .setType(vis == View.VISIBLE ?
+                                    MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)) */
     public void visibility(int category, int vis)
             throws IllegalArgumentException {
         visibility(category, vis == View.VISIBLE);
     }
 
+    /** Logs an ACTION event on the category.
+     * Equivalent to write(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION)) */
     public void action(int category) {
-        EventLogTags.writeSysuiAction(category, "");
         saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION));
     }
 
+    /** Logs an ACTION event on the category.
+     * Equivalent to write(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION)
+                           .setSubtype(value) */
     public void action(int category, int value) {
-        EventLogTags.writeSysuiAction(category, Integer.toString(value));
         saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION).setSubtype(value));
     }
 
+    /** Logs an ACTION event on the category.
+     * Equivalent to write(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION)
+                           .setSubtype(value ? 1 : 0) */
     public void action(int category, boolean value) {
-        EventLogTags.writeSysuiAction(category, Boolean.toString(value));
         saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION).setSubtype(value ? 1 : 0));
     }
 
+    /** Logs an ACTION event on the category.
+     * Equivalent to write(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION)
+                           .setPackageName(value ? 1 : 0) */
     public void action(int category, String pkg) {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");
         }
-        EventLogTags.writeSysuiAction(category, pkg);
         saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION).setPackageName(pkg));
     }
 
-    /** Add an integer value to the monotonically increasing counter with the given name. */
-    public void count(String name, int value) {
-        EventLogTags.writeSysuiCount(name, value);
-        saveLog(new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
-                    .setCounterName(name)
-                    .setCounterValue(value));
-    }
-
-    /** Increment the bucket with the integer label on the histogram with the given name. */
-    public void histogram(String name, int bucket) {
-        // see LogHistogram in system/core/libmetricslogger/metrics_logger.cpp
-        EventLogTags.writeSysuiHistogram(name, bucket);
-        saveLog(new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
-                    .setCounterName(name)
-                    .setCounterBucket(bucket)
-                    .setCounterValue(1));
-    }
-
-    /** @deprecated use {@link #visible(int)} */
+    /** @deprecated because untestable; use {@link #visible(int)} */
     @Deprecated
     public static void visible(Context context, int category) throws IllegalArgumentException {
         getLogger().visible(category);
     }
 
-    /** @deprecated use {@link #hidden(int)} */
+    /** @deprecated because untestable; use {@link #hidden(int)} */
     @Deprecated
     public static void hidden(Context context, int category) throws IllegalArgumentException {
         getLogger().hidden(category);
     }
 
-    /** @deprecated use {@link #visibility(int, boolean)} */
+    /** @deprecated because untestable; use {@link #visibility(int, boolean)} */
     @Deprecated
     public static void visibility(Context context, int category, boolean visibile)
             throws IllegalArgumentException {
         getLogger().visibility(category, visibile);
     }
 
-    /** @deprecated use {@link #visibility(int, int)} */
+    /** @deprecated because untestable; use {@link #visibility(int, int)} */
     @Deprecated
     public static void visibility(Context context, int category, int vis)
             throws IllegalArgumentException {
         visibility(context, category, vis == View.VISIBLE);
     }
 
-    /** @deprecated use {@link #action(int)} */
+    /** @deprecated because untestable; use {@link #action(int)} */
     @Deprecated
     public static void action(Context context, int category) {
         getLogger().action(category);
     }
 
-    /** @deprecated use {@link #action(int, int)} */
+    /** @deprecated because untestable; use {@link #action(int, int)} */
     @Deprecated
     public static void action(Context context, int category, int value) {
         getLogger().action(category, value);
     }
 
-    /** @deprecated use {@link #action(int, boolean)} */
+    /** @deprecated because untestable; use {@link #action(int, boolean)} */
     @Deprecated
     public static void action(Context context, int category, boolean value) {
         getLogger().action(category, value);
     }
 
-    /** @deprecated use {@link #write(LogMaker)} */
+    /** @deprecated because untestable; use {@link #write(LogMaker)} */
     @Deprecated
     public static void action(LogMaker content) {
         getLogger().write(content);
     }
 
-    /** @deprecated use {@link #action(int, String)} */
+    /** @deprecated because untestable; use {@link #action(int, String)} */
     @Deprecated
     public static void action(Context context, int category, String pkg) {
         getLogger().action(category, pkg);
@@ -189,7 +213,7 @@ public class MetricsLogger {
 
     /**
      * Add an integer value to the monotonically increasing counter with the given name.
-     * @deprecated use {@link #count(String, int)}
+     * @deprecated because untestable; use {@link #count(String, int)}
      */
     @Deprecated
     public static void count(Context context, String name, int value) {

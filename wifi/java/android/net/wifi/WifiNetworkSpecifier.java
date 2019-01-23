@@ -25,6 +25,7 @@ import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import java.util.Objects;
@@ -63,18 +64,25 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
      */
     public final int requestorUid;
 
+    /**
+     * The package name of the app initializing this network specifier.
+     */
+    public final String requestorPackageName;
+
     public WifiNetworkSpecifier(@NonNull PatternMatcher ssidPatternMatcher,
                  @NonNull Pair<MacAddress, MacAddress> bssidPatternMatcher,
                  @NonNull WifiConfiguration wifiConfiguration,
-                 int requestorUid) {
+                 int requestorUid, @NonNull String requestorPackageName) {
         checkNotNull(ssidPatternMatcher);
         checkNotNull(bssidPatternMatcher);
         checkNotNull(wifiConfiguration);
+        checkNotNull(requestorPackageName);
 
         this.ssidPatternMatcher = ssidPatternMatcher;
         this.bssidPatternMatcher = bssidPatternMatcher;
         this.wifiConfiguration = wifiConfiguration;
         this.requestorUid = requestorUid;
+        this.requestorPackageName = requestorPackageName;
     }
 
     public static final Creator<WifiNetworkSpecifier> CREATOR =
@@ -88,8 +96,9 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                             Pair.create(baseAddress, mask);
                     WifiConfiguration wifiConfiguration = in.readParcelable(null);
                     int requestorUid = in.readInt();
+                    String requestorPackageName = in.readString();
                     return new WifiNetworkSpecifier(ssidPatternMatcher, bssidPatternMatcher,
-                            wifiConfiguration, requestorUid);
+                            wifiConfiguration, requestorUid, requestorPackageName);
                 }
 
                 @Override
@@ -110,6 +119,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         dest.writeParcelable(bssidPatternMatcher.second, flags);
         dest.writeParcelable(wifiConfiguration, flags);
         dest.writeInt(requestorUid);
+        dest.writeString(requestorPackageName);
     }
 
     @Override
@@ -136,7 +146,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                 ssidPatternMatcher.getType(),
                 bssidPatternMatcher,
                 wifiConfiguration.allowedKeyManagement,
-                requestorUid);
+                requestorUid, requestorPackageName);
     }
 
     @Override
@@ -156,7 +166,8 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                     lhs.bssidPatternMatcher)
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
                     lhs.wifiConfiguration.allowedKeyManagement)
-                && requestorUid == lhs.requestorUid;
+                && requestorUid == lhs.requestorUid
+                && TextUtils.equals(requestorPackageName, lhs.requestorPackageName);
     }
 
     @Override
@@ -168,6 +179,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                 .append(", SSID=").append(wifiConfiguration.SSID)
                 .append(", BSSID=").append(wifiConfiguration.BSSID)
                 .append(", requestorUid=").append(requestorUid)
+                .append(", requestorPackageName=").append(requestorPackageName)
                 .append("]")
                 .toString();
     }

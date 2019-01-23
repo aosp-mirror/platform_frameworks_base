@@ -8494,6 +8494,18 @@ public class PackageParser {
     public static PackageInfo generatePackageInfoFromApex(File apexFile, boolean collectCerts)
             throws PackageParserException {
         PackageInfo pi = new PackageInfo();
+
+        // TODO(b/123086053) properly fill in the ApplicationInfo with data from AndroidManifest
+        // Add ApplicationInfo to the PackageInfo.
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.sourceDir = apexFile.getPath();
+        ai.flags = ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_INSTALLED;
+        ai.enabled = true;
+        ai.targetSdkVersion = 28;
+        ai.targetSandboxVersion = 0;
+        pi.applicationInfo = ai;
+
+
         // TODO(b/123052859): We should avoid these repeated calls to parseApkLite each time
         // we want to generate information for APEX modules.
         PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile,

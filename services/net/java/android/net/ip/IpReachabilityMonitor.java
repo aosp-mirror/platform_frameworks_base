@@ -16,11 +16,13 @@
 
 package android.net.ip;
 
+import static android.net.metrics.IpReachabilityEvent.NUD_FAILED;
+import static android.net.metrics.IpReachabilityEvent.NUD_FAILED_ORGANIC;
+import static android.net.metrics.IpReachabilityEvent.PROVISIONING_LOST;
+import static android.net.metrics.IpReachabilityEvent.PROVISIONING_LOST_ORGANIC;
+
 import android.content.Context;
-import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.LinkProperties.ProvisioningChange;
-import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.ip.IpNeighborMonitor.NeighborEvent;
 import android.net.metrics.IpConnectivityLog;
@@ -33,28 +35,19 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
-import android.system.ErrnoException;
-import android.system.OsConstants;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.DumpUtils.Dump;
 
-import java.io.InterruptedIOException;
 import java.io.PrintWriter;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -314,10 +307,11 @@ public class IpReachabilityMonitor {
             }
         }
 
-        final ProvisioningChange delta = LinkProperties.compareProvisioning(
-                mLinkProperties, whatIfLp);
+        final boolean lostProvisioning =
+                (mLinkProperties.isIPv4Provisioned() && !whatIfLp.isIPv4Provisioned())
+                || (mLinkProperties.isIPv6Provisioned() && !whatIfLp.isIPv6Provisioned());
 
-        if (delta == ProvisioningChange.LOST_PROVISIONING) {
+        if (lostProvisioning) {
             final String logMsg = "FAILURE: LOST_PROVISIONING, " + event;
             Log.w(TAG, logMsg);
             if (mCallback != null) {
@@ -326,7 +320,7 @@ public class IpReachabilityMonitor {
                 mCallback.notifyLost(ip, logMsg);
             }
         }
-        logNudFailed(delta);
+        logNudFailed(lostProvisioning);
     }
 
     private boolean avoidingBadLinks() {
@@ -376,11 +370,21 @@ public class IpReachabilityMonitor {
         mMetricsLog.log(mInterfaceParams.name, new IpReachabilityEvent(eventType));
     }
 
-    private void logNudFailed(ProvisioningChange delta) {
+    private void logNudFailed(boolean lostProvisioning) {
         long duration = SystemClock.elapsedRealtime() - mLastProbeTimeMs;
         boolean isFromProbe = (duration < getProbeWakeLockDuration());
-        boolean isProvisioningLost = (delta == ProvisioningChange.LOST_PROVISIONING);
-        int eventType = IpReachabilityEvent.nudFailureEventType(isFromProbe, isProvisioningLost);
+        int eventType = nudFailureEventType(isFromProbe, lostProvisioning);
         mMetricsLog.log(mInterfaceParams.name, new IpReachabilityEvent(eventType));
+    }
+
+    /**
+     * Returns the NUD failure event type code corresponding to the given conditions.
+     */
+    private static int nudFailureEventType(boolean isFromProbe, boolean isProvisioningLost) {
+        if (isFromProbe) {
+            return isProvisioningLost ? PROVISIONING_LOST : NUD_FAILED;
+        } else {
+            return isProvisioningLost ? PROVISIONING_LOST_ORGANIC : NUD_FAILED_ORGANIC;
+        }
     }
 }

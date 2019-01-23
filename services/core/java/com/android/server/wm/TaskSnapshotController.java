@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.TaskSnapshotPersister.DISABLE_FULL_SIZED_BITMAPS;
-import static com.android.server.wm.TaskSnapshotPersister.REDUCED_SCALE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -90,9 +89,8 @@ class TaskSnapshotController {
     private final WindowManagerService mService;
 
     private final TaskSnapshotCache mCache;
-    private final TaskSnapshotPersister mPersister = new TaskSnapshotPersister(
-            Environment::getDataSystemCeDirectory);
-    private final TaskSnapshotLoader mLoader = new TaskSnapshotLoader(mPersister);
+    private final TaskSnapshotPersister mPersister;
+    private final TaskSnapshotLoader mLoader;
     private final ArraySet<Task> mSkipClosingAppSnapshotTasks = new ArraySet<>();
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
     private final Handler mHandler = new Handler();
@@ -116,6 +114,8 @@ class TaskSnapshotController {
 
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
+        mPersister = new TaskSnapshotPersister(mService, Environment::getDataSystemCeDirectory);
+        mLoader = new TaskSnapshotLoader(mPersister);
         mCache = new TaskSnapshotCache(mService, mLoader);
         mIsRunningOnTv = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
@@ -270,7 +270,7 @@ class TaskSnapshotController {
         }
 
         final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
-        final float scaleFraction = isLowRamDevice ? REDUCED_SCALE : 1f;
+        final float scaleFraction = isLowRamDevice ? mPersister.getReducedScale() : 1f;
         task.getBounds(mTmpRect);
         mTmpRect.offsetTo(0, 0);
 

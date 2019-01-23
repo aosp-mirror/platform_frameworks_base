@@ -479,13 +479,9 @@ public class EditorInfo implements InputType, Parcelable {
      * If not {@code null}, this editor needs to talk to IMEs that run for the specified user, no
      * matter what user ID the calling process has.
      *
-     * <p>Note: This field is silently ignored when:</p>
-     * <ul>
-     *     <li>{@link android.view.inputmethod.InputMethodSystemProperty#PER_PROFILE_IME_ENABLED} is
-     *     {@code false}.</li>
-     *     <li>{@link android.view.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED}
-     *     is {@code true}.</li>
-     * </ul>
+     * <p>Note: This field will be silently ignored when
+     * {@link android.view.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED} is
+     * {@code true}.</p>
      *
      * <p>Note also that pseudo handles such as {@link UserHandle#ALL} are not supported.</p>
      *

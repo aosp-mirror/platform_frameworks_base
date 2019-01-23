@@ -53,6 +53,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 100;
     public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 5000;
+    private static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
 
     private static class OverflowBinder extends Binder {}
 
@@ -347,7 +348,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         callStat.callingUid = uid;
         callStat.recordedCallCount = 1;
         callStat.callCount = 1;
-        callStat.methodName = "__DEBUG_" + variableName;
+        callStat.methodName = DEBUG_ENTRY_PREFIX + variableName;
         callStat.latencyMicros = value;
         return callStat;
     }
@@ -398,6 +399,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
         final List<ExportedCallStat> exportedCallStats = getExportedCallStats();
         exportedCallStats.sort(BinderCallsStats::compareByCpuDesc);
         for (ExportedCallStat e : exportedCallStats) {
+            if (e.methodName.startsWith(DEBUG_ENTRY_PREFIX)) {
+                // Do not dump debug entries.
+                continue;
+            }
             sb.setLength(0);
             sb.append("    ")
                     .append(packageMap.mapUid(e.callingUid))

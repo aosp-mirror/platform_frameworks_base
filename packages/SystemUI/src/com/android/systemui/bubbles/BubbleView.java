@@ -298,7 +298,7 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
 
     }
 
-    public void setAppOverlayIntent(PendingIntent intent) {
+    public void setBubbleIntent(PendingIntent intent) {
         mAppOverlayIntent = intent;
     }
 }

@@ -705,6 +705,9 @@
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
 
+    <!-- Flag indicating whether we should enable the adaptive sleep.-->
+    <bool name="config_adaptive_sleep_available">false</bool>
+
     <!-- Flag indicating whether we should enable smart battery. -->
     <bool name="config_smart_battery_available">false</bool>
 
@@ -930,6 +933,10 @@
     <!-- Boolean indicating whether the HWC setColorTransform function can be performed efficiently
          in hardware. -->
     <bool name="config_setColorTransformAccelerated">false</bool>
+
+    <!-- Boolean indicating whether the HWC setColorTransform function can be performed efficiently
+         in hardware for individual layers. -->
+    <bool name="config_setColorTransformAcceleratedPerLayer">false</bool>
 
     <!-- Control whether Night display is available. This should only be enabled on devices
          that have a HWC implementation that can apply the matrix passed to setColorTransform
@@ -1742,6 +1749,19 @@
     <!-- Package name providing geofence API support. Used only when
          config_enableGeofenceOverlay is false. -->
     <string name="config_geofenceProviderPackageName" translatable="false">@null</string>
+
+    <!-- Whether to enable Hardware Activity-Recognition overlay which allows Hardware
+         Activity-Recognition to be replaced by an app at run-time. When disabled, only the
+         config_activityRecognitionHardwarePackageName package will be searched for
+         its implementation, otherwise packages whose signature matches the
+         signatures of config_locationProviderPackageNames will be searched, and
+         the service with the highest version number will be picked. Anyone who
+         wants to disable the overlay mechanism can set it to false.
+         -->
+    <bool name="config_enableActivityRecognitionHardwareOverlay" translatable="false">true</bool>
+    <!-- Package name providing Hardware Activity-Recognition API support. Used only when
+         config_enableActivityRecognitionHardwareOverlay is false. -->
+    <string name="config_activityRecognitionHardwarePackageName" translatable="false">@null</string>
 
     <!-- Package name(s) containing location provider support.
          These packages can contain services implementing location providers,
@@ -3728,4 +3748,7 @@
 
     <!-- Enable Zram writeback feature to allow unused pages in zram be written to flash. -->
     <bool name="config_zramWriteback">false</bool>
+
+    <!-- Whether cbrs is supported on the device or not -->
+    <bool translatable="false" name="config_cbrs_supported">false</bool>
 </resources>
