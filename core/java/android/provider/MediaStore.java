@@ -89,9 +89,19 @@ public final class MediaStore {
     /** A content:// style uri to the authority for the media provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
-    /** {@hide} */
+    /**
+     * Volume name used for content on "internal" storage of device. This
+     * volume contains media distributed with the device, such as built-in
+     * ringtones and wallpapers.
+     */
     public static final String VOLUME_INTERNAL = "internal";
-    /** {@hide} */
+
+    /**
+     * Volume name used for content on "external" storage of device. This only
+     * includes media on the primary shared storage device; the contents of any
+     * secondary storage devices can be obtained using
+     * {@link #getAllVolumeNames(Context)}.
+     */
     public static final String VOLUME_EXTERNAL = "external";
 
     /**
@@ -1566,7 +1576,13 @@ public final class MediaStore {
         /**
          * This class provides utility methods to obtain thumbnails for various
          * {@link Images} items.
+         *
+         * @deprecated Callers should migrate to using
+         *             {@link ContentResolver#loadThumbnail}, since it offers
+         *             richer control over requested thumbnail sizes and
+         *             cancellation behavior.
          */
+        @Deprecated
         public static class Thumbnails implements BaseColumns {
             public static final Cursor query(ContentResolver cr, Uri uri, String[] projection) {
                 return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER);
@@ -2743,7 +2759,13 @@ public final class MediaStore {
         /**
          * This class provides utility methods to obtain thumbnails for various
          * {@link Video} items.
+         *
+         * @deprecated Callers should migrate to using
+         *             {@link ContentResolver#loadThumbnail}, since it offers
+         *             richer control over requested thumbnail sizes and
+         *             cancellation behavior.
          */
+        @Deprecated
         public static class Thumbnails implements BaseColumns {
             /**
              * Cancel any outstanding {@link #getThumbnail} requests, causing
