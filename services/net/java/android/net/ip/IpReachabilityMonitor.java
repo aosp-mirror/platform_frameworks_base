@@ -22,6 +22,7 @@ import static android.net.metrics.IpReachabilityEvent.PROVISIONING_LOST;
 import static android.net.metrics.IpReachabilityEvent.PROVISIONING_LOST_ORGANIC;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.RouteInfo;
 import android.net.ip.IpNeighborMonitor.NeighborEvent;
@@ -29,7 +30,6 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.netlink.StructNdMsg;
 import android.net.util.InterfaceParams;
-import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -165,7 +165,8 @@ public class IpReachabilityMonitor {
     private final SharedLog mLog;
     private final Callback mCallback;
     private final Dependencies mDependencies;
-    private final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
+    private final boolean mUsingMultinetworkPolicyTracker;
+    private final ConnectivityManager mCm;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
     private LinkProperties mLinkProperties = new LinkProperties();
     private Map<InetAddress, NeighborEvent> mNeighborWatchList = new HashMap<>();
@@ -174,19 +175,21 @@ public class IpReachabilityMonitor {
 
     public IpReachabilityMonitor(
             Context context, InterfaceParams ifParams, Handler h, SharedLog log, Callback callback,
-            MultinetworkPolicyTracker tracker) {
-        this(ifParams, h, log, callback, tracker, Dependencies.makeDefault(context, ifParams.name));
+            boolean usingMultinetworkPolicyTracker) {
+        this(context, ifParams, h, log, callback, usingMultinetworkPolicyTracker,
+                Dependencies.makeDefault(context, ifParams.name));
     }
 
     @VisibleForTesting
-    IpReachabilityMonitor(InterfaceParams ifParams, Handler h, SharedLog log, Callback callback,
-            MultinetworkPolicyTracker tracker, Dependencies dependencies) {
+    IpReachabilityMonitor(Context context, InterfaceParams ifParams, Handler h, SharedLog log,
+            Callback callback, boolean usingMultinetworkPolicyTracker, Dependencies dependencies) {
         if (ifParams == null) throw new IllegalArgumentException("null InterfaceParams");
 
         mInterfaceParams = ifParams;
         mLog = log.forSubComponent(TAG);
         mCallback = callback;
-        mMultinetworkPolicyTracker = tracker;
+        mUsingMultinetworkPolicyTracker = usingMultinetworkPolicyTracker;
+        mCm = context.getSystemService(ConnectivityManager.class);
         mDependencies = dependencies;
 
         mIpNeighborMonitor = new IpNeighborMonitor(h, mLog,
@@ -324,7 +327,7 @@ public class IpReachabilityMonitor {
     }
 
     private boolean avoidingBadLinks() {
-        return (mMultinetworkPolicyTracker == null) || mMultinetworkPolicyTracker.getAvoidBadWifi();
+        return !mUsingMultinetworkPolicyTracker || mCm.getAvoidBadWifi();
     }
 
     public void probeAll() {

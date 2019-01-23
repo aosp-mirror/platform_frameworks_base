@@ -3699,6 +3699,19 @@ public class ConnectivityManager {
     }
 
     /**
+     * Determine whether the device is configured to avoid bad wifi.
+     * @hide
+     */
+    @SystemApi
+    public boolean getAvoidBadWifi() {
+        try {
+            return mService.getAvoidBadWifi();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * It is acceptable to briefly use multipath data to provide seamless connectivity for
      * time-sensitive user-facing operations when the system default network is temporarily
      * unresponsive. The amount of data should be limited (less than one megabyte for every call to
