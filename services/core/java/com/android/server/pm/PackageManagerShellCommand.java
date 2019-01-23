@@ -40,10 +40,10 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionParams;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
@@ -634,9 +634,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 if (showVersionCode) {
                     pw.print(" versionCode:");
                     if (info.applicationInfo != null) {
-                        pw.print(info.applicationInfo.versionCode);
+                        pw.print(info.applicationInfo.longVersionCode);
                     } else {
-                        pw.print(info.versionCode);
+                        pw.print(info.getLongVersionCode());
                     }
                 }
                 if (listInstaller && !isApex) {
