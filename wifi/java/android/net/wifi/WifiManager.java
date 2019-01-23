@@ -16,7 +16,7 @@
 
 package android.net.wifi;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.READ_WIFI_CREDENTIAL;
 
@@ -950,8 +950,7 @@ public class WifiManager {
      * which was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag
      * set.
      * <p>
-     * Note: The broadcast is sent to the app only if it holds either one of
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * Note: The broadcast is sent to the app only if it holds
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
      *
      * @see #EXTRA_NETWORK_SUGGESTION
@@ -1183,7 +1182,7 @@ public class WifiManager {
      * containing configurations which they created.
      */
     @Deprecated
-    @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_WIFI_STATE})
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE})
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -1199,7 +1198,7 @@ public class WifiManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_WIFI_STATE, READ_WIFI_CREDENTIAL})
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE, READ_WIFI_CREDENTIAL})
     public List<WifiConfiguration> getPrivilegedConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -1656,8 +1655,7 @@ public class WifiManager {
      * When the device decides to connect to one of the provided network suggestions, platform sends
      * a directed broadcast {@link #ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION} to the app if
      * the network was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()}
-     * flag set and the app holds either one of
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * flag set and the app holds
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
      *<p>
      * NOTE:
@@ -2288,7 +2286,6 @@ public class WifiManager {
     /**
      * Return the results of the latest access point scan.
      * @return the list of access points found in the most recent scan. An app must hold
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
      * in order to get valid results.
      */
@@ -2599,7 +2596,7 @@ public class WifiManager {
      * <p>
      * Applications need to have the following permissions to start LocalOnlyHotspot: {@link
      * android.Manifest.permission#CHANGE_WIFI_STATE} and {@link
-     * android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION}.  Callers without
+     * android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}.  Callers without
      * the permissions will trigger a {@link java.lang.SecurityException}.
      * <p>
      * @param callback LocalOnlyHotspotCallback for the application to receive updates about
@@ -2682,7 +2679,7 @@ public class WifiManager {
      * {@link LocalOnlyHotspotObserver#onStopped()} callbacks.
      * <p>
      * Applications should have the
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION}
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}
      * permission.  Callers without the permission will trigger a
      * {@link java.lang.SecurityException}.
      * <p>

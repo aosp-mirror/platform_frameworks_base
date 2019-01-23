@@ -231,7 +231,7 @@ public class WifiAwareManager {
      * <p>
      * This version of the API attaches a listener to receive the MAC address of the Aware interface
      * on startup and whenever it is updated (it is randomized at regular intervals for privacy).
-     * The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * The application must have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission to execute this attach request. Otherwise, use the
      * {@link #attach(AttachCallback, Handler)} version. Note that aside from permission
      * requirements this listener will wake up the host at regular intervals causing higher power

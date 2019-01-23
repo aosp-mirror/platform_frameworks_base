@@ -133,7 +133,7 @@ public class WifiAwareSession implements AutoCloseable {
      *      An application must use the {@link DiscoverySession#close()} to
      *      terminate the publish discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
-     * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * <p>The application must have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission to start a publish discovery session.
      *
      * @param publishConfig The {@link PublishConfig} specifying the
@@ -179,7 +179,7 @@ public class WifiAwareSession implements AutoCloseable {
      *      An application must use the {@link DiscoverySession#close()} to
      *      terminate the subscribe discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
-     * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * <p>The application must have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission to start a subscribe discovery session.
      *
      * @param subscribeConfig The {@link SubscribeConfig} specifying the
