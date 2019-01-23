@@ -3748,4 +3748,7 @@
 
     <!-- Enable Zram writeback feature to allow unused pages in zram be written to flash. -->
     <bool name="config_zramWriteback">false</bool>
+
+    <!-- Whether cbrs is supported on the device or not -->
+    <bool translatable="false" name="config_cbrs_supported">false</bool>
 </resources>

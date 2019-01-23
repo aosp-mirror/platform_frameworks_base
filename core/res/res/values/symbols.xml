@@ -3544,4 +3544,7 @@
   <java-symbol type="bool" name="config_silenceSensorAvailable" />
 
   <java-symbol type="bool" name="config_zramWriteback" />
+
+  <!-- For CBRS -->
+  <java-symbol type="bool" name="config_cbrs_supported" />
 </resources>
