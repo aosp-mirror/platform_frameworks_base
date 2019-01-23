@@ -103,7 +103,7 @@ public class AppZygote {
         String abi = mAppInfo.primaryCpuAbi != null ? mAppInfo.primaryCpuAbi :
                 Build.SUPPORTED_ABIS[0];
         try {
-            mZygote = Process.zygoteProcess.startChildZygote(
+            mZygote = Process.ZYGOTE_PROCESS.startChildZygote(
                     "com.android.internal.os.AppZygoteInit",
                     mAppInfo.processName + "_zygote",
                     mZygoteUid,
