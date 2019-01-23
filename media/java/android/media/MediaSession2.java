@@ -90,6 +90,8 @@ public class MediaSession2 implements AutoCloseable {
     private boolean mClosed;
     //@GuardedBy("mLock")
     private boolean mPlaybackActive;
+    //@GuardedBy("mLock")
+    private ForegroundServiceEventCallback mForegroundServiceEventCallback;
 
     MediaSession2(@NonNull Context context, @NonNull String id, PendingIntent sessionActivity,
             @NonNull Executor callbackExecutor, @NonNull SessionCallback callback) {
@@ -119,6 +121,7 @@ public class MediaSession2 implements AutoCloseable {
     public void close() {
         try {
             List<ControllerInfo> controllerInfos;
+            ForegroundServiceEventCallback callback;
             synchronized (mLock) {
                 if (mClosed) {
                     return;
@@ -126,10 +129,14 @@ public class MediaSession2 implements AutoCloseable {
                 mClosed = true;
                 controllerInfos = getConnectedControllers();
                 mConnectedControllers.clear();
-                mCallback.onSessionClosed(this);
+                callback = mForegroundServiceEventCallback;
+                mForegroundServiceEventCallback = null;
             }
             synchronized (MediaSession2.class) {
                 SESSION_ID_LIST.remove(mSessionId);
+            }
+            if (callback != null) {
+                callback.onSessionClosed(this);
             }
             for (ControllerInfo info : controllerInfos) {
                 info.notifyDisconnected();
@@ -224,11 +231,16 @@ public class MediaSession2 implements AutoCloseable {
      * @param playbackActive {@code true} if the playback active, {@code false} otherwise.
      **/
     public void setPlaybackActive(boolean playbackActive) {
+        final ForegroundServiceEventCallback serviceCallback;
         synchronized (mLock) {
             if (mPlaybackActive == playbackActive) {
                 return;
             }
             mPlaybackActive = playbackActive;
+            serviceCallback = mForegroundServiceEventCallback;
+        }
+        if (serviceCallback != null) {
+            serviceCallback.onPlaybackActiveChanged(this, playbackActive);
         }
         List<ControllerInfo> controllerInfos = getConnectedControllers();
         for (ControllerInfo controller : controllerInfos) {
@@ -255,6 +267,18 @@ public class MediaSession2 implements AutoCloseable {
 
     SessionCallback getCallback() {
         return mCallback;
+    }
+
+    void setForegroundServiceEventCallback(ForegroundServiceEventCallback callback) {
+        synchronized (mLock) {
+            if (mForegroundServiceEventCallback == callback) {
+                return;
+            }
+            if (mForegroundServiceEventCallback != null && callback != null) {
+                throw new IllegalStateException("A session cannot be added to multiple services");
+            }
+            mForegroundServiceEventCallback = callback;
+        }
     }
 
     // Called by Session2Link.onConnect and MediaSession2Service.MediaSession2ServiceStub.connect
@@ -695,8 +719,6 @@ public class MediaSession2 implements AutoCloseable {
      * This API is not generally intended for third party application developers.
      */
     public abstract static class SessionCallback {
-        ForegroundServiceEventCallback mForegroundServiceEventCallback;
-
         /**
          * Called when a controller is created for this session. Return allowed commands for
          * controller. By default it returns {@code null}.
@@ -753,19 +775,10 @@ public class MediaSession2 implements AutoCloseable {
         public void onCommandResult(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull Object token,
                 @NonNull Session2Command command, @NonNull Session2Command.Result result) {}
+    }
 
-        final void onSessionClosed(MediaSession2 session) {
-            if (mForegroundServiceEventCallback != null) {
-                mForegroundServiceEventCallback.onSessionClosed(session);
-            }
-        }
-
-        void setForegroundServiceEventCallback(ForegroundServiceEventCallback callback) {
-            mForegroundServiceEventCallback = callback;
-        }
-
-        abstract static class ForegroundServiceEventCallback {
-            public void onSessionClosed(MediaSession2 session) {}
-        }
+    abstract static class ForegroundServiceEventCallback {
+        public void onPlaybackActiveChanged(MediaSession2 session, boolean playbackActive) {}
+        public void onSessionClosed(MediaSession2 session) {}
     }
 }

@@ -19,7 +19,10 @@ package android.media;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -27,8 +30,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.Log;
-
-import com.android.internal.annotations.GuardedBy;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -42,11 +43,7 @@ import java.util.Map;
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
- * @hide
  */
-// TODO: Unhide
-// TODO: Add onUpdateNotification(), and calls it to get Notification for startForegroundService()
-//       when a session's player state becomes playing.
 public abstract class MediaSession2Service extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -56,10 +53,29 @@ public abstract class MediaSession2Service extends Service {
     private static final String TAG = "MediaSession2Service";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private Map<String, MediaSession2> mSessions = new ArrayMap<>();
+    private final MediaSession2.ForegroundServiceEventCallback mForegroundServiceEventCallback =
+            new MediaSession2.ForegroundServiceEventCallback() {
+                @Override
+                public void onPlaybackActiveChanged(MediaSession2 session, boolean playbackActive) {
+                    MediaSession2Service.this.onPlaybackActiveChanged(session, playbackActive);
+                }
 
+                @Override
+                public void onSessionClosed(MediaSession2 session) {
+                    removeSession(session);
+                }
+            };
+
+    private final Object mLock = new Object();
+    //@GuardedBy("mLock")
+    private NotificationManager mNotificationManager;
+    //@GuardedBy("mLock")
+    private Intent mStartSelfIntent;
+    //@GuardedBy("mLock")
+    private Map<String, MediaSession2> mSessions = new ArrayMap<>();
+    //@GuardedBy("mLock")
+    private Map<MediaSession2, MediaNotification> mNotifications = new ArrayMap<>();
+    //@GuardedBy("mLock")
     private MediaSession2ServiceStub mStub;
 
     /**
@@ -72,7 +88,12 @@ public abstract class MediaSession2Service extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mStub = new MediaSession2ServiceStub(this);
+        synchronized (mLock) {
+            mStub = new MediaSession2ServiceStub(this);
+            mStartSelfIntent = new Intent(this, this.getClass());
+            mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
     }
 
     @CallSuper
@@ -80,16 +101,11 @@ public abstract class MediaSession2Service extends Service {
     @Nullable
     public IBinder onBind(@NonNull Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            return mStub;
+            synchronized (mLock) {
+                return mStub;
+            }
         }
         return null;
-    }
-
-    @CallSuper
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        // TODO: Dispatch media key events to the primary session.
-        return START_STICKY;
     }
 
     /**
@@ -104,10 +120,12 @@ public abstract class MediaSession2Service extends Service {
     public void onDestroy() {
         super.onDestroy();
         synchronized (mLock) {
-            for (MediaSession2 session : mSessions.values()) {
-                session.getCallback().setForegroundServiceEventCallback(null);
+            List<MediaSession2> sessions = getSessions();
+            for (MediaSession2 session : sessions) {
+                removeSession(session);
             }
             mSessions.clear();
+            mNotifications.clear();
         }
         mStub.close();
     }
@@ -144,6 +162,24 @@ public abstract class MediaSession2Service extends Service {
     public abstract MediaSession2 onGetPrimarySession();
 
     /**
+     * Called when notification UI needs update. Override this method to show or cancel your own
+     * notification UI.
+     * <p>
+     * This would be called on {@link MediaSession2}'s callback executor when playback state is
+     * changed.
+     * <p>
+     * With the notification returned here, the service becomes foreground service when the playback
+     * is started. Apps must request the permission
+     * {@link android.Manifest.permission#FOREGROUND_SERVICE} in order to use this API. It becomes
+     * background service after the playback is stopped.
+     *
+     * @param session a session that needs notification update.
+     * @return a {@link MediaNotification}. Can be {@code null}.
+     */
+    @Nullable
+    public abstract MediaNotification onUpdateNotification(@NonNull MediaSession2 session);
+
+    /**
      * Adds a session to this service.
      * <p>
      * Added session will be removed automatically when it's closed, or removed when
@@ -161,21 +197,15 @@ public abstract class MediaSession2Service extends Service {
         }
         synchronized (mLock) {
             MediaSession2 previousSession = mSessions.get(session.getSessionId());
-            if (previousSession != session) {
-                if (previousSession != null) {
+            if (previousSession != null) {
+                if (previousSession != session) {
                     Log.w(TAG, "Session ID should be unique, ID=" + session.getSessionId()
                             + ", previous=" + previousSession + ", session=" + session);
                 }
                 return;
             }
             mSessions.put(session.getSessionId(), session);
-            session.getCallback().setForegroundServiceEventCallback(
-                    new MediaSession2.SessionCallback.ForegroundServiceEventCallback() {
-                        @Override
-                        public void onSessionClosed(MediaSession2 session) {
-                            removeSession(session);
-                        }
-                    });
+            session.setForegroundServiceEventCallback(mForegroundServiceEventCallback);
         }
     }
 
@@ -189,8 +219,21 @@ public abstract class MediaSession2Service extends Service {
         if (session == null) {
             throw new IllegalArgumentException("session shouldn't be null");
         }
+        MediaNotification notification;
         synchronized (mLock) {
+            if (mSessions.get(session.getSessionId()) != session) {
+                // Session isn't added or removed already.
+                return;
+            }
             mSessions.remove(session.getSessionId());
+            notification = mNotifications.remove(session);
+        }
+        session.setForegroundServiceEventCallback(null);
+        if (notification != null) {
+            mNotificationManager.cancel(notification.getNotificationId());
+        }
+        if (getSessions().isEmpty()) {
+            stopForeground(false);
         }
     }
 
@@ -205,6 +248,78 @@ public abstract class MediaSession2Service extends Service {
             list.addAll(mSessions.values());
         }
         return list;
+    }
+
+    /**
+     * Called by registered {@link MediaSession2.ForegroundServiceEventCallback}
+     *
+     * @param session session with change
+     * @param playbackActive {@code true} if playback is active.
+     */
+    void onPlaybackActiveChanged(MediaSession2 session, boolean playbackActive) {
+        MediaNotification mediaNotification = onUpdateNotification(session);
+        if (mediaNotification == null) {
+            // The service implementation doesn't want to use the automatic start/stopForeground
+            // feature.
+            return;
+        }
+        synchronized (mLock) {
+            mNotifications.put(session, mediaNotification);
+        }
+        int id = mediaNotification.getNotificationId();
+        Notification notification = mediaNotification.getNotification();
+        if (!playbackActive) {
+            mNotificationManager.notify(id, notification);
+            return;
+        }
+        // playbackActive == true
+        startForegroundService(mStartSelfIntent);
+        startForeground(id, notification);
+    }
+
+    /**
+     * Returned by {@link #onUpdateNotification(MediaSession2)} for making session service
+     * foreground service to keep playback running in the background. It's highly recommended to
+     * show media style notification here.
+     */
+    public static class MediaNotification {
+        private final int mNotificationId;
+        private final Notification mNotification;
+
+        /**
+         * Default constructor
+         *
+         * @param notificationId notification id to be used for
+         *        {@link NotificationManager#notify(int, Notification)}.
+         * @param notification a notification to make session service run in the foreground. Media
+         *        style notification is recommended here.
+         */
+        public MediaNotification(int notificationId, @NonNull Notification notification) {
+            if (notification == null) {
+                throw new IllegalArgumentException("notification shouldn't be null");
+            }
+            mNotificationId = notificationId;
+            mNotification = notification;
+        }
+
+        /**
+         * Gets the id of the notification.
+         *
+         * @return the notification id
+         */
+        public int getNotificationId() {
+            return mNotificationId;
+        }
+
+        /**
+         * Gets the notification.
+         *
+         * @return the notification
+         */
+        @NonNull
+        public Notification getNotification() {
+            return mNotification;
+        }
     }
 
     private static final class MediaSession2ServiceStub extends IMediaSession2Service.Stub
