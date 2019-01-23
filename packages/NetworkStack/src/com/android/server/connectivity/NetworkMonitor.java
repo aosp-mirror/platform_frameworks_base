@@ -247,7 +247,6 @@ public class NetworkMonitor extends StateMachine {
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
     private final ConnectivityManager mCm;
-    private final NetworkRequest mDefaultRequest;
     private final IpConnectivityLog mMetricsLog;
     private final Dependencies mDependencies;
 
@@ -336,7 +335,6 @@ public class NetworkMonitor extends StateMachine {
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mCm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mDefaultRequest = defaultRequest;
 
         // CHECKSTYLE:OFF IndentationCheck
         addState(mDefaultState);
@@ -486,8 +484,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private boolean isValidationRequired() {
-        return NetworkMonitorUtils.isValidationRequired(
-                mDefaultRequest.networkCapabilities, mNetworkCapabilities);
+        return NetworkMonitorUtils.isValidationRequired(mNetworkCapabilities);
     }
 
 
