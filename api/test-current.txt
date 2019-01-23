@@ -1055,6 +1055,8 @@ package android.os {
   public final class UserHandle implements android.os.Parcelable {
     method public static int getAppId(int);
     method public int getIdentifier();
+    field public static final android.os.UserHandle ALL;
+    field public static final android.os.UserHandle CURRENT;
     field public static final android.os.UserHandle SYSTEM;
   }
 

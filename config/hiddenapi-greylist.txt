@@ -1120,8 +1120,6 @@ Landroid/os/UserHandle;->AID_APP_START:I
 Landroid/os/UserHandle;->AID_CACHE_GID_START:I
 Landroid/os/UserHandle;->AID_ROOT:I
 Landroid/os/UserHandle;->AID_SHARED_GID_START:I
-Landroid/os/UserHandle;->ALL:Landroid/os/UserHandle;
-Landroid/os/UserHandle;->CURRENT:Landroid/os/UserHandle;
 Landroid/os/UserHandle;->CURRENT_OR_SELF:Landroid/os/UserHandle;
 Landroid/os/UserHandle;->ERR_GID:I
 Landroid/os/UserHandle;->getAppIdFromSharedAppGid(I)I
