@@ -2640,8 +2640,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private boolean networkRequiresValidation(NetworkAgentInfo nai) {
-        return isValidationRequired(
-                mDefaultRequest.networkCapabilities, nai.networkCapabilities);
+        return isValidationRequired(nai.networkCapabilities);
     }
 
     private void handleFreshlyValidatedNetwork(NetworkAgentInfo nai) {
