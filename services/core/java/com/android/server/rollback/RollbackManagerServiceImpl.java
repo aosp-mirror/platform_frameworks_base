@@ -28,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.StringParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
@@ -56,12 +55,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * Implementation of service that manages APK level rollbacks.
@@ -200,48 +197,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public RollbackInfo getAvailableRollback(String packageName) {
+    public ParceledListSlice getAvailableRollbacks() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getAvailableRollback");
+                "getAvailableRollbacks");
 
-        RollbackData data = getRollbackForPackage(packageName);
-        if (data == null) {
-            return null;
-        }
-
-        // Note: The rollback for the package ought to be for the currently
-        // installed version, otherwise the rollback data is out of date. In
-        // that rare case, we'll check when we execute the rollback whether
-        // it's out of date or not, so no need to check package versions here.
-
-        for (PackageRollbackInfo info : data.packages) {
-            if (info.getPackageName().equals(packageName)) {
-                // TODO: Once the RollbackInfo API supports info about
-                // dependant packages, add that info here.
-                return new RollbackInfo(data.rollbackId, data.packages);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public StringParceledListSlice getPackagesWithAvailableRollbacks() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getPackagesWithAvailableRollbacks");
-
-        final Set<String> packageNames = new HashSet<>();
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
+            List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                for (PackageRollbackInfo info : data.packages) {
-                    packageNames.add(info.getPackageName());
-                }
+                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages));
             }
+            return new ParceledListSlice<>(rollbacks);
         }
-        return new StringParceledListSlice(new ArrayList<>(packageNames));
     }
 
     @Override
