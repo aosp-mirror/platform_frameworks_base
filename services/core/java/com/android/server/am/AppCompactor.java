@@ -64,7 +64,7 @@ public final class AppCompactor {
 
     final private String COMPACT_ACTION_FILE = "file";
     final private String COMPACT_ACTION_ANON = "anon";
-    final private String COMPACT_ACTION_FULL = "full";
+    final private String COMPACT_ACTION_FULL = "all";
 
     final private String compactActionSome;
     final private String compactActionFull;
