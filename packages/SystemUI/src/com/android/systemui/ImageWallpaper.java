@@ -16,14 +16,18 @@
 
 package com.android.systemui;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.app.WallpaperManager;
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Trace;
@@ -33,7 +37,6 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -94,7 +97,7 @@ public class ImageWallpaper extends WallpaperService {
         float mYOffset = 0f;
         float mScale = 1f;
 
-        private Display mDefaultDisplay;
+        private Display mDisplay;
         private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
 
         boolean mVisible = true;
@@ -138,10 +141,20 @@ public class ImageWallpaper extends WallpaperService {
             super.onCreate(surfaceHolder);
 
             //noinspection ConstantConditions
-            mDefaultDisplay = getSystemService(WindowManager.class).getDefaultDisplay();
+            final Context displayContext = getDisplayContext();
+            final int displayId = displayContext == null ? DEFAULT_DISPLAY :
+                    displayContext.getDisplayId();
+            DisplayManager dm = getSystemService(DisplayManager.class);
+            if (dm != null) {
+                mDisplay = dm.getDisplay(displayId);
+                if (mDisplay == null) {
+                    Log.e(TAG, "Cannot find display! Fallback to default.");
+                    mDisplay = dm.getDisplay(DEFAULT_DISPLAY);
+                }
+            }
             setOffsetNotificationsEnabled(false);
 
-            updateSurfaceSize(surfaceHolder, getDefaultDisplayInfo(), false /* forDraw */);
+            updateSurfaceSize(surfaceHolder, getDisplayInfo(), false /* forDraw */);
         }
 
         @Override
@@ -165,9 +178,26 @@ public class ImageWallpaper extends WallpaperService {
                 hasWallpaper = false;
             }
 
-            // Set surface size equal to bitmap size, prevent memory waste
-            int surfaceWidth = Math.max(MIN_BACKGROUND_WIDTH, mBackgroundWidth);
-            int surfaceHeight = Math.max(MIN_BACKGROUND_HEIGHT, mBackgroundHeight);
+            // Expected surface size.
+            int surfaceWidth = Math.max(displayInfo.logicalWidth, mBackgroundWidth);
+            int surfaceHeight = Math.max(displayInfo.logicalHeight, mBackgroundHeight);
+
+            // Calculate the minimum drawing area of the surface, which saves memory and does not
+            // distort the image.
+            final float scale = Math.min(
+                    (float) mBackgroundHeight / (float) surfaceHeight,
+                    (float) mBackgroundWidth / (float) surfaceWidth);
+            surfaceHeight = (int) (scale * surfaceHeight);
+            surfaceWidth = (int) (scale * surfaceWidth);
+
+            // Set surface size to at least MIN size.
+            if (surfaceWidth < MIN_BACKGROUND_WIDTH || surfaceHeight < MIN_BACKGROUND_HEIGHT) {
+                final float scaleUp = Math.max(
+                        (float) MIN_BACKGROUND_WIDTH / (float) surfaceWidth,
+                        (float) MIN_BACKGROUND_HEIGHT / (float) surfaceHeight);
+                surfaceWidth = (int) ((float) surfaceWidth * scaleUp);
+                surfaceHeight = (int) ((float) surfaceHeight * scaleUp);
+            }
 
             // Used a fixed size surface, because we are special.  We can do
             // this because we know the current design of window animations doesn't
@@ -267,8 +297,8 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         @VisibleForTesting
-        DisplayInfo getDefaultDisplayInfo() {
-            mDefaultDisplay.getDisplayInfo(mTmpDisplayInfo);
+        DisplayInfo getDisplayInfo() {
+            mDisplay.getDisplayInfo(mTmpDisplayInfo);
             return mTmpDisplayInfo;
         }
 
@@ -278,7 +308,7 @@ public class ImageWallpaper extends WallpaperService {
             }
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawWallpaper");
-                DisplayInfo displayInfo = getDefaultDisplayInfo();
+                DisplayInfo displayInfo = getDisplayInfo();
                 int newRotation = displayInfo.rotation;
 
                 // Sometimes a wallpaper is not large enough to cover the screen in one dimension.
@@ -445,7 +475,7 @@ public class ImageWallpaper extends WallpaperService {
             if (DEBUG) {
                 Log.d(TAG, "Wallpaper loaded: " + mBackground);
             }
-            updateSurfaceSize(getSurfaceHolder(), getDefaultDisplayInfo(),
+            updateSurfaceSize(getSurfaceHolder(), getDisplayInfo(),
                     false /* forDraw */);
         }
 
