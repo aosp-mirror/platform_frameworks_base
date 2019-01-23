@@ -19,6 +19,7 @@ package com.android.server.statusbar;
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.Notification;
 import android.app.StatusBarManager;
@@ -42,10 +43,12 @@ import android.service.notification.NotificationStats;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -660,7 +663,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     // TODO(b/117478341): make it aware of multi-display if needed.
     /**
      * Disable additional status bar features. Pass the bitwise-or of the DISABLE2_* flags.
-     * To re-enable everything, pass {@link #DISABLE_NONE}.
+     * To re-enable everything, pass {@link #DISABLE2_NONE}.
      *
      * Warning: Only pass DISABLE2_* flags into this function, do not use DISABLE_* flags.
      */
@@ -698,7 +701,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         final int net2 = gatherDisableActionsLocked(mCurrentUserId, 2);
 
         // TODO(b/113914868): investigation log for disappearing home button
-        if (whichFlag == 1 && pkg.contains("systemui")) {
+        if (whichFlag == 1 && pkg != null && pkg.contains("systemui")) {
             String disabledData = "{ ";
             for (int i = 0; i < mDisableRecords.size(); i++) {
                 DisableRecord tok = mDisableRecords.get(i);
@@ -722,6 +725,30 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 }
             }
         }
+    }
+
+    /**
+     * Get the currently applied disable flags, in the form of one Pair<Integer, Integer>.
+     *
+     * @return pair of disable flags in the form of (disabled1, disabled2), where (0, 0) indicates
+     * no flags are set for this token.
+     */
+    @Override
+    public int[] getDisableFlags(IBinder token, int userId) {
+        enforceStatusBar();
+
+        int disable1 = 0;
+        int disable2 = 0;
+        synchronized (mLock) {
+            // Find a matching record if it exists
+            DisableRecord record = findMatchingRecordLocked(token, userId).second;
+            if (record != null) {
+                disable1 = record.what1;
+                disable2 = record.what2;
+            }
+        }
+
+        return new int[] {disable1, disable2};
     }
 
     @Override
@@ -1296,7 +1323,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-        (new StatusBarShellCommand(this)).exec(
+        (new StatusBarShellCommand(this, mContext)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
 
@@ -1316,16 +1343,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         // Find matching record, if any
-        final int N = mDisableRecords.size();
-        DisableRecord record = null;
-        int i;
-        for (i = 0; i < N; i++) {
-            DisableRecord r = mDisableRecords.get(i);
-            if (r.token == token && r.userId == userId) {
-                record = r;
-                break;
-            }
-        }
+        Pair<Integer, DisableRecord> match = findMatchingRecordLocked(token, userId);
+        int i = match.first;
+        DisableRecord record = match.second;
 
         // Remove record if binder is already dead
         if (!token.isBinderAlive()) {
@@ -1350,6 +1370,23 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         record = new DisableRecord(userId, token);
         record.setFlags(what, which, pkg);
         mDisableRecords.add(record);
+    }
+
+    @Nullable
+    @GuardedBy("mLock")
+    private Pair<Integer, DisableRecord> findMatchingRecordLocked(IBinder token, int userId) {
+        final int numRecords = mDisableRecords.size();
+        DisableRecord record = null;
+        int i;
+        for (i = 0; i < numRecords; i++) {
+            DisableRecord r = mDisableRecords.get(i);
+            if (r.token == token && r.userId == userId) {
+                record = r;
+                break;
+            }
+        }
+
+        return new Pair<Integer, DisableRecord>(i, record);
     }
 
     // lock on mDisableRecords

@@ -14,21 +14,31 @@
 
 package com.android.server.statusbar;
 
+import static android.app.StatusBarManager.DEFAULT_SETUP_DISABLE2_FLAGS;
+import static android.app.StatusBarManager.DEFAULT_SETUP_DISABLE_FLAGS;
+import static android.app.StatusBarManager.DISABLE2_NONE;
+import static android.app.StatusBarManager.DISABLE_NONE;
+
 import android.content.ComponentName;
+import android.content.Context;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.service.quicksettings.TileService;
-
-import com.android.internal.statusbar.IStatusBarService;
 
 import java.io.PrintWriter;
 
 public class StatusBarShellCommand extends ShellCommand {
 
-    private final StatusBarManagerService mInterface;
+    private static final IBinder sToken = new StatusBarShellCommandToken();
 
-    public StatusBarShellCommand(StatusBarManagerService service) {
+    private final StatusBarManagerService mInterface;
+    private final Context mContext;
+
+    public StatusBarShellCommand(StatusBarManagerService service, Context context) {
         mInterface = service;
+        mContext = context;
     }
 
     @Override
@@ -56,6 +66,8 @@ public class StatusBarShellCommand extends ShellCommand {
                     return 0;
                 case "get-status-icons":
                     return runGetStatusIcons();
+                case "disable-for-setup":
+                    return runDisableForSetup();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -104,6 +116,22 @@ public class StatusBarShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runDisableForSetup() {
+        String arg = getNextArgRequired();
+        String pkg = mContext.getPackageName();
+        boolean disable = Boolean.parseBoolean(arg);
+
+        if (disable) {
+            mInterface.disable(DEFAULT_SETUP_DISABLE_FLAGS, sToken, pkg);
+            mInterface.disable2(DEFAULT_SETUP_DISABLE2_FLAGS, sToken, pkg);
+        } else {
+            mInterface.disable(DISABLE_NONE, sToken, pkg);
+            mInterface.disable2(DISABLE2_NONE, sToken, pkg);
+        }
+
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -135,5 +163,14 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("  get-status-icons");
         pw.println("    Print the list of status bar icons and the order they appear in");
         pw.println("");
+        pw.println("  disable-for-setup DISABLE");
+        pw.println("    If true, disable status bar components unsuitable for device setup");
+        pw.println("");
+    }
+
+    /**
+     * Token to send to StatusBarManagerService for disable* commands
+     */
+    private static final class StatusBarShellCommandToken extends Binder {
     }
 }

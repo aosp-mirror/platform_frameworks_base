@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.View;
 
@@ -40,11 +42,12 @@ import java.lang.annotation.RetentionPolicy;
 public class StatusBarManager {
 
     /** @hide */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int DISABLE_EXPAND = View.STATUS_BAR_DISABLE_EXPAND;
     /** @hide */
     public static final int DISABLE_NOTIFICATION_ICONS = View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS;
     /** @hide */
+    @SystemApi
     public static final int DISABLE_NOTIFICATION_ALERTS
             = View.STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
 
@@ -56,14 +59,17 @@ public class StatusBarManager {
     /** @hide */
     public static final int DISABLE_SYSTEM_INFO = View.STATUS_BAR_DISABLE_SYSTEM_INFO;
     /** @hide */
+    @SystemApi
     public static final int DISABLE_HOME = View.STATUS_BAR_DISABLE_HOME;
     /** @hide */
+    @SystemApi
     public static final int DISABLE_RECENT = View.STATUS_BAR_DISABLE_RECENT;
     /** @hide */
     public static final int DISABLE_BACK = View.STATUS_BAR_DISABLE_BACK;
     /** @hide */
     public static final int DISABLE_CLOCK = View.STATUS_BAR_DISABLE_CLOCK;
     /** @hide */
+    @SystemApi
     public static final int DISABLE_SEARCH = View.STATUS_BAR_DISABLE_SEARCH;
 
     /** @hide */
@@ -72,7 +78,7 @@ public class StatusBarManager {
             View.STATUS_BAR_DISABLE_HOME | View.STATUS_BAR_DISABLE_RECENT;
 
     /** @hide */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int DISABLE_NONE = 0x00000000;
 
     /** @hide */
@@ -116,6 +122,7 @@ public class StatusBarManager {
     public static final int DISABLE2_ROTATE_SUGGESTIONS = 1 << 4;
 
     /** @hide */
+    @SystemApi
     public static final int DISABLE2_NONE = 0x00000000;
 
     /** @hide */
@@ -134,6 +141,21 @@ public class StatusBarManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Disable2Flags {}
+
+    /**
+     * Default disable flags for setup
+     *
+     * @hide
+     */
+    public static final int DEFAULT_SETUP_DISABLE_FLAGS = DISABLE_NOTIFICATION_ALERTS
+            | DISABLE_HOME | DISABLE_EXPAND | DISABLE_RECENT | DISABLE_CLOCK | DISABLE_SEARCH;
+
+    /**
+     * Default disable2 flags for setup
+     *
+     * @hide
+     */
+    public static final int DEFAULT_SETUP_DISABLE2_FLAGS = DISABLE2_ROTATE_SUGGESTIONS;
 
     /** @hide */
     public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
@@ -335,6 +357,53 @@ public class StatusBarManager {
             if (svc != null) {
                 svc.setIconVisibility(slot, visible);
             }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable or disable status bar elements (notifications, clock) which are inappropriate during
+     * device setup.
+     *
+     * @param disabled whether to apply or remove the disabled flags
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setDisabledForSetup(boolean disabled) {
+        try {
+            final int userId = Binder.getCallingUserHandle().getIdentifier();
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.disableForUser(disabled ? DEFAULT_SETUP_DISABLE_FLAGS : DISABLE_NONE,
+                        mToken, mContext.getPackageName(), userId);
+                svc.disable2ForUser(disabled ? DEFAULT_SETUP_DISABLE2_FLAGS : DISABLE2_NONE,
+                        mToken, mContext.getPackageName(), userId);
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the currently applied StatusBar disable flags
+     *
+     * @return a pair of Integers in the form of (disable, disable2)
+     *
+     * @hide
+     */
+    @SystemApi
+    public Pair<Integer, Integer> getDisableFlags() {
+        try {
+            final int userId = Binder.getCallingUserHandle().getIdentifier();
+            final IStatusBarService svc = getService();
+            int[] flags = new int[] {0, 0};
+            if (svc != null) {
+                flags = svc.getDisableFlags(mToken, userId);
+            }
+
+            return new Pair<Integer, Integer>(flags[0], flags[1]);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

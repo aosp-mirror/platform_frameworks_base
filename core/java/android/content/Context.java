@@ -3620,9 +3620,10 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.app.StatusBarManager
+     *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
