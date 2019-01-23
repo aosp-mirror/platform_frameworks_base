@@ -541,8 +541,7 @@ public abstract class MediaBrowserService extends Service {
             throw new IllegalStateException("This should be called inside of onGetRoot or"
                     + " onLoadChildren or onLoadItem methods");
         }
-        return new RemoteUserInfo(mCurConnection.pkg, mCurConnection.pid, mCurConnection.uid,
-                mCurConnection.callbacks.asBinder());
+        return new RemoteUserInfo(mCurConnection.pkg, mCurConnection.pid, mCurConnection.uid);
     }
 
     /**
