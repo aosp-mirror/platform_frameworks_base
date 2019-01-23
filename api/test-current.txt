@@ -798,11 +798,16 @@ package android.net {
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
   }
 
+  public final class IpPrefix implements android.os.Parcelable {
+    ctor public IpPrefix(java.net.InetAddress, int);
+  }
+
   public final class IpSecManager {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
   public class LinkAddress implements android.os.Parcelable {
+    ctor public LinkAddress(java.net.InetAddress, int, int, int);
     method public boolean isGlobalPreferred();
     method public boolean isIPv4();
     method public boolean isIPv6();
@@ -810,7 +815,10 @@ package android.net {
   }
 
   public final class LinkProperties implements android.os.Parcelable {
+    ctor public LinkProperties(android.net.LinkProperties);
     method public boolean addDnsServer(java.net.InetAddress);
+    method @Nullable public android.net.IpPrefix getNat64Prefix();
+    method public java.util.List<java.net.InetAddress> getPcscfServers();
     method public String getTcpBufferSizes();
     method public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
     method public boolean hasGlobalIPv6Address();
@@ -822,6 +830,8 @@ package android.net {
     method public boolean isReachable(java.net.InetAddress);
     method public boolean removeDnsServer(java.net.InetAddress);
     method public boolean removeRoute(android.net.RouteInfo);
+    method public void setNat64Prefix(android.net.IpPrefix);
+    method public void setPcscfServers(java.util.Collection<java.net.InetAddress>);
     method public void setPrivateDnsServerName(@Nullable String);
     method public void setTcpBufferSizes(String);
     method public void setUsePrivateDns(boolean);
@@ -839,6 +849,7 @@ package android.net {
   }
 
   public final class RouteInfo implements android.os.Parcelable {
+    ctor public RouteInfo(android.net.IpPrefix, java.net.InetAddress, String, int);
     method public int getType();
     field public static final int RTN_THROW = 9; // 0x9
     field public static final int RTN_UNICAST = 1; // 0x1
@@ -925,6 +936,7 @@ package android.net.metrics {
   }
 
   public class IpConnectivityLog {
+    ctor public IpConnectivityLog();
     method public boolean log(long, android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(String, android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(android.net.Network, int[], android.net.metrics.IpConnectivityLog.Event);
@@ -971,6 +983,20 @@ package android.net.metrics {
     field public static final int NETWORK_UNLINGER = 6; // 0x6
     field public static final int NETWORK_VALIDATED = 2; // 0x2
     field public static final int NETWORK_VALIDATION_FAILED = 3; // 0x3
+  }
+
+  public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
+  }
+
+  public static class RaEvent.Builder {
+    ctor public RaEvent.Builder();
+    method public android.net.metrics.RaEvent build();
+    method public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
   }
 
   public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
