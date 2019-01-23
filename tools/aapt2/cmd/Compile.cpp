@@ -469,16 +469,12 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
       return false;
     }
 
-    // Read the file as a string
-    char buffer_2[data->size()];
-    memcpy(&buffer_2, data->data(), data->size());
-    StringPiece content(buffer_2, data->size());
-
     BigBuffer crunched_png_buffer(4096);
     io::BigBufferOutputStream crunched_png_buffer_out(&crunched_png_buffer);
 
     // Ensure that we only keep the chunks we care about if we end up
     // using the original PNG instead of the crunched one.
+    const StringPiece content(reinterpret_cast<const char*>(data->data()), data->size());
     PngChunkFilter png_chunk_filter(content);
     std::unique_ptr<Image> image = ReadPng(context, path_data.source, &png_chunk_filter);
     if (!image) {
