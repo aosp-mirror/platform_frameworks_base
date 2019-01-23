@@ -807,7 +807,10 @@ public class Camera {
      *
      * @throws RuntimeException if starting preview fails; usually this would be
      *    because of a hardware or other low-level error, or because release()
-     *    has been called on this Camera instance.
+     *    has been called on this Camera instance. The QCIF (176x144) exception
+     *    mentioned in {@link Parameters#setPreviewSize setPreviewSize} and
+     *    {@link Parameters#setPictureSize setPictureSize} can also cause this
+     *    exception be thrown.
      */
     public native final void startPreview();
 
@@ -2848,6 +2851,16 @@ public class Camera {
          * orientation should also be considered while setting picture size and
          * thumbnail size.
          *
+         * Exception on 176x144 (QCIF) resolution:
+         * Camera devices usually have a fixed capability for downscaling from
+         * larger resolution to smaller, and the QCIF resolution sometimes
+         * is not fully supported due to this limitation on devices with
+         * high-resolution image sensors. Therefore, trying to configure a QCIF
+         * preview size with any picture or video size larger than 1920x1080
+         * (either width or height) might not be supported, and
+         * {@link #setParameters(Camera.Parameters)} might throw a
+         * RuntimeException if it is not.
+         *
          * @param width  the width of the pictures, in pixels
          * @param height the height of the pictures, in pixels
          * @see #setDisplayOrientation(int)
@@ -2892,6 +2905,16 @@ public class Camera {
          * camera is used as the video source. In this case, the size of the
          * preview can be different from the resolution of the recorded video
          * during video recording.</p>
+         *
+         * <p>Exception on 176x144 (QCIF) resolution:
+         * Camera devices usually have a fixed capability for downscaling from
+         * larger resolution to smaller, and the QCIF resolution sometimes
+         * is not fully supported due to this limitation on devices with
+         * high-resolution image sensors. Therefore, trying to configure a QCIF
+         * video resolution with any preview or picture size larger than
+         * 1920x1080  (either width or height) might not be supported, and
+         * {@link #setParameters(Camera.Parameters)} will throw a
+         * RuntimeException if it is not.</p>
          *
          * @return a list of Size object if camera has separate preview and
          *         video output; otherwise, null is returned.
@@ -3186,6 +3209,16 @@ public class Camera {
          *
          * <p>Applications need to consider the display orientation. See {@link
          * #setPreviewSize(int,int)} for reference.</p>
+         *
+         * <p>Exception on 176x144 (QCIF) resolution:
+         * Camera devices usually have a fixed capability for downscaling from
+         * larger resolution to smaller, and the QCIF resolution sometimes
+         * is not fully supported due to this limitation on devices with
+         * high-resolution image sensors. Therefore, trying to configure a QCIF
+         * picture size with any preview or video size larger than 1920x1080
+         * (either width or height) might not be supported, and
+         * {@link #setParameters(Camera.Parameters)} might throw a
+         * RuntimeException if it is not.</p>
          *
          * @param width  the width for pictures, in pixels
          * @param height the height for pictures, in pixels
