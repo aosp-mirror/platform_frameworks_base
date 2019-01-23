@@ -36,6 +36,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -648,6 +649,32 @@ public final class BluetoothAdapter {
 
     private final Object mLock = new Object();
     private final Map<LeScanCallback, ScanCallback> mLeScanClients;
+    private static final Map<BluetoothDevice, List<Pair<MetadataListener, Handler>>>
+                sMetadataListeners = new HashMap<>();
+
+    /**
+     * Bluetooth metadata listener. Overrides the default BluetoothMetadataListener
+     * implementation.
+     */
+    private static final IBluetoothMetadataListener sBluetoothMetadataListener =
+            new IBluetoothMetadataListener.Stub() {
+        @Override
+        public void onMetadataChanged(BluetoothDevice device, int key, String value) {
+            synchronized (sMetadataListeners) {
+                if (sMetadataListeners.containsKey(device)) {
+                    List<Pair<MetadataListener, Handler>> list = sMetadataListeners.get(device);
+                    for (Pair<MetadataListener, Handler> pair : list) {
+                        MetadataListener listener = pair.first;
+                        Handler handler = pair.second;
+                        handler.post(() -> {
+                            listener.onMetadataChanged(device, key, value);
+                        });
+                    }
+                }
+            }
+            return;
+        }
+    };
 
     /**
      * Get a handle to the default local Bluetooth adapter.
@@ -2607,6 +2634,16 @@ public final class BluetoothAdapter {
                             }
                         }
                     }
+                    synchronized (sMetadataListeners) {
+                        sMetadataListeners.forEach((device, pair) -> {
+                            try {
+                                mService.registerMetadataListener(sBluetoothMetadataListener,
+                                        device);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Failed to register metadata listener", e);
+                            }
+                        });
+                    }
                 }
 
                 public void onBluetoothServiceDown() {
@@ -3089,5 +3126,143 @@ public final class BluetoothAdapter {
         Log.e(TAG, "listenUsingInsecureL2capCoc: PLEASE USE THE OFFICIAL API, "
                     + "listenUsingInsecureL2capChannel");
         return listenUsingInsecureL2capChannel();
+    }
+
+    /**
+     * Register a {@link #MetadataListener} to receive update about metadata
+     * changes for this {@link BluetoothDevice}.
+     * Registration must be done when Bluetooth is ON and will last until
+     * {@link #unregisterMetadataListener(BluetoothDevice)} is called, even when Bluetooth
+     * restarted in the middle.
+     * All input parameters should not be null or {@link NullPointerException} will be triggered.
+     * The same {@link BluetoothDevice} and {@link #MetadataListener} pair can only be registered
+     * once, double registration would cause {@link IllegalArgumentException}.
+     *
+     * @param device {@link BluetoothDevice} that will be registered
+     * @param listener {@link #MetadataListener} that will receive asynchronous callbacks
+     * @param handler the handler for listener callback
+     * @return true on success, false on error
+     * @throws NullPointerException If one of {@code listener}, {@code device} or {@code handler}
+     * is null.
+     * @throws IllegalArgumentException The same {@link #MetadataListener} and
+     * {@link BluetoothDevice} are registered twice.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean registerMetadataListener(BluetoothDevice device, MetadataListener listener,
+            Handler handler) {
+        if (DBG) Log.d(TAG, "registerMetdataListener()");
+
+        final IBluetooth service = mService;
+        if (service == null) {
+            Log.e(TAG, "Bluetooth is not enabled. Cannot register metadata listener");
+            return false;
+        }
+        if (listener == null) {
+            throw new NullPointerException("listener is null");
+        }
+        if (device == null) {
+            throw new NullPointerException("device is null");
+        }
+        if (handler == null) {
+            throw new NullPointerException("handler is null");
+        }
+
+        synchronized (sMetadataListeners) {
+            List<Pair<MetadataListener, Handler>> listenerList = sMetadataListeners.get(device);
+            if (listenerList == null) {
+                // Create new listener/handler list for registeration
+                listenerList = new ArrayList<>();
+                sMetadataListeners.put(device, listenerList);
+            } else {
+                // Check whether this device was already registed by the lisenter
+                if (listenerList.stream().anyMatch((pair) -> (pair.first.equals(listener)))) {
+                    throw new IllegalArgumentException("listener was already regestered"
+                            + " for the device");
+                }
+            }
+
+            Pair<MetadataListener, Handler> listenerPair = new Pair(listener, handler);
+            listenerList.add(listenerPair);
+
+            boolean ret = false;
+            try {
+                ret = service.registerMetadataListener(sBluetoothMetadataListener, device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "registerMetadataListener fail", e);
+            } finally {
+                if (!ret) {
+                    // Remove listener registered earlier when fail.
+                    listenerList.remove(listenerPair);
+                    if (listenerList.isEmpty()) {
+                        // Remove the device if its listener list is empty
+                        sMetadataListeners.remove(device);
+                    }
+                }
+            }
+            return ret;
+        }
+    }
+
+    /**
+     * Unregister all {@link MetadataListener} from this {@link BluetoothDevice}.
+     * Unregistration can be done when Bluetooth is either ON or OFF.
+     * {@link #registerMetadataListener(MetadataListener, BluetoothDevice, Handler)} must
+     * be called before unregisteration.
+     * Unregistering a device that is not regestered would cause {@link IllegalArgumentException}.
+     *
+     * @param device {@link BluetoothDevice} that will be unregistered. it
+     * should not be null or {@link NullPointerException} will be triggered.
+     * @return true on success, false on error
+     * @throws NullPointerException If {@code device} is null.
+     * @throws IllegalArgumentException If {@code device} has not been registered before.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean unregisterMetadataListener(BluetoothDevice device) {
+        if (DBG) Log.d(TAG, "unregisterMetdataListener()");
+        if (device == null) {
+            throw new NullPointerException("device is null");
+        }
+
+        synchronized (sMetadataListeners) {
+            if (sMetadataListeners.containsKey(device)) {
+                sMetadataListeners.remove(device);
+            } else {
+                throw new IllegalArgumentException("device was not registered");
+            }
+
+            final IBluetooth service = mService;
+            if (service == null) {
+                // Bluetooth is OFF, do nothing to Bluetooth service.
+                return true;
+            }
+            try {
+                return service.unregisterMetadataListener(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "unregisterMetadataListener fail", e);
+                return false;
+            }
+        }
+    }
+
+    /**
+     * This abstract class is used to implement {@link BluetoothAdapter} metadata listener.
+     * @hide
+     */
+    @SystemApi
+    public abstract class MetadataListener {
+        /**
+         * Callback triggered if the metadata of {@link BluetoothDevice} registered in
+         * {@link #registerMetadataListener}.
+         *
+         * @param device changed {@link BluetoothDevice}.
+         * @param key changed metadata key, one of BluetoothDevice.METADATA_*.
+         * @param value the new value of metadata.
+         */
+        public void onMetadataChanged(BluetoothDevice device, int key, String value) {
+        }
     }
 }

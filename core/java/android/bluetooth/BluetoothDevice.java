@@ -341,6 +341,137 @@ public final class BluetoothDevice implements Parcelable {
             "android.bluetooth.device.action.SDP_RECORD";
 
     /**
+     * Maximum length of a metadata entry, this is to avoid exploding Bluetooth
+     * disk usage
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_MAX_LENGTH = 2048;
+
+    /**
+     * Manufacturer name of this Bluetooth device
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_MANUFACTURER_NAME = 0;
+
+    /**
+     * Model name of this Bluetooth device
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_MODEL_NAME = 1;
+
+    /**
+     * Software version of this Bluetooth device
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_SOFTWARE_VERSION = 2;
+
+    /**
+     * Hardware version of this Bluetooth device
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_HARDWARE_VERSION = 3;
+
+    /**
+     * Package name of the companion app, if any
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_COMPANION_APP = 4;
+
+    /**
+     * URI to the main icon shown on the settings UI
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_MAIN_ICON = 5;
+
+    /**
+     * Whether this device is an untethered headset with left, right and case
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_IS_UNTHETHERED_HEADSET = 6;
+
+    /**
+     * URI to icon of the left headset
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_LEFT_ICON = 7;
+
+    /**
+     * URI to icon of the right headset
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_RIGHT_ICON = 8;
+
+    /**
+     * URI to icon of the headset charging case
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_CASE_ICON = 9;
+
+    /**
+     * Battery level (0-100), {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
+     * is invalid, of the left headset
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_LEFT_BATTERY = 10;
+
+    /**
+     * Battery level (0-100), {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
+     * is invalid, of the right headset
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_RIGHT_BATTERY = 11;
+
+    /**
+     * Battery level (0-100), {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
+     * is invalid, of the headset charging case
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_CASE_BATTERY = 12;
+
+    /**
+     * Whether the left headset is charging
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_LEFT_CHARGING = 13;
+
+    /**
+     * Whether the right headset is charging
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_RIGHT_CHARGING = 14;
+
+    /**
+     * Whether the headset charging case is charging
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTHETHERED_CASE_CHARGING = 15;
+
+    /**
+     * URI to the enhanced settings UI slice, null or empty String means
+     * the UI does not exist
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16;
+
+    /**
      * Broadcast Action: This intent is used to broadcast the {@link UUID}
      * wrapped as a {@link android.os.ParcelUuid} of the remote device after it
      * has been fetched. This intent is sent only when the UUIDs of the remote
@@ -2027,5 +2158,62 @@ public final class BluetoothDevice implements Parcelable {
     public BluetoothSocket createInsecureL2capCocSocket(int transport, int psm) throws IOException {
         Log.e(TAG, "createL2capCocSocket: PLEASE USE THE OFFICIAL API, createInsecureL2capChannel");
         return createInsecureL2capChannel(psm);
+    }
+
+    /**
+     * Set a keyed metadata of this {@link BluetoothDevice} to a
+     * {@link String} value.
+     * Only bonded devices's metadata will be persisted across Bluetooth
+     * restart.
+     * Metadata will be removed when the device's bond state is moved to
+     * {@link #BOND_NONE}.
+     *
+     * @param key must be within the list of BluetoothDevice.METADATA_*
+     * @param value the string data to set for key. Must be less than
+     * {@link BluetoothAdapter#METADATA_MAX_LENGTH} characters in length
+     * @return true on success, false on error
+     * @hide
+    */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setMetadata(int key, String value) {
+        final IBluetooth service = sService;
+        if (service == null) {
+            Log.e(TAG, "Bluetooth is not enabled. Cannot set metadata");
+            return false;
+        }
+        if (value.length() > METADATA_MAX_LENGTH) {
+            throw new IllegalArgumentException("value length is " + value.length()
+                    + ", should not over " + METADATA_MAX_LENGTH);
+        }
+        try {
+            return service.setMetadata(this, key, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "setMetadata fail", e);
+            return false;
+        }
+    }
+
+    /**
+     * Get a keyed metadata for this {@link BluetoothDevice} as {@link String}
+     *
+     * @param key must be within the list of BluetoothDevice.METADATA_*
+     * @return Metadata of the key as string, null on error or not found
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public String getMetadata(int key) {
+        final IBluetooth service = sService;
+        if (service == null) {
+            Log.e(TAG, "Bluetooth is not enabled. Cannot get metadata");
+            return null;
+        }
+        try {
+            return service.getMetadata(this, key);
+        } catch (RemoteException e) {
+            Log.e(TAG, "getMetadata fail", e);
+            return null;
+        }
     }
 }
