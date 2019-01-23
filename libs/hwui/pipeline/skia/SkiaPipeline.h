@@ -105,6 +105,11 @@ public:
         mLightCenter = lightGeometry.center;
     }
 
+    void setPictureCapturedCallback(
+            const std::function<void(sk_sp<SkPicture>&&)>& callback) override {
+        mPictureCapturedCallback = callback;
+    }
+
 protected:
     void dumpResourceCacheUsage() const;
     void setSurfaceColorProperties(renderthread::ColorMode colorMode);
@@ -163,6 +168,8 @@ private:
      *  parallel tryCapture calls (not really needed).
      */
     std::unique_ptr<SkPictureRecorder> mRecorder;
+    std::unique_ptr<SkNWayCanvas> mNwayCanvas;
+    std::function<void(sk_sp<SkPicture>&&)> mPictureCapturedCallback;
 
     static float mLightRadius;
     static uint8_t mAmbientShadowAlpha;

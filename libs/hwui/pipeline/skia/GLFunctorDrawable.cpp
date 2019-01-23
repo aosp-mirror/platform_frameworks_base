@@ -74,7 +74,13 @@ static bool GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSiz
 
 void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     if (canvas->getGrContext() == nullptr) {
-        SkDEBUGF(("Attempting to draw GLFunctor into an unsupported surface"));
+        // We're dumping a picture, render a light-blue rectangle instead
+        // TODO: Draw the WebView text on top? Seemingly complicated as SkPaint doesn't
+        // seem to have a default typeface that works. We only ever use drawGlyphs, which
+        // requires going through minikin & hwui's canvas which we don't have here.
+        SkPaint paint;
+        paint.setColor(0xFF81D4FA);
+        canvas->drawRect(mBounds, paint);
         return;
     }
 

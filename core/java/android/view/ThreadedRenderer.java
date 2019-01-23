@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.HardwareRenderer;
+import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
@@ -551,6 +552,10 @@ public final class ThreadedRenderer extends HardwareRenderer {
             }
         }
         dumpProfileInfo(fd, flags);
+    }
+
+    Picture captureRenderingCommands() {
+        return null;
     }
 
     @Override

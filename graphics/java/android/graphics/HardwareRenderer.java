@@ -20,6 +20,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.os.IBinder;
@@ -667,6 +668,17 @@ public class HardwareRenderer {
         nSetContentDrawBounds(mNativeProxy, left, top, right, bottom);
     }
 
+    /** @hide */
+    public void setPictureCaptureCallback(@Nullable PictureCapturedCallback callback) {
+        nSetPictureCaptureCallback(mNativeProxy, callback);
+    }
+
+    /** called by native */
+    static void invokePictureCapturedCallback(long picturePtr, PictureCapturedCallback callback) {
+        Picture picture = new Picture(picturePtr);
+        callback.onPictureCaptured(picture);
+    }
+
     /**
      * Interface used to receive callbacks when a frame is being drawn.
      *
@@ -693,6 +705,17 @@ public class HardwareRenderer {
          * @param frameNr The id of the frame that was drawn.
          */
         void onFrameComplete(long frameNr);
+    }
+
+    /**
+     * Interface for listening to picture captures
+     * @hide
+     */
+    @TestApi
+    public interface PictureCapturedCallback {
+        /** @hide */
+        @TestApi
+        void onPictureCaptured(Picture picture);
     }
 
     private static void validateAlpha(float alpha, String argumentName) {
@@ -997,6 +1020,9 @@ public class HardwareRenderer {
 
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
             int top, int right, int bottom);
+
+    private static native void nSetPictureCaptureCallback(long nativeProxy,
+            PictureCapturedCallback callback);
 
     private static native void nSetFrameCallback(long nativeProxy, FrameDrawingCallback callback);
 
