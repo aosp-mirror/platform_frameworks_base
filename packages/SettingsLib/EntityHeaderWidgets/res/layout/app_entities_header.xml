@@ -33,7 +33,7 @@
         android:textAppearance="@style/AppEntitiesHeader.Text.HeaderTitle"/>
 
     <LinearLayout
-        android:id="@+id/all_apps_view"
+        android:id="@+id/app_views_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
@@ -60,5 +60,13 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="106dp"
+        android:gravity="center"
+        android:visibility="gone"
+        android:textAppearance="@style/AppEntitiesHeader.Text.Summary"/>
 
 </LinearLayout>
