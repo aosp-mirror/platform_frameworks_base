@@ -241,8 +241,10 @@ uint32_t RenderProxy::frameTimePercentile(int percentile) {
 }
 
 void RenderProxy::dumpGraphicsMemory(int fd) {
-    auto& thread = RenderThread::getInstance();
-    thread.queue().runSync([&]() { thread.dumpGraphicsMemory(fd); });
+    if (RenderThread::hasInstance()) {
+        auto& thread = RenderThread::getInstance();
+        thread.queue().runSync([&]() { thread.dumpGraphicsMemory(fd); });
+    }
 }
 
 void RenderProxy::setProcessStatsBuffer(int fd) {
