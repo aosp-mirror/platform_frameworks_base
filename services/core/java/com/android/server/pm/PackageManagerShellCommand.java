@@ -40,10 +40,10 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionParams;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
@@ -2307,7 +2307,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
                     break;
                 case "--apex":
-                    sessionParams.installFlags |= PackageManager.INSTALL_APEX;
+                    sessionParams.setInstallAsApex();
                     sessionParams.setStaged();
                     break;
                 case "--multi-package":

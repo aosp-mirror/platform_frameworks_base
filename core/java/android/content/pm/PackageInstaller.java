@@ -1543,6 +1543,13 @@ public class PackageInstaller {
             this.isStaged = true;
         }
 
+        /**
+         * Set this session to be installing an APEX package.
+         */
+        public void setInstallAsApex() {
+            installFlags |= PackageManager.INSTALL_APEX;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
