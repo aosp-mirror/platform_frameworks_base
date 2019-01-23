@@ -77,6 +77,9 @@ public class InsetsSourceConsumer {
         if (applyLocalVisibilityOverride()) {
             mController.notifyVisibilityChanged();
         }
+        if (mSourceControl == null) {
+            mController.notifyControlRevoked(this);
+        }
     }
 
     @VisibleForTesting

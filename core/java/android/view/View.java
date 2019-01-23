@@ -10956,7 +10956,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     void dispatchWindowInsetsAnimationFinished(InsetsAnimation animation) {
-        if (mListenerInfo != null && mListenerInfo.mOnApplyWindowInsetsListener != null) {
+        if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationListener != null) {
             mListenerInfo.mWindowInsetsAnimationListener.onFinished(animation);
         }
     }
