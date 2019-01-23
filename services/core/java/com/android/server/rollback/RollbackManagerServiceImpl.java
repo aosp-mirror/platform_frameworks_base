@@ -31,6 +31,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
+import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Binder;
@@ -39,14 +40,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.storage.StorageManager;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
-import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerServiceUtils;
 
 import java.io.File;
@@ -111,6 +111,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final HandlerThread mHandlerThread;
     private final Installer mInstaller;
     private final RollbackPackageHealthObserver mPackageHealthObserver;
+    private final AppDataRollbackHelper mUserdataHelper;
 
     RollbackManagerServiceImpl(Context context) {
         mContext = context;
@@ -124,6 +125,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
 
         mPackageHealthObserver = new RollbackPackageHealthObserver(mContext);
+        mUserdataHelper = new AppDataRollbackHelper(mInstaller);
 
         // Kick off loading of the rollback data from strorage in a background
         // thread.
@@ -424,6 +426,35 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    void onUnlockUser(int userId) {
+        getHandler().post(() -> {
+            final ArrayList<String> pendingBackupPackages = new ArrayList<>();
+            final Map<String, RestoreInfo> pendingRestorePackages = new HashMap<>();
+            final List<RollbackData> changed;
+            synchronized (mLock) {
+                ensureRollbackDataLoadedLocked();
+                changed = mUserdataHelper.computePendingBackupsAndRestores(userId,
+                        pendingBackupPackages, pendingRestorePackages, mAvailableRollbacks,
+                        mRecentlyExecutedRollbacks);
+            }
+
+            mUserdataHelper.commitPendingBackupAndRestoreForUser(userId,
+                    pendingBackupPackages, pendingRestorePackages);
+
+            for (RollbackData rd : changed) {
+                try {
+                    mRollbackStore.saveAvailableRollback(rd);
+                } catch (IOException ioe) {
+                    Log.e(TAG, "Unable to save rollback info for : " + rd.rollbackId, ioe);
+                }
+            }
+
+            synchronized (mLock) {
+                mRollbackStore.saveRecentlyExecutedRollbacks(mRecentlyExecutedRollbacks);
+            }
+        });
+    }
+
     /**
      * Load rollback data from storage if it has not already been loaded.
      * After calling this funciton, mAvailableRollbacks and
@@ -533,6 +564,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // that are necessary to keep track of.
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
+
+            // This should never happen because we can't have any pending backups left after
+            // a rollback has been executed. See AppDataRollbackHelper#restoreAppData where we
+            // clear all pending backups at the point of restore because they're guaranteed to be
+            // no-ops.
+            //
+            // We may, however, have one or more pending restores left to handle.
+            for (PackageRollbackInfo target : rollback.getPackages()) {
+                if (target.getPendingBackups().size() > 0) {
+                    Log.e(TAG, "No backups allowed to be pending for: " + target);
+                    target.getPendingBackups().clear();
+                }
+            }
+
             mRecentlyExecutedRollbacks.add(rollback);
             mRollbackStore.saveRecentlyExecutedRollbacks(mRecentlyExecutedRollbacks);
         }
@@ -701,27 +746,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         VersionedPackage installedVersion = new VersionedPackage(packageName,
                 installedPackage.getLongVersionCode());
 
-        for (int user : installedUsers) {
-            final int storageFlags;
-            if (StorageManager.isFileEncryptedNativeOrEmulated()
-                    && !StorageManager.isUserKeyUnlocked(user)) {
-                // We've encountered a user that hasn't unlocked on a FBE device, so we can't copy
-                // across app user data until the user unlocks their device.
-                Log.e(TAG, "User: " + user + " isn't unlocked, skipping CE userdata backup.");
-                storageFlags = Installer.FLAG_STORAGE_DE;
-            } else {
-                storageFlags = Installer.FLAG_STORAGE_CE | Installer.FLAG_STORAGE_DE;
-            }
 
-            try {
-                mInstaller.snapshotAppData(packageName, user, storageFlags);
-            } catch (InstallerException ie) {
-                Log.e(TAG, "Unable to create app data snapshot for: " + packageName, ie);
-            }
-        }
+        final IntArray pendingBackups = mUserdataHelper.snapshotAppData(packageName,
+                installedUsers);
 
-        PackageRollbackInfo info = new PackageRollbackInfo(newVersion, installedVersion);
-
+        PackageRollbackInfo info = new PackageRollbackInfo(newVersion, installedVersion,
+                pendingBackups, new ArrayList<>());
         RollbackData data;
         try {
             synchronized (mLock) {
@@ -760,40 +790,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         getHandler().post(() -> {
-            PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
             final RollbackData rollbackData = getRollbackForPackage(packageName);
-            if (rollbackData == null) {
-                pmi.finishPackageInstall(token, false);
-                return;
-            }
-
-            if (!rollbackData.inProgress) {
-                Log.e(TAG, "Request to restore userData for: " + packageName
-                        + ", but no rollback in progress.");
-                pmi.finishPackageInstall(token, false);
-                return;
-            }
-
-            final int storageFlags;
-            if (StorageManager.isFileEncryptedNativeOrEmulated()
-                    && !StorageManager.isUserKeyUnlocked(userId)) {
-                // We've encountered a user that hasn't unlocked on a FBE device, so we can't copy
-                // across app user data until the user unlocks their device.
-                Log.e(TAG, "User: " + userId + " isn't unlocked, skipping CE userdata restore.");
-
-                storageFlags = Installer.FLAG_STORAGE_DE;
-            } else {
-                storageFlags = Installer.FLAG_STORAGE_CE | Installer.FLAG_STORAGE_DE;
-            }
-
-            try {
-                mInstaller.restoreAppDataSnapshot(packageName, appId, ceDataInode,
-                        seInfo, userId, storageFlags);
-            } catch (InstallerException ie) {
-                Log.e(TAG, "Unable to restore app data snapshot: " + packageName, ie);
-            }
-
+            final boolean changedRollbackData = mUserdataHelper.restoreAppData(packageName,
+                    rollbackData, userId, appId, ceDataInode, seInfo);
+            final PackageManagerInternal pmi = LocalServices.getService(
+                    PackageManagerInternal.class);
             pmi.finishPackageInstall(token, false);
+
+            // We've updated metadata about this rollback, so save it to flash.
+            if (changedRollbackData) {
+                try {
+                    mRollbackStore.saveAvailableRollback(rollbackData);
+                } catch (IOException ioe) {
+                    // TODO(narayan): What is the right thing to do here ? This isn't a fatal error,
+                    // since it will only result in us trying to restore data again, which will be
+                    // a no-op if there's no data available.
+                    Log.e(TAG, "Unable to save available rollback: " + packageName, ioe);
+                }
+            }
         });
     }
 
@@ -900,10 +914,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                for (PackageRollbackInfo info : data.packages) {
-                    if (info.getPackageName().equals(packageName)) {
-                        return data;
-                    }
+                if (getPackageRollbackInfo(data, packageName) != null) {
+                    return data;
                 }
             }
         }
@@ -926,6 +938,22 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }
+
+        return null;
+    }
+
+    /**
+     * Returns the {@code PackageRollbackInfo} associated with {@code packageName} from
+     * a specified {@code RollbackData}.
+     */
+    static PackageRollbackInfo getPackageRollbackInfo(RollbackData data,
+            String packageName) {
+        for (PackageRollbackInfo info : data.packages) {
+            if (info.getPackageName().equals(packageName)) {
+                return info;
+            }
+        }
+
         return null;
     }
 

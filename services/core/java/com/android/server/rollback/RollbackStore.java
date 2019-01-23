@@ -16,9 +16,12 @@
 
 package com.android.server.rollback;
 
+import android.annotation.NonNull;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
+import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
+import android.util.IntArray;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -96,6 +99,64 @@ class RollbackStore {
             }
         }
         return availableRollbacks;
+    }
+
+    /**
+     * Converts an {@code JSONArray} of integers to an {@code IntArray}.
+     */
+    private static @NonNull IntArray convertToIntArray(@NonNull JSONArray jsonArray)
+            throws JSONException {
+        if (jsonArray.length() == 0) {
+            return new IntArray();
+        }
+
+        final int[] ret = new int[jsonArray.length()];
+        for (int i = 0; i < ret.length; ++i) {
+            ret[i] = jsonArray.getInt(i);
+        }
+
+        return IntArray.wrap(ret);
+    }
+
+    /**
+     * Converts an {@code IntArray} into an {@code JSONArray} of integers.
+     */
+    private static @NonNull JSONArray convertToJsonArray(@NonNull IntArray intArray) {
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < intArray.size(); ++i) {
+            jsonArray.put(intArray.get(i));
+        }
+
+        return jsonArray;
+    }
+
+    private static @NonNull JSONArray convertToJsonArray(@NonNull List<RestoreInfo> list)
+            throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        for (RestoreInfo ri : list) {
+            JSONObject jo = new JSONObject();
+            jo.put("userId", ri.userId);
+            jo.put("appId", ri.appId);
+            jo.put("seInfo", ri.seInfo);
+            jsonArray.put(jo);
+        }
+
+        return jsonArray;
+    }
+
+    private static @NonNull ArrayList<RestoreInfo> convertToRestoreInfoArray(
+            @NonNull JSONArray array) throws JSONException {
+        ArrayList<RestoreInfo> restoreInfos = new ArrayList<>();
+
+        for (int i = 0; i < array.length(); ++i) {
+            JSONObject jo = array.getJSONObject(i);
+            restoreInfos.add(new RestoreInfo(
+                    jo.getInt("userId"),
+                    jo.getInt("appId"),
+                    jo.getString("seInfo")));
+        }
+
+        return restoreInfos;
     }
 
     /**
@@ -239,6 +300,12 @@ class RollbackStore {
         JSONObject json = new JSONObject();
         json.put("versionRolledBackFrom", toJson(info.getVersionRolledBackFrom()));
         json.put("versionRolledBackTo", toJson(info.getVersionRolledBackTo()));
+
+        IntArray pendingBackups = info.getPendingBackups();
+        List<RestoreInfo> pendingRestores = info.getPendingRestores();
+        json.put("pendingBackups", convertToJsonArray(pendingBackups));
+        json.put("pendingRestores", convertToJsonArray(pendingRestores));
+
         return json;
     }
 
@@ -247,7 +314,14 @@ class RollbackStore {
                 json.getJSONObject("versionRolledBackFrom"));
         VersionedPackage versionRolledBackTo = versionedPackageFromJson(
                 json.getJSONObject("versionRolledBackTo"));
-        return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo);
+
+        final IntArray pendingBackups = convertToIntArray(
+                json.getJSONArray("pendingBackups"));
+        final ArrayList<RestoreInfo> pendingRestores = convertToRestoreInfoArray(
+                json.getJSONArray("pendingRestores"));
+
+        return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
+                pendingBackups, pendingRestores);
     }
 
     private JSONArray versionedPackagesToJson(List<VersionedPackage> packages)

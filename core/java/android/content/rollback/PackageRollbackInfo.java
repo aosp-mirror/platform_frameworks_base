@@ -16,10 +16,14 @@
 
 package android.content.rollback;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.IntArray;
+
+import java.util.ArrayList;
 
 /**
  * Information about a rollback available for a particular package.
@@ -31,6 +35,38 @@ public final class PackageRollbackInfo implements Parcelable {
 
     private final VersionedPackage mVersionRolledBackFrom;
     private final VersionedPackage mVersionRolledBackTo;
+
+    /**
+     * Encapsulates information required to restore a snapshot of an app's userdata.
+     *
+     * @hide
+     */
+    public static class RestoreInfo {
+        public final int userId;
+        public final int appId;
+        public final String seInfo;
+
+        public RestoreInfo(int userId, int appId, String seInfo) {
+            this.userId = userId;
+            this.appId = appId;
+            this.seInfo = seInfo;
+        }
+    }
+
+    /*
+     * The list of users for which we need to backup userdata for this package. Backups of
+     * credential encrypted data are listed as pending if the user hasn't unlocked their device
+     * with credentials yet.
+     */
+    // NOTE: Not a part of the Parcelable representation of this object.
+    private final IntArray mPendingBackups;
+
+    /**
+     * The list of users for which we need to restore userdata for this package. This field is
+     * non-null only after a rollback for this package has been committed.
+     */
+    // NOTE: Not a part of the Parcelable representation of this object.
+    private final ArrayList<RestoreInfo> mPendingRestores;
 
     /**
      * Returns the name of the package to roll back from.
@@ -54,15 +90,46 @@ public final class PackageRollbackInfo implements Parcelable {
     }
 
     /** @hide */
+    public IntArray getPendingBackups() {
+        return mPendingBackups;
+    }
+
+    /** @hide */
+    public ArrayList<RestoreInfo> getPendingRestores() {
+        return mPendingRestores;
+    }
+
+    /** @hide */
+    public RestoreInfo getRestoreInfo(int userId) {
+        for (RestoreInfo ri : mPendingRestores) {
+            if (ri.userId == userId) {
+                return ri;
+            }
+        }
+
+        return null;
+    }
+
+    /** @hide */
+    public void removeRestoreInfo(RestoreInfo ri) {
+        mPendingRestores.remove(ri);
+    }
+
+    /** @hide */
     public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
-            VersionedPackage packageRolledBackTo) {
+            VersionedPackage packageRolledBackTo,
+            @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores) {
         this.mVersionRolledBackFrom = packageRolledBackFrom;
         this.mVersionRolledBackTo = packageRolledBackTo;
+        this.mPendingBackups = pendingBackups;
+        this.mPendingRestores = pendingRestores;
     }
 
     private PackageRollbackInfo(Parcel in) {
         this.mVersionRolledBackFrom = VersionedPackage.CREATOR.createFromParcel(in);
         this.mVersionRolledBackTo = VersionedPackage.CREATOR.createFromParcel(in);
+        this.mPendingRestores = null;
+        this.mPendingBackups = null;
     }
 
     @Override
