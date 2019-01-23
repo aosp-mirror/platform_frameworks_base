@@ -83,9 +83,29 @@ public class IpClientUtil {
                 .makeIpClient(ifName, new IpClientCallbacksProxy(callback));
     }
 
-    private static class IpClientCallbacksProxy extends IIpClientCallbacks.Stub {
+    /**
+     * Create a new IpClient.
+     *
+     * <p>This is a convenience method to allow clients to use {@link IpClientCallbacksProxy}
+     * instead of {@link IIpClientCallbacks}.
+     * @see {@link NetworkStack#makeIpClient(String, IIpClientCallbacks)}
+     */
+    public static void makeIpClient(
+            Context context, String ifName, IpClientCallbacksProxy callback) {
+        context.getSystemService(NetworkStack.class)
+                .makeIpClient(ifName, callback);
+    }
+
+    /**
+     * Wrapper to relay calls from {@link IIpClientCallbacks} to {@link IpClientCallbacks}.
+     */
+    public static class IpClientCallbacksProxy extends IIpClientCallbacks.Stub {
         protected final IpClientCallbacks mCb;
-        IpClientCallbacksProxy(IpClientCallbacks cb) {
+
+        /**
+         * Create a new IpClientCallbacksProxy.
+         */
+        public IpClientCallbacksProxy(IpClientCallbacks cb) {
             mCb = cb;
         }
 
