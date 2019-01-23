@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.IBinder.DeathRecipient;
@@ -35,8 +36,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-// TODO: Expose API when the implementation is more complete.
-//@SystemApi
+@SystemApi
 @SystemService(Context.BUGREPORT_SERVICE)
 public class BugreportManager {
     private final Context mContext;
