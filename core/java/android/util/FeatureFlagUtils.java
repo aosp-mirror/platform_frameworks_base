@@ -53,9 +53,9 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
         DEFAULT_FLAGS.put("settings_slice_injection", "false");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put("settings_wifi_dpp", "false");
-        DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "false");
-        DEFAULT_FLAGS.put("settings_wifi_sharing", "false");
+        DEFAULT_FLAGS.put("settings_wifi_dpp", "true");
+        DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "true");
+        DEFAULT_FLAGS.put("settings_wifi_sharing", "true");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put(SAFETY_HUB, "false");
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
