@@ -698,14 +698,6 @@ class TaskRecord extends ConfigurationContainer {
             return false;
         }
 
-        final boolean toTopOfStack = position == MAX_VALUE;
-        if (toTopOfStack && toStack.getResumedActivity() != null
-                && toStack.topRunningActivityLocked() != null) {
-            // Pause the resumed activity on the target stack while re-parenting task on top of it.
-            toStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                    null /* resuming */, false /* pauseImmediately */);
-        }
-
         final int toStackWindowingMode = toStack.getWindowingMode();
         final ActivityRecord topActivity = getTopActivity();
 

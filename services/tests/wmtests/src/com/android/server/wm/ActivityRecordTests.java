@@ -31,7 +31,6 @@ import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 
@@ -76,9 +75,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mStack = (TestActivityStack) new StackBuilder(mRootActivityContainer).build();
         mTask = mStack.getChildAt(0);
         mActivity = mTask.getTopActivity();
-
-        doReturn(false).when(mService).isBooting();
-        doReturn(true).when(mService).isBooted();
     }
 
     @Test
@@ -121,23 +117,22 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
 
-        // The activity is in the focused stack so it should be resumed.
+        // The activity is in the focused stack so it should not move to paused.
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
-        assertTrue(mActivity.isState(RESUMED));
+        assertTrue(mActivity.isState(STOPPED));
         assertFalse(pauseFound.value);
 
-        // Make the activity non focusable
-        mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
-        doReturn(false).when(mActivity).isFocusable();
+        // Clear focused stack
+        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        when(display.getFocusedStack()).thenReturn(null);
 
-        // If the activity is not focusable, it should move to paused.
+        // In the unfocused stack, the activity should move to paused.
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
         assertTrue(mActivity.isState(PAUSING));
         assertTrue(pauseFound.value);
 
         // Make sure that the state does not change for current non-stopping states.
         mActivity.setState(INITIALIZING, "testPausingWhenVisibleFromStopped");
-        doReturn(true).when(mActivity).isFocusable();
 
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
 
