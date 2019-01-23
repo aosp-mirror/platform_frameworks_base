@@ -116,7 +116,7 @@ public final class MediaSession {
 
     private final MediaSessionEngine mImpl;
 
-    // Do not change the name of mCallbackWrapper. Support lib accesses this by using reflection.
+    // Do not change the name of mCallback. Support lib accesses this by using reflection.
     @UnsupportedAppUsage
     private Object mCallback;
 
@@ -160,6 +160,7 @@ public final class MediaSession {
      * @param callback The callback object
      */
     public void setCallback(@Nullable Callback callback) {
+        mCallback = callback == null ? null : new Object();
         mImpl.setCallback(callback);
     }
 
@@ -173,6 +174,7 @@ public final class MediaSession {
      * @param handler The handler that events should be posted on.
      */
     public void setCallback(@Nullable Callback callback, @Nullable Handler handler) {
+        mCallback = callback == null ? null : new Object();
         mImpl.setCallback(callback, handler);
     }
 
