@@ -3389,6 +3389,15 @@ package android.media {
     method @NonNull public android.media.TimedMetaData.Builder setTimedMetaData(long, @NonNull byte[]);
   }
 
+  public abstract class VolumeProvider {
+    method public void setCallback(android.media.VolumeProvider.Callback);
+  }
+
+  public abstract static class VolumeProvider.Callback {
+    ctor public VolumeProvider.Callback();
+    method public abstract void onVolumeChanged(android.media.VolumeProvider);
+  }
+
 }
 
 package android.media.audiopolicy {
@@ -3562,6 +3571,10 @@ package android.media.session {
 
   public abstract static class MediaSession.Callback {
     method public void onSetMediaButtonEventDelegate(@NonNull android.media.session.MediaSessionEngine.MediaButtonEventDelegate);
+  }
+
+  public static final class MediaSession.Token implements android.os.Parcelable {
+    method public android.media.session.ControllerLink getControllerLink();
   }
 
   public final class MediaSessionEngine implements java.lang.AutoCloseable {
