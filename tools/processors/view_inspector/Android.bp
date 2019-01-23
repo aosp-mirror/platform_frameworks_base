@@ -1,5 +1,7 @@
-java_library_host {
+java_plugin {
     name: "view-inspector-annotation-processor",
+
+    processor_class: "android.processor.view.inspector.PlatformInspectableProcessor",
 
     srcs: ["src/java/**/*.java"],
     java_resource_dirs: ["src/resources"],

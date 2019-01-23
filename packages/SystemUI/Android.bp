@@ -73,7 +73,7 @@ android_library {
         "com.android.keyguard",
     ],
 
-    annotation_processors: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler-2.19"],
 }
 
 android_library {
@@ -127,7 +127,7 @@ android_library {
         "--extra-packages",
         "com.android.keyguard:com.android.systemui",
     ],
-    annotation_processors: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler-2.19"],
 }
 
 android_app {
