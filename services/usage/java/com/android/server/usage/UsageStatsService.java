@@ -491,6 +491,8 @@ public class UsageStatsService extends SystemService implements
             switch (event.mEventType) {
                 case Event.ACTIVITY_RESUMED:
                     synchronized (mVisibleActivities) {
+                        // check if this activity has already been resumed
+                        if (mVisibleActivities.get(event.mInstanceId) != null) break;
                         mVisibleActivities.put(event.mInstanceId, event.getClassName());
                         try {
                             mAppTimeLimit.noteUsageStart(packageName, userId);
