@@ -2363,7 +2363,6 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: An existing version of an application package has been
      * rolled back to a previous version.
-     * The data contains the name of the package.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.

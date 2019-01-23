@@ -16,7 +16,6 @@
 
 package com.android.server.rollback;
 
-import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,7 +35,6 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -384,12 +382,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         addRecentlyExecutedRollback(rollback);
                         sendSuccess(statusReceiver);
 
-                        Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED,
-                                Uri.fromParts("package", targetPackageName,
-                                        Manifest.permission.MANAGE_ROLLBACKS));
+                        Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
 
                         // TODO: This call emits the warning "Calling a method in the
                         // system process without a qualified user". Fix that.
+                        // TODO: Limit this to receivers holding the
+                        // MANAGE_ROLLBACKS permission?
                         mContext.sendBroadcast(broadcast);
                     }
             );

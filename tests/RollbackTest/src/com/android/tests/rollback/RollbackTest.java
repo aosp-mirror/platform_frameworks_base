@@ -25,7 +25,6 @@ import android.content.IntentFilter;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.test.InstrumentationRegistry;
@@ -152,7 +151,6 @@ public class RollbackTest {
             // received could lead to test flakiness.
             Intent broadcast = broadcastReceiver.poll(5, TimeUnit.SECONDS);
             assertNotNull(broadcast);
-            assertEquals(TEST_APP_A, broadcast.getData().getSchemeSpecificPart());
             assertNull(broadcastReceiver.poll(0, TimeUnit.SECONDS));
 
             // Verify the recent rollback has been recorded.
@@ -474,8 +472,7 @@ public class RollbackTest {
     @Test
     public void testRollbackBroadcastRestrictions() throws Exception {
         RollbackBroadcastReceiver broadcastReceiver = new RollbackBroadcastReceiver();
-        Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED,
-                Uri.fromParts("package", "com.android.tests.rollback.bogus", null));
+        Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
         try {
             InstrumentationRegistry.getContext().sendBroadcast(broadcast);
             fail("Succeeded in sending restricted broadcast from app context.");
