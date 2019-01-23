@@ -32,7 +32,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateController;
@@ -40,6 +39,8 @@ import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -128,7 +129,8 @@ public class NotificationLogger implements StateListener {
                 NotificationEntry entry = activeNotifications.get(i);
                 String key = entry.notification.getKey();
                 boolean isVisible = mListContainer.isInVisibleLocation(entry);
-                NotificationVisibility visObj = NotificationVisibility.obtain(key, i, N, isVisible);
+                NotificationVisibility visObj = NotificationVisibility.obtain(key, i, N, isVisible,
+                        getNotificationLocation(entry));
                 boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(visObj);
                 if (isVisible) {
                     // Build new set of visible notifications.
@@ -159,6 +161,40 @@ public class NotificationLogger implements StateListener {
             mTmpNoLongerVisibleNotifications.clear();
         }
     };
+
+    /**
+     * Returns the location of the notification referenced by the given {@link NotificationEntry}.
+     */
+    public static NotificationVisibility.NotificationLocation getNotificationLocation(
+            NotificationEntry entry) {
+        ExpandableNotificationRow row = entry.getRow();
+        ExpandableViewState childViewState = row.getViewState();
+
+        if (childViewState == null) {
+            return NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN;
+        }
+        return convertNotificationLocation(childViewState.location);
+    }
+
+    private static NotificationVisibility.NotificationLocation convertNotificationLocation(
+            int location) {
+        switch (location) {
+            case ExpandableViewState.LOCATION_FIRST_HUN:
+                return NotificationVisibility.NotificationLocation.LOCATION_FIRST_HEADS_UP;
+            case ExpandableViewState.LOCATION_HIDDEN_TOP:
+                return NotificationVisibility.NotificationLocation.LOCATION_HIDDEN_TOP;
+            case ExpandableViewState.LOCATION_MAIN_AREA:
+                return NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA;
+            case ExpandableViewState.LOCATION_BOTTOM_STACK_PEEKING:
+                return NotificationVisibility.NotificationLocation.LOCATION_BOTTOM_STACK_PEEKING;
+            case ExpandableViewState.LOCATION_BOTTOM_STACK_HIDDEN:
+                return NotificationVisibility.NotificationLocation.LOCATION_BOTTOM_STACK_HIDDEN;
+            case ExpandableViewState.LOCATION_GONE:
+                return NotificationVisibility.NotificationLocation.LOCATION_GONE;
+            default:
+                return NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN;
+        }
+    }
 
     @Inject
     public NotificationLogger(NotificationListener notificationListener,

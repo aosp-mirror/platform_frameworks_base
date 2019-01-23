@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
@@ -130,8 +131,11 @@ public class NotificationLockscreenUserManagerImpl implements
                     final int count =
                             getEntryManager().getNotificationData().getActiveNotifications().size();
                     final int rank = getEntryManager().getNotificationData().getRank(notificationKey);
+                    NotificationVisibility.NotificationLocation location =
+                            NotificationLogger.getNotificationLocation(
+                                    getEntryManager().getNotificationData().get(notificationKey));
                     final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
-                            rank, count, true);
+                            rank, count, true, location);
                     try {
                         mBarService.onNotificationClick(notificationKey, nv);
                     } catch (RemoteException e) {
