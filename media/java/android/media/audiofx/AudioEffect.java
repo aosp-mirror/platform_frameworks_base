@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -229,7 +228,7 @@ public class AudioEffect {
      * The method {@link #queryEffects()} returns an array of Descriptors to facilitate effects
      * enumeration.
      */
-    public static final class Descriptor implements Parcelable {
+    public static class Descriptor {
 
         public Descriptor() {
         }
@@ -294,7 +293,9 @@ public class AudioEffect {
             this.implementor = implementor;
         }
 
-        private Descriptor(Parcel in) {
+        /** @hide */
+        @TestApi
+        public Descriptor(Parcel in) {
             type = UUID.fromString(in.readString());
             uuid = UUID.fromString(in.readString());
             connectMode = in.readString();
@@ -302,33 +303,14 @@ public class AudioEffect {
             implementor = in.readString();
         }
 
-        public static final Parcelable.Creator<Descriptor> CREATOR =
-                new Parcelable.Creator<Descriptor>() {
-                    /**
-                     * Rebuilds a Descriptor previously stored with writeToParcel().
-                     * @param p Parcel object to read the Descriptor from
-                     * @return a new Descriptor created from the data in the parcel
-                     */
-                    public Descriptor createFromParcel(Parcel p) {
-                        return new Descriptor(p);
-                    }
-                    public Descriptor[] newArray(int size) {
-                        return new Descriptor[size];
-                    }
-        };
-
         @Override
         public int hashCode() {
             return Objects.hash(type, uuid, connectMode, name, implementor);
         }
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        /** @hide */
+        @TestApi
+        public void writeToParcel(Parcel dest) {
             dest.writeString(type.toString());
             dest.writeString(uuid.toString());
             dest.writeString(connectMode);
