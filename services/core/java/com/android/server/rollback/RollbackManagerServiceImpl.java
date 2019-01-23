@@ -219,7 +219,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (info.getPackageName().equals(packageName)) {
                 // TODO: Once the RollbackInfo API supports info about
                 // dependant packages, add that info here.
-                return new RollbackInfo(data.rollbackId, info);
+                return new RollbackInfo(data.rollbackId, data.packages);
             }
         }
         return null;
@@ -279,18 +279,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void executeRollbackInternal(RollbackInfo rollback,
             String callerPackageName, IntentSender statusReceiver) {
-        String targetPackageName = rollback.targetPackage.getPackageName();
-        Log.i(TAG, "Initiating rollback of " + targetPackageName);
+        Log.i(TAG, "Initiating rollback");
 
-        // Get the latest RollbackData for the target package.
-        final RollbackData data = getRollbackForPackage(targetPackageName);
+        RollbackData data = getRollbackForId(rollback.getRollbackId());
         if (data == null) {
-            sendFailure(statusReceiver, "No rollback available for package.");
-            return;
-        }
-
-        if (data.rollbackId != rollback.getRollbackId()) {
-            sendFailure(statusReceiver, "Rollback for package is out of date.");
+            sendFailure(statusReceiver, "Rollback unavailable");
             return;
         }
 
@@ -335,14 +328,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = context.getPackageManager();
         try {
             PackageInstaller packageInstaller = pm.getPackageInstaller();
-            String installerPackageName = pm.getInstallerPackageName(targetPackageName);
-            if (installerPackageName == null) {
-                sendFailure(statusReceiver, "Cannot find installer package");
-                return;
-            }
             PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            parentParams.setInstallerPackageName(installerPackageName);
             parentParams.setAllowDowngrade(true);
             parentParams.setMultiPackage();
             int parentSessionId = packageInstaller.createSession(parentParams);
@@ -351,6 +338,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (PackageRollbackInfo info : data.packages) {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
+                if (installerPackageName == null) {
+                    sendFailure(statusReceiver, "Cannot find installer package");
+                    return;
+                }
                 params.setInstallerPackageName(installerPackageName);
                 params.setAllowDowngrade(true);
                 int sessionId = packageInstaller.createSession(params);
@@ -406,7 +398,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             data.inProgress = true;
             parentSession.commit(receiver.getIntentSender());
         } catch (IOException e) {
-            Log.e(TAG, "Unable to roll back " + targetPackageName, e);
+            Log.e(TAG, "Rollback failed", e);
             sendFailure(statusReceiver, "IOException: " + e.toString());
             return;
         }
@@ -537,9 +529,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             boolean changed = false;
             while (iter.hasNext()) {
                 RollbackInfo rollback = iter.next();
-                if (packageName.equals(rollback.targetPackage.getPackageName())) {
-                    iter.remove();
-                    changed = true;
+                for (PackageRollbackInfo info : rollback.getPackages()) {
+                    if (packageName.equals(info.getPackageName())) {
+                        iter.remove();
+                        changed = true;
+                        break;
+                    }
                 }
             }
 
@@ -929,6 +924,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     if (info.getPackageName().equals(packageName)) {
                         return data;
                     }
+                }
+            }
+        }
+        return null;
+    }
+
+    /*
+     * Returns the RollbackData, if any, for an available rollback with the
+     * given rollbackId.
+     */
+    private RollbackData getRollbackForId(int rollbackId) {
+        synchronized (mLock) {
+            // TODO: Have ensureRollbackDataLoadedLocked return the list of
+            // available rollbacks, to hopefully avoid forgetting to call it?
+            ensureRollbackDataLoadedLocked();
+            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                RollbackData data = mAvailableRollbacks.get(i);
+                if (data.rollbackId == rollbackId) {
+                    return data;
                 }
             }
         }

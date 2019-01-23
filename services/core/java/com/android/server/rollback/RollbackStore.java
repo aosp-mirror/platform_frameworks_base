@@ -114,13 +114,9 @@ class RollbackStore {
                 for (int i = 0; i < array.length(); ++i) {
                     JSONObject element = array.getJSONObject(i);
                     int rollbackId = element.getInt("rollbackId");
-                    String packageName = element.getString("packageName");
-                    long higherVersionCode = element.getLong("higherVersionCode");
-                    long lowerVersionCode = element.getLong("lowerVersionCode");
-                    PackageRollbackInfo target = new PackageRollbackInfo(
-                            new VersionedPackage(packageName, higherVersionCode),
-                            new VersionedPackage(packageName, lowerVersionCode));
-                    RollbackInfo rollback = new RollbackInfo(rollbackId, target);
+                    List<PackageRollbackInfo> packages = packageRollbackInfosFromJson(
+                            element.getJSONArray("packages"));
+                    RollbackInfo rollback = new RollbackInfo(rollbackId, packages);
                     recentlyExecutedRollbacks.add(rollback);
                 }
             } catch (IOException | JSONException e) {
@@ -155,18 +151,8 @@ class RollbackStore {
     void saveAvailableRollback(RollbackData data) throws IOException {
         try {
             JSONObject dataJson = new JSONObject();
-            JSONArray packagesJson = new JSONArray();
-            for (PackageRollbackInfo info : data.packages) {
-                JSONObject infoJson = new JSONObject();
-                infoJson.put("packageName", info.getPackageName());
-                infoJson.put("higherVersionCode",
-                        info.getVersionRolledBackFrom().getLongVersionCode());
-                infoJson.put("lowerVersionCode",
-                        info.getVersionRolledBackTo().getVersionCode());
-                packagesJson.put(infoJson);
-            }
             dataJson.put("rollbackId", data.rollbackId);
-            dataJson.put("packages", packagesJson);
+            dataJson.put("packages", toJson(data.packages));
             dataJson.put("timestamp", data.timestamp.toString());
 
             PrintWriter pw = new PrintWriter(new File(data.backupDir, "rollback.json"));
@@ -200,11 +186,7 @@ class RollbackStore {
                 RollbackInfo rollback = recentlyExecutedRollbacks.get(i);
                 JSONObject element = new JSONObject();
                 element.put("rollbackId", rollback.getRollbackId());
-                element.put("packageName", rollback.targetPackage.getPackageName());
-                element.put("higherVersionCode",
-                        rollback.targetPackage.getVersionRolledBackFrom().getLongVersionCode());
-                element.put("lowerVersionCode",
-                        rollback.targetPackage.getVersionRolledBackTo().getLongVersionCode());
+                element.put("packages", toJson(rollback.getPackages()));
                 array.put(element);
             }
 
@@ -229,23 +211,46 @@ class RollbackStore {
 
             int rollbackId = dataJson.getInt("rollbackId");
             RollbackData data = new RollbackData(rollbackId, backupDir);
-
-            JSONArray packagesJson = dataJson.getJSONArray("packages");
-            for (int i = 0; i < packagesJson.length(); ++i) {
-                JSONObject infoJson = packagesJson.getJSONObject(i);
-                String packageName = infoJson.getString("packageName");
-                long higherVersionCode = infoJson.getLong("higherVersionCode");
-                long lowerVersionCode = infoJson.getLong("lowerVersionCode");
-                data.packages.add(new PackageRollbackInfo(
-                        new VersionedPackage(packageName, higherVersionCode),
-                        new VersionedPackage(packageName, lowerVersionCode)));
-            }
-
+            data.packages.addAll(packageRollbackInfosFromJson(dataJson.getJSONArray("packages")));
             data.timestamp = Instant.parse(dataJson.getString("timestamp"));
             return data;
         } catch (JSONException | DateTimeParseException e) {
             throw new IOException(e);
         }
+    }
+
+    private JSONObject toJson(PackageRollbackInfo info) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("packageName", info.getPackageName());
+        json.put("higherVersionCode", info.getVersionRolledBackFrom().getLongVersionCode());
+        json.put("lowerVersionCode", info.getVersionRolledBackTo().getLongVersionCode());
+        return json;
+    }
+
+    private PackageRollbackInfo packageRollbackInfoFromJson(JSONObject json) throws JSONException {
+        String packageName = json.getString("packageName");
+        long higherVersionCode = json.getLong("higherVersionCode");
+        long lowerVersionCode = json.getLong("lowerVersionCode");
+        return new PackageRollbackInfo(
+                new VersionedPackage(packageName, higherVersionCode),
+                new VersionedPackage(packageName, lowerVersionCode));
+    }
+
+    private JSONArray toJson(List<PackageRollbackInfo> infos) throws JSONException {
+        JSONArray json = new JSONArray();
+        for (PackageRollbackInfo info : infos) {
+            json.put(toJson(info));
+        }
+        return json;
+    }
+
+    private List<PackageRollbackInfo> packageRollbackInfosFromJson(JSONArray json)
+            throws JSONException {
+        List<PackageRollbackInfo> infos = new ArrayList<>();
+        for (int i = 0; i < json.length(); ++i) {
+            infos.add(packageRollbackInfoFromJson(json.getJSONObject(i)));
+        }
+        return infos;
     }
 
     /**
