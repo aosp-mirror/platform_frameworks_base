@@ -199,14 +199,6 @@ public final class Session2Token implements Parcelable {
     }
 
     /**
-     * @hide
-     * @return component name of the session. Can be {@code null} for {@link #TYPE_SESSION}.
-     */
-    public ComponentName getComponentName() {
-        return mComponentName;
-    }
-
-    /**
      * @return type of the token
      * @see #TYPE_SESSION
      * @see #TYPE_SESSION_SERVICE
@@ -215,10 +207,7 @@ public final class Session2Token implements Parcelable {
         return mType;
     }
 
-    /**
-     * @hide
-     */
-    public Session2Link getSessionLink() {
+    Session2Link getSessionLink() {
         return mSessionLink;
     }
 
