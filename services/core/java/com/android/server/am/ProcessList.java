@@ -145,6 +145,11 @@ public final class ProcessList {
     static final int CACHED_APP_MAX_ADJ = 999;
     static final int CACHED_APP_MIN_ADJ = 900;
 
+    // This is the oom_adj level that we allow to die first. This cannot be equal to
+    // CACHED_APP_MAX_ADJ unless processes are actively being assigned an oom_score_adj of
+    // CACHED_APP_MAX_ADJ.
+    static final int CACHED_APP_LMK_FIRST_ADJ = 950;
+
     // Number of levels we have available for different service connection group importance
     // levels.
     static final int CACHED_APP_IMPORTANCE_LEVELS = 5;
@@ -266,7 +271,7 @@ public final class ProcessList {
     // can't give it a different value for every possible kind of process.
     private final int[] mOomAdj = new int[] {
             FOREGROUND_APP_ADJ, VISIBLE_APP_ADJ, PERCEPTIBLE_APP_ADJ,
-            BACKUP_APP_ADJ, CACHED_APP_MIN_ADJ, CACHED_APP_MAX_ADJ
+            BACKUP_APP_ADJ, CACHED_APP_MIN_ADJ, CACHED_APP_LMK_FIRST_ADJ
     };
     // These are the low-end OOM level limits.  This is appropriate for an
     // HVGA or smaller phone with less than 512MB.  Values are in KB.
