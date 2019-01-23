@@ -18,6 +18,7 @@ package com.android.server.locksettings;
 
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+
 import static com.android.internal.widget.LockPatternUtils.stringToPattern;
 
 import android.app.ActivityManager;
@@ -58,6 +59,18 @@ class LockSettingsShellCommand extends ShellCommand {
             mCurrentUserId = ActivityManager.getService().getCurrentUser().id;
 
             parseArgs();
+            if (!mLockPatternUtils.hasSecureLockScreen()) {
+                switch (cmd) {
+                    case COMMAND_HELP:
+                    case COMMAND_GET_DISABLED:
+                    case COMMAND_SET_DISABLED:
+                        break;
+                    default:
+                        getErrPrintWriter().println(
+                                "The device does not support lock screen - ignoring the command.");
+                        return -1;
+                }
+            }
             if (!checkCredential()) {
                 return -1;
             }

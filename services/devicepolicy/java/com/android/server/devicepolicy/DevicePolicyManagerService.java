@@ -4223,7 +4223,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPasswordHistoryLength(ComponentName who, int length, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
@@ -4246,13 +4246,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordHistoryLength(ComponentName who, int userHandle, boolean parent) {
+        if (!mLockPatternUtils.hasSecureLockScreen()) {
+            return 0;
+        }
         return getStrictestPasswordRequirement(who, userHandle, parent,
                 admin -> admin.passwordHistoryLength, PASSWORD_QUALITY_UNSPECIFIED);
     }
 
     @Override
     public void setPasswordExpirationTimeout(ComponentName who, long timeout, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
@@ -4288,7 +4291,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public long getPasswordExpirationTimeout(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return 0L;
         }
         enforceFullCrossUsersPermission(userHandle);
@@ -4423,7 +4426,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public long getPasswordExpiration(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return 0L;
         }
         enforceFullCrossUsersPermission(userHandle);
@@ -4770,6 +4773,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getCurrentFailedPasswordAttempts(int userHandle, boolean parent) {
+        if (!mLockPatternUtils.hasSecureLockScreen()) {
+            return 0;
+        }
         enforceFullCrossUsersPermission(userHandle);
         synchronized (getLockObject()) {
             if (!isCallerWithSystemUid()) {
@@ -4789,7 +4795,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setMaximumFailedPasswordsForWipe(ComponentName who, int num, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
@@ -4815,7 +4821,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getMaximumFailedPasswordsForWipe(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return 0;
         }
         enforceFullCrossUsersPermission(userHandle);
@@ -4829,7 +4835,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return UserHandle.USER_NULL;
         }
         enforceFullCrossUsersPermission(userHandle);
@@ -4910,6 +4916,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
     @Override
     public boolean resetPassword(String passwordOrNull, int flags) throws RemoteException {
+        if (!mLockPatternUtils.hasSecureLockScreen()) {
+            Slog.w(LOG_TAG, "Cannot reset password when the device has no lock screen");
+            return false;
+        }
+
         final int callingUid = mInjector.binderGetCallingUid();
         final int userHandle = mInjector.userHandleGetCallingUserId();
 
@@ -5252,7 +5263,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setRequiredStrongAuthTimeout(ComponentName who, long timeoutMs,
             boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
@@ -5285,7 +5296,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public long getRequiredStrongAuthTimeout(ComponentName who, int userId, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
         }
         enforceFullCrossUsersPermission(userId);
@@ -6494,7 +6505,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         enforceFullCrossUsersPermission(userHandle);
@@ -6514,7 +6525,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void reportPasswordChanged(@UserIdInt int userId) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         enforceFullCrossUsersPermission(userId);
@@ -8800,7 +8811,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setTrustAgentConfiguration(ComponentName admin, ComponentName agent,
             PersistableBundle args, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         Preconditions.checkNotNull(admin, "admin is null");
@@ -8817,7 +8828,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public List<PersistableBundle> getTrustAgentConfiguration(ComponentName admin,
             ComponentName agent, int userHandle, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return null;
         }
         Preconditions.checkNotNull(agent, "agent null");
@@ -13215,7 +13226,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean setResetPasswordToken(ComponentName admin, byte[] token) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return false;
         }
         if (token == null || token.length < 32) {
@@ -13243,7 +13254,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean clearResetPasswordToken(ComponentName admin) {
-        if (!mHasFeature) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return false;
         }
         synchronized (getLockObject()) {
@@ -13269,6 +13280,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isResetPasswordTokenActive(ComponentName admin) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
+            return false;
+        }
         synchronized (getLockObject()) {
             final int userHandle = mInjector.userHandleGetCallingUserId();
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -13290,6 +13304,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean resetPasswordWithToken(ComponentName admin, String passwordOrNull, byte[] token,
             int flags) {
+        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
+            return false;
+        }
         Preconditions.checkNotNull(token);
         synchronized (getLockObject()) {
             final int userHandle = mInjector.userHandleGetCallingUserId();

@@ -19,6 +19,7 @@ package android.app;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -124,6 +125,7 @@ public class KeyguardManager {
      *
      * @return the intent for launching the activity or null if no password is required.
      **/
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public Intent createConfirmDeviceCredentialIntent(CharSequence title, CharSequence description) {
         if (!isDeviceSecure()) return null;
         Intent intent = new Intent(ACTION_CONFIRM_DEVICE_CREDENTIAL);
@@ -176,6 +178,7 @@ public class KeyguardManager {
      * @throws IllegalStateException if the device has already been provisioned
      * @hide
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     @SystemApi
     public Intent createConfirmFactoryResetCredentialIntent(
             CharSequence title, CharSequence description, CharSequence alternateButtonLabel) {
@@ -231,6 +234,7 @@ public class KeyguardManager {
      * secure notifications cannot be shown if {@code false}
      * @hide
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     @RequiresPermission(Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)
     @SystemApi
     public void setPrivateNotificationsAllowed(boolean allow) {
@@ -249,6 +253,7 @@ public class KeyguardManager {
      * By default, private notifications are allowed.
      * @hide
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     @RequiresPermission(Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)
     @SystemApi
     public boolean getPrivateNotificationsAllowed() {
