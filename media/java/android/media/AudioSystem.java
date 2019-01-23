@@ -1100,7 +1100,8 @@ public class AudioSystem
             (1 << STREAM_RING) |
             (1 << STREAM_NOTIFICATION) |
             (1 << STREAM_SYSTEM) |
-            (1 << STREAM_VOICE_CALL);
+            (1 << STREAM_VOICE_CALL) |
+            (1 << STREAM_BLUETOOTH_SCO);
 
     /**
      * Event posted by AudioTrack and AudioRecord JNI (JNIDeviceCallback) when routing changes.
