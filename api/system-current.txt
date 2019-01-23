@@ -5728,7 +5728,6 @@ package android.provider {
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
-    field public static final String NAMESPACE_NOTIFICATION_ASSISTANT = "notification_assistant";
   }
 
   public static interface DeviceConfig.ActivityManager {
@@ -5759,6 +5758,12 @@ package android.provider {
     field public static final String NAMESPACE = "intelligence_attention";
     field public static final String PROPERTY_ATTENTION_ENABLED = "attention_enabled";
     field public static final String PROPERTY_ATTENTION_SETTINGS = "attention_settings";
+  }
+
+  public static interface DeviceConfig.NotificationAssistant {
+    field public static final String GENERATE_ACTIONS = "generate_actions";
+    field public static final String GENERATE_REPLIES = "generate_replies";
+    field public static final String NAMESPACE = "notification_assistant";
   }
 
   public static interface DeviceConfig.OnPropertyChangedListener {
