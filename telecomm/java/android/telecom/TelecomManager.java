@@ -793,15 +793,17 @@ public class TelecomManager {
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
      * exists no user-chosen default {@code PhoneAccount}.
+     * <p>
+     * The default dialer has access to use this method.
      *
      * @return The user outgoing phone account selected by the user.
-     * @hide
      */
-    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public PhoneAccountHandle getUserSelectedOutgoingPhoneAccount() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getUserSelectedOutgoingPhoneAccount();
+                return getTelecomService().getUserSelectedOutgoingPhoneAccount(
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getUserSelectedOutgoingPhoneAccount", e);
@@ -810,10 +812,14 @@ public class TelecomManager {
     }
 
     /**
-     * Sets the user-chosen default for making outgoing phone calls.
+     * Sets the user-chosen default {@link PhoneAccountHandle} for making outgoing phone calls.
+     *
+     * @param accountHandle The {@link PhoneAccountHandle} which will be used by default for making
+     *                      outgoing voice calls.
      * @hide
      */
-    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public void setUserSelectedOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
