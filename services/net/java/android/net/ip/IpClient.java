@@ -19,6 +19,7 @@ package android.net.ip;
 import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.DhcpResults;
 import android.net.INetd;
 import android.net.IpPrefix;
@@ -37,7 +38,6 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.shared.InitialConfiguration;
 import android.net.util.InterfaceParams;
-import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
 import android.net.util.SharedLog;
 import android.os.ConditionVariable;
@@ -391,6 +391,7 @@ public class IpClient extends StateMachine {
     protected final IpClientCallbacks mCallback;
     private final Dependencies mDependencies;
     private final CountDownLatch mShutdownLatch;
+    private final ConnectivityManager mCm;
     private final INetworkManagementService mNwService;
     private final NetlinkTracker mNetlinkTracker;
     private final WakeupMessage mProvisioningTimeoutAlarm;
@@ -408,7 +409,6 @@ public class IpClient extends StateMachine {
      */
     private LinkProperties mLinkProperties;
     private android.net.shared.ProvisioningConfiguration mConfiguration;
-    private MultinetworkPolicyTracker mMultinetworkPolicyTracker;
     private IpReachabilityMonitor mIpReachabilityMonitor;
     private DhcpClient mDhcpClient;
     private DhcpResults mDhcpResults;
@@ -476,6 +476,7 @@ public class IpClient extends StateMachine {
         mCallback = new LoggingCallbackWrapper(callback);
         mDependencies = deps;
         mShutdownLatch = new CountDownLatch(1);
+        mCm = mContext.getSystemService(ConnectivityManager.class);
         mNwService = deps.getNMS();
 
         sSmLogs.putIfAbsent(mInterfaceName, new SharedLog(MAX_LOG_RECORDS, mTag));
@@ -961,8 +962,9 @@ public class IpClient extends StateMachine {
         // Note that we can still be disconnected by IpReachabilityMonitor
         // if the IPv6 default gateway (but not the IPv6 DNS servers; see
         // accompanying code in IpReachabilityMonitor) is unreachable.
-        final boolean ignoreIPv6ProvisioningLoss = (mMultinetworkPolicyTracker != null)
-                && !mMultinetworkPolicyTracker.getAvoidBadWifi();
+        final boolean ignoreIPv6ProvisioningLoss =
+                mConfiguration != null && mConfiguration.mUsingMultinetworkPolicyTracker
+                && mCm.getAvoidBadWifi();
 
         // Additionally:
         //
@@ -1253,7 +1255,7 @@ public class IpClient extends StateMachine {
                             mCallback.onReachabilityLost(logMsg);
                         }
                     },
-                    mMultinetworkPolicyTracker);
+                    mConfiguration.mUsingMultinetworkPolicyTracker);
         } catch (IllegalArgumentException iae) {
             // Failed to start IpReachabilityMonitor. Log it and call
             // onProvisioningFailure() immediately.
@@ -1486,13 +1488,6 @@ public class IpClient extends StateMachine {
                 return;
             }
 
-            if (mConfiguration.mUsingMultinetworkPolicyTracker) {
-                mMultinetworkPolicyTracker = new MultinetworkPolicyTracker(
-                        mContext, getHandler(),
-                        () -> mLog.log("OBSERVED AvoidBadWifi changed"));
-                mMultinetworkPolicyTracker.start();
-            }
-
             if (mConfiguration.mUsingIpReachabilityMonitor && !startIpReachabilityMonitor()) {
                 doImmediateProvisioningFailure(
                         IpManagerEvent.ERROR_STARTING_IPREACHABILITYMONITOR);
@@ -1508,11 +1503,6 @@ public class IpClient extends StateMachine {
             if (mIpReachabilityMonitor != null) {
                 mIpReachabilityMonitor.stop();
                 mIpReachabilityMonitor = null;
-            }
-
-            if (mMultinetworkPolicyTracker != null) {
-                mMultinetworkPolicyTracker.shutdown();
-                mMultinetworkPolicyTracker = null;
             }
 
             if (mDhcpClient != null) {
