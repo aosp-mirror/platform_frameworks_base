@@ -1519,13 +1519,6 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
-            reportNotSupported();
-            return false;
-        }
-
-        @BinderThread
-        @Override
         public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
             reportNotSupported();
         }
