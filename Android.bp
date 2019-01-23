@@ -519,8 +519,6 @@ java_defaults {
         "media/java/android/media/tv/ITvInputSessionCallback.aidl",
         "media/java/android/media/tv/ITvRemoteProvider.aidl",
         "media/java/android/media/tv/ITvRemoteServiceInput.aidl",
-        "media/java/android/service/media/IMediaBrowserService.aidl",
-        "media/java/android/service/media/IMediaBrowserServiceCallbacks.aidl",
         "telecomm/java/com/android/internal/telecom/ICallRedirectionAdapter.aidl",
         "telecomm/java/com/android/internal/telecom/ICallRedirectionService.aidl",
         "telecomm/java/com/android/internal/telecom/ICallScreeningAdapter.aidl",

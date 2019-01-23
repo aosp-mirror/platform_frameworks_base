@@ -35,6 +35,8 @@ filegroup {
         "apex/java/android/media/MediaMetadata.java",
         "apex/java/android/media/MediaParceledListSlice.java",
         "apex/java/android/media/VolumeProvider.java",
+        "apex/java/android/media/browse/MediaBrowser.java",
+        "apex/java/android/media/browse/MediaBrowserUtils.java",
         "apex/java/android/media/session/ControllerCallbackLink.java",
         "apex/java/android/media/session/ControllerLink.java",
         "apex/java/android/media/session/ISession.aidl",
@@ -47,6 +49,9 @@ filegroup {
         "apex/java/android/media/session/PlaybackState.java",
         "apex/java/android/media/session/SessionCallbackLink.java",
         "apex/java/android/media/session/SessionLink.java",
+        "apex/java/android/service/media/IMediaBrowserService.aidl",
+        "apex/java/android/service/media/IMediaBrowserServiceCallbacks.aidl",
+        "apex/java/android/service/media/MediaBrowserService.java",
     ],
 }
 
@@ -60,6 +65,8 @@ filegroup {
         "apex/java/android/media/session/ISessionCallback.aidl",
         "apex/java/android/media/session/ISessionController.aidl",
         "apex/java/android/media/session/ISessionControllerCallback.aidl",
+        "apex/java/android/service/media/IMediaBrowserService.aidl",
+        "apex/java/android/service/media/IMediaBrowserServiceCallbacks.aidl",
     ],
 }
 
