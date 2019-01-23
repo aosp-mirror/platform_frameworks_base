@@ -1508,6 +1508,12 @@ public class ConnectivityServiceTest {
         verifyActiveNetwork(TRANSPORT_WIFI);
     }
 
+    @Test
+    public void testRequiresValidation() {
+        assertTrue(NetworkMonitorUtils.isValidationRequired(
+                mCm.getDefaultRequest().networkCapabilities));
+    }
+
     enum CallbackState {
         NONE,
         AVAILABLE,
@@ -4404,8 +4410,7 @@ public class ConnectivityServiceTest {
         mMockVpn.setUids(ranges);
         // VPN networks do not satisfy the default request and are automatically validated
         // by NetworkMonitor
-        assertFalse(NetworkMonitorUtils.isValidationRequired(
-                mCm.getDefaultRequest().networkCapabilities, vpnNetworkAgent.mNetworkCapabilities));
+        assertFalse(NetworkMonitorUtils.isValidationRequired(vpnNetworkAgent.mNetworkCapabilities));
         vpnNetworkAgent.setNetworkValid();
 
         vpnNetworkAgent.connect(false);
