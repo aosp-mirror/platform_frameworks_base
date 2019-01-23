@@ -72,6 +72,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -823,6 +824,16 @@ public class FileUtils {
      * @hide
      */
     public static boolean contains(File[] dirs, File file) {
+        for (File dir : dirs) {
+            if (contains(dir, file)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** {@hide} */
+    public static boolean contains(Collection<File> dirs, File file) {
         for (File dir : dirs) {
             if (contains(dir, file)) {
                 return true;

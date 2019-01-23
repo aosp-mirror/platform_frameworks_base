@@ -70,6 +70,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -1224,7 +1226,7 @@ public final class MediaStore {
                 if (sv.isPrimary()) {
                     return VOLUME_EXTERNAL;
                 } else {
-                    return checkArgumentVolumeName(sv.getUuid());
+                    return checkArgumentVolumeName(sv.getNormalizedUuid());
                 }
             }
             throw new IllegalStateException("Unknown volume at " + path);
@@ -2919,7 +2921,7 @@ public final class MediaStore {
                 if (vi.isPrimary()) {
                     volumeNames.add(VOLUME_EXTERNAL);
                 } else {
-                    volumeNames.add(vi.getFsUuid());
+                    volumeNames.add(vi.getNormalizedFsUuid());
                 }
             }
         }
@@ -2953,8 +2955,7 @@ public final class MediaStore {
         // When not one of the well-known values above, it must be a hex UUID
         for (int i = 0; i < volumeName.length(); i++) {
             final char c = volumeName.charAt(i);
-            if (('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
-                    || ('0' <= c && c <= '9') || (c == '-')) {
+            if (('a' <= c && c <= 'f') || ('0' <= c && c <= '9') || (c == '-')) {
                 continue;
             } else {
                 throw new IllegalArgumentException("Invalid volume name: " + volumeName);
@@ -2963,23 +2964,26 @@ public final class MediaStore {
         return volumeName;
     }
 
-    /** {@hide} */
+    /**
+     * Return path where the given volume is mounted. Not valid for
+     * {@link #VOLUME_INTERNAL}.
+     *
+     * @hide
+     */
     public static @NonNull File getVolumePath(@NonNull String volumeName)
             throws FileNotFoundException {
         if (TextUtils.isEmpty(volumeName)) {
             throw new IllegalArgumentException();
         }
 
-        if (VOLUME_INTERNAL.equals(volumeName)) {
-            return Environment.getDataDirectory();
-        } else if (VOLUME_EXTERNAL.equals(volumeName)) {
+        if (VOLUME_EXTERNAL.equals(volumeName)) {
             return Environment.getExternalStorageDirectory();
         }
 
         final StorageManager sm = AppGlobals.getInitialApplication()
                 .getSystemService(StorageManager.class);
         for (VolumeInfo vi : sm.getVolumes()) {
-            if (Objects.equals(vi.getFsUuid(), volumeName)) {
+            if (Objects.equals(vi.getNormalizedFsUuid(), volumeName)) {
                 final File path = vi.getPathForUser(UserHandle.myUserId());
                 if (path != null) {
                     return path;
@@ -2989,6 +2993,33 @@ public final class MediaStore {
             }
         }
         throw new FileNotFoundException("Failed to find path for " + volumeName);
+    }
+
+    /**
+     * Return paths that should be scanned for the given volume.
+     *
+     * @hide
+     */
+    public static @NonNull Collection<File> getVolumeScanPaths(@NonNull String volumeName)
+            throws FileNotFoundException {
+        if (TextUtils.isEmpty(volumeName)) {
+            throw new IllegalArgumentException();
+        }
+
+        final ArrayList<File> res = new ArrayList<>();
+        if (VOLUME_INTERNAL.equals(volumeName)) {
+            res.add(new File(Environment.getRootDirectory(), "media"));
+            res.add(new File(Environment.getOemDirectory(), "media"));
+            res.add(new File(Environment.getProductDirectory(), "media"));
+        } else {
+            res.add(getVolumePath(volumeName));
+            final UserManager um = AppGlobals.getInitialApplication()
+                    .getSystemService(UserManager.class);
+            if (VOLUME_EXTERNAL.equals(volumeName) && um.isDemoUser()) {
+                res.add(Environment.getDataPreloadsMediaDirectory());
+            }
+        }
+        return res;
     }
 
     /**
