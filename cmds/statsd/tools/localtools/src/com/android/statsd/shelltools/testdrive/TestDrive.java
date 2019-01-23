@@ -55,7 +55,8 @@ public class TestDrive {
         "AID_ROOT",
         "AID_BLUETOOTH",
         "AID_LMKD",
-        "com.android.managedprovisioning"
+        "com.android.managedprovisioning",
+        "AID_NETWORK_STACK"
     };
     private static final Logger LOGGER = Logger.getLogger(TestDrive.class.getName());
 
