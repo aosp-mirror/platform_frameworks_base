@@ -1774,4 +1774,9 @@ interface ITelephony {
      * Set the String provisioning value for the provisioning key specified.
      */
     int setImsProvisioningString(int subId, int key, String value);
+
+    /**
+     * Enable or disable a logical modem stack associated with the slotIndex.
+     */
+    boolean enableModemForSlot(int slotIndex, boolean enable);
 }
