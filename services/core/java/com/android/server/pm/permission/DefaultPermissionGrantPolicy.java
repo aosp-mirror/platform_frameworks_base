@@ -1272,6 +1272,7 @@ public final class DefaultPermissionGrantPolicy {
             return mContext.getPackageManager().getPackageInfo(pkg,
                     DEFAULT_PACKAGE_INFO_QUERY_FLAGS | extraFlags);
         } catch (NameNotFoundException e) {
+            Slog.e(TAG, "PackageNot found: " + pkg, e);
             return null;
         }
     }
