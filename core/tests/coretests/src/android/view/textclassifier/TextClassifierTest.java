@@ -262,6 +262,9 @@ public class TextClassifierTest {
         assertEquals(
                 context.getString(com.android.internal.R.string.translate),
                 classification.getActions().get(0).getTitle());
+        Intent intent = (Intent) classification.getExtras()
+                .getParcelableArrayList(TextClassifierImpl.ACTIONS_INTENTS).get(0);
+        assertEquals(Intent.ACTION_TRANSLATE, intent.getAction());
 
         LocaleList.setDefault(originalLocales);
     }
