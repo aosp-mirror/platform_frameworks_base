@@ -91,8 +91,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.service.vr.IVrManager;
-import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
@@ -203,7 +201,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_CREATE_SESSION = 1050;
 
     static final int MSG_START_INPUT = 2000;
-    static final int MSG_START_VR_INPUT = 2010;
 
     static final int MSG_UNBIND_CLIENT = 3000;
     static final int MSG_BIND_CLIENT = 3010;
@@ -378,28 +375,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             method = _method;
             session = _session;
             channel = _channel;
-        }
-    }
-
-    /**
-     * VR state callback.
-     * Listens for when VR mode finishes.
-     */
-    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
-        @Override
-        public void onVrStateChanged(boolean enabled) {
-            if (!enabled) {
-                restoreNonVrImeFromSettingsNoCheck();
-            }
-        }
-    };
-
-    private void restoreNonVrImeFromSettingsNoCheck() {
-        // switch back to non-VR InputMethod from settings.
-        synchronized (mMethodMap) {
-            if (!mIsVrImeStarted) return;
-            mIsVrImeStarted = false;
-            updateFromSettingsLocked(false);
         }
     }
 
@@ -596,9 +571,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     int mCurTokenDisplayId = INVALID_DISPLAY;
 
     final ImeDisplayValidator mImeDisplayValidator;
-
-    /** True if VR IME started by {@link #startVrInputMethodNoCheck}. */
-    boolean mIsVrImeStarted;
 
     /**
      * If non-null, this is the input method service we are currently connected
@@ -972,31 +944,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         DEFAULT_DISPLAY).sendToTarget();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
-            }
-        }
-    }
-
-    /**
-     * Start a VR InputMethod that matches IME with package name of {@param component}.
-     * Note: This method is called from {@link android.app.VrManager}.
-     */
-    private void startVrInputMethodNoCheck(@Nullable ComponentName component) {
-        if (component == null) {
-            // clear the current VR-only IME (if any) and restore normal IME.
-            restoreNonVrImeFromSettingsNoCheck();
-            return;
-        }
-
-        synchronized (mMethodMap) {
-            String packageName = component.getPackageName();
-            for (InputMethodInfo info : mMethodList) {
-                if (TextUtils.equals(info.getPackageName(), packageName) && info.isVrOnly()) {
-                    // set this is as current inputMethod without updating settings.
-                    setInputMethodEnabledLocked(info.getId(), true);
-                    setInputMethodLocked(info.getId(), NOT_A_SUBTYPE_ID);
-                    mIsVrImeStarted = true;
-                    break;
-                }
             }
         }
     }
@@ -1452,15 +1399,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
-        // Register VR-state listener.
-        IVrManager vrManager = (IVrManager) ServiceManager.getService(Context.VR_SERVICE);
-        if (vrManager != null) {
-            try {
-                vrManager.registerListener(mVrStateCallbacks);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to register VR mode state listener.");
-            }
-        }
     }
 
     private void resetDefaultImeLocked(Context context) {
@@ -1688,25 +1626,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getInputMethodListLocked(false /* isVrOnly */, resolvedUserIds[0]);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
-    public List<InputMethodInfo> getVrInputMethodList() {
-        final int callingUserId = UserHandle.getCallingUserId();
-        synchronized (mMethodMap) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(callingUserId,
-                    mSettings.getCurrentUserId(), null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
-            }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getInputMethodListLocked(true /* isVrOnly */, resolvedUserIds[0]);
+                return getInputMethodListLocked(resolvedUserIds[0]);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1732,8 +1652,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    private List<InputMethodInfo> getInputMethodListLocked(boolean isVrOnly,
-            @UserIdInt int userId) {
+    private List<InputMethodInfo> getInputMethodListLocked(@UserIdInt int userId) {
         final ArrayList<InputMethodInfo> methodList;
         if (userId == mSettings.getCurrentUserId()) {
             // Create a copy.
@@ -1747,7 +1666,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
                     methodList);
         }
-        methodList.removeIf(imi -> imi.isVrOnly() != isVrOnly);
         return methodList;
     }
 
@@ -2021,8 +1939,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
-        final int displayIdToShowIme = computeImeDisplayIdForTarget(
-                cs.selfReportedDisplayId, mIsVrImeStarted, mImeDisplayValidator);
+        final int displayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
+                mImeDisplayValidator);
 
         if (mCurClient != cs) {
             // Was the keyguard locked when switching over to the new client?
@@ -2131,17 +2049,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * Find the display where the IME should be shown.
      *
      * @param displayId the ID of the display where the IME client target is.
-     * @param isVrImeStarted {@code true} if VR IME started, {@code false} otherwise.
      * @param checker instance of {@link ImeDisplayValidator} which is used for
      *                checking display config to adjust the final target display.
      * @return The ID of the display where the IME should be shown.
      */
-    static int computeImeDisplayIdForTarget(int displayId, boolean isVrImeStarted,
-            @NonNull ImeDisplayValidator checker) {
-        // For VR IME, we always show in default display.
-        if (isVrImeStarted) {
-            return DEFAULT_DISPLAY;
-        }
+    static int computeImeDisplayIdForTarget(int displayId, @NonNull ImeDisplayValidator checker) {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
             // We always assume that the default display id suitable to show the IME window.
             return DEFAULT_DISPLAY;
@@ -3627,9 +3539,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_SET_INTERACTIVE:
                 handleSetInteractive(msg.arg1 != 0);
                 return true;
-            case MSG_START_VR_INPUT:
-                startVrInputMethodNoCheck((ComponentName) msg.obj);
-                return true;
             case MSG_REPORT_FULLSCREEN_MODE: {
                 final boolean fullscreen = msg.arg1 != 0;
                 final ClientState clientState = (ClientState)msg.obj;
@@ -3716,6 +3625,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             try {
                 final InputMethodInfo imi = new InputMethodInfo(context, ri,
                         additionalSubtypeMap.get(imeId));
+                if (imi.isVrOnly()) {
+                    continue;  // Skip VR-only IME, which isn't supported for now.
+                }
                 methodList.add(imi);
                 methodMap.put(imi.getId(), imi);
                 if (DEBUG) {
@@ -4099,17 +4011,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
             boolean setSubtypeOnly) {
-        // Updates to InputMethod are transient in VR mode. Its not included in history.
-        final boolean isVrInput = imi != null && imi.isVrOnly();
-        if (!isVrInput) {
-            // Update the history of InputMethod and Subtype
-            mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
-        }
-
-        if (isVrInput) {
-            // Updates to InputMethod are transient in VR mode. Any changes to Settings are skipped.
-            return;
-        }
+        mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
 
         // Set Subtype here
         if (imi == null || subtypeId < 0) {
@@ -4225,7 +4127,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         synchronized (mMethodMap) {
-            return getInputMethodListLocked(false, userId);
+            return getInputMethodListLocked(userId);
         }
     }
 
@@ -4254,11 +4156,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void hideCurrentInputMethod() {
             mService.mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
             mService.mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
-        }
-
-        @Override
-        public void startVrInputMethodNoCheck(@Nullable ComponentName componentName) {
-            mService.mHandler.obtainMessage(MSG_START_VR_INPUT, componentName).sendToTarget();
         }
 
         @Override
@@ -4648,7 +4545,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
             for (int userId : userIds) {
                 final List<InputMethodInfo> methods = all
-                        ? getInputMethodListLocked(false, userId)
+                        ? getInputMethodListLocked(userId)
                         : getEnabledInputMethodListLocked(userId);
                 if (userIds.length > 1) {
                     pr.print("User #");

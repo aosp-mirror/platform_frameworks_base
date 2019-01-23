@@ -35,7 +35,6 @@ interface IInputMethodManager {
 
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getInputMethodList();
-    List<InputMethodInfo> getVrInputMethodList();
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getEnabledInputMethodList();
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,

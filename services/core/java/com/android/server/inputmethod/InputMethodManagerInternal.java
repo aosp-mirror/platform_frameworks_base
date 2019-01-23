@@ -18,7 +18,6 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.ComponentName;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.server.LocalServices;
@@ -40,11 +39,6 @@ public abstract class InputMethodManagerInternal {
      * Hides the current input method, if visible.
      */
     public abstract void hideCurrentInputMethod();
-
-    /**
-     * Switches to VR InputMethod defined in the packageName of {@param componentName}.
-     */
-    public abstract void startVrInputMethodNoCheck(ComponentName componentName);
 
     /**
      * Returns the list of installed input methods for the specified user.
@@ -73,10 +67,6 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void hideCurrentInputMethod() {
-                }
-
-                @Override
-                public void startVrInputMethodNoCheck(ComponentName componentName) {
                 }
 
                 @Override

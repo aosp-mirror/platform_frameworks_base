@@ -922,19 +922,6 @@ public final class InputMethodManager {
         }
     }
 
-    /**
-     * Returns a list of VR InputMethod currently installed.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
-    public List<InputMethodInfo> getVrInputMethodList() {
-        try {
-            return mService.getVrInputMethodList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     public List<InputMethodInfo> getEnabledInputMethodList() {
         try {
             return mService.getEnabledInputMethodList();
