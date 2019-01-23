@@ -5529,6 +5529,12 @@ package android.provider {
     method public void onPropertyChanged(String, String, String);
   }
 
+  public static interface DeviceConfig.Telephony {
+    field public static final String NAMESPACE = "telephony";
+    field public static final String PROPERTY_ENABLE_RAMPING_RINGER = "enable_ramping_ringer";
+    field public static final String PROPERTY_RAMPING_RINGER_DURATION = "ramping_duration";
+  }
+
   public final class DocumentsContract {
     method public static boolean isManageMode(android.net.Uri);
     method public static android.net.Uri setManageMode(android.net.Uri);

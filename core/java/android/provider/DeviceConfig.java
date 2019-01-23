@@ -103,6 +103,24 @@ public final class DeviceConfig {
     @SystemApi
     public static final String NAMESPACE_NOTIFICATION_ASSISTANT = "notification_assistant";
 
+    /**
+     * Telephony related properties definitions.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Telephony {
+        String NAMESPACE = "telephony";
+        /**
+         * Whether to apply ramping ringer on incoming phone calls.
+         */
+        String PROPERTY_ENABLE_RAMPING_RINGER = "enable_ramping_ringer";
+        /**
+         * Ringer ramping time in milliseconds.
+         */
+        String PROPERTY_RAMPING_RINGER_DURATION = "ramping_duration";
+    }
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
