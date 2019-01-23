@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents an ongoing {@link MediaSession2} or a MediaSession2Service.
+ * Represents an ongoing {@link MediaSession2} or a {@link MediaSession2Service}.
  * If it's representing a session service, it may not be ongoing.
  * <p>
  * This API is not generally intended for third party application developers.
