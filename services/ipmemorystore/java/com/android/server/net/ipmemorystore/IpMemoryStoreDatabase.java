@@ -21,9 +21,12 @@ import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
+import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQuery;
 import android.net.NetworkUtils;
 import android.net.ipmemorystore.NetworkAttributes;
 import android.net.ipmemorystore.Status;
@@ -35,6 +38,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Encapsulating class for using the SQLite database backing the memory store.
@@ -46,6 +50,9 @@ import java.util.List;
  */
 public class IpMemoryStoreDatabase {
     private static final String TAG = IpMemoryStoreDatabase.class.getSimpleName();
+    // A pair of NetworkAttributes objects is group-close if the confidence that they are
+    // the same is above this cutoff. See NetworkAttributes and SameL3NetworkResponse.
+    private static final float GROUPCLOSE_CONFIDENCE = 0.5f;
 
     /**
      * Contract class for the Network Attributes table.
@@ -187,30 +194,35 @@ public class IpMemoryStoreDatabase {
         return addresses;
     }
 
+    @NonNull
+    private static ContentValues toContentValues(@Nullable final NetworkAttributes attributes) {
+        final ContentValues values = new ContentValues();
+        if (null == attributes) return values;
+        if (null != attributes.assignedV4Address) {
+            values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS,
+                    NetworkUtils.inet4AddressToIntHTH(attributes.assignedV4Address));
+        }
+        if (null != attributes.groupHint) {
+            values.put(NetworkAttributesContract.COLNAME_GROUPHINT, attributes.groupHint);
+        }
+        if (null != attributes.dnsAddresses) {
+            values.put(NetworkAttributesContract.COLNAME_DNSADDRESSES,
+                    encodeAddressList(attributes.dnsAddresses));
+        }
+        if (null != attributes.mtu) {
+            values.put(NetworkAttributesContract.COLNAME_MTU, attributes.mtu);
+        }
+        return values;
+    }
+
     // Convert a NetworkAttributes object to content values to store them in a table compliant
     // with the contract defined in NetworkAttributesContract.
     @NonNull
     private static ContentValues toContentValues(@NonNull final String key,
             @Nullable final NetworkAttributes attributes, final long expiry) {
-        final ContentValues values = new ContentValues();
+        final ContentValues values = toContentValues(attributes);
         values.put(NetworkAttributesContract.COLNAME_L2KEY, key);
         values.put(NetworkAttributesContract.COLNAME_EXPIRYDATE, expiry);
-        if (null != attributes) {
-            if (null != attributes.assignedV4Address) {
-                values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS,
-                        NetworkUtils.inet4AddressToIntHTH(attributes.assignedV4Address));
-            }
-            if (null != attributes.groupHint) {
-                values.put(NetworkAttributesContract.COLNAME_GROUPHINT, attributes.groupHint);
-            }
-            if (null != attributes.dnsAddresses) {
-                values.put(NetworkAttributesContract.COLNAME_DNSADDRESSES,
-                        encodeAddressList(attributes.dnsAddresses));
-            }
-            if (null != attributes.mtu) {
-                values.put(NetworkAttributesContract.COLNAME_MTU, attributes.mtu);
-            }
-        }
         return values;
     }
 
@@ -226,6 +238,32 @@ public class IpMemoryStoreDatabase {
         values.put(PrivateDataContract.COLNAME_DATANAME, name);
         values.put(PrivateDataContract.COLNAME_DATA, data);
         return values;
+    }
+
+    @Nullable
+    private static NetworkAttributes readNetworkAttributesLine(@NonNull final Cursor cursor) {
+        // Make sure the data hasn't expired
+        final long expiry = getLong(cursor, NetworkAttributesContract.COLNAME_EXPIRYDATE, -1L);
+        if (expiry < System.currentTimeMillis()) return null;
+
+        final NetworkAttributes.Builder builder = new NetworkAttributes.Builder();
+        final int assignedV4AddressInt = getInt(cursor,
+                NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS, 0);
+        final String groupHint = getString(cursor, NetworkAttributesContract.COLNAME_GROUPHINT);
+        final byte[] dnsAddressesBlob =
+                getBlob(cursor, NetworkAttributesContract.COLNAME_DNSADDRESSES);
+        final int mtu = getInt(cursor, NetworkAttributesContract.COLNAME_MTU, -1);
+        if (0 != assignedV4AddressInt) {
+            builder.setAssignedV4Address(NetworkUtils.intToInet4AddressHTH(assignedV4AddressInt));
+        }
+        builder.setGroupHint(groupHint);
+        if (null != dnsAddressesBlob) {
+            builder.setDnsAddresses(decodeAddressList(dnsAddressesBlob));
+        }
+        if (mtu >= 0) {
+            builder.setMtu(mtu);
+        }
+        return builder.build();
     }
 
     private static final String[] EXPIRY_COLUMN = new String[] {
@@ -313,32 +351,9 @@ public class IpMemoryStoreDatabase {
         // result here. 0 results means the key was not found.
         if (cursor.getCount() != 1) return null;
         cursor.moveToFirst();
-
-        // Make sure the data hasn't expired
-        final long expiry = cursor.getLong(
-                cursor.getColumnIndexOrThrow(NetworkAttributesContract.COLNAME_EXPIRYDATE));
-        if (expiry < System.currentTimeMillis()) return null;
-
-        final NetworkAttributes.Builder builder = new NetworkAttributes.Builder();
-        final int assignedV4AddressInt = getInt(cursor,
-                NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS, 0);
-        final String groupHint = getString(cursor, NetworkAttributesContract.COLNAME_GROUPHINT);
-        final byte[] dnsAddressesBlob =
-                getBlob(cursor, NetworkAttributesContract.COLNAME_DNSADDRESSES);
-        final int mtu = getInt(cursor, NetworkAttributesContract.COLNAME_MTU, -1);
+        final NetworkAttributes attributes = readNetworkAttributesLine(cursor);
         cursor.close();
-
-        if (0 != assignedV4AddressInt) {
-            builder.setAssignedV4Address(NetworkUtils.intToInet4AddressHTH(assignedV4AddressInt));
-        }
-        builder.setGroupHint(groupHint);
-        if (null != dnsAddressesBlob) {
-            builder.setDnsAddresses(decodeAddressList(dnsAddressesBlob));
-        }
-        if (mtu >= 0) {
-            builder.setMtu(mtu);
-        }
-        return builder.build();
+        return attributes;
     }
 
     private static final String[] DATA_COLUMN = new String[] {
@@ -365,17 +380,134 @@ public class IpMemoryStoreDatabase {
         return result;
     }
 
+    /**
+     * The following is a horrible hack that is necessary because the Android SQLite API does not
+     * have a way to query a binary blob. This, almost certainly, is an overlook.
+     *
+     * The Android SQLite API has two family of methods : one for query that returns data, and
+     * one for more general SQL statements that can execute any statement but may not return
+     * anything. All the query methods, however, take only String[] for the arguments.
+     *
+     * In principle it is simple to write a function that will encode the binary blob in the
+     * way SQLite expects it. However, because the API forces the argument to be coerced into a
+     * String, the SQLiteQuery object generated by the default query methods will bind all
+     * arguments as Strings and SQL will *sanitize* them. This works okay for numeric types,
+     * but the format for blobs is x'<hex string>'. Note the presence of quotes, which will
+     * be sanitized, changing the contents of the field, and the query will fail to match the
+     * blob.
+     *
+     * As far as I can tell, there are two possible ways around this problem. The first one
+     * is to put the data in the query string and eschew it being an argument. This would
+     * require doing the sanitizing by hand. The other is to call bindBlob directly on the
+     * generated SQLiteQuery object, which not only is a lot less dangerous than rolling out
+     * sanitizing, but also will do the right thing if the underlying format ever changes.
+     *
+     * But none of the methods that take an SQLiteQuery object can return data ; this *must*
+     * be called with SQLiteDatabase#query. This object is not accessible from outside.
+     * However, there is a #query version that accepts a CursorFactory and this is pretty
+     * straightforward to implement as all the arguments are coming in and the SQLiteCursor
+     * class is public API.
+     * With this, it's possible to intercept the SQLiteQuery object, and assuming the args
+     * are available, to bind them directly and work around the API's oblivious coercion into
+     * Strings.
+     *
+     * This is really sad, but I don't see another way of having this work than this or the
+     * hand-rolled sanitizing, and this is the lesser evil.
+     */
+    private static class CustomCursorFactory implements SQLiteDatabase.CursorFactory {
+        @NonNull
+        private final ArrayList<Object> mArgs;
+        CustomCursorFactory(@NonNull final ArrayList<Object> args) {
+            mArgs = args;
+        }
+        @Override
+        public Cursor newCursor(final SQLiteDatabase db, final SQLiteCursorDriver masterQuery,
+                final String editTable,
+                final SQLiteQuery query) {
+            int index = 1; // bind is 1-indexed
+            for (final Object arg : mArgs) {
+                if (arg instanceof String) {
+                    query.bindString(index++, (String) arg);
+                } else if (arg instanceof Long) {
+                    query.bindLong(index++, (Long) arg);
+                } else if (arg instanceof Integer) {
+                    query.bindLong(index++, Long.valueOf((Integer) arg));
+                } else if (arg instanceof byte[]) {
+                    query.bindBlob(index++, (byte[]) arg);
+                } else {
+                    throw new IllegalStateException("Unsupported type CustomCursorFactory "
+                            + arg.getClass().toString());
+                }
+            }
+            return new SQLiteCursor(masterQuery, editTable, query);
+        }
+    }
+
+    // Returns the l2key of the closest match, if and only if it matches
+    // closely enough (as determined by group-closeness).
+    @Nullable
+    static String findClosestAttributes(@NonNull final SQLiteDatabase db,
+            @NonNull final NetworkAttributes attr) {
+        if (attr.isEmpty()) return null;
+        final ContentValues values = toContentValues(attr);
+
+        // Build the selection and args. To cut down on the number of lines to search, limit
+        // the search to those with at least one argument equals to the requested attributes.
+        // This works only because null attributes match only will not result in group-closeness.
+        final StringJoiner sj = new StringJoiner(" OR ");
+        final ArrayList<Object> args = new ArrayList<>();
+        args.add(System.currentTimeMillis());
+        for (final String field : values.keySet()) {
+            sj.add(field + " = ?");
+            args.add(values.get(field));
+        }
+
+        final String selection = NetworkAttributesContract.COLNAME_EXPIRYDATE + " > ? AND ("
+                + sj.toString() + ")";
+        final Cursor cursor = db.queryWithFactory(new CustomCursorFactory(args),
+                false, // distinct
+                NetworkAttributesContract.TABLENAME,
+                null, // columns, null means everything
+                selection, // selection
+                null, // selectionArgs, horrendously passed to the cursor factory instead
+                null, // groupBy
+                null, // having
+                null, // orderBy
+                null); // limit
+        if (cursor.getCount() <= 0) return null;
+        cursor.moveToFirst();
+        String bestKey = null;
+        float bestMatchConfidence = GROUPCLOSE_CONFIDENCE; // Never return a match worse than this.
+        while (!cursor.isAfterLast()) {
+            final NetworkAttributes read = readNetworkAttributesLine(cursor);
+            final float confidence = read.getNetworkGroupSamenessConfidence(attr);
+            if (confidence > bestMatchConfidence) {
+                bestKey = getString(cursor, NetworkAttributesContract.COLNAME_L2KEY);
+                bestMatchConfidence = confidence;
+            }
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return bestKey;
+    }
+
     // Helper methods
-    static String getString(final Cursor cursor, final String columnName) {
+    private static String getString(final Cursor cursor, final String columnName) {
         final int columnIndex = cursor.getColumnIndex(columnName);
         return (columnIndex >= 0) ? cursor.getString(columnIndex) : null;
     }
-    static byte[] getBlob(final Cursor cursor, final String columnName) {
+    private static byte[] getBlob(final Cursor cursor, final String columnName) {
         final int columnIndex = cursor.getColumnIndex(columnName);
         return (columnIndex >= 0) ? cursor.getBlob(columnIndex) : null;
     }
-    static int getInt(final Cursor cursor, final String columnName, final int defaultValue) {
+    private static int getInt(final Cursor cursor, final String columnName,
+            final int defaultValue) {
         final int columnIndex = cursor.getColumnIndex(columnName);
         return (columnIndex >= 0) ? cursor.getInt(columnIndex) : defaultValue;
+    }
+    private static long getLong(final Cursor cursor, final String columnName,
+            final long defaultValue) {
+        final int columnIndex = cursor.getColumnIndex(columnName);
+        return (columnIndex >= 0) ? cursor.getLong(columnIndex) : defaultValue;
     }
 }
