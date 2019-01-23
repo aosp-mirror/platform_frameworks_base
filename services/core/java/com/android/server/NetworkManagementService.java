@@ -46,7 +46,9 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.InetAddresses;
 import android.net.INetd;
+import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
 import android.net.ITetheringStatsProvider;
 import android.net.InterfaceConfiguration;
@@ -205,6 +207,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private INetd mNetdService;
 
+    private final NetdUnsolicitedEventListener mNetdUnsolicitedEventListener;
+
     private IBatteryStats mBatteryStats;
 
     private final Thread mThread;
@@ -322,6 +326,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
+        mNetdUnsolicitedEventListener = new NetdUnsolicitedEventListener();
+
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
@@ -340,6 +346,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mFgHandler = null;
         mThread = null;
         mServices = null;
+        mNetdUnsolicitedEventListener = null;
     }
 
     static NetworkManagementService create(Context context, String socket, SystemServices services)
@@ -446,7 +453,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // our sanity-checking state.
         mActiveAlerts.remove(iface);
         mActiveQuotas.remove(iface);
-
         invokeForAllObservers(o -> o.interfaceRemoved(iface));
     }
 
@@ -552,7 +558,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return;
             }
             // No current code examines the interface parameter in a global alert. Just pass null.
-            notifyLimitReached(LIMIT_GLOBAL_ALERT, null);
+            mDaemonHandler.post(() -> notifyLimitReached(LIMIT_GLOBAL_ALERT, null));
         }
     }
 
@@ -583,6 +589,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private void connectNativeNetdService() {
         mNetdService = mServices.getNetd();
+        try {
+            mNetdService.registerUnsolicitedEventListener(mNetdUnsolicitedEventListener);
+            if (DBG) Slog.d(TAG, "Register unsolicited event listener");
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Failed to set Netd unsolicited event listener " + e);
+        }
     }
 
     /**
@@ -709,11 +721,93 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a route change.
      */
-    private void notifyRouteChange(String action, RouteInfo route) {
-        if (action.equals("updated")) {
+    private void notifyRouteChange(boolean updated, RouteInfo route) {
+        if (updated) {
             invokeForAllObservers(o -> o.routeUpdated(route));
         } else {
             invokeForAllObservers(o -> o.routeRemoved(route));
+        }
+    }
+
+    private class NetdUnsolicitedEventListener extends INetdUnsolicitedEventListener.Stub {
+        @Override
+        public void onInterfaceClassActivityChanged(boolean isActive,
+                int label, long timestamp, int uid) throws RemoteException {
+            final long timestampNanos;
+            if (timestamp <= 0) {
+                timestampNanos = SystemClock.elapsedRealtimeNanos();
+            } else {
+                timestampNanos = timestamp;
+            }
+            mDaemonHandler.post(() -> notifyInterfaceClassActivity(label,
+                    isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                    : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                    timestampNanos, uid, false));
+        }
+
+        @Override
+        public void onQuotaLimitReached(String alertName, String ifName)
+                throws RemoteException {
+            mDaemonHandler.post(() -> notifyLimitReached(alertName, ifName));
+        }
+
+        @Override
+        public void onInterfaceDnsServerInfo(String ifName,
+                long lifetime, String[] servers) throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceDnsServerInfo(ifName, lifetime, servers));
+        }
+
+        @Override
+        public void onInterfaceAddressUpdated(String addr,
+                String ifName, int flags, int scope) throws RemoteException {
+            final LinkAddress address = new LinkAddress(addr, flags, scope);
+            mDaemonHandler.post(() -> notifyAddressUpdated(ifName, address));
+        }
+
+        @Override
+        public void onInterfaceAddressRemoved(String addr,
+                String ifName, int flags, int scope) throws RemoteException {
+            final LinkAddress address = new LinkAddress(addr, flags, scope);
+            mDaemonHandler.post(() -> notifyAddressRemoved(ifName, address));
+        }
+
+        @Override
+        public void onInterfaceAdded(String ifName) throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceAdded(ifName));
+        }
+
+        @Override
+        public void onInterfaceRemoved(String ifName) throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceRemoved(ifName));
+        }
+
+        @Override
+        public void onInterfaceChanged(String ifName, boolean up)
+                throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceStatusChanged(ifName, up));
+        }
+
+        @Override
+        public void onInterfaceLinkStateChanged(String ifName, boolean up)
+                throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceLinkStateChanged(ifName, up));
+        }
+
+        @Override
+        public void onRouteChanged(boolean updated,
+                String route, String gateway, String ifName) throws RemoteException {
+            final RouteInfo processRoute = new RouteInfo(new IpPrefix(route),
+                    ("".equals(gateway)) ? null : InetAddresses.parseNumericAddress(gateway),
+                    ifName);
+            mDaemonHandler.post(() -> notifyRouteChange(updated, processRoute));
+        }
+
+        @Override
+        public void onStrictCleartextDetected(int uid, String hex) throws RemoteException {
+            // Don't need to post to mDaemonHandler because the only thing
+            // that notifyCleartextNetwork does is post to a handler
+            ActivityManager.getService().notifyCleartextNetwork(uid,
+                    HexDump.hexStringToByteArray(hex));
         }
     }
 
@@ -904,7 +998,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                             InetAddress gateway = null;
                             if (via != null) gateway = InetAddress.parseNumericAddress(via);
                             RouteInfo route = new RouteInfo(new IpPrefix(cooked[3]), gateway, dev);
-                            notifyRouteChange(cooked[2], route);
+                            notifyRouteChange(cooked[2].equals("updated"), route);
                             return true;
                         } catch (IllegalArgumentException e) {}
                     }
@@ -1367,13 +1461,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (ConnectivityManager.isNetworkTypeMobile(type)) {
                 mNetworkActive = false;
             }
-            mDaemonHandler.post(new Runnable() {
-                @Override public void run() {
-                    notifyInterfaceClassActivity(type,
-                            DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
-                            SystemClock.elapsedRealtimeNanos(), -1, false);
-                }
-            });
+            mDaemonHandler.post(() -> notifyInterfaceClassActivity(type,
+                    DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+                    SystemClock.elapsedRealtimeNanos(), -1, false));
         }
     }
 
@@ -1396,13 +1486,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 throw new IllegalStateException(e);
             }
             mActiveIdleTimers.remove(iface);
-            mDaemonHandler.post(new Runnable() {
-                @Override public void run() {
-                    notifyInterfaceClassActivity(params.type,
-                            DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                            SystemClock.elapsedRealtimeNanos(), -1, false);
-                }
-            });
+            mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type,
+                    DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                    SystemClock.elapsedRealtimeNanos(), -1, false));
         }
     }
 
