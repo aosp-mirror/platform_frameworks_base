@@ -676,6 +676,10 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                         // 3tap and hold
                         afterLongTapTimeoutTransitionToDraggingState(event);
 
+                    } else if (isTapOutOfDistanceSlop()) {
+
+                        transitionToDelegatingStateAndClear();
+
                     } else if (mDetectTripleTap
                             // If magnified, delay an ACTION_DOWN for mMultiTapMaxDelay
                             // to ensure reachability of
@@ -920,6 +924,31 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             mShortcutTriggered = state;
             // TODO: multi-display support for magnification gesture handler
             mMagnificationController.setForceShowMagnifiableBounds(Display.DEFAULT_DISPLAY, state);
+        }
+
+        /**
+         * Detects if last action down is out of distance slop between with previous
+         * one, when triple tap is enabled.
+         *
+         * @return true if tap is out of distance slop
+         */
+        boolean isTapOutOfDistanceSlop() {
+            if (!mDetectTripleTap) return false;
+            if (mPreLastDown == null || mLastDown == null) {
+                return false;
+            }
+            final boolean outOfDistanceSlop =
+                    GestureUtils.distance(mPreLastDown, mLastDown) > mMultiTapMaxDistance;
+            if (tapCount() > 0) {
+                return outOfDistanceSlop;
+            }
+            // There's no tap in the queue here. We still need to check if this is the case that
+            // user tap screen quickly and out of distance slop.
+            if (outOfDistanceSlop
+                    && !GestureUtils.isTimedOut(mPreLastDown, mLastDown, mMultiTapMaxDelay)) {
+                return true;
+            }
+            return false;
         }
     }
 
