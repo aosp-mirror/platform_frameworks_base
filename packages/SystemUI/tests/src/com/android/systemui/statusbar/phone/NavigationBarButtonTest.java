@@ -24,9 +24,11 @@ import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
+import android.os.SystemClock;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -39,12 +41,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.function.Predicate;
+
 /** atest NavigationBarButtonTest */
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
 public class NavigationBarButtonTest extends SysuiTestCase {
 
+    private static final String TAG = "NavigationBarButtonTest";
     private ImageReader mReader;
     private NavigationBarView mNavBar;
     private VirtualDisplay mVirtualDisplay;
@@ -78,7 +83,29 @@ public class NavigationBarButtonTest extends SysuiTestCase {
 
         assertNotNull("virtual display must not be null", mVirtualDisplay);
 
+        waitForDisplayReady(mVirtualDisplay.getDisplay().getDisplayId());
+
         return mVirtualDisplay.getDisplay();
+    }
+
+    private void waitForDisplayReady(int displayId) {
+        waitForDisplayCondition(displayId, state -> state);
+    }
+
+    private void waitForDisplayCondition(int displayId, Predicate<Boolean> condition) {
+        for (int retry = 1; retry <= 10; retry++) {
+            if (condition.test(isDisplayOn(displayId))) {
+                return;
+            }
+            Log.i(TAG, "Waiting for virtual display ready ... retry = " + retry);
+            SystemClock.sleep(500);
+        }
+    }
+
+    private boolean isDisplayOn(int displayId) {
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        Display display = displayManager.getDisplay(displayId);
+        return display != null && display.getState() == Display.STATE_ON;
     }
 
     @After
