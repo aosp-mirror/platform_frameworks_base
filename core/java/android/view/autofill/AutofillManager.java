@@ -1769,8 +1769,8 @@ public final class AutofillManager {
         }
 
         if (callback != null) {
-            if (id.isVirtual()) {
-                callback.onAutofillEvent(anchor, id.getVirtualChildId(),
+            if (id.isVirtualInt()) {
+                callback.onAutofillEvent(anchor, id.getVirtualChildIntId(),
                         AutofillCallback.EVENT_INPUT_SHOWN);
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_SHOWN);
@@ -1896,7 +1896,7 @@ public final class AutofillManager {
                     failedIds.add(id);
                     continue;
                 }
-                if (id.isVirtual()) {
+                if (id.isVirtualInt()) {
                     if (virtualValues == null) {
                         // Most likely there will be just one view with virtual children.
                         virtualValues = new ArrayMap<>(1);
@@ -1907,7 +1907,7 @@ public final class AutofillManager {
                         valuesByParent = new SparseArray<>(5);
                         virtualValues.put(view, valuesByParent);
                     }
-                    valuesByParent.put(id.getVirtualChildId(), value);
+                    valuesByParent.put(id.getVirtualChildIntId(), value);
                 } else {
                     // Mark the view as to be autofilled with 'value'
                     if (mLastAutofilledData == null) {
@@ -2142,8 +2142,8 @@ public final class AutofillManager {
         }
 
         if (callback != null) {
-            if (id.isVirtual()) {
-                callback.onAutofillEvent(anchor, id.getVirtualChildId(),
+            if (id.isVirtualInt()) {
+                callback.onAutofillEvent(anchor, id.getVirtualChildIntId(),
                         AutofillCallback.EVENT_INPUT_HIDDEN);
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_HIDDEN);
@@ -2169,8 +2169,8 @@ public final class AutofillManager {
         }
 
         if (callback != null) {
-            if (id.isVirtual()) {
-                callback.onAutofillEvent(anchor, id.getVirtualChildId(),
+            if (id.isVirtualInt()) {
+                callback.onAutofillEvent(anchor, id.getVirtualChildIntId(),
                         AutofillCallback.EVENT_INPUT_UNAVAILABLE);
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
