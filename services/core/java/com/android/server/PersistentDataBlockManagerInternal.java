@@ -31,6 +31,19 @@ public interface PersistentDataBlockManagerInternal {
      */
     byte[] getFrpCredentialHandle();
 
+    /** Stores the data used to enable the Test Harness Mode after factory-resetting. */
+    void setTestHarnessModeData(byte[] data);
+
+    /**
+     * Retrieves the data used to place the device into Test Harness Mode.
+     *
+     * @throws IllegalStateException if the underlying storage is corrupt or inaccessible.
+     */
+    byte[] getTestHarnessModeData();
+
+    /** Clear out the Test Harness Mode data. */
+    void clearTestHarnessModeData();
+
     /** Update the OEM unlock enabled bit, bypassing user restriction checks. */
     void forceOemUnlockEnabled(boolean enabled);
 }

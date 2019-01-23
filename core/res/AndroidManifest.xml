@@ -1748,6 +1748,10 @@
     <permission android:name="android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED"
         android:protectionLevel="signature" />
 
+    <!-- @hide Allows the device to be reset, clearing all data and enables Test Harness Mode. -->
+    <permission android:name="android.permission.ENABLE_TEST_HARNESS_MODE"
+        android:protectionLevel="signature" />
+
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
