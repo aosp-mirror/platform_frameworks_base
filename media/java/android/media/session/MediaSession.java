@@ -144,7 +144,7 @@ public final class MediaSession {
             SessionLink sessionLink = manager.createSession(cbLink, tag);
             mImpl = new MediaSessionEngine(context, sessionLink, cbLink, cbStub,
                     context.getResources().getDimensionPixelSize(
-                            com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize));
+                            android.R.dimen.config_mediaMetadataBitmapMaxSize));
         } catch (RuntimeException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }
@@ -723,7 +723,7 @@ public final class MediaSession {
 
         private QueueItem(Parcel in) {
             mImpl = new MediaSessionEngine.QueueItem(in);
-            mId = in.readLong();
+            mId = mImpl.getQueueId();
         }
 
         /**
