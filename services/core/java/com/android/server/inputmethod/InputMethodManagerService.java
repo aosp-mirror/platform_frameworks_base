@@ -4106,25 +4106,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mCurrentSubtype;
     }
 
-    @Override
-    public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
-        synchronized (mMethodMap) {
-            // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked()) {
-                return false;
-            }
-            if (subtype != null && mCurMethodId != null) {
-                InputMethodInfo imi = mMethodMap.get(mCurMethodId);
-                int subtypeId = InputMethodUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode());
-                if (subtypeId != NOT_A_SUBTYPE_ID) {
-                    setInputMethodLocked(mCurMethodId, subtypeId);
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
     private List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         synchronized (mMethodMap) {
             return getInputMethodListLocked(userId);

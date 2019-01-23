@@ -64,7 +64,6 @@ interface IInputMethodManager {
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     boolean isInputMethodPickerShownForTest();
     InputMethodSubtype getCurrentInputMethodSubtype();
-    boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
