@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.graphics.ColorUtils;
@@ -251,7 +252,7 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
             // HACK: release() will crash if the view is not attached.
 
             mActivityView.setVisibility(View.GONE);
-            tmpParent.addView(mActivityView, new ViewGroup.LayoutParams(
+            tmpParent.addView(mActivityView, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
         }
