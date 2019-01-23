@@ -528,11 +528,13 @@ public class PackageParserTest {
         PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexFile, false);
         assertEquals("com.google.android.tzdata", pi.packageName);
         assertEquals(1, pi.getLongVersionCode());
+        assertEquals(1, pi.applicationInfo.longVersionCode);
         assertNull(pi.signingInfo);
 
         pi = PackageParser.generatePackageInfoFromApex(apexFile, true);
         assertEquals("com.google.android.tzdata", pi.packageName);
         assertEquals(1, pi.getLongVersionCode());
+        assertEquals(1, pi.applicationInfo.longVersionCode);
         assertNotNull(pi.signingInfo);
         assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
     }

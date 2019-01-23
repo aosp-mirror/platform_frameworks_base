@@ -8513,6 +8513,7 @@ public class PackageParser {
 
         pi.packageName = apk.packageName;
         pi.setLongVersionCode(apk.getLongVersionCode());
+        ai.setVersionCode(apk.getLongVersionCode());
 
         if (collectCerts) {
             if (apk.signingDetails.hasPastSigningCertificates()) {
