@@ -5818,6 +5818,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
 
         @Override
+        public int getConstrainSwipeStartPosition() {
+            NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
+            if (menuRow != null) {
+                return Math.abs(menuRow.getMenuSnapTarget());
+            }
+            return 0;
+        }
+
+                @Override
         public boolean canChildBeDismissed(View v) {
             return NotificationStackScrollLayout.this.canChildBeDismissed(v);
         }
