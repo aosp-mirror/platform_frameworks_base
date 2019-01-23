@@ -4466,7 +4466,7 @@ message SeOmapiReported {
   // SIMx or eSEx.
   optional string terminal = 2;
 
-  optional string packageName = 3;
+  optional string package_name = 3;
 }
 
 /**
