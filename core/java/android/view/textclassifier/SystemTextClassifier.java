@@ -20,15 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.service.textclassifier.IConversationActionsCallback;
-import android.service.textclassifier.ITextClassificationCallback;
+import android.service.textclassifier.ITextClassifierCallback;
 import android.service.textclassifier.ITextClassifierService;
-import android.service.textclassifier.ITextLanguageCallback;
-import android.service.textclassifier.ITextLinksCallback;
-import android.service.textclassifier.ITextSelectionCallback;
+import android.service.textclassifier.TextClassifierService;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -73,9 +72,10 @@ public final class SystemTextClassifier implements TextClassifier {
         Utils.checkMainThread();
         try {
             request.setCallingPackageName(mPackageName);
-            final TextSelectionCallback callback = new TextSelectionCallback();
+            final BlockingCallback<TextSelection> callback =
+                    new BlockingCallback<>("textselection");
             mManagerService.onSuggestSelection(mSessionId, request, callback);
-            final TextSelection selection = callback.mReceiver.get();
+            final TextSelection selection = callback.get();
             if (selection != null) {
                 return selection;
             }
@@ -95,9 +95,10 @@ public final class SystemTextClassifier implements TextClassifier {
         Utils.checkMainThread();
         try {
             request.setCallingPackageName(mPackageName);
-            final TextClassificationCallback callback = new TextClassificationCallback();
+            final BlockingCallback<TextClassification> callback =
+                    new BlockingCallback<>("textclassification");
             mManagerService.onClassifyText(mSessionId, request, callback);
-            final TextClassification classification = callback.mReceiver.get();
+            final TextClassification classification = callback.get();
             if (classification != null) {
                 return classification;
             }
@@ -122,9 +123,10 @@ public final class SystemTextClassifier implements TextClassifier {
 
         try {
             request.setCallingPackageName(mPackageName);
-            final TextLinksCallback callback = new TextLinksCallback();
+            final BlockingCallback<TextLinks> callback =
+                    new BlockingCallback<>("textlinks");
             mManagerService.onGenerateLinks(mSessionId, request, callback);
-            final TextLinks links = callback.mReceiver.get();
+            final TextLinks links = callback.get();
             if (links != null) {
                 return links;
             }
@@ -165,9 +167,10 @@ public final class SystemTextClassifier implements TextClassifier {
 
         try {
             request.setCallingPackageName(mPackageName);
-            final TextLanguageCallback callback = new TextLanguageCallback();
+            final BlockingCallback<TextLanguage> callback =
+                    new BlockingCallback<>("textlanguage");
             mManagerService.onDetectLanguage(mSessionId, request, callback);
-            final TextLanguage textLanguage = callback.mReceiver.get();
+            final TextLanguage textLanguage = callback.get();
             if (textLanguage != null) {
                 return textLanguage;
             }
@@ -184,9 +187,10 @@ public final class SystemTextClassifier implements TextClassifier {
 
         try {
             request.setCallingPackageName(mPackageName);
-            final ConversationActionsCallback callback = new ConversationActionsCallback();
+            final BlockingCallback<ConversationActions> callback =
+                    new BlockingCallback<>("conversation-actions");
             mManagerService.onSuggestConversationActions(mSessionId, request, callback);
-            final ConversationActions conversationActions = callback.mReceiver.get();
+            final ConversationActions conversationActions = callback.get();
             if (conversationActions != null) {
                 return conversationActions;
             }
@@ -245,82 +249,28 @@ public final class SystemTextClassifier implements TextClassifier {
         }
     }
 
-    private static final class TextSelectionCallback extends ITextSelectionCallback.Stub {
+    private static final class BlockingCallback<T extends Parcelable>
+            extends ITextClassifierCallback.Stub {
+        private final ResponseReceiver<T> mReceiver;
 
-        final ResponseReceiver<TextSelection> mReceiver = new ResponseReceiver<>("textselection");
+        BlockingCallback(String name) {
+            mReceiver = new ResponseReceiver<>(name);
+        }
 
         @Override
-        public void onSuccess(TextSelection selection) {
-            mReceiver.onSuccess(selection);
+        public void onSuccess(Bundle result) {
+            mReceiver.onSuccess(TextClassifierService.getResponse(result));
         }
 
         @Override
         public void onFailure() {
             mReceiver.onFailure();
         }
-    }
 
-    private static final class TextClassificationCallback extends ITextClassificationCallback.Stub {
-
-        final ResponseReceiver<TextClassification> mReceiver =
-                new ResponseReceiver<>("textclassification");
-
-        @Override
-        public void onSuccess(TextClassification classification) {
-            mReceiver.onSuccess(classification);
+        public T get() {
+            return mReceiver.get();
         }
 
-        @Override
-        public void onFailure() {
-            mReceiver.onFailure();
-        }
-    }
-
-    private static final class TextLinksCallback extends ITextLinksCallback.Stub {
-
-        final ResponseReceiver<TextLinks> mReceiver = new ResponseReceiver<>("textlinks");
-
-        @Override
-        public void onSuccess(TextLinks links) {
-            mReceiver.onSuccess(links);
-        }
-
-        @Override
-        public void onFailure() {
-            mReceiver.onFailure();
-        }
-    }
-
-    private static final class TextLanguageCallback extends ITextLanguageCallback.Stub {
-
-        final ResponseReceiver<TextLanguage> mReceiver = new ResponseReceiver<>("textlanguage");
-
-        @Override
-        public void onSuccess(TextLanguage textLanguage) {
-            mReceiver.onSuccess(textLanguage);
-        }
-
-        @Override
-        public void onFailure() {
-            mReceiver.onFailure();
-        }
-    }
-
-    private static final class ConversationActionsCallback
-            extends IConversationActionsCallback.Stub {
-
-        final ResponseReceiver<ConversationActions> mReceiver =
-                new ResponseReceiver<>("conversationaction");
-
-        @Override
-        public void onSuccess(ConversationActions conversationActions) {
-            mReceiver.onSuccess(conversationActions);
-        }
-
-        @Override
-        public void onFailure() {
-            mReceiver.onFailure();
-        }
     }
 
     private static final class ResponseReceiver<T> {

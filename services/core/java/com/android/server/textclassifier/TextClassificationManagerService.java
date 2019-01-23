@@ -27,12 +27,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.service.textclassifier.IConversationActionsCallback;
-import android.service.textclassifier.ITextClassificationCallback;
+import android.service.textclassifier.ITextClassifierCallback;
 import android.service.textclassifier.ITextClassifierService;
-import android.service.textclassifier.ITextLanguageCallback;
-import android.service.textclassifier.ITextLinksCallback;
-import android.service.textclassifier.ITextSelectionCallback;
 import android.service.textclassifier.TextClassifierService;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -132,7 +128,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @Override
     public void onSuggestSelection(
             TextClassificationSessionId sessionId,
-            TextSelection.Request request, ITextSelectionCallback callback)
+            TextSelection.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
@@ -155,7 +151,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @Override
     public void onClassifyText(
             TextClassificationSessionId sessionId,
-            TextClassification.Request request, ITextClassificationCallback callback)
+            TextClassification.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
@@ -178,7 +174,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @Override
     public void onGenerateLinks(
             TextClassificationSessionId sessionId,
-            TextLinks.Request request, ITextLinksCallback callback)
+            TextLinks.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
@@ -241,7 +237,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     public void onDetectLanguage(
             TextClassificationSessionId sessionId,
             TextLanguage.Request request,
-            ITextLanguageCallback callback) throws RemoteException {
+            ITextClassifierCallback callback) throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
         validateInput(mContext, request.getCallingPackageName());
@@ -264,7 +260,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     public void onSuggestConversationActions(
             TextClassificationSessionId sessionId,
             ConversationActions.Request request,
-            IConversationActionsCallback callback) throws RemoteException {
+            ITextClassifierCallback callback) throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
         validateInput(mContext, request.getCallingPackageName());
