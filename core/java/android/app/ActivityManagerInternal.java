@@ -219,9 +219,11 @@ public abstract class ActivityManagerInternal {
      * @param userId
      * @param event
      * @param appToken ActivityRecord's appToken.
+     * @param taskRoot TaskRecord's root
      */
     public abstract void updateActivityUsageStats(
-            ComponentName activity, int userId, int event, IBinder appToken);
+            ComponentName activity, int userId, int event, IBinder appToken,
+            ComponentName taskRoot);
     public abstract void updateForegroundTimeIfOnBattery(
             String packageName, int uid, long cpuTimeDiff);
     public abstract void sendForegroundProfileChanged(int userId);

@@ -40,9 +40,11 @@ public abstract class UsageStatsManagerInternal {
      *                  {@link UsageEvents}
      * @param instanceId For activity, hashCode of ActivityRecord's appToken.
      *                   For non-activity, it is not used.
+     * @param taskRoot For activity, the name of the package at the root of the task
+     *                 For non-activity, it is not used.
      */
     public abstract void reportEvent(ComponentName component, @UserIdInt int userId, int eventType,
-            int instanceId);
+            int instanceId, ComponentName taskRoot);
 
     /**
      * Reports an event to the UsageStatsManager.

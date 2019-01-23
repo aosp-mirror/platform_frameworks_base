@@ -218,6 +218,14 @@ public class IntervalStats {
                 case (int) IntervalStatsProto.Event.INSTANCE_ID:
                     event.mInstanceId = parser.readInt(IntervalStatsProto.Event.INSTANCE_ID);
                     break;
+                case (int) IntervalStatsProto.Event.TASK_ROOT_PACKAGE_INDEX:
+                    event.mTaskRootPackage = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.TASK_ROOT_PACKAGE_INDEX) - 1));
+                    break;
+                case (int) IntervalStatsProto.Event.TASK_ROOT_CLASS_INDEX:
+                    event.mTaskRootClass = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.TASK_ROOT_CLASS_INDEX) - 1));
+                    break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     // Handle default values for certain events types
                     switch (event.mEventType) {
@@ -331,6 +339,12 @@ public class IntervalStats {
         event.mPackage = getCachedStringRef(event.mPackage);
         if (event.mClass != null) {
             event.mClass = getCachedStringRef(event.mClass);
+        }
+        if (event.mTaskRootPackage != null) {
+            event.mTaskRootPackage = getCachedStringRef(event.mTaskRootPackage);
+        }
+        if (event.mTaskRootClass != null) {
+            event.mTaskRootClass = getCachedStringRef(event.mTaskRootClass);
         }
         if (event.mEventType == NOTIFICATION_INTERRUPTION) {
             event.mNotificationChannelId = getCachedStringRef(event.mNotificationChannelId);

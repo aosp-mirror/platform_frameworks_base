@@ -401,7 +401,7 @@ class UserUsageStatsService {
     }
 
     UsageEvents queryEvents(final long beginTime, final long endTime,
-            boolean obfuscateInstantApps) {
+                            boolean obfuscateInstantApps) {
         final ArraySet<String> names = new ArraySet<>();
         List<Event> results = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, new StatCombiner<Event>() {
@@ -425,6 +425,12 @@ class UserUsageStatsService {
                             if (event.mClass != null) {
                                 names.add(event.mClass);
                             }
+                            if (event.mTaskRootPackage != null) {
+                                names.add(event.mTaskRootPackage);
+                            }
+                            if (event.mTaskRootClass != null) {
+                                names.add(event.mTaskRootClass);
+                            }
                             accumulatedResult.add(event);
                         }
                     }
@@ -436,11 +442,11 @@ class UserUsageStatsService {
 
         String[] table = names.toArray(new String[names.size()]);
         Arrays.sort(table);
-        return new UsageEvents(results, table);
+        return new UsageEvents(results, table, true);
     }
 
     UsageEvents queryEventsForPackage(final long beginTime, final long endTime,
-            final String packageName) {
+            final String packageName, boolean includeTaskRoot) {
         final ArraySet<String> names = new ArraySet<>();
         names.add(packageName);
         final List<Event> results = queryStats(INTERVAL_DAILY,
@@ -459,6 +465,12 @@ class UserUsageStatsService {
                         if (event.mClass != null) {
                             names.add(event.mClass);
                         }
+                        if (includeTaskRoot && event.mTaskRootPackage != null) {
+                            names.add(event.mTaskRootPackage);
+                        }
+                        if (includeTaskRoot && event.mTaskRootClass != null) {
+                            names.add(event.mTaskRootClass);
+                        }
                         accumulatedResult.add(event);
                     }
                 });
@@ -469,7 +481,7 @@ class UserUsageStatsService {
 
         final String[] table = names.toArray(new String[names.size()]);
         Arrays.sort(table);
-        return new UsageEvents(results, table);
+        return new UsageEvents(results, table, includeTaskRoot);
     }
 
     void persistActiveStats() {
@@ -682,6 +694,14 @@ class UserUsageStatsService {
                 || event.mEventType == Event.ACTIVITY_PAUSED
                 || event.mEventType == Event.ACTIVITY_STOPPED) {
             pw.printPair("instanceId", event.getInstanceId());
+        }
+
+        if (event.getTaskRootPackageName() != null) {
+            pw.printPair("taskRootPackage", event.getTaskRootPackageName());
+        }
+
+        if (event.getTaskRootClassName() != null) {
+            pw.printPair("taskRootClass", event.getTaskRootClassName());
         }
 
         if (event.mNotificationChannelId != null) {

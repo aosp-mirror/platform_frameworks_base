@@ -1095,6 +1095,8 @@ package android.app.usage {
   public static final class UsageEvents.Event {
     method public int getInstanceId();
     method public String getNotificationChannelId();
+    method @Nullable public String getTaskRootClassName();
+    method @Nullable public String getTaskRootPackageName();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
     field public static final int SLICE_PINNED = 14; // 0xe
@@ -1109,6 +1111,7 @@ package android.app.usage {
   public final class UsageStatsManager {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
+    method public int getUsageSource();
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
     method public void reportUsageStart(@NonNull android.app.Activity, @NonNull String);
@@ -1124,6 +1127,8 @@ package android.app.usage {
     field public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
     field public static final int STANDBY_BUCKET_EXEMPTED = 5; // 0x5
     field public static final int STANDBY_BUCKET_NEVER = 50; // 0x32
+    field public static final int USAGE_SOURCE_CURRENT_ACTIVITY = 2; // 0x2
+    field public static final int USAGE_SOURCE_TASK_ROOT_ACTIVITY = 1; // 0x1
   }
 
 }

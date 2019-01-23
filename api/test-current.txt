@@ -352,6 +352,10 @@ package android.app.usage {
     method public boolean isReservedSupported(@NonNull java.util.UUID);
   }
 
+  public final class UsageStatsManager {
+    method public void forceUsageSourceSettingRead();
+  }
+
 }
 
 package android.bluetooth {
