@@ -6841,6 +6841,13 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_ADAPTIVE_SLEEP = 1628;
     
+    // Tagged data for SMART_REPLY_VISIBLE and NOTIFICATION_ITEM_ACTION.
+    // The UI location of the notification containing the smart suggestions.
+    // This is a NotificationLocation object (see the NotificationLocation
+    // enum).
+    // OS: Q
+    NOTIFICATION_LOCATION = 1629;
+
     // The autofill system made request to the system-provided augmented autofill service.
     // OS: Q
     // Package: Package of app that is autofilled
@@ -6849,18 +6856,11 @@ message MetricsEvent {
     // request
     // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
-    AUTOFILL_AUGMENTED_REQUEST = 1629;
+    AUTOFILL_AUGMENTED_REQUEST = 1630;
 
     // Tag of a field for the number of augmented autofill requests in a session
     // OS: Q
-    FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS = 1630;
-
-    // Tagged data for SMART_REPLY_VISIBLE and NOTIFICATION_ITEM_ACTION.
-    // The UI location of the notification containing the smart suggestions.
-    // This is a NotificationLocation object (see the NotificationLocation
-    // enum).
-    // OS: Q
-    NOTIFICATION_LOCATION = 1629;
+    FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS = 1631;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
