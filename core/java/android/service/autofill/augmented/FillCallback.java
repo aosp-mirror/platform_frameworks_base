@@ -59,7 +59,8 @@ public final class FillCallback {
         if (fillWindow != null) {
             fillWindow.show();
         }
-        // TODO(b/111330312): properly implement on server-side by updating the Session state
-        // accordingly (and adding CTS tests)
+        // TODO(b/123099468): must notify the server so it can update the session state to avoid
+        // showing conflicting UIs (for example, if a new request is made to the main autofill
+        // service and it now wants to show something).
     }
 }

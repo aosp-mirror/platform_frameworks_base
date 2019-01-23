@@ -67,7 +67,7 @@ public abstract class AugmentedAutofillService extends Service {
 
     private static final String TAG = AugmentedAutofillService.class.getSimpleName();
 
-    // TODO(b/111330312): STOPSHIP use dynamic value, or change to false
+    // TODO(b/123100811): STOPSHIP use dynamic value, or change to false
     static final boolean DEBUG = true;
     static final boolean VERBOSE = false;
 
@@ -127,8 +127,6 @@ public abstract class AugmentedAutofillService extends Service {
         return false;
     }
 
-    // TODO(b/111330312): add methods to disable autofill per app / activity?
-
     /**
      * Asks the service to handle an "augmented" autofill request.
      *
@@ -175,12 +173,11 @@ public abstract class AugmentedAutofillService extends Service {
                     focusedValue, requestTime, callback);
             mAutofillProxies.put(sessionId,  proxy);
         } else {
-            // TODO(b/111330312): figure out if it's ok to reuse the proxy; add logging
-            // TODO(b/111330312): also make sure to cover scenario on CTS test
+            // TODO(b/123099468): figure out if it's ok to reuse the proxy; add logging
             if (DEBUG) Log.d(TAG, "Reusing proxy for session " + sessionId);
             proxy.update(focusedId, focusedValue);
         }
-        // TODO(b/111330312): set cancellation signal
+        // TODO(b/123101711): set cancellation signal
         final CancellationSignal cancellationSignal = null;
         onFillRequest(new FillRequest(proxy), cancellationSignal, new FillController(proxy),
                 new FillCallback(proxy));
@@ -193,7 +190,7 @@ public abstract class AugmentedAutofillService extends Service {
                 final int sessionId = mAutofillProxies.keyAt(i);
                 final AutofillProxy proxy = mAutofillProxies.valueAt(i);
                 if (proxy == null) {
-                    // TODO(b/111330312): this might be fine, in which case we should logv it
+                    // TODO(b/123100811): this might be fine, in which case we should logv it
                     Log.w(TAG, "No proxy for session " + sessionId);
                     return;
                 }
@@ -303,7 +300,7 @@ public abstract class AugmentedAutofillService extends Service {
             this.mFocusedId = focusedId;
             this.mFocusedValue = focusedValue;
             this.mRequestTime = requestTime;
-            // TODO(b/111330312): linkToDeath
+            // TODO(b/123099468): linkToDeath
         }
 
         @NonNull
@@ -366,7 +363,7 @@ public abstract class AugmentedAutofillService extends Service {
 
         private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue) {
             synchronized (mLock) {
-                // TODO(b/111330312): should we close the popupwindow if the focused id changed?
+                // TODO(b/123099468): should we close the popupwindow if the focused id changed?
                 mFocusedId = focusedId;
                 mFocusedValue = focusedValue;
             }
@@ -425,7 +422,7 @@ public abstract class AugmentedAutofillService extends Service {
                 default:
                     Slog.w(TAG, "invalid event reported: " + event);
             }
-            // TODO(b/111330312): log metrics as well
+            // TODO(b/122858578): log metrics as well
         }
 
         public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
