@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.util;
+package android.net.shared;
 
 import android.net.INetd;
 import android.os.RemoteException;

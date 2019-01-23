@@ -100,7 +100,7 @@ import android.net.netlink.InetDiagMessage;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
-import android.net.util.NetdService;
+import android.net.shared.NetdService;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
