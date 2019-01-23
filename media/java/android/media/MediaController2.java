@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Allows an app to interact with an active {@link MediaSession2} or a
- * MediaSession2Service which would provide {@link MediaSession2}. Media buttons and other
+ * {@link MediaSession2Service} which would provide {@link MediaSession2}. Media buttons and other
  * commands can be sent to the session.
  * <p>
  * This API is not generally intended for third party application developers.
@@ -53,7 +53,6 @@ import java.util.concurrent.Executor;
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
  */
-// TODO: use @link for MediaSession2Service
 public class MediaController2 implements AutoCloseable {
     static final String TAG = "MediaController2";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
