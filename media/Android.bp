@@ -1,15 +1,9 @@
 java_library {
-    name: "updatable-media",
+    name: "updatable-media1",
 
     srcs: [
         ":media1-srcs",
-        ":mediasession2-srcs",
-        ":mediaplayer2-srcs",
         ":framework-media-annotation-srcs",
-    ],
-
-    static_libs: [
-        "mediaplayer2-protos",
     ],
 
     aidl: {
@@ -17,6 +11,7 @@ java_library {
             "apex/java",
         ],
 
+        // TODO: find out a way to include only the necessary aidl files instead of dirs.
         include_dirs: [
             "frameworks/base/core/java",
             "frameworks/base/media/java",
@@ -27,6 +22,58 @@ java_library {
 
     // Make sure that the implementaion only relies on SDK or system APIs.
     sdk_version: "system_current",
+}
+
+java_library {
+    name: "updatable-mediasession2",
+
+    srcs: [
+        ":mediasession2-srcs",
+        ":framework-media-annotation-srcs",
+    ],
+
+    aidl: {
+        export_include_dirs: [
+            "apex/java",
+        ],
+
+        // TODO: find out a way to include only the necessary aidl files instead of dirs.
+        include_dirs: [
+            "frameworks/base/core/java",
+        ],
+    },
+
+    installable: true,
+
+    // Make sure that the implementaion only relies on SDK or system APIs.
+    sdk_version: "system_current",
+}
+
+java_library {
+    name: "updatable-media",
+
+    srcs: [
+        ":mediaplayer2-srcs",
+        ":framework-media-annotation-srcs",
+    ],
+
+    static_libs: [
+        "mediaplayer2-protos",
+    ],
+
+    installable: true,
+
+    // Make sure that the implementaion only relies on SDK or system APIs.
+    sdk_version: "system_current",
+}
+
+filegroup {
+    name: "media-srcs-without-aidls",
+    srcs : [
+        ":media1-srcs-without-aidls",
+        ":mediasession2-srcs-without-aidls",
+        ":mediaplayer2-srcs",
+    ],
 }
 
 filegroup {
@@ -56,7 +103,7 @@ filegroup {
 }
 
 filegroup {
-    name: "media1-stubs-srcs",
+    name: "media1-srcs-without-aidls",
     srcs: [
         ":media1-srcs",
     ],
@@ -90,7 +137,7 @@ filegroup {
 }
 
 filegroup {
-    name: "mediasession2-stubs-srcs",
+    name: "mediasession2-srcs-without-aidls",
     srcs: [
         ":mediasession2-srcs",
     ],
