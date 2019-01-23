@@ -44,6 +44,7 @@ import java.io.FileDescriptor;
  */
 class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private static final String TAG = "BugreportManagerService";
+    private static final String BUGREPORT_SERVICE = "bugreportd";
     private static final long DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS = 30 * 1000;
 
     private IDumpstate mDs = null;
@@ -64,6 +65,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         throw new UnsupportedOperationException("setListener is not allowed on this service");
     }
 
+    // TODO(b/111441001): Intercept onFinished here in system server and shutdown
+    // the bugreportd service.
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
     public void startBugreport(int callingUidUnused, String callingPackage,
@@ -82,6 +85,14 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
         mDs.startBugreport(callingUid, callingPackage,
                 bugreportFd, screenshotFd, bugreportMode, listener);
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void cancelBugreport() throws RemoteException {
+        // This tells init to cancel bugreportd service.
+        SystemProperties.set("ctl.stop", BUGREPORT_SERVICE);
+        mDs = null;
     }
 
     private boolean validate(@BugreportParams.BugreportMode int mode) {
@@ -107,7 +118,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
      */
     private IDumpstate getDumpstateService() {
         // Start bugreport service.
-        SystemProperties.set("ctl.start", "bugreport");
+        SystemProperties.set("ctl.start", BUGREPORT_SERVICE);
 
         IDumpstate ds = null;
         boolean timedOut = false;
