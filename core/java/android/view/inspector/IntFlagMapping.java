@@ -21,10 +21,11 @@ import android.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
- * Maps the values of an {@code int} property to arrays of string for properties that encode flags.
+ * Maps the values of an {@code int} property to sets of string for properties that encode flags.
  *
  * An {@link InspectionCompanion} may provide an instance of this class to a {@link PropertyMapper}
  * for flag values packed into primitive {@code int} properties.
@@ -45,7 +46,7 @@ public final class IntFlagMapping {
      * Get an array of the names of enabled flags for a given property value.
      *
      * @param value The value of the property
-     * @return The names of the enabled flags
+     * @return The names of the enabled flags, empty if no flags enabled
      */
     @NonNull
     public Set<String> get(int value) {
@@ -136,7 +137,7 @@ public final class IntFlagMapping {
         private final int mMask;
 
         private Flag(@NonNull String name, int target, int mask) {
-            mName = name;
+            mName = Objects.requireNonNull(name);
             mTarget = target;
             mMask = mask;
         }
