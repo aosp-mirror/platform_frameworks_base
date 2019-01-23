@@ -277,6 +277,8 @@ applications that come with the platform
         <permission name="android.permission.MOVE_PACKAGE"/>
         <permission name="android.permission.OBSERVE_APP_USAGE"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
+        <!-- Needed for test only -->
+        <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
         <permission name="android.permission.POWER_SAVER" />
         <permission name="android.permission.READ_FRAME_BUFFER"/>
         <permission name="android.permission.READ_LOWPAN_CREDENTIAL"/>

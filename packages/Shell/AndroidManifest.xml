@@ -177,6 +177,8 @@
 
     <!-- Permission needed to run network tests in CTS -->
     <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
+    <!-- Permission needed to test tcp keepalive offload. -->
+    <uses-permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
