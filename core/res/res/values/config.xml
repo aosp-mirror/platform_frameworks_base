@@ -372,7 +372,7 @@
 
 
     <!-- Configuration of Ethernet interfaces in the following format:
-         <interface name|mac address>;[Network Capabilities];[IP config]
+         <interface name|mac address>;[Network Capabilities];[IP config];[Override Transport]
          Where
                [Network Capabilities] Optional. A comma seprated list of network capabilities.
                    Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
@@ -380,11 +380,16 @@
                    use the following format to specify static IP configuration:
                        ip=<ip-address/mask> gateway=<ip-address> dns=<comma-sep-ip-addresses>
                        domains=<comma-sep-domains>
+               [Override Transport] Optional. An override network transport type to allow
+                    the propagation of an interface type on the other end of a local Ethernet
+                    interface. Value must be from NetworkCapabilities#TRANSPORT_* constants. If
+                    left out, this will default to TRANSPORT_ETHERNET.
          -->
     <string-array translatable="false" name="config_ethernet_interfaces">
         <!--
         <item>eth1;12,13,14,15;ip=192.168.0.10/24 gateway=192.168.0.1 dns=4.4.4.4,8.8.8.8</item>
         <item>eth2;;ip=192.168.0.11/24</item>
+        <item>eth3;12,13,14,15;ip=192.168.0.12/24;1</item>
         -->
     </string-array>
 
