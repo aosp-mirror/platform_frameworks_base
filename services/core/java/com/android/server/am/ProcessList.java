@@ -183,6 +183,10 @@ public final class ProcessList {
     // is not entirely fatal but is generally a bad idea.
     static final int BACKUP_APP_ADJ = 300;
 
+    // This is a process bound by the system that's more important than services but not so
+    // perceptible that it affects the user immediately if killed.
+    static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
+
     // This is a process only hosting components that are perceptible to the
     // user, and we really want to avoid killing them, but they are not
     // immediately visible. An example is background music playback.
@@ -717,6 +721,9 @@ public final class ProcessList {
         } else if (setAdj >= ProcessList.BACKUP_APP_ADJ) {
             return buildOomTag("bkup  ", "bkup", null, setAdj,
                     ProcessList.BACKUP_APP_ADJ, compact);
+        } else if (setAdj >= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+            return buildOomTag("prcl  ", "prcl", null, setAdj,
+                    ProcessList.PERCEPTIBLE_LOW_APP_ADJ, compact);
         } else if (setAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
             return buildOomTag("prcp  ", "prcp", null, setAdj,
                     ProcessList.PERCEPTIBLE_APP_ADJ, compact);
