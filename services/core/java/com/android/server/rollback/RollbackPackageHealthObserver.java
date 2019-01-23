@@ -27,6 +27,7 @@ import android.os.HandlerThread;
 
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
+import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 
 import java.util.List;
 
@@ -39,10 +40,12 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
     private Context mContext;
+    private RollbackManager mRollbackManager;
     private Handler mHandler;
 
     RollbackPackageHealthObserver(Context context) {
         mContext = context;
+        mRollbackManager = mContext.getSystemService(RollbackManager.class);
         HandlerThread handlerThread = new HandlerThread("RollbackPackageHealthObserver");
         handlerThread.start();
         mHandler = handlerThread.getThreadHandler();
@@ -50,19 +53,47 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean onHealthCheckFailed(String packageName) {
-        RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
-        for (RollbackInfo rollback : rollbackManager.getAvailableRollbacks()) {
-            for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
-                if (packageName.equals(packageRollback.getPackageName())) {
-                    // TODO(zezeozue): Only rollback if rollback version == failed package version
-                    mHandler.post(() -> executeRollback(rollbackManager, rollback));
-                    return true;
-                }
-            }
+    public int onHealthCheckFailed(String packageName) {
+        RollbackInfo rollback = getAvailableRollback(packageName);
+        if (rollback == null) {
+            // Don't handle the notification, no rollbacks available for the package
+            return PackageHealthObserverImpact.USER_IMPACT_NONE;
         }
-        // Don't handle the notification, no rollbacks available
-        return false;
+        // Rollback is available, we may get a callback into #execute
+        return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
+    }
+
+    @Override
+    public boolean execute(String packageName) {
+        RollbackInfo rollback = getAvailableRollback(packageName);
+        if (rollback == null) {
+            // Expected a rollback to be available, what happened?
+            return false;
+        }
+
+        // TODO(zezeozue): Only rollback if rollback version == failed package version
+        LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver((Intent result) -> {
+            int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_FAILURE);
+            if (status == PackageInstaller.STATUS_SUCCESS) {
+                // TODO(zezeozue); Log success metrics
+                // Rolledback successfully, no action required by other observers
+            } else {
+                // TODO(zezeozue); Log failure metrics
+                // Rollback failed other observers should have a shot
+            }
+        });
+
+        // TODO(zezeozue): Log initiated metrics
+        mHandler.post(() ->
+                mRollbackManager.commitRollback(rollback, rollbackReceiver.getIntentSender()));
+        // Assume rollback executed successfully
+        return true;
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     /**
@@ -73,26 +104,15 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
     }
 
-    private void executeRollback(RollbackManager manager, RollbackInfo rollback) {
-        // TODO(zezeozue): Log initiated metrics
-        LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver((Intent result) -> {
-            mHandler.post(() -> {
-                int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                        PackageInstaller.STATUS_FAILURE);
-                if (status == PackageInstaller.STATUS_SUCCESS) {
-                    // TODO(zezeozue); Log success metrics
-                    // Rolledback successfully, no action required by other observers
-                } else {
-                    // TODO(zezeozue); Log failure metrics
-                    // Rollback failed other observers should have a shot
+    private RollbackInfo getAvailableRollback(String packageName) {
+        for (RollbackInfo rollback : mRollbackManager.getAvailableRollbacks()) {
+            for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
+                if (packageName.equals(packageRollback.getPackageName())) {
+                    // TODO(zezeozue): Only rollback if rollback version == failed package version
+                    return rollback;
                 }
-            });
-        });
-        manager.commitRollback(rollback, rollbackReceiver.getIntentSender());
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
+            }
+        }
+        return null;
     }
 }

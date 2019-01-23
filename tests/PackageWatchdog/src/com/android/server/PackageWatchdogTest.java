@@ -26,8 +26,8 @@ import android.os.test.TestLooper;
 import android.support.test.InstrumentationRegistry;
 
 import com.android.server.PackageWatchdog.PackageHealthObserver;
+import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,23 +45,22 @@ import java.util.concurrent.TimeUnit;
 public class PackageWatchdogTest {
     private static final String APP_A = "com.package.a";
     private static final String APP_B = "com.package.b";
+    private static final String APP_C = "com.package.c";
+    private static final String APP_D = "com.package.d";
     private static final String OBSERVER_NAME_1 = "observer1";
     private static final String OBSERVER_NAME_2 = "observer2";
     private static final String OBSERVER_NAME_3 = "observer3";
+    private static final String OBSERVER_NAME_4 = "observer4";
     private static final long SHORT_DURATION = TimeUnit.SECONDS.toMillis(1);
     private static final long LONG_DURATION = TimeUnit.SECONDS.toMillis(5);
     private TestLooper mTestLooper;
 
     @Before
     public void setUp() throws Exception {
-        mTestLooper = new TestLooper();
-        mTestLooper.startAutoDispatch();
-    }
-
-    @After
-    public void tearDown() throws Exception {
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
+        mTestLooper = new TestLooper();
+        mTestLooper.startAutoDispatch();
     }
 
     /**
@@ -154,7 +153,6 @@ public class PackageWatchdogTest {
         assertTrue(watchdog1.getPackages(observer2).contains(APP_A));
         assertTrue(watchdog1.getPackages(observer2).contains(APP_B));
 
-
         // Then advance time and run IO Handler so file is saved
         mTestLooper.dispatchAll();
 
@@ -198,47 +196,191 @@ public class PackageWatchdogTest {
             watchdog.onPackageFailure(new String[]{APP_A});
         }
 
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
         // Verify that observers are not notified
         assertEquals(0, observer1.mFailedPackages.size());
         assertEquals(0, observer2.mFailedPackages.size());
     }
 
     /**
-     * Test package failure and notifies all observer since none handles the failure
+     * Test package failure and does not notify any observer because they are not observing
+     * the failed packages.
      */
     @Test
-    public void testPackageFailureNotifyAll() throws Exception {
+    public void testPackageFailureNotifyNone() throws Exception {
         PackageWatchdog watchdog = createWatchdog();
-        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
-        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1,
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2,
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
 
-        // Start observing for observer1 and observer2 without handling failures
+
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_B), SHORT_DURATION);
 
-        // Then fail APP_A and APP_B above the threshold
+        // Then fail APP_C (not observed) above the threshold
         for (int i = 0; i < TRIGGER_FAILURE_COUNT; i++) {
-            watchdog.onPackageFailure(new String[]{APP_A, APP_B});
+            watchdog.onPackageFailure(new String[]{APP_C});
         }
 
-        // Verify all observers are notifed of all package failures
-        List<String> observer1Packages = observer1.mFailedPackages;
-        List<String> observer2Packages = observer2.mFailedPackages;
-        assertEquals(2, observer1Packages.size());
-        assertEquals(1, observer2Packages.size());
-        assertEquals(APP_A, observer1Packages.get(0));
-        assertEquals(APP_B, observer1Packages.get(1));
-        assertEquals(APP_A, observer2Packages.get(0));
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
+        // Verify that observers are not notified
+        assertEquals(0, observer1.mFailedPackages.size());
+        assertEquals(0, observer2.mFailedPackages.size());
     }
 
     /**
-     * Test package failure and notifies only one observer because it handles the failure
+     * Test package failure and notifies only least impact observers.
      */
     @Test
-    public void testPackageFailureNotifyOne() throws Exception {
+    public void testPackageFailureNotifyAllDifferentImpacts() throws Exception {
         PackageWatchdog watchdog = createWatchdog();
-        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1, true /* shouldHandle */);
-        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2, true /* shouldHandle */);
+        TestObserver observerNone = new TestObserver(OBSERVER_NAME_1,
+                PackageHealthObserverImpact.USER_IMPACT_NONE);
+        TestObserver observerHigh = new TestObserver(OBSERVER_NAME_2,
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        TestObserver observerMid = new TestObserver(OBSERVER_NAME_3,
+                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+        TestObserver observerLow = new TestObserver(OBSERVER_NAME_4,
+                PackageHealthObserverImpact.USER_IMPACT_LOW);
+
+        // Start observing for all impact observers
+        watchdog.startObservingHealth(observerNone, Arrays.asList(APP_A, APP_B, APP_C, APP_D),
+                SHORT_DURATION);
+        watchdog.startObservingHealth(observerHigh, Arrays.asList(APP_A, APP_B, APP_C),
+                SHORT_DURATION);
+        watchdog.startObservingHealth(observerMid, Arrays.asList(APP_A, APP_B),
+                SHORT_DURATION);
+        watchdog.startObservingHealth(observerLow, Arrays.asList(APP_A),
+                SHORT_DURATION);
+
+        // Then fail all apps above the threshold
+        for (int i = 0; i < TRIGGER_FAILURE_COUNT; i++) {
+            watchdog.onPackageFailure(new String[]{APP_A, APP_B, APP_C, APP_D});
+        }
+
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
+        // Verify least impact observers are notifed of package failures
+        List<String> observerNonePackages = observerNone.mFailedPackages;
+        List<String> observerHighPackages = observerHigh.mFailedPackages;
+        List<String> observerMidPackages = observerMid.mFailedPackages;
+        List<String> observerLowPackages = observerLow.mFailedPackages;
+
+        // APP_D failure observed by only observerNone is not caught cos its impact is none
+        assertEquals(0, observerNonePackages.size());
+        // APP_C failure is caught by observerHigh cos it's the lowest impact observer
+        assertEquals(1, observerHighPackages.size());
+        assertEquals(APP_C, observerHighPackages.get(0));
+        // APP_B failure is caught by observerMid cos it's the lowest impact observer
+        assertEquals(1, observerMidPackages.size());
+        assertEquals(APP_B, observerMidPackages.get(0));
+        // APP_A failure is caught by observerLow cos it's the lowest impact observer
+        assertEquals(1, observerLowPackages.size());
+        assertEquals(APP_A, observerLowPackages.get(0));
+    }
+
+    /**
+     * Test package failure and least impact observers are notified successively.
+     * State transistions:
+     *
+     * <ul>
+     * <li>(observer1:low, observer2:mid) -> {observer1}
+     * <li>(observer1:high, observer2:mid) -> {observer2}
+     * <li>(observer1:high, observer2:none) -> {observer1}
+     * <li>(observer1:none, observer2:none) -> {}
+     * <ul>
+     */
+    @Test
+    public void testPackageFailureNotifyLeastSuccessively() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observerFirst = new TestObserver(OBSERVER_NAME_1,
+                PackageHealthObserverImpact.USER_IMPACT_LOW);
+        TestObserver observerSecond = new TestObserver(OBSERVER_NAME_2,
+                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+
+        // Start observing for observerFirst and observerSecond with failure handling
+        watchdog.startObservingHealth(observerFirst, Arrays.asList(APP_A), LONG_DURATION);
+        watchdog.startObservingHealth(observerSecond, Arrays.asList(APP_A), LONG_DURATION);
+
+        // Then fail APP_A above the threshold
+        for (int i = 0; i < TRIGGER_FAILURE_COUNT; i++) {
+            watchdog.onPackageFailure(new String[]{APP_A});
+        }
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
+        // Verify only observerFirst is notifed
+        assertEquals(1, observerFirst.mFailedPackages.size());
+        assertEquals(APP_A, observerFirst.mFailedPackages.get(0));
+        assertEquals(0, observerSecond.mFailedPackages.size());
+
+        // After observerFirst handles failure, next action it has is high impact
+        observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_HIGH;
+        observerFirst.mFailedPackages.clear();
+        observerSecond.mFailedPackages.clear();
+
+        // Then fail APP_A again above the threshold
+        for (int i = 0; i < TRIGGER_FAILURE_COUNT; i++) {
+            watchdog.onPackageFailure(new String[]{APP_A});
+        }
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
+        // Verify only observerSecond is notifed cos it has least impact
+        assertEquals(1, observerSecond.mFailedPackages.size());
+        assertEquals(APP_A, observerSecond.mFailedPackages.get(0));
+        assertEquals(0, observerFirst.mFailedPackages.size());
+
+        // After observerSecond handles failure, it has no further actions
+        observerSecond.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
+        observerFirst.mFailedPackages.clear();
+        observerSecond.mFailedPackages.clear();
+
+        // Then fail APP_A again above the threshold
+        for (int i = 0; i < TRIGGER_FAILURE_COUNT; i++) {
+            watchdog.onPackageFailure(new String[]{APP_A});
+        }
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
+        // Verify only observerFirst is notifed cos it has the only action
+        assertEquals(1, observerFirst.mFailedPackages.size());
+        assertEquals(APP_A, observerFirst.mFailedPackages.get(0));
+        assertEquals(0, observerSecond.mFailedPackages.size());
+
+        // After observerFirst handles failure, it too has no further actions
+        observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
+        observerFirst.mFailedPackages.clear();
+        observerSecond.mFailedPackages.clear();
+
+        // Then fail APP_A again above the threshold
+        for (int i = 0; i < TRIGGER_FAILURE_COUNT; i++) {
+            watchdog.onPackageFailure(new String[]{APP_A});
+        }
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
+        // Verify no observer is notified cos no actions left
+        assertEquals(0, observerFirst.mFailedPackages.size());
+        assertEquals(0, observerSecond.mFailedPackages.size());
+    }
+
+    /**
+     * Test package failure and notifies only one observer even with observer impact tie.
+     */
+    @Test
+    public void testPackageFailureNotifyOneSameImpact() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1,
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2,
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
 
         // Start observing for observer1 and observer2 with failure handling
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
@@ -248,6 +390,9 @@ public class PackageWatchdogTest {
         for (int i = 0; i < TRIGGER_FAILURE_COUNT; i++) {
             watchdog.onPackageFailure(new String[]{APP_A});
         }
+
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
 
         // Verify only one observer is notifed
         assertEquals(1, observer1.mFailedPackages.size());
@@ -262,21 +407,26 @@ public class PackageWatchdogTest {
 
     private static class TestObserver implements PackageHealthObserver {
         private final String mName;
-        private boolean mShouldHandle;
+        private int mImpact;
         final List<String> mFailedPackages = new ArrayList<>();
 
         TestObserver(String name) {
             mName = name;
+            mImpact = PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
         }
 
-        TestObserver(String name, boolean shouldHandle) {
+        TestObserver(String name, int impact) {
             mName = name;
-            mShouldHandle = shouldHandle;
+            mImpact = impact;
         }
 
-        public boolean onHealthCheckFailed(String packageName) {
+        public int onHealthCheckFailed(String packageName) {
+            return mImpact;
+        }
+
+        public boolean execute(String packageName) {
             mFailedPackages.add(packageName);
-            return mShouldHandle;
+            return true;
         }
 
         public String getName() {
