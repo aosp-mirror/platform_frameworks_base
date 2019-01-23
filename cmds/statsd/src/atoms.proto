@@ -299,6 +299,10 @@ message Atom {
         CarPowerStateChanged car_power_state_changed = 203;
         GarageModeInfo garage_mode_info = 204;
         TestAtomReported test_atom_reported = 205 [(log_from_module) = "cts"];
+        ContentCaptureCallerMismatchReported content_capture_caller_mismatch_reported = 206;
+        ContentCaptureServiceEvents content_capture_service_events = 207;
+        ContentCaptureSessionEvents content_capture_session_events = 208;
+        ContentCaptureFlushed content_capture_flushed = 209;
     }
 
     // Pulled events will start at field 10000.
@@ -4827,6 +4831,95 @@ message BuildInformation {
 
     // Build.TAGS. Comma-separated tags describing the build, like "unsigned,debug".
     optional string tags = 9;
+}
+
+/**
+ * Logs information about mismatched caller for content capture.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/android/service/contentcapture/ContentCaptureService.java
+ */
+message ContentCaptureCallerMismatchReported {
+    optional string intended_package = 1;
+    optional string calling_package = 2;
+}
+
+/**
+ * Logs information about content capture service events.
+ *
+ * Logged from:
+ *   frameworks/base/services/contentcapture/java/com/android/server/contentcapture/ContentCaptureMetricsLogger.java
+ */
+message ContentCaptureServiceEvents {
+    // The type of event.
+    enum Event {
+        UNKNOWN = 0;
+        ON_CONNECTED = 1;
+        ON_DISCONNECTED = 2;
+        SET_WHITELIST = 3;
+        SET_DISABLED = 4;
+        ON_USER_DATA_REMOVED = 5;
+    }
+    optional Event event = 1;
+    // component/package of content capture service.
+    optional string service_info = 2;
+    // component/package of target.
+    // it's a concatenated list of component/package for SET_WHITELIST event
+    // separated by " ".
+    optional string target_info = 3;
+}
+
+/**
+ * Logs information about content capture session events.
+ *
+ * Logged from:
+ *   frameworks/base/services/contentcapture/java/com/android/server/contentcapture/ContentCaptureMetricsLogger.java
+ */
+message ContentCaptureSessionEvents {
+    // The type of event.
+    enum Event {
+        UNKNOWN = 0;
+        ON_SESSION_STARTED = 1;
+        ON_SESSION_FINISHED = 2;
+        SESSION_NOT_CREATED = 3;
+    }
+    optional int32 session_id = 1;
+    optional Event event = 2;
+    // (n/a on session finished)
+    optional int32 state_flags = 3;
+    // component/package of content capture service.
+    optional string service_info = 4;
+    // component/package of app.
+    // (n/a on session finished)
+    optional string app_info = 5;
+    optional bool is_child_session = 6;
+}
+
+/**
+ * Logs information about session being flushed.
+ *
+ * Logged from:
+ *   frameworks/base/services/contentcapture/java/com/android/server/contentcapture/ContentCaptureMetricsLogger.java
+ */
+message ContentCaptureFlushed {
+    optional int32 session_id = 1;
+    // component/package of content capture service.
+    optional string service_info = 2;
+    // component/package of app.
+    optional string app_info = 3;
+    // session start/finish events
+    optional int32 child_session_started = 4;
+    optional int32 child_session_finished = 5;
+    // count of view events.
+    optional int32 view_appeared_count = 6;
+    optional int32 view_disappeared_count = 7;
+    optional int32 view_text_changed_count = 8;
+
+    // Flush stats.
+    optional int32 max_events = 9;
+    optional int32 idle_flush_freq = 10;
+    optional int32 text_flush_freq = 11;
+    optional int32 flush_reason = 12;
 }
 
 /**
