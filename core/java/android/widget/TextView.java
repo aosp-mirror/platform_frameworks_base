@@ -5117,7 +5117,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_scrollHorizontally
      * @see #setHorizontallyScrolling(boolean)
      */
-    public final boolean isHorizontallyScrolling() {
+    public final boolean isHorizontallyScrollable() {
         return mHorizontallyScrolling;
     }
 
