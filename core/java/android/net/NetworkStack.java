@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
+import android.net.ip.IIpClientCallbacks;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -77,6 +78,21 @@ public class NetworkStack {
         requestConnector(connector -> {
             try {
                 connector.makeDhcpServer(ifName, params, cb);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        });
+    }
+
+    /**
+     * Create an IpClient on the specified interface.
+     *
+     * <p>The IpClient will be returned asynchronously through the provided callbacks.
+     */
+    public void makeIpClient(String ifName, IIpClientCallbacks cb) {
+        requestConnector(connector -> {
+            try {
+                connector.makeIpClient(ifName, cb);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }

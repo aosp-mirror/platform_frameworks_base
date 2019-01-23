@@ -28,6 +28,7 @@
     <!-- Launch captive portal app as specific user -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.NETWORK_STACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
         android:label="NetworkStack"
         android:defaultToDeviceProtectedStorage="true"

@@ -39,6 +39,8 @@ import android.net.dhcp.DhcpServer;
 import android.net.dhcp.DhcpServingParams;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
+import android.net.ip.IIpClientCallbacks;
+import android.net.ip.IpClient;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.SharedLog;
 import android.os.IBinder;
@@ -50,7 +52,11 @@ import com.android.server.connectivity.NetworkMonitor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Android service used to start the network stack when bound to via an intent.
@@ -80,6 +86,8 @@ public class NetworkStackService extends Service {
         private static final int NUM_VALIDATION_LOG_LINES = 20;
         private final Context mContext;
         private final ConnectivityManager mCm;
+        @GuardedBy("mIpClients")
+        private final ArrayList<WeakReference<IpClient>> mIpClients = new ArrayList<>();
 
         private static final int MAX_VALIDATION_LOGS = 10;
         @GuardedBy("mValidationLogs")
@@ -138,12 +146,57 @@ public class NetworkStackService extends Service {
         }
 
         @Override
+        public void makeIpClient(String ifName, IIpClientCallbacks cb) throws RemoteException {
+            final IpClient ipClient = new IpClient(mContext, ifName, cb);
+
+            synchronized (mIpClients) {
+                final Iterator<WeakReference<IpClient>> it = mIpClients.iterator();
+                while (it.hasNext()) {
+                    final IpClient ipc = it.next().get();
+                    if (ipc == null) {
+                        it.remove();
+                    }
+                }
+                mIpClients.add(new WeakReference<>(ipClient));
+            }
+
+            cb.onIpClientCreated(ipClient.makeConnector());
+        }
+
+        @Override
         protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter fout,
                 @Nullable String[] args) {
             checkDumpPermission();
             final IndentingPrintWriter pw = new IndentingPrintWriter(fout, "  ");
             pw.println("NetworkStack logs:");
             mLog.dump(fd, pw, args);
+
+            // Dump full IpClient logs for non-GCed clients
+            pw.println();
+            pw.println("Recently active IpClient logs:");
+            final ArrayList<IpClient> ipClients = new ArrayList<>();
+            final HashSet<String> dumpedIpClientIfaces = new HashSet<>();
+            synchronized (mIpClients) {
+                for (WeakReference<IpClient> ipcRef : mIpClients) {
+                    final IpClient ipc = ipcRef.get();
+                    if (ipc != null) {
+                        ipClients.add(ipc);
+                    }
+                }
+            }
+
+            for (IpClient ipc : ipClients) {
+                pw.println(ipc.getName());
+                pw.increaseIndent();
+                ipc.dump(fd, pw, args);
+                pw.decreaseIndent();
+                dumpedIpClientIfaces.add(ipc.getInterfaceName());
+            }
+
+            // State machine and connectivity metrics logs are kept for GCed IpClients
+            pw.println();
+            pw.println("Other IpClient logs:");
+            IpClient.dumpAllLogs(fout, dumpedIpClientIfaces);
 
             pw.println();
             pw.println("Validation logs (most recent first):");

@@ -40,7 +40,7 @@ import android.net.dhcp.IDhcpServer;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
-import android.net.util.NetdService;
+import android.net.shared.NetdService;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.Looper;
