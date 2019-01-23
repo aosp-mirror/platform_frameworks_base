@@ -129,7 +129,7 @@ bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
     setSurfaceColorProperties(colorMode);
     if (surface) {
         mVkSurface = mVkManager.createSurface(surface, colorMode, mSurfaceColorSpace,
-                                              mSurfaceColorGamut, mSurfaceColorType);
+                                              mSurfaceColorType);
     }
 
     return mVkSurface != nullptr;

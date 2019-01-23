@@ -49,7 +49,7 @@ public:
     bool hasEglContext();
 
     Result<EGLSurface, EGLint> createSurface(EGLNativeWindowType window, ColorMode colorMode,
-                                             SkColorSpace::Gamut colorGamut);
+                                             sk_sp<SkColorSpace> colorSpace);
     void destroySurface(EGLSurface surface);
 
     void destroy();
