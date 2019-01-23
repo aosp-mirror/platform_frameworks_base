@@ -11199,8 +11199,6 @@ public final class Settings {
          * service_max_inactivity               (long)
          * service_bg_start_timeout             (long)
          * process_start_async                  (boolean)
-         * use_mem_aware_service_restarts       (boolean)
-         * service_restart_delay_duration       (long)
          * </pre>
          *
          * <p>
