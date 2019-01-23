@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
@@ -120,14 +121,26 @@ public class WifiInfo implements Parcelable {
     @UnsupportedAppUsage
     private String mMacAddress = DEFAULT_MAC_ADDRESS;
 
+    /**
+     * Whether the network is ephemeral or not.
+     */
     private boolean mEphemeral;
 
+    /**
+     * Whether the network is trusted or not.
+     */
     private boolean mTrusted;
 
     /**
      * OSU (Online Sign Up) AP for Passpoint R2.
      */
     private boolean mOsuAp;
+
+    /**
+     * If connected to a network suggestion or specifier, store the package name of the app,
+     * else null.
+     */
+    private String mNetworkSuggestionOrSpecifierPackageName;
 
     /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
@@ -209,6 +222,7 @@ public class WifiInfo implements Parcelable {
         setMeteredHint(false);
         setEphemeral(false);
         setOsuAp(false);
+        setNetworkSuggestionOrSpecifierPackageName(null);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -240,6 +254,8 @@ public class WifiInfo implements Parcelable {
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
             mTrusted = source.mTrusted;
+            mNetworkSuggestionOrSpecifierPackageName =
+                    source.mNetworkSuggestionOrSpecifierPackageName;
             mOsuAp = source.mOsuAp;
             txBad = source.txBad;
             txRetries = source.txRetries;
@@ -476,6 +492,17 @@ public class WifiInfo implements Parcelable {
         return mOsuAp;
     }
 
+    /** {@hide} */
+    public void setNetworkSuggestionOrSpecifierPackageName(@Nullable String packageName) {
+        mNetworkSuggestionOrSpecifierPackageName = packageName;
+    }
+
+    /** {@hide} */
+    public @Nullable String getNetworkSuggestionOrSpecifierPackageName() {
+        return mNetworkSuggestionOrSpecifierPackageName;
+    }
+
+
     /** @hide */
     @UnsupportedAppUsage
     public void setNetworkId(int id) {
@@ -634,6 +661,7 @@ public class WifiInfo implements Parcelable {
         dest.writeDouble(rxSuccessRate);
         mSupplicantState.writeToParcel(dest, flags);
         dest.writeInt(mOsuAp ? 1 : 0);
+        dest.writeString(mNetworkSuggestionOrSpecifierPackageName);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -672,6 +700,7 @@ public class WifiInfo implements Parcelable {
                 info.rxSuccessRate = in.readDouble();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 info.mOsuAp = in.readInt() != 0;
+                info.mNetworkSuggestionOrSpecifierPackageName = in.readString();
                 return info;
             }
 
