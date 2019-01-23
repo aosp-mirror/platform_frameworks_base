@@ -76,4 +76,6 @@ interface IShortcutService {
 
     // System API used by framework's ShareSheet (ChooserActivity)
     ParceledListSlice getShareTargets(String packageName, in IntentFilter filter, int userId);
+
+    boolean hasShareTargets(String packageName, String packageToCheck, int userId);
 }

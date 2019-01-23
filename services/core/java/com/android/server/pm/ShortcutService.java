@@ -2167,6 +2167,19 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @Override
+    public boolean hasShareTargets(String packageName, String packageToCheck,
+            @UserIdInt int userId) {
+        verifyCaller(packageName, userId);
+        enforceSystem();
+
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+
+            return getPackageShortcutsLocked(packageToCheck, userId).hasShareTargets();
+        }
+    }
+
     @GuardedBy("mLock")
     private ParceledListSlice<ShortcutInfo> getShortcutsWithQueryLocked(@NonNull String packageName,
             @UserIdInt int userId, int cloneFlags, @NonNull Predicate<ShortcutInfo> query) {

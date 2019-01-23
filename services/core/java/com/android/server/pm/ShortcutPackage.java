@@ -690,6 +690,10 @@ class ShortcutPackage extends ShortcutPackageItem {
         return result;
     }
 
+    public boolean hasShareTargets() {
+        return !mShareTargets.isEmpty();
+    }
+
     /**
      * Return the filenames (excluding path names) of icon bitmap files from this package.
      */
