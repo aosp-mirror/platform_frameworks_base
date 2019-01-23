@@ -244,6 +244,7 @@ package android {
   }
 
   public static final class R.style {
+    field public static final int Theme_DeviceDefault_DocumentsUI = 16974562; // 0x10302e2
     field public static final int Theme_Leanback_FormWizard = 16974544; // 0x10302d0
   }
 
