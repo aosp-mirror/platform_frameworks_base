@@ -30,6 +30,7 @@ import android.widget.TextView
 import com.android.systemui.Dependency
 import com.android.systemui.R
 import com.android.systemui.plugins.ActivityStarter
+import java.util.concurrent.TimeUnit
 
 class OngoingPrivacyDialog constructor(
     val context: Context,
@@ -60,7 +61,8 @@ class OngoingPrivacyDialog constructor(
             setNegativeButton(R.string.ongoing_privacy_dialog_cancel, null)
             setPositiveButton(R.string.ongoing_privacy_dialog_open_settings,
                     object : DialogInterface.OnClickListener {
-                        val intent = Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE)
+                        val intent = Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE).putExtra(
+                                Intent.EXTRA_DURATION_MILLIS, TimeUnit.MINUTES.toMillis(1))
 
                         @Suppress("DEPRECATION")
                         override fun onClick(dialog: DialogInterface?, which: Int) {
