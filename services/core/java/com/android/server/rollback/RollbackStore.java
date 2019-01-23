@@ -178,6 +178,8 @@ class RollbackStore {
      * rollback.
      */
     void deleteAvailableRollback(RollbackData data) {
+        // TODO(narayan): Make sure we delete the userdata snapshot along with the backup of the
+        // actual app.
         removeFile(data.backupDir);
     }
 

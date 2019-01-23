@@ -794,6 +794,12 @@ public abstract class PackageManagerInternal {
             "android.content.pm.extra.ENABLE_ROLLBACK_INSTALL_FLAGS";
 
     /**
+     * Extra field name for the set of installed users for a given rollback package.
+     */
+    public static final String EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS =
+            "android.content.pm.extra.ENABLE_ROLLBACK_INSTALLED_USERS";
+
+    /**
      * Used as the {@code enableRollbackCode} argument for
      * {@link PackageManagerInternal#setEnableRollbackCode} to indicate that
      * enabling rollback succeeded.
@@ -827,4 +833,10 @@ public abstract class PackageManagerInternal {
      * Ask the package manager to compile layouts in the given package.
      */
     public abstract boolean compileLayouts(String packageName);
+
+    /*
+     * Inform the package manager that the pending package install identified by
+     * {@code token} can be completed.
+     */
+    public abstract void finishPackageInstall(int token, boolean didLaunch);
 }

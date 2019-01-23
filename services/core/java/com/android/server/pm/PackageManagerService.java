@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRAD
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
+import static android.content.pm.PackageManager.INSTALL_ALLOW_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
@@ -201,6 +202,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
+import android.content.rollback.IRollbackManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -13872,6 +13874,38 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // If this is an update to a package that might be potentially downgraded, then we
+        // need to check with the rollback manager whether there's any userdata that might
+        // need to be restored for the package.
+        //
+        // TODO(narayan): Get this working for cases where userId == UserHandle.USER_ALL.
+        if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && !doRestore && update) {
+            IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
+
+            final String packageName = res.pkg.applicationInfo.packageName;
+            final String seInfo = res.pkg.applicationInfo.seInfo;
+            final PackageSetting ps;
+            int appId = -1;
+            long ceDataInode = -1;
+            synchronized (mSettings) {
+                ps = mSettings.getPackageLPr(packageName);
+                if (ps != null) {
+                    appId = ps.appId;
+                    ceDataInode = ps.getCeDataInode(userId);
+                }
+            }
+
+            if (ps != null) {
+                try {
+                    rm.restoreUserData(packageName, userId, appId, ceDataInode, seInfo, token);
+                } catch (RemoteException re) {
+                    // Cannot happen, the RollbackManager is hosted in the same process.
+                }
+                doRestore = true;
+            }
+        }
+
         if (!doRestore) {
             // No restore possible, or the Backup Manager was mysteriously not
             // available -- just fire the post-install work request directly.
@@ -14569,6 +14603,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
                             installFlags);
+                    enableRollbackIntent.putExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS,
+                            resolveUserIds(args.user.getIdentifier()));
                     enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
                             PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -23790,6 +23827,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             return mArtManagerService.compileLayouts(pkg);
+        }
+
+        @Override
+        public void finishPackageInstall(int token, boolean didLaunch) {
+            PackageManagerService.this.finishPackageInstall(token, didLaunch);
         }
     }
 
