@@ -1672,22 +1672,17 @@ package android.content.pm.permission {
 package android.content.rollback {
 
   public final class PackageRollbackInfo implements android.os.Parcelable {
-    ctor public PackageRollbackInfo(String, android.content.rollback.PackageRollbackInfo.PackageVersion, android.content.rollback.PackageRollbackInfo.PackageVersion);
     method public int describeContents();
+    method public String getPackageName();
+    method public android.content.pm.VersionedPackage getVersionRolledBackFrom();
+    method public android.content.pm.VersionedPackage getVersionRolledBackTo();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
-    field public final android.content.rollback.PackageRollbackInfo.PackageVersion higherVersion;
-    field public final android.content.rollback.PackageRollbackInfo.PackageVersion lowerVersion;
-    field public final String packageName;
-  }
-
-  public static class PackageRollbackInfo.PackageVersion {
-    ctor public PackageRollbackInfo.PackageVersion(long);
-    field public final long versionCode;
   }
 
   public final class RollbackInfo implements android.os.Parcelable {
     method public int describeContents();
+    method public int getRollbackId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
     field public final android.content.rollback.PackageRollbackInfo targetPackage;

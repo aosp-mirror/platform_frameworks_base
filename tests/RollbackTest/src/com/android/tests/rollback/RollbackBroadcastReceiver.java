@@ -44,7 +44,6 @@ class RollbackBroadcastReceiver extends BroadcastReceiver {
     RollbackBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
-        filter.addDataScheme("package");
         InstrumentationRegistry.getContext().registerReceiver(this, filter);
     }
 

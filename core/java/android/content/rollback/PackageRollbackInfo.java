@@ -17,10 +17,9 @@
 package android.content.rollback;
 
 import android.annotation.SystemApi;
+import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.Objects;
 
 /**
  * Information about a rollback available for a particular package.
@@ -29,59 +28,41 @@ import java.util.Objects;
  */
 @SystemApi
 public final class PackageRollbackInfo implements Parcelable {
-    /**
-     * The name of a package being rolled back.
-     */
-    public final String packageName;
+
+    private final VersionedPackage mVersionRolledBackFrom;
+    private final VersionedPackage mVersionRolledBackTo;
 
     /**
-     * The version the package was rolled back from.
+     * Returns the name of the package to roll back from.
      */
-    public final PackageVersion higherVersion;
-
-    /**
-     * The version the package was rolled back to.
-     */
-    public final PackageVersion lowerVersion;
-
-    /**
-     * Represents a version of a package.
-     */
-    public static class PackageVersion {
-        public final long versionCode;
-
-        // TODO(b/120200473): Include apk sha or some other way to distinguish
-        // between two different apks with the same version code.
-        public PackageVersion(long versionCode) {
-            this.versionCode = versionCode;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other instanceof PackageVersion)  {
-                PackageVersion otherVersion = (PackageVersion) other;
-                return versionCode == otherVersion.versionCode;
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(versionCode);
-        }
+    public String getPackageName() {
+        return mVersionRolledBackFrom.getPackageName();
     }
 
-    public PackageRollbackInfo(String packageName,
-            PackageVersion higherVersion, PackageVersion lowerVersion) {
-        this.packageName = packageName;
-        this.higherVersion = higherVersion;
-        this.lowerVersion = lowerVersion;
+    /**
+     * Returns the version of the package rolled back from.
+     */
+    public VersionedPackage getVersionRolledBackFrom() {
+        return mVersionRolledBackFrom;
+    }
+
+    /**
+     * Returns the version of the package rolled back to.
+     */
+    public VersionedPackage getVersionRolledBackTo() {
+        return mVersionRolledBackTo;
+    }
+
+    /** @hide */
+    public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
+            VersionedPackage packageRolledBackTo) {
+        this.mVersionRolledBackFrom = packageRolledBackFrom;
+        this.mVersionRolledBackTo = packageRolledBackTo;
     }
 
     private PackageRollbackInfo(Parcel in) {
-        this.packageName = in.readString();
-        this.higherVersion = new PackageVersion(in.readLong());
-        this.lowerVersion = new PackageVersion(in.readLong());
+        this.mVersionRolledBackFrom = VersionedPackage.CREATOR.createFromParcel(in);
+        this.mVersionRolledBackTo = VersionedPackage.CREATOR.createFromParcel(in);
     }
 
     @Override
@@ -91,9 +72,8 @@ public final class PackageRollbackInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(packageName);
-        out.writeLong(higherVersion.versionCode);
-        out.writeLong(lowerVersion.versionCode);
+        mVersionRolledBackFrom.writeToParcel(out, flags);
+        mVersionRolledBackTo.writeToParcel(out, flags);
     }
 
     public static final Parcelable.Creator<PackageRollbackInfo> CREATOR =
