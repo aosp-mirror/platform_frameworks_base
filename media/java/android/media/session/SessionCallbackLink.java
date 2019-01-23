@@ -669,7 +669,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyCommand(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String command, Bundle args, ResultReceiver cb) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onCommand(packageName, pid, uid, caller, command, args, cb);
@@ -681,7 +681,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyMediaButton(String packageName, int pid, int uid,
                 Intent mediaButtonIntent, int sequenceNumber, ResultReceiver cb) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onMediaButton(packageName, pid, uid, mediaButtonIntent,
@@ -694,7 +694,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyMediaButtonFromController(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, Intent mediaButtonIntent) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onMediaButtonFromController(packageName, pid, uid, caller,
@@ -707,7 +707,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPrepare(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPrepare(packageName, pid, uid, caller);
@@ -719,7 +719,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPrepareFromMediaId(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String mediaId, Bundle extras) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPrepareFromMediaId(packageName, pid, uid, caller, mediaId, extras);
@@ -731,7 +731,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPrepareFromSearch(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String query, Bundle extras) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPrepareFromSearch(packageName, pid, uid, caller, query, extras);
@@ -743,7 +743,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPrepareFromUri(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, Uri uri, Bundle extras) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPrepareFromUri(packageName, pid, uid, caller, uri, extras);
@@ -755,7 +755,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPlay(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPlay(packageName, pid, uid, caller);
@@ -767,7 +767,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPlayFromMediaId(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String mediaId, Bundle extras) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPlayFromMediaId(packageName, pid, uid, caller, mediaId, extras);
@@ -779,7 +779,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPlayFromSearch(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String query, Bundle extras) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPlayFromSearch(packageName, pid, uid, caller, query, extras);
@@ -791,7 +791,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPlayFromUri(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, Uri uri, Bundle extras) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPlayFromUri(packageName, pid, uid, caller, uri, extras);
@@ -803,7 +803,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifySkipToTrack(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, long id) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onSkipToTrack(packageName, pid, uid, caller, id);
@@ -815,7 +815,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPause(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPause(packageName, pid, uid, caller);
@@ -827,7 +827,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyStop(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onStop(packageName, pid, uid, caller);
@@ -839,7 +839,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyNext(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onNext(packageName, pid, uid, caller);
@@ -851,7 +851,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyPrevious(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onPrevious(packageName, pid, uid, caller);
@@ -863,7 +863,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyFastForward(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onFastForward(packageName, pid, uid, caller);
@@ -875,7 +875,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyRewind(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onRewind(packageName, pid, uid, caller);
@@ -887,7 +887,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifySeekTo(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, long pos) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onSeekTo(packageName, pid, uid, caller, pos);
@@ -899,7 +899,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyRate(String packageName, int pid, int uid, ControllerCallbackLink caller,
                 Rating rating) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onRate(packageName, pid, uid, caller, rating);
@@ -910,7 +910,7 @@ public final class SessionCallbackLink implements Parcelable {
 
         public void notifyCustomAction(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String action, Bundle args) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onCustomAction(packageName, pid, uid, caller, action, args);
@@ -922,7 +922,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifyAdjustVolume(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, int direction) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onAdjustVolume(packageName, pid, uid, caller, direction);
@@ -934,7 +934,7 @@ public final class SessionCallbackLink implements Parcelable {
         @Override
         public void notifySetVolumeTo(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, int value) {
-            ensureMediasControlPermission();
+            ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 mCallbackStub.onSetVolumeTo(packageName, pid, uid, caller, value);
@@ -943,7 +943,7 @@ public final class SessionCallbackLink implements Parcelable {
             }
         }
 
-        private void ensureMediasControlPermission() {
+        private void ensureMediaControlPermission() {
             // Allow API calls from the System UI
             if (mContext.checkCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
                     == PackageManager.PERMISSION_GRANTED) {

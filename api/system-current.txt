@@ -3538,6 +3538,76 @@ package android.media.session {
     method public void unregisterCallback(@NonNull android.media.session.ControllerCallbackLink);
   }
 
+  public abstract static class MediaSession.Callback {
+    method public void onSetMediaButtonEventDelegate(@NonNull android.media.session.MediaSessionEngine.MediaButtonEventDelegate);
+  }
+
+  public final class MediaSessionEngine implements java.lang.AutoCloseable {
+    ctor public MediaSessionEngine(@NonNull android.content.Context, @NonNull android.media.session.SessionLink, @NonNull android.media.session.SessionCallbackLink, @NonNull android.media.session.MediaSessionEngine.CallbackStub, int);
+    method public void close();
+    method public String getCallingPackage();
+    method @NonNull public android.media.session.MediaController getController();
+    method @NonNull public android.media.session.MediaSessionManager.RemoteUserInfo getCurrentControllerInfo();
+    method @NonNull public android.media.session.MediaSession.Token getSessionToken();
+    method public boolean isActive();
+    method public static boolean isActiveState(int);
+    method public void sendSessionEvent(@NonNull String, @Nullable android.os.Bundle);
+    method public void setActive(boolean);
+    method public void setCallback(@Nullable android.media.session.MediaSession.Callback);
+    method public void setCallback(@Nullable android.media.session.MediaSession.Callback, @NonNull android.os.Handler);
+    method public void setExtras(@Nullable android.os.Bundle);
+    method public void setFlags(int);
+    method public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
+    method public void setMetadata(@Nullable android.media.MediaMetadata);
+    method public void setPlaybackState(@Nullable android.media.session.PlaybackState);
+    method public void setPlaybackToLocal(android.media.AudioAttributes);
+    method public void setPlaybackToRemote(@NonNull android.media.VolumeProvider);
+    method public void setQueue(@Nullable java.util.List<android.media.session.MediaSession.QueueItem>);
+    method public void setQueueTitle(@Nullable CharSequence);
+    method public void setRatingType(int);
+    method public void setSessionActivity(@Nullable android.app.PendingIntent);
+  }
+
+  public static final class MediaSessionEngine.CallbackStub {
+    ctor public MediaSessionEngine.CallbackStub();
+    method public void onAdjustVolume(String, int, int, android.media.session.ControllerCallbackLink, int);
+    method public void onCommand(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle, android.os.ResultReceiver);
+    method public void onCustomAction(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
+    method public void onFastForward(String, int, int, android.media.session.ControllerCallbackLink);
+    method public void onMediaButton(String, int, int, android.content.Intent, int, android.os.ResultReceiver);
+    method public void onMediaButtonFromController(String, int, int, android.media.session.ControllerCallbackLink, android.content.Intent);
+    method public void onNext(String, int, int, android.media.session.ControllerCallbackLink);
+    method public void onPause(String, int, int, android.media.session.ControllerCallbackLink);
+    method public void onPlay(String, int, int, android.media.session.ControllerCallbackLink);
+    method public void onPlayFromMediaId(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
+    method public void onPlayFromSearch(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
+    method public void onPlayFromUri(String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
+    method public void onPrepare(String, int, int, android.media.session.ControllerCallbackLink);
+    method public void onPrepareFromMediaId(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
+    method public void onPrepareFromSearch(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
+    method public void onPrepareFromUri(String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
+    method public void onPrevious(String, int, int, android.media.session.ControllerCallbackLink);
+    method public void onRate(String, int, int, android.media.session.ControllerCallbackLink, android.media.Rating);
+    method public void onRewind(String, int, int, android.media.session.ControllerCallbackLink);
+    method public void onSeekTo(String, int, int, android.media.session.ControllerCallbackLink, long);
+    method public void onSetVolumeTo(String, int, int, android.media.session.ControllerCallbackLink, int);
+    method public void onSkipToTrack(String, int, int, android.media.session.ControllerCallbackLink, long);
+    method public void onStop(String, int, int, android.media.session.ControllerCallbackLink);
+  }
+
+  public static interface MediaSessionEngine.MediaButtonEventDelegate {
+    method public boolean onMediaButtonIntent(android.content.Intent);
+  }
+
+  public static final class MediaSessionEngine.QueueItem {
+    ctor public MediaSessionEngine.QueueItem(android.media.MediaDescription, long);
+    ctor public MediaSessionEngine.QueueItem(android.os.Parcel);
+    method public android.media.MediaDescription getDescription();
+    method public long getQueueId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int UNKNOWN_ID = -1; // 0xffffffff
+  }
+
   public final class MediaSessionManager {
     method @RequiresPermission(android.Manifest.permission.SET_MEDIA_KEY_LISTENER) public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, @Nullable android.os.Handler);
