@@ -16,7 +16,6 @@
 
 package android.provider;
 
-import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 
@@ -1607,8 +1606,6 @@ public final class DocumentsContract {
      */
     public static Path findDocumentPath(ContentInterface content, Uri treeUri)
             throws FileNotFoundException {
-        checkArgument(isTreeUri(treeUri), treeUri + " is not a tree uri.");
-
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, treeUri);
