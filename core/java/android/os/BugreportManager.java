@@ -75,13 +75,25 @@ public class BugreportManager {
         int BUGREPORT_ERROR_USER_DENIED_CONSENT =
                 IDumpstateListener.BUGREPORT_ERROR_USER_DENIED_CONSENT;
 
+        /** The request to get user consent timed out. */
+        int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT =
+                IDumpstateListener.BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT;
+
         /**
          * Called when taking bugreport resulted in an error.
          *
          * @param errorCode the error that occurred. Possible values are
          *     {@code BUGREPORT_ERROR_INVALID_INPUT},
          *     {@code BUGREPORT_ERROR_RUNTIME},
-         *     {@code BUGREPORT_ERROR_USER_DENIED_CONSENT}.
+         *     {@code BUGREPORT_ERROR_USER_DENIED_CONSENT},
+         *     {@code BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT}.
+         *
+         * <p>If {@code BUGREPORT_ERROR_USER_DENIED_CONSENT} is passed, then the user did not
+         * consent to sharing the bugreport with the calling app.
+         *
+         * <p>If {@code BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT} is passed, then the consent timed
+         * out, but the bugreport could be available in the internal directory of dumpstate for
+         * manual retrieval.
          */
         void onError(@BugreportErrorCode int errorCode);
 
