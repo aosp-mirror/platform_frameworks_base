@@ -636,11 +636,15 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void opComplete(int token, long result) throws RemoteException {
-        int userId = binderGetCallingUserId();
+    public void opCompleteForUser(int userId, int token, long result) throws RemoteException {
         if (isUserReadyForBackup(userId)) {
-            mService.opComplete(binderGetCallingUserId(), token, result);
+            mService.opComplete(userId, token, result);
         }
+    }
+
+    @Override
+    public void opComplete(int token, long result) throws RemoteException {
+        opCompleteForUser(binderGetCallingUserId(), token, result);
     }
 
     @Override

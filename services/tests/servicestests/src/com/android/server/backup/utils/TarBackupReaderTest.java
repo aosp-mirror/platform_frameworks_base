@@ -44,6 +44,7 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Bundle;
 import android.os.Process;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -88,12 +89,14 @@ public class TarBackupReaderTest {
 
     private final PackageManagerStub mPackageManagerStub = new PackageManagerStub();
     private Context mContext;
+    private int mUserId;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         mContext = InstrumentationRegistry.getContext();
+        mUserId = UserHandle.USER_SYSTEM;
     }
 
     @Test
@@ -146,7 +149,7 @@ public class TarBackupReaderTest {
                 fileMetadata);
         RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
                 mPackageManagerStub, false /* allowApks */, fileMetadata, signatures,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(restorePolicy).isEqualTo(RestorePolicy.IGNORE);
         assertThat(fileMetadata.packageName).isEqualTo(TEST_PACKAGE_NAME);
@@ -160,7 +163,7 @@ public class TarBackupReaderTest {
                 fileMetadata);
         restorePolicy = tarBackupReader.chooseRestorePolicy(
                 mPackageManagerStub, false /* allowApks */, fileMetadata, signatures,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(restorePolicy).isEqualTo(RestorePolicy.IGNORE);
         assertThat(fileMetadata.packageName).isEqualTo(TEST_PACKAGE_NAME);
@@ -223,7 +226,7 @@ public class TarBackupReaderTest {
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
                 true /* allowApks */, new FileMetadata(), null /* signatures */,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         verifyZeroInteractions(mBackupManagerMonitorMock);
@@ -244,7 +247,7 @@ public class TarBackupReaderTest {
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
                 true /* allowApks */, info, new Signature[0] /* signatures */,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT_IF_APK);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -269,7 +272,7 @@ public class TarBackupReaderTest {
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
                 true /* allowApks */, info, new Signature[0] /* signatures */,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT_IF_APK);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -295,7 +298,7 @@ public class TarBackupReaderTest {
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
                 false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -320,7 +323,7 @@ public class TarBackupReaderTest {
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
                 false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -347,7 +350,7 @@ public class TarBackupReaderTest {
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
                 false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */,
-                mMockPackageManagerInternal);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -381,7 +384,8 @@ public class TarBackupReaderTest {
         PackageManagerStub.sPackageInfo = packageInfo;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), signatures, mMockPackageManagerInternal);
+                false /* allowApks */, new FileMetadata(), signatures,
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -419,7 +423,8 @@ public class TarBackupReaderTest {
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
                 packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), signatures, mMockPackageManagerInternal);
+                false /* allowApks */, new FileMetadata(), signatures,
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -456,7 +461,8 @@ public class TarBackupReaderTest {
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
                 packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), signatures, mMockPackageManagerInternal);
+                false /* allowApks */, new FileMetadata(), signatures,
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -497,7 +503,8 @@ public class TarBackupReaderTest {
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
                 packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, info, signatures, mMockPackageManagerInternal);
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal,
+                mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -540,7 +547,8 @@ public class TarBackupReaderTest {
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
                 packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                true /* allowApks */, info, signatures, mMockPackageManagerInternal);
+                true /* allowApks */, info, signatures, mMockPackageManagerInternal,
+                mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT_IF_APK);
         verifyNoMoreInteractions(mBackupManagerMonitorMock);
@@ -579,7 +587,8 @@ public class TarBackupReaderTest {
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
                 packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, info, signatures, mMockPackageManagerInternal);
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal,
+                mUserId);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);

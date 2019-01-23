@@ -232,7 +232,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         continue;
                     }
 
-                    if (AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, pm)) {
+                    if (AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, mUserId)) {
                         mAcceptSet.add(info);
                     }
                 } catch (NameNotFoundException e) {

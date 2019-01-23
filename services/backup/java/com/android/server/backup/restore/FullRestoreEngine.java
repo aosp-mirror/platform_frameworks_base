@@ -230,7 +230,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             PackageManagerInternal.class);
                     RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
                             mBackupManagerService.getPackageManager(), allowApks, info, signatures,
-                            pmi);
+                            pmi, mUserId);
                     mManifestSignatures.put(info.packageName, signatures);
                     mPackagePolicies.put(pkg, restorePolicy);
                     mPackageInstallers.put(pkg, info.installerPackageName);
@@ -332,8 +332,9 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
 
                         try {
-                            mTargetApp = mBackupManagerService.getPackageManager()
-                                    .getApplicationInfoAsUser(pkg, 0, mUserId);
+                            mTargetApp =
+                                    mBackupManagerService.getPackageManager()
+                                            .getApplicationInfoAsUser(pkg, 0, mUserId);
 
                             // If we haven't sent any data to this app yet, we probably
                             // need to clear it first. Check that.

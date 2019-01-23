@@ -286,7 +286,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
         while (iter.hasNext()) {
             PackageInfo pkg = iter.next().getValue();
-            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo, pm)
+            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo,
+                    mUserBackupManagerService.getUserId())
                     || AppBackupUtils.appIsStopped(pkg.applicationInfo)) {
                 iter.remove();
                 if (DEBUG) {
