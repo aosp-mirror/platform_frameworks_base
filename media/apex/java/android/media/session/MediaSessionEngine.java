@@ -53,7 +53,7 @@ import java.util.Objects;
  */
 @SystemApi
 public final class MediaSessionEngine implements AutoCloseable {
-    private static final String TAG = MediaSession.TAG;
+    private static final String TAG = "MediaSession";
 
     private final Object mLock = new Object();
     private final int mMaxBitmapSize;
@@ -172,7 +172,7 @@ public final class MediaSessionEngine implements AutoCloseable {
      *
      * @param flags The flags to set for this session.
      */
-    public void setFlags(@MediaSession.SessionFlags int flags) {
+    public void setFlags(int flags) {
         try {
             mSessionLink.setFlags(flags);
         } catch (RuntimeException e) {
@@ -409,7 +409,7 @@ public final class MediaSessionEngine implements AutoCloseable {
      * <li>{@link Rating#RATING_THUMB_UP_DOWN}</li>
      * </ul>
      */
-    public void setRatingType(@Rating.Style int type) {
+    public void setRatingType(int type) {
         try {
             mSessionLink.setRatingType(type);
         } catch (RuntimeException e) {

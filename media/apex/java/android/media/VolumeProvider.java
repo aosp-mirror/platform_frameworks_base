@@ -158,7 +158,10 @@ public abstract class VolumeProvider {
      * @hide
      */
     @SystemApi
-    public static abstract class Callback {
+    public abstract static class Callback {
+        /**
+         * Called when volume changed.
+         */
         public abstract void onVolumeChanged(VolumeProvider volumeProvider);
     }
 }

@@ -50,6 +50,7 @@ java_defaults {
 
         ":framework-javastream-protos",
         // TODO: Remove this after introduce corresponding srcs under media/java/
+        ":media1-srcs",
         ":mediasession2-srcs",
 
         "core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl",
@@ -503,11 +504,7 @@ java_defaults {
         "media/java/android/media/session/ICallback.aidl",
         "media/java/android/media/session/IOnMediaKeyListener.aidl",
         "media/java/android/media/session/IOnVolumeKeyLongPressListener.aidl",
-        "media/java/android/media/session/ISession.aidl",
         "media/java/android/media/session/ISession2TokensListener.aidl",
-        "media/java/android/media/session/ISessionCallback.aidl",
-        "media/java/android/media/session/ISessionController.aidl",
-        "media/java/android/media/session/ISessionControllerCallback.aidl",
         "media/java/android/media/session/ISessionManager.aidl",
         "media/java/android/media/soundtrigger/ISoundTriggerDetectionService.aidl",
         "media/java/android/media/soundtrigger/ISoundTriggerDetectionServiceClient.aidl",
@@ -1271,6 +1268,7 @@ stubs_defaults {
         ":non_openjdk_javadoc_files",
         ":android_icu4j_src_files_for_docs",
         ":conscrypt_public_api_files",
+        ":media1-stubs-srcs",
         ":mediasession2-stubs-srcs",
         ":mediaplayer2-srcs",
         "test-mock/src/**/*.java",
@@ -1334,6 +1332,7 @@ stubs_defaults {
         ":non_openjdk_javadoc_files",
         ":android_icu4j_src_files_for_docs",
         ":conscrypt_public_api_files",
+        ":media1-stubs-srcs",
         ":mediasession2-stubs-srcs",
         ":mediaplayer2-srcs",
     ],
@@ -1790,6 +1789,7 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
+        "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",

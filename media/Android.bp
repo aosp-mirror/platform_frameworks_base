@@ -1,17 +1,65 @@
 java_library {
-    name: "media1",
+    name: "updatable-media",
 
     srcs: [
         ":media1-srcs",
+        ":mediasession2-srcs",
+        ":mediaplayer2-srcs",
+        ":framework-media-annotation-srcs",
     ],
 
+    static_libs: [
+        "mediaplayer2-protos",
+    ],
+
+    aidl: {
+        export_include_dirs: [
+            "apex/java",
+        ],
+
+        include_dirs: [
+            "frameworks/base/core/java",
+            "frameworks/base/media/java",
+        ],
+    },
+
+    installable: true,
+
+    // Make sure that the implementaion only relies on SDK or system APIs.
     sdk_version: "system_current",
 }
 
 filegroup {
     name: "media1-srcs",
     srcs: [
-        "java/android/media/session/MediaSessionProviderService.java",
+        "apex/java/android/media/MediaMetadata.java",
+        "apex/java/android/media/MediaParceledListSlice.java",
+        "apex/java/android/media/VolumeProvider.java",
+        "apex/java/android/media/session/ControllerCallbackLink.java",
+        "apex/java/android/media/session/ControllerLink.java",
+        "apex/java/android/media/session/ISession.aidl",
+        "apex/java/android/media/session/ISessionCallback.aidl",
+        "apex/java/android/media/session/ISessionController.aidl",
+        "apex/java/android/media/session/ISessionControllerCallback.aidl",
+        "apex/java/android/media/session/MediaController.java",
+        "apex/java/android/media/session/MediaSessionEngine.java",
+        "apex/java/android/media/session/MediaSessionProviderService.java",
+        "apex/java/android/media/session/PlaybackState.java",
+        "apex/java/android/media/session/SessionCallbackLink.java",
+        "apex/java/android/media/session/SessionLink.java",
+    ],
+}
+
+filegroup {
+    name: "media1-stubs-srcs",
+    srcs: [
+        ":media1-srcs",
+    ],
+    exclude_srcs: [
+        "apex/java/android/media/session/ISession.aidl",
+        "apex/java/android/media/session/ISessionCallback.aidl",
+        "apex/java/android/media/session/ISessionController.aidl",
+        "apex/java/android/media/session/ISessionControllerCallback.aidl",
     ],
 }
 
@@ -44,35 +92,6 @@ filegroup {
         "apex/java/android/media/IMediaSession2.aidl",
         "apex/java/android/media/IMediaSession2Service.aidl",
     ],
-}
-
-java_library {
-    name: "updatable-media",
-
-    srcs: [
-        ":mediasession2-srcs",
-        ":mediaplayer2-srcs",
-        ":framework-media-annotation-srcs",
-    ],
-
-    static_libs: [
-        "mediaplayer2-protos",
-    ],
-
-    aidl: {
-        export_include_dirs: [
-            "apex/java",
-        ],
-
-        include_dirs: [
-            "frameworks/base/core/java",
-        ],
-    },
-
-    installable: true,
-
-    // Make sure that the implementaion only relies on SDK or system APIs.
-    sdk_version: "system_current",
 }
 
 filegroup {
