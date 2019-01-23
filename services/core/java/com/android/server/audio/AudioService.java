@@ -1163,11 +1163,13 @@ public class AudioService extends IAudioService.Stub
 
     private void checkMuteAffectedStreams() {
         // any stream with a min level > 0 is not muteable by definition
-        // STREAM_VOICE_CALL can be muted by applications that has the the MODIFY_PHONE_STATE permission.
+        // STREAM_VOICE_CALL and STREAM_BLUETOOTH_SCO can be muted by applications
+        // that has the the MODIFY_PHONE_STATE permission.
         for (int i = 0; i < mStreamStates.length; i++) {
             final VolumeStreamState vss = mStreamStates[i];
             if (vss.mIndexMin > 0 &&
-                vss.mStreamType != AudioSystem.STREAM_VOICE_CALL) {
+                (vss.mStreamType != AudioSystem.STREAM_VOICE_CALL &&
+                vss.mStreamType != AudioSystem.STREAM_BLUETOOTH_SCO)) {
                 mMuteAffectedStreams &= ~(1 << vss.mStreamType);
             }
         }
@@ -1617,10 +1619,11 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        // If adjust is mute and the stream is STREAM_VOICE_CALL, make sure
+        // If adjust is mute and the stream is STREAM_VOICE_CALL or STREAM_BLUETOOTH_SCO, make sure
         // that the calling app have the MODIFY_PHONE_STATE permission.
         if (isMuteAdjust &&
-            streamType == AudioSystem.STREAM_VOICE_CALL &&
+            (streamType == AudioSystem.STREAM_VOICE_CALL ||
+                streamType == AudioSystem.STREAM_BLUETOOTH_SCO) &&
             mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MODIFY_PHONE_STATE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1937,12 +1940,14 @@ public class AudioService extends IAudioService.Stub
                     + " CHANGE_ACCESSIBILITY_VOLUME  callingPackage=" + callingPackage);
             return;
         }
-        if ((streamType == AudioManager.STREAM_VOICE_CALL) &&
+        if ((streamType == AudioManager.STREAM_VOICE_CALL ||
+                streamType == AudioManager.STREAM_BLUETOOTH_SCO) &&
                 (index == 0) &&
                 (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MODIFY_PHONE_STATE)
                     != PackageManager.PERMISSION_GRANTED)) {
-            Log.w(TAG, "Trying to call setStreamVolume() for STREAM_VOICE_CALL and index 0 without"
+            Log.w(TAG, "Trying to call setStreamVolume() for STREAM_VOICE_CALL or"
+                    + " STREAM_BLUETOOTH_SCO and index 0 without"
                     + " MODIFY_PHONE_STATE  callingPackage=" + callingPackage);
             return;
         }
