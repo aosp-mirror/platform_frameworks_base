@@ -21,17 +21,13 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.PlaybackState;
-import android.media.session.MediaSession;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
-
-import java.lang.IllegalArgumentException;
 
 /**
  * RemoteControlClient enables exposing information meant to be consumed by remote controls
@@ -682,7 +678,7 @@ import java.lang.IllegalArgumentException;
 
                 // USE_SESSIONS
                 if (mSession != null) {
-                    int pbState = PlaybackState.getStateFromRccState(state);
+                    int pbState = getStateFromRccState(state);
                     long position = hasPosition ? mPlaybackPositionMs
                             : PlaybackState.PLAYBACK_POSITION_UNKNOWN;
 
@@ -718,8 +714,7 @@ import java.lang.IllegalArgumentException;
             // USE_SESSIONS
             if (mSession != null) {
                 PlaybackState.Builder bob = new PlaybackState.Builder(mSessionPlaybackState);
-                bob.setActions(
-                        PlaybackState.getActionsFromRccControlFlags(transportControlFlags));
+                bob.setActions(getActionsFromRccControlFlags(transportControlFlags));
                 mSessionPlaybackState = bob.build();
                 mSession.setPlaybackState(mSessionPlaybackState);
             }
@@ -1001,16 +996,19 @@ import java.lang.IllegalArgumentException;
      * Period for playback position drift checks, 15s when playing at 1x or slower.
      */
     private final static long POSITION_REFRESH_PERIOD_PLAYING_MS = 15000;
+
     /**
      * Minimum period for playback position drift checks, never more often when every 2s, when
      * fast forwarding or rewinding.
      */
     private final static long POSITION_REFRESH_PERIOD_MIN_MS = 2000;
+
     /**
      * The value above which the difference between client-reported playback position and
      * estimated position is considered a drift.
      */
     private final static long POSITION_DRIFT_MAX_MS = 500;
+
     /**
      * Compute the period at which the estimated playback position should be compared against the
      * actual playback position. Is a funciton of playback speed.
@@ -1024,5 +1022,152 @@ import java.lang.IllegalArgumentException;
             return Math.max((long)(POSITION_REFRESH_PERIOD_PLAYING_MS / Math.abs(speed)),
                     POSITION_REFRESH_PERIOD_MIN_MS);
         }
+    }
+
+    /**
+     * Get the {@link PlaybackState} state for the given
+     * {@link RemoteControlClient} state.
+     *
+     * @param rccState The state used by {@link RemoteControlClient}.
+     * @return The equivalent state used by {@link PlaybackState}.
+     */
+    private static int getStateFromRccState(int rccState) {
+        switch (rccState) {
+            case PLAYSTATE_BUFFERING:
+                return PlaybackState.STATE_BUFFERING;
+            case PLAYSTATE_ERROR:
+                return PlaybackState.STATE_ERROR;
+            case PLAYSTATE_FAST_FORWARDING:
+                return PlaybackState.STATE_FAST_FORWARDING;
+            case PLAYSTATE_NONE:
+                return PlaybackState.STATE_NONE;
+            case PLAYSTATE_PAUSED:
+                return PlaybackState.STATE_PAUSED;
+            case PLAYSTATE_PLAYING:
+                return PlaybackState.STATE_PLAYING;
+            case PLAYSTATE_REWINDING:
+                return PlaybackState.STATE_REWINDING;
+            case PLAYSTATE_SKIPPING_BACKWARDS:
+                return PlaybackState.STATE_SKIPPING_TO_PREVIOUS;
+            case PLAYSTATE_SKIPPING_FORWARDS:
+                return PlaybackState.STATE_SKIPPING_TO_NEXT;
+            case PLAYSTATE_STOPPED:
+                return PlaybackState.STATE_STOPPED;
+            default:
+                return -1;
+        }
+    }
+
+    /**
+     * Get the {@link RemoteControlClient} state for the given
+     * {@link PlaybackState} state.
+     *
+     * @param state The state used by {@link PlaybackState}.
+     * @return The equivalent state used by {@link RemoteControlClient}.
+     */
+    static int getRccStateFromState(int state) {
+        switch (state) {
+            case PlaybackState.STATE_BUFFERING:
+                return PLAYSTATE_BUFFERING;
+            case PlaybackState.STATE_ERROR:
+                return PLAYSTATE_ERROR;
+            case PlaybackState.STATE_FAST_FORWARDING:
+                return PLAYSTATE_FAST_FORWARDING;
+            case PlaybackState.STATE_NONE:
+                return PLAYSTATE_NONE;
+            case PlaybackState.STATE_PAUSED:
+                return PLAYSTATE_PAUSED;
+            case PlaybackState.STATE_PLAYING:
+                return PLAYSTATE_PLAYING;
+            case PlaybackState.STATE_REWINDING:
+                return PLAYSTATE_REWINDING;
+            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
+                return PLAYSTATE_SKIPPING_BACKWARDS;
+            case PlaybackState.STATE_SKIPPING_TO_NEXT:
+                return PLAYSTATE_SKIPPING_FORWARDS;
+            case PlaybackState.STATE_STOPPED:
+                return PLAYSTATE_STOPPED;
+            default:
+                return -1;
+        }
+    }
+
+    private static long getActionsFromRccControlFlags(int rccFlags) {
+        long actions = 0;
+        long flag = 1;
+        while (flag <= rccFlags) {
+            if ((flag & rccFlags) != 0) {
+                actions |= getActionForRccFlag((int) flag);
+            }
+            flag = flag << 1;
+        }
+        return actions;
+    }
+
+    static int getRccControlFlagsFromActions(long actions) {
+        int rccFlags = 0;
+        long action = 1;
+        while (action <= actions && action < Integer.MAX_VALUE) {
+            if ((action & actions) != 0) {
+                rccFlags |= getRccFlagForAction(action);
+            }
+            action = action << 1;
+        }
+        return rccFlags;
+    }
+
+    private static long getActionForRccFlag(int flag) {
+        switch (flag) {
+            case FLAG_KEY_MEDIA_PREVIOUS:
+                return PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+            case FLAG_KEY_MEDIA_REWIND:
+                return PlaybackState.ACTION_REWIND;
+            case FLAG_KEY_MEDIA_PLAY:
+                return PlaybackState.ACTION_PLAY;
+            case FLAG_KEY_MEDIA_PLAY_PAUSE:
+                return PlaybackState.ACTION_PLAY_PAUSE;
+            case FLAG_KEY_MEDIA_PAUSE:
+                return PlaybackState.ACTION_PAUSE;
+            case FLAG_KEY_MEDIA_STOP:
+                return PlaybackState.ACTION_STOP;
+            case FLAG_KEY_MEDIA_FAST_FORWARD:
+                return PlaybackState.ACTION_FAST_FORWARD;
+            case FLAG_KEY_MEDIA_NEXT:
+                return PlaybackState.ACTION_SKIP_TO_NEXT;
+            case FLAG_KEY_MEDIA_POSITION_UPDATE:
+                return PlaybackState.ACTION_SEEK_TO;
+            case FLAG_KEY_MEDIA_RATING:
+                return PlaybackState.ACTION_SET_RATING;
+        }
+        return 0;
+    }
+
+    private static int getRccFlagForAction(long action) {
+        // We only care about the lower set of actions that can map to rcc
+        // flags.
+        int testAction = action < Integer.MAX_VALUE ? (int) action : 0;
+        switch (testAction) {
+            case (int) PlaybackState.ACTION_SKIP_TO_PREVIOUS:
+                return FLAG_KEY_MEDIA_PREVIOUS;
+            case (int) PlaybackState.ACTION_REWIND:
+                return FLAG_KEY_MEDIA_REWIND;
+            case (int) PlaybackState.ACTION_PLAY:
+                return FLAG_KEY_MEDIA_PLAY;
+            case (int) PlaybackState.ACTION_PLAY_PAUSE:
+                return FLAG_KEY_MEDIA_PLAY_PAUSE;
+            case (int) PlaybackState.ACTION_PAUSE:
+                return FLAG_KEY_MEDIA_PAUSE;
+            case (int) PlaybackState.ACTION_STOP:
+                return FLAG_KEY_MEDIA_STOP;
+            case (int) PlaybackState.ACTION_FAST_FORWARD:
+                return FLAG_KEY_MEDIA_FAST_FORWARD;
+            case (int) PlaybackState.ACTION_SKIP_TO_NEXT:
+                return FLAG_KEY_MEDIA_NEXT;
+            case (int) PlaybackState.ACTION_SEEK_TO:
+                return FLAG_KEY_MEDIA_POSITION_UPDATE;
+            case (int) PlaybackState.ACTION_SET_RATING:
+                return FLAG_KEY_MEDIA_RATING;
+        }
+        return 0;
     }
 }
