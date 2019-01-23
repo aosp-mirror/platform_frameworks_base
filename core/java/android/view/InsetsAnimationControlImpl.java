@@ -122,7 +122,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mController.scheduleApplyChangeInsets();
     }
 
-    void applyChangeInsets(InsetsState state) {
+    @VisibleForTesting
+    public void applyChangeInsets(InsetsState state) {
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
         ArrayList<SurfaceParams> params = new ArrayList<>();
         if (offset.left != 0) {

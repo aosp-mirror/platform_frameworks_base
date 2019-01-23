@@ -101,6 +101,7 @@ public class InsetsAnimationControlImplTest {
     @Test
     public void testChangeInsets() {
         mController.changeInsets(Insets.of(0, 30, 40, 0));
+        mController.applyChangeInsets(new InsetsState());
         assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
 
         ArgumentCaptor<SurfaceParams> captor = ArgumentCaptor.forClass(SurfaceParams.class);
