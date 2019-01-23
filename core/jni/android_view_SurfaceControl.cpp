@@ -126,7 +126,12 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         jstring nameStr, jint w, jint h, jint format, jint flags, jlong parentObject,
         jint windowType, jint ownerUid) {
     ScopedUtfChars name(env, nameStr);
-    sp<SurfaceComposerClient> client(android_view_SurfaceSession_getClient(env, sessionObj));
+    sp<SurfaceComposerClient> client;
+    if (sessionObj != NULL) {
+        client = android_view_SurfaceSession_getClient(env, sessionObj);
+    } else {
+        client = SurfaceComposerClient::getDefault();
+    }
     SurfaceControl *parent = reinterpret_cast<SurfaceControl*>(parentObject);
     sp<SurfaceControl> surface;
     status_t err = client->createSurfaceChecked(
@@ -275,6 +280,21 @@ static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     transaction->setPosition(ctrl, x, y);
+}
+
+static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+        jobject sourceObj, jobject dstObj, jlong orientation) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+
+    Rect source, dst;
+    if (sourceObj != NULL) {
+        source = rectFromObj(env, sourceObj);
+    }
+    if (dstObj != NULL) {
+        dst = rectFromObj(env, dstObj);
+    }
+    transaction->setGeometry(ctrl, source, dst, orientation);
 }
 
 static void nativeSetGeometryAppliesWithResize(JNIEnv* env, jclass clazz,
@@ -868,13 +888,13 @@ static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong transactionO
 
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
-        jobject newParentObject) {
+        jlong newParentObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<IBinder> parentHandle = ibinderForJavaObject(env, newParentObject);
+    auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
 
     {
         auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->reparent(ctrl, parentHandle);
+        transaction->reparent(ctrl, newParent != NULL ? newParent->getHandle() : NULL);
     }
 }
 
@@ -1063,7 +1083,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeDeferTransactionUntilSurface },
     {"nativeReparentChildren", "(JJLandroid/os/IBinder;)V",
             (void*)nativeReparentChildren } ,
-    {"nativeReparent", "(JJLandroid/os/IBinder;)V",
+    {"nativeReparent", "(JJJ)V",
             (void*)nativeReparent },
     {"nativeSeverChildren", "(JJ)V",
             (void*)nativeSeverChildren } ,
@@ -1087,6 +1107,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeGetDisplayedContentSample",
             "(Landroid/os/IBinder;JJ)Landroid/hardware/display/DisplayedContentSample;",
             (void*)nativeGetDisplayedContentSample },
+    {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
+            (void*)nativeSetGeometry }
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

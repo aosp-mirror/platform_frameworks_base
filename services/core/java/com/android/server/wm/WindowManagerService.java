@@ -7334,7 +7334,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void reparentDisplayContent(int displayId, IBinder surfaceControlHandle) {
+    public void reparentDisplayContent(int displayId, SurfaceControl sc) {
         final Display display = mDisplayManager.getDisplay(displayId);
         if (display == null) {
             throw new IllegalArgumentException(
@@ -7351,7 +7351,7 @@ public class WindowManagerService extends IWindowManager.Stub
             long token = Binder.clearCallingIdentity();
             try {
                 DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-                displayContent.reparentDisplayContent(surfaceControlHandle);
+                displayContent.reparentDisplayContent(sc);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

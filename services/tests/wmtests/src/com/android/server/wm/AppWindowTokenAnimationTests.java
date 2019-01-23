@@ -70,9 +70,9 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
         mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         verify(mTransaction).reparent(eq(mToken.getSurfaceControl()),
-                eq(mToken.mSurfaceAnimator.mLeash.getHandle()));
+                eq(mToken.mSurfaceAnimator.mLeash));
         verify(mTransaction).reparent(eq(mToken.mSurfaceAnimator.mLeash),
-                eq(mToken.mAnimationBoundsLayer.getHandle()));
+                eq(mToken.mAnimationBoundsLayer));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
         mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         verify(mTransaction).reparent(eq(mToken.getSurfaceControl()),
-                eq(mToken.mSurfaceAnimator.mLeash.getHandle()));
+                eq(mToken.mSurfaceAnimator.mLeash));
         assertThat(mToken.mAnimationBoundsLayer).isNull();
     }
 }

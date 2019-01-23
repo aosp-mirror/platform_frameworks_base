@@ -2404,7 +2404,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
         if (!mSurfaceAnimator.hasLeash()) {
-            t.reparent(mSurfaceControl, newParent.getHandle());
+            t.reparent(mSurfaceControl, newParent);
         }
     }
 
@@ -2450,7 +2450,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
 
             // Reparent leash to animation bounds layer.
-            t.reparent(leash, mAnimationBoundsLayer.getHandle());
+            t.reparent(leash, mAnimationBoundsLayer);
         }
     }
 

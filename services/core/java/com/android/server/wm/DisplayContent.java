@@ -4588,7 +4588,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Reparents the given surface to mOverlayLayer.
      */
     void reparentToOverlay(Transaction transaction, SurfaceControl surface) {
-        transaction.reparent(surface, mOverlayLayer.getHandle());
+        transaction.reparent(surface, mOverlayLayer);
     }
 
     void applyMagnificationSpec(MagnificationSpec spec) {
@@ -4831,11 +4831,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Re-parent the DisplayContent's top surfaces, {@link #mWindowingLayer} and
      * {@link #mOverlayLayer} to the specified surfaceControl.
      *
-     * @param surfaceControlHandle The handle for the new SurfaceControl, where the DisplayContent's
+     * @param surfaceControlHandle The new SurfaceControl, where the DisplayContent's
      *                             surfaces will be re-parented to.
      */
-    void reparentDisplayContent(IBinder surfaceControlHandle) {
-        mPendingTransaction.reparent(mWindowingLayer, surfaceControlHandle)
-                .reparent(mOverlayLayer, surfaceControlHandle);
+    void reparentDisplayContent(SurfaceControl sc) {
+        mPendingTransaction.reparent(mWindowingLayer, sc)
+                .reparent(mOverlayLayer, sc);
     }
 }
