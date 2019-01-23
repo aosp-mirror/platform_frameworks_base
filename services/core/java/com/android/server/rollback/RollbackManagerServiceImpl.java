@@ -287,14 +287,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         Log.i(TAG, "Initiating rollback of " + targetPackageName);
 
         // Get the latest RollbackData for the target package.
-        RollbackData data = getRollbackForPackage(targetPackageName);
+        final RollbackData data = getRollbackForPackage(targetPackageName);
         if (data == null) {
             sendFailure(statusReceiver, "No rollback available for package.");
             return;
         }
 
         if (data.rollbackId != rollback.getRollbackId()) {
-            sendFailure(statusReceiver, "Rollback for package is out of date");
+            sendFailure(statusReceiver, "Rollback for package is out of date.");
+            return;
+        }
+
+        if (data.inProgress) {
+            sendFailure(statusReceiver, "Rollback for package is already in progress.");
             return;
         }
 
@@ -373,6 +378,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
             final LocalIntentReceiver receiver = new LocalIntentReceiver(
                     (Intent result) -> {
+                        // We've now completed the rollback, so we mark it as no longer in
+                        // progress.
+                        data.inProgress = false;
+
                         int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                                 PackageInstaller.STATUS_FAILURE);
                         if (status != PackageInstaller.STATUS_SUCCESS) {
@@ -394,6 +403,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
             );
 
+            data.inProgress = true;
             parentSession.commit(receiver.getIntentSender());
         } catch (IOException e) {
             Log.e(TAG, "Unable to roll back " + targetPackageName, e);
@@ -776,10 +786,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         getHandler().post(() -> {
             PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-            // TODO(narayan): Should we make sure we're in the middle of a session commit for a
-            // a package with this package name ? Otherwise it's possible we may roll back data
-            // for some other downgrade.
-            if (getRollbackForPackage(packageName) == null) {
+            final RollbackData rollbackData = getRollbackForPackage(packageName);
+            if (rollbackData == null) {
+                pmi.finishPackageInstall(token, false);
+                return;
+            }
+
+            if (!rollbackData.inProgress) {
+                Log.e(TAG, "Request to restore userData for: " + packageName
+                        + ", but no rollback in progress.");
                 pmi.finishPackageInstall(token, false);
                 return;
             }
