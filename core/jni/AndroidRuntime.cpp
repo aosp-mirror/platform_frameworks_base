@@ -150,6 +150,8 @@ extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
 extern int register_android_view_DisplayEventReceiver(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
+extern int register_android_view_InputApplicationHandle(JNIEnv* env);
+extern int register_android_view_InputWindowHandle(JNIEnv* env);
 extern int register_android_view_TextureLayer(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
@@ -1365,6 +1367,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_RenderNode),
     REG_JNI(register_android_view_RenderNodeAnimator),
     REG_JNI(register_android_view_DisplayListCanvas),
+    REG_JNI(register_android_view_InputApplicationHandle),
+    REG_JNI(register_android_view_InputWindowHandle),
     REG_JNI(register_android_view_TextureLayer),
     REG_JNI(register_android_view_ThreadedRenderer),
     REG_JNI(register_android_view_Surface),

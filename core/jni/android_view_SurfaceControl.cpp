@@ -340,7 +340,7 @@ static void nativeSetInputWindowInfo(JNIEnv* env, jclass clazz, jlong transactio
         jlong nativeObject, jobject inputWindow) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
-    sp<NativeInputWindowHandle> handle = android_server_InputWindowHandle_getHandle(
+    sp<NativeInputWindowHandle> handle = android_view_InputWindowHandle_getHandle(
             env, inputWindow);
     handle->updateInfo();
 
