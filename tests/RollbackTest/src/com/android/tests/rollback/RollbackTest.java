@@ -31,10 +31,8 @@ import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Ignore;
@@ -112,8 +110,7 @@ public class RollbackTest {
             // between when the app is uninstalled and when the previously
             // available rollback, if any, is removed.
             Thread.sleep(1000);
-            assertNull(rm.getAvailableRollback(TEST_APP_A));
-            assertFalse(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
+            assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
 
             // There should be no recently executed rollbacks for this package.
             assertNull(getUniqueRollbackInfoForPackage(
@@ -132,8 +129,8 @@ public class RollbackTest {
             // between when the app is installed and when the rollback
             // is made available.
             Thread.sleep(1000);
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
 
             // We should not have received any rollback requests yet.
@@ -193,23 +190,24 @@ public class RollbackTest {
             // is made available.
             Thread.sleep(1000);
 
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
-            RollbackInfo rollbackA = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollbackA = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollbackA);
 
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_B));
-            RollbackInfo rollbackB = rm.getAvailableRollback(TEST_APP_B);
+            RollbackInfo rollbackB = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
             // Reload the persisted data.
             rm.reloadPersistedData();
 
             // The apps should still be available for rollback.
-            rollbackA = rm.getAvailableRollback(TEST_APP_A);
+            rollbackA = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollbackA);
 
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_B));
-            rollbackB = rm.getAvailableRollback(TEST_APP_B);
+            rollbackB = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
             // Rollback of B should not rollback A
@@ -251,24 +249,22 @@ public class RollbackTest {
             // is made available.
             Thread.sleep(1000);
 
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
-            RollbackInfo rollbackA = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollbackA = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoForAandB(rollbackA);
 
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_B));
-            RollbackInfo rollbackB = rm.getAvailableRollback(TEST_APP_B);
+            RollbackInfo rollbackB = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoForAandB(rollbackB);
 
             // Reload the persisted data.
             rm.reloadPersistedData();
 
             // The apps should still be available for rollback.
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
-            rollbackA = rm.getAvailableRollback(TEST_APP_A);
+            rollbackA = getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoForAandB(rollbackA);
 
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_B));
-            rollbackB = rm.getAvailableRollback(TEST_APP_B);
+            rollbackB = getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoForAandB(rollbackB);
 
             // Rollback of B should rollback A as well
@@ -303,8 +299,8 @@ public class RollbackTest {
             // between when the app is installed and when the rollback
             // is made available.
             Thread.sleep(1000);
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
 
             // Roll back the app.
             RollbackTestUtils.rollback(rollback);
@@ -352,16 +348,16 @@ public class RollbackTest {
             // between when the app is installed and when the rollback
             // is made available.
             Thread.sleep(1000);
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
 
             // Expire the rollback.
             rm.expireRollbackForPackage(TEST_APP_A);
 
             // The rollback should no longer be available.
-            assertNull(rm.getAvailableRollback(TEST_APP_A));
-            assertFalse(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
+            assertNull(getUniqueRollbackInfoForPackage(
+                        rm.getAvailableRollbacks(), TEST_APP_A));
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
         }
@@ -432,7 +428,8 @@ public class RollbackTest {
             processUserData(TEST_APP_A);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             RollbackTestUtils.rollback(rollback);
             processUserData(TEST_APP_A);
         } finally {
@@ -494,10 +491,12 @@ public class RollbackTest {
             // between when the app is installed and when the rollback
             // is made available.
             Thread.sleep(1000);
-            RollbackInfo rollbackA = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollbackA = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollbackA);
 
-            RollbackInfo rollbackB = rm.getAvailableRollback(TEST_APP_B);
+            RollbackInfo rollbackB = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
             // Executing rollback should roll back the correct package.
@@ -529,14 +528,7 @@ public class RollbackTest {
         RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
         try {
-            rm.getAvailableRollback(TEST_APP_A);
-            fail("expected SecurityException");
-        } catch (SecurityException e) {
-            // Expected.
-        }
-
-        try {
-            rm.getPackagesWithAvailableRollbacks();
+            rm.getAvailableRollbacks();
             fail("expected SecurityException");
         } catch (SecurityException e) {
             // Expected.
@@ -600,8 +592,8 @@ public class RollbackTest {
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
 
             // TEST_APP_A should now be available for rollback.
-            assertTrue(rm.getPackagesWithAvailableRollbacks().contains(TEST_APP_A));
-            RollbackInfo rollback = rm.getAvailableRollback(TEST_APP_A);
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoForAandB(rollback);
 
             // Rollback the app. It should cause both test apps to be rolled
@@ -667,12 +659,12 @@ public class RollbackTest {
             // between when the app is installed and when the rollback
             // is made available.
             Thread.sleep(1000);
-            RollbackInfo rollbackA = rm.getAvailableRollback(TEST_APP_A);
-            assertNotNull(rollbackA);
+            RollbackInfo rollbackA = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollbackA);
 
-            RollbackInfo rollbackB = rm.getAvailableRollback(TEST_APP_B);
-            assertNotNull(rollbackB);
+            RollbackInfo rollbackB = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
             // Start apps PackageWatchdog#TRIGGER_FAILURE_COUNT times so TEST_APP_A crashes
