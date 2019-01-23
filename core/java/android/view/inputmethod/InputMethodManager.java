@@ -1881,7 +1881,15 @@ public final class InputMethodManager {
 
     /**
      * Notify the event when the user tapped or clicked the text view.
+     *
+     * @param view {@link View} which is being clicked.
+     * @see InputMethodService#onViewClicked(boolean)
+     * @deprecated The semantics of this method can never be defined well for composite {@link View}
+     *             that works as a giant "Canvas", which can host its own UI hierarchy and sub focus
+     *             state. {@link android.webkit.WebView} is a good example. Application / IME
+     *             developers should not rely on this method.
      */
+    @Deprecated
     public void viewClicked(View view) {
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
