@@ -55,6 +55,7 @@ import android.net.Uri;
 import android.opengl.Matrix;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemProperties;
@@ -66,6 +67,9 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
+import android.view.SurfaceControl;
+import android.view.SurfaceControl.DisplayPrimaries;
+
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ColorDisplayController;
@@ -145,43 +149,20 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public void setUp(Context context, boolean needsLinear) {
             mSetUp = false;
+            final Resources res = context.getResources();
 
-            final Resources res = getContext().getResources();
-            final String[] displayPrimariesValues = res.getStringArray(
-                    R.array.config_displayWhiteBalanceDisplayPrimaries);
+            ColorSpace.Rgb displayColorSpaceRGB = getDisplayColorSpaceFromSurfaceControl();
+            if (displayColorSpaceRGB == null) {
+                Slog.w(TAG, "Failed to get display color space from SurfaceControl, trying res");
+                displayColorSpaceRGB = getDisplayColorSpaceFromResources(res);
+                if (displayColorSpaceRGB == null) {
+                    Slog.e(TAG, "Failed to get display color space from resources");
+                    return;
+                }
+            }
+
             final String[] nominalWhiteValues = res.getStringArray(
                     R.array.config_displayWhiteBalanceDisplayNominalWhite);
-
-            if (displayPrimariesValues.length != NUM_DISPLAY_PRIMARIES_VALS) {
-                Slog.e(TAG, "Unexpected display white balance primaries resource length " +
-                        displayPrimariesValues.length);
-                return;
-            }
-
-            if (nominalWhiteValues.length != NUM_VALUES_PER_PRIMARY) {
-                Slog.e(TAG, "Unexpected display white balance nominal white resource length " +
-                        nominalWhiteValues.length);
-                return;
-            }
-
-            float[] displayRedGreenBlueXYZ =
-                    new float[NUM_DISPLAY_PRIMARIES_VALS - NUM_VALUES_PER_PRIMARY];
-            float[] displayWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
-            for (int i = 0; i < displayRedGreenBlueXYZ.length; i++) {
-                displayRedGreenBlueXYZ[i] = Float.parseFloat(displayPrimariesValues[i]);
-            }
-            for (int i = 0; i < displayWhiteXYZ.length; i++) {
-                displayWhiteXYZ[i] = Float.parseFloat(
-                        displayPrimariesValues[displayRedGreenBlueXYZ.length + i]);
-            }
-
-            final ColorSpace.Rgb displayColorSpaceRGB = new ColorSpace.Rgb(
-                    "Display Color Space",
-                    displayRedGreenBlueXYZ,
-                    displayWhiteXYZ,
-                    2.2f // gamma, unused for display white balance
-            );
-
             float[] displayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
             for (int i = 0; i < nominalWhiteValues.length; i++) {
                 displayNominalWhiteXYZ[i] = Float.parseFloat(nominalWhiteValues[i]);
@@ -190,14 +171,14 @@ public final class ColorDisplayService extends SystemService {
             final int colorTemperatureMin = res.getInteger(
                     R.integer.config_displayWhiteBalanceColorTemperatureMin);
             if (colorTemperatureMin <= 0) {
-                Slog.e(TAG, "display white balance minimum temperature must be greater than 0");
+                Slog.e(TAG, "Display white balance minimum temperature must be greater than 0");
                 return;
             }
 
             final int colorTemperatureMax = res.getInteger(
                     R.integer.config_displayWhiteBalanceColorTemperatureMax);
             if (colorTemperatureMax < colorTemperatureMin) {
-                Slog.e(TAG, "display white balance max temp must be greater or equal to min");
+                Slog.e(TAG, "Display white balance max temp must be greater or equal to min");
                 return;
             }
 
@@ -322,6 +303,57 @@ public final class ColorDisplayService extends SystemService {
                 pw.println("  mMatrixDisplayWhiteBalance = " +
                         matrixToString(mMatrixDisplayWhiteBalance, 4));
             }
+        }
+
+        private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {
+            return new ColorSpace.Rgb(
+                "Display Color Space",
+                redGreenBlueXYZ,
+                whiteXYZ,
+                2.2f // gamma, unused for display white balance
+            );
+        }
+
+        private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
+            IBinder displayToken = SurfaceControl.getBuiltInDisplay(
+                    SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+            if (displayToken == null) {
+                return null;
+            }
+
+            DisplayPrimaries primaries = SurfaceControl.getDisplayNativePrimaries(displayToken);
+            if (primaries == null || primaries.red == null || primaries.green == null ||
+                primaries.blue == null || primaries.white == null) {
+                return null;
+            }
+
+            return makeRgbColorSpaceFromXYZ(
+                    new float[] {
+                        primaries.red.X, primaries.red.Y, primaries.red.Z,
+                        primaries.green.X, primaries.green.Y, primaries.green.Z,
+                        primaries.blue.X, primaries.blue.Y, primaries.blue.Z,
+                    },
+                    new float[] { primaries.white.X, primaries.white.Y, primaries.white.Z }
+                    );
+        }
+
+        private ColorSpace.Rgb getDisplayColorSpaceFromResources(Resources res) {
+            final String[] displayPrimariesValues = res.getStringArray(
+                    R.array.config_displayWhiteBalanceDisplayPrimaries);
+            float[] displayRedGreenBlueXYZ =
+                    new float[NUM_DISPLAY_PRIMARIES_VALS - NUM_VALUES_PER_PRIMARY];
+            float[] displayWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
+
+            for (int i = 0; i < displayRedGreenBlueXYZ.length; i++) {
+                displayRedGreenBlueXYZ[i] = Float.parseFloat(displayPrimariesValues[i]);
+            }
+
+            for (int i = 0; i < displayWhiteXYZ.length; i++) {
+                displayWhiteXYZ[i] = Float.parseFloat(
+                        displayPrimariesValues[displayRedGreenBlueXYZ.length + i]);
+            }
+
+            return makeRgbColorSpaceFromXYZ(displayRedGreenBlueXYZ, displayWhiteXYZ);
         }
     };
 
