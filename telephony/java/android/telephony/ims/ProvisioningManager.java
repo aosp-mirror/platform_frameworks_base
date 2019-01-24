@@ -21,6 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -38,11 +39,66 @@ import java.util.concurrent.Executor;
  * to changes in these configurations.
  *
  * Note: IMS provisioning keys are defined per carrier or OEM using OMA-DM or other provisioning
- * applications and may vary.
+ * applications and may vary. For compatibility purposes, the first 100 integer values used in
+ * {@link #setProvisioningIntValue(int, int)} have been reserved for existing provisioning keys
+ * previously defined in the Android framework. Some common constants have been defined in this
+ * class to make integrating with other system apps easier. USE WITH CARE!
+ *
+ * To avoid collisions, please use String based configurations when possible:
+ * {@link #setProvisioningStringValue(int, String)} and {@link #getProvisioningStringValue(int)}.
  * @hide
  */
 @SystemApi
 public class ProvisioningManager {
+
+    /**
+     * The query from {@link #getProvisioningStringValue(int)} has resulted in an unspecified error.
+     */
+    public static final String STRING_QUERY_RESULT_ERROR_GENERIC =
+            "STRING_QUERY_RESULT_ERROR_GENERIC";
+
+    /**
+     * The query from {@link #getProvisioningStringValue(int)} has resulted in an error because the
+     * ImsService implementation was not ready for provisioning queries.
+     */
+    public static final String STRING_QUERY_RESULT_ERROR_NOT_READY =
+            "STRING_QUERY_RESULT_ERROR_NOT_READY";
+
+    /**
+     * The integer result of provisioning for the queried key is disabled.
+     */
+    public static final int PROVISIONING_VALUE_DISABLED = 0;
+
+    /**
+     * The integer result of provisioning for the queried key is enabled.
+     */
+    public static final int PROVISIONING_VALUE_ENABLED = 1;
+
+
+    /**
+     * Override the user-defined WiFi Roaming enabled setting for this subscription, defined in
+     * {@link SubscriptionManager#WFC_ROAMING_ENABLED_CONTENT_URI}, for the purposes of provisioning
+     * the subscription for WiFi Calling.
+     *
+     * @see #getProvisioningIntValue(int)
+     * @see #setProvisioningIntValue(int, int)
+     */
+    public static final int KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE = 26;
+
+    /**
+     * Override the user-defined WiFi mode for this subscription, defined in
+     * {@link SubscriptionManager#WFC_MODE_CONTENT_URI}, for the purposes of provisioning
+     * this subscription for WiFi Calling.
+     *
+     * Valid values for this key are:
+     * {@link ImsMmTelManager#WIFI_MODE_WIFI_ONLY},
+     * {@link ImsMmTelManager#WIFI_MODE_CELLULAR_PREFERRED}, or
+     * {@link ImsMmTelManager#WIFI_MODE_WIFI_PREFERRED}.
+     *
+     * @see #getProvisioningIntValue(int)
+     * @see #setProvisioningIntValue(int, int)
+     */
+    public static final int KEY_VOICE_OVER_WIFI_MODE_OVERRIDE = 27;
 
     /**
      * Callback for IMS provisioning changes.
@@ -180,10 +236,15 @@ public class ProvisioningManager {
 
     /**
      * Query for the integer value associated with the provided key.
+     *
+     * This operation is blocking and should not be performed on the UI thread.
+     *
      * @param key An integer that represents the provisioning key, which is defined by the OEM.
-     * @return an integer value for the provided key.
+     * @return an integer value for the provided key, or
+     * {@link ImsConfigImplBase#CONFIG_RESULT_UNKNOWN} if the key doesn't exist.
      * @throws IllegalArgumentException if the key provided was invalid.
      */
+    @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getProvisioningIntValue(int key) {
         try {
@@ -195,10 +256,16 @@ public class ProvisioningManager {
 
     /**
      * Query for the String value associated with the provided key.
-     * @param key An integer that represents the provisioning key, which is defined by the OEM.
-     * @return a String value for the provided key, or {@code null} if the key doesn't exist.
+     *
+     * This operation is blocking and should not be performed on the UI thread.
+     *
+     * @param key A String that represents the provisioning key, which is defined by the OEM.
+     * @return a String value for the provided key, {@code null} if the key doesn't exist, or one
+     * of the following error codes: {@link #STRING_QUERY_RESULT_ERROR_GENERIC},
+     * {@link #STRING_QUERY_RESULT_ERROR_NOT_READY}.
      * @throws IllegalArgumentException if the key provided was invalid.
      */
+    @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getProvisioningStringValue(int key) {
         try {
@@ -210,10 +277,16 @@ public class ProvisioningManager {
 
     /**
      * Set the integer value associated with the provided key.
+     *
+     * This operation is blocking and should not be performed on the UI thread.
+     *
+     * Use {@link #setProvisioningStringValue(int, String)} with proper namespacing (to be defined
+     * per OEM or carrier) when possible instead to avoid key collision if needed.
      * @param key An integer that represents the provisioning key, which is defined by the OEM.
      * @param value a integer value for the provided key.
      * @return the result of setting the configuration value.
      */
+    @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public @ImsConfigImplBase.SetConfigResult int setProvisioningIntValue(int key, int value) {
         try {
@@ -226,10 +299,14 @@ public class ProvisioningManager {
     /**
      * Set the String value associated with the provided key.
      *
-     * @param key An integer that represents the provisioning key, which is defined by the OEM.
+     * This operation is blocking and should not be performed on the UI thread.
+     *
+     * @param key A String that represents the provisioning key, which is defined by the OEM and
+     *     should be appropriately namespaced to avoid collision.
      * @param value a String value for the provided key.
      * @return the result of setting the configuration value.
      */
+    @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public @ImsConfigImplBase.SetConfigResult int setProvisioningStringValue(int key,
             String value) {
