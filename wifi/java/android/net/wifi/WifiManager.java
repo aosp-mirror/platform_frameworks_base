@@ -4777,4 +4777,92 @@ public class WifiManager {
             });
         }
     }
+
+    /**
+     * Interface for Wi-Fi usability statistics listener. Should be implemented by applications and
+     * set when calling {@link WifiManager#addWifiUsabilityStatsListener(Executor,
+     * WifiUsabilityStatsListener)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface WifiUsabilityStatsListener {
+        /**
+         * Called when Wi-Fi usability statistics is updated.
+         *
+         * @param seqNum The sequence number of statistics, used to derive the timing of updated
+         *               Wi-Fi usability statistics, set by framework and incremented by one after
+         *               each update.
+         * @param isSameBssidAndFreq The flag to indicate whether the BSSID and the frequency of
+         *                           network stays the same or not relative to the last update of
+         *                           Wi-Fi usability stats.
+         * @param stats The updated Wi-Fi usability statistics.
+         */
+        void onStatsUpdated(int seqNum, boolean isSameBssidAndFreq,
+                WifiUsabilityStatsEntry stats);
+    }
+
+    /**
+     * Adds a listener for Wi-Fi usability statistics. See {@link WifiUsabilityStatsListener}.
+     * Multiple listeners can be added. Callers will be invoked periodically by framework to
+     * inform clients about the current Wi-Fi usability statistics. Callers can remove a previously
+     * added listener using {@link removeWifiUsabilityStatsListener}.
+     *
+     * @param executor The executor on which callback will be invoked.
+     * @param listener Listener for Wifi usability statistics.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public void addWifiUsabilityStatsListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull WifiUsabilityStatsListener listener) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        if (mVerboseLoggingEnabled) {
+            Log.v(TAG, "addWifiUsabilityStatsListener: listener=" + listener);
+        }
+        try {
+            mService.addWifiUsabilityStatsListener(new Binder(),
+                    new IWifiUsabilityStatsListener.Stub() {
+                        @Override
+                        public void onStatsUpdated(int seqNum, boolean isSameBssidAndFreq,
+                                WifiUsabilityStatsEntry stats) {
+                            if (mVerboseLoggingEnabled) {
+                                Log.v(TAG, "WifiUsabilityStatsListener: onStatsUpdated: seqNum="
+                                        + seqNum);
+                            }
+                            Binder.withCleanCallingIdentity(() ->
+                                    executor.execute(() -> listener.onStatsUpdated(seqNum,
+                                            isSameBssidAndFreq, stats)));
+                        }
+                    },
+                    listener.hashCode()
+            );
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allow callers to remove a previously registered listener. After calling this method,
+     * applications will no longer receive Wi-Fi usability statistics.
+     *
+     * @param listener Listener to remove the Wi-Fi usability statistics.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public void removeWifiUsabilityStatsListener(@NonNull WifiUsabilityStatsListener listener) {
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        if (mVerboseLoggingEnabled) {
+            Log.v(TAG, "removeWifiUsabilityStatsListener: listener=" + listener);
+        }
+        try {
+            mService.removeWifiUsabilityStatsListener(listener.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
