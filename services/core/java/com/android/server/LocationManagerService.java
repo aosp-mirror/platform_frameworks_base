@@ -2200,7 +2200,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             return false;
         }
 
-        if (mBackgroundThrottlePackageWhitelist.contains(record.mReceiver.mIdentity.mPackageName)) {
+        if (mIgnoreSettingsPackageWhitelist.contains(record.mReceiver.mIdentity.mPackageName)) {
             return true;
         }
 

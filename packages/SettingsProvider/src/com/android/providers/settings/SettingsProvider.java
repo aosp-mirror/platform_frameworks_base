@@ -4231,7 +4231,7 @@ public class SettingsProvider extends ContentProvider {
 
                         String defLocationMode = Integer.toString(
                                 !TextUtils.isEmpty(locationProvidersAllowed.getValue())
-                                        ? Secure.LOCATION_MODE_HIGH_ACCURACY
+                                        ? Secure.LOCATION_MODE_ON
                                         : Secure.LOCATION_MODE_OFF);
                         secureSettings.insertSettingLocked(
                                 Secure.LOCATION_MODE, defLocationMode,

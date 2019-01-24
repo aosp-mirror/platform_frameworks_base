@@ -181,22 +181,14 @@ public class LocationManager {
         "android.location.GPS_ENABLED_CHANGE";
 
     /**
-     * Broadcast intent action when the configured location providers
-     * change. For use with {@link #isProviderEnabled(String)}. If you're interacting with the
-     * {@link android.provider.Settings.Secure#LOCATION_MODE} API, use {@link #MODE_CHANGED_ACTION}
-     * instead.
+     * Broadcast intent action when the set of enabled location providers changes. To check the
+     * status of a provider, use {@link #isProviderEnabled(String)}.
      */
-    public static final String PROVIDERS_CHANGED_ACTION =
-        "android.location.PROVIDERS_CHANGED";
+    public static final String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";
 
     /**
-     * Broadcast intent action when {@link android.provider.Settings.Secure#LOCATION_MODE} changes.
-     * For use with the {@link android.provider.Settings.Secure#LOCATION_MODE} API.
-     * If you're interacting with {@link #isProviderEnabled(String)}, use
-     * {@link #PROVIDERS_CHANGED_ACTION} instead.
-     *
-     * In the future, there may be mode changes that do not result in
-     * {@link #PROVIDERS_CHANGED_ACTION} broadcasts.
+     * Broadcast intent action when the device location mode changes. To check the location mode,
+     * use {@link #isLocationEnabled()}.
      */
     public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
 
@@ -207,8 +199,10 @@ public class LocationManager {
      * If you're interacting with {@link #isProviderEnabled(String)}, use
      * {@link #PROVIDERS_CHANGED_ACTION} instead.
      *
+     * @deprecated Do not use.
      * @hide
      */
+    @Deprecated
     public static final String MODE_CHANGING_ACTION = "com.android.settings.location.MODE_CHANGING";
 
     /**
@@ -299,7 +293,7 @@ public class LocationManager {
             "com.android.settings.location.FOOTER_STRING";
 
     // Map from LocationListeners to their associated ListenerTransport objects
-    private HashMap<LocationListener,ListenerTransport> mListeners =
+    private final HashMap<LocationListener, ListenerTransport> mListeners =
         new HashMap<LocationListener,ListenerTransport>();
 
     private class ListenerTransport extends ILocationListener.Stub {
@@ -1264,39 +1258,20 @@ public class LocationManager {
     }
 
     /**
-     * Returns the current enabled/disabled status of location
+     * Returns the current enabled/disabled state of location. To listen for changes, see
+     * {@link #MODE_CHANGED_ACTION}.
      *
-     * @return true if location is enabled. false if location is disabled.
+     * @return true if location is enabled and false if location is disabled.
      */
     public boolean isLocationEnabled() {
         return isLocationEnabledForUser(Process.myUserHandle());
     }
 
     /**
-     * Method for enabling or disabling location.
-     *
-     * @param enabled true to enable location. false to disable location
-     * @param userHandle the user to set
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(WRITE_SECURE_SETTINGS)
-    public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
-        Settings.Secure.putIntForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.LOCATION_MODE,
-                enabled
-                        ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
-                        : Settings.Secure.LOCATION_MODE_OFF,
-                userHandle.getIdentifier());
-    }
-
-    /**
-     * Returns the current enabled/disabled status of location
+     * Returns the current enabled/disabled state of location.
      *
      * @param userHandle the user to query
-     * @return true location is enabled. false if location is disabled.
+     * @return true if location is enabled and false if location is disabled.
      *
      * @hide
      */
@@ -1310,19 +1285,32 @@ public class LocationManager {
     }
 
     /**
-     * Returns the current enabled/disabled status of the given provider.
+     * Enables or disables the location setting.
      *
-     * <p>If the user has enabled this provider in the Settings menu, true
-     * is returned otherwise false is returned
+     * @param enabled true to enable location and false to disable location.
+     * @param userHandle the user to set
      *
-     * <p>Callers should instead use {@link #isLocationEnabled()}
-     * unless they depend on provider-specific APIs such as
-     * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
+        Settings.Secure.putIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCATION_MODE,
+                enabled
+                        ? Settings.Secure.LOCATION_MODE_ON
+                        : Settings.Secure.LOCATION_MODE_OFF,
+                userHandle.getIdentifier());
+    }
+
+    /**
+     * Returns the current enabled/disabled status of the given provider. To listen for changes, see
+     * {@link #PROVIDERS_CHANGED_ACTION}.
      *
-     * <p>
-     * Before API version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this
-     * method would throw {@link SecurityException} if the location permissions
-     * were not sufficient to use the specified provider.
+     * Before API version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this method would throw
+     * {@link SecurityException} if the location permissions were not sufficient to use the
+     * specified provider.
      *
      * @param provider the name of the provider
      * @return true if the provider exists and is enabled
@@ -1334,19 +1322,13 @@ public class LocationManager {
     }
 
     /**
-     * Returns the current enabled/disabled status of the given provider and user.
+     * Returns the current enabled/disabled status of the given provider and user. Callers should
+     * prefer {@link #isLocationEnabledForUser(UserHandle)} unless they depend on provider-specific
+     * APIs.
      *
-     * <p>If the user has enabled this provider in the Settings menu, true
-     * is returned otherwise false is returned
-     *
-     * <p>Callers should instead use {@link #isLocationEnabled()}
-     * unless they depend on provider-specific APIs such as
-     * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
-     *
-     * <p>
-     * Before API version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this
-     * method would throw {@link SecurityException} if the location permissions
-     * were not sufficient to use the specified provider.
+     * Before API version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this method would throw
+     * {@link SecurityException} if the location permissions were not sufficient to use the
+     * specified provider.
      *
      * @param provider the name of the provider
      * @param userHandle the user to query
@@ -1367,12 +1349,14 @@ public class LocationManager {
     }
 
     /**
-     * Method for enabling or disabling a single location provider.
+     * Method for enabling or disabling a single location provider. This method is deprecated and
+     * functions as a best effort. It should not be relied on in any meaningful sense as providers
+     * may no longer be enabled or disabled by clients.
      *
      * @param provider the name of the provider
      * @param enabled true to enable the provider. false to disable the provider
      * @param userHandle the user to set
-     * @return true if the value was set, false on database errors
+     * @return true if the value was set, false otherwise
      *
      * @throws IllegalArgumentException if provider is null
      * @deprecated Do not manipulate providers individually, use
