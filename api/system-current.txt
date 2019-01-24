@@ -7426,6 +7426,7 @@ package android.telephony {
   public class PhoneStateListener {
     method public void onCallAttributesChanged(android.telephony.CallAttributes);
     method public void onCallDisconnectCauseChanged(int, int);
+    method public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
     method public void onPreciseCallStateChanged(android.telephony.PreciseCallState);
     method public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
     method public void onRadioPowerStateChanged(int);
@@ -7433,6 +7434,7 @@ package android.telephony {
     method public void onVoiceActivationStateChanged(int);
     field public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
+    field public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES = 134217728; // 0x8000000
     field public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
     field public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000

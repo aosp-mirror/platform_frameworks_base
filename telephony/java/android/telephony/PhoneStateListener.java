@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.telephony.emergency.EmergencyNumber;
+import android.telephony.ims.ImsReasonInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -347,6 +348,20 @@ public class PhoneStateListener {
     @SystemApi
     public static final int LISTEN_CALL_ATTRIBUTES_CHANGED                 = 0x04000000;
 
+    /**
+     * Listen for IMS call disconnect causes which contains
+     * {@link android.telephony.ims.ImsReasonInfo}
+     *
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE}
+     *
+     * @see #onImsCallDisconnectCauseChanged(ImsReasonInfo)
+     * @hide
+     */
+    @SystemApi
+    public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES              = 0x08000000;
+
     /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -574,6 +589,17 @@ public class PhoneStateListener {
      */
     @SystemApi
     public void onCallDisconnectCauseChanged(int disconnectCause, int preciseDisconnectCause) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when Ims call disconnect cause changes.
+     * @param imsReasonInfo {@link ImsReasonInfo} contains details on why IMS call failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void onImsCallDisconnectCauseChanged(@NonNull ImsReasonInfo imsReasonInfo) {
         // default implementation empty
     }
 
@@ -980,6 +1006,16 @@ public class PhoneStateListener {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> psl.onPreferredDataSubIdChanged(subId)));
+        }
+
+        public void onImsCallDisconnectCauseChanged(ImsReasonInfo disconnectCause) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onImsCallDisconnectCauseChanged(disconnectCause)));
+
         }
     }
 
