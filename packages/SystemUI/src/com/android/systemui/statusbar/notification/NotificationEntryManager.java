@@ -27,7 +27,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -62,12 +61,8 @@ public class NotificationEntryManager implements
     private static final String TAG = "NotificationEntryMgr";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final Context mContext;
     @VisibleForTesting
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
-
-    private final ForegroundServiceController mForegroundServiceController =
-            Dependency.get(ForegroundServiceController.class);
 
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
@@ -97,7 +92,6 @@ public class NotificationEntryManager implements
     }
 
     public NotificationEntryManager(Context context) {
-        mContext = context;
         mNotificationData = new NotificationData();
     }
 
