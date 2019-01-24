@@ -17,8 +17,9 @@
 package com.android.internal.os;
 
 import android.app.ApplicationLoaders;
+import android.app.LoadedApk;
+import android.content.pm.ApplicationInfo;
 import android.net.LocalSocket;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebViewFactory;
@@ -66,6 +67,34 @@ class WebViewZygoteInit {
         }
 
         @Override
+        protected boolean canPreloadApp() {
+            return true;
+        }
+
+        @Override
+        protected void handlePreloadApp(ApplicationInfo appInfo) {
+            Log.i(TAG, "Beginning application preload for " + appInfo.packageName);
+            LoadedApk loadedApk = new LoadedApk(null, appInfo, null, null, false, true, false);
+            ClassLoader loader = loadedApk.getClassLoader();
+            doPreload(loader, WebViewFactory.getWebViewLibrary(appInfo));
+
+            // Add the APK to the Zygote's list of allowed files for children.
+            Zygote.nativeAllowFileAcrossFork(appInfo.sourceDir);
+            if (appInfo.splitSourceDirs != null) {
+                for (String path : appInfo.splitSourceDirs) {
+                    Zygote.nativeAllowFileAcrossFork(path);
+                }
+            }
+            if (appInfo.sharedLibraryFiles != null) {
+                for (String path : appInfo.sharedLibraryFiles) {
+                    Zygote.nativeAllowFileAcrossFork(path);
+                }
+            }
+
+            Log.i(TAG, "Application preload done");
+        }
+
+        @Override
         protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
                 String cacheKey) {
             Log.i(TAG, "Beginning package preload");
@@ -76,15 +105,21 @@ class WebViewZygoteInit {
             ClassLoader loader = ApplicationLoaders.getDefault().createAndCacheWebViewClassLoader(
                     packagePath, libsPath, cacheKey);
 
-            // Load the native library using WebViewLibraryLoader to share the RELRO data with other
-            // processes.
-            WebViewLibraryLoader.loadNativeLibrary(loader, libFileName);
-
             // Add the APK to the Zygote's list of allowed files for children.
             String[] packageList = TextUtils.split(packagePath, File.pathSeparator);
             for (String packageEntry : packageList) {
                 Zygote.nativeAllowFileAcrossFork(packageEntry);
             }
+
+            doPreload(loader, libFileName);
+
+            Log.i(TAG, "Package preload done");
+        }
+
+        private void doPreload(ClassLoader loader, String libFileName) {
+            // Load the native library using WebViewLibraryLoader to share the RELRO data with other
+            // processes.
+            WebViewLibraryLoader.loadNativeLibrary(loader, libFileName);
 
             // Once we have the classloader, look up the WebViewFactoryProvider implementation and
             // call preloadInZygote() on it to give it the opportunity to preload the native library
@@ -114,8 +149,6 @@ class WebViewZygoteInit {
             } catch (IOException ioe) {
                 throw new IllegalStateException("Error writing to command socket", ioe);
             }
-
-            Log.i(TAG, "Package preload done");
         }
     }
 
