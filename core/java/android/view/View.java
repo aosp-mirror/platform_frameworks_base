@@ -13994,7 +13994,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (clickable) {
                         setPressed(true, x, y);
                     }
-                    checkForLongClick(0, x, y);
+                    checkForLongClick(ViewConfiguration.getLongPressTimeout(), x, y);
                     return true;
                 }
             }
@@ -14735,7 +14735,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mHasPerformedLongPress = false;
 
                     if (!clickable) {
-                        checkForLongClick(0, x, y);
+                        checkForLongClick(ViewConfiguration.getLongPressTimeout(), x, y);
                         break;
                     }
 
@@ -14759,7 +14759,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         // Not inside a scrolling container, so show the feedback right away
                         setPressed(true, x, y);
-                        checkForLongClick(0, x, y);
+                        checkForLongClick(ViewConfiguration.getLongPressTimeout(), x, y);
                     }
                     break;
 
@@ -25434,7 +25434,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private void checkForLongClick(int delayOffset, float x, float y) {
+    private void checkForLongClick(long delay, float x, float y) {
         if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE || (mViewFlags & TOOLTIP) == TOOLTIP) {
             mHasPerformedLongPress = false;
 
@@ -25444,8 +25444,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPendingCheckForLongPress.setAnchor(x, y);
             mPendingCheckForLongPress.rememberWindowAttachCount();
             mPendingCheckForLongPress.rememberPressedState();
-            postDelayed(mPendingCheckForLongPress,
-                    ViewConfiguration.getLongPressTimeout() - delayOffset);
+            postDelayed(mPendingCheckForLongPress, delay);
         }
     }
 
@@ -27035,7 +27034,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         public void run() {
             mPrivateFlags &= ~PFLAG_PREPRESSED;
             setPressed(true, x, y);
-            checkForLongClick(ViewConfiguration.getTapTimeout(), x, y);
+            final long delay =
+                    ViewConfiguration.getLongPressTimeout() - ViewConfiguration.getTapTimeout();
+            checkForLongClick(delay, x, y);
         }
     }
 
