@@ -38,7 +38,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -499,7 +498,7 @@ public class TransactionParcelTests {
         }
 
         @Override
-        public void setHttpProxy(String s, String s1, String s2, Uri uri) throws RemoteException {
+        public void updateHttpProxy() throws RemoteException {
         }
 
         @Override

@@ -2246,17 +2246,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case UPDATE_HTTP_PROXY_MSG: {
-                ProxyInfo proxy = (ProxyInfo)msg.obj;
-                String host = "";
-                String port = "";
-                String exclList = "";
-                Uri pacFileUrl = Uri.EMPTY;
-                if (proxy != null) {
-                    host = proxy.getHost();
-                    port = Integer.toString(proxy.getPort());
-                    exclList = proxy.getExclusionListAsString();
-                    pacFileUrl = proxy.getPacFileUrl();
-                }
                 synchronized (ActivityManagerService.this) {
                     for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                         ProcessRecord r = mLruProcesses.get(i);
@@ -2264,7 +2253,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // ConnectivityManager and don't have network privileges anyway.
                         if (r.thread != null && !r.isolated) {
                             try {
-                                r.thread.setHttpProxy(host, port, exclList, pacFileUrl);
+                                r.thread.updateHttpProxy();
                             } catch (RemoteException ex) {
                                 Slog.w(TAG, "Failed to update http proxy for: " +
                                         r.info.processName);
@@ -21488,8 +21477,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
                     break;
                 case Proxy.PROXY_CHANGE_ACTION:
-                    ProxyInfo proxy = intent.getParcelableExtra(Proxy.EXTRA_PROXY_INFO);
-                    mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
+                    mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG));
                     break;
                 case android.hardware.Camera.ACTION_NEW_PICTURE:
                 case android.hardware.Camera.ACTION_NEW_VIDEO:
