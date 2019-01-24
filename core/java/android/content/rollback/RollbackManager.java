@@ -17,7 +17,6 @@
 package android.content.rollback;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -25,7 +24,6 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.os.RemoteException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,57 +64,6 @@ public final class RollbackManager {
     }
 
     /**
-     * Returns the rollback currently available to be executed for the given
-     * package.
-     * <p>
-     * The returned RollbackInfo describes what packages would be rolled back,
-     * including package version codes before and after rollback. The rollback
-     * can be initiated using {@link #executeRollback(RollbackInfo,IntentSender)}.
-     * <p>
-     * TODO: remove this API in favor of getAvailableRollbacks.
-     *
-     * @param packageName name of the package to get the availble RollbackInfo for.
-     * @return the rollback available for the package, or null if no rollback
-     *         is available for the package.
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public @Nullable RollbackInfo getAvailableRollback(@NonNull String packageName) {
-        for (RollbackInfo rollback : getAvailableRollbacks()) {
-            for (PackageRollbackInfo info : rollback.getPackages()) {
-                if (packageName.equals(info.getPackageName())) {
-                    return rollback;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets the names of packages that are available for rollback.
-     * Call {@link #getAvailableRollback(String)} to get more information
-     * about the rollback available for a particular package.
-     * <p>
-     * TODO: remove this API in favor of getAvailableRollbacks.
-     *
-     * @return the names of packages that are available for rollback.
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public @NonNull List<String> getPackagesWithAvailableRollbacks() {
-        List<String> packages = new ArrayList<>();
-        for (RollbackInfo rollbacks : getAvailableRollbacks()) {
-            for (PackageRollbackInfo info : rollbacks.getPackages()) {
-                packages.add(info.getPackageName());
-            }
-        }
-        return packages;
-    }
-
-
-    /**
      * Gets the list of all recently executed rollbacks.
      * This is for the purposes of preventing re-install of a bad version of a
      * package.
@@ -150,7 +97,7 @@ public final class RollbackManager {
      * of the installed packages or available rollbacks are inconsistent with
      * the versions specified in the given rollback object, which can happen
      * if a package has been updated or a rollback expired since the rollback
-     * object was retrieved from {@link #getAvailableRollback(String)}.
+     * object was retrieved from {@link #getAvailableRollbacks()}.
      * <p>
      * TODO: Specify the returns status codes.
      * TODO: What happens in case reboot is required for the rollback to take
