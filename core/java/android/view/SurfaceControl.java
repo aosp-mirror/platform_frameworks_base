@@ -41,6 +41,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.os.IBinder;
@@ -1734,7 +1735,10 @@ public final class SurfaceControl implements Parcelable {
             Log.w(TAG, "Failed to take screenshot");
             return null;
         }
-        return Bitmap.createHardwareBitmap(buffer);
+        // TODO(b/116112787) Now that hardware bitmap creation can take color space, we
+        // should continue to fix screenshot.
+        return Bitmap.wrapHardwareBuffer(HardwareBuffer.createFromGraphicBuffer(buffer),
+                ColorSpace.get(ColorSpace.Named.SRGB));
     }
 
     /**

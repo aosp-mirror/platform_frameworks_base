@@ -21,6 +21,7 @@
 
 #include "android_os_Parcel.h"
 #include "android/graphics/GraphicsJNI.h"
+#include "android/graphics/GraphicBuffer.h"
 
 #include <android/hardware_buffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
@@ -92,6 +93,12 @@ static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
         return NULL;
     }
 
+    GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(buffer);
+    return reinterpret_cast<jlong>(wrapper);
+}
+
+static jlong android_hardware_HardwareBuffer_createFromGraphicBuffer(JNIEnv* env, jobject clazz, jobject graphicBuffer) {
+    sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
     GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(buffer);
     return reinterpret_cast<jlong>(wrapper);
 }
@@ -243,6 +250,8 @@ const char* const kClassPathName = "android/hardware/HardwareBuffer";
 static const JNINativeMethod gMethods[] = {
     { "nCreateHardwareBuffer",  "(IIIIJ)J",
             (void*) android_hardware_HardwareBuffer_create },
+    { "nCreateFromGraphicBuffer", "(Landroid/graphics/GraphicBuffer;)J",
+            (void*) android_hardware_HardwareBuffer_createFromGraphicBuffer },
     { "nGetNativeFinalizer", "()J",
             (void*) android_hardware_HardwareBuffer_getNativeFinalizer },
     { "nWriteHardwareBufferToParcel",  "(JLandroid/os/Parcel;)V",

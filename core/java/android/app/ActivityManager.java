@@ -42,6 +42,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -1767,6 +1768,10 @@ public class ActivityManager {
         private final int mSystemUiVisibility;
         private final boolean mIsTranslucent;
 
+        // TODO(b/116112787) TaskSnapshot must also book keep the color space from hardware bitmap
+        // when created.
+        private final ColorSpace mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+
         public TaskSnapshot(@NonNull ComponentName topActivityComponent, GraphicBuffer snapshot,
                 int orientation, Rect contentInsets, boolean reducedResolution, float scale,
                 boolean isRealSnapshot, int windowingMode, int systemUiVisibility,
@@ -1809,6 +1814,13 @@ public class ActivityManager {
         @UnsupportedAppUsage
         public GraphicBuffer getSnapshot() {
             return mSnapshot;
+        }
+
+        /**
+         * @return The color space of graphic buffer representing the screenshot.
+         */
+        public ColorSpace getColorSpace() {
+            return mColorSpace;
         }
 
         /**

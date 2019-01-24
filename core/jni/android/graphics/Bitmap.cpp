@@ -1136,19 +1136,6 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
     return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(false));
 }
 
-static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphicBuffer) {
-    sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
-    // To support any color space, we need to pass an additional ColorSpace argument to
-    // java Bitmap.createHardwareBitmap.
-    SkColorType ct = uirenderer::PixelFormatToColorType(buffer->getPixelFormat());
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, ct, SkColorSpace::MakeSRGB());
-    if (!bitmap.get()) {
-        ALOGW("failed to create hardware bitmap from graphic buffer");
-        return NULL;
-    }
-    return bitmap::createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(false));
-}
-
 static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject hardwareBuffer,
                                                jlong colorSpacePtr) {
     AHardwareBuffer* hwBuf = android_hardware_HardwareBuffer_getNativeHardwareBuffer(env,
@@ -1243,8 +1230,6 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
     {   "nativeCopyPreserveInternalConfig", "(J)Landroid/graphics/Bitmap;",
         (void*)Bitmap_copyPreserveInternalConfig },
-    {   "nativeCreateHardwareBitmap", "(Landroid/graphics/GraphicBuffer;)Landroid/graphics/Bitmap;",
-        (void*) Bitmap_createHardwareBitmap },
     {   "nativeWrapHardwareBufferBitmap", "(Landroid/hardware/HardwareBuffer;J)Landroid/graphics/Bitmap;",
         (void*) Bitmap_wrapHardwareBufferBitmap },
     {   "nativeCreateGraphicBufferHandle", "(J)Landroid/graphics/GraphicBuffer;",
