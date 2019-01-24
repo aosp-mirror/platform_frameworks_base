@@ -76,6 +76,7 @@ public class AppTransitionController {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final WallpaperController mWallpaperControllerLocked;
+    private RemoteAnimationDefinition mRemoteAnimationDefinition = null;
 
     private final SparseIntArray mTempTransitionReasons = new SparseIntArray();
 
@@ -83,6 +84,10 @@ public class AppTransitionController {
         mService = service;
         mDisplayContent = displayContent;
         mWallpaperControllerLocked = mDisplayContent.mWallpaperController;
+    }
+
+    void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        mRemoteAnimationDefinition = definition;
     }
 
     /**
@@ -216,6 +221,21 @@ public class AppTransitionController {
         return mainWindow != null ? mainWindow.mAttrs : null;
     }
 
+    RemoteAnimationAdapter getRemoteAnimationOverride(AppWindowToken animLpToken, int transit,
+            ArraySet<Integer> activityTypes) {
+        final RemoteAnimationDefinition definition = animLpToken.getRemoteAnimationDefinition();
+        if (definition != null) {
+            final RemoteAnimationAdapter adapter = definition.getAdapter(transit, activityTypes);
+            if (adapter != null) {
+                return adapter;
+            }
+        }
+        if (mRemoteAnimationDefinition == null) {
+            return null;
+        }
+        return mRemoteAnimationDefinition.getAdapter(transit, activityTypes);
+    }
+
     /**
      * Overrides the pending transition with the remote animation defined for the transition in the
      * set of defined remote animations in the app window token.
@@ -229,11 +249,8 @@ public class AppTransitionController {
         if (animLpToken == null) {
             return;
         }
-        final RemoteAnimationDefinition definition = animLpToken.getRemoteAnimationDefinition();
-        if (definition == null) {
-            return;
-        }
-        final RemoteAnimationAdapter adapter = definition.getAdapter(transit, activityTypes);
+        final RemoteAnimationAdapter adapter =
+                getRemoteAnimationOverride(animLpToken, transit, activityTypes);
         if (adapter != null) {
             animLpToken.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(
                     adapter);

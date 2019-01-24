@@ -77,7 +77,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         MockitoAnnotations.initMocks(this);
 
         when(mMockRunner.asBinder()).thenReturn(new Binder());
-        mAdapter = new RemoteAnimationAdapter(mMockRunner, 100, 50);
+        mAdapter = new RemoteAnimationAdapter(mMockRunner, 100, 50, true /* changeNeedsSnapshot */);
         mAdapter.setCallingPid(123);
         mWm.mH.runWithScissors(() -> mHandler = new TestHandler(null, mClock), 0);
         mController = new RemoteAnimationController(mWm, mAdapter, mHandler);
