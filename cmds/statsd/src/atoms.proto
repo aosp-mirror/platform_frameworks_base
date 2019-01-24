@@ -206,6 +206,7 @@ message Atom {
         BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported = 142;
         AttentionManagerServiceResultReported attention_manager_service_result_reported = 143;
         AdbConnectionChanged adb_connection_changed = 144;
+        SpeechDspStatReported speech_dsp_stat_reported = 145;
     }
 
     // Pulled events will start at field 10000.
@@ -4520,4 +4521,19 @@ message AdbConnectionChanged {
 
     // True if the 'always allow' option was selected for this system.
     optional bool always_allow = 4;
+}
+
+/*
+ * Logs the reported speech DSP status.
+ *
+ * Logged from:
+ *  Vendor audio implementation.
+ */
+message SpeechDspStatReported {
+    // The total Speech DSP uptime in milliseconds.
+    optional int32 total_uptime_millis = 1;
+    // The total Speech DSP downtime in milliseconds.
+    optional int32 total_downtime_millis = 2;
+    optional int32 total_crash_count = 3;
+    optional int32 total_recover_count = 4;
 }

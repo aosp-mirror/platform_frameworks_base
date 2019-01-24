@@ -1097,6 +1097,14 @@ hardware::Return<void> StatsService::reportUsbPortOverheatEvent(
     return hardware::Void();
 }
 
+hardware::Return<void> StatsService::reportSpeechDspStat(
+        const SpeechDspStat& speechDspStat) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), speechDspStat);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
 void StatsService::binderDied(const wp <IBinder>& who) {
     ALOGW("statscompanion service died");
     StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());

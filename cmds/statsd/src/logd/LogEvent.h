@@ -121,6 +121,9 @@ public:
     explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                       const UsbPortOverheatEvent& usbPortOverheatEvent);
 
+    explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                      const SpeechDspStat& speechDspStat);
+
     ~LogEvent();
 
     /**
