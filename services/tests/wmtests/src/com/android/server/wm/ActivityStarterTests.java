@@ -599,6 +599,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 false, false, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_nfcUid_notAborted", false,
+                Process.NFC_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingUidHasVisibleWindow_notAborted", false,
                 UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1,
