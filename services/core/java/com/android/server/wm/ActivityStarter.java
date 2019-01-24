@@ -916,7 +916,8 @@ class ActivityStarter {
             PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart,
             Intent intent) {
         // don't abort for the most important UIDs
-        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID) {
+        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID
+                || callingUid == Process.NFC_UID) {
             return false;
         }
         // don't abort if the callerApp has any visible activity
