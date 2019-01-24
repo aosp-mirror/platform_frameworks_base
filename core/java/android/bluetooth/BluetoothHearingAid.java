@@ -39,15 +39,14 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * This class provides the public APIs to control the Bluetooth Hearing Aid
- * profile.
+ * This class provides the public APIs to control the Hearing Aid profile.
  *
  * <p>BluetoothHearingAid is a proxy object for controlling the Bluetooth Hearing Aid
  * Service via IPC. Use {@link BluetoothAdapter#getProfileProxy} to get
  * the BluetoothHearingAid proxy object.
  *
- * <p> Each method is protected with its appropriate permission.
- * @hide
+ * <p> Android only supports one set of connected Bluetooth Hearing Aid device at a time. Each
+ * method is protected with its appropriate permission.
  */
 public final class BluetoothHearingAid implements BluetoothProfile {
     private static final String TAG = "BluetoothHearingAid";
@@ -56,7 +55,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
 
     /**
      * Intent used to broadcast the change in connection state of the Hearing Aid
-     * profile.
+     * profile. Please note that in the binaural case, there will be two different LE devices for
+     * the left and right side and each device will have their own connection state changes.S
      *
      * <p>This intent will have 3 extras:
      * <ul>
@@ -77,27 +77,6 @@ public final class BluetoothHearingAid implements BluetoothProfile {
             "android.bluetooth.hearingaid.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
-     * Intent used to broadcast the change in the Playing state of the Hearing Aid
-     * profile.
-     *
-     * <p>This intent will have 3 extras:
-     * <ul>
-     * <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
-     * <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile. </li>
-     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
-     * </ul>
-     *
-     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
-     * {@link #STATE_PLAYING}, {@link #STATE_NOT_PLAYING},
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PLAYING_STATE_CHANGED =
-            "android.bluetooth.hearingaid.profile.action.PLAYING_STATE_CHANGED";
-
-    /**
      * Intent used to broadcast the selection of a connected device as active.
      *
      * <p>This intent will have one extra:
@@ -108,6 +87,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
      * receive.
+     *
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @UnsupportedAppUsage
@@ -115,32 +96,38 @@ public final class BluetoothHearingAid implements BluetoothProfile {
             "android.bluetooth.hearingaid.profile.action.ACTIVE_DEVICE_CHANGED";
 
     /**
-     * Hearing Aid device is streaming music. This state can be one of
-     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
-     * {@link #ACTION_PLAYING_STATE_CHANGED} intent.
+     * This device represents Left Hearing Aid.
+     *
+     * @hide
      */
-    public static final int STATE_PLAYING = 10;
-
-    /**
-     * Hearing Aid device is NOT streaming music. This state can be one of
-     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
-     * {@link #ACTION_PLAYING_STATE_CHANGED} intent.
-     */
-    public static final int STATE_NOT_PLAYING = 11;
-
-    /** This device represents Left Hearing Aid. */
     public static final int SIDE_LEFT = IBluetoothHearingAid.SIDE_LEFT;
 
-    /** This device represents Right Hearing Aid. */
+    /**
+     * This device represents Right Hearing Aid.
+     *
+     * @hide
+     */
     public static final int SIDE_RIGHT = IBluetoothHearingAid.SIDE_RIGHT;
 
-    /** This device is Monaural. */
+    /**
+     * This device is Monaural.
+     *
+     * @hide
+     */
     public static final int MODE_MONAURAL = IBluetoothHearingAid.MODE_MONAURAL;
 
-    /** This device is Binaural (should receive only left or right audio). */
+    /**
+     * This device is Binaural (should receive only left or right audio).
+     *
+     * @hide
+     */
     public static final int MODE_BINAURAL = IBluetoothHearingAid.MODE_BINAURAL;
 
-    /** Can't read ClientID for this device */
+    /**
+     * Indicates the HiSyncID could not be read and is unavailable.
+     *
+     * @hide
+     */
     public static final long HI_SYNC_ID_INVALID = IBluetoothHearingAid.HI_SYNC_ID_INVALID;
 
     private Context mContext;
@@ -234,12 +221,6 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         } finally {
             mServiceLock.writeLock().unlock();
         }
-    }
-
-    @Override
-    public void finalize() {
-        // The empty finalize needs to be kept or the
-        // cts signature tests would fail.
     }
 
     /**
@@ -538,10 +519,6 @@ public final class BluetoothHearingAid implements BluetoothProfile {
                 return "connected";
             case STATE_DISCONNECTING:
                 return "disconnecting";
-            case STATE_PLAYING:
-                return "playing";
-            case STATE_NOT_PLAYING:
-                return "not playing";
             default:
                 return "<unknown state " + state + ">";
         }
