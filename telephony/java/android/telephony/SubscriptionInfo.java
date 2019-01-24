@@ -184,6 +184,11 @@ public class SubscriptionInfo implements Parcelable {
     private int mProfileClass;
 
     /**
+     * Type of subscription
+     */
+    private int mSubscriptionType;
+
+    /**
      * @hide
      */
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
@@ -206,7 +211,8 @@ public class SubscriptionInfo implements Parcelable {
             @Nullable String groupUUID, boolean isMetered, int carrierId, int profileClass) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString, -1,
-                isOpportunistic, groupUUID, isMetered, false, carrierId, profileClass);
+                isOpportunistic, groupUUID, isMetered, false, carrierId, profileClass,
+                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM);
     }
 
     /**
@@ -217,7 +223,7 @@ public class SubscriptionInfo implements Parcelable {
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardString, int cardId,
             boolean isOpportunistic, @Nullable String groupUUID, boolean isMetered,
-            boolean isGroupDisabled, int carrierid, int profileClass) {
+            boolean isGroupDisabled, int carrierId, int profileClass, int subType) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
@@ -239,10 +245,10 @@ public class SubscriptionInfo implements Parcelable {
         this.mGroupUUID = groupUUID;
         this.mIsMetered = isMetered;
         this.mIsGroupDisabled = isGroupDisabled;
-        this.mCarrierId = carrierid;
+        this.mCarrierId = carrierId;
         this.mProfileClass = profileClass;
+        this.mSubscriptionType = subType;
     }
-
 
     /**
      * @return the subscription ID.
@@ -487,6 +493,16 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
+     * This method returns the type of a subscription. It can be
+     * {@link SubscriptionManager#SUBSCRIPTION_TYPE_LOCAL_SIM} or
+     * {@link SubscriptionManager#SUBSCRIPTION_TYPE_REMOTE_SIM}.
+     * @return the type of subscription
+     */
+    public @SubscriptionManager.SubscriptionType int getSubscriptionType() {
+        return mSubscriptionType;
+    }
+
+    /**
      * Checks whether the app with the given context is authorized to manage this subscription
      * according to its metadata. Only supported for embedded subscriptions (if {@link #isEmbedded}
      * returns true).
@@ -612,11 +628,12 @@ public class SubscriptionInfo implements Parcelable {
             boolean isGroupDisabled = source.readBoolean();
             int carrierid = source.readInt();
             int profileClass = source.readInt();
+            int subType = source.readInt();
 
             return new SubscriptionInfo(id, iccId, simSlotIndex, displayName, carrierName,
                     nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc, countryIso,
                     isEmbedded, accessRules, cardString, cardId, isOpportunistic, groupUUID,
-                    isMetered, isGroupDisabled, carrierid, profileClass);
+                    isMetered, isGroupDisabled, carrierid, profileClass, subType);
         }
 
         @Override
@@ -650,6 +667,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeBoolean(mIsGroupDisabled);
         dest.writeInt(mCarrierId);
         dest.writeInt(mProfileClass);
+        dest.writeInt(mSubscriptionType);
     }
 
     @Override
@@ -686,7 +704,8 @@ public class SubscriptionInfo implements Parcelable {
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
                 + " isOpportunistic " + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
                 + " isMetered=" + mIsMetered + " mIsGroupDisabled=" + mIsGroupDisabled
-                + " profileClass=" + mProfileClass + "}";
+                + " profileClass=" + mProfileClass
+                + " subscriptionType=" + mSubscriptionType + "}";
     }
 
     @Override
