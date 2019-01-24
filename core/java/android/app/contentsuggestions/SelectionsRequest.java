@@ -25,6 +25,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * The request object used to request content selections from {@link ContentSuggestionsManager}.
+ *
+ * <p>Selections are requested for a given taskId as specified by
+ * {@link android.app.ActivityManager} and optionally take an interest point that specifies the
+ * point on the screen that should be considered as the most important.
+ *
  * @hide
  */
 @SystemApi
@@ -49,16 +55,17 @@ public final class SelectionsRequest implements Parcelable {
     }
 
     /**
-     * Return the request point of interest.
+     * Return the request point of interest or {@code null} if there is no point of interest for
+     * this request.
      */
-    public Point getInterestPoint() {
+    public @Nullable Point getInterestPoint() {
         return mInterestPoint;
     }
 
     /**
-     * Return the request extras.
+     * Return the request extras or {@code null} if there aren't any.
      */
-    public Bundle getExtras() {
+    public @Nullable Bundle getExtras() {
         return mExtras;
     }
 
@@ -99,6 +106,11 @@ public final class SelectionsRequest implements Parcelable {
         private Point mInterestPoint;
         private Bundle mExtras;
 
+        /**
+         * Default constructor.
+         *
+         * @param taskId of the type used by {@link android.app.ActivityManager}
+         */
         public Builder(int taskId) {
             mTaskId = taskId;
         }

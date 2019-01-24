@@ -23,6 +23,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Represents the classification of a content suggestion. The result of a
+ * {@link ClassificationsRequest} to {@link ContentSuggestionsManager}.
+ *
  * @hide
  */
 @SystemApi
@@ -32,6 +35,12 @@ public final class ContentClassification implements Parcelable {
     @NonNull
     private final Bundle mExtras;
 
+    /**
+     * Default constructor.
+     *
+     * @param classificationId implementation specific id for the selection /  classification.
+     * @param extras containing the classification data.
+     */
     public ContentClassification(@NonNull String classificationId, @NonNull Bundle extras) {
         mClassificationId = classificationId;
         mExtras = extras;
@@ -40,14 +49,14 @@ public final class ContentClassification implements Parcelable {
     /**
      * Return the classification id.
      */
-    public String getId() {
+    public @NonNull String getId() {
         return mClassificationId;
     }
 
     /**
      * Return the classification extras.
      */
-    public Bundle getExtras() {
+    public @NonNull Bundle getExtras() {
         return mExtras;
     }
 
