@@ -140,6 +140,10 @@ public class SystemConfig {
     // without throttling, as read from the configuration files.
     final ArraySet<String> mAllowUnthrottledLocation = new ArraySet<>();
 
+    // These are the packages that are white-listed to be able to retrieve location even when user
+    // location settings are off, for emergency purposes, as read from the configuration files.
+    final ArraySet<String> mAllowIgnoreLocationSettings = new ArraySet<>();
+
     // These are the action strings of broadcasts which are whitelisted to
     // be delivered anonymously even to apps which target O+.
     final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
@@ -253,6 +257,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAllowUnthrottledLocation() {
         return mAllowUnthrottledLocation;
+    }
+
+    public ArraySet<String> getAllowIgnoreLocationSettings() {
+        return mAllowIgnoreLocationSettings;
     }
 
     public ArraySet<String> getLinkedApps() {
@@ -676,6 +684,20 @@ public class SystemConfig {
                                         + permFile + " at " + parser.getPositionDescription());
                             } else {
                                 mAllowUnthrottledLocation.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-ignore-location-settings": {
+                        if (allowAll) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowIgnoreLocationSettings.add(pkgname);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

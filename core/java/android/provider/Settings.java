@@ -9493,6 +9493,14 @@ public final class Settings {
             "location_background_throttle_package_whitelist";
 
         /**
+         * Packages that are whitelisted for ignoring location settings (may retrieve location even
+         * when user location settings are off), for emergency purposes.
+         * @hide
+         */
+        public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST =
+                "location_ignore_settings_package_whitelist";
+
+        /**
          * Whether to disable location status callbacks in preparation for deprecation.
          * @hide
          */
