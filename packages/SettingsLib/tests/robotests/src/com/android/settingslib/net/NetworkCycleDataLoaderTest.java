@@ -130,7 +130,8 @@ public class NetworkCycleDataLoaderTest {
             .thenReturn(networkHistory);
         final long now = System.currentTimeMillis();
         final long fourWeeksAgo = now - (DateUtils.WEEK_IN_MILLIS * 4);
-        when(networkHistory.getStart()).thenReturn(fourWeeksAgo);
+        final long twoDaysAgo = now - (DateUtils.DAY_IN_MILLIS * 2);
+        when(networkHistory.getStart()).thenReturn(twoDaysAgo);
         when(networkHistory.getEnd()).thenReturn(now);
 
         mLoader.loadFourWeeksData();
