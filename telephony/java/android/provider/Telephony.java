@@ -2311,6 +2311,9 @@ public final class Telephony {
 
         /**
          * Contains message parts.
+         *
+         * To avoid issues where applications might cache a part ID, the ID of a deleted part must
+         * not be reused to point at a new part.
          */
         public static final class Part implements BaseColumns {
 
@@ -2320,6 +2323,12 @@ public final class Telephony {
              */
             private Part() {
             }
+
+            /**
+             * The {@code content://} style URL for this table. Can be appended with a part ID to
+             * address individual parts.
+             */
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, "part");
 
             /**
              * The identifier of the message which this part belongs to.
