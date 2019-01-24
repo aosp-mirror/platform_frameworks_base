@@ -152,6 +152,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Whether a captive portal was found during the last network validation attempt.
     public boolean lastCaptivePortalDetected;
 
+    // Indicates the user was notified of a successful captive portal login since a portal was
+    // last detected.
+    public boolean captivePortalLoginNotified;
+
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
     // network is taken down.  This usually only happens to the default network. Lingering ends with
@@ -618,18 +622,19 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     public String toString() {
-        return "NetworkAgentInfo{ ni{" + networkInfo + "}  " +
-                "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  " +
-                "lp{" + linkProperties + "}  " +
-                "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  " +
-                "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  " +
-                "created{" + created + "} lingering{" + isLingering() + "} " +
-                "explicitlySelected{" + networkMisc.explicitlySelected + "} " +
-                "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
-                "everCaptivePortalDetected{" + everCaptivePortalDetected + "} " +
-                "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} " +
-                "clat{" + clatd + "} " +
-                "}";
+        return "NetworkAgentInfo{ ni{" + networkInfo + "}  "
+                + "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  "
+                + "lp{" + linkProperties + "}  "
+                + "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  "
+                + "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  "
+                + "created{" + created + "} lingering{" + isLingering() + "} "
+                + "explicitlySelected{" + networkMisc.explicitlySelected + "} "
+                + "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} "
+                + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
+                + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
+                + "captivePortalLoginNotified{" + captivePortalLoginNotified + "} "
+                + "clat{" + clatd + "} "
+                + "}";
     }
 
     public String name() {
