@@ -666,6 +666,7 @@ public class UserRestrictionsUtils {
 
             case android.provider.Settings.Secure.ALWAYS_ON_VPN_APP:
             case android.provider.Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN:
+            case android.provider.Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST:
                 // Whitelist system uid (ConnectivityService) and root uid to change always-on vpn
                 final int appId = UserHandle.getAppId(callingUid);
                 if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {

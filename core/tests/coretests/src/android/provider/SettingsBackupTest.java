@@ -574,6 +574,7 @@ public class SettingsBackupTest {
                  Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
                  Settings.Secure.ALWAYS_ON_VPN_APP,
                  Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
+                 Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST,
                  Settings.Secure.ANDROID_ID,
                  Settings.Secure.ANR_SHOW_BACKGROUND,
                  Settings.Secure.ASSISTANT,
