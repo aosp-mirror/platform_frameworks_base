@@ -23,6 +23,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager.StackInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -119,6 +120,7 @@ public class ActivityView extends ViewGroup {
 
     /** Callback that notifies when the container is ready or destroyed. */
     public abstract static class StateCallback {
+
         /**
          * Called when the container is ready for launching activities. Calling
          * {@link #startActivity(Intent)} prior to this callback will result in an
@@ -127,6 +129,7 @@ public class ActivityView extends ViewGroup {
          * @see #startActivity(Intent)
          */
         public abstract void onActivityViewReady(ActivityView view);
+
         /**
          * Called when the container can no longer launch activities. Calling
          * {@link #startActivity(Intent)} after this callback will result in an
@@ -135,11 +138,24 @@ public class ActivityView extends ViewGroup {
          * @see #startActivity(Intent)
          */
         public abstract void onActivityViewDestroyed(ActivityView view);
+
+        /**
+         * Called when a task is created inside the container.
+         * This is a filtered version of {@link TaskStackListener}
+         */
+        public void onTaskCreated(int taskId, ComponentName componentName) { }
+
         /**
          * Called when a task is moved to the front of the stack inside the container.
          * This is a filtered version of {@link TaskStackListener}
          */
         public void onTaskMovedToFront(ActivityManager.StackInfo stackInfo) { }
+
+        /**
+         * Called when a task is about to be removed from the stack inside the container.
+         * This is a filtered version of {@link TaskStackListener}
+         */
+        public void onTaskRemovalStarted(int taskId) { }
     }
 
     /**
@@ -508,14 +524,45 @@ public class ActivityView extends ViewGroup {
 
         @Override
         public void onTaskMovedToFront(int taskId) throws RemoteException {
-            if (mActivityViewCallback  != null) {
-                StackInfo stackInfo = getTopMostStackInfo();
-                // if StackInfo was null or unrelated to the "move to front" then there's no use
-                // notifying the callback
-                if (stackInfo != null
-                        && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                    mActivityViewCallback.onTaskMovedToFront(stackInfo);
-                }
+            if (mActivityViewCallback  == null) {
+                return;
+            }
+
+            StackInfo stackInfo = getTopMostStackInfo();
+            // if StackInfo was null or unrelated to the "move to front" then there's no use
+            // notifying the callback
+            if (stackInfo != null
+                    && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                mActivityViewCallback.onTaskMovedToFront(stackInfo);
+            }
+        }
+
+        @Override
+        public void onTaskCreated(int taskId, ComponentName componentName) throws RemoteException {
+            if (mActivityViewCallback  == null) {
+                return;
+            }
+
+            StackInfo stackInfo = getTopMostStackInfo();
+            // if StackInfo was null or unrelated to the task creation then there's no use
+            // notifying the callback
+            if (stackInfo != null
+                    && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                mActivityViewCallback.onTaskCreated(taskId, componentName);
+            }
+        }
+
+        @Override
+        public void onTaskRemovalStarted(int taskId) throws RemoteException {
+            if (mActivityViewCallback  == null) {
+                return;
+            }
+            StackInfo stackInfo = getTopMostStackInfo();
+            // if StackInfo was null or task is on a different display then there's no use
+            // notifying the callback
+            if (stackInfo != null
+                    && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                mActivityViewCallback.onTaskRemovalStarted(taskId);
             }
         }
 
