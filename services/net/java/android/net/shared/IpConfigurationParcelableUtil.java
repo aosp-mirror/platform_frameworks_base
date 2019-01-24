@@ -73,7 +73,7 @@ public final class IpConfigurationParcelableUtil {
     public static DhcpResultsParcelable toStableParcelable(@Nullable DhcpResults results) {
         if (results == null) return null;
         final DhcpResultsParcelable p = new DhcpResultsParcelable();
-        p.baseConfiguration = toStableParcelable((StaticIpConfiguration) results);
+        p.baseConfiguration = toStableParcelable(results.toStaticIpConfiguration());
         p.leaseDuration = results.leaseDuration;
         p.mtu = results.mtu;
         p.serverAddress = parcelAddress(results.serverAddress);
