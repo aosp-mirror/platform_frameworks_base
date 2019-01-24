@@ -202,7 +202,7 @@ public class SmartActionsHelper {
         }
         TextClassifierEvent textClassifierEvent =
                 createTextClassifierEventBuilder(TextClassifierEvent.TYPE_SMART_ACTION, resultId)
-                        .setEntityType(ConversationAction.TYPE_TEXT_REPLY)
+                        .setEntityTypes(ConversationAction.TYPE_TEXT_REPLY)
                         .build();
         mTextClassifier.onTextClassifierEvent(textClassifierEvent);
     }
@@ -225,7 +225,7 @@ public class SmartActionsHelper {
         }
         TextClassifierEvent textClassifierEvent =
                 createTextClassifierEventBuilder(TextClassifierEvent.TYPE_SMART_ACTION, resultId)
-                        .setEntityType(actionType)
+                        .setEntityTypes(actionType)
                         .build();
         mTextClassifier.onTextClassifierEvent(textClassifierEvent);
     }

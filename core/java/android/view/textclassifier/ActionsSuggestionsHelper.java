@@ -103,10 +103,9 @@ public final class ActionsSuggestionsHelper {
         final String modelName = String.format(
                 Locale.US, "%s_v%d", localesJoiner.toString(), modelVersion);
         final int hash = Objects.hash(
-                messages.stream()
-                        .map(ConversationActions.Message::getText)
-                        .collect(Collectors.toList()),
-                context.getPackageName());
+                messages.stream().mapToInt(ActionsSuggestionsHelper::hashMessage),
+                context.getPackageName(),
+                System.currentTimeMillis());
         return SelectionSessionLogger.SignatureParser.createSignature(
                 SelectionSessionLogger.CLASSIFIER_ID, modelName, hash);
     }
@@ -127,5 +126,9 @@ public final class ActionsSuggestionsHelper {
             }
             return result;
         }
+    }
+
+    private static int hashMessage(ConversationActions.Message message) {
+        return Objects.hash(message.getAuthor(), message.getText(), message.getReferenceTime());
     }
 }
