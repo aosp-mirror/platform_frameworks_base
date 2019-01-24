@@ -39,6 +39,7 @@ using android::idmap2::PolicyBitmask;
 using android::idmap2::PolicyFlags;
 using android::idmap2::Result;
 using android::idmap2::utils::kIdmapFilePermissionMask;
+using android::idmap2::utils::UidHasWriteAccessToPath;
 
 bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
   std::string target_apk_path;
@@ -63,6 +64,13 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
           .OptionalFlag("--ignore-overlayable", "disables overlayable and policy checks",
                         &ignore_overlayable);
   if (!opts.Parse(args, out_error)) {
+    return false;
+  }
+
+  const uid_t uid = getuid();
+  if (!UidHasWriteAccessToPath(uid, idmap_path)) {
+    out_error << "error: uid " << uid << " does not have write access to " << idmap_path
+              << std::endl;
     return false;
   }
 
