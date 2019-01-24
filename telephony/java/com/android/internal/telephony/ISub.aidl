@@ -276,6 +276,11 @@ interface ISub {
 
     String getSubscriptionProperty(int subId, String propKey, String callingPackage);
 
+    boolean setSubscriptionEnabled(boolean enable, int subId);
+
+    boolean isSubscriptionEnabled(int subId);
+
+    int getEnabledSubscriptionId(int slotIndex);
     /**
      * Get the SIM state for the slot index
      * @return SIM state as the ordinal of IccCardConstants.State
