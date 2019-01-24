@@ -6862,6 +6862,14 @@ message MetricsEvent {
     // OS: Q
     FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS = 1631;
 
+    // OPEN: Settings > System > Aware
+    // OS: Q
+    SETTINGS_AWARE = 1632;
+
+    // OPEN: Settings > System > Aware > Disable > Dialog
+    // OS: Q
+    DIALOG_AWARE_DISABLE = 1633;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

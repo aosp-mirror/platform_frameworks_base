@@ -3553,4 +3553,6 @@
 
   <!-- For CBRS -->
   <java-symbol type="bool" name="config_cbrs_supported" />
+
+  <java-symbol type="bool" name="config_awareSettingAvailable" />
 </resources>

@@ -2183,4 +2183,10 @@ enum PageId {
     // OPEN: Settings > Display > Adaptive sleep
     // OS: Q
     SETTINGS_ADAPTIVE_SLEEP = 1628;
+
+    // OPEN: Settings > System > Aware
+    SETTINGS_AWARE = 1632;
+
+    // OPEN: Settings > System > Aware > Disable > Dialog
+    DIALOG_AWARE_DISABLE = 1633;
 }
