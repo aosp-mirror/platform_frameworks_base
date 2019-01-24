@@ -86,9 +86,7 @@ public class ImsMmTelManager {
 
     /**
      * Prefer registering for IMS over IWLAN if possible if WiFi signal quality is high enough.
-     * @hide
      */
-    @SystemApi
     public static final int WIFI_MODE_WIFI_PREFERRED = 2;
 
     /**
