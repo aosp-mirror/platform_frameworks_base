@@ -202,9 +202,11 @@ public class IpMemoryStoreServiceTest {
         final CountDownLatch latch = new CountDownLatch(1);
         functor.accept(latch);
         try {
-            latch.await(5000, TimeUnit.MILLISECONDS);
+            if (!latch.await(5000, TimeUnit.MILLISECONDS)) {
+                fail(timeoutMessage);
+            }
         } catch (InterruptedException e) {
-            fail(timeoutMessage);
+            fail("Thread was interrupted");
         }
     }
 
@@ -314,6 +316,7 @@ public class IpMemoryStoreServiceTest {
                             assertEquals(Status.ERROR_ILLEGAL_ARGUMENT, status.resultCode);
                             assertNull(key);
                             assertNull(attr);
+                            latch.countDown();
                         })));
     }
 
@@ -383,6 +386,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertEquals(FAKE_KEYS[5], key);
+                    latch.countDown();
                 })));
 
         // MTU matches key 4 but v4 address matches key 5. The latter is stronger.
@@ -392,6 +396,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertEquals(FAKE_KEYS[5], key);
+                    latch.countDown();
                 })));
 
         // Closest to key 3 (indeed, identical)
@@ -402,6 +407,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertEquals(FAKE_KEYS[3], key);
+                    latch.countDown();
                 })));
 
         // Group hint alone must not be strong enough to override the rest
@@ -411,6 +417,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertEquals(FAKE_KEYS[3], key);
+                    latch.countDown();
                 })));
 
         // Still closest to key 3, though confidence is lower
@@ -421,6 +428,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertEquals(FAKE_KEYS[3], key);
+                    latch.countDown();
                 })));
 
         // But changing the MTU makes this closer to key 4
@@ -430,6 +438,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertEquals(FAKE_KEYS[4], key);
+                    latch.countDown();
                 })));
 
         // MTU alone not strong enough to make this group-close
@@ -441,6 +450,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertNull(key);
+                    latch.countDown();
                 })));
     }
 
@@ -450,6 +460,7 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Retrieve network sameness not successful : " + status.resultCode,
                             status.isSuccess());
                     assertEquals(sameness, answer.getNetworkSameness());
+                    latch.countDown();
                 })));
     }
 
@@ -488,6 +499,7 @@ public class IpMemoryStoreServiceTest {
                             + status.resultCode, status.isSuccess());
                     assertEquals(Status.ERROR_ILLEGAL_ARGUMENT, status.resultCode);
                     assertNull(answer);
+                    latch.countDown();
                 })));
     }
 }
