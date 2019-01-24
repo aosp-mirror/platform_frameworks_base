@@ -61,6 +61,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.usb.UsbPortInfoProto;
 import android.service.usb.UsbPortManagerProto;
+import android.service.usb.UsbServiceProto;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -74,7 +75,6 @@ import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 /**
@@ -141,7 +141,11 @@ public class UsbPortManager {
 
     // Maintains the current connected status of the port.
     // Uploads logs only when the connection status is changes.
-    private final HashMap<String, Boolean> mConnected = new HashMap<>();
+    private final ArrayMap<String, Boolean> mConnected = new ArrayMap<>();
+
+    // Maintains the USB contaminant status that was previously logged.
+    // Logs get uploaded only when contaminant presence status changes.
+    private final ArrayMap<String, Integer> mContaminantStatus = new ArrayMap<>();
 
     private NotificationManager mNotificationManager;
 
@@ -959,6 +963,24 @@ public class UsbPortManager {
         updateContaminantNotification();
     }
 
+    // Constants have to be converted between USB HAL V1.2 ContaminantDetectionStatus
+    // to usb.proto as proto guidelines recommends 0 to be UNKNOWN/UNSUPPORTTED
+    // whereas HAL policy is against a loosely defined constant.
+    private static int convertContaminantDetectionStatusToProto(int contaminantDetectionStatus) {
+        switch (contaminantDetectionStatus) {
+            case UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED:
+                return UsbServiceProto.CONTAMINANT_STATUS_NOT_SUPPORTED;
+            case UsbPortStatus.CONTAMINANT_DETECTION_DISABLED:
+                return UsbServiceProto.CONTAMINANT_STATUS_DISABLED;
+            case UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED:
+                return UsbServiceProto.CONTAMINANT_STATUS_NOT_DETECTED;
+            case UsbPortStatus.CONTAMINANT_DETECTION_DETECTED:
+                return UsbServiceProto.CONTAMINANT_STATUS_DETECTED;
+            default:
+                return UsbServiceProto.CONTAMINANT_STATUS_UNKNOWN;
+        }
+    }
+
     private void sendPortChangedBroadcastLocked(PortInfo portInfo) {
         final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_CHANGED);
         intent.addFlags(
@@ -973,6 +995,33 @@ public class UsbPortManager {
                 Manifest.permission.MANAGE_USB));
 
         // Log to statsd
+
+        // Port is removed
+        if (portInfo.mUsbPortStatus == null) {
+            if (mConnected.containsKey(portInfo.mUsbPort.getId())) {
+                //Previous logged a connected. Set it to disconnected.
+                if (mConnected.get(portInfo.mUsbPort.getId())) {
+                    StatsLog.write(StatsLog.USB_CONNECTOR_STATE_CHANGED,
+                            StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_DISCONNECTED,
+                            portInfo.mUsbPort.getId(), portInfo.mLastConnectDurationMillis);
+                }
+                mConnected.remove(portInfo.mUsbPort.getId());
+            }
+
+            if (mContaminantStatus.containsKey(portInfo.mUsbPort.getId())) {
+                //Previous logged a contaminant detected. Set it to not detected.
+                if ((mContaminantStatus.get(portInfo.mUsbPort.getId())
+                        == UsbPortStatus.CONTAMINANT_DETECTION_DETECTED)) {
+                    StatsLog.write(StatsLog.USB_CONTAMINANT_REPORTED,
+                            portInfo.mUsbPort.getId(),
+                            convertContaminantDetectionStatusToProto(
+                                    UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED));
+                }
+                mContaminantStatus.remove(portInfo.mUsbPort.getId());
+            }
+            return;
+        }
+
         if (!mConnected.containsKey(portInfo.mUsbPort.getId())
                 || (mConnected.get(portInfo.mUsbPort.getId())
                 != portInfo.mUsbPortStatus.isConnected())) {
@@ -982,6 +1031,17 @@ public class UsbPortManager {
                     ? StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_CONNECTED :
                     StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_DISCONNECTED,
                     portInfo.mUsbPort.getId(), portInfo.mLastConnectDurationMillis);
+        }
+
+        if (!mContaminantStatus.containsKey(portInfo.mUsbPort.getId())
+                || (mContaminantStatus.get(portInfo.mUsbPort.getId())
+                != portInfo.mUsbPortStatus.getContaminantDetectionStatus())) {
+            mContaminantStatus.put(portInfo.mUsbPort.getId(),
+                    portInfo.mUsbPortStatus.getContaminantDetectionStatus());
+            StatsLog.write(StatsLog.USB_CONTAMINANT_REPORTED,
+                    portInfo.mUsbPort.getId(),
+                    convertContaminantDetectionStatusToProto(
+                            portInfo.mUsbPortStatus.getContaminantDetectionStatus()));
         }
     }
 

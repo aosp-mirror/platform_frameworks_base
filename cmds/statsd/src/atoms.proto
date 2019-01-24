@@ -34,6 +34,7 @@ import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.
 import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
+import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
@@ -207,6 +208,7 @@ message Atom {
         AttentionManagerServiceResultReported attention_manager_service_result_reported = 143;
         AdbConnectionChanged adb_connection_changed = 144;
         SpeechDspStatReported speech_dsp_stat_reported = 145;
+        UsbContaminantReported usb_contaminant_reported = 146;
     }
 
     // Pulled events will start at field 10000.
@@ -4536,4 +4538,14 @@ message SpeechDspStatReported {
     optional int32 total_downtime_millis = 2;
     optional int32 total_crash_count = 3;
     optional int32 total_recover_count = 4;
+}
+
+/**
+ * Logs USB connector contaminant status.
+ *
+ * Logged from: USB Service.
+ */
+message UsbContaminantReported {
+    optional string id = 1;
+    optional android.service.usb.ContaminantPresenceStatus status = 2;
 }
