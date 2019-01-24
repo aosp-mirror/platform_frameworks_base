@@ -430,6 +430,9 @@ public class LauncherAppsService extends SystemService {
             if (!mVouchedSignaturesByUser.containsKey(user)) {
                 initVouchedSignatures(user);
             }
+            if (isManagedProfileAdmin(user, appInfo.packageName)) {
+                return false;
+            }
             if (mVouchProviders.contains(appInfo.packageName)) {
                 // If it's a vouching packages then we must show hidden app
                 return true;
@@ -451,6 +454,24 @@ public class LauncherAppsService extends SystemService {
                 // Should not happen
             }
             return true;
+        }
+
+        private boolean isManagedProfileAdmin(UserHandle user, String packageName) {
+            final List<UserInfo> userInfoList = mUm.getProfiles(user.getIdentifier());
+            for (int i = 0; i < userInfoList.size(); i++) {
+                UserInfo userInfo = userInfoList.get(i);
+                if (!userInfo.isManagedProfile()) {
+                    continue;
+                }
+                ComponentName componentName = mDpm.getProfileOwnerAsUser(userInfo.getUserHandle());
+                if (componentName == null) {
+                    continue;
+                }
+                if (componentName.getPackageName().equals(packageName)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @VisibleForTesting
