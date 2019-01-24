@@ -231,15 +231,18 @@ public class InsetsController implements WindowInsetsController {
         mState.dump(prefix + "  ", pw);
     }
 
-    void dispatchAnimationStarted(WindowInsetsAnimationListener.InsetsAnimation animation) {
+    @VisibleForTesting
+    public void dispatchAnimationStarted(WindowInsetsAnimationListener.InsetsAnimation animation) {
         mViewRoot.mView.dispatchWindowInsetsAnimationStarted(animation);
     }
 
-    void dispatchAnimationFinished(WindowInsetsAnimationListener.InsetsAnimation animation) {
+    @VisibleForTesting
+    public void dispatchAnimationFinished(WindowInsetsAnimationListener.InsetsAnimation animation) {
         mViewRoot.mView.dispatchWindowInsetsAnimationFinished(animation);
     }
 
-    void scheduleApplyChangeInsets() {
+    @VisibleForTesting
+    public void scheduleApplyChangeInsets() {
         if (!mAnimCallbackScheduled) {
             mViewRoot.mChoreographer.postCallback(Choreographer.CALLBACK_INSETS_ANIMATION,
                     mAnimCallback, null /* token*/);

@@ -25,7 +25,6 @@ import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -591,9 +590,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     delayed = runningAppAnimation = true;
                 }
                 final WindowState window = findMainWindow();
-                //TODO (multidisplay): Magnification is supported only for the default display.
-                if (window != null && accessibilityController != null
-                        && getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
+                if (window != null && accessibilityController != null) {
                     accessibilityController.onAppWindowTransitionLocked(window, transit);
                 }
                 changed = true;
@@ -2407,7 +2404,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
         if (!mSurfaceAnimator.hasLeash()) {
-            t.reparent(mSurfaceControl, newParent.getHandle());
+            t.reparent(mSurfaceControl, newParent);
         }
     }
 
@@ -2453,7 +2450,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
 
             // Reparent leash to animation bounds layer.
-            t.reparent(leash, mAnimationBoundsLayer.getHandle());
+            t.reparent(leash, mAnimationBoundsLayer);
         }
     }
 

@@ -41,7 +41,7 @@ import android.view.KeyEvent;
 
     void onKeyEvent(in KeyEvent event, int sequence);
 
-    void onMagnificationChanged(in Region region, float scale, float centerX, float centerY);
+    void onMagnificationChanged(int displayId, in Region region, float scale, float centerX, float centerY);
 
     void onSoftKeyboardShowModeChanged(int showMode);
 

@@ -18,14 +18,13 @@ package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
-import static android.util.DebugUtils.flagsToString;
 import static android.view.autofill.AutofillManager.MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS;
+import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -61,6 +60,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManager.SmartSuggestionMode;
 import android.view.autofill.AutofillManagerInternal;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManager;
@@ -80,8 +80,6 @@ import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,26 +99,6 @@ public final class AutofillManagerService
     private static final String TAG = "AutofillManagerService";
 
     private static final Object sLock = AutofillManagerService.class;
-
-    /**
-     * IME supports Smart Suggestions.
-     */
-    // NOTE: must be public because of flagsToString()
-    public static final int FLAG_SMART_SUGGESTION_IME = 0x1;
-
-    /**
-     * System supports Smarts Suggestions (as a popup-window similar to standard Autofill).
-     */
-    // NOTE: must be public because of flagsToString()
-    public static final int FLAG_SMART_SUGGESTION_SYSTEM = 0x2;
-
-    /** @hide */
-    @IntDef(flag = true, prefix = { "FLAG_SMART_SUGGESTION_" }, value = {
-            FLAG_SMART_SUGGESTION_IME,
-            FLAG_SMART_SUGGESTION_SYSTEM
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface SmartSuggestionMode {}
 
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
@@ -484,7 +462,7 @@ public final class AutofillManagerService
                 Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS, 0);
         if (sDebug) {
             Slog.d(TAG, "setSmartSuggestionEmulationFromSettings(): "
-                    + smartSuggestionFlagsToString(flags));
+                    + getSmartSuggestionModeToString(flags));
         }
 
         synchronized (mLock) {
@@ -696,10 +674,6 @@ public final class AutofillManagerService
         synchronized (sLock) {
             return sVisibleDatasetsMaxCount;
         }
-    }
-
-    static String smartSuggestionFlagsToString(int flags) {
-        return flagsToString(AutofillManagerService.class, "FLAG_SMART_SUGGESTION_", flags);
     }
 
     private final class LocalService extends AutofillManagerInternal {
@@ -1251,7 +1225,7 @@ public final class AutofillManagerService
                     pw.println(getWhitelistedCompatModePackagesFromSettings());
                     if (mSupportedSmartSuggestionModes != 0) {
                         pw.print("Smart Suggestion modes: ");
-                        pw.println(smartSuggestionFlagsToString(mSupportedSmartSuggestionModes));
+                        pw.println(getSmartSuggestionModeToString(mSupportedSmartSuggestionModes));
                     }
                     if (showHistory) {
                         pw.println(); pw.println("Requests history:"); pw.println();

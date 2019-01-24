@@ -208,6 +208,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final WindowManagerInternal mWindowManagerService;
 
+    private final DisplayManager mDisplayManager;
+
     private AppWidgetManagerInternal mAppWidgetService;
 
     private final SecurityPolicy mSecurityPolicy;
@@ -304,10 +306,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mMainHandler = new MainHandler(mContext.getMainLooper());
         mGlobalActionPerformer = new GlobalActionPerformer(mContext, mWindowManagerService);
+        mDisplayManager = mContext.getSystemService(DisplayManager.class);
 
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
                 context.getContentResolver());
+        registerDisplayListener(mMainHandler);
     }
 
     @Override
@@ -521,6 +525,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
         }, UserHandle.ALL, intentFilter, null, null);
+    }
+
+    private void registerDisplayListener(Handler handler) {
+        mDisplayManager.registerDisplayListener(new DisplayManager.DisplayListener() {
+            @Override
+            public void onDisplayAdded(int displayId) {
+                synchronized (mLock) {
+                    UserState userState = getCurrentUserStateLocked();
+                    updateMagnificationLocked(userState);
+                }
+            }
+
+            @Override
+            public void onDisplayRemoved(int displayId) {
+                if (mMagnificationController != null) {
+                    mMagnificationController.onDisplayRemoved(displayId);
+                }
+            }
+
+            @Override
+            public void onDisplayChanged(int displayId) {
+                // do nothing
+            }
+        }, handler);
     }
 
     @Override
@@ -968,17 +996,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Called by the MagnificationController when the state of display
      * magnification changes.
      *
+     * @param displayId The logical display id.
      * @param region the new magnified region, may be empty if
      *               magnification is not enabled (e.g. scale is 1)
      * @param scale the new scale
      * @param centerX the new screen-relative center X coordinate
      * @param centerY the new screen-relative center Y coordinate
      */
-    public void notifyMagnificationChanged(@NonNull Region region,
+    public void notifyMagnificationChanged(int displayId, @NonNull Region region,
             float scale, float centerX, float centerY) {
         synchronized (mLock) {
             notifyClearAccessibilityCacheLocked();
-            notifyMagnificationChangedLocked(region, scale, centerX, centerY);
+            notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
         }
     }
 
@@ -1203,12 +1232,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void notifyMagnificationChangedLocked(@NonNull Region region,
+    private void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
             float scale, float centerX, float centerY) {
         final UserState state = getCurrentUserStateLocked();
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             final AccessibilityServiceConnection service = state.mBoundServices.get(i);
-            service.notifyMagnificationChangedLocked(region, scale, centerX, centerY);
+            service.notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
         }
     }
 
@@ -2191,15 +2220,44 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
-        if (!mUiAutomationManager.suppressingAccessibilityServicesLocked()
-                && (userState.mIsDisplayMagnificationEnabled
-                        || userState.mIsNavBarMagnificationEnabled
-                        || userHasListeningMagnificationServicesLocked(userState))) {
-            // Initialize the magnification controller if necessary
-            getMagnificationController();
-            mMagnificationController.register();
-        } else if (mMagnificationController != null) {
-            mMagnificationController.unregister();
+        if (mUiAutomationManager.suppressingAccessibilityServicesLocked()
+                && mMagnificationController != null) {
+            mMagnificationController.unregisterAll();
+            return;
+        }
+
+        // register all display if global magnification is enabled.
+        final Display[] displays = mDisplayManager.getDisplays();
+        if (userState.mIsDisplayMagnificationEnabled
+                || userState.mIsNavBarMagnificationEnabled) {
+            for (int i = 0; i < displays.length; i++) {
+                final Display display = displays[i];
+                // Overlay display uses overlay window to simulate secondary displays in
+                // one display. It's not a real display and there's no input events for it.
+                // We should ignore it.
+                if (display.getType() == Display.TYPE_OVERLAY) {
+                    continue;
+                }
+                getMagnificationController().register(display.getDisplayId());
+            }
+            return;
+        }
+
+        // register if display has listening magnification services.
+        for (int i = 0; i < displays.length; i++) {
+            final Display display = displays[i];
+            // Overlay display uses overlay window to simulate secondary displays in
+            // one display. It's not a real display and there's no input events for it.
+            // We should ignore it.
+            if (display.getType() == Display.TYPE_OVERLAY) {
+                continue;
+            }
+            final int displayId = display.getDisplayId();
+            if (userHasListeningMagnificationServicesLocked(userState, displayId)) {
+                getMagnificationController().register(displayId);
+            } else if (mMagnificationController != null) {
+                mMagnificationController.unregister(displayId);
+            }
         }
     }
 
@@ -2222,12 +2280,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Returns whether the specified user has any services that are capable of
      * controlling magnification and are actively listening for magnification updates.
      */
-    private boolean userHasListeningMagnificationServicesLocked(UserState userState) {
+    private boolean userHasListeningMagnificationServicesLocked(UserState userState,
+            int displayId) {
         final List<AccessibilityServiceConnection> services = userState.mBoundServices;
         for (int i = 0, count = services.size(); i < count; i++) {
             final AccessibilityServiceConnection service = services.get(i);
             if (mSecurityPolicy.canControlMagnification(service)
-                    && service.isMagnificationCallbackEnabled()) {
+                    && service.isMagnificationCallbackEnabled(displayId)) {
                 return true;
             }
         }

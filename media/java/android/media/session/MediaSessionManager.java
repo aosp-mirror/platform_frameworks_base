@@ -28,7 +28,6 @@ import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
 import android.media.MediaSession2;
 import android.media.Session2Token;
-import android.media.browse.MediaBrowser;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,6 +36,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.media.MediaBrowserService;
 import android.service.notification.NotificationListenerService;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -797,7 +797,6 @@ public final class MediaSessionManager {
         private final String mPackageName;
         private final int mPid;
         private final int mUid;
-        private final IBinder mCallerBinder;
 
         /**
          * Create a new remote user information.
@@ -807,22 +806,9 @@ public final class MediaSessionManager {
          * @param uid The uid of the remote user
          */
         public RemoteUserInfo(@NonNull String packageName, int pid, int uid) {
-            this(packageName, pid, uid, null);
-        }
-
-        /**
-         * Create a new remote user information.
-         *
-         * @param packageName The package name of the remote user
-         * @param pid The pid of the remote user
-         * @param uid The uid of the remote user
-         * @param callerBinder The binder of the remote user. Can be {@code null}.
-         */
-        public RemoteUserInfo(String packageName, int pid, int uid, IBinder callerBinder) {
             mPackageName = packageName;
             mPid = pid;
             mUid = uid;
-            mCallerBinder = callerBinder;
         }
 
         /**
@@ -847,13 +833,8 @@ public final class MediaSessionManager {
         }
 
         /**
-         * Returns equality of two RemoteUserInfo. Two RemoteUserInfos are the same only if they're
-         * sent to the same controller (either {@link MediaController} or
-         * {@link MediaBrowser}. If it's not nor one of them is triggered by the key presses, they
-         * would be considered as different one.
-         * <p>
-         * If you only want to compare the caller's package, compare them with the
-         * {@link #getPackageName()}, {@link #getPid()}, and/or {@link #getUid()} directly.
+         * Returns equality of two RemoteUserInfo. Two RemoteUserInfo objects are equal
+         * if and only if they have the same package name, same pid, and same uid.
          *
          * @param obj the reference object with which to compare.
          * @return {@code true} if equals, {@code false} otherwise
@@ -867,8 +848,9 @@ public final class MediaSessionManager {
                 return true;
             }
             RemoteUserInfo otherUserInfo = (RemoteUserInfo) obj;
-            return (mCallerBinder == null || otherUserInfo.mCallerBinder == null) ? false
-                    : mCallerBinder.equals(otherUserInfo.mCallerBinder);
+            return TextUtils.equals(mPackageName, otherUserInfo.mPackageName)
+                    && mPid == otherUserInfo.mPid
+                    && mUid == otherUserInfo.mUid;
         }
 
         @Override

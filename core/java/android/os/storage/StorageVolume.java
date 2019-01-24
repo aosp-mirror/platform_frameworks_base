@@ -35,6 +35,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.CharArrayWriter;
 import java.io.File;
+import java.util.Locale;
 
 /**
  * Information about a shared/external storage volume for a specific user.
@@ -261,6 +262,11 @@ public final class StorageVolume implements Parcelable {
      */
     public @Nullable String getUuid() {
         return mFsUuid;
+    }
+
+    /** {@hide} */
+    public @Nullable String getNormalizedUuid() {
+        return mFsUuid != null ? mFsUuid.toLowerCase(Locale.US) : null;
     }
 
     /**

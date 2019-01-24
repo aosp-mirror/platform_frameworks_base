@@ -34,26 +34,57 @@ public class AutofillIdTest {
     public void testNonVirtual() {
         final AutofillId id = new AutofillId(42);
         assertThat(id.getViewId()).isEqualTo(42);
-        assertThat(id.isVirtual()).isFalse();
-        assertThat(id.getVirtualChildId()).isEqualTo(View.NO_ID);
+        assertThat(id.isNonVirtual()).isTrue();
+        assertThat(id.isVirtualInt()).isFalse();
+        assertThat(id.isVirtualLong()).isFalse();
+        assertThat(id.getVirtualChildIntId()).isEqualTo(View.NO_ID);
+        assertThat(id.getVirtualChildLongId()).isEqualTo(View.NO_ID);
 
         final AutofillId clone = cloneThroughParcel(id);
         assertThat(clone.getViewId()).isEqualTo(42);
-        assertThat(clone.isVirtual()).isFalse();
-        assertThat(clone.getVirtualChildId()).isEqualTo(View.NO_ID);
+        assertThat(clone.isNonVirtual()).isTrue();
+        assertThat(clone.isVirtualInt()).isFalse();
+        assertThat(clone.isVirtualLong()).isFalse();
+        assertThat(clone.getVirtualChildIntId()).isEqualTo(View.NO_ID);
+        assertThat(clone.getVirtualChildLongId()).isEqualTo(View.NO_ID);
     }
 
     @Test
-    public void testVirtual() {
+    public void testVirtual_int() {
         final AutofillId id = new AutofillId(42, 108);
         assertThat(id.getViewId()).isEqualTo(42);
-        assertThat(id.isVirtual()).isTrue();
-        assertThat(id.getVirtualChildId()).isEqualTo(108);
+        assertThat(id.isVirtualInt()).isTrue();
+        assertThat(id.isVirtualLong()).isFalse();
+        assertThat(id.isNonVirtual()).isFalse();
+        assertThat(id.getVirtualChildIntId()).isEqualTo(108);
+        assertThat(id.getVirtualChildLongId()).isEqualTo(View.NO_ID);
 
         final AutofillId clone = cloneThroughParcel(id);
         assertThat(clone.getViewId()).isEqualTo(42);
-        assertThat(clone.isVirtual()).isTrue();
-        assertThat(clone.getVirtualChildId()).isEqualTo(108);
+        assertThat(clone.isVirtualLong()).isFalse();
+        assertThat(clone.isVirtualInt()).isTrue();
+        assertThat(clone.isNonVirtual()).isFalse();
+        assertThat(clone.getVirtualChildIntId()).isEqualTo(108);
+        assertThat(clone.getVirtualChildLongId()).isEqualTo(View.NO_ID);
+    }
+
+    @Test
+    public void testVirtual_long() {
+        final AutofillId id = new AutofillId(new AutofillId(42), 4815162342L, 108);
+        assertThat(id.getViewId()).isEqualTo(42);
+        assertThat(id.isVirtualLong()).isTrue();
+        assertThat(id.isVirtualInt()).isFalse();
+        assertThat(id.isNonVirtual()).isFalse();
+        assertThat(id.getVirtualChildIntId()).isEqualTo(View.NO_ID);
+        assertThat(id.getVirtualChildLongId()).isEqualTo(4815162342L);
+
+        final AutofillId clone = cloneThroughParcel(id);
+        assertThat(clone.getViewId()).isEqualTo(42);
+        assertThat(clone.isVirtualLong()).isTrue();
+        assertThat(clone.isVirtualInt()).isFalse();
+        assertThat(clone.isNonVirtual()).isFalse();
+        assertThat(clone.getVirtualChildIntId()).isEqualTo(View.NO_ID);
+        assertThat(clone.getVirtualChildLongId()).isEqualTo(4815162342L);
     }
 
     @Test
@@ -62,27 +93,33 @@ public class AutofillIdTest {
 
         final AutofillId id = new AutofillId(new AutofillId(42), 108);
         assertThat(id.getViewId()).isEqualTo(42);
-        assertThat(id.isVirtual()).isTrue();
-        assertThat(id.getVirtualChildId()).isEqualTo(108);
+        assertThat(id.isVirtualInt()).isTrue();
+        assertThat(id.getVirtualChildIntId()).isEqualTo(108);
 
         final AutofillId clone = cloneThroughParcel(id);
         assertThat(clone.getViewId()).isEqualTo(42);
-        assertThat(clone.isVirtual()).isTrue();
-        assertThat(clone.getVirtualChildId()).isEqualTo(108);
+        assertThat(clone.isVirtualInt()).isTrue();
+        assertThat(clone.getVirtualChildIntId()).isEqualTo(108);
     }
 
     @Test
     public void testVirtual_withSession() {
-        final AutofillId id = new AutofillId(new AutofillId(42), 108, 666);
+        final AutofillId id = new AutofillId(new AutofillId(42), 108L, 666);
         assertThat(id.getViewId()).isEqualTo(42);
-        assertThat(id.isVirtual()).isTrue();
-        assertThat(id.getVirtualChildId()).isEqualTo(108);
+        assertThat(id.isVirtualLong()).isTrue();
+        assertThat(id.isVirtualInt()).isFalse();
+        assertThat(id.isNonVirtual()).isFalse();
+        assertThat(id.getVirtualChildLongId()).isEqualTo(108L);
+        assertThat(id.getVirtualChildIntId()).isEqualTo(View.NO_ID);
         assertThat(id.getSessionId()).isEqualTo(666);
 
         final AutofillId clone = cloneThroughParcel(id);
         assertThat(clone.getViewId()).isEqualTo(42);
-        assertThat(clone.isVirtual()).isTrue();
-        assertThat(clone.getVirtualChildId()).isEqualTo(108);
+        assertThat(clone.isVirtualLong()).isTrue();
+        assertThat(clone.isVirtualInt()).isFalse();
+        assertThat(clone.isNonVirtual()).isFalse();
+        assertThat(clone.getVirtualChildLongId()).isEqualTo(108L);
+        assertThat(clone.getVirtualChildIntId()).isEqualTo(View.NO_ID);
         assertThat(clone.getSessionId()).isEqualTo(666);
     }
 
@@ -118,13 +155,14 @@ public class AutofillIdTest {
         assertThat(virtualIdDifferentParent).isNotEqualTo(virtualIdDifferentChild);
         assertThat(virtualIdDifferentChild).isNotEqualTo(virtualIdDifferentParent);
 
-        final AutofillId virtualIdDifferentSession = new AutofillId(new AutofillId(42), 1, 108);
+        final AutofillId virtualIdDifferentSession = new AutofillId(new AutofillId(42), 1L, 108);
         assertThat(virtualIdDifferentSession).isNotEqualTo(virtualId);
         assertThat(virtualId).isNotEqualTo(virtualIdDifferentSession);
         assertThat(virtualIdDifferentSession).isNotEqualTo(realId);
         assertThat(realId).isNotEqualTo(virtualIdDifferentSession);
 
-        final AutofillId sameVirtualIdDifferentSession = new AutofillId(new AutofillId(42), 1, 108);
+        final AutofillId sameVirtualIdDifferentSession =
+                new AutofillId(new AutofillId(42), 1L, 108);
         assertThat(sameVirtualIdDifferentSession).isEqualTo(virtualIdDifferentSession);
         assertThat(virtualIdDifferentSession).isEqualTo(sameVirtualIdDifferentSession);
         assertThat(sameVirtualIdDifferentSession.hashCode())

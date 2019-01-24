@@ -352,6 +352,10 @@ package android.app.usage {
     method public boolean isReservedSupported(@NonNull java.util.UUID);
   }
 
+  public final class UsageStatsManager {
+    method public void forceUsageSourceSettingRead();
+  }
+
 }
 
 package android.bluetooth {
@@ -770,6 +774,11 @@ package android.media.audiofx {
     method public void setParameterListener(android.media.audiofx.AudioEffect.OnParameterChangeListener);
     method public static byte[] shortToByteArray(short);
     field public static final java.util.UUID EFFECT_TYPE_NULL;
+  }
+
+  public static class AudioEffect.Descriptor {
+    ctor public AudioEffect.Descriptor(android.os.Parcel);
+    method public void writeToParcel(android.os.Parcel);
   }
 
   public static interface AudioEffect.OnParameterChangeListener {
@@ -1679,10 +1688,7 @@ package android.service.autofill.augmented {
     method public int getTaskId();
   }
 
-  public final class FillResponse implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.autofill.augmented.FillResponse> CREATOR;
+  public final class FillResponse {
   }
 
   public static final class FillResponse.Builder {
@@ -1696,7 +1702,6 @@ package android.service.autofill.augmented {
     ctor public FillWindow();
     method public void destroy();
     method public boolean update(@NonNull android.service.autofill.augmented.PresentationParams.Area, @NonNull android.view.View, long);
-    field public static final long FLAG_METADATA_ADDRESS = 1L; // 0x1L
   }
 
   public abstract class PresentationParams {
@@ -2268,6 +2273,10 @@ package android.view {
     method public static int getLongPressTooltipHideTimeout();
   }
 
+  public class ViewDebug {
+    method @Nullable public static AutoCloseable startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.function.Function<android.graphics.Picture,java.lang.Boolean>);
+  }
+
   public interface WindowManager extends android.view.ViewManager {
     method public default void setShouldShowIme(int, boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
@@ -2328,6 +2337,12 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
+    method @NonNull public java.util.Set<android.content.ComponentName> getAugmentedAutofillDisabledActivities();
+    method @NonNull public java.util.Set<java.lang.String> getAugmentedAutofillDisabledPackages();
+    method public void setActivityAugmentedAutofillEnabled(@NonNull android.content.ComponentName, boolean);
+    method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method public void setPackageAugmentedAutofillEnabled(@NonNull String, boolean);
+    field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
   }
 

@@ -22,7 +22,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -58,8 +57,7 @@ public class InputMethodManagerServiceTests {
         // Make sure that there is a short-circuit for DEFAULT_DISPLAY.
         assertEquals(DEFAULT_DISPLAY,
                 InputMethodManagerService.computeImeDisplayIdForTarget(
-                        DEFAULT_DISPLAY, false /* isVrImeStarted */,
-                        sMustNotBeCalledChecker));
+                        DEFAULT_DISPLAY, sMustNotBeCalledChecker));
     }
 
     @Test
@@ -67,17 +65,7 @@ public class InputMethodManagerServiceTests {
         // Make sure that there is a short-circuit for INVALID_DISPLAY.
         assertEquals(DEFAULT_DISPLAY,
                 InputMethodManagerService.computeImeDisplayIdForTarget(
-                        INVALID_DISPLAY, false /* isVrImeStarted */,
-                        sMustNotBeCalledChecker));
-    }
-
-    @Test
-    public void testComputeImeDisplayId_VrIme() {
-        // Make sure that there is a short-circuit for VR IME.
-        assertEquals(DEFAULT_DISPLAY,
-                InputMethodManagerService.computeImeDisplayIdForTarget(
-                        SYSTEM_DECORATION_SUPPORT_DISPLAY_ID, true /* isVrImeStarted */,
-                        sMustNotBeCalledChecker));
+                        INVALID_DISPLAY, sMustNotBeCalledChecker));
     }
 
     @Test
@@ -86,8 +74,7 @@ public class InputMethodManagerServiceTests {
         // Make sure IME displayId is DEFAULT_DISPLAY.
         assertEquals(DEFAULT_DISPLAY,
                 InputMethodManagerService.computeImeDisplayIdForTarget(
-                        NO_SYSTEM_DECORATION_SUPPORT_DISPLAY_ID, false /* isVrImeStarted */,
-                        sChecker));
+                        NO_SYSTEM_DECORATION_SUPPORT_DISPLAY_ID, sChecker));
     }
 
     @Test
@@ -96,7 +83,6 @@ public class InputMethodManagerServiceTests {
         // Make sure IME displayId is the same display.
         assertEquals(SYSTEM_DECORATION_SUPPORT_DISPLAY_ID,
                 InputMethodManagerService.computeImeDisplayIdForTarget(
-                        SYSTEM_DECORATION_SUPPORT_DISPLAY_ID, false /* isVrImeStarted */,
-                        sChecker));
+                        SYSTEM_DECORATION_SUPPORT_DISPLAY_ID, sChecker));
     }
 }

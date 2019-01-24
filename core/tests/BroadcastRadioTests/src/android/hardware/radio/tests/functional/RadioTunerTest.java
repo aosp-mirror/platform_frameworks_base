@@ -18,13 +18,13 @@ package android.hardware.radio.tests.functional;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
@@ -119,10 +119,9 @@ public class RadioTunerTest {
     }
 
     private void resetCallback() {
-        verify(mCallback, atLeast(0)).onMetadataChanged(any());
-        verify(mCallback, atLeast(0)).onProgramInfoChanged(any());
-        verify(mCallback, atLeast(0)).onProgramListChanged();
-        verifyNoMoreInteractions(mCallback);
+        verify(mCallback, never()).onError(anyInt());
+        verify(mCallback, never()).onTuneFailed(anyInt(), any());
+        verify(mCallback, never()).onControlChanged(anyBoolean());
         Mockito.reset(mCallback);
     }
 

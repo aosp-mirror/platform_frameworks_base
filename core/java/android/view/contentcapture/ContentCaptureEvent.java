@@ -15,6 +15,8 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -267,8 +269,7 @@ public final class ContentCaptureEvent implements Parcelable {
             pw.print(", parentSessionId="); pw.print(mParentSessionId);
         }
         if (mText != null) {
-            // Cannot print content because could have PII
-            pw.print(", text="); pw.print(mText.length()); pw.print("_chars");
+            pw.print(", text="); pw.println(getSanitizedString(mText));
         }
     }
 
@@ -292,6 +293,9 @@ public final class ContentCaptureEvent implements Parcelable {
                 string.append(", class=").append(className);
             }
             string.append(", id=").append(mNode.getAutofillId());
+        }
+        if (mText != null) {
+            string.append(", text=").append(getSanitizedString(mText));
         }
         return string.append(']').toString();
     }

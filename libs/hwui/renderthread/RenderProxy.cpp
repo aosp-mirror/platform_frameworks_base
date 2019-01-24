@@ -21,6 +21,7 @@
 #include "Properties.h"
 #include "Readback.h"
 #include "Rect.h"
+#include "WebViewFunctorManager.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/VectorDrawableAtlas.h"
 #include "renderstate/RenderState.h"
@@ -30,7 +31,6 @@
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
-#include "WebViewFunctorManager.h"
 
 #include <ui/GraphicBuffer.h>
 
@@ -147,9 +147,7 @@ void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
 void RenderProxy::destroyFunctor(int functor) {
     ATRACE_CALL();
     RenderThread& thread = RenderThread::getInstance();
-    thread.queue().post([=]() {
-        WebViewFunctorManager::instance().destroyFunctor(functor);
-    });
+    thread.queue().post([=]() { WebViewFunctorManager::instance().destroyFunctor(functor); });
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {
@@ -164,9 +162,9 @@ void RenderProxy::buildLayer(RenderNode* node) {
 
 bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap) {
     auto& thread = RenderThread::getInstance();
-    return thread.queue().runSync(
-            [&]() -> bool { return thread.readback().copyLayerInto(layer, &bitmap)
-                                   == CopyResult::Success; });
+    return thread.queue().runSync([&]() -> bool {
+        return thread.readback().copyLayerInto(layer, &bitmap) == CopyResult::Success;
+    });
 }
 
 void RenderProxy::pushLayerUpdate(DeferredLayerUpdater* layer) {
@@ -204,9 +202,8 @@ void RenderProxy::fence() {
 }
 
 int RenderProxy::maxTextureSize() {
-    static int maxTextureSize = RenderThread::getInstance().queue().runSync([]() {
-        return DeviceInfo::get()->maxTextureSize();
-    });
+    static int maxTextureSize = RenderThread::getInstance().queue().runSync(
+            []() { return DeviceInfo::get()->maxTextureSize(); });
     return maxTextureSize;
 }
 
@@ -244,8 +241,10 @@ uint32_t RenderProxy::frameTimePercentile(int percentile) {
 }
 
 void RenderProxy::dumpGraphicsMemory(int fd) {
-    auto& thread = RenderThread::getInstance();
-    thread.queue().runSync([&]() { thread.dumpGraphicsMemory(fd); });
+    if (RenderThread::hasInstance()) {
+        auto& thread = RenderThread::getInstance();
+        thread.queue().runSync([&]() { thread.dumpGraphicsMemory(fd); });
+    }
 }
 
 void RenderProxy::setProcessStatsBuffer(int fd) {
@@ -281,6 +280,12 @@ void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom)
     mDrawFrameTask.setContentDrawBounds(left, top, right, bottom);
 }
 
+void RenderProxy::setPictureCapturedCallback(
+        const std::function<void(sk_sp<SkPicture>&&)>& callback) {
+    mRenderThread.queue().post(
+            [ this, cb = callback ]() { mContext->setPictureCapturedCallback(cb); });
+}
+
 void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
@@ -302,9 +307,7 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) 
 }
 
 void RenderProxy::setForceDark(bool enable) {
-    mRenderThread.queue().post([this, enable]() {
-        mContext->setForceDark(enable);
-    });
+    mRenderThread.queue().post([this, enable]() { mContext->setForceDark(enable); });
 }
 
 int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top, int right, int bottom,
@@ -348,9 +351,8 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
         return (int)thread.readback().copyHWBitmapInto(hwBitmap, bitmap);
     } else {
-        return thread.queue().runSync([&]() -> int {
-            return (int)thread.readback().copyHWBitmapInto(hwBitmap, bitmap);
-        });
+        return thread.queue().runSync(
+                [&]() -> int { return (int)thread.readback().copyHWBitmapInto(hwBitmap, bitmap); });
     }
 }
 

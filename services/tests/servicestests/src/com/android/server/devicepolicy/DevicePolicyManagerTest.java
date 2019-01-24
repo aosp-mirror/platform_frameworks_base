@@ -206,6 +206,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_UID;
 
         setUpUserManager();
+
+        when(getServices().lockPatternUtils.hasSecureLockScreen()).thenReturn(true);
     }
 
     private TransferOwnershipMetadataManager getMockTransferMetadataManager() {
@@ -836,6 +838,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkIntent(intent),
                 MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID));
     }
+
     /**
      * Test for: {@link DevicePolicyManager#setDeviceOwner} DO on system user installs successfully.
      */
@@ -2618,6 +2621,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().lockPatternUtils
                 .isSeparateProfileChallengeEnabled(eq(PROFILE_USER))).thenReturn(false);
         dpmi.reportSeparateProfileChallengeChanged(PROFILE_USER);
+        when(getServices().lockPatternUtils.hasSecureLockScreen()).thenReturn(true);
 
         verifyScreenTimeoutCall(Long.MAX_VALUE, PROFILE_USER);
         verifyScreenTimeoutCall(10L , UserHandle.USER_SYSTEM);
@@ -4231,6 +4235,41 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         setActivePasswordState(passwordMetricsWithSymbols);
         assertTrue(dpm.isActivePasswordSufficient());
+    }
+
+    public void testIsActivePasswordSufficient_noLockScreen() throws Exception {
+        // If there is no lock screen, the password is considered empty no matter what, because
+        // it provides no security.
+        when(getServices().lockPatternUtils.hasSecureLockScreen()).thenReturn(false);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        mContext.packageName = admin1.getPackageName();
+        setupDeviceOwner();
+
+        // If no password requirements are set, isActivePasswordSufficient should succeed.
+        assertTrue(dpm.isActivePasswordSufficient());
+
+        // Now set some password quality requirements.
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+
+        reset(mContext.spiedContext);
+        final int userHandle = UserHandle.getUserId(mContext.binder.callingUid);
+        PasswordMetrics passwordMetricsNoSymbols = new PasswordMetrics(
+                DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 9,
+                8, 2,
+                6, 1,
+                0, 1);
+        // This should be ignored, as there is no lock screen.
+        dpm.setActivePasswordState(passwordMetricsNoSymbols, userHandle);
+        dpm.reportPasswordChanged(userHandle);
+
+        // No broadcast should be sent.
+        verify(mContext.spiedContext, times(0)).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED),
+                MockUtils.checkUserHandle(userHandle));
+
+        // The active (nonexistent) password doesn't comply with the requirements.
+        assertFalse(dpm.isActivePasswordSufficient());
     }
 
     private void setActivePasswordState(PasswordMetrics passwordMetrics)

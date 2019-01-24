@@ -8421,6 +8421,20 @@ public final class Settings {
         public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS =
                 "location_access_check_delay_millis";
 
+
+        /**
+         * Comma separated list of enabled overlay packages for all android.theme.customization.*
+         * categories. If there is no corresponding package included for a category, then all
+         * overlay packages in that category must be disabled.
+         * @hide
+         */
+        @SystemApi
+        public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES =
+                "theme_customization_overlay_packages";
+
+        private static final Validator THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR =
+                new SettingsValidators.PackageNameListValidator(",");
+
         /**
          * This are the settings to be backed up.
          *
@@ -8544,6 +8558,7 @@ public final class Settings {
             LOCK_SCREEN_WHEN_TRUST_LOST,
             SKIP_GESTURE,
             SILENCE_GESTURE,
+            THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
         };
 
         /**
@@ -8714,6 +8729,8 @@ public final class Settings {
             VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
             VALIDATORS.put(SKIP_GESTURE, SKIP_GESTURE_VALIDATOR);
             VALIDATORS.put(SILENCE_GESTURE, SILENCE_GESTURE_VALIDATOR);
+            VALIDATORS.put(THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                    THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR);
         }
 
         /**
@@ -9450,23 +9467,6 @@ public final class Settings {
          */
         public static final String HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED =
                 "hdmi_control_auto_device_off_enabled";
-
-        /**
-         * If <b>true</b>, enables out-of-the-box execution for priv apps.
-         * Default: false
-         * Values: 0 = false, 1 = true
-         *
-         * @hide
-         */
-        public static final String PRIV_APP_OOB_ENABLED = "priv_app_oob_enabled";
-
-        /**
-         * Comma separated list of privileged package names, which will be running out-of-box APK.
-         * Default: "ALL"
-         *
-         * @hide
-         */
-        public static final String PRIV_APP_OOB_LIST = "priv_app_oob_list";
 
         /**
          * The interval in milliseconds at which location requests will be throttled when they are
@@ -11506,6 +11506,20 @@ public final class Settings {
         public static final String DISPLAY_PANEL_LPM = "display_panel_lpm";
 
         /**
+         * App time limit usage source setting.
+         * This controls which app in a task will be considered the source of usage when
+         * calculating app usage time limits.
+         *
+         * 1 -> task root app
+         * 2 -> current app
+         * Any other value defaults to task root app.
+         *
+         * Need to reboot the device for this setting to take effect.
+         * @hide
+         */
+        public static final String APP_TIME_LIMIT_USAGE_SOURCE = "app_time_limit_usage_source";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>
@@ -11865,6 +11879,28 @@ public final class Settings {
          * @hide
          */
         public static final String KEEP_PROFILE_IN_BACKGROUND = "keep_profile_in_background";
+
+        /**
+         * The default time in ms within which a subsequent connection from an always allowed system
+         * is allowed to reconnect without user interaction.
+         *
+         * @hide
+         */
+        public static final long DEFAULT_ADB_ALLOWED_CONNECTION_TIME = 604800000;
+
+        /**
+         * When the user first connects their device to a system a prompt is displayed to allow
+         * the adb connection with an option to 'Always allow' connections from this system. If the
+         * user selects this always allow option then the connection time is stored for the system.
+         * This setting is the time in ms within which a subsequent connection from an always
+         * allowed system is allowed to reconnect without user interaction.
+         *
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String ADB_ALLOWED_CONNECTION_TIME =
+                "adb_allowed_connection_time";
 
         /**
          * Get the key that retrieves a bluetooth headset's priority.

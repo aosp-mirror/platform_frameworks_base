@@ -30,6 +30,11 @@ import android.os.Parcelable;
 public final class RollbackInfo implements Parcelable {
 
     /**
+     * A unique identifier for the rollback.
+     */
+    private final int mRollbackId;
+
+    /**
      * The package that needs to be rolled back.
      */
     public final PackageRollbackInfo targetPackage;
@@ -40,12 +45,21 @@ public final class RollbackInfo implements Parcelable {
     // staged installs is supported.
 
     /** @hide */
-    public RollbackInfo(PackageRollbackInfo targetPackage) {
+    public RollbackInfo(int rollbackId, PackageRollbackInfo targetPackage) {
+        this.mRollbackId = rollbackId;
         this.targetPackage = targetPackage;
     }
 
     private RollbackInfo(Parcel in) {
-        this.targetPackage = PackageRollbackInfo.CREATOR.createFromParcel(in);
+        mRollbackId = in.readInt();
+        targetPackage = PackageRollbackInfo.CREATOR.createFromParcel(in);
+    }
+
+    /**
+     * Returns a unique identifier for this rollback.
+     */
+    public int getRollbackId() {
+        return mRollbackId;
     }
 
     @Override
@@ -55,6 +69,7 @@ public final class RollbackInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mRollbackId);
         targetPackage.writeToParcel(out, flags);
     }
 

@@ -267,6 +267,22 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs, con
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const SpeechDspStat& speechDspStat) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::SPEECH_DSP_STAT_REPORTED;
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
+                                 Value(speechDspStat.totalUptimeMillis)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)),
+                                 Value(speechDspStat.totalDowntimeMillis)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
+                                 Value(speechDspStat.totalCrashCount)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)),
+                                 Value(speechDspStat.totalRecoverCount)));
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                    const BatteryCausedShutdown& batteryCausedShutdown) {
     mLogdTimestampNs = wallClockTimestampNs;
     mElapsedTimestampNs = elapsedTimestampNs;

@@ -24,7 +24,7 @@ java_library {
         ":services-networkstack-shared-srcs",
     ],
     static_libs: [
-        "dhcp-packet-lib",
+        "services-netlink-lib",
     ]
 }
 

@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -304,8 +305,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         final int count =
                 mEntryManager.getNotificationData().getActiveNotifications().size();
         final int rank = mEntryManager.getNotificationData().getRank(notificationKey);
+        NotificationVisibility.NotificationLocation location =
+                NotificationLogger.getNotificationLocation(
+                        mEntryManager.getNotificationData().get(notificationKey));
         final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
-                rank, count, true);
+                rank, count, true, location);
         try {
             mBarService.onNotificationClick(notificationKey, nv);
         } catch (RemoteException ex) {

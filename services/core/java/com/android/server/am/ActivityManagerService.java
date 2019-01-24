@@ -64,6 +64,7 @@ import static android.os.Process.SHELL_UID;
 import static android.os.Process.SIGNAL_USR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
+import static android.os.Process.ZYGOTE_PROCESS;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
@@ -75,7 +76,6 @@ import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
-import static android.os.Process.zygoteProcess;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
@@ -2162,7 +2162,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ? Collections.emptyList()
                             : Arrays.asList(exemptions.split(","));
                 }
-                if (!zygoteProcess.setApiBlacklistExemptions(mExemptions)) {
+                if (!ZYGOTE_PROCESS.setApiBlacklistExemptions(mExemptions)) {
                   Slog.e(TAG, "Failed to set API blacklist exemptions!");
                   // leave mExemptionsStr as is, so we don't try to send the same list again.
                   mExemptions = Collections.emptyList();
@@ -2175,7 +2175,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
                 mLogSampleRate = logSampleRate;
-                zygoteProcess.setHiddenApiAccessLogSampleRate(mLogSampleRate);
+                ZYGOTE_PROCESS.setHiddenApiAccessLogSampleRate(mLogSampleRate);
             }
             mPolicy = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY);
         }
@@ -2864,16 +2864,18 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param userId
      * @param event
      * @param appToken ActivityRecord's appToken.
+     * @param taskRoot TaskRecord's root
      */
     public void updateActivityUsageStats(ComponentName activity, int userId, int event,
-            IBinder appToken) {
+            IBinder appToken, ComponentName taskRoot) {
         if (DEBUG_SWITCH) {
             Slog.d(TAG_SWITCH, "updateActivityUsageStats: comp="
                     + activity + " hash=" + appToken.hashCode() + " event=" + event);
         }
         synchronized (this) {
             if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode());
+                mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode(),
+                        taskRoot);
             }
         }
     }
@@ -2911,7 +2913,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(service, userId,
                         started ? UsageEvents.Event.FOREGROUND_SERVICE_START
-                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP, 0);
+                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP, 0, null);
             }
         }
     }
@@ -4880,7 +4882,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         ArraySet<String> completedIsas = new ArraySet<String>();
         for (String abi : Build.SUPPORTED_ABIS) {
-            zygoteProcess.establishZygoteConnectionForAbi(abi);
+            ZYGOTE_PROCESS.establishZygoteConnectionForAbi(abi);
             final String instructionSet = VMRuntime.getInstructionSet(abi);
             if (!completedIsas.contains(instructionSet)) {
                 try {
@@ -17521,10 +17523,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void updateActivityUsageStats(ComponentName activity, int userId, int event,
-                IBinder appToken) {
+                IBinder appToken, ComponentName taskRoot) {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.updateActivityUsageStats(activity, userId, event,
-                        appToken);
+                        appToken, taskRoot);
             }
         }
 

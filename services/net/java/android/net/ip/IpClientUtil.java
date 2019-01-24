@@ -16,8 +16,15 @@
 
 package android.net.ip;
 
+import static android.net.shared.IpConfigurationParcelableUtil.fromStableParcelable;
+import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
+
 import android.content.Context;
+import android.net.DhcpResultsParcelable;
 import android.net.LinkProperties;
+import android.net.LinkPropertiesParcelable;
+import android.net.NetworkStack;
+import android.net.ip.IIpClientCallbacks;
 import android.os.ConditionVariable;
 
 import java.io.FileDescriptor;
@@ -31,8 +38,8 @@ import java.io.PrintWriter;
  * @hide
  */
 public class IpClientUtil {
-    // TODO: remove once IpClient dumps are moved to NetworkStack and callers don't need this arg
-    public static final String DUMP_ARG = IpClient.DUMP_ARG;
+    // TODO: remove with its callers
+    public static final String DUMP_ARG = "ipclient";
 
     /**
      * Subclass of {@link IpClientCallbacks} allowing clients to block until provisioning is
@@ -69,24 +76,129 @@ public class IpClientUtil {
      *
      * <p>This is a convenience method to allow clients to use {@link IpClientCallbacks} instead of
      * {@link IIpClientCallbacks}.
+     * @see {@link NetworkStack#makeIpClient(String, IIpClientCallbacks)}
      */
     public static void makeIpClient(Context context, String ifName, IpClientCallbacks callback) {
-        // TODO: request IpClient asynchronously from NetworkStack.
-        final IpClient ipClient = new IpClient(context, ifName, callback);
-        callback.onIpClientCreated(ipClient.makeConnector());
+        context.getSystemService(NetworkStack.class)
+                .makeIpClient(ifName, new IpClientCallbacksProxy(callback));
+    }
+
+    /**
+     * Create a new IpClient.
+     *
+     * <p>This is a convenience method to allow clients to use {@link IpClientCallbacksProxy}
+     * instead of {@link IIpClientCallbacks}.
+     * @see {@link NetworkStack#makeIpClient(String, IIpClientCallbacks)}
+     */
+    public static void makeIpClient(
+            Context context, String ifName, IpClientCallbacksProxy callback) {
+        context.getSystemService(NetworkStack.class)
+                .makeIpClient(ifName, callback);
+    }
+
+    /**
+     * Wrapper to relay calls from {@link IIpClientCallbacks} to {@link IpClientCallbacks}.
+     */
+    public static class IpClientCallbacksProxy extends IIpClientCallbacks.Stub {
+        protected final IpClientCallbacks mCb;
+
+        /**
+         * Create a new IpClientCallbacksProxy.
+         */
+        public IpClientCallbacksProxy(IpClientCallbacks cb) {
+            mCb = cb;
+        }
+
+        @Override
+        public void onIpClientCreated(IIpClient ipClient) {
+            mCb.onIpClientCreated(ipClient);
+        }
+
+        @Override
+        public void onPreDhcpAction() {
+            mCb.onPreDhcpAction();
+        }
+
+        @Override
+        public void onPostDhcpAction() {
+            mCb.onPostDhcpAction();
+        }
+
+        // This is purely advisory and not an indication of provisioning
+        // success or failure.  This is only here for callers that want to
+        // expose DHCPv4 results to other APIs (e.g., WifiInfo#setInetAddress).
+        // DHCPv4 or static IPv4 configuration failure or success can be
+        // determined by whether or not the passed-in DhcpResults object is
+        // null or not.
+        @Override
+        public void onNewDhcpResults(DhcpResultsParcelable dhcpResults) {
+            mCb.onNewDhcpResults(fromStableParcelable(dhcpResults));
+        }
+
+        @Override
+        public void onProvisioningSuccess(LinkPropertiesParcelable newLp) {
+            mCb.onProvisioningSuccess(fromStableParcelable(newLp));
+        }
+        @Override
+        public void onProvisioningFailure(LinkPropertiesParcelable newLp) {
+            mCb.onProvisioningFailure(fromStableParcelable(newLp));
+        }
+
+        // Invoked on LinkProperties changes.
+        @Override
+        public void onLinkPropertiesChange(LinkPropertiesParcelable newLp) {
+            mCb.onLinkPropertiesChange(fromStableParcelable(newLp));
+        }
+
+        // Called when the internal IpReachabilityMonitor (if enabled) has
+        // detected the loss of a critical number of required neighbors.
+        @Override
+        public void onReachabilityLost(String logMsg) {
+            mCb.onReachabilityLost(logMsg);
+        }
+
+        // Called when the IpClient state machine terminates.
+        @Override
+        public void onQuit() {
+            mCb.onQuit();
+        }
+
+        // Install an APF program to filter incoming packets.
+        @Override
+        public void installPacketFilter(byte[] filter) {
+            mCb.installPacketFilter(filter);
+        }
+
+        // Asynchronously read back the APF program & data buffer from the wifi driver.
+        // Due to Wifi HAL limitations, the current implementation only supports dumping the entire
+        // buffer. In response to this request, the driver returns the data buffer asynchronously
+        // by sending an IpClient#EVENT_READ_PACKET_FILTER_COMPLETE message.
+        @Override
+        public void startReadPacketFilter() {
+            mCb.startReadPacketFilter();
+        }
+
+        // If multicast filtering cannot be accomplished with APF, this function will be called to
+        // actuate multicast filtering using another means.
+        @Override
+        public void setFallbackMulticastFilter(boolean enabled) {
+            mCb.setFallbackMulticastFilter(enabled);
+        }
+
+        // Enabled/disable Neighbor Discover offload functionality. This is
+        // called, for example, whenever 464xlat is being started or stopped.
+        @Override
+        public void setNeighborDiscoveryOffload(boolean enable) {
+            mCb.setNeighborDiscoveryOffload(enable);
+        }
     }
 
     /**
      * Dump logs for the specified IpClient.
-     * TODO: remove logging from this method once IpClient logs are dumped in NetworkStack dumpsys,
-     * then remove callers and delete.
+     * TODO: remove callers and delete
      */
     public static void dumpIpClient(
             IIpClient connector, FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!(connector instanceof IpClient.IpClientConnector)) {
-            pw.println("Invalid connector");
-            return;
-        }
-        ((IpClient.IpClientConnector) connector).dumpIpClientLogs(fd, pw, args);
+        pw.println("IpClient logs have moved to dumpsys network_stack");
     }
 }

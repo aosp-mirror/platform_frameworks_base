@@ -54,6 +54,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -181,7 +182,11 @@ public class NotificationRemoteInputManager implements Dumpable {
             final int rank = mEntryManager.getNotificationData().getRank(key);
             final Notification.Action action =
                     statusBarNotification.getNotification().actions[actionIndex];
-            final NotificationVisibility nv = NotificationVisibility.obtain(key, rank, count, true);
+            NotificationVisibility.NotificationLocation location =
+                    NotificationLogger.getNotificationLocation(
+                            mEntryManager.getNotificationData().get(key));
+            final NotificationVisibility nv =
+                    NotificationVisibility.obtain(key, rank, count, true, location);
             try {
                 mBarService.onNotificationActionClick(key, buttonIndex, action, nv, false);
             } catch (RemoteException e) {

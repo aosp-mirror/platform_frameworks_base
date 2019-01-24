@@ -2944,6 +2944,8 @@
     </public-group>
 
     <public-group type="style" first-id="0x010302e2">
+        <!-- @hide @SystemApi -->
+        <public name="Theme.DeviceDefault.DocumentsUI" />
     </public-group>
 
     <public-group type="id" first-id="0x01020046">

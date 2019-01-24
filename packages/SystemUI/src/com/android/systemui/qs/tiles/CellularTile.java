@@ -188,7 +188,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
         } else if (mobileDataEnabled) {
             state.state = Tile.STATE_ACTIVE;
-            state.secondaryLabel = getMobileDataDescription(cb);
+            state.secondaryLabel = getMobileDataSubscriptionName(cb);
         } else {
             state.state = Tile.STATE_INACTIVE;
             state.secondaryLabel = r.getString(R.string.cell_data_off);
@@ -207,16 +207,16 @@ public class CellularTile extends QSTileImpl<SignalState> {
         state.contentDescription = state.label + ", " + contentDescriptionSuffix;
     }
 
-    private CharSequence getMobileDataDescription(CallbackInfo cb) {
-        if (cb.roaming && !TextUtils.isEmpty(cb.dataContentDescription)) {
+    private CharSequence getMobileDataSubscriptionName(CallbackInfo cb) {
+        if (cb.roaming && !TextUtils.isEmpty(cb.dataSubscriptionName)) {
             String roaming = mContext.getString(R.string.data_connection_roaming);
-            String dataDescription = cb.dataContentDescription;
+            String dataDescription = cb.dataSubscriptionName.toString();
             return mContext.getString(R.string.mobile_data_text_format, roaming, dataDescription);
         }
         if (cb.roaming) {
             return mContext.getString(R.string.data_connection_roaming);
         }
-        return cb.dataContentDescription;
+        return cb.dataSubscriptionName;
     }
 
     @Override
@@ -231,7 +231,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private static final class CallbackInfo {
         boolean airplaneModeEnabled;
-        String dataContentDescription;
+        CharSequence dataSubscriptionName;
         boolean activityIn;
         boolean activityOut;
         boolean noSim;
@@ -249,7 +249,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
                 // Not data sim, don't display.
                 return;
             }
-            mInfo.dataContentDescription = typeContentDescription;
+            mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
             mInfo.roaming = roaming;

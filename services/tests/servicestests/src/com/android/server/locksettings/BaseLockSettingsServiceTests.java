@@ -37,8 +37,8 @@ import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.os.storage.IStorageManager;
+import android.os.storage.StorageManager;
 import android.security.KeyStore;
 import android.test.AndroidTestCase;
 
@@ -46,6 +46,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.LocalServices;
+import com.android.server.wm.WindowManagerInternal;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -85,6 +86,8 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     KeyStore mKeyStore;
     MockSyntheticPasswordManager mSpManager;
     IAuthSecret mAuthSecretService;
+    WindowManagerInternal mMockWindowManager;
+    protected boolean mHasSecureLockScreen;
 
     @Override
     protected void setUp() throws Exception {
@@ -97,10 +100,13 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mActivityManager = mock(IActivityManager.class);
         mDevicePolicyManager = mock(DevicePolicyManager.class);
         mDevicePolicyManagerInternal = mock(DevicePolicyManagerInternal.class);
+        mMockWindowManager = mock(WindowManagerInternal.class);
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(DevicePolicyManagerInternal.class, mDevicePolicyManagerInternal);
+        LocalServices.addService(WindowManagerInternal.class, mMockWindowManager);
 
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
                 mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class),
@@ -114,10 +120,16 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
             storageDir.mkdirs();
         }
 
+        mHasSecureLockScreen = true;
         mLockPatternUtils = new LockPatternUtils(mContext) {
             @Override
             public ILockSettings getLockSettings() {
                 return mService;
+            }
+
+            @Override
+            public boolean hasSecureLockScreen() {
+                return mHasSecureLockScreen;
             }
         };
         mSpManager = new MockSyntheticPasswordManager(mContext, mStorage, mGateKeeperService,

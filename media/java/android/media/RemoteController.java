@@ -632,8 +632,8 @@ import java.util.List;
             l = this.mOnClientUpdateListener;
         }
         if (l != null) {
-            int playstate = state == null ? RemoteControlClient.PLAYSTATE_NONE : PlaybackState
-                    .getRccStateFromState(state.getState());
+            int playstate = state == null ? RemoteControlClient.PLAYSTATE_NONE
+                    : RemoteControlClient.getRccStateFromState(state.getState());
             if (state == null || state.getPosition() == PlaybackState.PLAYBACK_POSITION_UNKNOWN) {
                 l.onClientPlaybackStateUpdate(playstate);
             } else {
@@ -642,7 +642,7 @@ import java.util.List;
             }
             if (state != null) {
                 l.onClientTransportControlUpdate(
-                        PlaybackState.getRccControlFlagsFromActions(state.getActions()));
+                        RemoteControlClient.getRccControlFlagsFromActions(state.getActions()));
             }
         }
     }

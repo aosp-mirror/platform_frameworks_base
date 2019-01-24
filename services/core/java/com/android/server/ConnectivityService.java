@@ -100,7 +100,7 @@ import android.net.netlink.InetDiagMessage;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
-import android.net.util.NetdService;
+import android.net.shared.NetdService;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -2640,8 +2640,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private boolean networkRequiresValidation(NetworkAgentInfo nai) {
-        return isValidationRequired(
-                mDefaultRequest.networkCapabilities, nai.networkCapabilities);
+        return isValidationRequired(nai.networkCapabilities);
     }
 
     private void handleFreshlyValidatedNetwork(NetworkAgentInfo nai) {
@@ -3182,6 +3181,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public boolean avoidBadWifi() {
         return mMultinetworkPolicyTracker.getAvoidBadWifi();
     }
+
+    @Override
+    public boolean getAvoidBadWifi() {
+        if (!checkNetworkStackPermission()) {
+            throw new SecurityException("avoidBadWifi requires NETWORK_STACK permission");
+        }
+        return avoidBadWifi();
+    }
+
 
     private void rematchForAvoidBadWifiUpdate() {
         rematchAllNetworksAndRequests(null, 0);

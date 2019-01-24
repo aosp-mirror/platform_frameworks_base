@@ -310,6 +310,15 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="PictureCaptureDemo"
+            android:label="Debug/Picture Capture">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
         
         <activity
                 android:name="SmallCircleActivity"

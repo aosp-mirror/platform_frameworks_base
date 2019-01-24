@@ -42,6 +42,7 @@ import com.android.internal.util.Preconditions;
 import java.io.CharArrayWriter;
 import java.io.File;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -252,6 +253,10 @@ public class VolumeInfo implements Parcelable {
     @UnsupportedAppUsage
     public @Nullable String getFsUuid() {
         return fsUuid;
+    }
+
+    public @Nullable String getNormalizedFsUuid() {
+        return fsUuid != null ? fsUuid.toLowerCase(Locale.US) : null;
     }
 
     @UnsupportedAppUsage

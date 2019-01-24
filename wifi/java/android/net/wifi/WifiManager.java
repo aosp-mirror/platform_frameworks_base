@@ -2084,6 +2084,8 @@ public class WifiManager {
     public static final int WIFI_FEATURE_LOW_LATENCY      = 0x40000000; // Low Latency modes
     /** @hide */
     public static final int WIFI_FEATURE_DPP              = 0x80000000; // DPP (Easy-Connect)
+    /** @hide */
+    public static final long WIFI_FEATURE_P2P_RAND_MAC    = 0x100000000L; // Random P2P MAC
 
     private long getSupportedFeatures() {
         try {

@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -67,6 +68,7 @@ public class LockPatternUtilsTest {
         // TODO(b/63758238): stop spying the class under test
         mLockPatternUtils = spy(new LockPatternUtils(context));
         when(mLockPatternUtils.getLockSettings()).thenReturn(ils);
+        doReturn(true).when(mLockPatternUtils).hasSecureLockScreen();
 
         final UserInfo userInfo = Mockito.mock(UserInfo.class);
         when(userInfo.isDemo()).thenReturn(isDemoUser);

@@ -27,6 +27,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -77,6 +78,7 @@ public class LockSettingsShellCommandTest {
         final Context context = InstrumentationRegistry.getTargetContext();
         mUserId = ActivityManager.getCurrentUser();
         mCommand = new LockSettingsShellCommand(mLockPatternUtils);
+        when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(true);
     }
 
     @Test
@@ -103,6 +105,16 @@ public class LockSettingsShellCommandTest {
     }
 
     @Test
+    public void testChangePin_noLockScreen() throws Exception {
+        when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(false);
+        assertEquals(-1, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pin", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+        verify(mLockPatternUtils).hasSecureLockScreen();
+        verifyNoMoreInteractions(mLockPatternUtils);
+    }
+
+    @Test
     public void testChangePassword() throws Exception {
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
@@ -115,6 +127,16 @@ public class LockSettingsShellCommandTest {
     }
 
     @Test
+    public void testChangePassword_noLockScreen() throws Exception {
+        when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(false);
+        assertEquals(-1,  mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-password", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+        verify(mLockPatternUtils).hasSecureLockScreen();
+        verifyNoMoreInteractions(mLockPatternUtils);
+    }
+
+    @Test
     public void testChangePattern() throws Exception {
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(false);
@@ -123,6 +145,16 @@ public class LockSettingsShellCommandTest {
                 new String[] { "set-pattern", "--old", "1234", "4321" },
                 mShellCallback, mResultReceiver));
         verify(mLockPatternUtils).saveLockPattern(stringToPattern("4321"), "1234", mUserId);
+    }
+
+    @Test
+    public void testChangePattern_noLockScreen() throws Exception {
+        when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(false);
+        assertEquals(-1, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pattern", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+        verify(mLockPatternUtils).hasSecureLockScreen();
+        verifyNoMoreInteractions(mLockPatternUtils);
     }
 
     @Test

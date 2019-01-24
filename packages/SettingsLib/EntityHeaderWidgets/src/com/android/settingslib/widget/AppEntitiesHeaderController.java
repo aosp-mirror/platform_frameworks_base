@@ -77,9 +77,11 @@ public class AppEntitiesHeaderController {
 
     private final Context mContext;
     private final TextView mHeaderTitleView;
+    private final TextView mHeaderEmptyView;
     private final Button mHeaderDetailsView;
 
     private final AppEntityInfo[] mAppEntityInfos;
+    private final View mAppViewsContainer;
     private final View[] mAppEntityViews;
     private final ImageView[] mAppIconViews;
     private final TextView[] mAppTitleViews;
@@ -87,6 +89,7 @@ public class AppEntitiesHeaderController {
 
     private int mHeaderTitleRes;
     private int mHeaderDetailsRes;
+    private int mHeaderEmptyRes;
     private View.OnClickListener mDetailsOnClickListener;
 
     /**
@@ -104,6 +107,8 @@ public class AppEntitiesHeaderController {
         mContext = context;
         mHeaderTitleView = appEntitiesHeaderView.findViewById(R.id.header_title);
         mHeaderDetailsView = appEntitiesHeaderView.findViewById(R.id.header_details);
+        mHeaderEmptyView = appEntitiesHeaderView.findViewById(R.id.empty_view);
+        mAppViewsContainer = appEntitiesHeaderView.findViewById(R.id.app_views_container);
 
         mAppEntityInfos = new AppEntityInfo[MAXIMUM_APPS];
         mAppIconViews = new ImageView[MAXIMUM_APPS];
@@ -152,6 +157,14 @@ public class AppEntitiesHeaderController {
     }
 
     /**
+     * Sets the string resource id for the empty text.
+     */
+    public AppEntitiesHeaderController setHeaderEmptyRes(@StringRes int emptyRes) {
+        mHeaderEmptyRes = emptyRes;
+        return this;
+    }
+
+    /**
      * Set an app entity at a specified position view.
      *
      * @param index         the index at which the specified view is to be inserted
@@ -192,6 +205,12 @@ public class AppEntitiesHeaderController {
      */
     public void apply() {
         bindHeaderTitleView();
+
+        if (isAppEntityInfosEmpty()) {
+            setEmptyViewVisible(true);
+            return;
+        }
+        setEmptyViewVisible(false);
         bindHeaderDetailsView();
 
         // Rebind all apps view
@@ -244,5 +263,23 @@ public class AppEntitiesHeaderController {
                     TextUtils.isEmpty(summary) ? View.INVISIBLE : View.VISIBLE);
             mAppSummaryViews[index].setText(summary);
         }
+    }
+
+    private void setEmptyViewVisible(boolean visible) {
+        if (mHeaderEmptyRes != 0) {
+            mHeaderEmptyView.setText(mHeaderEmptyRes);
+        }
+        mHeaderEmptyView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mHeaderDetailsView.setVisibility(visible ? View.GONE : View.VISIBLE);
+        mAppViewsContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
+    }
+
+    private boolean isAppEntityInfosEmpty() {
+        for (AppEntityInfo info : mAppEntityInfos) {
+            if (info != null) {
+                return false;
+            }
+        }
+        return true;
     }
 }

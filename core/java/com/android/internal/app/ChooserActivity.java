@@ -103,7 +103,9 @@ public class ChooserActivity extends ResolverActivity {
      * binding to every ChooserTargetService implementation.
      */
     // TODO(b/121287573): Replace with a system flag (setprop?)
-    private static final boolean USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS = false;
+    private static final boolean USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS = true;
+    private static final boolean USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS = true;
+
     // TODO(b/121287224): Re-evaluate this limit
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
@@ -136,6 +138,7 @@ public class ChooserActivity extends ResolverActivity {
     private static final int CHOOSER_TARGET_SERVICE_RESULT = 1;
     private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT = 2;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 3;
+    private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
 
     private final Handler mChooserHandler = new Handler() {
         @Override
@@ -182,6 +185,9 @@ public class ChooserActivity extends ResolverActivity {
                         mChooserListAdapter.addServiceResults(resultInfo.originalTarget,
                                 resultInfo.resultTargets);
                     }
+                    break;
+
+                case SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED:
                     sendVoiceChoicesIfNeeded();
                     mChooserListAdapter.setShowServiceTargets(true);
                     break;
@@ -630,6 +636,7 @@ public class ChooserActivity extends ResolverActivity {
             // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
             // for direct share targets. After ShareSheet is refactored we should use the
             // ShareShortcutInfos directly.
+            boolean resultMessageSent = false;
             for (int i = 0; i < driList.size(); i++) {
                 List<ChooserTarget> chooserTargets = new ArrayList<>();
                 for (int j = 0; j < resultList.size(); j++) {
@@ -645,6 +652,13 @@ public class ChooserActivity extends ResolverActivity {
                 final Message msg = Message.obtain();
                 msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
                 msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null);
+                mChooserHandler.sendMessage(msg);
+                resultMessageSent = true;
+            }
+
+            if (resultMessageSent) {
+                final Message msg = Message.obtain();
+                msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
                 mChooserHandler.sendMessage(msg);
             }
         });
@@ -1178,13 +1192,17 @@ public class ChooserActivity extends ResolverActivity {
                     mTargetsNeedPruning = true;
                 }
             }
+
             if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
                 if (DEBUG) {
                     Log.d(TAG, "querying direct share targets from ShortcutManager");
                 }
                 queryDirectShareTargets(this);
-            } else {
-                if (DEBUG) Log.d(TAG, "List built querying services");
+            }
+            if (USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS) {
+                if (DEBUG) {
+                    Log.d(TAG, "List built querying services");
+                }
                 queryTargetServices(this);
             }
         }

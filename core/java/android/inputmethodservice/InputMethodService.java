@@ -2087,7 +2087,14 @@ public class InputMethodService extends AbstractInputMethodService {
      * protocol, so applications with custom text editing written before this method appeared will
      * not call to inform the IME of this interaction.
      * @param focusChanged true if the user changed the focused view by this click.
+     * @see InputMethodManager#viewClicked(View)
+     * @deprecated The method may not be called for composite {@link View} that works as a giant
+     *             "Canvas", which can host its own UI hierarchy and sub focus state.
+     *             {@link android.webkit.WebView} is a good example. Application / IME developers
+     *             should not rely on this method. If your goal is just being notified when an
+     *             on-going input is interrupted, simply monitor {@link #onFinishInput()}.
      */
+    @Deprecated
     public void onViewClicked(boolean focusChanged) {
         // Intentionally empty
     }

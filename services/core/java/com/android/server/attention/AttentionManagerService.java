@@ -47,6 +47,7 @@ import android.service.attention.IAttentionService;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -176,11 +177,16 @@ public class AttentionManagerService extends SystemService {
                             userState.mAttentionCheckCache = new AttentionCheckCache(
                                     SystemClock.uptimeMillis(), result,
                                     timestamp);
+
+                            StatsLog.write(StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
+                                    result);
                         }
 
                         @Override
                         public void onFailure(int requestCode, int error) {
                             callback.onFailure(requestCode, error);
+                            StatsLog.write(StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
+                                    error);
                         }
 
                         @Override

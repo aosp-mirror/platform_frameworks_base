@@ -164,7 +164,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         int N = pkgs.size();
         for (int a = N-1; a >= 0; a--) {
             PackageInfo pkg = pkgs.get(a);
-            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo, pm)) {
+            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo, userId)) {
                 pkgs.remove(a);
             }
         }

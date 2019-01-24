@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
@@ -181,6 +182,8 @@ public abstract class BackupAgent extends ContextWrapper {
 
     Handler mHandler = null;
 
+    @Nullable private UserHandle mUser;
+
     Handler getHandler() {
         if (mHandler == null) {
             mHandler = new Handler(Looper.getMainLooper());
@@ -232,6 +235,8 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public void onCreate(UserHandle user) {
         onCreate();
+
+        mUser = user;
     }
 
     /**
@@ -526,6 +531,10 @@ public abstract class BackupAgent extends ContextWrapper {
      *    this application to store as a backup.
      */
     public void onQuotaExceeded(long backupDataBytes, long quotaBytes) {
+    }
+
+    private int getBackupUserId() {
+        return mUser == null ? super.getUserId() : mUser.getIdentifier();
     }
 
     /**
@@ -1033,7 +1042,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -1082,7 +1091,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -1112,7 +1121,8 @@ public abstract class BackupAgent extends ContextWrapper {
             } finally {
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, measureOutput.getSize());
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token,
+                            measureOutput.getSize());
                 } catch (RemoteException e) {
                     // timeout, so we're safe
                 }
@@ -1137,7 +1147,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -1162,7 +1172,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }

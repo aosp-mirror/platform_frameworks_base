@@ -24,7 +24,7 @@ import android.net.RouteInfo;
  *
  * @hide
  */
-interface INetworkManagementEventObserver {
+oneway interface INetworkManagementEventObserver {
     /**
      * Interface configuration status has changed.
      *

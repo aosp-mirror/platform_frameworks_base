@@ -24,6 +24,8 @@
 #include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
 
+#include <bionic_malloc.h>
+
 #include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
@@ -64,6 +66,11 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     ALOGE_IF(err != OK, "Cannot register %s: %d", ISchedulingPolicyService::descriptor, err);
 }
 
+static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
+                                                                     jobject /* clazz */) {
+   android_mallopt(M_INIT_ZYGOTE_CHILD_PROFILING, nullptr, 0);
+}
+
 /*
  * JNI registration.
  */
@@ -71,6 +78,8 @@ static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "startSensorService", "()V", (void*) android_server_SystemServer_startSensorService },
     { "startHidlServices", "()V", (void*) android_server_SystemServer_startHidlServices },
+    { "initZygoteChildHeapProfiling", "()V",
+      (void*) android_server_SystemServer_initZygoteChildHeapProfiling },
 };
 
 int register_android_server_SystemServer(JNIEnv* env)

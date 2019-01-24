@@ -16,11 +16,15 @@
 
 package com.android.server.pm.dex;
 
+import static com.android.server.pm.dex.PackageDynamicCodeLoading.FILE_TYPE_DEX;
+import static com.android.server.pm.dex.PackageDynamicCodeLoading.FILE_TYPE_NATIVE;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.FileUtils;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ByteStringUtils;
 import android.util.EventLog;
@@ -35,20 +39,23 @@ import com.android.server.pm.dex.PackageDynamicCodeLoading.DynamicCodeFile;
 import com.android.server.pm.dex.PackageDynamicCodeLoading.PackageDynamicCode;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * This class is responsible for logging data about secondary dex files.
- * The data logged includes hashes of the name and content of each file.
+ * This class is responsible for logging data about secondary dex files and, despite the name,
+ * native code executed from an app's private directory. The data logged includes hashes of the
+ * name and content of each file.
  */
 public class DexLogger {
     private static final String TAG = "DexLogger";
 
-    // Event log tag & subtag used for SafetyNet logging of dynamic
-    // code loading (DCL) - see b/63927552.
+    // Event log tag & subtags used for SafetyNet logging of dynamic code loading (DCL) -
+    // see b/63927552.
     private static final int SNET_TAG = 0x534e4554;
-    private static final String DCL_SUBTAG = "dcl";
+    private static final String DCL_DEX_SUBTAG = "dcl";
+    private static final String DCL_NATIVE_SUBTAG = "dcln";
 
     private final IPackageManager mPackageManager;
     private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
@@ -114,12 +121,11 @@ public class DexLogger {
             }
 
             int storageFlags;
-            if (appInfo.deviceProtectedDataDir != null
-                    && FileUtils.contains(appInfo.deviceProtectedDataDir, filePath)) {
-                storageFlags = StorageManager.FLAG_STORAGE_DE;
-            } else if (appInfo.credentialProtectedDataDir != null
-                    && FileUtils.contains(appInfo.credentialProtectedDataDir, filePath)) {
+
+            if (fileIsUnder(filePath, appInfo.credentialProtectedDataDir)) {
                 storageFlags = StorageManager.FLAG_STORAGE_CE;
+            } else if (fileIsUnder(filePath, appInfo.deviceProtectedDataDir)) {
+                storageFlags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 Slog.e(TAG, "Could not infer CE/DE storage for path " + filePath);
                 needWrite |= mPackageDynamicCodeLoading.removeFile(packageName, filePath, userId);
@@ -139,6 +145,9 @@ public class DexLogger {
                         + ": " + e.getMessage());
             }
 
+            String subtag = fileInfo.mFileType == FILE_TYPE_DEX
+                    ? DCL_DEX_SUBTAG
+                    : DCL_NATIVE_SUBTAG;
             String fileName = new File(filePath).getName();
             String message = PackageUtils.computeSha256Digest(fileName.getBytes());
 
@@ -165,7 +174,7 @@ public class DexLogger {
                 }
 
                 if (loadingUid != -1) {
-                    writeDclEvent(loadingUid, message);
+                    writeDclEvent(subtag, loadingUid, message);
                 }
             }
         }
@@ -175,21 +184,58 @@ public class DexLogger {
         }
     }
 
+    private boolean fileIsUnder(String filePath, String directoryPath) {
+        if (directoryPath == null) {
+            return false;
+        }
+
+        try {
+            return FileUtils.contains(new File(directoryPath).getCanonicalPath(),
+                    new File(filePath).getCanonicalPath());
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     @VisibleForTesting
     PackageDynamicCode getPackageDynamicCodeInfo(String packageName) {
         return mPackageDynamicCodeLoading.getPackageDynamicCodeInfo(packageName);
     }
 
     @VisibleForTesting
-    void writeDclEvent(int uid, String message) {
-        EventLog.writeEvent(SNET_TAG, DCL_SUBTAG, uid, message);
+    void writeDclEvent(String subtag, int uid, String message) {
+        EventLog.writeEvent(SNET_TAG, subtag, uid, message);
     }
 
-    void record(int loaderUserId, String dexPath,
-            String owningPackageName, String loadingPackageName) {
+    void recordDex(int loaderUserId, String dexPath, String owningPackageName,
+            String loadingPackageName) {
         if (mPackageDynamicCodeLoading.record(owningPackageName, dexPath,
-                PackageDynamicCodeLoading.FILE_TYPE_DEX, loaderUserId,
-                loadingPackageName)) {
+                FILE_TYPE_DEX, loaderUserId, loadingPackageName)) {
+            mPackageDynamicCodeLoading.maybeWriteAsync();
+        }
+    }
+
+    /**
+     * Record that an app running in the specified uid has executed native code from the file at
+     * {@link path}.
+     */
+    public void recordNative(int loadingUid, String path) {
+        String[] packages;
+        try {
+            packages = mPackageManager.getPackagesForUid(loadingUid);
+            if (packages == null || packages.length == 0) {
+                return;
+            }
+        } catch (RemoteException e) {
+            // Can't happen, we're local.
+            return;
+        }
+
+        String loadingPackageName = packages[0];
+        int loadingUserId = UserHandle.getUserId(loadingUid);
+
+        if (mPackageDynamicCodeLoading.record(loadingPackageName, path,
+                FILE_TYPE_NATIVE, loadingUserId, loadingPackageName)) {
             mPackageDynamicCodeLoading.maybeWriteAsync();
         }
     }

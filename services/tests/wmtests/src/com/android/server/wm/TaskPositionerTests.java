@@ -19,6 +19,10 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.TaskPositioner.MIN_ASPECT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
@@ -38,13 +42,12 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 /**
  * Tests for the {@link TaskPositioner} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskPositionerTests
+ *  atest WmTests:TaskPositionerTests
  */
 @SmallTest
 public class TaskPositionerTests extends WindowTestsBase {
@@ -73,18 +76,17 @@ public class TaskPositionerTests extends WindowTestsBase {
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, dm);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
 
-        mPositioner = new TaskPositioner(mWm, Mockito.mock(IActivityTaskManager.class));
+        mPositioner = new TaskPositioner(mWm, mock(IActivityTaskManager.class));
         mPositioner.register(mDisplayContent);
 
-        mWindow = Mockito.spy(createWindow(null, TYPE_BASE_APPLICATION, "window"));
-        final Task task = Mockito.spy(mWindow.getTask());
-        Mockito.when(mWindow.getTask()).thenReturn(task);
-
-        Mockito.doAnswer(invocation -> {
+        mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
+        final Task task = mWindow.getTask();
+        spyOn(task);
+        doAnswer(invocation -> {
             final Rect rect = (Rect) invocation.getArguments()[0];
             rect.set(mDimBounds);
-            return (Void) null;
-        }).when(task).getDimBounds(Mockito.any(Rect.class));
+            return null;
+        }).when(task).getDimBounds(any(Rect.class));
 
         mWindow.getStack().setWindowingMode(WINDOWING_MODE_FREEFORM);
     }

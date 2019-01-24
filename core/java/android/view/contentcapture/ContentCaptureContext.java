@@ -86,7 +86,6 @@ public final class ContentCaptureContext implements Parcelable {
     private final @Nullable Uri mUri;
 
     // Fields below are set by server when the session starts
-    // TODO(b/111276913): create new object for taskId + componentName / reuse on other places
     private final @Nullable ComponentName mComponentName;
     private final int mTaskId;
     private final int mDisplayId;
@@ -213,6 +212,7 @@ public final class ContentCaptureContext implements Parcelable {
     public static final class Builder {
         private Bundle mExtras;
         private Uri mUri;
+        private boolean mDestroyed;
 
         /**
          * Sets extra options associated with this context.
@@ -221,11 +221,13 @@ public final class ContentCaptureContext implements Parcelable {
          *
          * @param extras extra options.
          * @return this builder.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
          */
         @NonNull
         public Builder setExtras(@NonNull Bundle extras) {
-            // TODO(b/111276913): check build just once / throw exception / test / document
             mExtras = Preconditions.checkNotNull(extras);
+            throwIfDestroyed();
             return this;
         }
 
@@ -236,22 +238,34 @@ public final class ContentCaptureContext implements Parcelable {
          *
          * @param uri URI associated with this context.
          * @return this builder.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
          */
         @NonNull
         public Builder setUri(@NonNull Uri uri) {
-            // TODO(b/111276913): check build just once / throw exception / test / document
             mUri = Preconditions.checkNotNull(uri);
+            throwIfDestroyed();
             return this;
         }
 
         /**
          * Builds the {@link ContentCaptureContext}.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called or no call to either
+         * {@link #setExtras(Bundle)} or {@link #setUri(Uri)} was made.
+         *
+         * @return the built {@code ContentCaptureContext}
          */
         public ContentCaptureContext build() {
-            // TODO(b/111276913): check build just once / throw exception / test / document
-            // TODO(b/111276913): make sure it at least one property (uri / extras) / test /
-            // throw exception / documment
+            throwIfDestroyed();
+            Preconditions.checkState(mExtras != null || mUri != null, "Must call setUri() "
+                    + "or setExtras() before calling build()");
+            mDestroyed = true;
             return new ContentCaptureContext(this);
+        }
+
+        private void throwIfDestroyed() {
+            Preconditions.checkState(!mDestroyed, "Already called #build()");
         }
     }
 

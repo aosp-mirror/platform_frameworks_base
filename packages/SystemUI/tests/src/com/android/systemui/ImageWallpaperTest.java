@@ -68,7 +68,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
             public Engine onCreateEngine() {
                 return new DrawableEngine() {
                     @Override
-                    DisplayInfo getDefaultDisplayInfo() {
+                    DisplayInfo getDisplayInfo() {
                         return mDisplayInfo;
                     }
 

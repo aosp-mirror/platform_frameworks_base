@@ -16,10 +16,13 @@
 
 package android.net.ip;
 
+import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -33,6 +36,7 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
@@ -82,10 +86,11 @@ public class IpClientTest {
     private static final int TEST_TIMEOUT_MS = 400;
 
     @Mock private Context mContext;
+    @Mock private ConnectivityManager mCm;
     @Mock private INetworkManagementService mNMService;
     @Mock private INetd mNetd;
     @Mock private Resources mResources;
-    @Mock private IpClientCallbacks mCb;
+    @Mock private IIpClientCallbacks mCb;
     @Mock private AlarmManager mAlarm;
     @Mock private IpClient.Dependencies mDependecies;
     private MockContentResolver mContentResolver;
@@ -98,6 +103,9 @@ public class IpClientTest {
         MockitoAnnotations.initMocks(this);
 
         when(mContext.getSystemService(eq(Context.ALARM_SERVICE))).thenReturn(mAlarm);
+        when(mContext.getSystemServiceName(ConnectivityManager.class))
+                .thenReturn(Context.CONNECTIVITY_SERVICE);
+        when(mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(mCm);
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getInteger(R.integer.config_networkAvoidBadWifi))
                 .thenReturn(DEFAULT_AVOIDBADWIFI_CONFIG_VALUE);
@@ -204,7 +212,8 @@ public class IpClientTest {
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
-                .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
+                .onLinkPropertiesChange(argThat(
+                        lp -> fromStableParcelable(lp).equals(makeEmptyLinkProperties(iface))));
     }
 
     @Test
@@ -249,13 +258,15 @@ public class IpClientTest {
         mObserver.addressUpdated(iface, new LinkAddress(addresses[lastAddr]));
         LinkProperties want = linkproperties(links(addresses), routes(prefixes));
         want.setInterfaceName(iface);
-        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).onProvisioningSuccess(eq(want));
+        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).onProvisioningSuccess(argThat(
+                lp -> fromStableParcelable(lp).equals(want)));
 
         ipc.shutdown();
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
-                .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
+                .onLinkPropertiesChange(argThat(
+                        lp -> fromStableParcelable(lp).equals(makeEmptyLinkProperties(iface))));
     }
 
     @Test
@@ -487,11 +498,11 @@ public class IpClientTest {
         List<String> list3 = Arrays.asList("bar", "baz");
         List<String> list4 = Arrays.asList("foo", "bar", "baz");
 
-        assertTrue(IpClient.all(list1, (x) -> false));
-        assertFalse(IpClient.all(list2, (x) -> false));
-        assertTrue(IpClient.all(list3, (x) -> true));
-        assertTrue(IpClient.all(list2, (x) -> x.charAt(0) == 'f'));
-        assertFalse(IpClient.all(list4, (x) -> x.charAt(0) == 'f'));
+        assertTrue(InitialConfiguration.all(list1, (x) -> false));
+        assertFalse(InitialConfiguration.all(list2, (x) -> false));
+        assertTrue(InitialConfiguration.all(list3, (x) -> true));
+        assertTrue(InitialConfiguration.all(list2, (x) -> x.charAt(0) == 'f'));
+        assertFalse(InitialConfiguration.all(list4, (x) -> x.charAt(0) == 'f'));
     }
 
     @Test
@@ -501,11 +512,11 @@ public class IpClientTest {
         List<String> list3 = Arrays.asList("bar", "baz");
         List<String> list4 = Arrays.asList("foo", "bar", "baz");
 
-        assertFalse(IpClient.any(list1, (x) -> true));
-        assertTrue(IpClient.any(list2, (x) -> true));
-        assertTrue(IpClient.any(list2, (x) -> x.charAt(0) == 'f'));
-        assertFalse(IpClient.any(list3, (x) -> x.charAt(0) == 'f'));
-        assertTrue(IpClient.any(list4, (x) -> x.charAt(0) == 'f'));
+        assertFalse(InitialConfiguration.any(list1, (x) -> true));
+        assertTrue(InitialConfiguration.any(list2, (x) -> true));
+        assertTrue(InitialConfiguration.any(list2, (x) -> x.charAt(0) == 'f'));
+        assertFalse(InitialConfiguration.any(list3, (x) -> x.charAt(0) == 'f'));
+        assertTrue(InitialConfiguration.any(list4, (x) -> x.charAt(0) == 'f'));
     }
 
     @Test

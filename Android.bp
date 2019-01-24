@@ -732,10 +732,13 @@ java_defaults {
         "ext",
     ],
 
+    jarjar_rules: ":framework-hidl-jarjar",
+
     static_libs: [
         "apex_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
         "framework-protos",
+        "game-driver-protos",
         "mediaplayer2-protos",
         "android.hidl.base-V1.0-java",
         "android.hardware.cas-V1.0-java",
@@ -790,6 +793,11 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "framework-hidl-jarjar",
+    srcs: ["jarjar_rules_hidl.txt"],
+}
+
 java_library {
     name: "framework",
     defaults: ["framework-defaults"],
@@ -800,11 +808,7 @@ java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
     // Use UsedByApps annotation processor
-    annotation_processors: ["unsupportedappusage-annotation-processor"],
-    // b/25860419: annotation processors must be explicitly specified for grok
-    annotation_processor_classes: [
-        "android.processor.unsupportedappusage.UsedByAppsProcessor",
-    ],
+    plugins: ["unsupportedappusage-annotation-processor"],
 }
 
 // A host library including just UnsupportedAppUsage.java so that the annotation

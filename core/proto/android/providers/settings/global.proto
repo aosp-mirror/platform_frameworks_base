@@ -731,8 +731,7 @@ message GlobalSettingsProto {
     // Defines global runtime overrides to window policy.
     optional SettingProto policy_control = 92;
     optional SettingProto power_manager_constants = 93;
-    // If true, out-of-the-box execution for priv apps is enabled.
-    optional SettingProto priv_app_oob_enabled = 94 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 94; // Used to be priv_app_oob_enabled
 
     message PrepaidSetup {
         option (android.msg_privacy).dest = DEST_EXPLICIT;

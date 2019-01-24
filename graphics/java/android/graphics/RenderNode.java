@@ -184,7 +184,7 @@ public final class RenderNode {
      *
      * @param name The name of the RenderNode, used for debugging purpose. May be null.
      */
-    public RenderNode(String name) {
+    public RenderNode(@Nullable String name) {
         this(name, null);
     }
 

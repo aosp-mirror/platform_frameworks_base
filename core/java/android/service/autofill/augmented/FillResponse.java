@@ -19,8 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.autofill.AutofillId;
 
 import java.util.List;
@@ -34,7 +32,7 @@ import java.util.List;
 @TestApi
 //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
 //in the same package as the test, and that module is compiled with SDK=test_current
-public final class FillResponse implements Parcelable {
+public final class FillResponse {
 
     private final FillWindow mFillWindow;
 
@@ -70,8 +68,8 @@ public final class FillResponse implements Parcelable {
          * @return this builder
          */
         public Builder setFillWindow(@NonNull FillWindow fillWindow) {
-            // TODO(b/111330312): implement / check not null / unit test
-            // TODO(b/111330312): throw exception if FillWindow not updated yet
+            // TODO(b/123100712): check not null / unit test / throw exception if FillWindow not
+            // updated yet
             mFillWindow = fillWindow;
             return this;
         }
@@ -85,7 +83,7 @@ public final class FillResponse implements Parcelable {
          * @return this builder
          */
         public Builder setIgnoredIds(@NonNull List<AutofillId> ids) {
-            // TODO(b/111330312): implement / check not null / unit test
+            // TODO(b/123100695): implement / check not null / unit test
             return this;
         }
 
@@ -102,37 +100,10 @@ public final class FillResponse implements Parcelable {
          * @return A built response.
          */
         public FillResponse build() {
-            // TODO(b/111330312): check conditions / add unit test
+            // TODO(b/123100712): check conditions / add unit test
             return new FillResponse(this);
         }
-
-        // TODO(b/111330312): add methods to disable app / activity, either here or on manager
     }
 
-    // TODO(b/111330312): implement to String
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        // TODO(b/111330312): implement
-    }
-
-    public static final Parcelable.Creator<FillResponse> CREATOR =
-            new Parcelable.Creator<FillResponse>() {
-
-                @Override
-                public FillResponse createFromParcel(Parcel parcel) {
-                    // TODO(b/111330312): implement
-                    return null;
-                }
-
-                @Override
-                public FillResponse[] newArray(int size) {
-                    return new FillResponse[size];
-                }
-    };
+    // TODO(b/123100811): implement to String
 }

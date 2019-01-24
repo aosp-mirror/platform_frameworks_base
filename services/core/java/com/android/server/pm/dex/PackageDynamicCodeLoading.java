@@ -53,6 +53,9 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
     // is represented in the text file format.)
     static final int FILE_TYPE_DEX = 'D';
 
+    // Type code to indicate a secondary file containing native code.
+    static final int FILE_TYPE_NATIVE = 'N';
+
     private static final String TAG = "PackageDynamicCodeLoading";
 
     private static final String FILE_VERSION_HEADER = "DCL1";
@@ -107,7 +110,7 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
      */
     boolean record(String owningPackageName, String filePath, int fileType, int ownerUserId,
             String loadingPackageName) {
-        if (fileType != FILE_TYPE_DEX) {
+        if (!isValidFileType(fileType)) {
             throw new IllegalArgumentException("Bad file type: " + fileType);
         }
         synchronized (mLock) {
@@ -118,6 +121,10 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
             }
             return packageInfo.add(filePath, (char) fileType, ownerUserId, loadingPackageName);
         }
+    }
+
+    private static boolean isValidFileType(int fileType) {
+        return fileType == FILE_TYPE_DEX || fileType == FILE_TYPE_NATIVE;
     }
 
     /**
@@ -407,7 +414,7 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
             if (packages.length == 0) {
                 throw new IOException("Malformed line: " + line);
             }
-            if (type != FILE_TYPE_DEX) {
+            if (!isValidFileType(type)) {
                 throw new IOException("Unknown file type: " + line);
             }
 

@@ -23,11 +23,10 @@ import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
+import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
+import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-import static com.android.server.autofill.AutofillManagerService.FLAG_SMART_SUGGESTION_IME;
-import static com.android.server.autofill.AutofillManagerService.FLAG_SMART_SUGGESTION_SYSTEM;
-import static com.android.server.autofill.AutofillManagerService.smartSuggestionFlagsToString;
 import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -88,6 +87,7 @@ import android.util.TimeUtils;
 import android.view.KeyEvent;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManager.SmartSuggestionMode;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
@@ -97,7 +97,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
@@ -250,7 +249,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Destroys the augmented Autofill UI.
      */
-    // TODO(b/111330312): this runnable is called when the Autofill session is destroyed, the
+    // TODO(b/123099468): this runnable is called when the Autofill session is destroyed, the
     // main reason being the cases where user tap HOME.
     // Right now it's completely destroying the UI, but we need to decide whether / how to
     // properly recover it later (for example, if the user switches back to the activity,
@@ -2559,7 +2558,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             notifyUnavailableToClient(AutofillManager.STATE_FINISHED);
             removeSelf();
         } else {
-            // TODO(b/111330312, b/119638958): must set internal state so when user focus other
+            // TODO(b/123099468, b/119638958): must set internal state so when user focus other
             // fields it does not generate a new call to the standard autofill service (right now
             // it does). Must also add CTS tests to exercise this scenario.
             if (sVerbose) {
@@ -2574,7 +2573,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      *
      * @return callback to destroy the autofill UI, or {@code null} if not supported.
      */
-    // TODO(b/111330312): might need to call it in other places, like when the service returns a
+    // TODO(b/123099468): might need to call it in other places, like when the service returns a
     // non-null response but without datasets (for example, just SaveInfo)
     @GuardedBy("mLock")
     private Runnable triggerAugmentedAutofillLocked() {
@@ -2594,14 +2593,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Define which mode will be used
         final int mode;
-        if ((supportedModes & FLAG_SMART_SUGGESTION_IME) != 0) {
-            // TODO(b/111330312): support it :-)
-            Slog.w(TAG, "Smart Suggestions on IME not supported yet");
-            return null;
-        } else if ((supportedModes & FLAG_SMART_SUGGESTION_SYSTEM) != 0) {
+        if ((supportedModes & FLAG_SMART_SUGGESTION_SYSTEM) != 0) {
             mode = FLAG_SMART_SUGGESTION_SYSTEM;
+        } else if ((supportedModes & AutofillManager.FLAG_SMART_SUGGESTION_LEGACY) != 0) {
+            mode = AutofillManager.FLAG_SMART_SUGGESTION_LEGACY;
         } else {
-            Slog.w(TAG, "Unsupported Smart Suggestion Mode: " + supportedModes);
+            Slog.w(TAG, "Unsupported Smart Suggestion mode: " + supportedModes);
             return null;
         }
 
@@ -2614,7 +2611,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.v(TAG, "calling Augmented Autofill Service ("
                     + remoteService.getComponentName().toShortString() + ") on view "
                     + mCurrentViewId + " using suggestion mode "
-                    + smartSuggestionFlagsToString(mode)
+                    + getSmartSuggestionModeToString(mode)
                     + " when server returned null for session " + this.id);
         }
 

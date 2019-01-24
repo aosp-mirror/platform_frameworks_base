@@ -138,7 +138,7 @@ public class Ringtone {
         mAudioAttributes = attributes;
         // The audio attributes have to be set before the media player is prepared.
         // Re-initialize it.
-        setUri(mUri);
+        setUri(mUri, mVolumeShaperConfig);
     }
 
     /**
@@ -415,6 +415,7 @@ public class Ringtone {
             mLocalPlayer.reset();
             mLocalPlayer.release();
             mLocalPlayer = null;
+            mVolumeShaper = null;
             synchronized (sActiveRingtones) {
                 sActiveRingtones.remove(this);
             }

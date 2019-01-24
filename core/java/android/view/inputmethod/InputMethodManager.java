@@ -27,6 +27,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -917,19 +918,6 @@ public final class InputMethodManager {
     public List<InputMethodInfo> getInputMethodList() {
         try {
             return mService.getInputMethodList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns a list of VR InputMethod currently installed.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
-    public List<InputMethodInfo> getVrInputMethodList() {
-        try {
-            return mService.getVrInputMethodList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1894,7 +1882,15 @@ public final class InputMethodManager {
 
     /**
      * Notify the event when the user tapped or clicked the text view.
+     *
+     * @param view {@link View} which is being clicked.
+     * @see InputMethodService#onViewClicked(boolean)
+     * @deprecated The semantics of this method can never be defined well for composite {@link View}
+     *             that works as a giant "Canvas", which can host its own UI hierarchy and sub focus
+     *             state. {@link android.webkit.WebView} is a good example. Application / IME
+     *             developers should not rely on this method.
      */
+    @Deprecated
     public void viewClicked(View view) {
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
@@ -2497,11 +2493,48 @@ public final class InputMethodManager {
      */
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
-        try {
-            return mService.setCurrentInputMethodSubtype(subtype);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            Log.w(TAG, "System process should not call setCurrentInputMethodSubtype() because "
+                    + "almost always it is a bug under multi-user / multi-profile environment. "
+                    + "Consider directly interacting with InputMethodManagerService "
+                    + "via LocalServices.");
+            return false;
         }
+        if (subtype == null) {
+            // See the JavaDoc. This is how this method has worked.
+            return false;
+        }
+        final Context fallbackContext = ActivityThread.currentApplication();
+        if (fallbackContext == null) {
+            return false;
+        }
+        if (fallbackContext.checkSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+        final ContentResolver contentResolver = fallbackContext.getContentResolver();
+        final String imeId = Settings.Secure.getString(contentResolver,
+                Settings.Secure.DEFAULT_INPUT_METHOD);
+        if (ComponentName.unflattenFromString(imeId) == null) {
+            // Null or invalid IME ID format.
+            return false;
+        }
+        final List<InputMethodSubtype> enabledSubtypes;
+        try {
+            enabledSubtypes = mService.getEnabledInputMethodSubtypeList(imeId, true);
+        } catch (RemoteException e) {
+            return false;
+        }
+        final int numSubtypes = enabledSubtypes.size();
+        for (int i = 0; i < numSubtypes; ++i) {
+            final InputMethodSubtype enabledSubtype = enabledSubtypes.get(i);
+            if (enabledSubtype.equals(subtype)) {
+                Settings.Secure.putInt(contentResolver,
+                        Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, enabledSubtype.hashCode());
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -2642,7 +2675,13 @@ public final class InputMethodManager {
      *
      * @param imiId Id of InputMethodInfo which additional input method subtypes will be added to.
      * @param subtypes subtypes will be added as additional subtypes of the current input method.
+     * @deprecated For IMEs that have already implemented features like customizable/downloadable
+     *             keyboard layouts/languages, please start migration to other approaches. One idea
+     *             would be exposing only one unified {@link InputMethodSubtype} then implement
+     *             IME's own language switching mechanism within that unified subtype. The support
+     *             of "Additional Subtype" may be completely dropped in a future version of Android.
      */
+    @Deprecated
     public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
         try {
             mService.setAdditionalInputMethodSubtypes(imiId, subtypes);

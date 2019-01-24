@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaMetadata;
+import android.media.MediaParceledListSlice;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession.QueueItem;
 import android.os.Binder;
@@ -127,7 +128,8 @@ public final class ControllerCallbackLink implements Parcelable {
     @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void notifyQueueChanged(@Nullable List<QueueItem> queue) {
         try {
-            mIControllerCallback.notifyQueueChanged(queue);
+            mIControllerCallback.notifyQueueChanged(queue == null ? null :
+                    new MediaParceledListSlice(queue));
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -275,11 +277,11 @@ public final class ControllerCallbackLink implements Parcelable {
         }
 
         @Override
-        public void notifyQueueChanged(List<QueueItem> queue) {
+        public void notifyQueueChanged(MediaParceledListSlice queue) {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onQueueChanged(queue);
+                mCallbackStub.onQueueChanged(queue == null ? null : queue.getList());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -313,12 +315,6 @@ public final class ControllerCallbackLink implements Parcelable {
         }
 
         private void ensureMediaControlPermission() {
-            // Allow API calls from the System UI
-            if (mContext.checkCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
-                    == PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-
             // Check if it's system server or has MEDIA_CONTENT_CONTROL.
             // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
             // check here.

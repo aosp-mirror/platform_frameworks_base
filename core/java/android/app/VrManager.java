@@ -215,19 +215,12 @@ public class VrManager {
     }
 
     /**
-     * Start VR Input method for the packageName in {@link ComponentName}.
-     * This method notifies InputMethodManagerService to use VR IME instead of
-     * regular phone IME.
-     * @param componentName ComponentName of a VR InputMethod that should be set as selected
-     * input by InputMethodManagerService.
+     * This method is not implemented.
+     *
+     * @param componentName not used
      */
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
     public void setVrInputMethod(ComponentName componentName) {
-        try {
-            mService.setVrInputMethod(componentName);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
     }
 
     /**

@@ -188,6 +188,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 LayoutInflater.from(context).inflate(R.layout.remote_input, root, false);
         v.mController = controller;
         v.mEntry = entry;
+        v.mEditText.setTextOperationUser(computeTextOperationUser(entry.notification.getUser()));
         v.setTag(VIEW_TAG);
 
         return v;
@@ -298,7 +299,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (mWrapper != null) {
             mWrapper.setRemoteInputVisible(true);
         }
-        mEditText.setTextOperationUser(computeTextOperationUser(mEntry.notification.getUser()));
         mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
         mEditText.setText(mEntry.remoteInputText);
@@ -328,7 +328,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mResetting = true;
         mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
 
-        mEditText.setTextOperationUser(null);
         mEditText.getText().clear();
         mEditText.setEnabled(true);
         mSendButton.setVisibility(VISIBLE);

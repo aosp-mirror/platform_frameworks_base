@@ -16,6 +16,7 @@
 package android.app.usage;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
@@ -286,11 +287,20 @@ public final class UsageEvents implements Parcelable {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String mClass;
 
-
         /**
          * {@hide}
          */
         public int mInstanceId;
+
+        /**
+         * {@hide}
+         */
+        public String mTaskRootPackage;
+
+        /**
+         * {@hide}
+         */
+        public String mTaskRootClass;
 
         /**
          * {@hide}
@@ -373,6 +383,8 @@ public final class UsageEvents implements Parcelable {
             mPackage = orig.mPackage;
             mClass = orig.mClass;
             mInstanceId = orig.mInstanceId;
+            mTaskRootPackage = orig.mTaskRootPackage;
+            mTaskRootClass = orig.mTaskRootClass;
             mTimeStamp = orig.mTimeStamp;
             mEventType = orig.mEventType;
             mConfiguration = orig.mConfiguration;
@@ -408,6 +420,28 @@ public final class UsageEvents implements Parcelable {
         @SystemApi
         public int getInstanceId() {
             return mInstanceId;
+        }
+
+        /**
+         * The package name of the task root when this event was reported.
+         * Or {@code null} for queries from apps without {@link
+         * android.Manifest.permission#PACKAGE_USAGE_STATS}
+         * @hide
+         */
+        @SystemApi
+        public @Nullable String getTaskRootPackageName() {
+            return mTaskRootPackage;
+        }
+
+        /**
+         * The class name of the task root when this event was reported.
+         * Or {@code null} for queries from apps without {@link
+         * android.Manifest.permission#PACKAGE_USAGE_STATS}
+         * @hide
+         */
+        @SystemApi
+        public @Nullable String getTaskRootClassName() {
+            return mTaskRootClass;
         }
 
         /**
@@ -522,6 +556,9 @@ public final class UsageEvents implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mIndex = 0;
 
+    // Only used when parceling events. If false, task roots will be omitted from the parcel
+    private final boolean mIncludeTaskRoots;
+
     /*
      * In order to save space, since ComponentNames will be duplicated everywhere,
      * we use a map and index into it.
@@ -552,6 +589,7 @@ public final class UsageEvents implements Parcelable {
             mParcel.setDataSize(mParcel.dataPosition());
             mParcel.setDataPosition(positionInParcel);
         }
+        mIncludeTaskRoots = true;
     }
 
     /**
@@ -560,16 +598,27 @@ public final class UsageEvents implements Parcelable {
      */
     UsageEvents() {
         mEventCount = 0;
+        mIncludeTaskRoots = true;
+    }
+
+    /**
+     * Construct the iterator in preparation for writing it to a parcel.
+     * Defaults to excluding task roots from the parcel.
+     * {@hide}
+     */
+    public UsageEvents(List<Event> events, String[] stringPool) {
+        this(events, stringPool, false);
     }
 
     /**
      * Construct the iterator in preparation for writing it to a parcel.
      * {@hide}
      */
-    public UsageEvents(List<Event> events, String[] stringPool) {
+    public UsageEvents(List<Event> events, String[] stringPool, boolean includeTaskRoots) {
         mStringPool = stringPool;
         mEventCount = events.size();
         mEventsToWrite = events;
+        mIncludeTaskRoots = includeTaskRoots;
     }
 
     /**
@@ -645,9 +694,25 @@ public final class UsageEvents implements Parcelable {
         } else {
             classIndex = -1;
         }
+
+        final int taskRootPackageIndex;
+        if (mIncludeTaskRoots && event.mTaskRootPackage != null) {
+            taskRootPackageIndex = findStringIndex(event.mTaskRootPackage);
+        } else {
+            taskRootPackageIndex = -1;
+        }
+
+        final int taskRootClassIndex;
+        if (mIncludeTaskRoots && event.mTaskRootClass != null) {
+            taskRootClassIndex = findStringIndex(event.mTaskRootClass);
+        } else {
+            taskRootClassIndex = -1;
+        }
         p.writeInt(packageIndex);
         p.writeInt(classIndex);
         p.writeInt(event.mInstanceId);
+        p.writeInt(taskRootPackageIndex);
+        p.writeInt(taskRootClassIndex);
         p.writeInt(event.mEventType);
         p.writeLong(event.mTimeStamp);
 
@@ -691,6 +756,21 @@ public final class UsageEvents implements Parcelable {
             eventOut.mClass = null;
         }
         eventOut.mInstanceId = p.readInt();
+
+        final int taskRootPackageIndex = p.readInt();
+        if (taskRootPackageIndex >= 0) {
+            eventOut.mTaskRootPackage = mStringPool[taskRootPackageIndex];
+        } else {
+            eventOut.mTaskRootPackage = null;
+        }
+
+        final int taskRootClassIndex = p.readInt();
+        if (taskRootClassIndex >= 0) {
+            eventOut.mTaskRootClass = mStringPool[taskRootClassIndex];
+        } else {
+            eventOut.mTaskRootClass = null;
+        }
+
         eventOut.mEventType = p.readInt();
         eventOut.mTimeStamp = p.readLong();
 

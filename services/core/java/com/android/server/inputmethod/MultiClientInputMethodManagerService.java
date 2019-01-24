@@ -159,11 +159,6 @@ public final class MultiClientInputMethodManagerService {
                         }
 
                         @Override
-                        public void startVrInputMethodNoCheck(ComponentName componentName) {
-                            reportNotSupported();
-                        }
-
-                        @Override
                         public List<InputMethodInfo> getInputMethodListAsUser(
                                 @UserIdInt int userId) {
                             return userIdToInputMethodInfoMapper.getAsList(userId);
@@ -1244,13 +1239,6 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public List<InputMethodInfo> getVrInputMethodList() {
-            reportNotSupported();
-            return Collections.emptyList();
-        }
-
-        @BinderThread
-        @Override
         public List<InputMethodInfo> getEnabledInputMethodList() {
             return mInputMethodInfoMap.getAsList(UserHandle.getUserId(Binder.getCallingUid()));
         }
@@ -1527,13 +1515,6 @@ public final class MultiClientInputMethodManagerService {
         public InputMethodSubtype getCurrentInputMethodSubtype() {
             reportNotSupported();
             return null;
-        }
-
-        @BinderThread
-        @Override
-        public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
-            reportNotSupported();
-            return false;
         }
 
         @BinderThread

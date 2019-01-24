@@ -51,6 +51,7 @@ import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
+import android.view.SurfaceControl;
 
 /**
  * System private interface to the window manager.
@@ -555,8 +556,8 @@ interface IWindowManager
      * display content info to any SurfaceControl, as this would be a security issue.
      *
      * @param displayId The id of the display.
-     * @param surfaceControlHandle The SurfaceControl handle that the top level layers for the
+     * @param surfaceControlHandle The SurfaceControl that the top level layers for the
      *        display should be re-parented to.
      */
-    void reparentDisplayContent(int displayId, in IBinder surfaceControlHandle);
+    void reparentDisplayContent(int displayId, in SurfaceControl sc);
 }

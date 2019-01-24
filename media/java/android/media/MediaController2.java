@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Allows an app to interact with an active {@link MediaSession2} or a
- * MediaSession2Service which would provide {@link MediaSession2}. Media buttons and other
+ * {@link MediaSession2Service} which would provide {@link MediaSession2}. Media buttons and other
  * commands can be sent to the session.
  * <p>
  * This API is not generally intended for third party application developers.
@@ -53,7 +53,6 @@ import java.util.concurrent.Executor;
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
  * for consistent behavior across all devices.
  */
-// TODO: use @link for MediaSession2Service
 public class MediaController2 implements AutoCloseable {
     static final String TAG = "MediaController2";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -70,6 +69,8 @@ public class MediaController2 implements AutoCloseable {
     private final SessionServiceConnection mServiceConnection;
 
     private final Object mLock = new Object();
+    //@GuardedBy("mLock")
+    private boolean mClosed;
     //@GuardedBy("mLock")
     private int mNextSeqNumber;
     //@GuardedBy("mLock")
@@ -141,7 +142,14 @@ public class MediaController2 implements AutoCloseable {
     @Override
     public void close() {
         synchronized (mLock) {
+            if (mClosed) {
+                // Already closed. Ignore rest of clean up code.
+                // Note: unbindService() throws IllegalArgumentException when it's called twice.
+                return;
+            }
+            mClosed = true;
             if (mServiceConnection != null) {
+                // Note: This should be called even when the bindService() has returned false.
                 mContext.unbindService(mServiceConnection);
             }
             if (mSessionBinder != null) {
@@ -167,7 +175,7 @@ public class MediaController2 implements AutoCloseable {
      * If it is not connected yet, it returns {@code null}.
      * <p>
      * This may differ with the {@link Session2Token} from the constructor. For example, if the
-     * controller is created with the token for MediaSession2Service, this would return
+     * controller is created with the token for {@link MediaSession2Service}, this would return
      * token for the {@link MediaSession2} in the service.
      *
      * @return Session2Token of the connected session, or {@code null} if not connected

@@ -845,10 +845,12 @@ public class NotificationManagerService extends SystemService {
                         reportSeen(r);
                     }
                     r.setVisibility(true, nv.rank, nv.count);
+                    boolean isHun = (nv.location
+                            == NotificationVisibility.NotificationLocation.LOCATION_FIRST_HEADS_UP);
                     // hasBeenVisiblyExpanded must be called after updating the expansion state of
                     // the NotificationRecord to ensure the expansion state is up-to-date.
-                    if (r.hasBeenVisiblyExpanded()) {
-                        logSmartSuggestionsVisible(r);
+                    if (isHun || r.hasBeenVisiblyExpanded()) {
+                        logSmartSuggestionsVisible(r, nv.location.toMetricsEventEnum());
                     }
                     maybeRecordInterruptionLocked(r);
                     nv.recycle();
@@ -876,7 +878,7 @@ public class NotificationManagerService extends SystemService {
                     // hasBeenVisiblyExpanded must be called after updating the expansion state of
                     // the NotificationRecord to ensure the expansion state is up-to-date.
                     if (r.hasBeenVisiblyExpanded()) {
-                        logSmartSuggestionsVisible(r);
+                        logSmartSuggestionsVisible(r, notificationLocation);
                     }
                     if (userAction) {
                         MetricsLogger.action(r.getItemLogMaker()
@@ -952,7 +954,7 @@ public class NotificationManagerService extends SystemService {
     };
 
     @VisibleForTesting
-    void logSmartSuggestionsVisible(NotificationRecord r) {
+    void logSmartSuggestionsVisible(NotificationRecord r, int notificationLocation) {
         // If the newly visible notification has smart suggestions
         // then log that the user has seen them.
         if ((r.getNumSmartRepliesAdded() > 0 || r.getNumSmartActionsAdded() > 0)
@@ -966,7 +968,10 @@ public class NotificationManagerService extends SystemService {
                             r.getNumSmartActionsAdded())
                     .addTaggedData(
                             MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                            r.getSuggestionsGeneratedByAssistant() ? 1 : 0);
+                            r.getSuggestionsGeneratedByAssistant() ? 1 : 0)
+                    // The fields in the NotificationVisibility.NotificationLocation enum map
+                    // directly to the fields in the MetricsEvent.NotificationLocation enum.
+                    .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION, notificationLocation);
             mMetricsLogger.write(logMaker);
         }
     }

@@ -2008,6 +2008,15 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.PERMISSION_GROUP_NAME";
 
     /**
+     * Intent extra: The number of milliseconds.
+     * <p>
+     * Type: long
+     * </p>
+     */
+    public static final String EXTRA_DURATION_MILLIS =
+            "android.intent.extra.DURATION_MILLIS";
+
+    /**
      * Activity action: Launch UI to review app uses of permissions.
      * <p>
      * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission name
@@ -2020,11 +2029,16 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #EXTRA_PERMISSION_NAME}.
      * </p>
      * <p>
+     * Input: {@link #EXTRA_DURATION_MILLIS} specifies the minimum number of milliseconds of recent
+     * activity to show (optional).  Must be non-negative.
+     * </p>
+     * <p>
      * Output: Nothing.
      * </p>
      *
      * @see #EXTRA_PERMISSION_NAME
      * @see #EXTRA_PERMISSION_GROUP_NAME
+     * @see #EXTRA_DURATION_MILLIS
      *
      * @hide
      */
@@ -2363,7 +2377,6 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: An existing version of an application package has been
      * rolled back to a previous version.
-     * The data contains the name of the package.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.

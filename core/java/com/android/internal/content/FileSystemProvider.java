@@ -74,6 +74,16 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     private static final boolean LOG_INOTIFY = false;
 
+    protected static final String SUPPORTED_QUERY_ARGS = joinNewline(
+            DocumentsContract.QUERY_ARG_DISPLAY_NAME,
+            DocumentsContract.QUERY_ARG_FILE_SIZE_OVER,
+            DocumentsContract.QUERY_ARG_LAST_MODIFIED_AFTER,
+            DocumentsContract.QUERY_ARG_MIME_TYPES);
+
+    private static String joinNewline(String... args) {
+        return TextUtils.join("\n", args);
+    }
+
     private String[] mDefaultProjection;
 
     @GuardedBy("mObservers")

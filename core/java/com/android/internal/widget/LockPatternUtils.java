@@ -34,6 +34,7 @@ import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -176,6 +177,7 @@ public class LockPatternUtils {
     private UserManager mUserManager;
     private final Handler mHandler;
     private final SparseLongArray mLockoutDeadlines = new SparseLongArray();
+    private Boolean mHasSecureLockScreen;
 
     /**
      * Use {@link TrustManager#isTrustUsuallyManaged(int)}.
@@ -706,6 +708,10 @@ public class LockPatternUtils {
      * @param userId the user whose pattern is to be saved.
      */
     public void saveLockPattern(List<LockPatternView.Cell> pattern, String savedPattern, int userId) {
+        if (!hasSecureLockScreen()) {
+            throw new UnsupportedOperationException(
+                    "This operation requires the lock screen feature.");
+        }
         if (pattern == null || pattern.size() < MIN_LOCK_PATTERN_SIZE) {
             throw new IllegalArgumentException("pattern must not be null and at least "
                     + MIN_LOCK_PATTERN_SIZE + " dots long.");
@@ -801,6 +807,10 @@ public class LockPatternUtils {
 
     /** Update the encryption password if it is enabled **/
     private void updateEncryptionPassword(final int type, final String password) {
+        if (!hasSecureLockScreen()) {
+            throw new UnsupportedOperationException(
+                    "This operation requires the lock screen feature.");
+        }
         if (!isDeviceEncryptionEnabled()) {
             return;
         }
@@ -835,6 +845,10 @@ public class LockPatternUtils {
      */
     public void saveLockPassword(String password, String savedPassword, int requestedQuality,
             int userHandle) {
+        if (!hasSecureLockScreen()) {
+            throw new UnsupportedOperationException(
+                    "This operation requires the lock screen feature.");
+        }
         if (password == null || password.length() < MIN_LOCK_PASSWORD_SIZE) {
             throw new IllegalArgumentException("password must not be null and at least "
                     + "of length " + MIN_LOCK_PASSWORD_SIZE);
@@ -1621,6 +1635,10 @@ public class LockPatternUtils {
      */
     public boolean setLockCredentialWithToken(String credential, int type, int requestedQuality,
             long tokenHandle, byte[] token, int userId) {
+        if (!hasSecureLockScreen()) {
+            throw new UnsupportedOperationException(
+                    "This operation requires the lock screen feature.");
+        }
         LockSettingsInternal localService = getLockSettingsInternal();
         if (type != CREDENTIAL_TYPE_NONE) {
             if (TextUtils.isEmpty(credential) || credential.length() < MIN_LOCK_PASSWORD_SIZE) {
@@ -1852,6 +1870,17 @@ public class LockPatternUtils {
 
     public boolean isSyntheticPasswordEnabled() {
         return getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM) != 0;
+    }
+
+    /**
+     * Return true if the device supports the lock screen feature, false otherwise.
+     */
+    public boolean hasSecureLockScreen() {
+        if (mHasSecureLockScreen == null) {
+            mHasSecureLockScreen = Boolean.valueOf(mContext.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN));
+        }
+        return mHasSecureLockScreen.booleanValue();
     }
 
     public static boolean userOwnsFrpCredential(Context context, UserInfo info) {

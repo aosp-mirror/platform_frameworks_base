@@ -39,6 +39,8 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.TreeSet;
 
+import android.system.ErrnoException;
+
 /**
  * Native methods for managing network interfaces.
  *
@@ -136,6 +138,32 @@ public class NetworkUtils {
      * @return {@code true} if {@code uid} can access network, {@code false} otherwise.
      */
     public native static boolean queryUserAccess(int uid, int netId);
+
+    /**
+     * DNS resolver series jni method.
+     * Issue the query {@code msg} on the network designated by {@code netId}.
+     * {@code flags} is an additional config to control actual querying behavior.
+     * @return a file descriptor to watch for read events
+     */
+    public static native FileDescriptor resNetworkSend(
+            int netId, byte[] msg, int msglen, int flags) throws ErrnoException;
+
+    /**
+     * DNS resolver series jni method.
+     * Look up the {@code nsClass} {@code nsType} Resource Record (RR) associated
+     * with Domain Name {@code dname} on the network designated by {@code netId}.
+     * {@code flags} is an additional config to control actual querying behavior.
+     * @return a file descriptor to watch for read events
+     */
+    public static native FileDescriptor resNetworkQuery(
+            int netId, String dname, int nsClass, int nsType, int flags) throws ErrnoException;
+
+    /**
+     * DNS resolver series jni method.
+     * Read a result for the query associated with the {@code fd}.
+     * @return a byte array containing blob answer
+     */
+    public static native byte[] resNetworkResult(FileDescriptor fd) throws ErrnoException;
 
     /**
      * Add an entry into the ARP cache.

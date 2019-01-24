@@ -167,13 +167,11 @@ public class WindowAnimator {
                             screenRotationAnimation.kill();
                             displayAnimator.mScreenRotationAnimation = null;
 
-                            //TODO (multidisplay): Accessibility supported only for the default
                             // display.
-                            if (accessibilityController != null && dc.isDefaultDisplay) {
+                            if (accessibilityController != null) {
                                 // We just finished rotation animation which means we did not
                                 // announce the rotation and waited for it to end, announce now.
-                                accessibilityController.onRotationChangedLocked(
-                                        mService.getDefaultDisplayContentLocked());
+                                accessibilityController.onRotationChangedLocked(dc);
                             }
                         }
                     }
@@ -197,9 +195,8 @@ public class WindowAnimator {
                         screenRotationAnimation.updateSurfaces(mTransaction);
                     }
                     orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
-                    //TODO (multidisplay): Magnification is supported only for the default display.
-                    if (accessibilityController != null && dc.isDefaultDisplay) {
-                        accessibilityController.drawMagnifiedRegionBorderIfNeededLocked();
+                    if (accessibilityController != null) {
+                        accessibilityController.drawMagnifiedRegionBorderIfNeededLocked(displayId);
                     }
                 }
 

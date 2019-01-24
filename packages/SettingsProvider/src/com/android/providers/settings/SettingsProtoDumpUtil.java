@@ -1109,9 +1109,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.POWER_MANAGER_CONSTANTS,
                 GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.PRIV_APP_OOB_ENABLED,
-                GlobalSettingsProto.PRIV_APP_OOB_ENABLED);
 
         final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,
@@ -2376,6 +2373,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SILENCE_GESTURE,
                 SecureSettingsProto.SILENCE_GESTURE_ENABLED);
+
+        dumpSetting(s, p,
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                SecureSettingsProto.THEME_CUSTOMIZATION_OVERLAY_PACKAGES);
 
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doReturn;
 import android.content.Context;
 import android.net.ipmemorystore.Blob;
 import android.net.ipmemorystore.IOnBlobRetrievedListener;
+import android.net.ipmemorystore.IOnL2KeyResponseListener;
 import android.net.ipmemorystore.IOnNetworkAttributesRetrieved;
 import android.net.ipmemorystore.IOnSameNetworkResponseListener;
 import android.net.ipmemorystore.IOnStatusListener;
@@ -67,7 +68,14 @@ public class IpMemoryStoreServiceTest {
     private static final String TEST_CLIENT_ID = "testClientId";
     private static final String TEST_DATA_NAME = "testData";
 
-    private static final String[] FAKE_KEYS = { "fakeKey1", "fakeKey2", "fakeKey3", "fakeKey4" };
+    private static final int FAKE_KEY_COUNT = 20;
+    private static final String[] FAKE_KEYS;
+    static {
+        FAKE_KEYS = new String[FAKE_KEY_COUNT];
+        for (int i = 0; i < FAKE_KEYS.length; ++i) {
+            FAKE_KEYS[i] = "fakeKey" + i;
+        }
+    }
 
     @Mock
     private Context mMockContext;
@@ -170,6 +178,25 @@ public class IpMemoryStoreServiceTest {
         };
     }
 
+    /** Helper method to make an IOnL2KeyResponseListener */
+    private interface OnL2KeyResponseListener {
+        void onL2KeyResponse(Status status, String key);
+    }
+    private IOnL2KeyResponseListener onL2KeyResponse(final OnL2KeyResponseListener functor) {
+        return new IOnL2KeyResponseListener() {
+            @Override
+            public void onL2KeyResponse(final StatusParcelable status, final String key)
+                    throws RemoteException {
+                functor.onL2KeyResponse(new Status(status), key);
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+    }
+
     // Helper method to factorize some boilerplate
     private void doLatched(final String timeoutMessage, final Consumer<CountDownLatch> functor) {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -195,12 +222,9 @@ public class IpMemoryStoreServiceTest {
     }
 
     @Test
-    public void testNetworkAttributes() {
+    public void testNetworkAttributes() throws UnknownHostException {
         final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
-        try {
-            na.setAssignedV4Address(
-                    (Inet4Address) Inet4Address.getByAddress(new byte[]{1, 2, 3, 4}));
-        } catch (UnknownHostException e) { /* Can't happen */ }
+        na.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
         na.setGroupHint("hint1");
         na.setMtu(219);
         final String l2Key = FAKE_KEYS[0];
@@ -218,10 +242,8 @@ public class IpMemoryStoreServiceTest {
                         })));
 
         final NetworkAttributes.Builder na2 = new NetworkAttributes.Builder();
-        try {
-            na.setDnsAddresses(Arrays.asList(
-                    new InetAddress[] {Inet6Address.getByName("0A1C:2E40:480A::1CA6")}));
-        } catch (UnknownHostException e) { /* Still can't happen */ }
+        na.setDnsAddresses(Arrays.asList(
+                new InetAddress[] {Inet6Address.getByName("0A1C:2E40:480A::1CA6")}));
         final NetworkAttributes attributes2 = na2.build();
         storeAttributes("Did not complete storing attributes 2", l2Key, attributes2);
 
@@ -333,8 +355,93 @@ public class IpMemoryStoreServiceTest {
     }
 
     @Test
-    public void testFindL2Key() {
-        // TODO : implement this
+    public void testFindL2Key() throws UnknownHostException {
+        final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
+        na.setGroupHint("hint0");
+        storeAttributes(FAKE_KEYS[0], na.build());
+
+        na.setDnsAddresses(Arrays.asList(
+                new InetAddress[] {Inet6Address.getByName("8D56:9AF1::08EE:20F1")}));
+        na.setMtu(219);
+        storeAttributes(FAKE_KEYS[1], na.build());
+        na.setMtu(null);
+        na.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
+        na.setDnsAddresses(Arrays.asList(
+                new InetAddress[] {Inet6Address.getByName("0A1C:2E40:480A::1CA6")}));
+        na.setGroupHint("hint1");
+        storeAttributes(FAKE_KEYS[2], na.build());
+        na.setMtu(219);
+        storeAttributes(FAKE_KEYS[3], na.build());
+        na.setMtu(240);
+        storeAttributes(FAKE_KEYS[4], na.build());
+        na.setAssignedV4Address((Inet4Address) Inet4Address.getByName("5.6.7.8"));
+        storeAttributes(FAKE_KEYS[5], na.build());
+
+        // Matches key 5 exactly
+        doLatched("Did not finish finding L2Key", latch ->
+                mService.findL2Key(na.build().toParcelable(), onL2KeyResponse((status, key) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertEquals(FAKE_KEYS[5], key);
+                })));
+
+        // MTU matches key 4 but v4 address matches key 5. The latter is stronger.
+        na.setMtu(240);
+        doLatched("Did not finish finding L2Key", latch ->
+                mService.findL2Key(na.build().toParcelable(), onL2KeyResponse((status, key) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertEquals(FAKE_KEYS[5], key);
+                })));
+
+        // Closest to key 3 (indeed, identical)
+        na.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
+        na.setMtu(219);
+        doLatched("Did not finish finding L2Key", latch ->
+                mService.findL2Key(na.build().toParcelable(), onL2KeyResponse((status, key) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertEquals(FAKE_KEYS[3], key);
+                })));
+
+        // Group hint alone must not be strong enough to override the rest
+        na.setGroupHint("hint0");
+        doLatched("Did not finish finding L2Key", latch ->
+                mService.findL2Key(na.build().toParcelable(), onL2KeyResponse((status, key) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertEquals(FAKE_KEYS[3], key);
+                })));
+
+        // Still closest to key 3, though confidence is lower
+        na.setGroupHint("hint1");
+        na.setDnsAddresses(null);
+        doLatched("Did not finish finding L2Key", latch ->
+                mService.findL2Key(na.build().toParcelable(), onL2KeyResponse((status, key) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertEquals(FAKE_KEYS[3], key);
+                })));
+
+        // But changing the MTU makes this closer to key 4
+        na.setMtu(240);
+        doLatched("Did not finish finding L2Key", latch ->
+                mService.findL2Key(na.build().toParcelable(), onL2KeyResponse((status, key) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertEquals(FAKE_KEYS[4], key);
+                })));
+
+        // MTU alone not strong enough to make this group-close
+        na.setGroupHint(null);
+        na.setDnsAddresses(null);
+        na.setAssignedV4Address(null);
+        doLatched("Did not finish finding L2Key", latch ->
+                mService.findL2Key(na.build().toParcelable(), onL2KeyResponse((status, key) -> {
+                    assertTrue("Retrieve network sameness not successful : " + status.resultCode,
+                            status.isSuccess());
+                    assertNull(key);
+                })));
     }
 
     private void assertNetworksSameness(final String key1, final String key2, final int sameness) {
@@ -349,7 +456,7 @@ public class IpMemoryStoreServiceTest {
     @Test
     public void testIsSameNetwork() throws UnknownHostException {
         final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
-        na.setAssignedV4Address((Inet4Address) Inet4Address.getByAddress(new byte[]{1, 2, 3, 4}));
+        na.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
         na.setGroupHint("hint1");
         na.setMtu(219);
         na.setDnsAddresses(Arrays.asList(Inet6Address.getByName("0A1C:2E40:480A::1CA6")));

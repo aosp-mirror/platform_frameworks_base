@@ -17,6 +17,7 @@
 package android.view.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+import static android.util.DebugUtils.flagsToString;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 
@@ -25,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.ComponentName;
@@ -77,6 +79,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 //TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
@@ -334,6 +337,25 @@ public final class AutofillManager {
      */
     @TestApi
     public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
+
+    /**
+     * Displays the Augment Autofill window using the same mechanism (such as a popup-window
+     * attached to the focused view) as the standard autofill.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_SMART_SUGGESTION_SYSTEM = 0x1;
+
+    /** @hide */ // TODO(b/123233342): remove when not used anymore
+    public static final int FLAG_SMART_SUGGESTION_LEGACY = 0x2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_SMART_SUGGESTION_" }, value = {
+            FLAG_SMART_SUGGESTION_SYSTEM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SmartSuggestionMode {}
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -1686,7 +1708,7 @@ public final class AutofillManager {
                 final IAutoFillManager service = mService;
                 final IAutoFillManagerClient serviceClient = mServiceClient;
                 mServiceClientCleaner = Cleaner.create(this, () -> {
-                    // TODO(b/111330312): call service to also remove reference to
+                    // TODO(b/123100811): call service to also remove reference to
                     // mAugmentedAutofillServiceClient
                     try {
                         service.removeClient(serviceClient, userId);
@@ -1746,6 +1768,108 @@ public final class AutofillManager {
         }
     }
 
+    /**
+     * Defines whether augmented autofill should be triggered for activities with such
+     * {@link android.content.ComponentName}.
+     *
+     * <p>Useful to blacklist a particular activity.
+     *
+     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
+     * service, and it's ignored if the caller isn't it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+    //in the same package as the test, and that module is compiled with SDK=test_current
+    public void setActivityAugmentedAutofillEnabled(@NonNull ComponentName activity,
+            boolean enabled) {
+        // TODO(b/123100824): implement
+    }
+
+    /**
+     * Defines whether augmented autofill should be triggered for activities of the app with such
+     * {@code packageName}.
+     *
+     * <p>Useful to blacklist any activity from a particular app.
+     *
+     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
+     * service, and it's ignored if the caller isn't it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+    //in the same package as the test, and that module is compiled with SDK=test_current
+    public void setPackageAugmentedAutofillEnabled(@NonNull String packageName, boolean enabled) {
+        // TODO(b/123100824): implement
+    }
+
+    /**
+     * Explicitly limits augmented autofill to the given packages and activities.
+     *
+     * <p>When the whitelist is set, it overrides the values passed to
+     * {@link #setActivityAugmentedAutofillEnabled(ComponentName, boolean)}
+     * and {@link #setPackageAugmentedAutofillEnabled(String, boolean)}.
+     *
+     * <p>To reset the whitelist, call it passing {@code null} to both arguments.
+     *
+     * <p>Useful when the service wants to restrict augmented autofill to a category of apps, like
+     * apps that uses addresses. For example, if the service wants to support augmented autofill on
+     * all activities of app {@code AddressApp1} and just activities {@code act1} and {@code act2}
+     * of {@code AddressApp2}, it would call:
+     * {@code setAugmentedAutofillWhitelist(Arrays.asList("AddressApp1"),
+     * Arrays.asList(new ComponentName("AddressApp2", "act1"),
+     * new ComponentName("AddressApp2", "act2")));}
+     *
+     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
+     * service, and it's ignored if the caller isn't it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
+    //in the same package as the test, and that module is compiled with SDK=test_current
+    public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
+            @Nullable List<ComponentName> activities) {
+        // TODO(b/123100824): implement
+    }
+
+    /**
+     * Gets the activities where augmented autofill was disabled by
+     * {@link #setActivityAugmentedAutofillEnabled(ComponentName, boolean)}.
+     *
+     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
+     * service, and it's ignored if the caller isn't it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @NonNull
+    public Set<ComponentName> getAugmentedAutofillDisabledActivities() {
+        return null; // TODO(b/123100824): implement
+    }
+
+    /**
+     * Gets the apps where content capture was disabled by
+     * {@link #setPackageAugmentedAutofillEnabled(String, boolean)}.
+     *
+     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
+     * service, and it's ignored if the caller isn't it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @NonNull
+    public Set<String> getAugmentedAutofillDisabledPackages() {
+        return null; // TODO(b/123100824): implement
+    }
+
     private void requestShowFillUi(int sessionId, AutofillId id, int width, int height,
             Rect anchorBounds, IAutofillWindowPresenter presenter) {
         final View anchor = findView(id);
@@ -1769,8 +1893,8 @@ public final class AutofillManager {
         }
 
         if (callback != null) {
-            if (id.isVirtual()) {
-                callback.onAutofillEvent(anchor, id.getVirtualChildId(),
+            if (id.isVirtualInt()) {
+                callback.onAutofillEvent(anchor, id.getVirtualChildIntId(),
                         AutofillCallback.EVENT_INPUT_SHOWN);
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_SHOWN);
@@ -1896,7 +2020,7 @@ public final class AutofillManager {
                     failedIds.add(id);
                     continue;
                 }
-                if (id.isVirtual()) {
+                if (id.isVirtualInt()) {
                     if (virtualValues == null) {
                         // Most likely there will be just one view with virtual children.
                         virtualValues = new ArrayMap<>(1);
@@ -1907,7 +2031,7 @@ public final class AutofillManager {
                         valuesByParent = new SparseArray<>(5);
                         virtualValues.put(view, valuesByParent);
                     }
-                    valuesByParent.put(id.getVirtualChildId(), value);
+                    valuesByParent.put(id.getVirtualChildIntId(), value);
                 } else {
                     // Mark the view as to be autofilled with 'value'
                     if (mLastAutofilledData == null) {
@@ -2142,8 +2266,8 @@ public final class AutofillManager {
         }
 
         if (callback != null) {
-            if (id.isVirtual()) {
-                callback.onAutofillEvent(anchor, id.getVirtualChildId(),
+            if (id.isVirtualInt()) {
+                callback.onAutofillEvent(anchor, id.getVirtualChildIntId(),
                         AutofillCallback.EVENT_INPUT_HIDDEN);
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_HIDDEN);
@@ -2169,8 +2293,8 @@ public final class AutofillManager {
         }
 
         if (callback != null) {
-            if (id.isVirtual()) {
-                callback.onAutofillEvent(anchor, id.getVirtualChildId(),
+            if (id.isVirtualInt()) {
+                callback.onAutofillEvent(anchor, id.getVirtualChildIntId(),
                         AutofillCallback.EVENT_INPUT_UNAVAILABLE);
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
@@ -2294,6 +2418,11 @@ public final class AutofillManager {
             default:
                 return "INVALID:" + state;
         }
+    }
+
+    /** @hide */
+    public static String getSmartSuggestionModeToString(@SmartSuggestionMode int flags) {
+        return flagsToString(AutofillManager.class, "FLAG_SMART_SUGGESTION_", flags);
     }
 
     @GuardedBy("mLock")
@@ -2972,7 +3101,6 @@ public final class AutofillManager {
 
         @Override
         public Rect getViewCoordinates(@NonNull AutofillId id) {
-            // TODO(b/111330312): use handler / callback?
             final AutofillManager afm = mAfm.get();
             if (afm == null) return null;
 

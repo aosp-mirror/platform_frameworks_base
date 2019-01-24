@@ -116,7 +116,7 @@ public final class MediaSession {
 
     private final MediaSessionEngine mImpl;
 
-    // Do not change the name of mCallbackWrapper. Support lib accesses this by using reflection.
+    // Do not change the name of mCallback. Support lib accesses this by using reflection.
     @UnsupportedAppUsage
     private Object mCallback;
 
@@ -144,7 +144,7 @@ public final class MediaSession {
             SessionLink sessionLink = manager.createSession(cbLink, tag);
             mImpl = new MediaSessionEngine(context, sessionLink, cbLink, cbStub,
                     context.getResources().getDimensionPixelSize(
-                            com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize));
+                            android.R.dimen.config_mediaMetadataBitmapMaxSize));
         } catch (RuntimeException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }
@@ -160,6 +160,7 @@ public final class MediaSession {
      * @param callback The callback object
      */
     public void setCallback(@Nullable Callback callback) {
+        mCallback = callback == null ? null : new Object();
         mImpl.setCallback(callback);
     }
 
@@ -173,6 +174,7 @@ public final class MediaSession {
      * @param handler The handler that events should be posted on.
      */
     public void setCallback(@Nullable Callback callback, @Nullable Handler handler) {
+        mCallback = callback == null ? null : new Object();
         mImpl.setCallback(callback, handler);
     }
 
@@ -479,7 +481,7 @@ public final class MediaSession {
          * @hide
          */
         @SystemApi
-        ControllerLink getControllerLink() {
+        public ControllerLink getControllerLink() {
             return mControllerLink;
         }
 
@@ -723,7 +725,7 @@ public final class MediaSession {
 
         private QueueItem(Parcel in) {
             mImpl = new MediaSessionEngine.QueueItem(in);
-            mId = in.readLong();
+            mId = mImpl.getQueueId();
         }
 
         /**

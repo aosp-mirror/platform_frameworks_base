@@ -5313,9 +5313,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void updateActivityUsageStats(ActivityRecord activity, int event) {
+        ComponentName taskRoot = null;
+        final TaskRecord task = activity.getTaskRecord();
+        if (task != null) {
+            final ActivityRecord rootActivity = task.getRootActivity();
+            if (rootActivity != null) {
+                taskRoot = rootActivity.mActivityComponent;
+            }
+        }
+
         final Message m = PooledLambda.obtainMessage(
                 ActivityManagerInternal::updateActivityUsageStats, mAmInternal,
-                activity.mActivityComponent, activity.mUserId, event, activity.appToken);
+                activity.mActivityComponent, activity.mUserId, event, activity.appToken, taskRoot);
         mH.sendMessage(m);
     }
 
@@ -6213,30 +6222,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 return;
             }
-            mH.post(() -> {
-                synchronized (mGlobalLock) {
-                    final ActivityDisplay activityDisplay =
-                            mRootActivityContainer.getActivityDisplay(displayId);
-                    if (activityDisplay == null) {
-                        // Call might come when display is not yet added or has been removed.
-                        if (DEBUG_CONFIGURATION) {
-                            Slog.w(TAG, "Trying to update display configuration for non-existing "
-                                    + "displayId=" + displayId);
-                        }
-                        return;
+            synchronized (mGlobalLock) {
+                final ActivityDisplay activityDisplay =
+                        mRootActivityContainer.getActivityDisplay(displayId);
+                if (activityDisplay == null) {
+                    // Call might come when display is not yet added or has been removed.
+                    if (DEBUG_CONFIGURATION) {
+                        Slog.w(TAG, "Trying to update display configuration for non-existing "
+                                + "displayId=" + displayId);
                     }
-                    final WindowProcessController process = mPidMap.get(pid);
-                    if (process == null) {
-                        if (DEBUG_CONFIGURATION) {
-                            Slog.w(TAG, "Trying to update display configuration for invalid "
-                                    + "process, pid=" + pid);
-                        }
-                        return;
-                    }
-                    process.registerDisplayConfigurationListenerLocked(activityDisplay);
+                    return;
                 }
-            });
-
+                final WindowProcessController process = mPidMap.get(pid);
+                if (process == null) {
+                    if (DEBUG_CONFIGURATION) {
+                        Slog.w(TAG, "Trying to update display configuration for invalid "
+                                + "process, pid=" + pid);
+                    }
+                    return;
+                }
+                process.registerDisplayConfigurationListenerLocked(activityDisplay);
+            }
         }
 
         @Override

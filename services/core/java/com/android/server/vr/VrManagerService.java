@@ -65,7 +65,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
-import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 import com.android.server.utils.ManagedApplicationService.LogEvent;
@@ -620,14 +619,6 @@ public class VrManagerService extends SystemService
         public void setStandbyEnabled(boolean standby) {
             enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER);
             VrManagerService.this.setStandbyEnabled(standby);
-        }
-
-        @Override
-        public void setVrInputMethod(ComponentName componentName) {
-            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
-            InputMethodManagerInternal imm =
-                    LocalServices.getService(InputMethodManagerInternal.class);
-            imm.startVrInputMethodNoCheck(componentName);
         }
 
         @Override

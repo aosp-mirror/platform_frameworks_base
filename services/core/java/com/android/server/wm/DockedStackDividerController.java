@@ -36,7 +36,6 @@ import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
 import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 
 import android.content.Context;
@@ -566,9 +565,7 @@ public class DockedStackDividerController {
             mMaximizeMeetFraction = getClipRevealMeetFraction(stack);
             animDuration = (long) (mAnimationDuration * mMaximizeMeetFraction);
         }
-        mService.mH.removeMessages(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED);
-        mService.mH.obtainMessage(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED,
-                minimizedDock ? 1 : 0, 0).sendToTarget();
+        mService.mAtmInternal.notifyDockedStackMinimizedChanged(minimizedDock);
         final int size = mDockedStackListeners.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);

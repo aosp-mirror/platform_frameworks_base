@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -233,6 +234,29 @@ public final class UsageStatsManager {
      */
     @SystemApi
     public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
+
+
+    /**
+     * App usage observers will consider the task root package the source of usage.
+     * @hide
+     */
+    @SystemApi
+    public static final int USAGE_SOURCE_TASK_ROOT_ACTIVITY = 1;
+
+    /**
+     * App usage observers will consider the visible activity's package the source of usage.
+     * @hide
+     */
+    @SystemApi
+    public static final int USAGE_SOURCE_CURRENT_ACTIVITY = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "USAGE_SOURCE_" }, value = {
+            USAGE_SOURCE_TASK_ROOT_ACTIVITY,
+            USAGE_SOURCE_CURRENT_ACTIVITY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UsageSource {}
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static final UsageEvents sEmptyResults = new UsageEvents();
@@ -776,6 +800,38 @@ public final class UsageStatsManager {
         }
     }
 
+    /**
+     * Get what App Usage Observers will consider the source of usage for an activity. Usage Source
+     * is decided at boot and will not change until next boot.
+     * @see #USAGE_SOURCE_TASK_ROOT_ACTIVITY
+     * @see #USAGE_SOURCE_CURRENT_ACTIVITY
+     *
+     * @throws SecurityException if the caller doesn't have the OBSERVE_APP_USAGE permission and
+     *                           is not the profile owner of this user.
+     * @hide
+     */
+    @SystemApi
+    public @UsageSource int getUsageSource() {
+        try {
+            return mService.getUsageSource();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Force the Usage Source be reread from global settings.
+     * @hide
+     */
+    @TestApi
+    public void forceUsageSourceSettingRead() {
+        try {
+            mService.forceUsageSourceSettingRead();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     public static String reasonToString(int standbyReason) {
         StringBuilder sb = new StringBuilder();
@@ -843,6 +899,22 @@ public final class UsageStatsManager {
                 break;
         }
         return sb.toString();
+    }
+
+    /** @hide */
+    public static String usageSourceToString(int usageSource) {
+        switch (usageSource) {
+            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
+                return "TASK_ROOT_ACTIVITY";
+            case USAGE_SOURCE_CURRENT_ACTIVITY:
+                return "CURRENT_ACTIVITY";
+            default:
+                StringBuilder sb = new StringBuilder();
+                sb.append("UNKNOWN(");
+                sb.append(usageSource);
+                sb.append(")");
+                return sb.toString();
+        }
     }
 
     /**

@@ -45,7 +45,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getUserSelectedOutgoingPhoneAccount
      */
-    PhoneAccountHandle getUserSelectedOutgoingPhoneAccount();
+    PhoneAccountHandle getUserSelectedOutgoingPhoneAccount(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#setUserSelectedOutgoingPhoneAccount
@@ -285,6 +285,8 @@ interface ITelecomService {
      */
     boolean isInEmergencyCall();
 
+    oneway void reportNuisanceCallStatus(in Uri address, boolean isNuisance, String callingPackage);
+
     /**
      * @see TelecomServiceImpl#handleCallIntent
      */
@@ -299,4 +301,5 @@ interface ITelecomService {
     void addOrRemoveTestCallCompanionApp(String packageName, boolean isAdded);
 
     void setTestAutoModeApp(String packageName);
+
 }

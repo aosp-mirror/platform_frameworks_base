@@ -63,6 +63,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManager.SmartSuggestionMode;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
@@ -72,7 +73,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
-import com.android.server.autofill.AutofillManagerService.SmartSuggestionMode;
 import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractPerUserSystemService;
@@ -855,7 +855,6 @@ final class AutofillManagerServiceImpl
 
     @GuardedBy("mLock")
     @SmartSuggestionMode int getSupportedSmartSuggestionModesLocked() {
-        // TODO(b/111330312): once we support IME, we need to set it per-user (OR'ed with master)
         return mMaster.getSupportedSmartSuggestionModesLocked();
     }
 
@@ -1049,7 +1048,7 @@ final class AutofillManagerServiceImpl
                     componentName, mUserId, new RemoteAugmentedAutofillServiceCallbacks() {
                         @Override
                         public void onServiceDied(@NonNull RemoteAugmentedAutofillService service) {
-                            // TODO(b/111330312): properly implement
+                            // TODO(b/123100811): properly implement
                             Slog.w(TAG, "remote augmented autofill service died");
                         }
                     }, mMaster.isInstantServiceAllowed(), mMaster.verbose);

@@ -1362,16 +1362,23 @@ public class DevicePolicyManager {
     public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
 
     /**
-     * Activity action: have the user enter a new password. This activity should
-     * be launched after using {@link #setPasswordQuality(ComponentName, int)},
-     * or {@link #setPasswordMinimumLength(ComponentName, int)} to have the user
-     * enter a new password that meets the current requirements. You can use
-     * {@link #isActivePasswordSufficient()} to determine whether you need to
-     * have the user select a new password in order to meet the current
-     * constraints. Upon being resumed from this activity, you can check the new
+     * Activity action: have the user enter a new password.
+     *
+     * <p>For admin apps, this activity should be launched after using {@link
+     * #setPasswordQuality(ComponentName, int)}, or {@link
+     * #setPasswordMinimumLength(ComponentName, int)} to have the user enter a new password that
+     * meets the current requirements. You can use {@link #isActivePasswordSufficient()} to
+     * determine whether you need to have the user select a new password in order to meet the
+     * current constraints. Upon being resumed from this activity, you can check the new
      * password characteristics to see if they are sufficient.
      *
-     * If the intent is launched from within a managed profile with a profile
+     * <p>Non-admin apps can use {@link #getPasswordComplexity()} to check the current screen lock
+     * complexity, and use this activity with extra {@link #EXTRA_PASSWORD_COMPLEXITY} to suggest
+     * to users how complex the app wants the new screen lock to be. Note that both {@link
+     * #getPasswordComplexity()} and the extra {@link #EXTRA_PASSWORD_COMPLEXITY} require the
+     * calling app to have the permission {@link permission#GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY}.
+     *
+     * <p>If the intent is launched from within a managed profile with a profile
      * owner built against {@link android.os.Build.VERSION_CODES#M} or before,
      * this will trigger entering a new password for the parent of the profile.
      * For all other cases it will trigger entering a new password for the user
@@ -1382,6 +1389,24 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PASSWORD
             = "android.app.action.SET_NEW_PASSWORD";
+
+    /**
+     * An integer indicating the complexity level of the new password an app would like the user to
+     * set when launching the action {@link #ACTION_SET_NEW_PASSWORD}.
+     *
+     * <p>Must be one of
+     * <ul>
+     *     <li>{@link #PASSWORD_COMPLEXITY_HIGH}
+     *     <li>{@link #PASSWORD_COMPLEXITY_MEDIUM}
+     *     <li>{@link #PASSWORD_COMPLEXITY_LOW}
+     *     <li>{@link #PASSWORD_COMPLEXITY_NONE}
+     * </ul>
+     *
+     * <p>If an invalid value is used, it will be treated as {@link #PASSWORD_COMPLEXITY_NONE}.
+     */
+    @RequiresPermission(android.Manifest.permission.GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY)
+    public static final String EXTRA_PASSWORD_COMPLEXITY =
+            "android.app.extra.PASSWORD_COMPLEXITY";
 
     /**
      * Constant for {@link #getPasswordComplexity()}: no password.
@@ -2513,6 +2538,9 @@ public class DevicePolicyManager {
      * requested quality constant (between the policy set here, the user's preference, and any other
      * considerations) is the one that is in effect.
      * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
@@ -2548,6 +2576,9 @@ public class DevicePolicyManager {
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
      * restrictions on the parent profile.
      *
+     * <p>Note: on devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature,
+     * the password is always treated as empty.
+     *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
      */
@@ -2580,6 +2611,9 @@ public class DevicePolicyManager {
      * {@link #PASSWORD_QUALITY_ALPHANUMERIC}, or {@link #PASSWORD_QUALITY_COMPLEX} with
      * {@link #setPasswordQuality}.
      * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
@@ -2609,11 +2643,13 @@ public class DevicePolicyManager {
      * restrictions on this user and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
      * restrictions on the parent profile.
      *
-     * user and its profiles or a particular one.
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
      */
@@ -2643,6 +2679,9 @@ public class DevicePolicyManager {
      * {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
      * setting this value. This constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
+     * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
@@ -2677,6 +2716,9 @@ public class DevicePolicyManager {
      * {@link #setPasswordMinimumUpperCase(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
@@ -2714,6 +2756,9 @@ public class DevicePolicyManager {
      * setting this value. This constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
      * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
@@ -2747,6 +2792,9 @@ public class DevicePolicyManager {
      * {@link #setPasswordMinimumLowerCase(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
@@ -2784,6 +2832,9 @@ public class DevicePolicyManager {
      * only imposed if the administrator has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
      * {@link #setPasswordQuality}. The default value is 1.
      * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
@@ -2817,6 +2868,9 @@ public class DevicePolicyManager {
      * {@link #setPasswordMinimumLetters(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
@@ -2853,6 +2907,9 @@ public class DevicePolicyManager {
      * setting this value. This constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 1.
      * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
@@ -2886,6 +2943,9 @@ public class DevicePolicyManager {
      * {@link #setPasswordMinimumNumeric(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
@@ -2922,6 +2982,9 @@ public class DevicePolicyManager {
      * only imposed if the administrator has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
      * {@link #setPasswordQuality}. The default value is 1.
      * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
@@ -2954,6 +3017,9 @@ public class DevicePolicyManager {
      * set by {@link #setPasswordMinimumSymbols(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
@@ -2990,6 +3056,9 @@ public class DevicePolicyManager {
      * setting this value. This constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
      * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
+     * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
@@ -3023,6 +3092,9 @@ public class DevicePolicyManager {
      * {@link #setPasswordMinimumNonLetter(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
@@ -3059,6 +3131,9 @@ public class DevicePolicyManager {
      * only imposed if the administrator has also requested either {@link #PASSWORD_QUALITY_NUMERIC}
      * , {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX} {@link #PASSWORD_QUALITY_ALPHABETIC}, or
      * {@link #PASSWORD_QUALITY_ALPHANUMERIC} with {@link #setPasswordQuality}.
+     * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
@@ -3112,6 +3187,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
      *             does not use {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD}
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void setPasswordExpirationTimeout(@NonNull ComponentName admin, long timeout) {
         if (mService != null) {
             try {
@@ -3136,6 +3212,7 @@ public class DevicePolicyManager {
      * @param admin The name of the admin component to check, or {@code null} to aggregate all admins.
      * @return The timeout for the given admin or the minimum of all timeouts
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public long getPasswordExpirationTimeout(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
@@ -3160,6 +3237,7 @@ public class DevicePolicyManager {
      * @param admin The name of the admin component to check, or {@code null} to aggregate all admins.
      * @return The password expiration time, in milliseconds since epoch.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public long getPasswordExpiration(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
@@ -3184,12 +3262,14 @@ public class DevicePolicyManager {
      * all admins.
      * @return The length of the password history
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public int getPasswordHistoryLength(@Nullable ComponentName admin) {
         return getPasswordHistoryLength(admin, myUserId());
     }
 
     /** @hide per-user version */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public int getPasswordHistoryLength(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -3204,10 +3284,16 @@ public class DevicePolicyManager {
     /**
      * Return the maximum password length that the device supports for a
      * particular password quality.
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always empty.
      * @param quality The quality being interrogated.
      * @return Returns the maximum length that the user can enter.
      */
     public int getPasswordMaximumLength(int quality) {
+        PackageManager pm = mContext.getPackageManager();
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ID_ATTESTATION)) {
+            return 0;
+        }
         // Kind-of arbitrary.
         return 16;
     }
@@ -3217,6 +3303,10 @@ public class DevicePolicyManager {
      * requirements (e.g. quality, minimum length) that have been requested by the admins of this
      * user and its participating profiles. Restrictions on profiles that have a separate challenge
      * are not taken into account. The user must be unlocked in order to perform the check.
+     * <p>
+     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty - i.e. this method will always return false on such
+     * devices, provided any password requirements were set.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
@@ -3249,6 +3339,9 @@ public class DevicePolicyManager {
      * screen lock complexity of the parent will be returned. However, this API does not support
      * explicitly querying the parent profile screen lock complexity via {@link
      * #getParentProfileInstance}.
+     *
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty.
      *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException if the calling application does not have the permission
@@ -3329,6 +3422,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN}
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public int getCurrentFailedPasswordAttempts() {
         return getCurrentFailedPasswordAttempts(myUserId());
     }
@@ -3396,6 +3490,7 @@ public class DevicePolicyManager {
      *             both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
      *             {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void setMaximumFailedPasswordsForWipe(@NonNull ComponentName admin, int num) {
         if (mService != null) {
             try {
@@ -3419,12 +3514,14 @@ public class DevicePolicyManager {
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public int getMaximumFailedPasswordsForWipe(@Nullable ComponentName admin) {
         return getMaximumFailedPasswordsForWipe(admin, myUserId());
     }
 
     /** @hide per-user version */
     @UnsupportedAppUsage
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public int getMaximumFailedPasswordsForWipe(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -3444,6 +3541,7 @@ public class DevicePolicyManager {
      * user passed in.
      * @hide Used only by Keyguard
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public int getProfileWithMinimumFailedPasswordsForWipe(int userHandle) {
         if (mService != null) {
             try {
@@ -3514,6 +3612,7 @@ public class DevicePolicyManager {
      *             that uses {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD}
      * @throws IllegalStateException if the calling user is locked or has a managed profile.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public boolean resetPassword(String password, int flags) {
         throwIfParentInstance("resetPassword");
         if (mService != null) {
@@ -3557,6 +3656,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if admin is not a device or profile owner.
      * @throws IllegalArgumentException if the supplied token is invalid.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public boolean setResetPasswordToken(ComponentName admin, byte[] token) {
         throwIfParentInstance("setResetPasswordToken");
         if (mService != null) {
@@ -3576,6 +3676,7 @@ public class DevicePolicyManager {
      * @return true if the operation is successful, false otherwise.
      * @throws SecurityException if admin is not a device or profile owner.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public boolean clearResetPasswordToken(ComponentName admin) {
         throwIfParentInstance("clearResetPasswordToken");
         if (mService != null) {
@@ -3596,6 +3697,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if admin is not a device or profile owner.
      * @throws IllegalStateException if no token has been set.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public boolean isResetPasswordTokenActive(ComponentName admin) {
         throwIfParentInstance("isResetPasswordTokenActive");
         if (mService != null) {
@@ -3637,6 +3739,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if admin is not a device or profile owner.
      * @throws IllegalStateException if the provided token is not valid.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public boolean resetPasswordWithToken(@NonNull ComponentName admin, String password,
             byte[] token, int flags) {
         throwIfParentInstance("resetPassword");
@@ -3742,6 +3845,7 @@ public class DevicePolicyManager {
      *
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void setRequiredStrongAuthTimeout(@NonNull ComponentName admin,
             long timeoutMs) {
         if (mService != null) {
@@ -3766,12 +3870,14 @@ public class DevicePolicyManager {
      *         across all participating admins.
      * @return The timeout in milliseconds or 0 if not configured for the provided admin.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin) {
         return getRequiredStrongAuthTimeout(admin, myUserId());
     }
 
     /** @hide per-user version */
     @UnsupportedAppUsage
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin, @UserIdInt int userId) {
         if (mService != null) {
             try {
@@ -5350,6 +5456,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
         if (mService != null) {
             try {
@@ -5363,6 +5470,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void reportPasswordChanged(@UserIdInt int userId) {
         if (mService != null) {
             try {
@@ -5377,6 +5485,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void reportFailedPasswordAttempt(int userHandle) {
         if (mService != null) {
             try {
@@ -5391,6 +5500,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void reportSuccessfulPasswordAttempt(int userHandle) {
         if (mService != null) {
             try {
@@ -5404,6 +5514,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void reportFailedBiometricAttempt(int userHandle) {
         if (mService != null) {
             try {
@@ -5417,6 +5528,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void reportSuccessfulBiometricAttempt(int userHandle) {
         if (mService != null) {
             try {
@@ -6383,6 +6495,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES}
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public void setTrustAgentConfiguration(@NonNull ComponentName admin,
             @NonNull ComponentName target, PersistableBundle configuration) {
         if (mService != null) {
@@ -6412,6 +6525,7 @@ public class DevicePolicyManager {
      * @param agent Which component to get enabled features for.
      * @return configuration for the given trust agent.
      */
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public @Nullable List<PersistableBundle> getTrustAgentConfiguration(
             @Nullable ComponentName admin, @NonNull ComponentName agent) {
         return getTrustAgentConfiguration(admin, agent, myUserId());
@@ -6419,6 +6533,7 @@ public class DevicePolicyManager {
 
     /** @hide per-user version */
     @UnsupportedAppUsage
+    @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public @Nullable List<PersistableBundle> getTrustAgentConfiguration(
             @Nullable ComponentName admin, @NonNull ComponentName agent, int userHandle) {
         if (mService != null) {

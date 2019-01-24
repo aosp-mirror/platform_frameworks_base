@@ -16,46 +16,45 @@
 
 package android.net.util;
 
-import static android.net.util.NetworkConstants.ARP_HWTYPE_ETHER;
-import static android.net.util.NetworkConstants.ARP_PAYLOAD_LEN;
-import static android.net.util.NetworkConstants.ARP_REPLY;
-import static android.net.util.NetworkConstants.ARP_REQUEST;
-import static android.net.util.NetworkConstants.DHCP4_CLIENT_PORT;
-import static android.net.util.NetworkConstants.ETHER_ADDR_LEN;
-import static android.net.util.NetworkConstants.ETHER_DST_ADDR_OFFSET;
-import static android.net.util.NetworkConstants.ETHER_HEADER_LEN;
-import static android.net.util.NetworkConstants.ETHER_SRC_ADDR_OFFSET;
-import static android.net.util.NetworkConstants.ETHER_TYPE_ARP;
-import static android.net.util.NetworkConstants.ETHER_TYPE_IPV4;
-import static android.net.util.NetworkConstants.ETHER_TYPE_IPV6;
-import static android.net.util.NetworkConstants.ETHER_TYPE_OFFSET;
-import static android.net.util.NetworkConstants.ICMPV6_HEADER_MIN_LEN;
-import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_LENGTH_SCALING_FACTOR;
-import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_MIN_LENGTH;
-import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_MTU;
-import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_SLLA;
-import static android.net.util.NetworkConstants.ICMPV6_ND_OPTION_TLLA;
-import static android.net.util.NetworkConstants.ICMPV6_NEIGHBOR_ADVERTISEMENT;
-import static android.net.util.NetworkConstants.ICMPV6_NEIGHBOR_SOLICITATION;
-import static android.net.util.NetworkConstants.ICMPV6_ROUTER_ADVERTISEMENT;
-import static android.net.util.NetworkConstants.ICMPV6_ROUTER_SOLICITATION;
-import static android.net.util.NetworkConstants.IPV4_ADDR_LEN;
-import static android.net.util.NetworkConstants.IPV4_DST_ADDR_OFFSET;
-import static android.net.util.NetworkConstants.IPV4_FLAGS_OFFSET;
-import static android.net.util.NetworkConstants.IPV4_FRAGMENT_MASK;
-import static android.net.util.NetworkConstants.IPV4_HEADER_MIN_LEN;
-import static android.net.util.NetworkConstants.IPV4_IHL_MASK;
-import static android.net.util.NetworkConstants.IPV4_PROTOCOL_OFFSET;
-import static android.net.util.NetworkConstants.IPV4_SRC_ADDR_OFFSET;
-import static android.net.util.NetworkConstants.IPV6_ADDR_LEN;
-import static android.net.util.NetworkConstants.IPV6_HEADER_LEN;
-import static android.net.util.NetworkConstants.IPV6_PROTOCOL_OFFSET;
-import static android.net.util.NetworkConstants.IPV6_SRC_ADDR_OFFSET;
-import static android.net.util.NetworkConstants.UDP_HEADER_LEN;
-import static android.net.util.NetworkConstants.asString;
-import static android.net.util.NetworkConstants.asUint;
 import static android.system.OsConstants.IPPROTO_ICMPV6;
 import static android.system.OsConstants.IPPROTO_UDP;
+
+import static com.android.server.util.NetworkStackConstants.ARP_HWTYPE_ETHER;
+import static com.android.server.util.NetworkStackConstants.ARP_PAYLOAD_LEN;
+import static com.android.server.util.NetworkStackConstants.ARP_REPLY;
+import static com.android.server.util.NetworkStackConstants.ARP_REQUEST;
+import static com.android.server.util.NetworkStackConstants.DHCP4_CLIENT_PORT;
+import static com.android.server.util.NetworkStackConstants.ETHER_ADDR_LEN;
+import static com.android.server.util.NetworkStackConstants.ETHER_DST_ADDR_OFFSET;
+import static com.android.server.util.NetworkStackConstants.ETHER_HEADER_LEN;
+import static com.android.server.util.NetworkStackConstants.ETHER_SRC_ADDR_OFFSET;
+import static com.android.server.util.NetworkStackConstants.ETHER_TYPE_ARP;
+import static com.android.server.util.NetworkStackConstants.ETHER_TYPE_IPV4;
+import static com.android.server.util.NetworkStackConstants.ETHER_TYPE_IPV6;
+import static com.android.server.util.NetworkStackConstants.ETHER_TYPE_OFFSET;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_HEADER_MIN_LEN;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_ND_OPTION_LENGTH_SCALING_FACTOR;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_ND_OPTION_MIN_LENGTH;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_ND_OPTION_MTU;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_ND_OPTION_SLLA;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_ND_OPTION_TLLA;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_NEIGHBOR_ADVERTISEMENT;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_NEIGHBOR_SOLICITATION;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_ROUTER_ADVERTISEMENT;
+import static com.android.server.util.NetworkStackConstants.ICMPV6_ROUTER_SOLICITATION;
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_LEN;
+import static com.android.server.util.NetworkStackConstants.IPV4_DST_ADDR_OFFSET;
+import static com.android.server.util.NetworkStackConstants.IPV4_FLAGS_OFFSET;
+import static com.android.server.util.NetworkStackConstants.IPV4_FRAGMENT_MASK;
+import static com.android.server.util.NetworkStackConstants.IPV4_HEADER_MIN_LEN;
+import static com.android.server.util.NetworkStackConstants.IPV4_IHL_MASK;
+import static com.android.server.util.NetworkStackConstants.IPV4_PROTOCOL_OFFSET;
+import static com.android.server.util.NetworkStackConstants.IPV4_SRC_ADDR_OFFSET;
+import static com.android.server.util.NetworkStackConstants.IPV6_ADDR_LEN;
+import static com.android.server.util.NetworkStackConstants.IPV6_HEADER_LEN;
+import static com.android.server.util.NetworkStackConstants.IPV6_PROTOCOL_OFFSET;
+import static com.android.server.util.NetworkStackConstants.IPV6_SRC_ADDR_OFFSET;
+import static com.android.server.util.NetworkStackConstants.UDP_HEADER_LEN;
 
 import android.net.MacAddress;
 import android.net.dhcp.DhcpPacket;
@@ -411,5 +410,26 @@ public class ConnectivityPacketSummary {
 
         final String MAC48_FORMAT = "%02x:%02x:%02x:%02x:%02x:%02x";
         return String.format(MAC48_FORMAT, printableBytes);
+    }
+
+    /**
+     * Convenience method to convert an int to a String.
+     */
+    public static String asString(int i) {
+        return Integer.toString(i);
+    }
+
+    /**
+     * Convenience method to read a byte as an unsigned int.
+     */
+    public static int asUint(byte b) {
+        return (b & 0xff);
+    }
+
+    /**
+     * Convenience method to read a short as an unsigned int.
+     */
+    public static int asUint(short s) {
+        return (s & 0xffff);
     }
 }

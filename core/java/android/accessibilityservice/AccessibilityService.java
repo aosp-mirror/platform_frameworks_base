@@ -37,6 +37,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -382,7 +383,8 @@ public abstract class AccessibilityService extends Service {
         void init(int connectionId, IBinder windowToken);
         boolean onGesture(int gestureId);
         boolean onKeyEvent(KeyEvent event);
-        void onMagnificationChanged(@NonNull Region region,
+        /** Magnification changed callbacks for different displays */
+        void onMagnificationChanged(int displayId, @NonNull Region region,
                 float scale, float centerX, float centerY);
         void onSoftKeyboardShowModeChanged(int showMode);
         void onPerformGestureResult(int sequence, boolean completedSuccessfully);
@@ -452,7 +454,9 @@ public abstract class AccessibilityService extends Service {
 
     private WindowManager mWindowManager;
 
-    private MagnificationController mMagnificationController;
+    /** List of magnification controllers, mapping from displayId -> MagnificationController. */
+    private final SparseArray<MagnificationController> mMagnificationControllers =
+            new SparseArray<>(0);
     private SoftKeyboardController mSoftKeyboardController;
     private AccessibilityButtonController mAccessibilityButtonController;
 
@@ -483,8 +487,10 @@ public abstract class AccessibilityService extends Service {
      * client code.
      */
     private void dispatchServiceConnected() {
-        if (mMagnificationController != null) {
-            mMagnificationController.onServiceConnected();
+        synchronized (mLock) {
+            for (int i = 0; i < mMagnificationControllers.size(); i++) {
+                mMagnificationControllers.valueAt(i).onServiceConnectedLocked();
+            }
         }
         if (mSoftKeyboardController != null) {
             mSoftKeyboardController.onServiceConnected();
@@ -652,11 +658,34 @@ public abstract class AccessibilityService extends Service {
      */
     @NonNull
     public final MagnificationController getMagnificationController() {
+        return getMagnificationController(Display.DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Returns the magnification controller of specified logical display, which may be used to
+     * query and modify the state of display magnification.
+     * <p>
+     * <strong>Note:</strong> In order to control magnification, your service
+     * must declare the capability by setting the
+     * {@link android.R.styleable#AccessibilityService_canControlMagnification}
+     * property in its meta-data. For more information, see
+     * {@link #SERVICE_META_DATA}.
+     *
+     * @param displayId The logic display id, use {@link Display#DEFAULT_DISPLAY} for
+     *                  default display.
+     * @return the magnification controller
+     *
+     * @hide
+     */
+    @NonNull
+    public final MagnificationController getMagnificationController(int displayId) {
         synchronized (mLock) {
-            if (mMagnificationController == null) {
-                mMagnificationController = new MagnificationController(this, mLock);
+            MagnificationController controller = mMagnificationControllers.get(displayId);
+            if (controller == null) {
+                controller = new MagnificationController(this, mLock, displayId);
+                mMagnificationControllers.put(displayId, controller);
             }
-            return mMagnificationController;
+            return controller;
         }
     }
 
@@ -765,11 +794,14 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
-    private void onMagnificationChanged(@NonNull Region region, float scale,
+    private void onMagnificationChanged(int displayId, @NonNull Region region, float scale,
             float centerX, float centerY) {
-        if (mMagnificationController != null) {
-            mMagnificationController.dispatchMagnificationChanged(
-                    region, scale, centerX, centerY);
+        MagnificationController controller;
+        synchronized (mLock) {
+            controller = mMagnificationControllers.get(displayId);
+        }
+        if (controller != null) {
+            controller.dispatchMagnificationChanged(region, scale, centerX, centerY);
         }
     }
 
@@ -794,6 +826,7 @@ public abstract class AccessibilityService extends Service {
      */
     public static final class MagnificationController {
         private final AccessibilityService mService;
+        private final int mDisplayId;
 
         /**
          * Map of listeners to their handlers. Lazily created when adding the
@@ -802,19 +835,19 @@ public abstract class AccessibilityService extends Service {
         private ArrayMap<OnMagnificationChangedListener, Handler> mListeners;
         private final Object mLock;
 
-        MagnificationController(@NonNull AccessibilityService service, @NonNull Object lock) {
+        MagnificationController(@NonNull AccessibilityService service, @NonNull Object lock,
+                int displayId) {
             mService = service;
             mLock = lock;
+            mDisplayId = displayId;
         }
 
         /**
          * Called when the service is connected.
          */
-        void onServiceConnected() {
-            synchronized (mLock) {
-                if (mListeners != null && !mListeners.isEmpty()) {
-                    setMagnificationCallbackEnabled(true);
-                }
+        void onServiceConnectedLocked() {
+            if (mListeners != null && !mListeners.isEmpty()) {
+                setMagnificationCallbackEnabled(true);
             }
         }
 
@@ -891,7 +924,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    connection.setMagnificationCallbackEnabled(enabled);
+                    connection.setMagnificationCallbackEnabled(mDisplayId, enabled);
                 } catch (RemoteException re) {
                     throw new RuntimeException(re);
                 }
@@ -952,7 +985,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationScale();
+                    return connection.getMagnificationScale(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain scale", re);
                     re.rethrowFromSystemServer();
@@ -981,7 +1014,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationCenterX();
+                    return connection.getMagnificationCenterX(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain center X", re);
                     re.rethrowFromSystemServer();
@@ -1010,7 +1043,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationCenterY();
+                    return connection.getMagnificationCenterY(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain center Y", re);
                     re.rethrowFromSystemServer();
@@ -1044,7 +1077,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationRegion();
+                    return connection.getMagnificationRegion(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain magnified region", re);
                     re.rethrowFromSystemServer();
@@ -1073,7 +1106,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.resetMagnification(animate);
+                    return connection.resetMagnification(mDisplayId, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to reset", re);
                     re.rethrowFromSystemServer();
@@ -1101,7 +1134,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.setMagnificationScaleAndCenter(
+                    return connection.setMagnificationScaleAndCenter(mDisplayId,
                             scale, Float.NaN, Float.NaN, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set scale", re);
@@ -1133,7 +1166,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.setMagnificationScaleAndCenter(
+                    return connection.setMagnificationScaleAndCenter(mDisplayId,
                             Float.NaN, centerX, centerY, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set center", re);
@@ -1624,9 +1657,10 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
-            public void onMagnificationChanged(@NonNull Region region,
+            public void onMagnificationChanged(int displayId, @NonNull Region region,
                     float scale, float centerX, float centerY) {
-                AccessibilityService.this.onMagnificationChanged(region, scale, centerX, centerY);
+                AccessibilityService.this.onMagnificationChanged(displayId, region, scale,
+                        centerX, centerY);
             }
 
             @Override
@@ -1729,13 +1763,15 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
-        public void onMagnificationChanged(@NonNull Region region,
+        /** Magnification changed callbacks for different displays */
+        public void onMagnificationChanged(int displayId, @NonNull Region region,
                 float scale, float centerX, float centerY) {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = region;
             args.arg2 = scale;
             args.arg3 = centerX;
             args.arg4 = centerY;
+            args.argi1 = displayId;
 
             final Message message = mCaller.obtainMessageO(DO_ON_MAGNIFICATION_CHANGED, args);
             mCaller.sendMessage(message);
@@ -1865,7 +1901,10 @@ public abstract class AccessibilityService extends Service {
                         final float scale = (float) args.arg2;
                         final float centerX = (float) args.arg3;
                         final float centerY = (float) args.arg4;
-                        mCallback.onMagnificationChanged(region, scale, centerX, centerY);
+                        final int displayId = args.argi1;
+                        args.recycle();
+                        mCallback.onMagnificationChanged(displayId, region, scale,
+                                centerX, centerY);
                     }
                 } return;
 
