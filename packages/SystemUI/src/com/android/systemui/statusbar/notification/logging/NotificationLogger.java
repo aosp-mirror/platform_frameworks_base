@@ -167,13 +167,10 @@ public class NotificationLogger implements StateListener {
      */
     public static NotificationVisibility.NotificationLocation getNotificationLocation(
             NotificationEntry entry) {
-        ExpandableNotificationRow row = entry.getRow();
-        ExpandableViewState childViewState = row.getViewState();
-
-        if (childViewState == null) {
+        if (entry == null || entry.getRow() == null || entry.getRow().getViewState() == null) {
             return NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN;
         }
-        return convertNotificationLocation(childViewState.location);
+        return convertNotificationLocation(entry.getRow().getViewState().location);
     }
 
     private static NotificationVisibility.NotificationLocation convertNotificationLocation(
