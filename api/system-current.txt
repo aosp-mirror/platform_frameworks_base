@@ -1702,10 +1702,10 @@ package android.content.rollback {
   }
 
   public final class RollbackManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void executeRollback(@NonNull android.content.rollback.RollbackInfo, @NonNull android.content.IntentSender);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void commitRollback(@NonNull android.content.rollback.RollbackInfo, @NonNull android.content.IntentSender);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyExecutedRollbacks();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void reloadPersistedData();
   }
 

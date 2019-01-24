@@ -88,7 +88,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 }
             });
         });
-        manager.executeRollback(rollback, rollbackReceiver.getIntentSender());
+        manager.commitRollback(rollback, rollbackReceiver.getIntentSender());
     }
 
     @Override

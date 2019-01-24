@@ -90,12 +90,12 @@ class RollbackTestUtils {
     }
 
     /**
-     * Execute the given rollback.
+     * Commit the given rollback.
      * @throws AssertionError if the rollback fails.
      */
     static void rollback(RollbackInfo rollback) throws InterruptedException {
         RollbackManager rm = getRollbackManager();
-        rm.executeRollback(rollback, LocalIntentSender.getIntentSender());
+        rm.commitRollback(rollback, LocalIntentSender.getIntentSender());
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
     }
 

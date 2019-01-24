@@ -84,8 +84,8 @@ public class RollbackTest {
                     Manifest.permission.DELETE_PACKAGES,
                     Manifest.permission.MANAGE_ROLLBACKS);
 
-            // Register a broadcast receiver for notification when the rollback is
-            // done executing.
+            // Register a broadcast receiver for notification when the
+            // rollback has been committed.
             RollbackBroadcastReceiver broadcastReceiver = new RollbackBroadcastReceiver();
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
@@ -98,7 +98,7 @@ public class RollbackTest {
             // so that's not the case!
             for (int i = 0; i < 5; ++i) {
                 RollbackInfo rollback = getUniqueRollbackInfoForPackage(
-                        rm.getRecentlyExecutedRollbacks(), TEST_APP_A);
+                        rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
                 if (rollback != null) {
                     Log.i(TAG, "Sleeping 1 second to wait for uninstall to take effect.");
                     Thread.sleep(1000);
@@ -112,9 +112,9 @@ public class RollbackTest {
             Thread.sleep(1000);
             assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
 
-            // There should be no recently executed rollbacks for this package.
+            // There should be no recently committed rollbacks for this package.
             assertNull(getUniqueRollbackInfoForPackage(
-                        rm.getRecentlyExecutedRollbacks(), TEST_APP_A));
+                        rm.getRecentlyCommittedRollbacks(), TEST_APP_A));
 
             // Install v1 of the app (without rollbacks enabled).
             RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
@@ -151,7 +151,7 @@ public class RollbackTest {
 
             // Verify the recent rollback has been recorded.
             rollback = getUniqueRollbackInfoForPackage(
-                    rm.getRecentlyExecutedRollbacks(), TEST_APP_A);
+                    rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
 
             broadcastReceiver.unregister();
@@ -277,10 +277,10 @@ public class RollbackTest {
     }
 
     /**
-     * Test that recently executed rollback data is properly persisted.
+     * Test that recently committed rollback data is properly persisted.
      */
     @Test
-    public void testRecentlyExecutedRollbackPersistence() throws Exception {
+    public void testRecentlyCommittedRollbackPersistence() throws Exception {
         try {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
@@ -308,7 +308,7 @@ public class RollbackTest {
 
             // Verify the recent rollback has been recorded.
             rollback = getUniqueRollbackInfoForPackage(
-                    rm.getRecentlyExecutedRollbacks(), TEST_APP_A);
+                    rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
             assertNotNull(rollback);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
 
@@ -317,7 +317,7 @@ public class RollbackTest {
 
             // Verify the recent rollback is still recorded.
             rollback = getUniqueRollbackInfoForPackage(
-                    rm.getRecentlyExecutedRollbacks(), TEST_APP_A);
+                    rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
             assertNotNull(rollback);
             assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
         } finally {
@@ -535,7 +535,7 @@ public class RollbackTest {
         }
 
         try {
-            rm.getRecentlyExecutedRollbacks();
+            rm.getRecentlyCommittedRollbacks();
             fail("expected SecurityException");
         } catch (SecurityException e) {
             // Expected.
@@ -544,7 +544,7 @@ public class RollbackTest {
         try {
             // TODO: What if the implementation checks arguments for non-null
             // first? Then this test isn't valid.
-            rm.executeRollback(null, null);
+            rm.commitRollback(null, null);
             fail("expected SecurityException");
         } catch (SecurityException e) {
             // Expected.
@@ -605,10 +605,10 @@ public class RollbackTest {
             // We should see recent rollbacks listed for both A and B.
             Thread.sleep(1000);
             RollbackInfo rollbackA = getUniqueRollbackInfoForPackage(
-                    rm.getRecentlyExecutedRollbacks(), TEST_APP_A);
+                    rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
 
             RollbackInfo rollbackB = getUniqueRollbackInfoForPackage(
-                    rm.getRecentlyExecutedRollbacks(), TEST_APP_B);
+                    rm.getRecentlyCommittedRollbacks(), TEST_APP_B);
             assertRollbackInfoForAandB(rollbackB);
 
             assertEquals(rollbackA.getRollbackId(), rollbackB.getRollbackId());
