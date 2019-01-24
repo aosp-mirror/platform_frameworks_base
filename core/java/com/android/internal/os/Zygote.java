@@ -117,7 +117,13 @@ public final class Zygote {
     /** Number of bytes sent to the Zygote over blastula pipes or the pool event FD */
     public static final int BLASTULA_MANAGEMENT_MESSAGE_BYTES = 8;
 
-    /** If the blastula pool should be created and used to start applications */
+    /**
+     * If the blastula pool should be created and used to start applications.
+     *
+     * Setting this value to false will disable the creation, maintenance, and use of the blastula
+     * pool.  When the blastula pool is disabled the application lifecycle will be identical to
+     * previous versions of Android.
+     */
     public static final boolean BLASTULA_POOL_ENABLED = false;
 
     /**
@@ -187,6 +193,11 @@ public final class Zygote {
     // TODO (chriswailes): This must be updated at the same time as sBlastulaPoolMax.
     static int sBlastulaPoolRefillThreshold = (sBlastulaPoolMax / 2);
 
+    /**
+     * @hide for internal use only
+     */
+    public static final int SOCKET_BUFFER_SIZE = 256;
+
     private static LocalServerSocket sBlastulaPoolSocket = null;
 
     /** a prototype instance for a future List.toArray() */
@@ -234,14 +245,14 @@ public final class Zygote {
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            String packageName, String[] packagesForUid, String[] visibleVolIds) {
+            String packageName, String[] packagesForUID, String[] visibleVolIDs) {
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir, packageName,
-                packagesForUid, visibleVolIds);
+                packagesForUID, visibleVolIDs);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
@@ -256,7 +267,7 @@ public final class Zygote {
     private static native int nativeForkAndSpecialize(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
-            String appDataDir, String packageName, String[] packagesForUid, String[] visibleVolIds);
+            String appDataDir, String packageName, String[] packagesForUID, String[] visibleVolIDs);
 
     /**
      * Specialize a Blastula instance.  The current VM must have been started
@@ -281,12 +292,12 @@ public final class Zygote {
      */
     public static void specializeBlastula(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
-            boolean startChildZygote, String instructionSet, String appDataDir,
-            String packageName, String[] packagesForUid, String[] visibleVolIds) {
+            boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
+            String[] packagesForUID, String[] visibleVolIDs) {
 
         nativeSpecializeBlastula(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
                                  niceName, startChildZygote, instructionSet, appDataDir,
-                                 packageName, packagesForUid, visibleVolIds);
+                                 packageName, packagesForUID, visibleVolIDs);
 
         // Enable tracing as soon as possible for the child process.
         Trace.setTracingEnabled(true, runtimeFlags);
@@ -306,7 +317,7 @@ public final class Zygote {
     private static native void nativeSpecializeBlastula(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
-            String[] packagesForUid, String[] visibleVolIds);
+            String[] packagesForUID, String[] visibleVolIDs);
 
     /**
      * Called to do any initialization before starting an application.
