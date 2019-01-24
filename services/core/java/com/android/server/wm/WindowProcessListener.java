@@ -44,8 +44,11 @@ public interface WindowProcessListener {
     void updateProcessInfo(boolean updateServiceConnectionActivities, boolean updateLru,
             boolean activityChange, boolean updateOomAdj);
 
-    /** Set process package been removed from device. */
-    void setRemoved(boolean removed);
+    /**
+     * Returns true if the process is removed and we should completely clean up the related records
+     * belonging to this process.
+     */
+    boolean isRemoved();
 
     /** Returns the total time (in milliseconds) spent executing in both user and system code. */
     long getCpuTime();

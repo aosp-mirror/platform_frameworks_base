@@ -264,7 +264,9 @@ final class ProcessRecord implements WindowProcessListener {
     boolean forceCrashReport;   // suppress normal auto-dismiss of crash dialog & report UI?
     private boolean mNotResponding; // does the app have a not responding dialog?
     Dialog anrDialog;           // dialog being displayed due to app not resp.
-    boolean removed;            // has app package been removed from device?
+    volatile boolean removed;   // Whether this process should be killed and removed from process
+                                // list. It is set when the package is force-stopped or the process
+                                // has crashed too many times.
     private boolean mDebugging; // was app launched for debugging?
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
     Dialog waitDialog;          // current wait for debugger dialog
@@ -1228,10 +1230,8 @@ final class ProcessRecord implements WindowProcessListener {
     }
 
     @Override
-    public void setRemoved(boolean removed) {
-        synchronized (mService) {
-            this.removed = removed;
-        }
+    public boolean isRemoved() {
+        return removed;
     }
 
     /**

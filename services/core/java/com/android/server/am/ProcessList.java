@@ -2038,25 +2038,25 @@ public final class ProcessList {
                     // We don't kill persistent processes.
                     continue;
                 }
-                if (app.removed) {
-                    procs.add(app);
-                } else if (app.setAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
-                    app.removed = true;
+                if (app.removed || app.setAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
                     procs.add(app);
                 }
             }
         }
+    }
 
-        final int N = procs.size();
-        for (int i = 0; i < N; i++) {
-            removeProcessLocked(procs.get(i), false, true, "kill all background");
-        }
+    @GuardedBy("mService")
+    boolean killPackageProcessesLocked(String packageName, int appId, int userId, int minOomAdj,
+            String reason) {
+        return killPackageProcessesLocked(packageName, appId, userId, minOomAdj,
+                false /* callerWillRestart */, true /* allowRestart */, true /* doit */,
+                false /* evenPersistent */, false /* setRemoved */, reason);
     }
 
     @GuardedBy("mService")
     final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
-            boolean doit, boolean evenPersistent, String reason) {
+            boolean doit, boolean evenPersistent, boolean setRemoved, String reason) {
         ArrayList<ProcessRecord> procs = new ArrayList<>();
 
         // Remove all processes this package may have touched: all with the
@@ -2114,7 +2114,9 @@ public final class ProcessList {
                 if (!doit) {
                     return true;
                 }
-                app.removed = true;
+                if (setRemoved) {
+                    app.removed = true;
+                }
                 procs.add(app);
             }
         }
@@ -2348,11 +2350,8 @@ public final class ProcessList {
             final int NA = apps.size();
             for (int ia = 0; ia < NA; ia++) {
                 final ProcessRecord app = apps.valueAt(ia);
-                if (app.removed) {
-                    procs.add(app);
-                } else if ((minTargetSdk < 0 || app.info.targetSdkVersion < minTargetSdk)
-                        && (maxProcState < 0 || app.setProcState > maxProcState)) {
-                    app.removed = true;
+                if (app.removed || ((minTargetSdk < 0 || app.info.targetSdkVersion < minTargetSdk)
+                        && (maxProcState < 0 || app.setProcState > maxProcState))) {
                     procs.add(app);
                 }
             }

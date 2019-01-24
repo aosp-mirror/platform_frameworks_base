@@ -474,6 +474,10 @@ class ActivityTestsBase {
         }
 
         @Override
+        void updateCpuStats() {
+        }
+
+        @Override
         void updateBatteryStats(ActivityRecord component, boolean resumed) {
         }
 

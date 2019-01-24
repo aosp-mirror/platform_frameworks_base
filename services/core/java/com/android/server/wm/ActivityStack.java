@@ -4673,6 +4673,14 @@ class ActivityStack extends ConfigurationContainer {
         removeHistoryRecordsForAppLocked(mStackSupervisor.mFinishingActivities, app,
                 "mFinishingActivities");
 
+        final boolean isProcessRemoved = app.isRemoved();
+        if (isProcessRemoved) {
+            // The package of the died process should be force-stopped, so make its activities as
+            // finishing to prevent the process from being started again if the next top (or being
+            // visible) activity also resides in the same process.
+            app.makeFinishingForProcessRemoved();
+        }
+
         boolean hasVisibleActivities = false;
 
         // Clean out the history list.
@@ -4725,7 +4733,7 @@ class ActivityStack extends ConfigurationContainer {
                                 + " stateNotNeeded=" + r.stateNotNeeded
                                 + " finishing=" + r.finishing
                                 + " state=" + r.getState() + " callers=" + Debug.getCallers(5));
-                        if (!r.finishing) {
+                        if (!r.finishing || isProcessRemoved) {
                             Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
                             EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                                     r.mUserId, System.identityHashCode(r),
@@ -5130,12 +5138,6 @@ class ActivityStack extends ConfigurationContainer {
                     }
                     didSomething = true;
                     Slog.i(TAG, "  Force finishing activity " + r);
-                    if (sameComponent) {
-                        if (r.hasProcess()) {
-                            r.app.setRemoved(true);
-                        }
-                        r.app = null;
-                    }
                     lastTask = r.getTaskRecord();
                     finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
                             true);

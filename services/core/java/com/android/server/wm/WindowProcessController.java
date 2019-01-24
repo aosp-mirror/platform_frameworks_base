@@ -416,6 +416,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mActivities.remove(r);
     }
 
+    void makeFinishingForProcessRemoved() {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            mActivities.get(i).makeFinishingLocked();
+        }
+    }
+
     public void clearActivities() {
         synchronized (mAtm.mGlobalLock) {
             mActivities.clear();
@@ -693,12 +699,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mH.sendMessage(m);
     }
 
-    void setRemoved(boolean removed) {
-        if (mListener == null) return;
-        // Posting on handler so WM lock isn't held when we call into AM.
-        final Message m = PooledLambda.obtainMessage(
-                WindowProcessListener::setRemoved, mListener, removed);
-        mAtm.mH.sendMessage(m);
+    boolean isRemoved() {
+        return mListener == null ? false : mListener.isRemoved();
     }
 
     void clearWaitingToKill() {
