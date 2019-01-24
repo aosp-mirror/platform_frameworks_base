@@ -135,6 +135,17 @@ class RollbackTestUtils {
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
     }
 
+    /** Launches {@code packageName} with {@link Intent#ACTION_MAIN}. */
+    static void launchPackage(String packageName)
+            throws InterruptedException, IOException {
+        Context context = InstrumentationRegistry.getContext();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setPackage(packageName);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        context.startActivity(intent);
+    }
+
     /**
      * Installs the apks with the given resource names as an atomic set.
      *
