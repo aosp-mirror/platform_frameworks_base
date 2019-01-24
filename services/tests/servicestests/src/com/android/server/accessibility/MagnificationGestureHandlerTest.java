@@ -158,7 +158,7 @@ public class MagnificationGestureHandlerTest {
             boolean detectShortcutTrigger) {
         MagnificationGestureHandler h = new MagnificationGestureHandler(
                 mContext, mMagnificationController,
-                detectTripleTap, detectShortcutTrigger);
+                detectTripleTap, detectShortcutTrigger, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
             protected String messageToString(Message m) {
