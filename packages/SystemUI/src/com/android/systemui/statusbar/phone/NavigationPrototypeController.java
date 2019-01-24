@@ -37,6 +37,7 @@ public class NavigationPrototypeController extends ContentObserver {
 
     private final String GESTURE_MATCH_SETTING = "quickstepcontroller_gesture_match_map";
     public static final String NAV_COLOR_ADAPT_ENABLE_SETTING = "navbar_color_adapt_enable";
+    public static final String PROTOTYPE_ENABLED = "prototype_enabled";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ACTION_DEFAULT, ACTION_QUICKSTEP, ACTION_QUICKSCRUB, ACTION_BACK,
