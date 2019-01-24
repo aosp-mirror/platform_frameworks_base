@@ -108,12 +108,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
             ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback listener) {}
 
     @Override
-    public void addCrossProfileCalendarPackage(ComponentName admin, String packageName) {
-    }
-
-    @Override
-    public boolean removeCrossProfileCalendarPackage(ComponentName admin, String packageName) {
-        return false;
+    public void setCrossProfileCalendarPackages(ComponentName admin, List<String> packageNames) {
     }
 
     @Override
