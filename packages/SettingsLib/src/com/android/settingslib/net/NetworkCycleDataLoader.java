@@ -22,7 +22,6 @@ import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
@@ -35,13 +34,13 @@ import android.os.ServiceManager;
 import android.text.format.DateUtils;
 import android.util.Pair;
 
+import androidx.annotation.VisibleForTesting;
+import androidx.loader.content.AsyncTaskLoader;
+
 import com.android.settingslib.NetworkPolicyEditor;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
-
-import androidx.annotation.VisibleForTesting;
-import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * Loader for network data usage history. It returns a list of usage data per billing cycle.
@@ -121,8 +120,7 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
 
             long cycleEnd = historyEnd;
             while (cycleEnd > historyStart) {
-                final long cycleStart = Math.max(
-                    historyStart, cycleEnd - (DateUtils.WEEK_IN_MILLIS * 4));
+                final long cycleStart = cycleEnd - (DateUtils.WEEK_IN_MILLIS * 4);
                 recordUsage(cycleStart, cycleEnd);
                 cycleEnd = cycleStart;
             }
