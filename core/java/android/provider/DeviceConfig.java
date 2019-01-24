@@ -316,10 +316,17 @@ public final class DeviceConfig {
     public interface Rollback {
         String NAMESPACE = "rollback";
 
+        String BOOT_NAMESPACE = "rollback_boot";
+
         /**
          * Timeout in milliseconds for enabling package rollback.
          */
         String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
+
+       /**
+        * The lifetime duration of rollback packages in millis
+        */
+        String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
     }
 
     /**

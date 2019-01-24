@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of service that manages APK level rollbacks.
@@ -71,12 +73,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     // Rollbacks expire after 48 hours.
     // TODO: How to test rollback expiration works properly?
-    private static final long ROLLBACK_LIFETIME_DURATION_MILLIS = 48 * 60 * 60 * 1000;
+    private static final long DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS =
+            TimeUnit.HOURS.toMillis(48);
 
     // Lock used to synchronize accesses to in-memory rollback data
     // structures. By convention, methods with the suffix "Locked" require
     // mLock is held when they are called.
     private final Object mLock = new Object();
+
+    // No need for guarding with lock because value is only accessed in handler thread
+    // and the value will be written on boot complete. Initialization here happens before
+    // handler threads are running so that's fine.
+    private long mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
 
     // Used for generating rollback IDs.
     private final Random mRandom = new SecureRandom();
@@ -484,7 +492,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         });
     }
 
+    private void updateRollbackLifetimeDurationInMillis() {
+        String strRollbackLifetimeInMillis = DeviceConfig.getProperty(
+                DeviceConfig.Rollback.BOOT_NAMESPACE,
+                DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS);
+
+        try {
+            mRollbackLifetimeDurationInMillis = (strRollbackLifetimeInMillis == null)
+                    ? DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS
+                    : Long.parseLong(strRollbackLifetimeInMillis);
+        } catch (NumberFormatException e) {
+            mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
+        }
+    }
+
     void onBootCompleted() {
+        getHandler().post(() -> updateRollbackLifetimeDurationInMillis());
+        // Also posts to handler thread
+        scheduleExpiration(0);
+
         getHandler().post(() -> {
             // Check to see if any staged sessions with rollback enabled have
             // been applied.
@@ -565,8 +591,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         for (RollbackInfo info : mRecentlyExecutedRollbacks) {
             mAllocatedRollbackIds.put(info.getRollbackId(), true);
         }
-
-        scheduleExpiration(0);
     }
 
     /**
@@ -700,8 +724,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 if (!data.isAvailable) {
                     continue;
                 }
-
-                if (!now.isBefore(data.timestamp.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS))) {
+                if (!now.isBefore(data.timestamp.plusMillis(mRollbackLifetimeDurationInMillis))) {
                     iter.remove();
                     deleteRollback(data);
                 } else if (oldest == null || oldest.isAfter(data.timestamp)) {
@@ -711,7 +734,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         if (oldest != null) {
-            scheduleExpiration(now.until(oldest.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS),
+            scheduleExpiration(now.until(oldest.plusMillis(mRollbackLifetimeDurationInMillis),
                         ChronoUnit.MILLIS));
         }
     }
@@ -1144,8 +1167,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         packages.add(data.packages.get(i).getPackageName());
                     }
                     mPackageHealthObserver.startObservingHealth(packages,
-                            ROLLBACK_LIFETIME_DURATION_MILLIS);
-                    scheduleExpiration(ROLLBACK_LIFETIME_DURATION_MILLIS);
+                            mRollbackLifetimeDurationInMillis);
+                    scheduleExpiration(mRollbackLifetimeDurationInMillis);
                 } catch (IOException e) {
                     Log.e(TAG, "Unable to enable rollback", e);
                     deleteRollback(data);
