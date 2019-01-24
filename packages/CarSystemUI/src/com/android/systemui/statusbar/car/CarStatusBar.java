@@ -114,9 +114,16 @@ public class CarStatusBar extends StatusBar implements
                     new DeviceProvisionedController.DeviceProvisionedListener() {
                         @Override
                         public void onDeviceProvisionedChanged() {
-                            mDeviceIsProvisioned =
-                                    mDeviceProvisionedController.isDeviceProvisioned();
-                            restartNavBars();
+                            mHandler.post(() -> {
+                                // on initial boot we are getting a call even though the value
+                                // is the same so we are confirming the reset is needed
+                                boolean deviceProvisioned =
+                                        mDeviceProvisionedController.isDeviceProvisioned();
+                                if (mDeviceIsProvisioned != deviceProvisioned) {
+                                    mDeviceIsProvisioned = deviceProvisioned;
+                                    restartNavBars();
+                                }
+                            });
                         }
                     });
         }
