@@ -61,13 +61,14 @@ public class BluetoothUtils {
         if (btClass != null) {
             switch (btClass.getMajorDeviceClass()) {
                 case BluetoothClass.Device.Major.COMPUTER:
-                    return new Pair<>(getBluetoothDrawable(context, R.drawable.ic_bt_laptop, level,
-                            iconScale),
+                    return new Pair<>(getBluetoothDrawable(context,
+                            com.android.internal.R.drawable.ic_bt_laptop, level, iconScale),
                             context.getString(R.string.bluetooth_talkback_computer));
 
                 case BluetoothClass.Device.Major.PHONE:
                     return new Pair<>(
-                            getBluetoothDrawable(context, R.drawable.ic_bt_cellphone, level,
+                            getBluetoothDrawable(context,
+                                    com.android.internal.R.drawable.ic_bt_cellphone, level,
                                     iconScale),
                             context.getString(R.string.bluetooth_talkback_phone));
 
@@ -79,7 +80,8 @@ public class BluetoothUtils {
 
                 case BluetoothClass.Device.Major.IMAGING:
                     return new Pair<>(
-                            getBluetoothDrawable(context, R.drawable.ic_settings_print, level,
+                            getBluetoothDrawable(context,
+                                    com.android.internal.R.drawable.ic_settings_print, level,
                                     iconScale),
                             context.getString(R.string.bluetooth_talkback_imaging));
 
@@ -98,19 +100,22 @@ public class BluetoothUtils {
         if (btClass != null) {
             if (btClass.doesClassMatch(BluetoothClass.PROFILE_HEADSET)) {
                 return new Pair<>(
-                        getBluetoothDrawable(context, R.drawable.ic_bt_headset_hfp, level,
+                        getBluetoothDrawable(context,
+                                com.android.internal.R.drawable.ic_bt_headset_hfp, level,
                                 iconScale),
                         context.getString(R.string.bluetooth_talkback_headset));
             }
             if (btClass.doesClassMatch(BluetoothClass.PROFILE_A2DP)) {
                 return new Pair<>(
-                        getBluetoothDrawable(context, R.drawable.ic_bt_headphones_a2dp, level,
+                        getBluetoothDrawable(context,
+                                com.android.internal.R.drawable.ic_bt_headphones_a2dp, level,
                                 iconScale),
                         context.getString(R.string.bluetooth_talkback_headphone));
             }
         }
         return new Pair<>(
-                getBluetoothDrawable(context, R.drawable.ic_settings_bluetooth, level, iconScale),
+                getBluetoothDrawable(context,
+                        com.android.internal.R.drawable.ic_settings_bluetooth, level, iconScale),
                 context.getString(R.string.bluetooth_talkback_bluetooth));
     }
 

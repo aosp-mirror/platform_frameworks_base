@@ -171,7 +171,7 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
 
     @Override
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_misc_hid;
+        return com.android.internal.R.drawable.ic_bt_misc_hid;
     }
 
     protected void finalize() {

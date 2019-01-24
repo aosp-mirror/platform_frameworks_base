@@ -31,7 +31,7 @@ import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class BluetoothDeviceLayerDrawableTest {
-    private static final int RES_ID = R.drawable.ic_bt_cellphone;
+    private static final int RES_ID = com.android.internal.R.drawable.ic_bt_cellphone;
     private static final int BATTERY_LEVEL = 15;
     private static final float BATTERY_ICON_SCALE = 0.75f;
     private static final int BATTERY_ICON_PADDING_TOP = 6;

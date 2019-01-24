@@ -56,7 +56,7 @@ public class FooterPreference extends Preference {
     }
 
     private void init() {
-        setIcon(R.drawable.ic_info_outline_24dp);
+        setIcon(com.android.internal.R.drawable.ic_info_outline_24);
         setKey(KEY_FOOTER);
         setOrder(ORDER_FOOTER);
         setSelectable(false);

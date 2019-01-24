@@ -74,10 +74,10 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setIcon_shouldShowButtonByDefault() {
-        mPref.setButton1Icon(R.drawable.ic_plus);
-        mPref.setButton2Icon(R.drawable.ic_plus);
-        mPref.setButton3Icon(R.drawable.ic_plus);
-        mPref.setButton4Icon(R.drawable.ic_plus);
+        mPref.setButton1Icon(com.android.internal.R.drawable.ic_plus);
+        mPref.setButton2Icon(com.android.internal.R.drawable.ic_plus);
+        mPref.setButton3Icon(com.android.internal.R.drawable.ic_plus);
+        mPref.setButton4Icon(com.android.internal.R.drawable.ic_plus);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -126,10 +126,10 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setVisibleIsGoneAndSetIcon_shouldNotShowButton() {
-        mPref.setButton1Icon(R.drawable.ic_plus).setButton1Visible(false);
-        mPref.setButton2Icon(R.drawable.ic_plus).setButton2Visible(false);
-        mPref.setButton3Icon(R.drawable.ic_plus).setButton3Visible(false);
-        mPref.setButton4Icon(R.drawable.ic_plus).setButton4Visible(false);
+        mPref.setButton1Icon(com.android.internal.R.drawable.ic_plus).setButton1Visible(false);
+        mPref.setButton2Icon(com.android.internal.R.drawable.ic_plus).setButton2Visible(false);
+        mPref.setButton3Icon(com.android.internal.R.drawable.ic_plus).setButton3Visible(false);
+        mPref.setButton4Icon(com.android.internal.R.drawable.ic_plus).setButton4Visible(false);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -215,7 +215,7 @@ public class ActionButtonsPreferenceTest {
     @Test
     public void onBindViewHolder_setButtonIcon_iconMustDisplayAboveText() {
         mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton1Icon(R.drawable.ic_plus);
+        mPref.setButton1Icon(com.android.internal.R.drawable.ic_plus);
 
         mPref.onBindViewHolder(mHolder);
         final Drawable[] drawablesAroundText =

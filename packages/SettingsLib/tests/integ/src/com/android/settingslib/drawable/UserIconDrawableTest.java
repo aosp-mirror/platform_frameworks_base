@@ -31,8 +31,6 @@ import android.graphics.PorterDuff.Mode;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.settingslib.R;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +43,7 @@ public class UserIconDrawableTest {
     public void getConstantState_shouldNotBeNull() {
         final Bitmap b = BitmapFactory.decodeResource(
                 InstrumentationRegistry.getTargetContext().getResources(),
-                R.drawable.ic_mode_edit);
+                com.android.internal.R.drawable.ic_mode_edit);
         mDrawable = new UserIconDrawable(100 /* size */).setIcon(b).bake();
         assertThat(mDrawable.getConstantState()).isNotNull();
     }

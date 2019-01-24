@@ -109,7 +109,7 @@
                 android:contentDescription="@string/accessibility_quick_settings_edit"
                 android:focusable="true"
                 android:padding="15dp"
-                android:src="@drawable/ic_mode_edit"
+                android:src="@*android:drawable/ic_mode_edit"
                 android:tint="?android:attr/colorForeground"/>
 
             <com.android.systemui.statusbar.AlphaOptimizedFrameLayout

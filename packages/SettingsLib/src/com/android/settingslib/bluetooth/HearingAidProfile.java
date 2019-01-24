@@ -228,7 +228,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_hearing_aid;
+        return com.android.internal.R.drawable.ic_bt_hearing_aid;
     }
 
     protected void finalize() {

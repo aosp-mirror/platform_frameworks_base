@@ -135,7 +135,7 @@ public class PbapServerProfile implements LocalBluetoothProfile {
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_cellphone;
+        return com.android.internal.R.drawable.ic_bt_cellphone;
     }
 
     protected void finalize() {
