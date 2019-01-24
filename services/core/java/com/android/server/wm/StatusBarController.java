@@ -61,9 +61,8 @@ public class StatusBarController extends BarController {
         }
 
         @Override
-        public int onAppTransitionStartingLocked(int transit, IBinder openToken,
-                IBinder closeToken, long duration, long statusBarAnimationStartTime,
-                long statusBarAnimationDuration) {
+        public int onAppTransitionStartingLocked(int transit, long duration,
+                long statusBarAnimationStartTime, long statusBarAnimationDuration) {
             mHandler.post(() -> {
                 StatusBarManagerInternal statusBar = getStatusBarInternal();
                 if (statusBar != null && mWin != null) {

@@ -1901,9 +1901,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mWindowManagerInternal.registerAppTransitionListener(new AppTransitionListener() {
             @Override
-            public int onAppTransitionStartingLocked(int transit, IBinder openToken,
-                    IBinder closeToken, long duration, long statusBarAnimationStartTime,
-                    long statusBarAnimationDuration) {
+            public int onAppTransitionStartingLocked(int transit, long duration,
+                    long statusBarAnimationStartTime, long statusBarAnimationDuration) {
                 return handleStartTransitionForKeyguardLw(transit, duration);
             }
 

@@ -118,8 +118,6 @@ public abstract class WindowManagerInternal {
          *
          * @param transit transition type indicating what kind of transition gets run, must be one
          *                of AppTransition.TRANSIT_* values
-         * @param openToken the token for the opening app
-         * @param closeToken the token for the closing app
          * @param duration the total duration of the transition
          * @param statusBarAnimationStartTime the desired start time for all visual animations in
          *        the status bar caused by this app transition in uptime millis
@@ -131,8 +129,8 @@ public abstract class WindowManagerInternal {
          * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER},
          * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
          */
-        public int onAppTransitionStartingLocked(int transit, IBinder openToken, IBinder closeToken,
-                long duration, long statusBarAnimationStartTime, long statusBarAnimationDuration) {
+        public int onAppTransitionStartingLocked(int transit, long duration,
+                long statusBarAnimationStartTime, long statusBarAnimationDuration) {
             return 0;
         }
 
