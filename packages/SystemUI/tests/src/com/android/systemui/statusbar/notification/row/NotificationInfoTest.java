@@ -504,7 +504,8 @@ public class NotificationInfoTest extends SysuiTestCase {
                 IMPORTANCE_DEFAULT, true);
         mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
         verify(mMetricsLogger).write(argThat(logMaker ->
-                logMaker.getType() == MetricsEvent.NOTIFICATION_BLOCKING_HELPER
+                logMaker.getCategory() == MetricsEvent.NOTIFICATION_BLOCKING_HELPER
+                        && logMaker.getType() == MetricsEvent.TYPE_OPEN
                         && logMaker.getSubtype() == MetricsEvent.BLOCKING_HELPER_DISPLAY
         ));
     }

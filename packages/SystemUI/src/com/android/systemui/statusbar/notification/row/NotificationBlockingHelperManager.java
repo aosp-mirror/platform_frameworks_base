@@ -165,8 +165,7 @@ public class NotificationBlockingHelperManager {
     private LogMaker getLogMaker() {
         return mBlockingHelperRow.getStatusBarNotification()
             .getLogMaker()
-            .setCategory(MetricsEvent.NOTIFICATION_ITEM)
-            .setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER);
+            .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER);
     }
 
     // Format must stay in sync with frameworks/base/core/res/res/values/config.xml
