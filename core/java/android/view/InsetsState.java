@@ -19,6 +19,7 @@ package android.view;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.indexOf;
 
@@ -34,6 +35,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowManager.LayoutParams;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -130,7 +132,7 @@ public class InsetsState implements Parcelable {
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout,
             @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
-            @Nullable @InsetSide SparseIntArray typeSideMap) {
+            int legacySoftInputMode, @Nullable @InsetSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         boolean[] typeVisibilityMap = new boolean[SIZE];
@@ -146,8 +148,12 @@ public class InsetsState implements Parcelable {
             if (source == null) {
                 continue;
             }
-            if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                    && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR)) {
+
+            boolean skipSystemBars = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
+                    && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR);
+            boolean skipIme = source.getType() == TYPE_IME
+                    && (legacySoftInputMode & LayoutParams.SOFT_INPUT_ADJUST_RESIZE) == 0;
+            if (skipSystemBars || skipIme) {
                 typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
                 continue;
             }

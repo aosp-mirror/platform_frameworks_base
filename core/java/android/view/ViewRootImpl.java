@@ -1886,7 +1886,7 @@ public final class ViewRootImpl implements ViewParent,
                 mLastWindowInsets = mInsetsController.calculateInsets(
                         mContext.getResources().getConfiguration().isScreenRound(),
                         mAttachInfo.mAlwaysConsumeNavBar, displayCutout,
-                        contentInsets, stableInsets);
+                        contentInsets, stableInsets, mWindowAttributes.softInputMode);
             } else {
                 mLastWindowInsets = new WindowInsets(contentInsets, stableInsets,
                         mContext.getResources().getConfiguration().isScreenRound(),

@@ -20,6 +20,7 @@ import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
@@ -78,7 +79,7 @@ public class InsetsControllerTest {
                     false,
                     new DisplayCutout(
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
-                    rect, rect);
+                    rect, rect, SOFT_INPUT_ADJUST_RESIZE);
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }

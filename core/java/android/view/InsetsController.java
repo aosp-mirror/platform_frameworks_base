@@ -112,6 +112,8 @@ public class InsetsController implements WindowInsetsController {
 
     private int mPendingTypesToShow;
 
+    private int mLastLegacySoftInputMode;
+
     public InsetsController(ViewRootImpl viewRoot) {
         mViewRoot = viewRoot;
         mAnimCallback = () -> {
@@ -126,7 +128,7 @@ public class InsetsController implements WindowInsetsController {
             }
             WindowInsets insets = state.calculateInsets(mFrame, mLastInsets.isRound(),
                     mLastInsets.shouldAlwaysConsumeNavBar(), mLastInsets.getDisplayCutout(),
-                    mLastLegacyContentInsets, mLastLegacyStableInsets,
+                    mLastLegacyContentInsets, mLastLegacyStableInsets, mLastLegacySoftInputMode,
                     null /* typeSideMap */);
             mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets);
         };
@@ -164,11 +166,12 @@ public class InsetsController implements WindowInsetsController {
     @VisibleForTesting
     public WindowInsets calculateInsets(boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout, Rect legacyContentInsets,
-            Rect legacyStableInsets) {
+            Rect legacyStableInsets, int legacySoftInputMode) {
         mLastLegacyContentInsets.set(legacyContentInsets);
         mLastLegacyStableInsets.set(legacyStableInsets);
+        mLastLegacySoftInputMode = legacySoftInputMode;
         mLastInsets = mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout,
-                legacyContentInsets, legacyStableInsets,
+                legacyContentInsets, legacyStableInsets, legacySoftInputMode,
                 null /* typeSideMap */);
         return mLastInsets;
     }
