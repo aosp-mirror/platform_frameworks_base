@@ -21,8 +21,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.admin.DevicePolicyManager;
@@ -61,11 +59,7 @@ import java.util.List;
  * <p>
  *     All callbacks are called on the main thread.
  * </p>
- *
- * @hide
  */
-@SystemApi
-@TestApi
 public abstract class NotificationAssistantService extends NotificationListenerService {
     private static final String TAG = "NotificationAssistants";
 
@@ -109,6 +103,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      *
      * @param sbn the notification to snooze
      * @param snoozeCriterionId the {@link SnoozeCriterion#getId()} representing a device context.
+     * @hide
      */
     abstract public void onNotificationSnoozedUntilContext(StatusBarNotification sbn,
             String snoozeCriterionId);
@@ -250,6 +245,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * {@link #onNotificationPosted(StatusBarNotification, RankingMap)} callback for the
      * notification.
      * @param key The key of the notification to snooze
+     * @hide
      */
     public final void unsnoozeNotification(String key) {
         if (!isBound()) return;
