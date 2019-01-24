@@ -28,12 +28,11 @@ namespace android {
 bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, StringPiece* out_type,
                          StringPiece* out_entry);
 
-// Convert a type_string_ref, entry_string_ref, and package
-// to AssetManager2::ResourceName. Useful for getting
-// resource name without re-running AssetManager2::FindEntry searches.
-bool ToResourceName(StringPoolRef& type_string_ref,
-                    StringPoolRef& entry_string_ref,
-                    const LoadedPackage* package,
+// Convert a type_string_ref, entry_string_ref, and package to AssetManager2::ResourceName.
+// Useful for getting resource name without re-running AssetManager2::FindEntry searches.
+bool ToResourceName(const StringPoolRef& type_string_ref,
+                    const StringPoolRef& entry_string_ref,
+                    const StringPiece& package_name,
                     AssetManager2::ResourceName* out_name);
 
 // Formats a ResourceName to "package:type/entry_name".
