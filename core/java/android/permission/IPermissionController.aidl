@@ -35,4 +35,6 @@ oneway interface IPermissionController {
     void countPermissionApps(in List<String> permissionNames, boolean countOnlyGranted,
             boolean countSystem, in RemoteCallback callback);
     void getPermissionUsages(boolean countSystem, long numMillis, in RemoteCallback callback);
+    void isApplicationQualifiedForRole(String roleName, String packageName,
+            in RemoteCallback callback);
 }

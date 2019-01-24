@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
@@ -136,8 +137,19 @@ public abstract class PermissionControllerService extends Service {
      *
      * @return descriptions of the users of permissions
      */
-    public abstract @NonNull List<RuntimePermissionUsageInfo>
-            onPermissionUsageResult(boolean countSystem, long numMillis);
+    public abstract @NonNull List<RuntimePermissionUsageInfo> onGetPermissionUsages(
+            boolean countSystem, long numMillis);
+
+    /**
+     * Check whether an application is qualified for a role.
+     *
+     * @param roleName name of the role to check for
+     * @param packageName package name of the application to check for
+     *
+     * @return whether the application is qualified for the role.
+     */
+    public abstract boolean onIsApplicationQualifiedForRole(@NonNull String roleName,
+            @NonNull String packageName);
 
     @Override
     public final IBinder onBind(Intent intent) {
@@ -240,6 +252,20 @@ public abstract class PermissionControllerService extends Service {
                                 PermissionControllerService.this, countSystem, numMillis,
                                 callback));
             }
+
+            @Override
+            public void isApplicationQualifiedForRole(String roleName, String packageName,
+                    RemoteCallback callback) {
+                checkStringNotEmpty(roleName);
+                checkStringNotEmpty(packageName);
+                checkNotNull(callback, "callback");
+
+                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
+
+                mHandler.sendMessage(obtainMessage(
+                        PermissionControllerService::isApplicationQualifiedForRole,
+                        PermissionControllerService.this, roleName, packageName, callback));
+            }
         };
     }
 
@@ -296,7 +322,7 @@ public abstract class PermissionControllerService extends Service {
     private void getPermissionUsages(boolean countSystem, long numMillis,
             @NonNull RemoteCallback callback) {
         List<RuntimePermissionUsageInfo> users =
-                onPermissionUsageResult(countSystem, numMillis);
+                onGetPermissionUsages(countSystem, numMillis);
         if (users != null && !users.isEmpty()) {
             Bundle result = new Bundle();
             result.putParcelableList(PermissionControllerManager.KEY_RESULT, users);
@@ -304,5 +330,13 @@ public abstract class PermissionControllerService extends Service {
         } else {
             callback.sendResult(null);
         }
+    }
+
+    private void isApplicationQualifiedForRole(@NonNull String roleName,
+            @NonNull String packageName, @NonNull RemoteCallback callback) {
+        boolean qualified = onIsApplicationQualifiedForRole(roleName, packageName);
+        Bundle result = new Bundle();
+        result.putBoolean(PermissionControllerManager.KEY_RESULT, qualified);
+        callback.sendResult(result);
     }
 }
