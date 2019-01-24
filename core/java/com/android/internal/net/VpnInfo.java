@@ -32,11 +32,11 @@ public class VpnInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "VpnInfo{" +
-                "ownerUid=" + ownerUid +
-                ", vpnIface='" + vpnIface + '\'' +
-                ", primaryUnderlyingIface='" + primaryUnderlyingIface + '\'' +
-                '}';
+        return "VpnInfo{"
+                + "ownerUid=" + ownerUid
+                + ", vpnIface='" + vpnIface + '\''
+                + ", primaryUnderlyingIface='" + primaryUnderlyingIface + '\''
+                + '}';
     }
 
     @Override

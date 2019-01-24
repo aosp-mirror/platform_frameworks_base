@@ -2384,14 +2384,14 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
-    void setAllHttpProxyLocked(String host, String port, String exclList, Uri pacFileUrl) {
+    void setAllHttpProxyLocked() {
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord r = mLruProcesses.get(i);
             // Don't dispatch to isolated processes as they can't access
             // ConnectivityManager and don't have network privileges anyway.
             if (r.thread != null && !r.isolated) {
                 try {
-                    r.thread.setHttpProxy(host, port, exclList, pacFileUrl);
+                    r.thread.updateHttpProxy();
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to update http proxy for: " +
                             r.info.processName);
