@@ -162,6 +162,8 @@ public class LinkAddress implements Parcelable {
      *              {@link OsConstants#RT_SCOPE_LINK} or {@link OsConstants#RT_SCOPE_SITE}).
      * @hide
      */
+    @SystemApi
+    @TestApi
     public LinkAddress(InetAddress address, int prefixLength, int flags, int scope) {
         init(address, prefixLength, flags, scope);
     }
