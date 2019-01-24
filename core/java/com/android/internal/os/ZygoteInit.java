@@ -73,8 +73,7 @@ import java.security.Security;
  * Pre-initializes some classes, and then waits for commands on a UNIX domain socket. Based on these
  * commands, forks off child processes that inherit the initial state of the VM.
  *
- * Please see {@link ZygoteConnection.Arguments} for documentation on the
- * client protocol.
+ * Please see {@link ZygoteArguments} for documentation on the client protocol.
  *
  * @hide
  */
@@ -434,12 +433,12 @@ public class ZygoteInit {
     /**
      * Finish remaining work for the newly forked system server process.
      */
-    private static Runnable handleSystemServerProcess(ZygoteConnection.Arguments parsedArgs) {
+    private static Runnable handleSystemServerProcess(ZygoteArguments parsedArgs) {
         // set umask to 0077 so new files and directories will default to owner-only permissions.
         Os.umask(S_IRWXG | S_IRWXO);
 
-        if (parsedArgs.niceName != null) {
-            Process.setArgV0(parsedArgs.niceName);
+        if (parsedArgs.mNiceName != null) {
+            Process.setArgV0(parsedArgs.mNiceName);
         }
 
         final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
@@ -458,8 +457,8 @@ public class ZygoteInit {
             }
         }
 
-        if (parsedArgs.invokeWith != null) {
-            String[] args = parsedArgs.remainingArgs;
+        if (parsedArgs.mInvokeWith != null) {
+            String[] args = parsedArgs.mRemainingArgs;
             // If we have a non-null system server class path, we'll have to duplicate the
             // existing arguments and append the classpath to it. ART will handle the classpath
             // correctly when we exec a new process.
@@ -471,15 +470,15 @@ public class ZygoteInit {
                 args = amendedArgs;
             }
 
-            WrapperInit.execApplication(parsedArgs.invokeWith,
-                    parsedArgs.niceName, parsedArgs.targetSdkVersion,
+            WrapperInit.execApplication(parsedArgs.mInvokeWith,
+                    parsedArgs.mNiceName, parsedArgs.mTargetSdkVersion,
                     VMRuntime.getCurrentInstructionSet(), null, args);
 
             throw new IllegalStateException("Unexpected return from WrapperInit.execApplication");
         } else {
             ClassLoader cl = null;
             if (systemServerClasspath != null) {
-                cl = createPathClassLoader(systemServerClasspath, parsedArgs.targetSdkVersion);
+                cl = createPathClassLoader(systemServerClasspath, parsedArgs.mTargetSdkVersion);
 
                 Thread.currentThread().setContextClassLoader(cl);
             }
@@ -487,8 +486,8 @@ public class ZygoteInit {
             /*
              * Pass the remaining arguments to SystemServer.
              */
-            return ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion,
-                    parsedArgs.remainingArgs, cl);
+            return ZygoteInit.zygoteInit(parsedArgs.mTargetSdkVersion,
+                    parsedArgs.mRemainingArgs, cl);
         }
 
         /* should never reach here */
@@ -683,29 +682,29 @@ public class ZygoteInit {
                 "--target-sdk-version=" + VMRuntime.SDK_VERSION_CUR_DEVELOPMENT,
                 "com.android.server.SystemServer",
         };
-        ZygoteConnection.Arguments parsedArgs = null;
+        ZygoteArguments parsedArgs = null;
 
         int pid;
 
         try {
-            parsedArgs = new ZygoteConnection.Arguments(args);
-            ZygoteConnection.applyDebuggerSystemProperty(parsedArgs);
-            ZygoteConnection.applyInvokeWithSystemProperty(parsedArgs);
+            parsedArgs = new ZygoteArguments(args);
+            Zygote.applyDebuggerSystemProperty(parsedArgs);
+            Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
             boolean profileSystemServer = SystemProperties.getBoolean(
                     "dalvik.vm.profilesystemserver", false);
             if (profileSystemServer) {
-                parsedArgs.runtimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
+                parsedArgs.mRuntimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
             }
 
             /* Request to fork the system server process */
             pid = Zygote.forkSystemServer(
-                    parsedArgs.uid, parsedArgs.gid,
-                    parsedArgs.gids,
-                    parsedArgs.runtimeFlags,
+                    parsedArgs.mUid, parsedArgs.mGid,
+                    parsedArgs.mGids,
+                    parsedArgs.mRuntimeFlags,
                     null,
-                    parsedArgs.permittedCapabilities,
-                    parsedArgs.effectiveCapabilities);
+                    parsedArgs.mPermittedCapabilities,
+                    parsedArgs.mEffectiveCapabilities);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex);
         }

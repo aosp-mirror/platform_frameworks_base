@@ -20,14 +20,14 @@ import static android.system.OsConstants.POLLIN;
 
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
-import android.system.Os;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.system.StructPollfd;
 import android.util.Log;
-
 import android.util.Slog;
-import java.io.IOException;
+
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -63,8 +63,7 @@ class ZygoteServer {
      */
     private boolean mIsForkChild;
 
-    ZygoteServer() {
-    }
+    ZygoteServer() { }
 
     void setForkChild() {
         mIsForkChild = true;
@@ -197,7 +196,7 @@ class ZygoteServer {
                 if (i == 0) {
                     ZygoteConnection newPeer = acceptCommandPeer(abiList);
                     peers.add(newPeer);
-                    fds.add(newPeer.getFileDesciptor());
+                    fds.add(newPeer.getFileDescriptor());
                 } else {
                     try {
                         ZygoteConnection connection = peers.get(i);
