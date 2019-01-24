@@ -21,7 +21,6 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
-import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -97,8 +96,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private int mNumUniqueChannelsInRow;
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingChannelImportance;
-    private int mStartingChannelOrNotificationImportance;
-    private int mChosenImportance;
+    private boolean mWasShownHighPriority;
+    /**
+     * The last importance level chosen by the user.  Null if the user has not chosen an importance
+     * level; non-null once the user takes an action which indicates an explicit preference.
+     */
+    @Nullable private Integer mChosenImportance;
     private boolean mIsSingleDefaultChannel;
     private boolean mIsNonblockable;
     private StatusBarNotification mSbn;
@@ -195,13 +198,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final OnAppSettingsClickListener onAppSettingsClick,
             boolean isDeviceProvisioned,
             boolean isNonblockable,
-            int importance)
+            int importance,
+            boolean wasShownHighPriority)
             throws RemoteException {
         bindNotification(pm, iNotificationManager, pkg, notificationChannel,
                 numUniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
                 onAppSettingsClick, isDeviceProvisioned, isNonblockable,
                 false /* isBlockingHelper */, false /* isUserSentimentNegative */,
-                importance);
+                importance, wasShownHighPriority);
     }
 
     public void bindNotification(
@@ -218,7 +222,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isNonblockable,
             boolean isForBlockingHelper,
             boolean isUserSentimentNegative,
-            int importance)
+            int importance,
+            boolean wasShownHighPriority)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
         mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -231,10 +236,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mCheckSaveListener = checkSaveListener;
         mOnSettingsClickListener = onSettingsClick;
         mSingleNotificationChannel = notificationChannel;
-        int channelImportance = mSingleNotificationChannel.getImportance();
-        mStartingChannelImportance = mChosenImportance = channelImportance;
-        mStartingChannelOrNotificationImportance =
-                channelImportance == IMPORTANCE_UNSPECIFIED ? importance : channelImportance;
+        mStartingChannelImportance = mSingleNotificationChannel.getImportance();
+        mWasShownHighPriority = wasShownHighPriority;
         mNegativeUserSentiment = isUserSentimentNegative;
         mIsNonblockable = isNonblockable;
         mIsForeground =
@@ -400,19 +403,27 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
      * @return new LogMaker
      */
     private LogMaker importanceChangeLogMaker() {
+        Integer chosenImportance =
+                mChosenImportance != null ? mChosenImportance : mStartingChannelImportance;
         return new LogMaker(MetricsEvent.ACTION_SAVE_IMPORTANCE)
                 .setType(MetricsEvent.TYPE_ACTION)
-                .setSubtype(mChosenImportance - mStartingChannelImportance);
+                .setSubtype(chosenImportance - mStartingChannelImportance);
     }
 
     private boolean hasImportanceChanged() {
         return mSingleNotificationChannel != null
-                && mStartingChannelImportance != mChosenImportance;
+                && mChosenImportance != null
+                && (mStartingChannelImportance != mChosenImportance
+                || (mWasShownHighPriority && mChosenImportance < IMPORTANCE_DEFAULT)
+                || (!mWasShownHighPriority && mChosenImportance >= IMPORTANCE_DEFAULT));
     }
 
     private void saveImportance() {
         if (!mIsNonblockable
                 || mExitReason != NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS) {
+            if (mChosenImportance == null) {
+                mChosenImportance = mStartingChannelImportance;
+            }
             updateImportance();
         }
     }
@@ -421,12 +432,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
      * Commits the updated importance values on the background thread.
      */
     private void updateImportance() {
-        mMetricsLogger.write(importanceChangeLogMaker());
+        if (mChosenImportance != null) {
+            mMetricsLogger.write(importanceChangeLogMaker());
 
-        Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
-        bgHandler.post(new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
-                mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
-                mStartingChannelImportance, mChosenImportance));
+            Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
+            bgHandler.post(
+                    new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
+                            mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
+                            mStartingChannelImportance, mChosenImportance));
+        }
     }
 
     private void bindButtons() {
@@ -444,11 +458,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             TextView silent = findViewById(R.id.int_silent);
             TextView alert = findViewById(R.id.int_alert);
 
-            boolean isCurrentlyAlerting =
-                    mStartingChannelOrNotificationImportance >= IMPORTANCE_DEFAULT;
-
             block.setOnClickListener(mOnStopOrMinimizeNotifications);
-            if (isCurrentlyAlerting) {
+            if (mWasShownHighPriority) {
                 silent.setOnClickListener(mOnToggleSilent);
                 silent.setText(R.string.inline_silent_button_silent);
                 alert.setOnClickListener(mOnKeepShowing);
@@ -517,7 +528,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 break;
             case ACTION_TOGGLE_SILENT:
                 mExitReason = NotificationCounters.BLOCKING_HELPER_TOGGLE_SILENT;
-                if (mStartingChannelOrNotificationImportance >= IMPORTANCE_DEFAULT) {
+                if (mWasShownHighPriority) {
                     mChosenImportance = IMPORTANCE_LOW;
                     confirmationText.setText(R.string.notification_channel_silenced);
                 } else {
@@ -584,9 +595,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public void onFinishedClosing() {
-        mStartingChannelImportance = mChosenImportance;
-        if (mChosenImportance != IMPORTANCE_UNSPECIFIED) {
-            mStartingChannelOrNotificationImportance = mChosenImportance;
+        if (mChosenImportance != null) {
+            mStartingChannelImportance = mChosenImportance;
         }
         mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
 

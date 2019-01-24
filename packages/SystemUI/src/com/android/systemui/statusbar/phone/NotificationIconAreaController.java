@@ -194,8 +194,7 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
             return false;
         }
-        if (!showLowPriority
-                && !mEntryManager.getNotificationData().isHighPriority(entry.notification)) {
+        if (!showLowPriority && !entry.isHighPriority()) {
             return false;
         }
         if (!entry.isTopLevelChild()) {

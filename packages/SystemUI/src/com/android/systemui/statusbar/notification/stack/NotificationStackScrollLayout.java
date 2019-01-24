@@ -2613,8 +2613,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification())) {
+                if (!row.getEntry().isHighPriority()) {
                     break;
                 } else {
                     lastChildBeforeGap = row;
@@ -2632,8 +2631,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification())) {
+                if (!row.getEntry().isHighPriority()) {
                     return row;
                 }
             }
@@ -5772,11 +5770,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             currentIndex++;
             boolean beforeSpeedBump;
             if (mLowPriorityBeforeSpeedBump) {
-                beforeSpeedBump = !mEntryManager.getNotificationData().isAmbient(
-                        row.getStatusBarNotification().getKey());
+                beforeSpeedBump = !row.getEntry().ambient;
             } else {
-                beforeSpeedBump = mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification());
+                beforeSpeedBump = row.getEntry().isHighPriority();
             }
             if (beforeSpeedBump) {
                 speedBumpIndex = currentIndex;
@@ -5800,8 +5796,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     continue;
                 }
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                if (!mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification())) {
+                if (!row.getEntry().isHighPriority()) {
                     if (currentIndex > 0) {
                         gapIndex = currentIndex;
                     }

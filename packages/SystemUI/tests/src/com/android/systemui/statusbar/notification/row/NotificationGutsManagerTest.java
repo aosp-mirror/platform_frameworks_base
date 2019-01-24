@@ -354,7 +354,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(0));
+                eq(0),
+                eq(false) /* wasShownHighPriority */);
     }
 
     @Test
@@ -382,16 +383,18 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(0));
+                eq(0),
+                eq(false) /* wasShownHighPriority */);
     }
 
     @Test
-    public void testInitializeNotificationInfoView_importance() throws Exception {
+    public void testInitializeNotificationInfoView_highPriority() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(true);
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
         row.getEntry().importance = IMPORTANCE_DEFAULT;
+        row.getEntry().setIsHighPriority(true);
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
@@ -411,7 +414,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(IMPORTANCE_DEFAULT));
+                eq(IMPORTANCE_DEFAULT),
+                eq(true) /* wasShownHighPriority */);
     }
 
     @Test
@@ -440,7 +444,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(0));
+                eq(0),
+                eq(false) /* wasShownHighPriority */);
     }
 
     @Test
@@ -468,7 +473,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */,
-                eq(0));
+                eq(0),
+                eq(false) /* wasShownHighPriority */);
     }
 
     @Test
