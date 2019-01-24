@@ -36,6 +36,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.server.job.JobSchedulerService.Constants;
+import com.android.server.job.JobSchedulerService.MaxJobCountsPerMemoryTrimLevel;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
 
@@ -148,14 +149,14 @@ class JobConcurrencyManager {
                 Slog.d(TAG, "Interactive: " + interactive);
             }
 
-            final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+            final long nowRealtime = JobSchedulerService.sElapsedRealtimeClock.millis();
             if (interactive) {
-                mLastScreenOnRealtime = now;
+                mLastScreenOnRealtime = nowRealtime;
                 mEffectiveInteractiveState = true;
 
                 mHandler.removeCallbacks(mRampUpForScreenOff);
             } else {
-                mLastScreenOffRealtime = now;
+                mLastScreenOffRealtime = nowRealtime;
 
                 // Set mEffectiveInteractiveState to false after the delay, when we may increase
                 // the concurrency.
@@ -232,38 +233,24 @@ class JobConcurrencyManager {
     private void updateMaxCountsLocked() {
         refreshSystemStateLocked();
 
-        if (mEffectiveInteractiveState) {
-            // Screen on
-            switch (mLastMemoryTrimLevel) {
-                case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_ON_MODERATE;
-                    break;
-                case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_ON_LOW;
-                    break;
-                case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_ON_CRITICAL;
-                    break;
-                default:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_ON_NORMAL;
-                    break;
-            }
-        } else {
-            // Screen off
-            switch (mLastMemoryTrimLevel) {
-                case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_OFF_MODERATE;
-                    break;
-                case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_OFF_LOW;
-                    break;
-                case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_OFF_CRITICAL;
-                    break;
-                default:
-                    mMaxJobCounts = mConstants.MAX_JOB_COUNTS_OFF_NORMAL;
-                    break;
-            }
+        final MaxJobCountsPerMemoryTrimLevel jobCounts = mEffectiveInteractiveState
+                ? mConstants.MAX_JOB_COUNTS_SCREEN_ON
+                : mConstants.MAX_JOB_COUNTS_SCREEN_OFF;
+
+
+        switch (mLastMemoryTrimLevel) {
+            case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
+                mMaxJobCounts = jobCounts.moderate;
+                break;
+            case ProcessStats.ADJ_MEM_FACTOR_LOW:
+                mMaxJobCounts = jobCounts.low;
+                break;
+            case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
+                mMaxJobCounts = jobCounts.critical;
+                break;
+            default:
+                mMaxJobCounts = jobCounts.normal;
+                break;
         }
     }
 
@@ -303,7 +290,7 @@ class JobConcurrencyManager {
 
         // Initialize the work variables and also count running jobs.
         mJobCountTracker.reset(
-                mMaxJobCounts.getTotalMax(),
+                mMaxJobCounts.getMaxTotal(),
                 mMaxJobCounts.getMaxBg(),
                 mMaxJobCounts.getMinBg());
 
@@ -482,10 +469,7 @@ class JobConcurrencyManager {
     }
 
 
-    public void dumpLocked(IndentingPrintWriter pw) {
-        final long now = System.currentTimeMillis();
-        final long nowRealtime = JobSchedulerService.sElapsedRealtimeClock.millis();
-
+    public void dumpLocked(IndentingPrintWriter pw, long now, long nowRealtime) {
         pw.println("Concurrency:");
 
         pw.increaseIndent();
@@ -522,19 +506,36 @@ class JobConcurrencyManager {
         }
     }
 
-    public void dumpProtoLocked(ProtoOutputStream proto) {
-        // TODO Implement it.
+    public void dumpProtoLocked(ProtoOutputStream proto, long tag, long now, long nowRealtime) {
+        final long token = proto.start(tag);
+
+        proto.write(JobConcurrencyManagerProto.CURRENT_INTERACTIVE,
+                mCurrentInteractiveState);
+        proto.write(JobConcurrencyManagerProto.EFFECTIVE_INTERACTIVE,
+                mEffectiveInteractiveState);
+
+        proto.write(JobConcurrencyManagerProto.TIME_SINCE_LAST_SCREEN_ON_MS,
+                nowRealtime - mLastScreenOnRealtime);
+        proto.write(JobConcurrencyManagerProto.TIME_SINCE_LAST_SCREEN_OFF_MS,
+                nowRealtime - mLastScreenOffRealtime);
+
+        mJobCountTracker.dumpProto(proto, JobConcurrencyManagerProto.JOB_COUNT_TRACKER);
+
+        proto.write(JobConcurrencyManagerProto.MEMORY_TRIM_LEVEL,
+                mLastMemoryTrimLevel);
+
+        proto.end(token);
     }
 
     /**
-     * This class decides, taking into account {@link #mMaxJobCounts} and how many jos are running /
+     * This class decides, taking into account {@link #mMaxJobCounts} and how mny jos are running /
      * pending, how many more job can start.
      *
      * Extracted for testing and logging.
      */
     @VisibleForTesting
     static class JobCountTracker {
-        private int mConfigNumTotalMaxJobs;
+        private int mConfigNumMaxTotalJobs;
         private int mConfigNumMaxBgJobs;
         private int mConfigNumMinBgJobs;
 
@@ -552,7 +553,7 @@ class JobConcurrencyManager {
         private int mNumActualMaxBgJobs;
 
         void reset(int numTotalMaxJobs, int numMaxBgJobs, int numMinBgJobs) {
-            mConfigNumTotalMaxJobs = numTotalMaxJobs;
+            mConfigNumMaxTotalJobs = numTotalMaxJobs;
             mConfigNumMaxBgJobs = numMaxBgJobs;
             mConfigNumMinBgJobs = numMinBgJobs;
 
@@ -607,12 +608,12 @@ class JobConcurrencyManager {
 
             // However, if there are FG jobs already running, we have to adjust it.
             mNumReservedForBg = Math.min(reservedForBg,
-                    mConfigNumTotalMaxJobs - mNumRunningFgJobs);
+                    mConfigNumMaxTotalJobs - mNumRunningFgJobs);
 
             // Max FG is [total - [number needed for BG jobs]]
             // [number needed for BG jobs] is the bigger one of [running BG] or [reserved BG]
             final int maxFg =
-                    mConfigNumTotalMaxJobs - Math.max(mNumRunningBgJobs, mNumReservedForBg);
+                    mConfigNumMaxTotalJobs - Math.max(mNumRunningBgJobs, mNumReservedForBg);
 
             // The above maxFg is the theoretical max. If there are less FG jobs, the actual
             // max FG will be lower accordingly.
@@ -623,7 +624,7 @@ class JobConcurrencyManager {
             // Max BG is [total - actual max FG], but cap at [config max BG].
             final int maxBg = Math.min(
                     mConfigNumMaxBgJobs,
-                    mConfigNumTotalMaxJobs - mNumActualMaxFgJobs);
+                    mConfigNumMaxTotalJobs - mNumActualMaxFgJobs);
 
             // If there are less BG jobs than maxBg, then reduce the actual max BG accordingly.
             // This isn't needed for the logic to work, but this will give consistent output
@@ -669,12 +670,13 @@ class JobConcurrencyManager {
             final int totalBg = mNumRunningBgJobs + mNumStartingBgJobs;
             return String.format(
                     "Config={tot=%d bg min/max=%d/%d}"
-                            + " Running: %d / %d (%d)"
+                            + " Running[FG/BG (total)]: %d / %d (%d)"
                             + " Pending: %d / %d (%d)"
                             + " Actual max: %d%s / %d%s (%d%s)"
+                            + " Res BG: %d"
                             + " Starting: %d / %d (%d)"
                             + " Total: %d%s / %d%s (%d%s)",
-                    mConfigNumTotalMaxJobs,
+                    mConfigNumMaxTotalJobs,
                     mConfigNumMinBgJobs,
                     mConfigNumMaxBgJobs,
 
@@ -684,19 +686,37 @@ class JobConcurrencyManager {
                     mNumPendingFgJobs, mNumPendingBgJobs,
                     mNumPendingFgJobs + mNumPendingBgJobs,
 
-                    mNumActualMaxFgJobs, (totalFg <= mConfigNumTotalMaxJobs) ? "" : "*",
+                    mNumActualMaxFgJobs, (totalFg <= mConfigNumMaxTotalJobs) ? "" : "*",
                     mNumActualMaxBgJobs, (totalBg <= mConfigNumMaxBgJobs) ? "" : "*",
 
                     mNumActualMaxFgJobs + mNumActualMaxBgJobs,
-                    (mNumActualMaxFgJobs + mNumActualMaxBgJobs <= mConfigNumTotalMaxJobs)
+                    (mNumActualMaxFgJobs + mNumActualMaxBgJobs <= mConfigNumMaxTotalJobs)
                             ? "" : "*",
+
+                    mNumReservedForBg,
 
                     mNumStartingFgJobs, mNumStartingBgJobs, mNumStartingFgJobs + mNumStartingBgJobs,
 
                     totalFg, (totalFg <= mNumActualMaxFgJobs) ? "" : "*",
                     totalBg, (totalBg <= mNumActualMaxBgJobs) ? "" : "*",
-                    totalFg + totalBg, (totalFg + totalBg <= mConfigNumTotalMaxJobs) ? "" : "*"
+                    totalFg + totalBg, (totalFg + totalBg <= mConfigNumMaxTotalJobs) ? "" : "*"
             );
+        }
+
+        public void dumpProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+
+            proto.write(JobCountTrackerProto.CONFIG_NUM_MAX_TOTAL_JOBS, mConfigNumMaxTotalJobs);
+            proto.write(JobCountTrackerProto.CONFIG_NUM_MAX_BG_JOBS, mConfigNumMaxBgJobs);
+            proto.write(JobCountTrackerProto.CONFIG_NUM_MIN_BG_JOBS, mConfigNumMinBgJobs);
+
+            proto.write(JobCountTrackerProto.NUM_RUNNING_FG_JOBS, mNumRunningFgJobs);
+            proto.write(JobCountTrackerProto.NUM_RUNNING_BG_JOBS, mNumRunningBgJobs);
+
+            proto.write(JobCountTrackerProto.NUM_PENDING_FG_JOBS, mNumPendingFgJobs);
+            proto.write(JobCountTrackerProto.NUM_PENDING_BG_JOBS, mNumPendingBgJobs);
+
+            proto.end(token);
         }
     }
 }
