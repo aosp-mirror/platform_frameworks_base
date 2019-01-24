@@ -831,6 +831,8 @@ public class Vpn {
             }
         }
 
+        lp.setHttpProxy(mConfig.proxyInfo);
+
         if (!allowIPv4) {
             lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
         }
