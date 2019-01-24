@@ -19,9 +19,15 @@ package com.android.server.location;
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -55,6 +61,8 @@ class GnssVisibilityControl {
     private static final String LOCATION_PERMISSION_NAME =
             "android.permission.ACCESS_FINE_LOCATION";
 
+    private static final String[] NO_LOCATION_ENABLED_PROXY_APPS = new String[0];
+
     // Wakelocks
     private static final String WAKELOCK_KEY = TAG;
     private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
@@ -66,13 +74,16 @@ class GnssVisibilityControl {
     private final Handler mHandler;
     private final Context mContext;
 
+    private boolean mIsMasterLocationSettingsEnabled = true;
+    private boolean mIsOnRoamingNetwork = false;
+
     // Number of non-framework location access proxy apps is expected to be small (< 5).
     private static final int HASH_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
     private HashMap<String, Boolean> mProxyAppToLocationPermissions = new HashMap<>(
             HASH_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS);
 
     private PackageManager.OnPermissionsChangedListener mOnPermissionsChangedListener =
-            uid -> postEvent(() -> handlePermissionsChanged(uid));
+            uid -> runOnHandler(() -> handlePermissionsChanged(uid));
 
     GnssVisibilityControl(Context context, Looper looper) {
         mContext = context;
@@ -81,8 +92,15 @@ class GnssVisibilityControl {
         mHandler = new Handler(looper);
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mPackageManager = mContext.getPackageManager();
+
+        // Set to empty proxy app list initially until the configuration properties are loaded.
+        updateNfwLocationAccessProxyAppsInGnssHal();
+
+        // Listen for proxy app package installation, removal events.
+        listenForProxyAppsPackageUpdates();
+        listenForRoamingNetworkUpdate();
+
         // TODO(b/122855984): Handle global location settings on/off.
-        // TODO(b/122856189): Handle roaming case.
     }
 
     void updateProxyApps(List<String> nfwLocationAccessProxyApps) {
@@ -90,18 +108,68 @@ class GnssVisibilityControl {
         //       but rather piggy backs on the GnssLocationProvider SIM_STATE_CHANGED handling
         //       so that the order of processing is preserved. GnssLocationProvider should
         //       first load the new config parameters for the new SIM and then call this method.
-        postEvent(() -> handleSubscriptionOrSimChanged(nfwLocationAccessProxyApps));
+        runOnHandler(() -> handleUpdateProxyApps(nfwLocationAccessProxyApps));
+    }
+
+    void masterLocationSettingsUpdated(boolean enabled) {
+        runOnHandler(() -> handleMasterLocationSettingsUpdated(enabled));
     }
 
     void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
             String otherProtocolStackName, byte requestor, String requestorId, byte responseType,
             boolean inEmergencyMode, boolean isCachedLocation) {
-        postEvent(() -> handleNfwNotification(
+        runOnHandler(() -> handleNfwNotification(
                 new NfwNotification(proxyAppPackageName, protocolStack, otherProtocolStackName,
                         requestor, requestorId, responseType, inEmergencyMode, isCachedLocation)));
     }
 
-    private void handleSubscriptionOrSimChanged(List<String> nfwLocationAccessProxyApps) {
+    private void listenForProxyAppsPackageUpdates() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        intentFilter.addDataScheme("package");
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (action == null) {
+                    return;
+                }
+
+                switch (action) {
+                    case Intent.ACTION_PACKAGE_ADDED:
+                    case Intent.ACTION_PACKAGE_REMOVED:
+                    case Intent.ACTION_PACKAGE_REPLACED:
+                        String pkgName = intent.getData().getEncodedSchemeSpecificPart();
+                        handleProxyAppPackageUpdate(pkgName, action);
+                        break;
+                }
+            }
+        }, UserHandle.ALL, intentFilter, null, mHandler);
+    }
+
+    private void handleProxyAppPackageUpdate(String pkgName, String action) {
+        final Boolean locationPermission = mProxyAppToLocationPermissions.get(pkgName);
+        // pkgName is not one of the proxy apps in our list.
+        if (locationPermission == null) {
+            return;
+        }
+
+        Log.i(TAG, "Proxy app " + pkgName + " package changed: " + action);
+        final boolean updatedLocationPermission = hasLocationPermission(pkgName);
+        if (locationPermission != updatedLocationPermission) {
+            // Permission changed. So, update the GNSS HAL with the updated list.
+            mProxyAppToLocationPermissions.put(pkgName, updatedLocationPermission);
+            updateNfwLocationAccessProxyAppsInGnssHal();
+        }
+    }
+
+    private void handleUpdateProxyApps(List<String> nfwLocationAccessProxyApps) {
+        if (!isProxyAppListUpdated(nfwLocationAccessProxyApps)) {
+            return;
+        }
+
         if (nfwLocationAccessProxyApps.isEmpty()) {
             // Stop listening for app permission changes. Clear the app list in GNSS HAL.
             if (!mProxyAppToLocationPermissions.isEmpty()) {
@@ -122,6 +190,27 @@ class GnssVisibilityControl {
             mProxyAppToLocationPermissions.put(proxApp, hasLocationPermission(proxApp));
         }
 
+        updateNfwLocationAccessProxyAppsInGnssHal();
+    }
+
+    private boolean isProxyAppListUpdated(List<String> nfwLocationAccessProxyApps) {
+        if (nfwLocationAccessProxyApps.size() != mProxyAppToLocationPermissions.size()) {
+            return true;
+        }
+
+        for (String nfwLocationAccessProxyApp : nfwLocationAccessProxyApps) {
+            if (!mProxyAppToLocationPermissions.containsKey(nfwLocationAccessProxyApp)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void handleMasterLocationSettingsUpdated(boolean enabled) {
+        mIsMasterLocationSettingsEnabled = enabled;
+        Log.i(TAG, "Master location settings switch changed to "
+                + (enabled ? "enabled" : "disabled"));
         updateNfwLocationAccessProxyAppsInGnssHal();
     }
 
@@ -149,7 +238,7 @@ class GnssVisibilityControl {
         private final boolean mInEmergencyMode;
         private final boolean mIsCachedLocation;
 
-        NfwNotification(String proxyAppPackageName, byte protocolStack,
+        private NfwNotification(String proxyAppPackageName, byte protocolStack,
                 String otherProtocolStackName, byte requestor, String requestorId,
                 byte responseType, boolean inEmergencyMode, boolean isCachedLocation) {
             mProxyAppPackageName = proxyAppPackageName;
@@ -162,7 +251,7 @@ class GnssVisibilityControl {
             mIsCachedLocation = isCachedLocation;
         }
 
-        void copyFieldsToIntent(Intent intent) {
+        private void copyFieldsToIntent(Intent intent) {
             intent.putExtra(KEY_PROTOCOL_STACK, mProtocolStack);
             if (!TextUtils.isEmpty(mOtherProtocolStackName)) {
                 intent.putExtra(KEY_OTHER_PROTOCOL_STACK_NAME, mOtherProtocolStackName);
@@ -188,7 +277,7 @@ class GnssVisibilityControl {
                     mRequestor, mRequestorId, mResponseType, mInEmergencyMode, mIsCachedLocation);
         }
 
-        String getResponseTypeAsString() {
+        private String getResponseTypeAsString() {
             switch (mResponseType) {
                 case NFW_RESPONSE_TYPE_REJECTED:
                     return "REJECTED";
@@ -246,6 +335,24 @@ class GnssVisibilityControl {
     }
 
     private void updateNfwLocationAccessProxyAppsInGnssHal() {
+        final String[] locationPermissionEnabledProxyApps = shouldDisableNfwLocationAccess()
+                ? NO_LOCATION_ENABLED_PROXY_APPS : getLocationPermissionEnabledProxyApps();
+        final String proxyAppsStr = Arrays.toString(locationPermissionEnabledProxyApps);
+        Log.i(TAG, "Updating non-framework location access proxy apps in the GNSS HAL to: "
+                + proxyAppsStr);
+        boolean result = native_enable_nfw_location_access(locationPermissionEnabledProxyApps);
+        if (!result) {
+            Log.e(TAG, "Failed to update non-framework location access proxy apps in the"
+                    + " GNSS HAL to: " + proxyAppsStr);
+        }
+    }
+
+    private boolean shouldDisableNfwLocationAccess() {
+        // TODO(b/122856189): Add disableWhenRoaming configuration per proxy app.
+        return mIsOnRoamingNetwork || !mIsMasterLocationSettingsEnabled;
+    }
+
+    private String[] getLocationPermissionEnabledProxyApps() {
         // Get a count of proxy apps with location permission enabled to array creation size.
         int countLocationPermissionEnabledProxyApps = 0;
         for (Boolean hasLocationPermissionEnabled : mProxyAppToLocationPermissions.values()) {
@@ -264,15 +371,7 @@ class GnssVisibilityControl {
                 locationPermissionEnabledProxyApps[i++] = proxyApp;
             }
         }
-
-        String proxyAppsStr = Arrays.toString(locationPermissionEnabledProxyApps);
-        Log.i(TAG, "Updating non-framework location access proxy apps in the GNSS HAL to: "
-                + proxyAppsStr);
-        boolean result = native_enable_nfw_location_access(locationPermissionEnabledProxyApps);
-        if (!result) {
-            Log.e(TAG, "Failed to update non-framework location access proxy apps in the"
-                    + " GNSS HAL to: " + proxyAppsStr);
-        }
+        return locationPermissionEnabledProxyApps;
     }
 
     private void handleNfwNotification(NfwNotification nfwNotification) {
@@ -360,7 +459,31 @@ class GnssVisibilityControl {
                 isPermissionMismatched);
     }
 
-    private void postEvent(Runnable event) {
+    private void listenForRoamingNetworkUpdate() {
+        // Register for network capabilities changes to monitor roaming changes.
+        ConnectivityManager mConnMgr = (ConnectivityManager) mContext.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+        networkRequestBuilder.addCapability(NetworkCapabilities.TRANSPORT_CELLULAR);
+        NetworkRequest networkRequest = networkRequestBuilder.build();
+        mConnMgr.registerNetworkCallback(networkRequest,
+                new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onCapabilitiesChanged(Network network,
+                            NetworkCapabilities capabilities) {
+                        boolean isRoaming = !capabilities.hasTransport(
+                                NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
+                        // No locking required for this test and set because the callback
+                        // runs in mHandler thread.
+                        if (mIsOnRoamingNetwork != isRoaming) {
+                            mIsOnRoamingNetwork = isRoaming;
+                            updateNfwLocationAccessProxyAppsInGnssHal();
+                        }
+                    }
+                }, mHandler);
+    }
+
+    private void runOnHandler(Runnable event) {
         // Hold a wake lock until this message is delivered.
         // Note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
