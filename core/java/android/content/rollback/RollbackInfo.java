@@ -17,6 +17,7 @@
 package android.content.rollback;
 
 import android.annotation.SystemApi;
+import android.content.pm.PackageInstaller;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,9 +38,6 @@ public final class RollbackInfo implements Parcelable {
     private final int mRollbackId;
 
     private final List<PackageRollbackInfo> mPackages;
-
-    // TODO: Add a flag to indicate if reboot is required, when rollback of
-    // staged installs is supported.
 
     /** @hide */
     public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages) {
@@ -64,6 +62,24 @@ public final class RollbackInfo implements Parcelable {
      */
     public List<PackageRollbackInfo> getPackages() {
         return mPackages;
+    }
+
+    /**
+     * Returns true if this rollback requires reboot to take effect after
+     * being committed.
+     */
+    public boolean isStaged() {
+        // TODO: Support rollback of staged installs.
+        return false;
+    }
+
+    /**
+     * Returns the session ID for the committed rollback for staged rollbacks.
+     * Only applicable for rollbacks that have been committed.
+     */
+    public int getSessionId() {
+        // TODO: Support rollback of staged installs.
+        return PackageInstaller.SessionInfo.INVALID_ID;
     }
 
     @Override
