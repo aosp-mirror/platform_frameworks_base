@@ -19,50 +19,40 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.NotificationManager;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.res.Resources;
 import android.provider.Settings.Global;
-import android.test.mock.MockContext;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.google.common.base.Objects;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
- atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/power/batterysaver/BatterySaverStateMachineTest.java
+ * atest com.android.server.power.batterysaver.BatterySaverStateMachineTest
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BatterySaverStateMachineTest {
 
-    private MyMockContext mMockContext;
+    private Context mMockContext;
     private ContentResolver mMockContextResolver;
     private BatterySaverController mMockBatterySaverController;
+    private NotificationManager mMockNotificationManager;
     private Device mDevice;
     private TestableBatterySaverStateMachine mTarget;
     private Resources mMockResources;
-
-    private class MyMockContext extends MockContext {
-        @Override
-        public ContentResolver getContentResolver() {
-            return mMockContextResolver;
-        }
-
-        @Override
-        public Resources getResources() {
-            return mMockResources;
-        }
-    }
 
     private DevicePersistedState mPersistedState;
 
@@ -116,6 +106,10 @@ public class BatterySaverStateMachineTest {
                     mPersistedState.global.getOrDefault(Global.LOW_POWER_MODE, 0) != 0,
                     mPersistedState.global.getOrDefault(Global.LOW_POWER_MODE_STICKY, 0) != 0,
                     mDevice.getLowPowerModeTriggerLevel(),
+                    mPersistedState.global.getOrDefault(
+                            Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED, 0) != 0,
+                    mPersistedState.global.getOrDefault(
+                            Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL, 90),
                     mPersistedState.global.getOrDefault(Global.AUTOMATIC_POWER_SAVER_MODE, 0),
                     mPersistedState.global.getOrDefault(
                             Global.DYNAMIC_POWER_SAVINGS_ENABLED, 0) != 0,
@@ -137,13 +131,13 @@ public class BatterySaverStateMachineTest {
      * Test target class.
      */
     private class TestableBatterySaverStateMachine extends BatterySaverStateMachine {
-        public TestableBatterySaverStateMachine() {
+        TestableBatterySaverStateMachine() {
             super(new Object(), mMockContext, mMockBatterySaverController);
         }
 
         @Override
         protected void putGlobalSetting(String key, int value) {
-            if (Objects.equal(mPersistedState.global.get(key), value)) {
+            if (Objects.equals(mPersistedState.global.get(key), value)) {
                 return;
             }
             mDevice.putGlobalSetting(key, value);
@@ -163,15 +157,25 @@ public class BatterySaverStateMachineTest {
         void runOnBgThreadLazy(Runnable r, int delayMillis) {
             r.run();
         }
+
+        @Override
+        void triggerDynamicModeNotification() {
+            // Do nothing
+        }
     }
 
     @Before
     public void setUp() {
-        mMockContext = new MyMockContext();
+        mMockContext = mock(Context.class);
         mMockContextResolver = mock(ContentResolver.class);
         mMockBatterySaverController = mock(BatterySaverController.class);
+        mMockNotificationManager = mock(NotificationManager.class);
         mMockResources = mock(Resources.class);
 
+        doReturn(mMockContextResolver).when(mMockContext).getContentResolver();
+        doReturn(mMockResources).when(mMockContext).getResources();
+        doReturn(mMockNotificationManager).when(mMockContext)
+                .getSystemService(NotificationManager.class);
         doAnswer((inv) -> mDevice.batterySaverEnabled = inv.getArgument(0))
                 .when(mMockBatterySaverController).enableBatterySaver(anyBoolean(), anyInt());
         when(mMockBatterySaverController.isEnabled())
@@ -446,8 +450,9 @@ public class BatterySaverStateMachineTest {
     }
 
     @Test
-    public void testAutoBatterySaver_withSticky() {
+    public void testAutoBatterySaver_withSticky_withAutoOffDisabled() {
         mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED, 0);
 
         mTarget.setBatterySaverEnabledManually(true);
 
@@ -515,6 +520,197 @@ public class BatterySaverStateMachineTest {
         assertEquals(false, mDevice.batterySaverEnabled);
         assertEquals(90, mPersistedState.batteryLevel);
         assertEquals(false, mPersistedState.batteryLow);
+    }
+
+    @Test
+    public void testAutoBatterySaver_withSticky_withAutoOffEnabled() {
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED, 1);
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL, 90);
+
+        // Scenario 1: User turns BS on manually above the threshold, it shouldn't turn off even
+        // with battery level change above threshold.
+        mDevice.setBatteryLevel(100);
+        mTarget.setBatterySaverEnabledManually(true);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(100, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setBatteryLevel(95);
+
+        assertEquals(true, mDevice.batterySaverEnabled); // Stays on.
+        assertEquals(95, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 2: User turns BS on manually above the threshold then charges device. BS
+        // shouldn't turn back on.
+        mDevice.setPowered(true);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(95, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setBatteryLevel(97);
+        mDevice.setPowered(false);
+
+        assertEquals(false, mDevice.batterySaverEnabled); // Sticky BS no longer enabled.
+        assertEquals(97, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 3: User turns BS on manually above the threshold. Device drains below
+        // threshold and then charged to below threshold. Sticky BS should activate.
+        mTarget.setBatterySaverEnabledManually(true);
+        mDevice.setBatteryLevel(30);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
+
+        mDevice.setPowered(true);
+        mDevice.setBatteryLevel(80);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(80, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setPowered(false);
+
+        assertEquals(true, mDevice.batterySaverEnabled); // Still enabled.
+        assertEquals(80, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setBatteryLevel(30);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
+
+        // Scenario 4: User turns BS on manually above the threshold. Device drains below
+        // threshold and is eventually charged to above threshold. Sticky BS should turn off.
+        mDevice.setPowered(true);
+        mDevice.setBatteryLevel(90);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setPowered(false);
+
+        assertEquals(false, mDevice.batterySaverEnabled); // Sticky BS no longer enabled.
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 5: User turns BS on manually below threshold and charges to below threshold.
+        // Sticky BS should activate.
+        mDevice.setBatteryLevel(70);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(70, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mTarget.setBatterySaverEnabledManually(true);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(70, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setPowered(true);
+        mDevice.setBatteryLevel(80);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(80, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setPowered(false);
+
+        assertEquals(true, mDevice.batterySaverEnabled); // Sticky BS still on.
+        assertEquals(80, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 6: User turns BS on manually below threshold and eventually charges to above
+        // threshold. Sticky BS should turn off.
+
+        mDevice.setPowered(true);
+        mDevice.setBatteryLevel(95);
+        mDevice.setPowered(false);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(95, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 7: User turns BS on above threshold and then reboots device. Sticky BS
+        // shouldn't activate.
+        mTarget.setBatterySaverEnabledManually(true);
+        mPersistedState.batteryLevel = 93;
+
+        initDevice();
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(93, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 8: User turns BS on below threshold and then reboots device without charging.
+        // Sticky BS should activate.
+        mDevice.setBatteryLevel(75);
+        mTarget.setBatterySaverEnabledManually(true);
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(75, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        initDevice();
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(75, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 9: User turns BS on below threshold and then reboots device after charging
+        // above threshold. Sticky BS shouldn't activate.
+        mDevice.setBatteryLevel(80);
+        mTarget.setBatterySaverEnabledManually(true);
+        mPersistedState.batteryLevel = 100;
+
+        initDevice();
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(100, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        // Scenario 10: Somehow autoDisableLevel is set to a value below lowPowerModeTriggerLevel
+        // and then user enables manually above both thresholds, discharges below
+        // autoDisableLevel and then charges up to between autoDisableLevel and
+        // lowPowerModeTriggerLevel. Sticky BS shouldn't activate, but BS should still be on
+        // because the level is below lowPowerModeTriggerLevel.
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 75);
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED, 1);
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL, 60);
+        initDevice();
+
+        mDevice.setBatteryLevel(90);
+        mTarget.setBatterySaverEnabledManually(true);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setBatteryLevel(50);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(50, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
+
+        mDevice.setPowered(true);
+        mDevice.setBatteryLevel(65);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(65, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
+
+        mDevice.setPowered(false);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(65, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
     }
 
     @Test
