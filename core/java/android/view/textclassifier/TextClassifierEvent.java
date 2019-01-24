@@ -72,7 +72,7 @@ public final class TextClassifierEvent implements Parcelable {
              TYPE_ACTIONS_SHOWN, TYPE_LINK_CLICKED, TYPE_OVERTYPE, TYPE_COPY_ACTION,
              TYPE_PASTE_ACTION, TYPE_CUT_ACTION, TYPE_SHARE_ACTION, TYPE_SMART_ACTION,
              TYPE_SELECTION_DRAG, TYPE_SELECTION_DESTROYED, TYPE_OTHER_ACTION, TYPE_SELECT_ALL,
-             TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY})
+             TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY, TYPE_ACTIONS_GENERATED})
     public @interface Type {
         // For custom event types, use range 1,000,000+.
     }
@@ -121,7 +121,7 @@ public final class TextClassifierEvent implements Parcelable {
 
     @Category private final int mEventCategory;
     @Type private final int mEventType;
-    @Nullable private final String mEntityType;
+    @Nullable private final String[] mEntityTypes;
     @Nullable private final TextClassificationContext mEventContext;
     @Nullable private final String mResultId;
     private final int mEventIndex;
@@ -139,11 +139,12 @@ public final class TextClassifierEvent implements Parcelable {
 
     // Language detection.
     @Nullable private final String mLanguage;
+    private final float mScore;
 
     private TextClassifierEvent(
             int eventCategory,
             int eventType,
-            String entityType,
+            String[] entityTypes,
             TextClassificationContext eventContext,
             String resultId,
             int eventIndex,
@@ -154,10 +155,11 @@ public final class TextClassifierEvent implements Parcelable {
             int relativeSuggestedWordStartIndex,
             int relativeSuggestedWordEndIndex,
             int[] actionIndex,
-            String language) {
+            String language,
+            float score) {
         mEventCategory = eventCategory;
         mEventType = eventType;
-        mEntityType = entityType;
+        mEntityTypes = entityTypes;
         mEventContext = eventContext;
         mResultId = resultId;
         mEventIndex = eventIndex;
@@ -169,6 +171,7 @@ public final class TextClassifierEvent implements Parcelable {
         mRelativeSuggestedWordEndIndex = relativeSuggestedWordEndIndex;
         mActionIndices = actionIndex;
         mLanguage = language;
+        mScore = score;
     }
 
     @Override
@@ -180,7 +183,7 @@ public final class TextClassifierEvent implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mEventCategory);
         dest.writeInt(mEventType);
-        dest.writeString(mEntityType);
+        dest.writeStringArray(mEntityTypes);
         dest.writeParcelable(mEventContext, flags);
         dest.writeString(mResultId);
         dest.writeInt(mEventIndex);
@@ -192,13 +195,14 @@ public final class TextClassifierEvent implements Parcelable {
         dest.writeInt(mRelativeSuggestedWordEndIndex);
         dest.writeIntArray(mActionIndices);
         dest.writeString(mLanguage);
+        dest.writeFloat(mScore);
     }
 
     private static TextClassifierEvent readFromParcel(Parcel in) {
         return new TextClassifierEvent(
                 /* eventCategory= */ in.readInt(),
                 /* eventType= */ in.readInt(),
-                /* entityType= */ in.readString(),
+                /* entityTypes=*/ in.readStringArray(),
                 /* eventContext= */ in.readParcelable(null),
                 /* resultId= */ in.readString(),
                 /* eventIndex= */ in.readInt(),
@@ -209,7 +213,8 @@ public final class TextClassifierEvent implements Parcelable {
                 /* relativeSuggestedWordStartIndex= */ in.readInt(),
                 /* relativeSuggestedWordEndIndex= */ in.readInt(),
                 /* actionIndices= */ in.createIntArray(),
-                /* language= */ in.readString());
+                /* language= */ in.readString(),
+                /* score= */ in.readFloat());
     }
 
     /**
@@ -229,11 +234,11 @@ public final class TextClassifierEvent implements Parcelable {
     }
 
     /**
-     * Returns the entity type. e.g. {@link TextClassifier#TYPE_ADDRESS}.
+     * Returns an array of entity types. e.g. {@link TextClassifier#TYPE_ADDRESS}.
      */
-    @Nullable
-    public String getEntityType() {
-        return mEntityType;
+    @NonNull
+    public String[] getEntityTypes() {
+        return mEntityTypes;
     }
 
     /**
@@ -327,13 +332,20 @@ public final class TextClassifierEvent implements Parcelable {
     }
 
     /**
+     * Returns the score of the suggestion.
+     */
+    public float getScore() {
+        return mScore;
+    }
+
+    /**
      * Builder to build a text classifier event.
      */
     public static final class Builder {
 
         private final int mEventCategory;
         private final int mEventType;
-        @Nullable private String mEntityType;
+        private String[] mEntityTypes = new String[0];
         @Nullable private TextClassificationContext mEventContext;
         @Nullable private String mResultId;
         private int mEventIndex;
@@ -345,6 +357,7 @@ public final class TextClassifierEvent implements Parcelable {
         private int mRelativeSuggestedWordEndIndex;
         private int[] mActionIndices = new int[0];
         @Nullable private String mLanguage;
+        private float mScore;
 
         /**
          * Creates a builder for building {@link TextClassifierEvent}s.
@@ -358,11 +371,12 @@ public final class TextClassifierEvent implements Parcelable {
         }
 
         /**
-         * Sets the entity type. e.g. {@link TextClassifier#TYPE_ADDRESS}.
+         * Sets the entity types. e.g. {@link TextClassifier#TYPE_ADDRESS}.
          */
         @NonNull
-        public Builder setEntityType(@Nullable String entityType) {
-            mEntityType = entityType;
+        public Builder setEntityTypes(@NonNull String... entityTypes) {
+            mEntityTypes = new String[entityTypes.length];
+            System.arraycopy(entityTypes, 0, mEntityTypes, 0, entityTypes.length);
             return this;
         }
 
@@ -478,6 +492,15 @@ public final class TextClassifierEvent implements Parcelable {
         }
 
         /**
+         * Sets the score of the suggestion.
+         */
+        @NonNull
+        public Builder setScore(float score) {
+            mScore = score;
+            return this;
+        }
+
+        /**
          * Builds and returns a text classifier event.
          */
         @NonNull
@@ -486,7 +509,7 @@ public final class TextClassifierEvent implements Parcelable {
             return new TextClassifierEvent(
                     mEventCategory,
                     mEventType,
-                    mEntityType,
+                    mEntityTypes,
                     mEventContext,
                     mResultId,
                     mEventIndex,
@@ -497,7 +520,8 @@ public final class TextClassifierEvent implements Parcelable {
                     mRelativeSuggestedWordStartIndex,
                     mRelativeSuggestedWordEndIndex,
                     mActionIndices,
-                    mLanguage);
+                    mLanguage,
+                    mScore);
         }
         // TODO: Add build(boolean validate).
     }
@@ -507,7 +531,7 @@ public final class TextClassifierEvent implements Parcelable {
         StringBuilder out = new StringBuilder(128);
         out.append("TextClassifierEvent{");
         out.append("mEventCategory=").append(mEventCategory);
-        out.append(", mEventType=").append(mEventType);
+        out.append(", mEventTypes=").append(Arrays.toString(mEntityTypes));
         out.append(", mEventContext=").append(mEventContext);
         out.append(", mResultId=").append(mResultId);
         out.append(", mEventIndex=").append(mEventIndex);
@@ -519,6 +543,7 @@ public final class TextClassifierEvent implements Parcelable {
         out.append(", mRelativeSuggestedWordEndIndex=").append(mRelativeSuggestedWordEndIndex);
         out.append(", mActionIndices=").append(Arrays.toString(mActionIndices));
         out.append(", mLanguage=").append(mLanguage);
+        out.append(", mScore=").append(mScore);
         out.append("}");
         return out.toString();
     }

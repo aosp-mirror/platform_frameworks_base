@@ -6780,22 +6780,22 @@ message MetricsEvent {
     CONVERSATION_ACTIONS = 1615;
 
     // ACTION: Actions from a text classifier are shown to user.
-    // CATEGORY: CONVERSATION_ACTIONS
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
     // OS: Q
     ACTION_TEXT_CLASSIFIER_ACTIONS_SHOWN = 1616;
 
-    // ACTION: Event time of a text classifier event in unix timestamp.
-    // CATEGORY: CONVERSATION_ACTIONS, LANGUAGE_DETECTION
+    // FIELD: Event time of a text classifier event in unix timestamp.
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
     // OS: Q
     FIELD_TEXT_CLASSIFIER_EVENT_TIME = 1617;
 
     // ACTION: Users compose their own replies instead of using suggested ones.
-    // CATEGORY: CONVERSATION_ACTIONS
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
     // OS: Q
     ACTION_TEXT_CLASSIFIER_MANUAL_REPLY = 1618;
 
     // ACTION: Text classifier generates an action.
-    // CATEGORY: CONVERSATION_ACTIONS
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
     // OS: Q
     ACTION_TEXT_CLASSIFIER_ACTIONS_GENERATED = 1619;
 
@@ -6840,7 +6840,7 @@ message MetricsEvent {
     // OPEN: Settings > Display > Adaptive sleep
     // OS: Q
     SETTINGS_ADAPTIVE_SLEEP = 1628;
-    
+
     // Tagged data for SMART_REPLY_VISIBLE and NOTIFICATION_ITEM_ACTION.
     // The UI location of the notification containing the smart suggestions.
     // This is a NotificationLocation object (see the NotificationLocation
@@ -6869,6 +6869,40 @@ message MetricsEvent {
     // OPEN: Settings > System > Aware > Disable > Dialog
     // OS: Q
     DIALOG_AWARE_DISABLE = 1633;
+
+    // FIELD: Session ID of TextClassifierEvent.
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_SESSION_ID = 1634;
+
+    // FIELD: First entity type.
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_FIRST_ENTITY_TYPE = 1635;
+    // FIELD: Second entity type.
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_SECOND_ENTITY_TYPE = 1636;
+
+    // FIELD: Third entity type.
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_THIRD_ENTITY_TYPE = 1637;
+
+    // FIELD: Score of the suggestion.
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_SCORE = 1638;
+
+    // FIELD: widget type, e.g: notification, textview
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_WIDGET_TYPE = 1639;
+
+    // FIELD: version of the widget.
+    // CATEGORY: LANGUAGE_DETECTION, CONVERSATION_ACTIONS
+    // OS: Q
+    FIELD_TEXT_CLASSIFIER_WIDGET_VERSION = 1640;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
