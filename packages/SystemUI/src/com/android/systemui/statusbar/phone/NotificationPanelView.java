@@ -447,6 +447,11 @@ public class NotificationPanelView extends PanelView implements
                 false);
         addView(mKeyguardStatusView, index);
 
+        // Re-associate the clock container with the keyguard clock switch.
+        mBigClockContainer.removeAllViews();
+        KeyguardClockSwitch keyguardClockSwitch = findViewById(R.id.keyguard_clock_container);
+        keyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+
         // Update keyguard bottom area
         index = indexOfChild(mKeyguardBottomArea);
         removeView(mKeyguardBottomArea);
