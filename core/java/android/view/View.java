@@ -9154,7 +9154,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         ContentCaptureSession session = null;
         if (mParent instanceof View) {
-            session = ((View) mParent).getContentCaptureSession();
+            session = ((View) mParent).getContentCaptureSession(ccm);
         }
 
         return session != null ? session : ccm.getMainContentCaptureSession();
