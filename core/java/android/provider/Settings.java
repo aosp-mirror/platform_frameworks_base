@@ -59,6 +59,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.hardware.display.ColorDisplayManager;
 import android.location.LocationManager;
 import android.media.AudioFormat;
 import android.net.ConnectivityManager;
@@ -89,7 +90,6 @@ import android.util.MemoryIntArray;
 import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.widget.ILockSettings;
 
 import java.io.IOException;
@@ -3239,8 +3239,8 @@ public final class Settings {
 
         private static final Validator DISPLAY_COLOR_MODE_VALIDATOR =
                 new SettingsValidators.InclusiveIntegerRangeValidator(
-                        ColorDisplayController.COLOR_MODE_NATURAL,
-                        ColorDisplayController.COLOR_MODE_AUTOMATIC);
+                        ColorDisplayManager.COLOR_MODE_NATURAL,
+                        ColorDisplayManager.COLOR_MODE_AUTOMATIC);
 
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins

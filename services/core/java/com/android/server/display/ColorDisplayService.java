@@ -19,7 +19,10 @@ package com.android.server.display;
 import static android.hardware.display.ColorDisplayManager.AUTO_MODE_CUSTOM_TIME;
 import static android.hardware.display.ColorDisplayManager.AUTO_MODE_DISABLED;
 import static android.hardware.display.ColorDisplayManager.AUTO_MODE_TWILIGHT;
-
+import static android.hardware.display.ColorDisplayManager.COLOR_MODE_AUTOMATIC;
+import static android.hardware.display.ColorDisplayManager.COLOR_MODE_BOOSTED;
+import static android.hardware.display.ColorDisplayManager.COLOR_MODE_NATURAL;
+import static android.hardware.display.ColorDisplayManager.COLOR_MODE_SATURATED;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION;
@@ -45,6 +48,7 @@ import android.database.ContentObserver;
 import android.graphics.ColorSpace;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.ColorDisplayManager.AutoMode;
+import android.hardware.display.ColorDisplayManager.ColorMode;
 import android.hardware.display.IColorDisplayManager;
 import android.hardware.display.Time;
 import android.net.Uri;
@@ -53,6 +57,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.provider.Settings.System;
@@ -61,7 +66,6 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
-
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ColorDisplayController;
@@ -71,7 +75,6 @@ import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -162,7 +165,7 @@ public final class ColorDisplayService extends SystemService {
             }
 
             float[] displayRedGreenBlueXYZ =
-                new float[NUM_DISPLAY_PRIMARIES_VALS - NUM_VALUES_PER_PRIMARY];
+                    new float[NUM_DISPLAY_PRIMARIES_VALS - NUM_VALUES_PER_PRIMARY];
             float[] displayWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
             for (int i = 0; i < displayRedGreenBlueXYZ.length; i++) {
                 displayRedGreenBlueXYZ[i] = Float.parseFloat(displayPrimariesValues[i]);
@@ -173,10 +176,10 @@ public final class ColorDisplayService extends SystemService {
             }
 
             final ColorSpace.Rgb displayColorSpaceRGB = new ColorSpace.Rgb(
-                "Display Color Space",
-                displayRedGreenBlueXYZ,
-                displayWhiteXYZ,
-                2.2f // gamma, unused for display white balance
+                    "Display Color Space",
+                    displayRedGreenBlueXYZ,
+                    displayWhiteXYZ,
+                    2.2f // gamma, unused for display white balance
             );
 
             float[] displayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
@@ -242,8 +245,8 @@ public final class ColorDisplayService extends SystemService {
                 mCurrentColorTemperatureXYZ = ColorSpace.cctToIlluminantdXyz(cct);
 
                 mChromaticAdaptationMatrix =
-                    ColorSpace.chromaticAdaptation(ColorSpace.Adaptation.BRADFORD,
-                            mDisplayNominalWhiteXYZ, mCurrentColorTemperatureXYZ);
+                        ColorSpace.chromaticAdaptation(ColorSpace.Adaptation.BRADFORD,
+                                mDisplayNominalWhiteXYZ, mCurrentColorTemperatureXYZ);
 
                 // Convert the adaptation matrix to RGB space
                 float[] result = ColorSpace.mul3x3(mChromaticAdaptationMatrix,
@@ -385,7 +388,7 @@ public final class ColorDisplayService extends SystemService {
      * subtraction from 1. The last row represents a non-multiplied addition, see surfaceflinger's
      * ProgramCache for full implementation details.
      */
-    private static final float[] MATRIX_INVERT_COLOR = new float[] {
+    private static final float[] MATRIX_INVERT_COLOR = new float[]{
             0.402f, -0.598f, -0.599f, 0f,
             -1.174f, -0.174f, -1.175f, 0f,
             -0.228f, -0.228f, 0.772f, 0f,
@@ -944,6 +947,89 @@ public final class ColorDisplayService extends SystemService {
                 .setSaturationLevel(packageName, mCurrentUser, saturationLevel);
     }
 
+    private void setColorModeInternal(@ColorMode int colorMode) {
+        if (!isColorModeAvailable(colorMode)) {
+            throw new IllegalArgumentException("Invalid colorMode: " + colorMode);
+        }
+        System.putIntForUser(getContext().getContentResolver(), System.DISPLAY_COLOR_MODE,
+                colorMode,
+                mCurrentUser);
+    }
+
+    private @ColorMode
+    int getColorModeInternal() {
+        final ContentResolver cr = getContext().getContentResolver();
+        if (Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
+                0, mCurrentUser) == 1
+                || Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+                0, mCurrentUser) == 1) {
+            // There are restrictions on the available color modes combined with a11y transforms.
+            if (isColorModeAvailable(COLOR_MODE_SATURATED)) {
+                return COLOR_MODE_SATURATED;
+            } else if (isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
+                return COLOR_MODE_AUTOMATIC;
+            }
+        }
+
+        int colorMode = System.getIntForUser(cr, System.DISPLAY_COLOR_MODE, -1, mCurrentUser);
+        if (colorMode == -1) {
+            // There might be a system property controlling color mode that we need to respect; if
+            // not, this will set a suitable default.
+            colorMode = getCurrentColorModeFromSystemProperties();
+        }
+
+        // This happens when a color mode is no longer available (e.g., after system update or B&R)
+        // or the device does not support any color mode.
+        if (!isColorModeAvailable(colorMode)) {
+            if (colorMode == COLOR_MODE_BOOSTED && isColorModeAvailable(COLOR_MODE_NATURAL)) {
+                colorMode = COLOR_MODE_NATURAL;
+            } else if (colorMode == COLOR_MODE_SATURATED
+                    && isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
+                colorMode = COLOR_MODE_AUTOMATIC;
+            } else if (colorMode == COLOR_MODE_AUTOMATIC
+                    && isColorModeAvailable(COLOR_MODE_SATURATED)) {
+                colorMode = COLOR_MODE_SATURATED;
+            } else {
+                colorMode = -1;
+            }
+        }
+
+        return colorMode;
+    }
+
+    /**
+     * Get the current color mode from system properties, or return -1 if invalid.
+     *
+     * See {@link com.android.server.display.DisplayTransformManager}
+     */
+    private @ColorMode
+    int getCurrentColorModeFromSystemProperties() {
+        final int displayColorSetting = SystemProperties.getInt("persist.sys.sf.native_mode", 0);
+        if (displayColorSetting == 0) {
+            return "1.0".equals(SystemProperties.get("persist.sys.sf.color_saturation"))
+                    ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
+        } else if (displayColorSetting == 1) {
+            return COLOR_MODE_SATURATED;
+        } else if (displayColorSetting == 2) {
+            return COLOR_MODE_AUTOMATIC;
+        } else {
+            return -1;
+        }
+    }
+
+    private boolean isColorModeAvailable(@ColorMode int colorMode) {
+        final int[] availableColorModes = getContext().getResources().getIntArray(
+                R.array.config_availableColorModes);
+        if (availableColorModes != null) {
+            for (int mode : availableColorModes) {
+                if (mode == colorMode) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void dumpInternal(PrintWriter pw) {
         pw.println("COLOR DISPLAY MANAGER dumpsys (color_display)");
         pw.println("Night Display:");
@@ -1445,12 +1531,37 @@ public final class ColorDisplayService extends SystemService {
      */
     public interface ColorTransformController {
 
-        /** Apply the given saturation (grayscale) matrix to the associated AppWindow. */
+        /**
+         * Apply the given saturation (grayscale) matrix to the associated AppWindow.
+         */
         void applyAppSaturation(@Size(9) float[] matrix, @Size(3) float[] translation);
     }
 
     @VisibleForTesting
     final class BinderService extends IColorDisplayManager.Stub {
+
+        @Override
+        public void setColorMode(int colorMode) {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to set display color mode");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setColorModeInternal(colorMode);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public int getColorMode() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getColorModeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
 
         @Override
         public boolean isDeviceColorManaged() {
@@ -1640,7 +1751,9 @@ public final class ColorDisplayService extends SystemService {
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+                return;
+            }
 
             final long token = Binder.clearCallingIdentity();
             try {

@@ -38,4 +38,7 @@ interface IColorDisplayManager {
     boolean setNightDisplayCustomStartTime(in Time time);
     Time getNightDisplayCustomEndTime();
     boolean setNightDisplayCustomEndTime(in Time time);
+
+    int getColorMode();
+    void setColorMode(int colorMode);
 }

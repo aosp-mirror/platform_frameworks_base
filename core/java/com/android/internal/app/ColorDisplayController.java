@@ -16,7 +16,6 @@
 
 package com.android.internal.app;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -24,18 +23,13 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.ColorDisplayManager.AutoMode;
+import android.hardware.display.ColorDisplayManager.ColorMode;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemProperties;
 import android.provider.Settings.Secure;
-import android.provider.Settings.System;
 import android.util.Slog;
 
-import com.android.internal.R;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.time.LocalTime;
 
 /**
@@ -48,35 +42,6 @@ public final class ColorDisplayController {
 
     private static final String TAG = "ColorDisplayController";
     private static final boolean DEBUG = false;
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({COLOR_MODE_NATURAL, COLOR_MODE_BOOSTED, COLOR_MODE_SATURATED, COLOR_MODE_AUTOMATIC})
-    public @interface ColorMode {}
-
-    /**
-     * Color mode with natural colors.
-     *
-     * @see #setColorMode(int)
-     */
-    public static final int COLOR_MODE_NATURAL = 0;
-    /**
-     * Color mode with boosted colors.
-     *
-     * @see #setColorMode(int)
-     */
-    public static final int COLOR_MODE_BOOSTED = 1;
-    /**
-     * Color mode with saturated colors.
-     *
-     * @see #setColorMode(int)
-     */
-    public static final int COLOR_MODE_SATURATED = 2;
-    /**
-     * Color mode with automatic colors.
-     *
-     * @see #setColorMode(int)
-     */
-    public static final int COLOR_MODE_AUTOMATIC = 3;
 
     private final Context mContext;
     private final int mUserId;
@@ -197,74 +162,10 @@ public final class ColorDisplayController {
     }
 
     /**
-     * Get the current color mode from system properties, or return -1.
-     *
-     * See com.android.server.display.DisplayTransformManager.
-     */
-    private @ColorMode int getCurrentColorModeFromSystemProperties() {
-        final int displayColorSetting = SystemProperties.getInt("persist.sys.sf.native_mode", 0);
-        if (displayColorSetting == 0) {
-            return "1.0".equals(SystemProperties.get("persist.sys.sf.color_saturation"))
-                    ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
-        } else if (displayColorSetting == 1) {
-            return COLOR_MODE_SATURATED;
-        } else if (displayColorSetting == 2) {
-            return COLOR_MODE_AUTOMATIC;
-        } else {
-            return -1;
-        }
-    }
-
-    private boolean isColorModeAvailable(@ColorMode int colorMode) {
-        final int[] availableColorModes = mContext.getResources().getIntArray(
-                R.array.config_availableColorModes);
-        if (availableColorModes != null) {
-            for (int mode : availableColorModes) {
-                if (mode == colorMode) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Get the current color mode.
      */
     public int getColorMode() {
-        if (getAccessibilityTransformActivated()) {
-            if (isColorModeAvailable(COLOR_MODE_SATURATED)) {
-                return COLOR_MODE_SATURATED;
-            } else if (isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
-                return COLOR_MODE_AUTOMATIC;
-            }
-        }
-
-        int colorMode = System.getIntForUser(mContext.getContentResolver(),
-                System.DISPLAY_COLOR_MODE, -1, mUserId);
-        if (colorMode == -1) {
-            // There might be a system property controlling color mode that we need to respect; if
-            // not, this will set a suitable default.
-            colorMode = getCurrentColorModeFromSystemProperties();
-        }
-
-        // This happens when a color mode is no longer available (e.g., after system update or B&R)
-        // or the device does not support any color mode.
-        if (!isColorModeAvailable(colorMode)) {
-            if (colorMode == COLOR_MODE_BOOSTED && isColorModeAvailable(COLOR_MODE_NATURAL)) {
-                colorMode = COLOR_MODE_NATURAL;
-            } else if (colorMode == COLOR_MODE_SATURATED
-                    && isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
-                colorMode = COLOR_MODE_AUTOMATIC;
-            } else if (colorMode == COLOR_MODE_AUTOMATIC
-                    && isColorModeAvailable(COLOR_MODE_SATURATED)) {
-                colorMode = COLOR_MODE_SATURATED;
-            } else {
-                colorMode = -1;
-            }
-        }
-
-        return colorMode;
+        return mColorDisplayManager.getColorMode();
     }
 
     /**
@@ -273,11 +174,7 @@ public final class ColorDisplayController {
      * @param colorMode the color mode
      */
     public void setColorMode(@ColorMode int colorMode) {
-        if (!isColorModeAvailable(colorMode)) {
-            throw new IllegalArgumentException("Invalid colorMode: " + colorMode);
-        }
-        System.putIntForUser(mContext.getContentResolver(), System.DISPLAY_COLOR_MODE, colorMode,
-                mUserId);
+        mColorDisplayManager.setColorMode(colorMode);
     }
 
     /**
@@ -292,18 +189,6 @@ public final class ColorDisplayController {
      */
     public int getMaximumColorTemperature() {
         return ColorDisplayManager.getMaximumColorTemperature(mContext);
-    }
-
-    /**
-     * Returns true if any Accessibility color transforms are enabled.
-     */
-    public boolean getAccessibilityTransformActivated() {
-        final ContentResolver cr = mContext.getContentResolver();
-        return
-            Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
-                    0, mUserId) == 1
-            || Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
-                    0, mUserId) == 1;
     }
 
     private void onSettingChanged(@NonNull String setting) {
@@ -327,13 +212,6 @@ public final class ColorDisplayController {
                     break;
                 case Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE:
                     mCallback.onColorTemperatureChanged(getColorTemperature());
-                    break;
-                case System.DISPLAY_COLOR_MODE:
-                    mCallback.onDisplayColorModeChanged(getColorMode());
-                    break;
-                case Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED:
-                case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
-                    mCallback.onAccessibilityTransformChanged(getAccessibilityTransformActivated());
                     break;
             }
         }
@@ -377,14 +255,6 @@ public final class ColorDisplayController {
                         false /* notifyForDescendants */, mContentObserver, mUserId);
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
-                cr.registerContentObserver(System.getUriFor(System.DISPLAY_COLOR_MODE),
-                        false /* notifyForDecendants */, mContentObserver, mUserId);
-                cr.registerContentObserver(
-                        Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED),
-                        false /* notifyForDecendants */, mContentObserver, mUserId);
-                cr.registerContentObserver(
-                        Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED),
-                        false /* notifyForDecendants */, mContentObserver, mUserId);
             }
         }
     }
@@ -424,19 +294,5 @@ public final class ColorDisplayController {
          * @param colorTemperature the color temperature to tint the screen
          */
         default void onColorTemperatureChanged(int colorTemperature) {}
-
-        /**
-         * Callback invoked when the color mode changes.
-         *
-         * @param displayColorMode the color mode
-         */
-        default void onDisplayColorModeChanged(int displayColorMode) {}
-
-        /**
-         * Callback invoked when Accessibility color transforms change.
-         *
-         * @param state the state Accessibility color transforms (true of active)
-         */
-        default void onAccessibilityTransformChanged(boolean state) {}
     }
 }

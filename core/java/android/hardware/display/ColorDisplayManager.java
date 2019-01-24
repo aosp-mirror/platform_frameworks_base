@@ -23,12 +23,14 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.provider.Settings.Secure;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -122,6 +124,42 @@ public final class ColorDisplayManager {
      */
     @SystemApi
     public static final int AUTO_MODE_TWILIGHT = 2;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({COLOR_MODE_NATURAL, COLOR_MODE_BOOSTED, COLOR_MODE_SATURATED, COLOR_MODE_AUTOMATIC})
+    public @interface ColorMode {}
+
+    /**
+     * Color mode with natural colors.
+     *
+     * @hide
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_NATURAL = 0;
+    /**
+     * Color mode with boosted colors.
+     *
+     * @hide
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_BOOSTED = 1;
+    /**
+     * Color mode with saturated colors.
+     *
+     * @hide
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_SATURATED = 2;
+    /**
+     * Color mode with automatic colors.
+     *
+     * @hide
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_AUTOMATIC = 3;
 
     private final ColorDisplayManagerInternal mManager;
     private MetricsLogger mMetricsLogger;
@@ -286,6 +324,24 @@ public final class ColorDisplayManager {
     }
 
     /**
+     * Sets the current display color mode.
+     *
+     * @hide
+     */
+    public void setColorMode(int colorMode) {
+        mManager.setColorMode(colorMode);
+    }
+
+    /**
+     * Gets the current display color mode.
+     *
+     * @hide
+     */
+    public int getColorMode() {
+        return mManager.getColorMode();
+    }
+
+    /**
      * Returns whether the device has a wide color gamut display.
      *
      * @hide
@@ -382,6 +438,18 @@ public final class ColorDisplayManager {
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public @CapabilityType int getTransformCapabilities() {
         return mManager.getTransformCapabilities();
+    }
+
+    /**
+     * Returns whether accessibility transforms are currently enabled, which determines whether
+     * color modes are currently configurable for this device.
+     *
+     * @hide
+     */
+    public static boolean areAccessibilityTransformsEnabled(Context context) {
+        final ContentResolver cr = context.getContentResolver();
+        return Secure.getInt(cr, Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0) == 1
+                || Secure.getInt(cr, Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0) == 1;
     }
 
     private MetricsLogger getMetricsLogger() {
@@ -523,6 +591,22 @@ public final class ColorDisplayManager {
         boolean setAppSaturationLevel(String packageName, int saturationLevel) {
             try {
                 return mCdm.setAppSaturationLevel(packageName, saturationLevel);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        int getColorMode() {
+            try {
+                return mCdm.getColorMode();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void setColorMode(int colorMode) {
+            try {
+                mCdm.setColorMode(colorMode);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

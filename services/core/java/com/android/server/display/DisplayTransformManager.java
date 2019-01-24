@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.app.ActivityTaskManager;
+import android.hardware.display.ColorDisplayManager;
 import android.opengl.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -27,7 +28,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.ColorDisplayController;
 
 import java.util.Arrays;
 
@@ -248,20 +248,20 @@ public class DisplayTransformManager {
      * work in linear space.
      */
     public static boolean needsLinearColorMatrix(int colorMode) {
-        return colorMode != ColorDisplayController.COLOR_MODE_SATURATED;
+        return colorMode != ColorDisplayManager.COLOR_MODE_SATURATED;
     }
 
     public boolean setColorMode(int colorMode, float[] nightDisplayMatrix) {
-        if (colorMode == ColorDisplayController.COLOR_MODE_NATURAL) {
+        if (colorMode == ColorDisplayManager.COLOR_MODE_NATURAL) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setDisplayColor(DISPLAY_COLOR_MANAGED);
-        } else if (colorMode == ColorDisplayController.COLOR_MODE_BOOSTED) {
+        } else if (colorMode == ColorDisplayManager.COLOR_MODE_BOOSTED) {
             applySaturation(COLOR_SATURATION_BOOSTED);
             setDisplayColor(DISPLAY_COLOR_MANAGED);
-        } else if (colorMode == ColorDisplayController.COLOR_MODE_SATURATED) {
+        } else if (colorMode == ColorDisplayManager.COLOR_MODE_SATURATED) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setDisplayColor(DISPLAY_COLOR_UNMANAGED);
-        } else if (colorMode == ColorDisplayController.COLOR_MODE_AUTOMATIC) {
+        } else if (colorMode == ColorDisplayManager.COLOR_MODE_AUTOMATIC) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setDisplayColor(DISPLAY_COLOR_ENHANCED);
         }
