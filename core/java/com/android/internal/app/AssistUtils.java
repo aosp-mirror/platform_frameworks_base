@@ -17,21 +17,16 @@
 package com.android.internal.app;
 
 import android.annotation.NonNull;
-import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
-
-import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -43,14 +38,6 @@ import java.util.Set;
 public class AssistUtils {
 
     private static final String TAG = "AssistUtils";
-
-    /**
-     * Sentinel value for "no default assistant specified."
-     *
-     * Empty string is already used to represent an explicit setting of No Assistant. null cannot
-     * be used because we can't represent a null value in XML.
-     */
-    private static final String UNSET = "#+UNSET";
 
     private final Context mContext;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
@@ -186,37 +173,9 @@ public class AssistUtils {
                 Settings.Secure.ASSISTANT, userId);
         if (setting != null) {
             return ComponentName.unflattenFromString(setting);
-        }
-
-        final String defaultSetting = mContext.getResources().getString(
-                R.string.config_defaultAssistantComponentName);
-        if (defaultSetting != null && !defaultSetting.equals(UNSET)) {
-            return ComponentName.unflattenFromString(defaultSetting);
-        }
-
-        // Fallback to keep backward compatible behavior when there is no user setting.
-        if (activeServiceSupportsAssistGesture()) {
-            return getActiveServiceComponentName();
-        }
-
-        if (UNSET.equals(defaultSetting)) {
+        } else {
             return null;
         }
-
-        final SearchManager searchManager =
-                (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-        if (searchManager == null) {
-            return null;
-        }
-        final Intent intent = searchManager.getAssistIntent(false);
-        PackageManager pm = mContext.getPackageManager();
-        ResolveInfo info = pm.resolveActivityAsUser(intent, PackageManager.MATCH_DEFAULT_ONLY,
-                userId);
-        if (info != null) {
-            return new ComponentName(info.activityInfo.applicationInfo.packageName,
-                    info.activityInfo.name);
-        }
-        return null;
     }
 
     public static boolean isPreinstalledAssistant(Context context, ComponentName assistant) {
