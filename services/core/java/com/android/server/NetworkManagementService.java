@@ -46,11 +46,11 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.InetAddresses;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
 import android.net.ITetheringStatsProvider;
+import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
 import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
@@ -465,9 +465,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a change in the data activity state of the interface
      */
-    private void notifyInterfaceClassActivity(int type, int powerState, long tsNanos,
+    private void notifyInterfaceClassActivity(int type, boolean isActive, long tsNanos,
             int uid, boolean fromRadio) {
         final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
+        int powerState = isActive
+                ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         if (isMobile) {
             if (!fromRadio) {
                 if (mMobileActivityFromRadio) {
@@ -497,9 +500,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
             }
         }
-
-        boolean isActive = powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
-                || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
 
         if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
             // Report the change in data activity.  We don't do this if this is a change
@@ -734,10 +734,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             } else {
                 timestampNanos = timestamp;
             }
-            mDaemonHandler.post(() -> notifyInterfaceClassActivity(label,
-                    isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
-                    : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                    timestampNanos, uid, false));
+            mDaemonHandler.post(() ->
+                    notifyInterfaceClassActivity(label, isActive, timestampNanos, uid, false));
         }
 
         @Override
@@ -904,9 +902,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     }
                     boolean isActive = cooked[2].equals("active");
                     notifyInterfaceClassActivity(Integer.parseInt(cooked[3]),
-                            isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
-                            : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                            timestampNanos, processUid, false);
+                            isActive, timestampNanos, processUid, false);
                     return true;
                     // break;
             case NetdResponseCode.InterfaceAddressChange:
@@ -1456,8 +1452,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (ConnectivityManager.isNetworkTypeMobile(type)) {
                 mNetworkActive = false;
             }
-            mDaemonHandler.post(() -> notifyInterfaceClassActivity(type,
-                    DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+            mDaemonHandler.post(() -> notifyInterfaceClassActivity(type, true,
                     SystemClock.elapsedRealtimeNanos(), -1, false));
         }
     }
@@ -1481,8 +1476,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 throw new IllegalStateException(e);
             }
             mActiveIdleTimers.remove(iface);
-            mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type,
-                    DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+            mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type, false,
                     SystemClock.elapsedRealtimeNanos(), -1, false));
         }
     }
