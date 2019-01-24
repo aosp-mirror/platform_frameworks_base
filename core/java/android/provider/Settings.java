@@ -13261,29 +13261,6 @@ public final class Settings {
         public static final String MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY =
                 "max_sound_trigger_detection_service_ops_per_day";
 
-        /**
-         * Property used by {@code com.android.server.SystemServer} on start to decide whether
-         * the Content Capture service should be created or not.
-         *
-         * <p>Possible values are:
-         *
-         * <ul>
-         *   <li>If set to {@code default}, it will only be set if the OEM provides and defines the
-         *   service name by overlaying {@code config_defaultContentCaptureService} (this is the
-         *   "default" mode)
-         *   <li>If set to {@code always}, it will always be enabled, even when the resource is not
-         *   overlaid (this is useful during development and to run the CTS tests on AOSP builds).
-         *   <li>Otherwise, it's explicitly disabled (this could work as a "kill switch" so OEMs
-         *   can disable it remotely in case of emergency by setting to something else (like
-         *   {@code "false"}); notice that it's also disabled if the OEM doesn't explicitly set one
-         *   of the values above).
-         * </ul>
-         *
-         * @hide
-         */
-        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED =
-                "content_capture_service_explicitly_enabled";
-
         /** {@hide} */
         public static final String ISOLATED_STORAGE_LOCAL = "isolated_storage_local";
         /** {@hide} */

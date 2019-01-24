@@ -5749,6 +5749,10 @@ package android.provider {
     field public static final String PROPERTY_SERVICE_ENABLED = "service_enabled";
   }
 
+  public static interface DeviceConfig.ContentCapture {
+    field public static final String NAMESPACE = "content_capture";
+  }
+
   public static interface DeviceConfig.FsiBoot {
     field public static final String NAMESPACE = "fsi_boot";
     field public static final String OOB_ENABLED = "oob_enabled";
