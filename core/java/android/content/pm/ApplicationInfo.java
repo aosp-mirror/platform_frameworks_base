@@ -1955,6 +1955,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0;
     }
 
+    /** @hide */
+    public boolean isCodeIntegrityPreferred() {
+        return (privateFlags & PRIVATE_FLAG_PREFER_CODE_INTEGRITY) != 0;
+    }
+
     /**
      * Returns whether or not this application was installed as a virtual preload.
      */
