@@ -9335,12 +9335,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Allows the device owner to enable or disable the backup service.
+     * Allows the device owner or profile owner to enable or disable the backup service.
      *
-     * <p> Backup service manages all backup and restore mechanisms on the device. Setting this to
-     * false will prevent data from being backed up or restored.
+     * <p> Each user has its own backup service which manages the backup and restore mechanisms in
+     * that user. Disabling the backup service will prevent data from being backed up or restored.
      *
-     * <p> Backup service is off by default when device owner is present.
+     * <p> Device owner calls this API to control backup services across all users on the device.
+     * Profile owner can use this API to enable or disable the profile's backup service. However,
+     * for a managed profile its backup functionality is only enabled if both the device owner
+     * and the profile owner have enabled the backup service.
+     *
+     * <p> By default, backup service is disabled on a device with device owner, and within a
+     * managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled {@code true} to enable the backup service, {@code false} to disable it.
@@ -9356,7 +9362,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Return whether the backup service is enabled by the device owner.
+     * Return whether the backup service is enabled by the device owner or profile owner for the
+     * current user, as previously set by {@link #setBackupServiceEnabled(ComponentName, boolean)}.
+     *
+     * <p> Whether the backup functionality is actually enabled or not depends on settings from both
+     * the current user and the device owner, please see
+     * {@link #setBackupServiceEnabled(ComponentName, boolean)} for details.
      *
      * <p> Backup service manages all backup and restore mechanisms on the device.
      *
