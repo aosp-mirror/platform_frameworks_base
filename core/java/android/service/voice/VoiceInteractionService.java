@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -40,6 +41,8 @@ import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -76,6 +79,33 @@ public class VoiceInteractionService extends Service {
      * android.R.styleable#VoiceInteractionService voice-interaction-service}&gt;</code> tag.
      */
     public static final String SERVICE_META_DATA = "android.voice_interaction";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"VOICE_STATE_"}, value = {
+            VOICE_STATE_NONE,
+            VOICE_STATE_CONDITIONAL_LISTENING,
+            VOICE_STATE_LISTENING,
+            VOICE_STATE_FULFILLING})
+    public @interface VoiceState {
+    }
+
+    /**
+     * Voice assistant inactive.
+     */
+    public static final int VOICE_STATE_NONE = 0;
+    /**
+     * Voice assistant listening, but will only trigger if it hears a request it can fulfill.
+     */
+    public static final int VOICE_STATE_CONDITIONAL_LISTENING = 1;
+    /**
+     * Voice assistant is listening to user speech.
+     */
+    public static final int VOICE_STATE_LISTENING = 2;
+    /**
+     * Voice assistant is fulfilling an action requested by the user.
+     */
+    public static final int VOICE_STATE_FULFILLING = 3;
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override
@@ -338,6 +368,43 @@ public class VoiceInteractionService extends Service {
             }
         } catch (Exception ex) {
             // Ignore.
+        }
+    }
+
+    /**
+     * Requests that the voice state UI indicate the given state.
+     *
+     * @param state value indicating whether the assistant is listening, fulfilling, etc.
+     */
+    public final void setVoiceState(@VoiceState int state) {
+        try {
+            mSystemService.setVoiceState(state);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Displays the given voice transcription contents.
+     */
+    public final void setTranscription(@NonNull String transcription) {
+        try {
+            mSystemService.setTranscription(transcription);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Hides transcription.
+     *
+     * @param immediate if {@code true}, remove before transcription animation completes.
+     */
+    public final void clearTranscription(boolean immediate) {
+        try {
+            mSystemService.clearTranscription(immediate);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -19,9 +19,6 @@ package com.android.server.voiceinteraction;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-
-import com.android.internal.app.IVoiceActionCheckCallback;
-import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -62,8 +59,9 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.app.IVoiceInteractionSessionListener;
+import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
@@ -75,6 +73,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.soundtrigger.SoundTriggerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1203,6 +1202,57 @@ public class VoiceInteractionManagerService extends SystemService {
                 mImpl.dumpLocked(fd, pw, args);
             }
             mSoundTriggerInternal.dump(fd, pw, args);
+        }
+
+        @Override
+        public void setTranscription(String transcription) {
+            synchronized (this) {
+                final int size = mVoiceInteractionSessionListeners.beginBroadcast();
+                for (int i = 0; i < size; ++i) {
+                    final IVoiceInteractionSessionListener listener =
+                            mVoiceInteractionSessionListeners.getBroadcastItem(i);
+                    try {
+                        listener.onTranscriptionUpdate(transcription);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error delivering voice transcription.", e);
+                    }
+                }
+                mVoiceInteractionSessionListeners.finishBroadcast();
+            }
+        }
+
+        @Override
+        public void clearTranscription(boolean immediate) {
+            synchronized (this) {
+                final int size = mVoiceInteractionSessionListeners.beginBroadcast();
+                for (int i = 0; i < size; ++i) {
+                    final IVoiceInteractionSessionListener listener =
+                            mVoiceInteractionSessionListeners.getBroadcastItem(i);
+                    try {
+                        listener.onTranscriptionComplete(immediate);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error delivering transcription complete event.", e);
+                    }
+                }
+                mVoiceInteractionSessionListeners.finishBroadcast();
+            }
+        }
+
+        @Override
+        public void setVoiceState(int state) {
+            synchronized (this) {
+                final int size = mVoiceInteractionSessionListeners.beginBroadcast();
+                for (int i = 0; i < size; ++i) {
+                    final IVoiceInteractionSessionListener listener =
+                            mVoiceInteractionSessionListeners.getBroadcastItem(i);
+                    try {
+                        listener.onVoiceStateChange(state);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error delivering voice state change.", e);
+                    }
+                }
+                mVoiceInteractionSessionListeners.finishBroadcast();
+            }
         }
 
         private void enforceCallingPermission(String permission) {
