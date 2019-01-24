@@ -94,9 +94,9 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         topBar.getFrameLw().set(0, 0, 500, 100);
         mProvider.setWindow(topBar, null);
-        mProvider.updateControlForTarget(target);
+        mProvider.updateControlForTarget(target, false /* force */);
         assertNotNull(mProvider.getControl());
-        mProvider.updateControlForTarget(null);
+        mProvider.updateControlForTarget(null, false /* force */);
         assertNull(mProvider.getControl());
     }
 
@@ -106,7 +106,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         topBar.getFrameLw().set(0, 0, 500, 100);
         mProvider.setWindow(topBar, null);
-        mProvider.updateControlForTarget(target);
+        mProvider.updateControlForTarget(target, false /* force */);
         InsetsState state = new InsetsState();
         state.getSource(TYPE_TOP_BAR).setVisible(false);
         mProvider.onInsetsModified(target, state.getSource(TYPE_TOP_BAR));
