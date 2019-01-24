@@ -11446,33 +11446,33 @@ public final class Settings {
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
 
         /**
-         * Game Update Package global preference for all Apps.
+         * Game Driver global preference for all Apps.
          * 0 = Default
-         * 1 = All Apps use Game Update Package
+         * 1 = All Apps use Game Driver
          * 2 = All Apps use system graphics driver
          * @hide
          */
-        public static final String GUP_DEV_ALL_APPS = "gup_dev_all_apps";
+        public static final String GAME_DRIVER_ALL_APPS = "game_driver_all_apps";
 
         /**
-         * List of Apps selected to use Game Update Package.
+         * List of Apps selected to use Game Driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
-        public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
+        public static final String GAME_DRIVER_OPT_IN_APPS = "game_driver_opt_in_apps";
 
         /**
-         * List of Apps selected not to use Game Update Package.
+         * List of Apps selected not to use Game Driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
-        public static final String GUP_DEV_OPT_OUT_APPS = "gup_dev_opt_out_apps";
+        public static final String GAME_DRIVER_OPT_OUT_APPS = "game_driver_opt_out_apps";
 
         /**
-         * Apps on the blacklist that are forbidden to use Game Update Package.
+         * Apps on the blacklist that are forbidden to use Game Driver.
          * @hide
          */
-        public static final String GUP_BLACKLIST = "gup_blacklist";
+        public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
 
         /**
          * Apps on the whitelist that are allowed to use Game Driver.

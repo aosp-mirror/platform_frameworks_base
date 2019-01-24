@@ -6492,10 +6492,10 @@ message MetricsEvent {
     // OS: Q
     ACTION_EMERGENCY_DIALER_FROM_POWER_MENU = 1569;
 
-    // OPEN: Settings > Developer Options > Game Update Packages
+    // OPEN: Settings > Developer Options > Game Driver Preference
     // CATEGORY: SETTINGS
     // OS: Q
-    SETTINGS_GUP_DASHBOARD = 1613;
+    SETTINGS_GAME_DRIVER_DASHBOARD = 1613;
 
     // ---- End Q Constants, all Q constants go above this line ----
 

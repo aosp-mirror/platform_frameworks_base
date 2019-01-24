@@ -384,20 +384,20 @@ message GlobalSettingsProto {
         // App allowed to load GPU debug layers.
         optional SettingProto debug_app = 1;
         optional SettingProto debug_layers = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // GUP - Game Update Package global preference for all Apps
+        // Game Driver - global preference for all Apps
         // 0 = Default
-        // 1 = All Apps use Game Update Package
+        // 1 = All Apps use Game Driver
         // 2 = All Apps use system graphics driver
-        optional SettingProto gup_dev_all_apps = 8;
-        // GUP - List of Apps selected to use Game Update Package
+        optional SettingProto game_driver_all_apps = 8;
+        // Game Driver - List of Apps selected to use Game Driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto gup_dev_opt_in_apps = 9;
-        // GUP - List of Apps selected not to use Game Update Package
+        optional SettingProto game_driver_opt_in_apps = 9;
+        // Game Driver - List of Apps selected not to use Game Driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto gup_dev_opt_out_apps = 10;
-        // GUP - List of Apps that are forbidden to use Game Update Package
-        optional SettingProto gup_blacklist = 11;
-        // List of Apps that are allowed to use Game Driver package.
+        optional SettingProto game_driver_opt_out_apps = 10;
+        // Game Driver - List of Apps that are forbidden to use Game Driver
+        optional SettingProto game_driver_blacklist = 11;
+        // Game Driver - List of Apps that are allowed to use Game Driver
         optional SettingProto game_driver_whitelist = 12;
     }
     optional Gpu gpu = 59;

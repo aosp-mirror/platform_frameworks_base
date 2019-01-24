@@ -648,17 +648,17 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS);
         dumpSetting(s, p,
-                Settings.Global.GUP_DEV_ALL_APPS,
-                GlobalSettingsProto.Gpu.GUP_DEV_ALL_APPS);
+                Settings.Global.GAME_DRIVER_ALL_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_ALL_APPS);
         dumpSetting(s, p,
-                Settings.Global.GUP_DEV_OPT_IN_APPS,
-                GlobalSettingsProto.Gpu.GUP_DEV_OPT_IN_APPS);
+                Settings.Global.GAME_DRIVER_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_IN_APPS);
         dumpSetting(s, p,
-                Settings.Global.GUP_DEV_OPT_OUT_APPS,
-                GlobalSettingsProto.Gpu.GUP_DEV_OPT_OUT_APPS);
+                Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
         dumpSetting(s, p,
-                Settings.Global.GUP_BLACKLIST,
-                GlobalSettingsProto.Gpu.GUP_BLACKLIST);
+                Settings.Global.GAME_DRIVER_BLACKLIST,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_BLACKLIST);
         dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_WHITELIST,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_WHITELIST);

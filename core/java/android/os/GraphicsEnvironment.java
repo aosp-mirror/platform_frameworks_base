@@ -57,7 +57,7 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
-    private static final String GUP_WHITELIST_FILENAME = "whitelist.txt";
+    private static final String GAME_DRIVER_WHITELIST_FILENAME = "whitelist.txt";
     private static final String GAME_DRIVER_BLACKLIST_FLAG = "blacklist";
     private static final int BASE64_FLAGS = Base64.NO_PADDING | Base64.NO_WRAP;
 
@@ -195,44 +195,45 @@ public class GraphicsEnvironment {
             return;
         }
 
-        // GUP_DEV_ALL_APPS
+        // GAME_DRIVER_ALL_APPS
         // 0: Default (Invalid values fallback to default as well)
         // 1: All apps use Game Driver
         // 2: All apps use system graphics driver
-        int gupDevAllApps = coreSettings.getInt(Settings.Global.GUP_DEV_ALL_APPS, 0);
-        if (gupDevAllApps == 2) {
+        int gameDriverAllApps = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
+        if (gameDriverAllApps == 2) {
             if (DEBUG) {
-                Log.w(TAG, "GUP is turned off on this device");
+                Log.w(TAG, "Game Driver is turned off on this device");
             }
             return;
         }
 
-        if (gupDevAllApps != 1) {
-            // GUP_DEV_OPT_OUT_APPS has higher priority than GUP_DEV_OPT_IN_APPS
-            if (getGlobalSettingsString(coreSettings, Settings.Global.GUP_DEV_OPT_OUT_APPS)
+        if (gameDriverAllApps != 1) {
+            // GAME_DRIVER_OPT_OUT_APPS has higher priority than GAME_DRIVER_OPT_IN_APPS
+            if (getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_OUT_APPS)
                             .contains(ai.packageName)) {
                 if (DEBUG) {
-                    Log.w(TAG, ai.packageName + " opts out from GUP.");
+                    Log.w(TAG, ai.packageName + " opts out from Game Driver.");
                 }
                 return;
             }
-            boolean isDevOptIn = getGlobalSettingsString(coreSettings,
-                                                         Settings.Global.GUP_DEV_OPT_IN_APPS)
-                              .contains(ai.packageName);
+            boolean isOptIn =
+                    getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
+                            .contains(ai.packageName);
 
-            if (!isDevOptIn && !onWhitelist(context, driverPackageName, ai.packageName)) {
+            if (!isOptIn && !onWhitelist(context, driverPackageName, ai.packageName)) {
                 if (DEBUG) {
                     Log.w(TAG, ai.packageName + " is not on the whitelist.");
                 }
                 return;
             }
 
-            if (!isDevOptIn) {
+            if (!isOptIn) {
                 // At this point, the application is on the whitelist only, check whether it's
                 // on the blacklist, terminate early when it's on the blacklist.
                 try {
                     // TODO(b/121350991) Switch to DeviceConfig with property listener.
-                    String base64String = coreSettings.getString(Settings.Global.GUP_BLACKLIST);
+                    String base64String =
+                            coreSettings.getString(Settings.Global.GAME_DRIVER_BLACKLIST);
                     if (base64String != null && !base64String.isEmpty()) {
                         Blacklists blacklistsProto = Blacklists.parseFrom(
                                 Base64.decode(base64String, BASE64_FLAGS));
@@ -318,7 +319,7 @@ public class GraphicsEnvironment {
             Context driverContext = context.createPackageContext(driverPackageName,
                                                                  Context.CONTEXT_RESTRICTED);
             AssetManager assets = driverContext.getAssets();
-            InputStream stream = assets.open(GUP_WHITELIST_FILENAME);
+            InputStream stream = assets.open(GAME_DRIVER_WHITELIST_FILENAME);
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             for (String packageName; (packageName = reader.readLine()) != null; ) {
                 if (packageName.equals(applicationPackageName)) {
