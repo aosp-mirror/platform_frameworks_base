@@ -49,7 +49,7 @@ import java.util.function.ToDoubleFunction;
  * per thread, uid or call description.
  */
 public class BinderCallsStats implements BinderInternal.Observer {
-    public static final boolean ENABLED_DEFAULT = false;
+    public static final boolean ENABLED_DEFAULT = true;
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 100;
     public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 5000;
