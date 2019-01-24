@@ -46,7 +46,6 @@ import android.view.InputChannel;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
-import android.view.animation.Animation;
 
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
@@ -70,8 +69,7 @@ final class InputMonitor {
 
     private boolean mDisableWallpaperTouchEvents;
     private final Rect mTmpRect = new Rect();
-    private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer =
-            new UpdateInputForAllWindowsConsumer();
+    private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer;
 
     private final int mDisplayId;
     private final DisplayContent mDisplayContent;
@@ -165,6 +163,7 @@ final class InputMonitor {
         mDisplayId = displayId;
         mInputTransaction = mDisplayContent.getPendingTransaction();
         mHandler = AnimationThread.getHandler();
+        mUpdateInputForAllWindowsConsumer = new UpdateInputForAllWindowsConsumer();
     }
 
     void onDisplayRemoved() {
@@ -407,6 +406,9 @@ final class InputMonitor {
         boolean inDrag;
         WallpaperController wallpaperController;
 
+        // An invalid window handle that tells SurfaceFlinger not update the input info.
+        final InputWindowHandle mInvalidInputWindow = new InputWindowHandle(null, null, mDisplayId);
+
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
 
@@ -445,6 +447,10 @@ final class InputMonitor {
             final InputWindowHandle inputWindowHandle = w.mInputWindowHandle;
             if (inputChannel == null || inputWindowHandle == null || w.mRemoved
                     || w.cantReceiveTouchInput()) {
+                if (w.mWinAnimator.hasSurface()) {
+                    mInputTransaction.setInputWindowInfo(
+                            w.mWinAnimator.mSurfaceController.mSurfaceControl, mInvalidInputWindow);
+                }
                 // Skip this window because it cannot possibly receive input.
                 return;
             }
