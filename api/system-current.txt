@@ -5626,6 +5626,18 @@ package android.provider {
     field public static final String NAMESPACE_NOTIFICATION_ASSISTANT = "notification_assistant";
   }
 
+  public static interface DeviceConfig.ActivityManager {
+    field public static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
+    field public static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
+    field public static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
+    field public static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
+    field public static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
+    field public static final String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+    field public static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
+    field public static final String KEY_USE_COMPACTION = "use_compaction";
+    field public static final String NAMESPACE = "activity_manager";
+  }
+
   public static interface DeviceConfig.FsiBoot {
     field public static final String NAMESPACE = "fsi_boot";
     field public static final String OOB_ENABLED = "oob_enabled";
