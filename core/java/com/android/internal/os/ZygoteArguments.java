@@ -339,6 +339,8 @@ class ZygoteArguments {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_FULL;
             }  else if (arg.equals("--mount-external-installer")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_INSTALLER;
+            }  else if (arg.equals("--mount-external-legacy")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_LEGACY;
             } else if (arg.equals("--query-abi-list")) {
                 mAbiListQuery = true;
             } else if (arg.equals("--get-pid")) {
