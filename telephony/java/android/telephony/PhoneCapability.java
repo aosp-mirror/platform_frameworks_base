@@ -33,15 +33,17 @@ public class PhoneCapability implements Parcelable {
     public final int maxActiveVoiceCalls;
     public final int maxActiveData;
     public final int max5G;
+    public final boolean validationBeforeSwitchSupported;
     public final List<ModemInfo> logicalModemList;
 
     public PhoneCapability(int maxActiveVoiceCalls, int maxActiveData, int max5G,
-            List<ModemInfo> logicalModemList) {
+            List<ModemInfo> logicalModemList, boolean validationBeforeSwitchSupported) {
         this.maxActiveVoiceCalls = maxActiveVoiceCalls;
         this.maxActiveData = maxActiveData;
         this.max5G = max5G;
         // Make sure it's not null.
         this.logicalModemList = logicalModemList == null ? new ArrayList<>() : logicalModemList;
+        this.validationBeforeSwitchSupported = validationBeforeSwitchSupported;
     }
 
     @Override
@@ -55,13 +57,15 @@ public class PhoneCapability implements Parcelable {
         maxActiveVoiceCalls = in.readInt();
         maxActiveData = in.readInt();
         max5G = in.readInt();
+        validationBeforeSwitchSupported = in.readBoolean();
         logicalModemList = new ArrayList<>();
         in.readList(logicalModemList, ModemInfo.class.getClassLoader());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(maxActiveVoiceCalls, maxActiveData, max5G, logicalModemList);
+        return Objects.hash(maxActiveVoiceCalls, maxActiveData, max5G, logicalModemList,
+                validationBeforeSwitchSupported);
     }
 
     @Override
@@ -79,6 +83,7 @@ public class PhoneCapability implements Parcelable {
         return (maxActiveVoiceCalls == s.maxActiveVoiceCalls
                 && maxActiveData == s.maxActiveData
                 && max5G == s.max5G
+                && validationBeforeSwitchSupported == s.validationBeforeSwitchSupported
                 && logicalModemList.equals(s.logicalModemList));
     }
 
@@ -96,6 +101,7 @@ public class PhoneCapability implements Parcelable {
         dest.writeInt(maxActiveVoiceCalls);
         dest.writeInt(maxActiveData);
         dest.writeInt(max5G);
+        dest.writeBoolean(validationBeforeSwitchSupported);
         dest.writeList(logicalModemList);
     }
 
