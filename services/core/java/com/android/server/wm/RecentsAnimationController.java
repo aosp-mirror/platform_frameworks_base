@@ -29,7 +29,6 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_R
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
-import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager.TaskSnapshot;
@@ -413,8 +412,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
         final SparseIntArray reasons = new SparseIntArray();
         reasons.put(WINDOWING_MODE_FULLSCREEN, APP_TRANSITION_RECENTS_ANIM);
-        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING,
-                reasons).sendToTarget();
+        mService.mAtmInternal.notifyAppTransitionStarting(reasons, SystemClock.uptimeMillis());
     }
 
     void cancelAnimation(@ReorderMode int reorderMode, String reason) {
