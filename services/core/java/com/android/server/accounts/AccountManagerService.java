@@ -5202,7 +5202,7 @@ public class AccountManagerService
                     Process.SYSTEM_UID, null /* packageName */, false);
             fout.println("Accounts: " + accounts.length);
             for (Account account : accounts) {
-                fout.println("  " + account.toSafeString());
+                fout.println("  " + account.toString());
             }
 
             // Add debug information.
