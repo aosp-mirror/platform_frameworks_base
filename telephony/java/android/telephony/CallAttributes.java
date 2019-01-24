@@ -50,10 +50,10 @@ public class CallAttributes implements Parcelable {
     }
 
     private CallAttributes(Parcel in) {
-        mPreciseCallState = (PreciseCallState) in.readValue(mPreciseCallState.getClass()
-                .getClassLoader());
+        mPreciseCallState = (PreciseCallState)
+                in.readValue(PreciseCallState.class.getClassLoader());
         mNetworkType = in.readInt();
-        mCallQuality = (CallQuality) in.readValue(mCallQuality.getClass().getClassLoader());
+        mCallQuality = (CallQuality) in.readValue(CallQuality.class.getClassLoader());
     }
 
     // getters
