@@ -91,20 +91,6 @@ public class EuiccManager {
             "android.telephony.euicc.action.NOTIFY_CARRIER_SETUP_INCOMPLETE";
 
     /**
-     * Intent action to select a profile to enable before download a new eSIM profile.
-     *
-     * May be called during device provisioning when there are multiple slots having profiles on
-     * them. This Intent launches a screen for all the current existing profiles and let users to
-     * choose which one they want to enable. In this case, the slot contains the profile will be
-     * activated.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String ACTION_PROFILE_SELECTION =
-            "android.telephony.euicc.action.PROFILE_SELECTION";
-
-    /**
      * Intent action to provision an embedded subscription.
      *
      * <p>May be called during device provisioning to launch a screen to perform embedded SIM
@@ -325,8 +311,8 @@ public class EuiccManager {
     @IntDef(prefix = {"EUICC_ACTIVATION_"}, value = {
             EUICC_ACTIVATION_TYPE_DEFAULT,
             EUICC_ACTIVATION_TYPE_BACKUP,
-            EUICC_ACTIVATION_TYPE_TRANSFER
-
+            EUICC_ACTIVATION_TYPE_TRANSFER,
+            EUICC_ACTIVATION_TYPE_ACCOUNT_REQUIRED,
     })
     public @interface EuiccActivationType{}
 
@@ -360,6 +346,14 @@ public class EuiccManager {
     @SystemApi
     public static final int EUICC_ACTIVATION_TYPE_TRANSFER = 3;
 
+    /**
+     * The activation flow of eSIM requiring user account will be started. This can only be used
+     * when there is user account signed in. Otherwise, the flow will be failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_ACCOUNT_REQUIRED = 4;
 
     /**
      * Euicc OTA update status which can be got by {@link #getOtaStatus}
