@@ -26,6 +26,7 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.Time;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -37,7 +38,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -71,7 +71,6 @@ public class ColorDisplayServiceTest {
     private MockTwilightManager mTwilightManager;
 
     private ColorDisplayService mColorDisplayService;
-    private ColorDisplayController mColorDisplayController;
     private ColorDisplayService.BinderService mBinderService;
 
     @BeforeClass
@@ -97,7 +96,6 @@ public class ColorDisplayServiceTest {
         mTwilightManager = new MockTwilightManager();
         LocalServices.addService(TwilightManager.class, mTwilightManager);
 
-        mColorDisplayController = new ColorDisplayController(mContext, mUserId);
         mColorDisplayService = new ColorDisplayService(mContext);
         mBinderService = mColorDisplayService.new BinderService();
     }
@@ -988,9 +986,11 @@ public class ColorDisplayServiceTest {
      * @param endTimeOffset the offset relative to now to deactivate Night display (in minutes)
      */
     private void setAutoModeCustom(int startTimeOffset, int endTimeOffset) {
-        mColorDisplayController.setAutoMode(ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
-        mColorDisplayController.setCustomStartTime(getLocalTimeRelativeToNow(startTimeOffset));
-        mColorDisplayController.setCustomEndTime(getLocalTimeRelativeToNow(endTimeOffset));
+        mBinderService.setNightDisplayAutoMode(ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
+        mBinderService.setNightDisplayCustomStartTime(
+                new Time(getLocalTimeRelativeToNow(startTimeOffset)));
+        mBinderService
+                .setNightDisplayCustomEndTime(new Time(getLocalTimeRelativeToNow(endTimeOffset)));
     }
 
     /**
@@ -1000,7 +1000,7 @@ public class ColorDisplayServiceTest {
      * @param sunriseOffset the offset relative to now for sunrise (in minutes)
      */
     private void setAutoModeTwilight(int sunsetOffset, int sunriseOffset) {
-        mColorDisplayController.setAutoMode(ColorDisplayManager.AUTO_MODE_TWILIGHT);
+        mBinderService.setNightDisplayAutoMode(ColorDisplayManager.AUTO_MODE_TWILIGHT);
         mTwilightManager.setTwilightState(
                 getTwilightStateRelativeToNow(sunsetOffset, sunriseOffset));
     }
@@ -1041,22 +1041,18 @@ public class ColorDisplayServiceTest {
     }
 
     /**
-     * Configures color mode via ColorDisplayController.
-     *
-     * @param colorMode the color mode to set
+     * Configures color mode.
      */
     private void setColorMode(int colorMode) {
-        mColorDisplayController.setColorMode(colorMode);
+        mBinderService.setColorMode(colorMode);
     }
 
     /**
      * Returns whether the color mode is valid on the device the tests are running on.
-     *
-     * @param mode the mode to check
      */
     private boolean isColorModeValid(int mode) {
         final int[] availableColorModes = mContext.getResources().getIntArray(
-            R.array.config_availableColorModes);
+                R.array.config_availableColorModes);
         if (availableColorModes != null) {
             for (int availableMode : availableColorModes) {
                 if (mode == availableMode) {
@@ -1073,12 +1069,9 @@ public class ColorDisplayServiceTest {
     private void startService() {
         Secure.putIntForUser(mContext.getContentResolver(), Secure.USER_SETUP_COMPLETE, 1, mUserId);
 
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                mColorDisplayService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
-                mColorDisplayService.onStartUser(mUserId);
-            }
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mColorDisplayService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+            mColorDisplayService.onStartUser(mUserId);
         });
     }
 
@@ -1100,7 +1093,7 @@ public class ColorDisplayServiceTest {
      */
     private void assertActiveColorMode(int mode) {
         assertWithMessage("Unexpected color mode setting")
-                .that(mColorDisplayController.getColorMode())
+                .that(mBinderService.getColorMode())
                 .isEqualTo(mode);
     }
 

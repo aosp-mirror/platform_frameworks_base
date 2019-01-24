@@ -18,6 +18,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.ArrayMap;
@@ -25,7 +26,6 @@ import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
@@ -206,7 +206,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<UserInfoController> mUserInfoController;
     @Inject Lazy<KeyguardMonitor> mKeyguardMonitor;
     @Inject Lazy<BatteryController> mBatteryController;
-    @Inject Lazy<ColorDisplayController> mColorDisplayController;
+    @Inject Lazy<NightDisplayListener> mNightDisplayListener;
     @Inject Lazy<ManagedProfileController> mManagedProfileController;
     @Inject Lazy<NextAlarmController> mNextAlarmController;
     @Inject Lazy<DataSaverController> mDataSaverController;
@@ -330,7 +330,7 @@ public class Dependency extends SystemUI {
 
         mProviders.put(BatteryController.class, mBatteryController::get);
 
-        mProviders.put(ColorDisplayController.class, mColorDisplayController::get);
+        mProviders.put(NightDisplayListener.class, mNightDisplayListener::get);
 
         mProviders.put(ManagedProfileController.class, mManagedProfileController::get);
 

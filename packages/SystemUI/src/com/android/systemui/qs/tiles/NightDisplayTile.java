@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.NightDisplayListener;
 import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
@@ -31,7 +32,6 @@ import android.widget.Switch;
 
 import androidx.annotation.StringRes;
 
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -46,8 +46,9 @@ import java.util.TimeZone;
 
 import javax.inject.Inject;
 
-public class NightDisplayTile extends QSTileImpl<BooleanState>
-        implements ColorDisplayController.Callback {
+/** Quick settings tile: Night display **/
+public class NightDisplayTile extends QSTileImpl<BooleanState> implements
+        NightDisplayListener.Callback {
 
     /**
      * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
@@ -57,13 +58,15 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     private static final String PATTERN_HOUR_MINUTE = "h:mm a";
     private static final String PATTERN_HOUR_NINUTE_24 = "HH:mm";
 
-    private ColorDisplayController mController;
+    private final ColorDisplayManager mManager;
+    private NightDisplayListener mListener;
     private boolean mIsListening;
 
     @Inject
     public NightDisplayTile(QSHost host) {
         super(host);
-        mController = new ColorDisplayController(mContext, ActivityManager.getCurrentUser());
+        mManager = mContext.getSystemService(ColorDisplayManager.class);
+        mListener = new NightDisplayListener(mContext, ActivityManager.getCurrentUser());
     }
 
     @Override
@@ -81,27 +84,27 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
         // Enroll in forced auto mode if eligible.
         if ("1".equals(Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE))
-                && mController.getAutoModeRaw() == -1) {
-            mController.setAutoMode(ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
+                && mManager.getNightDisplayAutoModeRaw() == -1) {
+            mManager.setNightDisplayAutoMode(ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
             Log.i("NightDisplayTile", "Enrolled in forced night display auto mode");
         }
 
         // Change current activation state.
         final boolean activated = !mState.value;
-        mController.setActivated(activated);
+        mManager.setNightDisplayActivated(activated);
     }
 
     @Override
     protected void handleUserSwitch(int newUserId) {
         // Stop listening to the old controller.
         if (mIsListening) {
-            mController.setListener(null);
+            mListener.setCallback(null);
         }
 
         // Make a new controller for the new user.
-        mController = new ColorDisplayController(mContext, newUserId);
+        mListener = new NightDisplayListener(mContext, newUserId);
         if (mIsListening) {
-            mController.setListener(this);
+            mListener.setCallback(this);
         }
 
         super.handleUserSwitch(newUserId);
@@ -109,7 +112,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.value = mController.isActivated();
+        state.value = mManager.isNightDisplayActivated();
         state.label = mContext.getString(R.string.quick_settings_night_display_label);
         state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
@@ -121,12 +124,12 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     }
 
     /**
-     * Returns a {@link String} for the secondary label that reflects when the light will be turned
-     * on or off based on the current auto mode and night light activated status.
+     * Returns a String for the secondary label that reflects when the light will be turned on or
+     * off based on the current auto mode and night light activated status.
      */
     @Nullable
     private String getSecondaryLabel(boolean isNightLightActivated) {
-        switch(mController.getAutoMode()) {
+        switch (mManager.getNightDisplayAutoMode()) {
             case ColorDisplayManager.AUTO_MODE_TWILIGHT:
                 // Auto mode related to sunrise & sunset. If the light is on, it's guaranteed to be
                 // turned off at sunrise. If it's off, it's guaranteed to be turned on at sunset.
@@ -143,10 +146,10 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
                 final DateTimeFormatter toggleTimeFormat;
 
                 if (isNightLightActivated) {
-                    toggleTime = mController.getCustomEndTime();
+                    toggleTime = mManager.getNightDisplayCustomEndTime();
                     toggleTimeStringRes = R.string.quick_settings_secondary_label_until;
                 } else {
-                    toggleTime = mController.getCustomStartTime();
+                    toggleTime = mManager.getNightDisplayCustomStartTime();
                     toggleTimeStringRes = R.string.quick_settings_night_secondary_label_on_at;
                 }
 
@@ -175,7 +178,8 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     public LogMaker populate(LogMaker logMaker) {
-        return super.populate(logMaker).addTaggedData(FIELD_QS_MODE, mController.getAutoModeRaw());
+        return super.populate(logMaker)
+                .addTaggedData(FIELD_QS_MODE, mManager.getNightDisplayAutoModeRaw());
     }
 
     @Override
@@ -187,10 +191,10 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     protected void handleSetListening(boolean listening) {
         mIsListening = listening;
         if (listening) {
-            mController.setListener(this);
+            mListener.setCallback(this);
             refreshState();
         } else {
-            mController.setListener(null);
+            mListener.setCallback(null);
         }
     }
 
