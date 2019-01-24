@@ -63,15 +63,17 @@ public final class Adjustment implements Parcelable {
 
     /**
      * Data type: ArrayList of {@link android.app.Notification.Action}.
-     * Used to suggest extra actions for a notification.
+     * Used to suggest contextual actions for a notification.
+     *
+     * @see Notification.Action.Builder#setContextual(boolean)
      */
-    public static final String KEY_SMART_ACTIONS = "key_smart_actions";
+    public static final String KEY_CONTEXTUAL_ACTIONS = "key_contextual_actions";
 
     /**
      * Data type: ArrayList of {@link CharSequence}.
      * Used to suggest smart replies for a notification.
      */
-    public static final String KEY_SMART_REPLIES = "key_smart_replies";
+    public static final String KEY_TEXT_REPLIES = "key_text_replies";
 
     /**
      * Data type: int, one of importance values e.g.

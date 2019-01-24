@@ -230,10 +230,10 @@ public class Assistant extends NotificationAssistantService {
         Bundle signals = new Bundle();
 
         if (!smartActions.isEmpty()) {
-            signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
+            signals.putParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, smartActions);
         }
         if (!smartReplies.isEmpty()) {
-            signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
+            signals.putCharSequenceArrayList(Adjustment.KEY_TEXT_REPLIES, smartReplies);
         }
         if (mSettings.mNewInterruptionModel) {
             if (mNotificationCategorizer.shouldSilence(entry)) {

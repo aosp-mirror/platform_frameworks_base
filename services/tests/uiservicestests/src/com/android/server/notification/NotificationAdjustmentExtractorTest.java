@@ -59,7 +59,7 @@ public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
         signals.putStringArrayList(Adjustment.KEY_PEOPLE, people);
         ArrayList<Notification.Action> smartActions = new ArrayList<>();
         smartActions.add(createAction());
-        signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
+        signals.putParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, smartActions);
         Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
         r.addAdjustment(adjustment);
 
