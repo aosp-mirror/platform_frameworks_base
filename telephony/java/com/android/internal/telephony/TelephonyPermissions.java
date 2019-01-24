@@ -284,10 +284,6 @@ public final class TelephonyPermissions {
      */
     private static boolean reportAccessDeniedToReadIdentifiers(Context context, int subId, int pid,
             int uid, String callingPackage, String message) {
-        // If the device identifier check is enabled then enforce the new access requirements for
-        // both 1P and 3P apps.
-        boolean enableDeviceIdentifierCheck = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED, 0) == 1;
         // Check if the application is a 3P app; if so then a separate setting is required to relax
         // the check to begin flagging problems with 3P apps early.
         boolean relax3PDeviceIdentifierCheck = Settings.Global.getInt(context.getContentResolver(),
@@ -300,6 +296,11 @@ public final class TelephonyPermissions {
                 context.getContentResolver(),
                 Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED, 0) == 1;
         boolean isNonPrivApp = false;
+        // Similar to above support relaxing the check for privileged apps while still enforcing it
+        // for non-privileged and 3P apps.
+        boolean relaxPrivDeviceIdentifierCheck = Settings.Global.getInt(
+                context.getContentResolver(),
+                Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_PRIV_CHECK_RELAXED, 0) == 1;
         ApplicationInfo callingPackageInfo = null;
         try {
             callingPackageInfo = context.getPackageManager().getApplicationInfo(callingPackage, 0);
@@ -315,37 +316,28 @@ public final class TelephonyPermissions {
             Log.e(LOG_TAG, "Exception caught obtaining package info for package " + callingPackage,
                     e);
         }
-        Log.wtf(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message
-                + ":is3PApp=" + is3PApp + ":isNonPrivApp=" + isNonPrivApp);
-        // The new Q restrictions for device identifier access will be enforced if any of the
-        // following are true:
-        // - The PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED setting has been set.
-        // - The app requesting a device identifier is not a preloaded app (3P), and the
-        //   PRIVILEGED_DEVICE_IDENTIFIER_3P_CHECK_RELAXED setting has not been set.
-        // - The app requesting a device identifier is a preloaded app but is not a privileged app,
-        //   and the PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED setting has not been set.
-        if (enableDeviceIdentifierCheck
+        // The new Q restrictions for device identifier access will be enforced for all apps with
+        // settings to individually disable the new restrictions for privileged, preloaded
+        // non-privileged, and 3P apps.
+        if ((!is3PApp && !isNonPrivApp && !relaxPrivDeviceIdentifierCheck)
                 || (is3PApp && !relax3PDeviceIdentifierCheck)
                 || (isNonPrivApp && !relaxNonPrivDeviceIdentifierCheck)) {
-            boolean targetQBehaviorDisabled = Settings.Global.getInt(context.getContentResolver(),
-                    Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_TARGET_Q_BEHAVIOR_ENABLED, 0) == 0;
-            if (callingPackage != null) {
-                // if the target SDK is pre-Q or the target Q behavior is disabled then check if
-                // the calling package would have previously had access to device identifiers.
-                if (callingPackageInfo != null && (
-                        callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q
-                                || targetQBehaviorDisabled)) {
-                    if (context.checkPermission(
-                            android.Manifest.permission.READ_PHONE_STATE,
-                            pid,
-                            uid) == PackageManager.PERMISSION_GRANTED) {
-                        return false;
-                    }
-                    if (SubscriptionManager.isValidSubscriptionId(subId)
-                            && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
-                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                        return false;
-                    }
+            Log.wtf(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message
+                    + ":is3PApp=" + is3PApp + ":isNonPrivApp=" + isNonPrivApp);
+            // if the target SDK is pre-Q then check if the calling package would have previously
+            // had access to device identifiers.
+            if (callingPackageInfo != null && (
+                    callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q)) {
+                if (context.checkPermission(
+                        android.Manifest.permission.READ_PHONE_STATE,
+                        pid,
+                        uid) == PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+                if (SubscriptionManager.isValidSubscriptionId(subId)
+                        && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
+                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                    return false;
                 }
             }
             throw new SecurityException(message + ": The user " + uid
