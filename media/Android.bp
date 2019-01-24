@@ -2,8 +2,7 @@ java_library {
     name: "updatable-media",
 
     srcs: [
-        ":mediaplayer2-srcs",
-        ":mediasession2-srcs",
+        ":updatable-media-srcs",
         ":framework-media-annotation-srcs",
     ],
 
@@ -12,8 +11,12 @@ java_library {
             "apex/java",
         ],
 
+        // It would be great if we don't need to add include_dirs for public
+        // parcelable classes. Find a better way.
         include_dirs: [
-            // For the usage of android.os.Bundle and android.os.ResultReceiver in aidl files
+            // To refer:
+            // android.os.Bundle
+            // android.os.ResultReceiver
             "frameworks/base/core/java",
         ],
     },
@@ -29,7 +32,15 @@ java_library {
 }
 
 filegroup {
-    name: "media-srcs-without-aidls",
+    name: "updatable-media-srcs",
+    srcs: [
+        ":mediasession2-srcs",
+        ":mediaplayer2-srcs",
+    ],
+}
+
+filegroup {
+    name: "updatable-media-srcs-without-aidls",
     srcs : [
         ":mediasession2-srcs-without-aidls",
         ":mediaplayer2-srcs",
@@ -84,3 +95,32 @@ filegroup {
         "apex/java/android/media/BufferingParams.java",
     ],
 }
+
+metalava_updatable_media_args = " --error UnhiddenSystemApi " +
+    "--hide RequiresPermission " +
+    "--hide MissingPermission --hide BroadcastBehavior " +
+    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--hide HiddenTypedefConstant "
+
+droidstubs {
+    name: "updatable-media-stubs",
+    srcs: [
+        ":updatable-media-srcs-without-aidls",
+        ":framework-media-annotation-srcs",
+    ],
+    args: metalava_updatable_media_args + " --show-annotation android.annotation.SystemApi " +
+        " --show-annotation android.annotation.TestApi ",
+    // Ideally, sdk_version here should be "current_system", but "current - 1" is used
+    // to avoid dependency cycle with framework.
+    sdk_version: "28",
+}
+
+java_library {
+    name: "updatable_media_stubs",
+    srcs: [":updatable-media-stubs"],
+    // Ideally, sdk_version here should be "current_system", but "current - 1" is used
+    // to avoid dependency cycle with framework.
+    sdk_version: "28",
+}
+
