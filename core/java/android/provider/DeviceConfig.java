@@ -181,6 +181,23 @@ public final class DeviceConfig {
         String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
     }
 
+    /**
+     * Namespace for storage-related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Storage {
+        String NAMESPACE = "storage";
+
+        /**
+         * If {@code 1}, enables the isolated storage feature. If {@code -1},
+         * disables the isolated storage feature. If {@code 0}, uses the default
+         * value from the build system.
+         */
+        String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
+    }
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
