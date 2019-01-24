@@ -735,7 +735,7 @@ package android.bluetooth {
     field public static final String ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE = "android.bluetooth.adapter.action.REQUEST_BLE_SCAN_ALWAYS_AVAILABLE";
   }
 
-  public abstract class BluetoothAdapter.MetadataListener {
+  public abstract static class BluetoothAdapter.MetadataListener {
     ctor public BluetoothAdapter.MetadataListener();
     method public void onMetadataChanged(android.bluetooth.BluetoothDevice, int, String);
   }

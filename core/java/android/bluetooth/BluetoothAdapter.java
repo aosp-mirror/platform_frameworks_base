@@ -3253,7 +3253,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    public abstract class MetadataListener {
+    public abstract static class MetadataListener {
         /**
          * Callback triggered if the metadata of {@link BluetoothDevice} registered in
          * {@link #registerMetadataListener}.
