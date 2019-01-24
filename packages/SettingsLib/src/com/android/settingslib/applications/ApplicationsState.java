@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageStats;
@@ -71,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -95,9 +97,14 @@ public class ApplicationsState {
     static ApplicationsState sInstance;
 
     public static ApplicationsState getInstance(Application app) {
+        return getInstance(app, AppGlobals.getPackageManager());
+    }
+
+    @VisibleForTesting
+    static ApplicationsState getInstance(Application app, IPackageManager iPackageManager) {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new ApplicationsState(app);
+                sInstance = new ApplicationsState(app, iPackageManager);
             }
             return sInstance;
         }
@@ -132,6 +139,7 @@ public class ApplicationsState {
     String mCurComputingSizePkg;
     int mCurComputingSizeUserId;
     boolean mSessionsChanged;
+    final HashSet<String> mHiddenModules = new HashSet<>();
 
     // Temporary for dispatching session callbacks.  Only touched by main thread.
     final ArrayList<WeakReference<Session>> mActiveSessions = new ArrayList<>();
@@ -172,11 +180,11 @@ public class ApplicationsState {
             FLAG_SESSION_REQUEST_HOME_APP | FLAG_SESSION_REQUEST_ICONS |
             FLAG_SESSION_REQUEST_SIZES | FLAG_SESSION_REQUEST_LAUNCHER;
 
-    private ApplicationsState(Application app) {
+    private ApplicationsState(Application app, IPackageManager iPackageManager) {
         mContext = app;
         mPm = mContext.getPackageManager();
         mDrawableFactory = IconDrawableFactory.newInstance(mContext);
-        mIpm = AppGlobals.getPackageManager();
+        mIpm = iPackageManager;
         mUm = mContext.getSystemService(UserManager.class);
         mStats = mContext.getSystemService(StorageStatsManager.class);
         for (int userId : mUm.getProfileIdsWithDisabled(UserHandle.myUserId())) {
@@ -193,6 +201,13 @@ public class ApplicationsState {
                 PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
         mRetrieveFlags = PackageManager.MATCH_DISABLED_COMPONENTS |
                 PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+
+        final List<ModuleInfo> moduleInfos = mPm.getInstalledModules(0 /* flags */);
+        for (ModuleInfo info : moduleInfos) {
+            if (info.isHidden()) {
+                mHiddenModules.add(info.getPackageName());
+            }
+        }
 
         /**
          * This is a trick to prevent the foreground thread from being delayed.
@@ -283,6 +298,10 @@ public class ApplicationsState {
                 }
                 mHaveDisabledApps = true;
             }
+            if (isHiddenModule(info.packageName)) {
+                mApplications.remove(i--);
+                continue;
+            }
             if (!mHaveInstantApps && AppUtils.isInstant(info)) {
                 mHaveInstantApps = true;
             }
@@ -314,8 +333,13 @@ public class ApplicationsState {
     public boolean haveDisabledApps() {
         return mHaveDisabledApps;
     }
+
     public boolean haveInstantApps() {
         return mHaveInstantApps;
+    }
+
+    boolean isHiddenModule(String packageName) {
+        return mHiddenModules.contains(packageName);
     }
 
     void doPauseIfNeededLocked() {
