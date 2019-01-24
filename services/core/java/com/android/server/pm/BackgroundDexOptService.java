@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * {@hide}
@@ -57,7 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BackgroundDexOptService extends JobService {
     private static final String TAG = "BackgroundDexOptService";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int JOB_IDLE_OPTIMIZE = 800;
     private static final int JOB_POST_BOOT_UPDATE = 801;
@@ -102,7 +103,6 @@ public class BackgroundDexOptService extends JobService {
     private final AtomicBoolean mExitPostBootUpdate = new AtomicBoolean(false);
 
     private final File mDataDir = Environment.getDataDirectory();
-
     private static final long mDowngradeUnusedAppsThresholdInMillis =
             getDowngradeUnusedAppsThresholdInMillis();
 
@@ -275,21 +275,18 @@ public class BackgroundDexOptService extends JobService {
 
         long lowStorageThreshold = getLowStorageThreshold(context);
         // Optimize primary apks.
-        int result = optimizePackages(pm, pkgs, lowStorageThreshold, /*is_for_primary_dex*/ true,
-                sFailedPackageNamesPrimary);
-
+        int result = optimizePackages(pm, pkgs, lowStorageThreshold,
+            /*isForPrimaryDex=*/ true);
         if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
             return result;
         }
-
-        if (SystemProperties.getBoolean("dalvik.vm.dexopt.secondary", false)) {
+        if (supportSecondaryDex()) {
             result = reconcileSecondaryDexFiles(pm.getDexManager());
             if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                 return result;
             }
-
-            result = optimizePackages(pm, pkgs, lowStorageThreshold, /*is_for_primary_dex*/ false,
-                    sFailedPackageNamesSecondary);
+            result = optimizePackages(pm, pkgs, lowStorageThreshold,
+                /*isForPrimaryDex=*/ false);
         }
         return result;
     }
@@ -339,92 +336,84 @@ public class BackgroundDexOptService extends JobService {
     }
 
     private int optimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
-            long lowStorageThreshold, boolean is_for_primary_dex,
-            ArraySet<String> failedPackageNames) {
+            long lowStorageThreshold, boolean isForPrimaryDex) {
         ArraySet<String> updatedPackages = new ArraySet<>();
         Set<String> unusedPackages = pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
+        Log.d(TAG, "Unsused Packages " +  String.join(",", unusedPackages));
         // Only downgrade apps when space is low on device.
         // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
         // up disk before user hits the actual lowStorageThreshold.
         final long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE *
                 lowStorageThreshold;
         boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
+        Log.d(TAG, "Should Downgrade " + shouldDowngrade);
+        boolean dex_opt_performed = false;
         for (String pkg : pkgs) {
             int abort_code = abortIdleOptimizations(lowStorageThreshold);
             if (abort_code == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                 return abort_code;
             }
-
-            synchronized (failedPackageNames) {
-                if (failedPackageNames.contains(pkg)) {
-                    // Skip previously failing package
-                    continue;
-                }
-            }
-
-            int reason;
-            boolean downgrade;
-            long package_size_before = 0; //used when the app is downgraded
             // Downgrade unused packages.
             if (unusedPackages.contains(pkg) && shouldDowngrade) {
-                package_size_before = getPackageSize(pm, pkg);
-                // This applies for system apps or if packages location is not a directory, i.e.
-                // monolithic install.
-                if (is_for_primary_dex && !pm.canHaveOatDir(pkg)) {
-                    // For apps that don't have the oat directory, instead of downgrading,
-                    // remove their compiler artifacts from dalvik cache.
-                    pm.deleteOatArtifactsOfPackage(pkg);
+                dex_opt_performed = downgradePackage(pm, pkg, isForPrimaryDex);
+            } else {
+                if (abort_code == OPTIMIZE_ABORT_NO_SPACE_LEFT) {
+                    // can't dexopt because of low space.
                     continue;
-                } else {
-                    reason = PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE;
-                    downgrade = true;
                 }
-            } else if (abort_code != OPTIMIZE_ABORT_NO_SPACE_LEFT) {
-                reason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
-                downgrade = false;
-            } else {
-                // can't dexopt because of low space.
-                continue;
+                dex_opt_performed = optimizePackage(pm, pkg, isForPrimaryDex);
             }
-
-            synchronized (failedPackageNames) {
-                // Conservatively add package to the list of failing ones in case
-                // performDexOpt never returns.
-                failedPackageNames.add(pkg);
-            }
-
-            // Optimize package if needed. Note that there can be no race between
-            // concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
-            boolean success;
-            int dexoptFlags =
-                    DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
-                    DexoptOptions.DEXOPT_BOOT_COMPLETE |
-                    (downgrade ? DexoptOptions.DEXOPT_DOWNGRADE : 0) |
-                    DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
-            if (is_for_primary_dex) {
-                int result = pm.performDexOptWithStatus(new DexoptOptions(pkg, reason,
-                        dexoptFlags));
-                success = result != PackageDexOptimizer.DEX_OPT_FAILED;
-                if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
-                    updatedPackages.add(pkg);
-                }
-            } else {
-                success = pm.performDexOpt(new DexoptOptions(pkg,
-                        reason, dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX));
-            }
-            if (success) {
-                // Dexopt succeeded, remove package from the list of failing ones.
-                synchronized (failedPackageNames) {
-                    failedPackageNames.remove(pkg);
-                }
-                if (downgrade) {
-                    StatsLog.write(StatsLog.APP_DOWNGRADED, pkg, package_size_before,
-                            getPackageSize(pm, pkg), /*aggressive=*/ false);
-                }
+            if (dex_opt_performed) {
+                updatedPackages.add(pkg);
             }
         }
+
         notifyPinService(updatedPackages);
         return OPTIMIZE_PROCESSED;
+    }
+
+
+    /**
+     * Try to downgrade the package to a smaller compilation filter.
+     * eg. if the package is in speed-profile the package will be downgraded to verify.
+     * @param pm PackageManagerService
+     * @param pkg The package to be downgraded.
+     * @param isForPrimaryDex. Apps can have several dex file, primary and secondary.
+     * @return true if the package was downgraded.
+     */
+    private boolean downgradePackage(PackageManagerService pm, String pkg,
+            boolean isForPrimaryDex) {
+        Log.d(TAG, "Downgrading " + pkg);
+        boolean dex_opt_performed = false;
+        int reason = PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE;
+        int dexoptFlags = DexoptOptions.DEXOPT_BOOT_COMPLETE
+                | DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB
+                | DexoptOptions.DEXOPT_DOWNGRADE;
+        long package_size_before = getPackageSize(pm, pkg);
+
+        if (isForPrimaryDex) {
+            // This applies for system apps or if packages location is not a directory, i.e.
+            // monolithic install.
+            if (!pm.canHaveOatDir(pkg)) {
+                // For apps that don't have the oat directory, instead of downgrading,
+                // remove their compiler artifacts from dalvik cache.
+                pm.deleteOatArtifactsOfPackage(pkg);
+            } else {
+                dex_opt_performed = performDexOptPrimary(pm, pkg, reason, dexoptFlags);
+            }
+        } else {
+            dex_opt_performed = performDexOptSecondary(pm, pkg, reason, dexoptFlags);
+        }
+
+        if (dex_opt_performed) {
+            StatsLog.write(StatsLog.APP_DOWNGRADED, pkg, package_size_before,
+                    getPackageSize(pm, pkg), /*aggressive=*/ false);
+        }
+        return dex_opt_performed;
+    }
+
+    private boolean supportSecondaryDex() {
+        return (SystemProperties.getBoolean("dalvik.vm.dexopt.secondary", false));
     }
 
     private int reconcileSecondaryDexFiles(DexManager dm) {
@@ -436,6 +425,73 @@ public class BackgroundDexOptService extends JobService {
             dm.reconcileSecondaryDexFiles(p);
         }
         return OPTIMIZE_PROCESSED;
+    }
+
+    /**
+     *
+     * Optimize package if needed. Note that there can be no race between
+     * concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
+     * @param pm An instance of PackageManagerService
+     * @param pkg The package to be downgraded.
+     * @param isForPrimaryDex. Apps can have several dex file, primary and secondary.
+     * @return true if the package was downgraded.
+     */
+    private boolean optimizePackage(PackageManagerService pm, String pkg,
+            boolean isForPrimaryDex) {
+        int reason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
+        int dexoptFlags = DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
+                | DexoptOptions.DEXOPT_BOOT_COMPLETE
+                | DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
+
+        return isForPrimaryDex
+            ? performDexOptPrimary(pm, pkg, reason, dexoptFlags)
+            : performDexOptSecondary(pm, pkg, reason, dexoptFlags);
+    }
+
+    private boolean performDexOptPrimary(PackageManagerService pm, String pkg, int reason,
+            int dexoptFlags) {
+        int result = trackPerformDexOpt(pkg, /*isForPrimaryDex=*/ false,
+                () -> pm.performDexOptWithStatus(new DexoptOptions(pkg, reason, dexoptFlags)));
+        return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
+    }
+
+    private boolean performDexOptSecondary(PackageManagerService pm, String pkg, int reason,
+            int dexoptFlags) {
+        DexoptOptions dexoptOptions = new DexoptOptions(pkg, reason,
+                dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX);
+        int result = trackPerformDexOpt(pkg, /*isForPrimaryDex=*/ true,
+                () -> pm.performDexOpt(dexoptOptions)
+                    ? PackageDexOptimizer.DEX_OPT_PERFORMED : PackageDexOptimizer.DEX_OPT_FAILED
+        );
+        return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
+    }
+
+    /**
+     * Execute the dexopt wrapper and make sure that if performDexOpt wrapper fails
+     * the package is added to the list of failed packages.
+     * Return one of following result:
+     *  {@link PackageDexOptimizer#DEX_OPT_SKIPPED}
+     *  {@link PackageDexOptimizer#DEX_OPT_PERFORMED}
+     *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
+     */
+    private int trackPerformDexOpt(String pkg, boolean isForPrimaryDex,
+            Supplier<Integer> performDexOptWrapper) {
+        ArraySet<String> sFailedPackageNames =
+                isForPrimaryDex ? sFailedPackageNamesPrimary : sFailedPackageNamesSecondary;
+        synchronized (sFailedPackageNames) {
+            if (sFailedPackageNames.contains(pkg)) {
+                // Skip previously failing package
+                return PackageDexOptimizer.DEX_OPT_SKIPPED;
+            }
+            sFailedPackageNames.add(pkg);
+        }
+        int result = performDexOptWrapper.get();
+        if (result != PackageDexOptimizer.DEX_OPT_FAILED) {
+            synchronized (sFailedPackageNames) {
+                sFailedPackageNames.remove(pkg);
+            }
+        }
+        return result;
     }
 
     // Evaluate whether or not idle optimizations should continue.
