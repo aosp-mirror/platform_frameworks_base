@@ -23,6 +23,7 @@ import static android.hardware.display.ColorDisplayManager.COLOR_MODE_AUTOMATIC;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_BOOSTED;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_NATURAL;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_SATURATED;
+
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION;
@@ -65,10 +66,9 @@ import android.provider.Settings.System;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.DisplayPrimaries;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
-import android.view.SurfaceControl;
-import android.view.SurfaceControl.DisplayPrimaries;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -79,6 +79,7 @@ import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -145,6 +146,7 @@ public final class ColorDisplayService extends SystemService {
         private float[] mCurrentColorTemperatureXYZ;
         private boolean mSetUp = false;
         private float[] mMatrixDisplayWhiteBalance = new float[16];
+        private Boolean mIsAvailable;
 
         @Override
         public void setUp(Context context, boolean needsLinear) {
@@ -255,6 +257,14 @@ public final class ColorDisplayService extends SystemService {
             return LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
         }
 
+        @Override
+        public boolean isAvailable(Context context) {
+            if (mIsAvailable == null) {
+                mIsAvailable = ColorDisplayManager.isDisplayWhiteBalanceAvailable(context);
+            }
+            return mIsAvailable;
+        }
+
         /**
          * Format a given matrix into a string.
          *
@@ -280,9 +290,7 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public void dump(PrintWriter pw) {
             synchronized (mLock) {
-                pw.println("ColorDisplayService");
                 pw.println("  mSetUp = " + mSetUp);
-
                 if (!mSetUp) {
                     return;
                 }
@@ -401,6 +409,11 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public int getLevel() {
             return LEVEL_COLOR_MATRIX_SATURATION;
+        }
+
+        @Override
+        public boolean isAvailable(Context context) {
+            return ColorDisplayManager.isColorTransformAccelerated(context);
         }
     };
 
@@ -623,7 +636,7 @@ public final class ColorDisplayService extends SystemService {
         // existing activated state. This ensures consistency of tint across the color mode change.
         onDisplayColorModeChanged(mNightDisplayController.getColorMode());
 
-        if (ColorDisplayManager.isNightDisplayAvailable(getContext())) {
+        if (mNightDisplayTintController.isAvailable(getContext())) {
             // Reset the activated state.
             mNightDisplayTintController.setActivated(null);
 
@@ -641,7 +654,7 @@ public final class ColorDisplayService extends SystemService {
             }
         }
 
-        if (ColorDisplayManager.isDisplayWhiteBalanceAvailable(getContext())) {
+        if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
             // Prepare the display white balance transform matrix.
             mDisplayWhiteBalanceTintController.setUp(getContext(), true /* needsLinear */);
 
@@ -658,7 +671,7 @@ public final class ColorDisplayService extends SystemService {
             mNightDisplayController = null;
         }
 
-        if (ColorDisplayManager.isNightDisplayAvailable(getContext())) {
+        if (mNightDisplayTintController.isAvailable(getContext())) {
             if (mNightDisplayAutoMode != null) {
                 mNightDisplayAutoMode.onStop();
                 mNightDisplayAutoMode = null;
@@ -666,7 +679,7 @@ public final class ColorDisplayService extends SystemService {
             mNightDisplayTintController.endAnimator();
         }
 
-        if (ColorDisplayManager.isDisplayWhiteBalanceAvailable(getContext())) {
+        if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
             mDisplayWhiteBalanceTintController.endAnimator();
         }
     }
@@ -714,9 +727,11 @@ public final class ColorDisplayService extends SystemService {
         mNightDisplayTintController.cancelAnimator();
         mDisplayWhiteBalanceTintController.cancelAnimator();
 
-        mNightDisplayTintController
-                .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
-        mNightDisplayTintController.setMatrix(getNightDisplayColorTemperatureSetting());
+        if (mNightDisplayTintController.isAvailable(getContext())) {
+            mNightDisplayTintController
+                    .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
+            mNightDisplayTintController.setMatrix(getNightDisplayColorTemperatureSetting());
+        }
 
         updateDisplayWhiteBalanceStatus();
 
@@ -1064,13 +1079,32 @@ public final class ColorDisplayService extends SystemService {
 
     private void dumpInternal(PrintWriter pw) {
         pw.println("COLOR DISPLAY MANAGER dumpsys (color_display)");
+
         pw.println("Night Display:");
-        if (ColorDisplayManager.isNightDisplayAvailable(getContext())) {
+        if (mNightDisplayTintController.isAvailable(getContext())) {
             pw.println("    Activated: " + mNightDisplayTintController.isActivated());
+            pw.println("    Color temp: " + mNightDisplayTintController.getColorTemperature());
         } else {
             pw.println("    Not available");
         }
+
+        pw.println("Global saturation:");
+        if (mGlobalSaturationTintController.isAvailable(getContext())) {
+            pw.println("    Activated: " + mGlobalSaturationTintController.isActivated());
+        } else {
+            pw.println("    Not available");
+        }
+
         mAppSaturationController.dump(pw);
+
+        pw.println("Display white balance:");
+        if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
+            pw.println("    Activated: " + mDisplayWhiteBalanceTintController.isActivated());
+        } else {
+            pw.println("    Not available");
+        }
+
+        pw.println("Color mode: " + getColorModeInternal());
     }
 
     private boolean isNightDisplayActivatedSetting() {
@@ -1368,12 +1402,19 @@ public final class ColorDisplayService extends SystemService {
          * Get the color transform level to apply the matrix.
          */
         public abstract int getLevel();
+
+        /**
+         * Returns whether or not this transform type is available on this device.
+         */
+        public abstract boolean isAvailable(Context context);
     }
 
     private final class NightDisplayTintController extends TintController {
 
-        private float[] mMatrix = new float[16];
+        private final float[] mMatrix = new float[16];
         private final float[] mColorTempCoefficients = new float[9];
+
+        private Boolean mIsAvailable;
         private Integer mColorTemp;
 
         /**
@@ -1446,13 +1487,21 @@ public final class ColorDisplayService extends SystemService {
             return LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
         }
 
+        @Override
+        public boolean isAvailable(Context context) {
+            if (mIsAvailable == null) {
+                mIsAvailable = ColorDisplayManager.isNightDisplayAvailable(context);
+            }
+            return mIsAvailable;
+        }
+
         void onActivated(boolean activated) {
             Slog.i(TAG, activated ? "Turning on night display" : "Turning off night display");
             if (mNightDisplayAutoMode != null) {
                 mNightDisplayAutoMode.onActivated(activated);
             }
 
-            if (ColorDisplayManager.isDisplayWhiteBalanceAvailable(getContext())) {
+            if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
                 updateDisplayWhiteBalanceStatus();
             }
 
