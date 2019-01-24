@@ -31,7 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
- * Unit test for {@link ContentCaptureSessionTest}.
+ * Unit tests for {@link ContentCaptureSession}.
  *
  * <p>To run it:
  * {@code atest FrameworksCoreTests:android.view.contentcapture.ContentCaptureSessionTest}
