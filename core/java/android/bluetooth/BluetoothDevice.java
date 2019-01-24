@@ -532,6 +532,28 @@ public final class BluetoothDevice implements Parcelable {
             "android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL";
 
     /**
+     * Intent to broadcast silence mode changed.
+     * Alway contains the extra field {@link #EXTRA_DEVICE}
+     * Alway contains the extra field {@link #EXTRA_SILENCE_ENABLED}
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_SILENCE_MODE_CHANGED =
+            "android.bluetooth.device.action.SILENCE_MODE_CHANGED";
+
+    /**
+     * Used as an extra field in {@link #ACTION_SILENCE_MODE_CHANGED} intent,
+     * contains whether device is in silence mode as boolean.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SILENCE_ENABLED =
+            "android.bluetooth.device.extra.SILENCE_ENABLED";
+
+    /**
      * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REQUEST} intent.
      *
      * @hide
@@ -1589,6 +1611,70 @@ public final class BluetoothDevice implements Parcelable {
             Log.e(TAG, "", e);
         }
         return ACCESS_UNKNOWN;
+    }
+
+    /**
+     * Set the Bluetooth device silence mode.
+     *
+     * When the {@link BluetoothDevice} enters silence mode, and the {@link BluetoothDevice}
+     * is an active device (for A2DP or HFP), the active device for that profile
+     * will be set to null.
+     * If the {@link BluetoothDevice} exits silence mode while the A2DP or HFP
+     * active device is null, the {@link BluetoothDevice} will be set as the
+     * active device for that profile.
+     * If the {@link BluetoothDevice} is disconnected, it exits silence mode.
+     * If the {@link BluetoothDevice} is set as the active device for A2DP or
+     * HFP, while silence mode is enabled, then the device will exit silence mode.
+     * If the {@link BluetoothDevice} is in silence mode, AVRCP position change
+     * event and HFP AG indicators will be disabled.
+     * If the {@link BluetoothDevice} is not connected with A2DP or HFP, it cannot
+     * enter silence mode.
+     *
+     * <p> Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
+     *
+     * @param silence true to enter silence mode, false to exit
+     * @return true on success, false on error.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setSilenceMode(boolean silence) {
+        final IBluetooth service = sService;
+        if (service == null) {
+            return false;
+        }
+        try {
+            if (getSilenceMode() == silence) {
+                return true;
+            }
+            return service.setSilenceMode(this, silence);
+        } catch (RemoteException e) {
+            Log.e(TAG, "setSilenceMode fail", e);
+            return false;
+        }
+    }
+
+    /**
+     * Get the device silence mode status
+     *
+     * <p> Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
+     *
+     * @return true on device in silence mode, otherwise false.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean getSilenceMode() {
+        final IBluetooth service = sService;
+        if (service == null) {
+            return false;
+        }
+        try {
+            return service.getSilenceMode(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "getSilenceMode fail", e);
+            return false;
+        }
     }
 
     /**
