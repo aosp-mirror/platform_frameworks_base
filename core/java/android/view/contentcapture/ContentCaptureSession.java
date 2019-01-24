@@ -34,8 +34,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
-import dalvik.system.CloseGuard;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -148,9 +146,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @Retention(RetentionPolicy.SOURCE)
     @interface FlushReason{}
 
-
-    private final CloseGuard mCloseGuard = CloseGuard.get();
-
     private final Object mLock = new Object();
 
     /**
@@ -185,7 +180,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @VisibleForTesting
     public ContentCaptureSession(@NonNull String id) {
         mId = Preconditions.checkNotNull(id);
-        mCloseGuard.open("destroy");
     }
 
     /** @hide */
@@ -251,8 +245,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             }
             mDestroyed = true;
 
-            mCloseGuard.close();
-
             // TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
             // id) and send it to the cache of batched commands
             if (VERBOSE) {
@@ -286,18 +278,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @Override
     public void close() {
         destroy();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (mCloseGuard != null) {
-                mCloseGuard.warnIfOpen();
-            }
-            destroy();
-        } finally {
-            super.finalize();
-        }
     }
 
     /**
