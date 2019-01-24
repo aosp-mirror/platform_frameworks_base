@@ -855,6 +855,22 @@ public class UsageStatsService extends SystemService implements
                     == PackageManager.PERMISSION_GRANTED;
         }
 
+        private boolean hasPermissions(String callingPackage, String... permissions) {
+            final int callingUid = Binder.getCallingUid();
+            if (callingUid == Process.SYSTEM_UID) {
+                // Caller is the system, so proceed.
+                return true;
+            }
+
+            boolean hasPermissions = true;
+            final Context context = getContext();
+            for (int i = 0; i < permissions.length; i++) {
+                hasPermissions = hasPermissions && (context.checkCallingPermission(permissions[i])
+                        == PackageManager.PERMISSION_GRANTED);
+            }
+            return hasPermissions;
+        }
+
         private void checkCallerIsSystemOrSameApp(String pkg) {
             if (isCallingUidSystem()) {
                 return;
@@ -1346,6 +1362,51 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public void registerAppUsageLimitObserver(int observerId, String[] packages,
+                long timeLimitMs, PendingIntent callbackIntent, String callingPackage) {
+            if (!hasPermissions(callingPackage,
+                    Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)) {
+                throw new SecurityException("Caller doesn't have both SUSPEND_APPS and "
+                        + "OBSERVE_APP_USAGE permissions");
+            }
+
+            if (packages == null || packages.length == 0) {
+                throw new IllegalArgumentException("Must specify at least one package");
+            }
+            if (callbackIntent == null) {
+                throw new NullPointerException("callbackIntent can't be null");
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this.registerAppUsageLimitObserver(callingUid, observerId,
+                        packages, timeLimitMs, callbackIntent, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void unregisterAppUsageLimitObserver(int observerId, String callingPackage) {
+            if (!hasPermissions(callingPackage,
+                    Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)) {
+                throw new SecurityException("Caller doesn't have both SUSPEND_APPS and "
+                        + "OBSERVE_APP_USAGE permissions");
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this.unregisterAppUsageLimitObserver(
+                        callingUid, observerId, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void reportUsageStart(IBinder activity, String token, String callingPackage) {
             reportPastUsageStart(activity, token, 0, callingPackage);
         }
@@ -1445,6 +1506,16 @@ public class UsageStatsService extends SystemService implements
 
     void unregisterUsageSessionObserver(int callingUid, int sessionObserverId, int userId) {
         mAppTimeLimit.removeUsageSessionObserver(callingUid, sessionObserverId, userId);
+    }
+
+    void registerAppUsageLimitObserver(int callingUid, int observerId, String[] packages,
+            long timeLimitMs, PendingIntent callbackIntent, int userId) {
+        mAppTimeLimit.addAppUsageLimitObserver(callingUid, observerId, packages, timeLimitMs,
+                callbackIntent, userId);
+    }
+
+    void unregisterAppUsageLimitObserver(int callingUid, int observerId, int userId) {
+        mAppTimeLimit.removeAppUsageLimitObserver(callingUid, observerId, userId);
     }
 
     /**
@@ -1651,6 +1722,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportExemptedSyncStart(String packageName, int userId) {
             mAppStandby.postReportExemptedSyncStart(packageName, userId);
+        }
+
+        @Override
+        public AppUsageLimitData getAppUsageLimit(String packageName, UserHandle user) {
+            return mAppTimeLimit.getAppUsageLimit(packageName, user);
         }
     }
 }
