@@ -439,12 +439,12 @@ public class RollbackTest {
 
     /**
      * Test restrictions on rollback broadcast sender.
-     * A random app should not be able to send a PACKAGE_ROLLBACK_EXECUTED broadcast.
+     * A random app should not be able to send a ROLLBACK_COMMITTED broadcast.
      */
     @Test
     public void testRollbackBroadcastRestrictions() throws Exception {
         RollbackBroadcastReceiver broadcastReceiver = new RollbackBroadcastReceiver();
-        Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
+        Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
         try {
             InstrumentationRegistry.getContext().sendBroadcast(broadcast);
             fail("Succeeded in sending restricted broadcast from app context.");

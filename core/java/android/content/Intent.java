@@ -2375,8 +2375,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_ENABLE_ROLLBACK =
             "android.intent.action.PACKAGE_ENABLE_ROLLBACK";
     /**
-     * Broadcast Action: An existing version of an application package has been
-     * rolled back to a previous version.
+     * Broadcast Action: A rollback has been committed.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -2385,8 +2384,8 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_ROLLBACK_EXECUTED =
-            "android.intent.action.PACKAGE_ROLLBACK_EXECUTED";
+    public static final String ACTION_ROLLBACK_COMMITTED =
+            "android.intent.action.ROLLBACK_COMMITTED";
     /**
      * @hide
      * Broadcast Action: Ask system services if there is any reason to

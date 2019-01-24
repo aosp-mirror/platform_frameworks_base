@@ -353,7 +353,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             addRecentlyExecutedRollback(rollback);
                             sendSuccess(statusReceiver);
 
-                            Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
+                            Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
 
                             // TODO: This call emits the warning "Calling a method in the
                             // system process without a qualified user". Fix that.
