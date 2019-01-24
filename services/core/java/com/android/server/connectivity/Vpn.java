@@ -151,7 +151,7 @@ public class Vpn {
                 .divide(BigInteger.valueOf(100));
     }
     // How many routes to evaluate before bailing and declaring this Vpn should provide
-    // the INTERNET capability. This is necessary because computing the address space is
+    // the INTERNET capability. This is necessary because computing the adress space is
     // O(n²) and this is running in the system service, so a limit is needed to alleviate
     // the risk of attack.
     // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
@@ -192,12 +192,6 @@ public class Vpn {
      * not set.
      */
     private boolean mLockdown = false;
-
-    /**
-     * Set of packages in addition to the VPN app itself that can access the network directly when
-     * VPN is not connected even if {@code mLockdown} is set.
-     */
-    private @NonNull List<String> mLockdownWhitelist = Collections.emptyList();
 
     /**
      * List of UIDs for which networking should be blocked until VPN is ready, during brief periods
@@ -326,9 +320,9 @@ public class Vpn {
      *
      * Used to enable/disable legacy VPN lockdown.
      *
-     * This uses the same ip rule mechanism as
-     * {@link #setAlwaysOnPackage(String, boolean, List<String>)}; previous settings from calling
-     * that function will be replaced and saved with the always-on state.
+     * This uses the same ip rule mechanism as {@link #setAlwaysOnPackage(String, boolean)};
+     * previous settings from calling that function will be replaced and saved with the
+     * always-on state.
      *
      * @param lockdown whether to prevent all traffic outside of a VPN.
      */
@@ -425,14 +419,12 @@ public class Vpn {
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
-     * @param lockdownWhitelist packages to be whitelisted from lockdown.
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
      */
-    public synchronized boolean setAlwaysOnPackage(
-            String packageName, boolean lockdown, List<String> lockdownWhitelist) {
+    public synchronized boolean setAlwaysOnPackage(String packageName, boolean lockdown) {
         enforceControlPermissionOrInternalCaller();
 
-        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownWhitelist)) {
+        if (setAlwaysOnPackageInternal(packageName, lockdown)) {
             saveAlwaysOnPackage();
             return true;
         }
@@ -447,25 +439,13 @@ public class Vpn {
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
-     * @param lockdownWhitelist packages to be whitelisted from lockdown. This is only used if
-     *        {@code lockdown} is {@code true}. Packages must not contain commas.
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
      */
     @GuardedBy("this")
-    private boolean setAlwaysOnPackageInternal(
-            String packageName, boolean lockdown, List<String> lockdownWhitelist) {
+    private boolean setAlwaysOnPackageInternal(String packageName, boolean lockdown) {
         if (VpnConfig.LEGACY_VPN.equals(packageName)) {
             Log.w(TAG, "Not setting legacy VPN \"" + packageName + "\" as always-on.");
             return false;
-        }
-
-        if (lockdownWhitelist != null) {
-            for (String pkg : lockdownWhitelist) {
-                if (pkg.contains(",")) {
-                    Log.w(TAG, "Not setting always-on vpn, invalid whitelisted package: " + pkg);
-                    return false;
-                }
-            }
         }
 
         if (packageName != null) {
@@ -480,18 +460,13 @@ public class Vpn {
         }
 
         mLockdown = (mAlwaysOn && lockdown);
-        mLockdownWhitelist = (mLockdown && lockdownWhitelist != null)
-                ? Collections.unmodifiableList(new ArrayList<>(lockdownWhitelist))
-                : Collections.emptyList();
-
         if (isCurrentPreparedPackage(packageName)) {
             updateAlwaysOnNotification(mNetworkInfo.getDetailedState());
-            setVpnForcedLocked(mLockdown);
         } else {
             // Prepare this app. The notification will update as a side-effect of updateState().
-            // It also calls setVpnForcedLocked().
             prepareInternal(packageName);
         }
+        setVpnForcedLocked(mLockdown);
         return true;
     }
 
@@ -503,17 +478,11 @@ public class Vpn {
      * @return the package name of the VPN controller responsible for always-on VPN,
      *         or {@code null} if none is set or always-on VPN is controlled through
      *         lockdown instead.
+     * @hide
      */
     public synchronized String getAlwaysOnPackage() {
         enforceControlPermissionOrInternalCaller();
         return (mAlwaysOn ? mPackage : null);
-    }
-
-    /**
-     * @return an immutable list of packages whitelisted from always-on VPN lockdown.
-     */
-    public synchronized List<String> getLockdownWhitelist() {
-        return mLockdown ? mLockdownWhitelist : null;
     }
 
     /**
@@ -527,9 +496,6 @@ public class Vpn {
                     getAlwaysOnPackage(), mUserHandle);
             mSystemServices.settingsSecurePutIntForUser(Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
                     (mAlwaysOn && mLockdown ? 1 : 0), mUserHandle);
-            mSystemServices.settingsSecurePutStringForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST,
-                    String.join(",", mLockdownWhitelist), mUserHandle);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -546,11 +512,7 @@ public class Vpn {
                     Settings.Secure.ALWAYS_ON_VPN_APP, mUserHandle);
             final boolean alwaysOnLockdown = mSystemServices.settingsSecureGetIntForUser(
                     Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, 0 /*default*/, mUserHandle) != 0;
-            final String whitelistString = mSystemServices.settingsSecureGetStringForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST, mUserHandle);
-            final List<String> whitelistedPackages = TextUtils.isEmpty(whitelistString)
-                    ? Collections.emptyList() : Arrays.asList(whitelistString.split(","));
-            setAlwaysOnPackageInternal(alwaysOnPackage, alwaysOnLockdown, whitelistedPackages);
+            setAlwaysOnPackageInternal(alwaysOnPackage, alwaysOnLockdown);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -570,7 +532,7 @@ public class Vpn {
             }
             // Remove always-on VPN if it's not supported.
             if (!isAlwaysOnPackageSupported(alwaysOnPackage)) {
-                setAlwaysOnPackage(null, false, null);
+                setAlwaysOnPackage(null, false);
                 return false;
             }
             // Skip if the service is already established. This isn't bulletproof: it's not bound
@@ -1287,10 +1249,9 @@ public class Vpn {
     }
 
     /**
-     * Restricts network access from all UIDs affected by this {@link Vpn}, apart from the VPN
-     * service app itself and whitelisted packages, to only sockets that have had {@code protect()}
-     * called on them. All non-VPN traffic is blocked via a {@code PROHIBIT} response from the
-     * kernel.
+     * Restrict network access from all UIDs affected by this {@link Vpn}, apart from the VPN
+     * service app itself, to only sockets that have had {@code protect()} called on them. All
+     * non-VPN traffic is blocked via a {@code PROHIBIT} response from the kernel.
      *
      * The exception for the VPN UID isn't technically necessary -- setup should use protected
      * sockets -- but in practice it saves apps that don't protect their sockets from breaking.
@@ -1306,13 +1267,8 @@ public class Vpn {
      */
     @GuardedBy("this")
     private void setVpnForcedLocked(boolean enforce) {
-        final List<String> exemptedPackages;
-        if (isNullOrLegacyVpn(mPackage)) {
-            exemptedPackages = null;
-        } else {
-            exemptedPackages = new ArrayList<>(mLockdownWhitelist);
-            exemptedPackages.add(mPackage);
-        }
+        final List<String> exemptedPackages =
+                isNullOrLegacyVpn(mPackage) ? null : Collections.singletonList(mPackage);
         final Set<UidRange> removedRanges = new ArraySet<>(mBlockedUsers);
 
         Set<UidRange> addedRanges = Collections.emptySet();
