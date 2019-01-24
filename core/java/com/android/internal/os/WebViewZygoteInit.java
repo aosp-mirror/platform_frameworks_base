@@ -18,7 +18,6 @@ package com.android.internal.os;
 
 import android.app.ApplicationLoaders;
 import android.net.LocalSocket;
-import android.net.LocalServerSocket;
 import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
