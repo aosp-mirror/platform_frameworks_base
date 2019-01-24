@@ -16,161 +16,19 @@
 
 package android.net;
 
-import static android.net.NetworkUtils.getImplicitNetmask;
-import static android.net.NetworkUtils.inet4AddressToIntHTH;
-import static android.net.NetworkUtils.inet4AddressToIntHTL;
-import static android.net.NetworkUtils.intToInet4AddressHTH;
-import static android.net.NetworkUtils.intToInet4AddressHTL;
-import static android.net.NetworkUtils.netmaskToPrefixLength;
-import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTH;
-import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTL;
-import static android.net.NetworkUtils.getBroadcastAddress;
-import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
-
 import static junit.framework.Assert.assertEquals;
 
-import static org.junit.Assert.fail;
-
 import android.support.test.runner.AndroidJUnit4;
-
-import java.math.BigInteger;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.util.TreeSet;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.math.BigInteger;
+import java.util.TreeSet;
+
 @RunWith(AndroidJUnit4.class)
 @android.support.test.filters.SmallTest
 public class NetworkUtilsTest {
-
-    private InetAddress Address(String addr) {
-        return InetAddress.parseNumericAddress(addr);
-    }
-
-    private Inet4Address IPv4Address(String addr) {
-        return (Inet4Address) Address(addr);
-    }
-
-    @Test
-    public void testGetImplicitNetmask() {
-        assertEquals(8, getImplicitNetmask(IPv4Address("4.2.2.2")));
-        assertEquals(8, getImplicitNetmask(IPv4Address("10.5.6.7")));
-        assertEquals(16, getImplicitNetmask(IPv4Address("173.194.72.105")));
-        assertEquals(16, getImplicitNetmask(IPv4Address("172.23.68.145")));
-        assertEquals(24, getImplicitNetmask(IPv4Address("192.0.2.1")));
-        assertEquals(24, getImplicitNetmask(IPv4Address("192.168.5.1")));
-        assertEquals(32, getImplicitNetmask(IPv4Address("224.0.0.1")));
-        assertEquals(32, getImplicitNetmask(IPv4Address("255.6.7.8")));
-    }
-
-    private void assertInvalidNetworkMask(Inet4Address addr) {
-        try {
-            netmaskToPrefixLength(addr);
-            fail("Invalid netmask " + addr.getHostAddress() + " did not cause exception");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
-    public void testInet4AddressToIntHTL() {
-        assertEquals(0, inet4AddressToIntHTL(IPv4Address("0.0.0.0")));
-        assertEquals(0x000080ff, inet4AddressToIntHTL(IPv4Address("255.128.0.0")));
-        assertEquals(0x0080ff0a, inet4AddressToIntHTL(IPv4Address("10.255.128.0")));
-        assertEquals(0x00feff0a, inet4AddressToIntHTL(IPv4Address("10.255.254.0")));
-        assertEquals(0xfeffa8c0, inet4AddressToIntHTL(IPv4Address("192.168.255.254")));
-        assertEquals(0xffffa8c0, inet4AddressToIntHTL(IPv4Address("192.168.255.255")));
-    }
-
-    @Test
-    public void testIntToInet4AddressHTL() {
-        assertEquals(IPv4Address("0.0.0.0"), intToInet4AddressHTL(0));
-        assertEquals(IPv4Address("255.128.0.0"), intToInet4AddressHTL(0x000080ff));
-        assertEquals(IPv4Address("10.255.128.0"), intToInet4AddressHTL(0x0080ff0a));
-        assertEquals(IPv4Address("10.255.254.0"), intToInet4AddressHTL(0x00feff0a));
-        assertEquals(IPv4Address("192.168.255.254"), intToInet4AddressHTL(0xfeffa8c0));
-        assertEquals(IPv4Address("192.168.255.255"), intToInet4AddressHTL(0xffffa8c0));
-    }
-
-    @Test
-    public void testInet4AddressToIntHTH() {
-        assertEquals(0, inet4AddressToIntHTH(IPv4Address("0.0.0.0")));
-        assertEquals(0xff800000, inet4AddressToIntHTH(IPv4Address("255.128.0.0")));
-        assertEquals(0x0aff8000, inet4AddressToIntHTH(IPv4Address("10.255.128.0")));
-        assertEquals(0x0afffe00, inet4AddressToIntHTH(IPv4Address("10.255.254.0")));
-        assertEquals(0xc0a8fffe, inet4AddressToIntHTH(IPv4Address("192.168.255.254")));
-        assertEquals(0xc0a8ffff, inet4AddressToIntHTH(IPv4Address("192.168.255.255")));
-    }
-
-    @Test
-    public void testIntToInet4AddressHTH() {
-        assertEquals(IPv4Address("0.0.0.0"), intToInet4AddressHTH(0));
-        assertEquals(IPv4Address("255.128.0.0"), intToInet4AddressHTH(0xff800000));
-        assertEquals(IPv4Address("10.255.128.0"), intToInet4AddressHTH(0x0aff8000));
-        assertEquals(IPv4Address("10.255.254.0"), intToInet4AddressHTH(0x0afffe00));
-        assertEquals(IPv4Address("192.168.255.254"), intToInet4AddressHTH(0xc0a8fffe));
-        assertEquals(IPv4Address("192.168.255.255"), intToInet4AddressHTH(0xc0a8ffff));
-    }
-
-    @Test
-    public void testNetmaskToPrefixLength() {
-        assertEquals(0, netmaskToPrefixLength(IPv4Address("0.0.0.0")));
-        assertEquals(9, netmaskToPrefixLength(IPv4Address("255.128.0.0")));
-        assertEquals(17, netmaskToPrefixLength(IPv4Address("255.255.128.0")));
-        assertEquals(23, netmaskToPrefixLength(IPv4Address("255.255.254.0")));
-        assertEquals(31, netmaskToPrefixLength(IPv4Address("255.255.255.254")));
-        assertEquals(32, netmaskToPrefixLength(IPv4Address("255.255.255.255")));
-
-        assertInvalidNetworkMask(IPv4Address("0.0.0.1"));
-        assertInvalidNetworkMask(IPv4Address("255.255.255.253"));
-        assertInvalidNetworkMask(IPv4Address("255.255.0.255"));
-    }
-
-    @Test
-    public void testPrefixLengthToV4NetmaskIntHTL() {
-        assertEquals(0, prefixLengthToV4NetmaskIntHTL(0));
-        assertEquals(0x000080ff /* 255.128.0.0 */, prefixLengthToV4NetmaskIntHTL(9));
-        assertEquals(0x0080ffff /* 255.255.128.0 */, prefixLengthToV4NetmaskIntHTL(17));
-        assertEquals(0x00feffff /* 255.255.254.0 */, prefixLengthToV4NetmaskIntHTL(23));
-        assertEquals(0xfeffffff /* 255.255.255.254 */, prefixLengthToV4NetmaskIntHTL(31));
-        assertEquals(0xffffffff /* 255.255.255.255 */, prefixLengthToV4NetmaskIntHTL(32));
-    }
-
-    @Test
-    public void testPrefixLengthToV4NetmaskIntHTH() {
-        assertEquals(0, prefixLengthToV4NetmaskIntHTH(0));
-        assertEquals(0xff800000 /* 255.128.0.0 */, prefixLengthToV4NetmaskIntHTH(9));
-        assertEquals(0xffff8000 /* 255.255.128.0 */, prefixLengthToV4NetmaskIntHTH(17));
-        assertEquals(0xfffffe00 /* 255.255.254.0 */, prefixLengthToV4NetmaskIntHTH(23));
-        assertEquals(0xfffffffe /* 255.255.255.254 */, prefixLengthToV4NetmaskIntHTH(31));
-        assertEquals(0xffffffff /* 255.255.255.255 */, prefixLengthToV4NetmaskIntHTH(32));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPrefixLengthToV4NetmaskIntHTH_NegativeLength() {
-        prefixLengthToV4NetmaskIntHTH(-1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPrefixLengthToV4NetmaskIntHTH_LengthTooLarge() {
-        prefixLengthToV4NetmaskIntHTH(33);
-    }
-
-    private void checkAddressMasking(String expectedAddr, String addr, int prefixLength) {
-        final int prefix = prefixLengthToV4NetmaskIntHTH(prefixLength);
-        final int addrInt = inet4AddressToIntHTH(IPv4Address(addr));
-        assertEquals(IPv4Address(expectedAddr), intToInet4AddressHTH(prefix & addrInt));
-    }
-
-    @Test
-    public void testPrefixLengthToV4NetmaskIntHTH_MaskAddr() {
-        checkAddressMasking("192.168.0.0", "192.168.128.1", 16);
-        checkAddressMasking("255.240.0.0", "255.255.255.255", 12);
-        checkAddressMasking("255.255.255.255", "255.255.255.255", 32);
-        checkAddressMasking("0.0.0.0", "255.255.255.255", 0);
-    }
-
     @Test
     public void testRoutedIPv4AddressCount() {
         final TreeSet<IpPrefix> set = new TreeSet<>(IpPrefix.lengthComparator());
@@ -266,45 +124,5 @@ public class NetworkUtilsTest {
         set.add(new IpPrefix("f00b:a33::/112"));
         assertEquals(BigInteger.valueOf(7l - 4 + 4 + 16 + 65536),
                 NetworkUtils.routedIPv6AddressCount(set));
-    }
-
-    @Test
-    public void testGetPrefixMaskAsAddress() {
-        assertEquals("255.255.240.0", getPrefixMaskAsInet4Address(20).getHostAddress());
-        assertEquals("255.0.0.0", getPrefixMaskAsInet4Address(8).getHostAddress());
-        assertEquals("0.0.0.0", getPrefixMaskAsInet4Address(0).getHostAddress());
-        assertEquals("255.255.255.255", getPrefixMaskAsInet4Address(32).getHostAddress());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetPrefixMaskAsAddress_PrefixTooLarge() {
-        getPrefixMaskAsInet4Address(33);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetPrefixMaskAsAddress_NegativePrefix() {
-        getPrefixMaskAsInet4Address(-1);
-    }
-
-    @Test
-    public void testGetBroadcastAddress() {
-        assertEquals("192.168.15.255",
-                getBroadcastAddress(IPv4Address("192.168.0.123"), 20).getHostAddress());
-        assertEquals("192.255.255.255",
-                getBroadcastAddress(IPv4Address("192.168.0.123"), 8).getHostAddress());
-        assertEquals("192.168.0.123",
-                getBroadcastAddress(IPv4Address("192.168.0.123"), 32).getHostAddress());
-        assertEquals("255.255.255.255",
-                getBroadcastAddress(IPv4Address("192.168.0.123"), 0).getHostAddress());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetBroadcastAddress_PrefixTooLarge() {
-        getBroadcastAddress(IPv4Address("192.168.0.123"), 33);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetBroadcastAddress_NegativePrefix() {
-        getBroadcastAddress(IPv4Address("192.168.0.123"), -1);
     }
 }
