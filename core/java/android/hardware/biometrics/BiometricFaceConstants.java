@@ -252,12 +252,55 @@ public interface BiometricFaceConstants {
     public static final int FACE_ACQUIRED_TOO_SIMILAR = 15;
 
     /**
+     * The magnitude of the pan angle of the user’s face with respect to the sensor’s
+     * capture plane is too high.
+     *
+     * The pan angle is defined as the angle swept out by the user’s face turning
+     * their neck left and right. The pan angle would be zero if the user faced the
+     * camera directly.
+     *
+     * The user should be informed to look more directly at the camera.
+     */
+    public static final int FACE_ACQUIRED_PAN_TOO_EXTREME = 16;
+
+    /**
+     * The magnitude of the tilt angle of the user’s face with respect to the sensor’s
+     * capture plane is too high.
+     *
+     * The tilt angle is defined as the angle swept out by the user’s face looking up
+     * and down. The pan angle would be zero if the user faced the camera directly.
+     *
+     * The user should be informed to look more directly at the camera.
+     */
+    public static final int FACE_ACQUIRED_TILT_TOO_EXTREME = 17;
+
+    /**
+     * The magnitude of the roll angle of the user’s face with respect to the sensor’s
+     * capture plane is too high.
+     *
+     * The roll angle is defined as the angle swept out by the user’s face tilting their head
+     * towards their shoulders to the left and right. The pan angle would be zero if the user
+     * faced the camera directly.
+     *
+     * The user should be informed to look more directly at the camera.
+     */
+    public static final int FACE_ACQUIRED_ROLL_TOO_EXTREME = 18;
+
+    /**
+     * The user’s face has been obscured by some object.
+     *
+     * The user should be informed to remove any objects from the line of sight from
+     * the sensor to the user’s face.
+     */
+    public static final int FACE_ACQUIRED_FACE_OBSCURED = 19;
+
+    /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
      *
      * @hide
      */
-    public static final int FACE_ACQUIRED_VENDOR = 16;
+    public static final int FACE_ACQUIRED_VENDOR = 20;
 
     /**
      * @hide
