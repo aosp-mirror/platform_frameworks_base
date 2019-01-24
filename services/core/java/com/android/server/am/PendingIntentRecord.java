@@ -379,6 +379,10 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             if (userId == UserHandle.USER_CURRENT) {
                 userId = controller.mUserController.getCurrentOrTargetUserId();
             }
+            // temporarily allow receivers and services to open activities from background if the
+            // PendingIntent.send() caller was foreground at the time of sendInner() call
+            final boolean allowTrampoline = uid != callingUid
+                    && controller.mAtmInternal.isUidForeground(callingUid);
 
             switch (key.type) {
                 case ActivityManager.INTENT_SENDER_ACTIVITY:
@@ -419,7 +423,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                                 uid, finalIntent, resolvedType, finishedReceiver, code, null, null,
                                 requiredPermission, options, (finishedReceiver != null),
                                 false, userId,
-                                mAllowBgActivityStartsForBroadcastSender.contains(whitelistToken));
+                                mAllowBgActivityStartsForBroadcastSender.contains(whitelistToken)
+                                || allowTrampoline);
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
                             sendFinish = false;
                         }
@@ -433,7 +438,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                         controller.mAmInternal.startServiceInPackage(uid, finalIntent, resolvedType,
                                 key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE,
                                 key.packageName, userId,
-                                mAllowBgActivityStartsForServiceSender.contains(whitelistToken));
+                                mAllowBgActivityStartsForServiceSender.contains(whitelistToken)
+                                || allowTrampoline);
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Unable to send startService intent", e);
                     } catch (TransactionTooLargeException e) {

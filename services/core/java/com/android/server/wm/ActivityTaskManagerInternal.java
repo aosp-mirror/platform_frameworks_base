@@ -489,4 +489,7 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract ActivityManager.TaskSnapshot getTaskSnapshot(int taskId,
             boolean reducedResolution);
+
+    /** Returns true if uid has a visible window or its process is in a top state. */
+    public abstract boolean isUidForeground(int uid);
 }

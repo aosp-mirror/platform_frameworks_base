@@ -5632,6 +5632,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mActiveUids.get(uid, PROCESS_STATE_NONEXISTENT);
     }
 
+    boolean isUidForeground(int uid) {
+        return (getUidStateLocked(uid) == ActivityManager.PROCESS_STATE_TOP)
+                || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
+    }
+
     /**
      * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
      * the whitelist
@@ -7039,6 +7044,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
             synchronized (mGlobalLock) {
                 return ActivityTaskManagerService.this.getTaskSnapshot(taskId, reducedResolution);
+            }
+        }
+
+        @Override
+        public boolean isUidForeground(int uid) {
+            synchronized (mGlobalLock) {
+                return ActivityTaskManagerService.this.isUidForeground(uid);
             }
         }
     }
