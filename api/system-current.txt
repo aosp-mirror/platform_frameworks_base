@@ -3381,6 +3381,15 @@ package android.media {
     method public void stop();
   }
 
+  public final class Session2Token implements android.os.Parcelable {
+    ctor public Session2Token(@NonNull android.content.Context, @NonNull String, @Nullable android.os.Bundle);
+    method public void destroy();
+    method @NonNull public android.os.Bundle getExtras();
+    method public int getPid();
+    method public boolean isDestroyed();
+    field public static final String SESSION_SERVICE_INTERFACE = "android.media.MediaSession2Service";
+  }
+
   public static class SubtitleData.Builder {
     ctor public SubtitleData.Builder();
     ctor public SubtitleData.Builder(@NonNull android.media.SubtitleData);

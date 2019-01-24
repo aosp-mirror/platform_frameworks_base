@@ -37,6 +37,7 @@ interface ISessionManager {
     SessionLink createSession(String packageName, in SessionCallbackLink sessionCb, String tag,
             int userId);
     void notifySession2Created(in Session2Token sessionToken);
+    void notifySession2Destroyed(in Session2Token sessionToken);
     List<ControllerLink> getSessions(in ComponentName compName, int userId);
     List<Session2Token> getSession2Tokens(int userId);
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
