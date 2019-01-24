@@ -55,6 +55,8 @@ void onDestroyed(int functor, void* data) {
 
 void draw_gl(int functor, void* data,
              const uirenderer::DrawGlInfo& draw_gl_params) {
+  float gabcdef[7];
+  draw_gl_params.color_space_ptr->transferFn(gabcdef);
   AwDrawFn_DrawGLParams params = {
       .version = kAwDrawFnVersion,
       .clip_left = draw_gl_params.clipLeft,
@@ -64,12 +66,24 @@ void draw_gl(int functor, void* data,
       .width = draw_gl_params.width,
       .height = draw_gl_params.height,
       .is_layer = draw_gl_params.isLayer,
+      .transfer_function_g = gabcdef[0],
+      .transfer_function_a = gabcdef[1],
+      .transfer_function_b = gabcdef[2],
+      .transfer_function_c = gabcdef[3],
+      .transfer_function_d = gabcdef[4],
+      .transfer_function_e = gabcdef[5],
+      .transfer_function_f = gabcdef[6],
   };
   COMPILE_ASSERT(NELEM(params.transform) == NELEM(draw_gl_params.transform),
                  mismatched_transform_matrix_sizes);
   for (int i = 0; i < NELEM(params.transform); ++i) {
     params.transform[i] = draw_gl_params.transform[i];
   }
+  COMPILE_ASSERT(sizeof(params.color_space_toXYZD50) == sizeof(skcms_Matrix3x3),
+                 gamut_transform_size_mismatch);
+  draw_gl_params.color_space_ptr->toXYZD50(
+      reinterpret_cast<skcms_Matrix3x3*>(&params.color_space_toXYZD50));
+
   SupportData* support = static_cast<SupportData*>(data);
   support->callbacks.draw_gl(functor, support->data, &params);
 }

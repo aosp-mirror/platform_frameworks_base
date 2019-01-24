@@ -20,7 +20,8 @@ extern "C" {
 // android to chromium are versioned.
 //
 // 1 is Android Q. This matches kAwDrawGLInfoVersion version 3.
-static const int kAwDrawFnVersion = 1;
+// 2 Adds transfer_function_* and color_space_toXYZD50 to AwDrawFn_DrawGLParams.
+static const int kAwDrawFnVersion = 2;
 
 struct AwDrawFn_OnSyncParams {
   int version;
@@ -64,6 +65,16 @@ struct AwDrawFn_DrawGLParams {
   // Input: current transformation matrix in surface pixels.
   // Uses the column-based OpenGL matrix format.
   float transform[16];
+
+  // Input: Color space parameters.
+  float transfer_function_g;
+  float transfer_function_a;
+  float transfer_function_b;
+  float transfer_function_c;
+  float transfer_function_d;
+  float transfer_function_e;
+  float transfer_function_f;
+  float color_space_toXYZD50[9];
 };
 
 struct AwDrawFn_InitVkParams {
