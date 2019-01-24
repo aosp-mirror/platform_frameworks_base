@@ -164,15 +164,11 @@ static SkBitmap makeHwCompatible(const FormatInfo& format, const SkBitmap& sourc
         const SkImageInfo& info = source.info();
         bitmap.allocPixels(
                 SkImageInfo::MakeN32(info.width(), info.height(), info.alphaType(), nullptr));
-        bitmap.eraseColor(0);
-        if (info.colorType() == kRGBA_F16_SkColorType) {
-            // Drawing RGBA_F16 onto ARGB_8888 is not supported
-            source.readPixels(bitmap.info().makeColorSpace(SkColorSpace::MakeSRGB()),
-                              bitmap.getPixels(), bitmap.rowBytes(), 0, 0);
-        } else {
-            SkCanvas canvas(bitmap);
-            canvas.drawBitmap(source, 0.0f, 0.0f, nullptr);
-        }
+
+        SkCanvas canvas(bitmap);
+        canvas.drawColor(0);
+        canvas.drawBitmap(source, 0.0f, 0.0f, nullptr);
+
         return bitmap;
     }
 }
@@ -253,8 +249,8 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
         eglDestroySyncKHR(display, fence);
     }
 
-    return Bitmap::createFrom(buffer.get(), bitmap.refColorSpace(), bitmap.alphaType(),
-                              Bitmap::computePalette(bitmap));
+    return Bitmap::createFrom(buffer.get(), bitmap.colorType(), bitmap.refColorSpace(),
+                              bitmap.alphaType(), Bitmap::computePalette(bitmap));
 }
 
 void HardwareBitmapUploader::terminate() {
