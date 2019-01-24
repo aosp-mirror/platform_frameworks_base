@@ -16,6 +16,10 @@
 
 package com.android.server.pm;
 
+import com.google.android.collect.Sets;
+
+import com.android.internal.util.Preconditions;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -37,10 +41,6 @@ import android.telephony.SubscriptionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-
-import com.android.internal.util.Preconditions;
-
-import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -660,7 +660,6 @@ public class UserRestrictionsUtils {
 
             case android.provider.Settings.Secure.ALWAYS_ON_VPN_APP:
             case android.provider.Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN:
-            case android.provider.Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST:
                 // Whitelist system uid (ConnectivityService) and root uid to change always-on vpn
                 final int appId = UserHandle.getAppId(callingUid);
                 if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
