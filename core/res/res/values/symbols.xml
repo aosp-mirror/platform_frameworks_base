@@ -434,6 +434,7 @@
   <java-symbol type="integer" name="config_bluetooth_operating_voltage_mv" />
   <java-symbol type="bool" name="config_bluetooth_pan_enable_autoconnect" />
   <java-symbol type="bool" name="config_bluetooth_reload_supported_profiles_when_enabled" />
+  <java-symbol type="bool" name="config_hearing_aid_profile_supported" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_drawLockTimeoutMillis" />
   <java-symbol type="integer" name="config_doublePressOnPowerBehavior" />
