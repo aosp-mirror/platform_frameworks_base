@@ -91,7 +91,7 @@ public class TextClassifierPerfTest {
     private static ConversationActions.Request createConversationActionsRequest(CharSequence text) {
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
-                        ConversationActions.Message.PERSON_USER_REMOTE)
+                        ConversationActions.Message.PERSON_USER_OTHERS)
                         .setText(text)
                         .build();
         return new ConversationActions.Request.Builder(Collections.singletonList(message))

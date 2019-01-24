@@ -109,9 +109,9 @@ public final class ConversationActions implements Parcelable {
          *
          * @see Builder#Builder(Person)
          */
-        public static final Person PERSON_USER_LOCAL =
+        public static final Person PERSON_USER_SELF =
                 new Person.Builder()
-                        .setKey("text-classifier-conversation-actions-local-user")
+                        .setKey("text-classifier-conversation-actions-user-self")
                         .build();
 
         /**
@@ -123,9 +123,9 @@ public final class ConversationActions implements Parcelable {
          *
          * @see Builder#Builder(Person)
          */
-        public static final Person PERSON_USER_REMOTE =
+        public static final Person PERSON_USER_OTHERS =
                 new Person.Builder()
-                        .setKey("text-classifier-conversation-actions-remote-user")
+                        .setKey("text-classifier-conversation-actions-user-others")
                         .build();
 
         @Nullable
@@ -235,10 +235,10 @@ public final class ConversationActions implements Parcelable {
             /**
              * Constructs a builder.
              *
-             * @param author the person that composed the message, use {@link #PERSON_USER_LOCAL}
+             * @param author the person that composed the message, use {@link #PERSON_USER_SELF}
              *               to represent the local user. If it is not possible to identify the
              *               remote user that the local user is conversing with, use
-             *               {@link #PERSON_USER_REMOTE} to represent a remote user.
+             *               {@link #PERSON_USER_OTHERS} to represent a remote user.
              */
             public Builder(@NonNull Person author) {
                 mAuthor = Preconditions.checkNotNull(author);

@@ -154,7 +154,7 @@ public class SmartActionHelperTest {
         ConversationActions.Message secondMessage = messages.get(0);
         MessageSubject.assertThat(secondMessage).hasText("secondMessage");
         MessageSubject.assertThat(secondMessage)
-                .hasPerson(ConversationActions.Message.PERSON_USER_LOCAL);
+                .hasPerson(ConversationActions.Message.PERSON_USER_SELF);
         MessageSubject.assertThat(secondMessage)
                 .hasReferenceTime(createZonedDateTimeFromMsUtc(2000));
 
