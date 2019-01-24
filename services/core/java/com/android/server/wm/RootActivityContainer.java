@@ -1296,14 +1296,19 @@ class RootActivityContainer extends ConfigurationContainer
     public void onDisplayAdded(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
-            getActivityDisplayOrCreate(displayId);
+            final ActivityDisplay display = getActivityDisplayOrCreate(displayId);
             // Do not start home before booting, or it may accidentally finish booting before it
             // starts. Instead, we expect home activities to be launched when the system is ready
             // (ActivityManagerService#systemReady).
             if (mService.isBooted() || mService.isBooting()) {
-                startHomeOnDisplay(mCurrentUser, "displayAdded", displayId);
+                startSystemDecorations(display.mDisplayContent);
             }
         }
+    }
+
+    private void startSystemDecorations(final DisplayContent displayContent) {
+        startHomeOnDisplay(mCurrentUser, "displayAdded", displayContent.getDisplayId());
+        displayContent.getDisplayPolicy().notifyDisplayReady();
     }
 
     @Override

@@ -100,4 +100,11 @@ public interface StatusBarManagerInternal {
      * @param rotation rotation suggestion
      */
     void onProposedRotationChanged(int rotation, boolean isValid);
+
+    /**
+     * Notifies System UI that the display is ready to show system decorations.
+     *
+     * @param displayId display ID
+     */
+    void onDisplayReady(int displayId);
 }
