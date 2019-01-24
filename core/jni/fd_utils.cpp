@@ -37,6 +37,8 @@ static const char* kPathWhitelist[] = {
   "/dev/null",
   "/dev/socket/zygote",
   "/dev/socket/zygote_secondary",
+  "/dev/socket/blastula_pool",
+  "/dev/socket/blastula_pool_secondary",
   "/dev/socket/webview_zygote",
   "/dev/socket/heapprofd",
   "/sys/kernel/debug/tracing/trace_marker",
