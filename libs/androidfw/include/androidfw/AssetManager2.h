@@ -257,11 +257,12 @@ class AssetManager2 {
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
 
-  template <typename Func>
-  void ForEachPackage(Func func) const {
+  void ForEachPackage(const std::function<bool(const std::string&, uint8_t)> func) const {
     for (const PackageGroup& package_group : package_groups_) {
-      func(package_group.packages_.front().loaded_package_->GetPackageName(),
-           package_group.dynamic_ref_table.mAssignedPackageId);
+      if (!func(package_group.packages_.front().loaded_package_->GetPackageName(),
+           package_group.dynamic_ref_table.mAssignedPackageId)) {
+        return;
+      }
     }
   }
 
@@ -282,10 +283,13 @@ class AssetManager2 {
   // care about the value. In this case, the value of `FindEntryResult::type_flags` is incomplete
   // and should not be used.
   //
+  // When `ignore_configuration` is true, FindEntry will return always select the first entry in
+  // for the type seen regardless of its configuration.
+  //
   // NOTE: FindEntry takes care of ensuring that structs within FindEntryResult have been properly
   // bounds-checked. Callers of FindEntry are free to trust the data if this method succeeds.
   ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
-                            FindEntryResult* out_entry) const;
+                            bool ignore_configuration, FindEntryResult* out_entry) const;
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
