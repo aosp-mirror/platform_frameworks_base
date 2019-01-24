@@ -231,6 +231,7 @@ LIBANDROID {
     ASurfaceTransaction_setBuffer; # introduced=29
     ASurfaceTransaction_setBufferAlpha; # introduced=29
     ASurfaceTransaction_setBufferTransparency; # introduced=29
+    ASurfaceTransaction_setColor; # introduced=29
     ASurfaceTransaction_setDamageRegion; # introduced=29
     ASurfaceTransaction_setDesiredPresentTime; # introduced=29
     ASurfaceTransaction_setGeometry; # introduced=29

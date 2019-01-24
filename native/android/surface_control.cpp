@@ -44,6 +44,76 @@ using Transaction = SurfaceComposerClient::Transaction;
     LOG_ALWAYS_FATAL_IF(!static_cast<const Rect&>(name).isValid(), \
                         "invalid arg passed as " #name " argument");
 
+static bool getWideColorSupport(const sp<SurfaceControl>& surfaceControl) {
+    sp<SurfaceComposerClient> client = surfaceControl->getClient();
+    sp<IBinder> display(client->getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
+
+    Vector<ui::ColorMode> colorModes;
+    status_t err = client->getDisplayColorModes(display, &colorModes);
+    if (err) {
+        ALOGE("unable to get wide color support");
+        return false;
+    }
+
+    bool wideColorBoardConfig =
+        getBool<ISurfaceFlingerConfigs,
+                &ISurfaceFlingerConfigs::hasWideColorDisplay>(false);
+
+    for (android::ui::ColorMode colorMode : colorModes) {
+        switch (colorMode) {
+            case ui::ColorMode::DISPLAY_P3:
+            case ui::ColorMode::ADOBE_RGB:
+            case ui::ColorMode::DCI_P3:
+                if (wideColorBoardConfig) {
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    return false;
+}
+
+static bool getHdrSupport(const sp<SurfaceControl>& surfaceControl) {
+    sp<SurfaceComposerClient> client = surfaceControl->getClient();
+    sp<IBinder> display(client->getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
+
+    HdrCapabilities hdrCapabilities;
+    status_t err = client->getHdrCapabilities(display, &hdrCapabilities);
+    if (err) {
+        ALOGE("unable to get hdr capabilities");
+        return false;
+    }
+
+    return !hdrCapabilities.getSupportedHdrTypes().empty();
+}
+
+static bool isDataSpaceValid(const sp<SurfaceControl>& surfaceControl, ADataSpace dataSpace) {
+    static_assert(static_cast<int>(ADATASPACE_UNKNOWN) == static_cast<int>(HAL_DATASPACE_UNKNOWN));
+    static_assert(static_cast<int>(ADATASPACE_SCRGB_LINEAR) == static_cast<int>(HAL_DATASPACE_V0_SCRGB_LINEAR));
+    static_assert(static_cast<int>(ADATASPACE_SRGB) == static_cast<int>(HAL_DATASPACE_V0_SRGB));
+    static_assert(static_cast<int>(ADATASPACE_SCRGB) == static_cast<int>(HAL_DATASPACE_V0_SCRGB));
+    static_assert(static_cast<int>(ADATASPACE_DISPLAY_P3) == static_cast<int>(HAL_DATASPACE_DISPLAY_P3));
+    static_assert(static_cast<int>(ADATASPACE_BT2020_PQ) == static_cast<int>(HAL_DATASPACE_BT2020_PQ));
+
+    switch (static_cast<android_dataspace_t>(dataSpace)) {
+        case HAL_DATASPACE_UNKNOWN:
+        case HAL_DATASPACE_V0_SRGB:
+            return true;
+        // These data space need wide gamut support.
+        case HAL_DATASPACE_V0_SCRGB_LINEAR:
+        case HAL_DATASPACE_V0_SCRGB:
+        case HAL_DATASPACE_DISPLAY_P3:
+            return getWideColorSupport(surfaceControl);
+        // These data space need HDR support.
+        case HAL_DATASPACE_BT2020_PQ:
+            return getHdrSupport(surfaceControl);
+        default:
+            return false;
+    }
+}
+
 Transaction* ASurfaceTransaction_to_Transaction(ASurfaceTransaction* aSurfaceTransaction) {
     return reinterpret_cast<Transaction*>(aSurfaceTransaction);
 }
@@ -430,4 +500,25 @@ void ASurfaceTransaction_setHdrMetadata_cta861_3(ASurfaceTransaction* aSurfaceTr
     }
 
     transaction->setHdrMetadata(surfaceControl, hdrMetadata);
+}
+
+void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
+                                  ASurfaceControl* aSurfaceControl,
+                                  float r, float g, float b, float alpha,
+                                  ADataSpace dataspace) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    LOG_ALWAYS_FATAL_IF(!isDataSpaceValid(surfaceControl, dataspace), "invalid dataspace");
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    half3 color;
+    color.r = r;
+    color.g = g;
+    color.b = b;
+
+    transaction->setColor(surfaceControl, color)
+                .setColorAlpha(surfaceControl, alpha)
+                .setColorDataspace(surfaceControl, static_cast<ui::Dataspace>(dataspace));
 }
