@@ -48,7 +48,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -252,21 +251,6 @@ public final class ContentService extends IContentService.Stub {
             }
         } finally {
             restoreCallingIdentity(identityToken);
-        }
-    }
-
-    @Override
-    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
-            throws RemoteException {
-        try {
-            return super.onTransact(code, data, reply, flags);
-        } catch (RuntimeException e) {
-            // The content service only throws security exceptions, so let's
-            // log all others.
-            if (!(e instanceof SecurityException)) {
-                Slog.wtf(TAG, "Content Service Crash", e);
-            }
-            throw e;
         }
     }
 
