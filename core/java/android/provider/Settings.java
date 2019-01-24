@@ -11475,6 +11475,14 @@ public final class Settings {
         public static final String GUP_BLACKLIST = "gup_blacklist";
 
         /**
+         * Apps on the whitelist that are allowed to use Game Driver.
+         * The string is a list of application package names, seperated by comma.
+         * i.e. <apk1>,<apk2>,...,<apkN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_WHITELIST = "game_driver_whitelist";
+
+        /**
          * Ordered GPU debug layer list
          * i.e. <layer1>:<layer2>:...:<layerN>
          * @hide

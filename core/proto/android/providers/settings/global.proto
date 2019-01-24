@@ -397,6 +397,8 @@ message GlobalSettingsProto {
         optional SettingProto gup_dev_opt_out_apps = 10;
         // GUP - List of Apps that are forbidden to use Game Update Package
         optional SettingProto gup_blacklist = 11;
+        // List of Apps that are allowed to use Game Driver package.
+        optional SettingProto game_driver_whitelist = 12;
     }
     optional Gpu gpu = 59;
 
