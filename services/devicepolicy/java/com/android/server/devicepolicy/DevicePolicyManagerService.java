@@ -74,14 +74,20 @@ import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
+
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
 
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
+        .PROVISIONING_ENTRY_POINT_ADB;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
+        .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
+
+
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -234,11 +240,11 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
+import com.android.internal.util.StatLogger;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
@@ -1919,11 +1925,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         AlarmManager getAlarmManager() {
-            return mContext.getSystemService(AlarmManager.class);
-        }
-
-        ConnectivityManager getConnectivityManager() {
-            return mContext.getSystemService(ConnectivityManager.class);
+            return (AlarmManager) mContext.getSystemService(AlarmManager.class);
         }
 
         IWindowManager getIWindowManager() {
@@ -6306,8 +6308,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @throws UnsupportedOperationException if the package does not support being set as always-on.
      */
     @Override
-    public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage, boolean lockdown,
-            List<String> lockdownWhitelist)
+    public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage, boolean lockdown)
             throws SecurityException {
         enforceProfileOrDeviceOwner(admin);
 
@@ -6315,23 +6316,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final long token = mInjector.binderClearCallingIdentity();
         try {
             if (vpnPackage != null && !isPackageInstalledForUser(vpnPackage, userId)) {
-                Slog.w(LOG_TAG, "Non-existent VPN package specified: " + vpnPackage);
-                throw new ServiceSpecificException(
-                        DevicePolicyManager.ERROR_VPN_PACKAGE_NOT_FOUND, vpnPackage);
+                return false;
             }
-
-            if (vpnPackage != null && lockdown && lockdownWhitelist != null) {
-                for (String packageName : lockdownWhitelist) {
-                    if (!isPackageInstalledForUser(packageName, userId)) {
-                        Slog.w(LOG_TAG, "Non-existent package in VPN whitelist: " + packageName);
-                        throw new ServiceSpecificException(
-                                DevicePolicyManager.ERROR_VPN_PACKAGE_NOT_FOUND, packageName);
-                    }
-                }
-            }
-            // If some package is uninstalled after the check above, it will be ignored by CM.
-            if (!mInjector.getConnectivityManager().setAlwaysOnVpnPackageForUser(
-                    userId, vpnPackage, lockdown, lockdownWhitelist)) {
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (!connectivityManager.setAlwaysOnVpnPackageForUser(userId, vpnPackage, lockdown)) {
                 throw new UnsupportedOperationException();
             }
             DevicePolicyEventLogger
@@ -6348,40 +6337,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public String getAlwaysOnVpnPackage(ComponentName admin) throws SecurityException {
-        enforceProfileOrDeviceOwner(admin);
-
-        final int userId = mInjector.userHandleGetCallingUserId();
-        final long token = mInjector.binderClearCallingIdentity();
-        try {
-            return mInjector.getConnectivityManager().getAlwaysOnVpnPackageForUser(userId);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(token);
-        }
-    }
-
-    @Override
-    public boolean isAlwaysOnVpnLockdownEnabled(ComponentName admin) throws SecurityException {
-        enforceProfileOrDeviceOwner(admin);
-
-        final int userId = mInjector.userHandleGetCallingUserId();
-        final long token = mInjector.binderClearCallingIdentity();
-        try {
-            return mInjector.getConnectivityManager().isVpnLockdownEnabled(userId);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(token);
-        }
-    }
-
-    @Override
-    public List<String> getAlwaysOnVpnLockdownWhitelist(ComponentName admin)
+    public String getAlwaysOnVpnPackage(ComponentName admin)
             throws SecurityException {
         enforceProfileOrDeviceOwner(admin);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         final long token = mInjector.binderClearCallingIdentity();
-        try {
-            return mInjector.getConnectivityManager().getVpnLockdownWhitelist(userId);
+        try{
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            return connectivityManager.getAlwaysOnVpnPackageForUser(userId);
         } finally {
             mInjector.binderRestoreCallingIdentity(token);
         }
@@ -6854,7 +6819,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceDeviceOwner(who);
         long token = mInjector.binderClearCallingIdentity();
         try {
-            mInjector.getConnectivityManager().setGlobalProxy(proxyInfo);
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            connectivityManager.setGlobalProxy(proxyInfo);
         } finally {
             mInjector.binderRestoreCallingIdentity(token);
         }
