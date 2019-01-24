@@ -78,6 +78,9 @@ import java.util.concurrent.TimeUnit;
  */
 public final class TextClassifierImpl implements TextClassifier {
 
+    /** @hide */
+    public static final String ACTIONS_INTENTS = "actions-intents";
+
     private static final String LOG_TAG = DEFAULT_LOG_TAG;
 
     private static final boolean DEBUG = false;
@@ -567,6 +570,7 @@ public final class TextClassifierImpl implements TextClassifier {
         // TODO: Make this configurable.
         final float foreignTextThreshold = typeCount == 0 ? 0.5f : 0.7f;
         boolean isPrimaryAction = true;
+        final ArrayList<Intent> sourceIntents = new ArrayList<>();
         for (LabeledIntent labeledIntent : IntentFactory.create(
                 mContext, classifiedText, isForeignText(classifiedText, foreignTextThreshold),
                 referenceTime, highestScoringResult)) {
@@ -586,9 +590,15 @@ public final class TextClassifierImpl implements TextClassifier {
                 isPrimaryAction = false;
             }
             builder.addAction(action);
+            sourceIntents.add(labeledIntent.getIntent());
         }
 
-        return builder.setId(createId(text, start, end)).build();
+        final Bundle extras = new Bundle();
+        extras.putParcelableArrayList(ACTIONS_INTENTS, sourceIntents);
+
+        return builder.setId(createId(text, start, end))
+                .setExtras(extras)
+                .build();
     }
 
     private boolean isForeignText(String text, float threshold) {
