@@ -924,14 +924,15 @@ class ActivityStarter {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
-        final boolean isCallingUidForeground = isUidForeground(callingUid);
+        final boolean isCallingUidForeground = mService.isUidForeground(callingUid);
         final boolean isCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
                 callingUid);
         if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
             return false;
         }
         // take realCallingUid into consideration
-        final boolean isRealCallingUidForeground = isUidForeground(realCallingUid);
+        final boolean isRealCallingUidForeground = mService.isUidForeground(
+                realCallingUid);
         final boolean isRealCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
                 realCallingUid);
         if (realCallingUid != callingUid) {
@@ -974,12 +975,6 @@ class ActivityStarter {
         maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp,
                 null /*r*/, originatingPendingIntent, true /*abortedStart*/);
         return true;
-    }
-
-    /** Returns true if uid has a visible window or its process is in a top state. */
-    private boolean isUidForeground(int uid) {
-        return (mService.getUidStateLocked(uid) == ActivityManager.PROCESS_STATE_TOP)
-            || mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
     /** Returns true if uid is in a persistent state. */
