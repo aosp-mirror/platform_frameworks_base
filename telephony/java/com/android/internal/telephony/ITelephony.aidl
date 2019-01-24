@@ -1765,6 +1765,24 @@ interface ITelephony {
     void unregisterImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
 
     /**
+     * Set the provisioning status for the IMS MmTel capability using the specified subscription.
+     */
+    void setImsProvisioningStatusForCapability(int subId, int capability, int tech,
+            boolean isProvisioned);
+
+    /**
+     * Get the provisioning status for the IMS MmTel capability specified.
+     */
+    boolean getImsProvisioningStatusForCapability(int subId, int capability, int tech);
+
+    /** Is the capability and tech flagged as provisioned in the cache */
+    boolean isMmTelCapabilityProvisionedInCache(int subId, int capability, int tech);
+
+    /** Set the provisioning for the capability and tech in the cache */
+    void cacheMmTelCapabilityProvisioning(int subId, int capability, int tech,
+            boolean isProvisioned);
+
+    /**
      * Return an integer containing the provisioning value for the specified provisioning key.
      */
     int getImsProvisioningInt(int subId, int key);
