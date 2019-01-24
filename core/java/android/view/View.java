@@ -3985,6 +3985,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SCROLL_AXIS_VERTICAL = 1 << 1;
 
     /**
+     * If a MotionEvent has CLASSIFICATION_AMBIGUOUS_GESTURE set, then certain the default
+     * long press action will be inhibited. However, to account for the possibility of incorrect
+     * classification, the default long press timeout will instead be increased for some situations
+     * by the following factor.
+     * Likewise, the touch slop for allowing long press will be increased when gesture is uncertain.
+     */
+    private static final int AMBIGUOUS_GESTURE_MULTIPLIER = 2;
+
+    /**
      * Controls the over-scroll mode for this view.
      * See {@link #overScrollBy(int, int, int, int, int, int, int, int, boolean)},
      * {@link #OVER_SCROLL_ALWAYS}, {@link #OVER_SCROLL_IF_CONTENT_SCROLLS},
@@ -14780,8 +14789,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         drawableHotspotChanged(x, y);
                     }
 
+                    final int motionClassification = event.getClassification();
+                    final boolean ambiguousGesture =
+                            motionClassification == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE;
+                    int touchSlop = mTouchSlop;
+                    if (ambiguousGesture && hasPendingLongPressCallback()) {
+                        if (!pointInView(x, y, touchSlop)) {
+                            // The default action here is to cancel long press. But instead, we
+                            // just extend the timeout here, in case the classification
+                            // stays ambiguous.
+                            removeLongPressCallback();
+                            long delay = ViewConfiguration.getLongPressTimeout()
+                                    * AMBIGUOUS_GESTURE_MULTIPLIER;
+                            // Subtract the time already spent
+                            delay -= event.getEventTime() - event.getDownTime();
+                            checkForLongClick(delay, x, y);
+                        }
+                        touchSlop *= AMBIGUOUS_GESTURE_MULTIPLIER;
+                    }
+
                     // Be lenient about moving outside of buttons
-                    if (!pointInView(x, y, mTouchSlop)) {
+                    if (!pointInView(x, y, touchSlop)) {
                         // Outside button
                         // Remove any future long press/tap checks
                         removeTapCallback();
@@ -14791,6 +14819,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         }
                         mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
                     }
+
+                    final boolean deepPress =
+                            motionClassification == MotionEvent.CLASSIFICATION_DEEP_PRESS;
+                    if (deepPress && hasPendingLongPressCallback()) {
+                        // process the long click action immediately
+                        removeLongPressCallback();
+                        checkForLongClick(0 /* send immediately */, x, y);
+                    }
+
                     break;
             }
 
@@ -14825,6 +14862,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return true if the long press callback is scheduled to run sometime in the future.
+     * Return false if there is no scheduled long press callback at the moment.
+     */
+    private boolean hasPendingLongPressCallback() {
+        if (mPendingCheckForLongPress == null) {
+            return false;
+        }
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo == null) {
+            return false;
+        }
+        return attachInfo.mHandler.hasCallbacks(mPendingCheckForLongPress);
+    }
+
+   /**
      * Remove the pending click action
      */
     @UnsupportedAppUsage
