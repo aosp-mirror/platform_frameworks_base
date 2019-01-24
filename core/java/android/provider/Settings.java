@@ -12959,28 +12959,6 @@ public final class Settings {
                 "sms_access_restriction_enabled";
 
         /**
-         * If set to 1, an app must have the READ_PRIVILEGED_PHONE_STATE permission (or be a device
-         * / profile owner with the READ_PHONE_STATE permission) to access device identifiers.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED =
-                "privileged_device_identifier_check_enabled";
-
-        /**
-         * If set to 1, an app that is targeting Q and does not meet the new requirements to access
-         * device identifiers will receive a SecurityException.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_TARGET_Q_BEHAVIOR_ENABLED =
-                "privileged_device_identifier_target_q_behavior_enabled";
-
-        /**
          * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
          * permission check for 3P apps.
          *
@@ -13001,6 +12979,17 @@ public final class Settings {
          */
         public static final String PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED =
                 "privileged_device_identifier_non_priv_check_relaxed";
+
+        /**
+         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
+         * permission check for preloaded privileged apps.
+         *
+         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
+         *
+         * @hide
+         */
+        public static final String PRIVILEGED_DEVICE_IDENTIFIER_PRIV_CHECK_RELAXED =
+                "privileged_device_identifier_priv_check_relaxed";
 
         /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
