@@ -3291,7 +3291,7 @@ public class DevicePolicyManager {
      */
     public int getPasswordMaximumLength(int quality) {
         PackageManager pm = mContext.getPackageManager();
-        if (!pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ID_ATTESTATION)) {
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)) {
             return 0;
         }
         // Kind-of arbitrary.
