@@ -48,21 +48,11 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
     }
 
     /**
-     * Detect when the org.apache.http.legacy is not on the bootclasspath.
-     *
-     * <p>This test will be ignored when org.apache.http.legacy is not on the bootclasspath and
-     * succeed otherwise. This allows a developer to ensure that the tests are being
-     */
-    @Test
-    public void detectWhenOAHLisOnBCP() {
-        Assume.assumeTrue(PackageBackwardCompatibility.bootClassPathContainsOAHL());
-    }
-
-    /**
      * Detect when the android.test.base is not on the bootclasspath.
      *
      * <p>This test will be ignored when org.apache.http.legacy is not on the bootclasspath and
-     * succeed otherwise. This allows a developer to ensure that the tests are being
+     * succeed otherwise. This allows a developer to ensure that the tests are being run in the
+     * correct environment.
      */
     @Test
     public void detectWhenATBisOnBCP() {
@@ -85,37 +75,11 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
         if (!PackageBackwardCompatibility.bootClassPathContainsATB()) {
             expected.add(ANDROID_TEST_BASE);
         }
-        if (!PackageBackwardCompatibility.bootClassPathContainsOAHL()) {
-            expected.add(ORG_APACHE_HTTP_LEGACY);
-        }
+        expected.add(ORG_APACHE_HTTP_LEGACY);
 
         PackageBuilder after = builder()
                 .targetSdkVersion(Build.VERSION_CODES.O)
                 .requiredLibraries(expected);
-
-        checkBackwardsCompatibility(before, after);
-    }
-
-    /**
-     * Ensures that the {@link PackageBackwardCompatibility} uses
-     * {@link RemoveUnnecessaryOrgApacheHttpLegacyLibraryTest}
-     * when necessary.
-     *
-     * <p>More comprehensive tests for that class can be found in
-     * {@link RemoveUnnecessaryOrgApacheHttpLegacyLibraryTest}.
-     */
-    @Test
-    public void org_apache_http_legacy_in_usesLibraries() {
-        Assume.assumeTrue("Test requires that "
-                        + ORG_APACHE_HTTP_LEGACY + " is on the bootclasspath",
-                PackageBackwardCompatibility.bootClassPathContainsOAHL());
-
-        PackageBuilder before = builder()
-                .requiredLibraries(ORG_APACHE_HTTP_LEGACY);
-
-        // org.apache.http.legacy should be removed from the libraries because it is provided
-        // on the bootclasspath and providing both increases start up cost unnecessarily.
-        PackageBuilder after = builder();
 
         checkBackwardsCompatibility(before, after);
     }
