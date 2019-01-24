@@ -2307,7 +2307,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
                     break;
                 case "--apex":
-                    sessionParams.installFlags |= PackageManager.INSTALL_APEX;
+                    sessionParams.setInstallAsApex();
                     sessionParams.setStaged();
                     break;
                 case "--multi-package":
