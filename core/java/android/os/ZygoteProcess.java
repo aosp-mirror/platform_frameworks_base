@@ -444,7 +444,7 @@ public class ZygoteProcess {
                 // If there was an IOException using the blastula pool we will log the error and
                 // attempt to start the process through the Zygote.
                 Log.e(LOG_TAG, "IO Exception while communicating with blastula pool - "
-                               + ex.toString());
+                               + ex.getMessage());
             } finally {
                 try {
                     blastulaSessionSocket.close();

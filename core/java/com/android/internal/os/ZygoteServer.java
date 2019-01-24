@@ -68,6 +68,15 @@ class ZygoteServer {
     private static final String BLASTULA_POOL_SIZE_MIN_DEFAULT = "1";
 
     /**
+     * Indicates if this Zygote server can support a blastula pool.  Currently this should only be
+     * true for the primary and secondary Zygotes, and not the App Zygotes or the WebView Zygote.
+     *
+     * TODO (chriswailes): Make this an explicit argument to the constructor
+     */
+
+    private final boolean mBlastulaPoolSupported;
+
+    /**
      * If the blastula pool should be created and used to start applications.
      *
      * Setting this value to false will disable the creation, maintenance, and use of the blastula
@@ -127,6 +136,8 @@ class ZygoteServer {
         mBlastulaPoolEventFD = null;
         mZygoteSocket = null;
         mBlastulaPoolSocket = null;
+
+        mBlastulaPoolSupported = false;
     }
 
     /**
@@ -151,10 +162,16 @@ class ZygoteServer {
         }
 
         fetchBlastulaPoolPolicyProps();
+
+        mBlastulaPoolSupported = true;
     }
 
     void setForkChild() {
         mIsForkChild = true;
+    }
+
+    public boolean isBlastulaPoolEnabled() {
+        return mBlastulaPoolEnabled;
     }
 
     /**
@@ -282,39 +299,38 @@ class ZygoteServer {
      *         this function will return a Runnable object representing the new application that is
      *         passed up from blastulaMain.
      */
-    private Runnable fillBlastulaPool(int[] sessionSocketRawFDs) {
-        if (mBlastulaPoolEnabled) {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillBlastulaPool");
 
-            int blastulaPoolCount = Zygote.getBlastulaPoolCount();
-            int numBlastulasToSpawn = mBlastulaPoolSizeMax - blastulaPoolCount;
+    Runnable fillBlastulaPool(int[] sessionSocketRawFDs) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillBlastulaPool");
 
-            if (blastulaPoolCount < mBlastulaPoolSizeMin
-                    || numBlastulasToSpawn >= mBlastulaPoolRefillThreshold) {
+        int blastulaPoolCount = Zygote.getBlastulaPoolCount();
+        int numBlastulasToSpawn = mBlastulaPoolSizeMax - blastulaPoolCount;
 
-                // Disable some VM functionality and reset some system values
-                // before forking.
-                ZygoteHooks.preFork();
-                Zygote.resetNicePriority();
+        if (blastulaPoolCount < mBlastulaPoolSizeMin
+                || numBlastulasToSpawn >= mBlastulaPoolRefillThreshold) {
 
-                while (blastulaPoolCount++ < mBlastulaPoolSizeMax) {
-                    Runnable caller = Zygote.forkBlastula(mBlastulaPoolSocket, sessionSocketRawFDs);
+            // Disable some VM functionality and reset some system values
+            // before forking.
+            ZygoteHooks.preFork();
+            Zygote.resetNicePriority();
 
-                    if (caller != null) {
-                        return caller;
-                    }
+            while (blastulaPoolCount++ < mBlastulaPoolSizeMax) {
+                Runnable caller = Zygote.forkBlastula(mBlastulaPoolSocket, sessionSocketRawFDs);
+
+                if (caller != null) {
+                    return caller;
                 }
-
-                // Re-enable runtime services for the Zygote.  Blastula services
-                // are re-enabled in specializeBlastula.
-                ZygoteHooks.postForkCommon();
-
-                Log.i("zygote",
-                        "Filled the blastula pool. New blastulas: " + numBlastulasToSpawn);
             }
 
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            // Re-enable runtime services for the Zygote.  Blastula services
+            // are re-enabled in specializeBlastula.
+            ZygoteHooks.postForkCommon();
+
+            Log.i("zygote",
+                    "Filled the blastula pool. New blastulas: " + numBlastulasToSpawn);
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         return null;
     }
@@ -334,12 +350,26 @@ class ZygoteServer {
         while (true) {
             fetchBlastulaPoolPolicyPropsWithMinInterval();
 
-            int[] blastulaPipeFDs = Zygote.getBlastulaPipeFDs();
+            int[] blastulaPipeFDs = null;
+            StructPollfd[] pollFDs = null;
 
-            // Space for all of the socket FDs, the Blastula Pool Event FD, and
-            // all of the open blastula read pipe FDs.
-            StructPollfd[] pollFDs =
-                new StructPollfd[socketFDs.size() + 1 + blastulaPipeFDs.length];
+            // Allocate enough space for the poll structs, taking into account
+            // the state of the blastula pool for this Zygote (could be a
+            // regular Zygote, a WebView Zygote, or an AppZygote).
+            if (mBlastulaPoolEnabled) {
+                blastulaPipeFDs = Zygote.getBlastulaPipeFDs();
+                pollFDs = new StructPollfd[socketFDs.size() + 1 + blastulaPipeFDs.length];
+            } else {
+                pollFDs = new StructPollfd[socketFDs.size()];
+            }
+
+            /*
+             * For reasons of correctness the blastula pool pipe and event FDs
+             * must be processed before the session and server sockets.  This
+             * is to ensure that the blastula pool accounting information is
+             * accurate when handling other requests like API blacklist
+             * exemptions.
+             */
 
             int pollIndex = 0;
             for (FileDescriptor socketFD : socketFDs) {
@@ -350,19 +380,22 @@ class ZygoteServer {
             }
 
             final int blastulaPoolEventFDIndex = pollIndex;
-            pollFDs[pollIndex] = new StructPollfd();
-            pollFDs[pollIndex].fd = mBlastulaPoolEventFD;
-            pollFDs[pollIndex].events = (short) POLLIN;
-            ++pollIndex;
 
-            for (int blastulaPipeFD : blastulaPipeFDs) {
-                FileDescriptor managedFd = new FileDescriptor();
-                managedFd.setInt$(blastulaPipeFD);
-
+            if (mBlastulaPoolEnabled) {
                 pollFDs[pollIndex] = new StructPollfd();
-                pollFDs[pollIndex].fd = managedFd;
+                pollFDs[pollIndex].fd = mBlastulaPoolEventFD;
                 pollFDs[pollIndex].events = (short) POLLIN;
                 ++pollIndex;
+
+                for (int blastulaPipeFD : blastulaPipeFDs) {
+                    FileDescriptor managedFd = new FileDescriptor();
+                    managedFd.setInt$(blastulaPipeFD);
+
+                    pollFDs[pollIndex] = new StructPollfd();
+                    pollFDs[pollIndex].fd = managedFd;
+                    pollFDs[pollIndex].events = (short) POLLIN;
+                    ++pollIndex;
+                }
             }
 
             try {
@@ -370,6 +403,8 @@ class ZygoteServer {
             } catch (ErrnoException ex) {
                 throw new RuntimeException("poll failed", ex);
             }
+
+            boolean blastulaPoolFDRead = false;
 
             while (--pollIndex >= 0) {
                 if ((pollFDs[pollIndex].revents & POLLIN) == 0) {
@@ -480,17 +515,22 @@ class ZygoteServer {
                         Zygote.removeBlastulaTableEntry((int) messagePayload);
                     }
 
-                    int[] sessionSocketRawFDs =
-                            socketFDs.subList(1, socketFDs.size())
+                    blastulaPoolFDRead = true;
+                }
+            }
+
+            // Check to see if the blastula pool needs to be refilled.
+            if (blastulaPoolFDRead) {
+                int[] sessionSocketRawFDs =
+                        socketFDs.subList(1, socketFDs.size())
                                 .stream()
                                 .mapToInt(fd -> fd.getInt$())
                                 .toArray();
 
-                    final Runnable command = fillBlastulaPool(sessionSocketRawFDs);
+                final Runnable command = fillBlastulaPool(sessionSocketRawFDs);
 
-                    if (command != null) {
-                        return command;
-                    }
+                if (command != null) {
+                    return command;
                 }
             }
         }

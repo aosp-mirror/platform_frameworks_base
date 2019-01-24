@@ -216,6 +216,10 @@ class BlastulaTableEntry {
     }
   }
 
+  void Clear() {
+    mStorage.store(INVALID_ENTRY_VALUE);
+  }
+
   /**
    * @return A copy of the data stored in this entry.
    */
@@ -1159,6 +1163,14 @@ static void UnblockSignal(int signum, fail_fn_t fail_fn) {
   }
 }
 
+static void ClearBlastulaTable() {
+  for (BlastulaTableEntry& entry : gBlastulaTable) {
+    entry.Clear();
+  }
+
+  gBlastulaPoolCount = 0;
+}
+
 // Utility routine to fork a process from the zygote.
 static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
                         const std::vector<int>& fds_to_close,
@@ -1200,6 +1212,9 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fds_to_close, fail_fn);
+
+    // Invalidate the entries in the blastula table.
+    ClearBlastulaTable();
 
     // Re-open all remaining open file descriptors so that they aren't shared
     // with the zygote across a fork.
@@ -1887,6 +1902,24 @@ static jint com_android_internal_os_Zygote_nativeGetBlastulaPoolCount(JNIEnv* en
   return gBlastulaPoolCount;
 }
 
+/**
+ * Kills all processes currently in the blastula pool.
+ *
+ * @param env  Managed runtime environment
+ * @return The number of blastulas currently in the blastula pool
+ */
+static void com_android_internal_os_Zygote_nativeEmptyBlastulaPool(JNIEnv* env, jclass) {
+  for (auto& entry : gBlastulaTable) {
+    auto entry_storage = entry.GetValues();
+
+    if (entry_storage.has_value()) {
+      kill(entry_storage.value().pid, SIGKILL);
+      entry.Clear();
+      --gBlastulaPoolCount;
+    }
+  }
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
@@ -1917,7 +1950,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeGetBlastulaPoolEventFD", "()I",
       (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolEventFD },
     { "nativeGetBlastulaPoolCount", "()I",
-      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount }
+      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount },
+    { "nativeEmptyBlastulaPool", "()V",
+      (void *) com_android_internal_os_Zygote_nativeEmptyBlastulaPool }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
