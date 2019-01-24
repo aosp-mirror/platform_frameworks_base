@@ -3573,6 +3573,15 @@
     <string name="adb_active_notification_message">Tap to turn off USB debugging</string>
     <string name="adb_active_notification_message" product="tv">Select to disable USB debugging.</string>
 
+    <!-- Title of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
+    <string name="usb_contaminant_detected_title">Liquid or debris in USB port</string>
+    <!-- Message of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
+    <string name="usb_contaminant_detected_message">USB port is automatically disabled. Tap to learn more.</string>
+    <!-- Title of notification shown when contaminant is no longer detected on the USB port. [CHAR LIMIT=NONE] -->
+    <string name="usb_contaminant_not_detected_title">Safe to use USB port</string>
+    <!-- Message of notification shown when contaminant is no longer detected on the USB port. [CHAR LIMIT=NONE] -->
+    <string name="usb_contaminant_not_detected_message">Phone no longer detects liquid or debris.</string>
+
     <!-- Title of notification shown to indicate that bug report is being collected. -->
     <string name="taking_remote_bugreport_notification_title">Taking bug report\u2026</string>
     <!-- Title of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
