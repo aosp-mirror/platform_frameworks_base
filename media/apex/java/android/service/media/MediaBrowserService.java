@@ -98,7 +98,7 @@ public abstract class MediaBrowserService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value = { RESULT_FLAG_OPTION_NOT_HANDLED,
+    @IntDef(flag = true, value = { RESULT_FLAG_OPTION_NOT_HANDLED,
             RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED })
     private @interface ResultFlags { }
 
@@ -291,7 +291,7 @@ public abstract class MediaBrowserService extends Service {
                         final ConnectionRecord connection = mConnections.get(b);
                         if (connection == null) {
                             Log.w(TAG, "addSubscription for callback that isn't registered id="
-                                + id);
+                                    + id);
                             return;
                         }
 
@@ -301,7 +301,8 @@ public abstract class MediaBrowserService extends Service {
         }
 
         @Override
-        public void removeSubscriptionDeprecated(String id, IMediaBrowserServiceCallbacks callbacks) {
+        public void removeSubscriptionDeprecated(
+                String id, IMediaBrowserServiceCallbacks callbacks) {
             // do-nothing
         }
 
@@ -487,7 +488,7 @@ public abstract class MediaBrowserService extends Service {
             @Override
             public void run() {
                 Iterator<ConnectionRecord> iter = mConnections.values().iterator();
-                while (iter.hasNext()){
+                while (iter.hasNext()) {
                     ConnectionRecord connection = iter.next();
                     try {
                         connection.callbacks.onConnect(connection.root.getRootId(), token,
@@ -607,7 +608,7 @@ public abstract class MediaBrowserService extends Service {
         final PackageManager pm = getPackageManager();
         final String[] packages = pm.getPackagesForUid(uid);
         final int N = packages.length;
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             if (packages[i].equals(pkg)) {
                 return true;
             }
@@ -648,7 +649,7 @@ public abstract class MediaBrowserService extends Service {
         List<Pair<IBinder, Bundle>> callbackList = connection.subscriptions.get(id);
         if (callbackList != null) {
             Iterator<Pair<IBinder, Bundle>> iter = callbackList.iterator();
-            while (iter.hasNext()){
+            while (iter.hasNext()) {
                 if (token == iter.next().first) {
                     removed = true;
                     iter.remove();
@@ -819,8 +820,8 @@ public abstract class MediaBrowserService extends Service {
          */
         public static final String EXTRA_SUGGESTED = "android.service.media.extra.SUGGESTED";
 
-        final private String mRootId;
-        final private Bundle mExtras;
+        private final String mRootId;
+        private final Bundle mExtras;
 
         /**
          * Constructs a browser root.
@@ -829,8 +830,8 @@ public abstract class MediaBrowserService extends Service {
          */
         public BrowserRoot(@NonNull String rootId, @Nullable Bundle extras) {
             if (rootId == null) {
-                throw new IllegalArgumentException("The root id in BrowserRoot cannot be null. " +
-                        "Use null for BrowserRoot instead.");
+                throw new IllegalArgumentException("The root id in BrowserRoot cannot be null. "
+                        + "Use null for BrowserRoot instead.");
             }
             mRootId = rootId;
             mExtras = extras;

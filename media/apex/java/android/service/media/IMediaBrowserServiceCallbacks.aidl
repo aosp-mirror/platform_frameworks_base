@@ -2,7 +2,6 @@
 
 package android.service.media;
 
-import android.graphics.Bitmap;
 import android.media.MediaParceledListSlice;
 import android.media.session.MediaSession;
 import android.os.Bundle;

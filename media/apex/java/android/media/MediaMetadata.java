@@ -250,16 +250,16 @@ public final class MediaMetadata implements Parcelable {
      * second line for media described by this metadata this should be preferred
      * to other fields if present.
      */
-    public static final String METADATA_KEY_DISPLAY_SUBTITLE
-            = "android.media.metadata.DISPLAY_SUBTITLE";
+    public static final String METADATA_KEY_DISPLAY_SUBTITLE =
+            "android.media.metadata.DISPLAY_SUBTITLE";
 
     /**
      * A description that is suitable for display to the user. When displaying
      * more information for media described by this metadata this should be
      * preferred to other fields if present.
      */
-    public static final String METADATA_KEY_DISPLAY_DESCRIPTION
-            = "android.media.metadata.DISPLAY_DESCRIPTION";
+    public static final String METADATA_KEY_DISPLAY_DESCRIPTION =
+            "android.media.metadata.DISPLAY_DESCRIPTION";
 
     /**
      * An icon or thumbnail that is suitable for display to the user. When
@@ -270,8 +270,8 @@ public final class MediaMetadata implements Parcelable {
      * if it is too large. For higher resolution artwork
      * {@link #METADATA_KEY_DISPLAY_ICON_URI} should be used instead.
      */
-    public static final String METADATA_KEY_DISPLAY_ICON
-            = "android.media.metadata.DISPLAY_ICON";
+    public static final String METADATA_KEY_DISPLAY_ICON =
+            "android.media.metadata.DISPLAY_ICON";
 
     /**
      * A Uri formatted String for an icon or thumbnail that is suitable for
@@ -285,8 +285,8 @@ public final class MediaMetadata implements Parcelable {
      * {@link ContentResolver#EXTRA_SIZE} for retrieving scaled artwork through
      * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)}.
      */
-    public static final String METADATA_KEY_DISPLAY_ICON_URI
-            = "android.media.metadata.DISPLAY_ICON_URI";
+    public static final String METADATA_KEY_DISPLAY_ICON_URI =
+            "android.media.metadata.DISPLAY_ICON_URI";
 
     /**
      * A String key for identifying the content. This value is specific to the
@@ -320,8 +320,8 @@ public final class MediaMetadata implements Parcelable {
      * <li>{@link MediaDescription#BT_FOLDER_TYPE_YEARS}</li>
      * </ul>
      */
-    public static final String METADATA_KEY_BT_FOLDER_TYPE
-            = "android.media.metadata.BT_FOLDER_TYPE";
+    public static final String METADATA_KEY_BT_FOLDER_TYPE =
+            "android.media.metadata.BT_FOLDER_TYPE";
 
     private static final @TextKey String[] PREFERRED_DESCRIPTION_ORDER = {
             METADATA_KEY_TITLE,

@@ -23,8 +23,6 @@ import android.app.PendingIntent;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
 import android.media.MediaParceledListSlice;
-import android.media.Rating;
-import android.media.VolumeProvider;
 import android.media.session.MediaSession.QueueItem;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -234,7 +232,7 @@ public final class SessionLink implements Parcelable {
      *
      * @param type the rating type.
      */
-    void setRatingType(@Rating.Style int type) {
+    void setRatingType(int type) {
         try {
             mISession.setRatingType(type);
         } catch (RemoteException e) {
@@ -261,7 +259,7 @@ public final class SessionLink implements Parcelable {
      * @param control the volume control type
      * @param max the max volume
      */
-    void setPlaybackToRemote(@VolumeProvider.ControlType int control, int max) {
+    void setPlaybackToRemote(int control, int max) {
         try {
             mISession.setPlaybackToRemote(control, max);
         } catch (RemoteException e) {

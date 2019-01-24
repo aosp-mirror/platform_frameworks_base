@@ -71,11 +71,10 @@ public final class Session2CommandGroup implements Parcelable {
      */
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     Session2CommandGroup(Parcel in) {
-        Session2Command[] commands = in.readParcelableArray(
-                Session2Command.class.getClassLoader(), Session2Command.class);
+        Parcelable[] commands = in.readParcelableArray(Session2Command.class.getClassLoader());
         if (commands != null) {
-            for (Session2Command command : commands) {
-                mCommands.add(command);
+            for (Parcelable command : commands) {
+                mCommands.add((Session2Command) command);
             }
         }
     }

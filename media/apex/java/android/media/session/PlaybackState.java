@@ -41,7 +41,7 @@ public final class PlaybackState implements Parcelable {
     /**
      * @hide
      */
-    @LongDef(flag=true, value={ACTION_STOP, ACTION_PAUSE, ACTION_PLAY, ACTION_REWIND,
+    @LongDef(flag = true, value = {ACTION_STOP, ACTION_PAUSE, ACTION_PLAY, ACTION_REWIND,
             ACTION_SKIP_TO_PREVIOUS, ACTION_SKIP_TO_NEXT, ACTION_FAST_FORWARD, ACTION_SET_RATING,
             ACTION_SEEK_TO, ACTION_PLAY_PAUSE, ACTION_PLAY_FROM_MEDIA_ID, ACTION_PLAY_FROM_SEARCH,
             ACTION_SKIP_TO_QUEUE_ITEM, ACTION_PLAY_FROM_URI, ACTION_PREPARE,
@@ -191,42 +191,42 @@ public final class PlaybackState implements Parcelable {
      * @see Builder#setState(int, long, float)
      * @see Builder#setState(int, long, float, long)
      */
-    public final static int STATE_NONE = 0;
+    public static final int STATE_NONE = 0;
 
     /**
      * State indicating this item is currently stopped.
      *
      * @see Builder#setState
      */
-    public final static int STATE_STOPPED = 1;
+    public static final int STATE_STOPPED = 1;
 
     /**
      * State indicating this item is currently paused.
      *
      * @see Builder#setState
      */
-    public final static int STATE_PAUSED = 2;
+    public static final int STATE_PAUSED = 2;
 
     /**
      * State indicating this item is currently playing.
      *
      * @see Builder#setState
      */
-    public final static int STATE_PLAYING = 3;
+    public static final int STATE_PLAYING = 3;
 
     /**
      * State indicating this item is currently fast forwarding.
      *
      * @see Builder#setState
      */
-    public final static int STATE_FAST_FORWARDING = 4;
+    public static final int STATE_FAST_FORWARDING = 4;
 
     /**
      * State indicating this item is currently rewinding.
      *
      * @see Builder#setState
      */
-    public final static int STATE_REWINDING = 5;
+    public static final int STATE_REWINDING = 5;
 
     /**
      * State indicating this item is currently buffering and will begin playing
@@ -234,7 +234,7 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_BUFFERING = 6;
+    public static final int STATE_BUFFERING = 6;
 
     /**
      * State indicating this item is currently in an error state. The error
@@ -242,7 +242,7 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_ERROR = 7;
+    public static final int STATE_ERROR = 7;
 
     /**
      * State indicating the class doing playback is currently connecting to a
@@ -252,21 +252,21 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_CONNECTING = 8;
+    public static final int STATE_CONNECTING = 8;
 
     /**
      * State indicating the player is currently skipping to the previous item.
      *
      * @see Builder#setState
      */
-    public final static int STATE_SKIPPING_TO_PREVIOUS = 9;
+    public static final int STATE_SKIPPING_TO_PREVIOUS = 9;
 
     /**
      * State indicating the player is currently skipping to the next item.
      *
      * @see Builder#setState
      */
-    public final static int STATE_SKIPPING_TO_NEXT = 10;
+    public static final int STATE_SKIPPING_TO_NEXT = 10;
 
     /**
      * State indicating the player is currently skipping to a specific item in
@@ -274,12 +274,12 @@ public final class PlaybackState implements Parcelable {
      *
      * @see Builder#setState
      */
-    public final static int STATE_SKIPPING_TO_QUEUE_ITEM = 11;
+    public static final int STATE_SKIPPING_TO_QUEUE_ITEM = 11;
 
     /**
      * Use this value for the position to indicate the position is not known.
      */
-    public final static long PLAYBACK_POSITION_UNKNOWN = -1;
+    public static final long PLAYBACK_POSITION_UNKNOWN = -1;
 
     private final int mState;
     private final long mPosition;
@@ -534,19 +534,19 @@ public final class PlaybackState implements Parcelable {
             return 0;
         }
 
-        public static final Parcelable.Creator<PlaybackState.CustomAction> CREATOR
-                = new Parcelable.Creator<PlaybackState.CustomAction>() {
+        public static final Parcelable.Creator<PlaybackState.CustomAction> CREATOR =
+                new Parcelable.Creator<PlaybackState.CustomAction>() {
 
-            @Override
-            public PlaybackState.CustomAction createFromParcel(Parcel p) {
-                return new PlaybackState.CustomAction(p);
-            }
+                    @Override
+                    public PlaybackState.CustomAction createFromParcel(Parcel p) {
+                        return new PlaybackState.CustomAction(p);
+                    }
 
-            @Override
-            public PlaybackState.CustomAction[] newArray(int size) {
-                return new PlaybackState.CustomAction[size];
-            }
-        };
+                    @Override
+                    public PlaybackState.CustomAction[] newArray(int size) {
+                        return new PlaybackState.CustomAction[size];
+                    }
+                };
 
         /**
          * Returns the action of the {@link CustomAction}.
@@ -588,10 +588,7 @@ public final class PlaybackState implements Parcelable {
 
         @Override
         public String toString() {
-            return "Action:" +
-                    "mName='" + mName +
-                    ", mIcon=" + mIcon +
-                    ", mExtras=" + mExtras;
+            return "Action:" + "mName='" + mName + ", mIcon=" + mIcon + ", mExtras=" + mExtras;
         }
 
         /**

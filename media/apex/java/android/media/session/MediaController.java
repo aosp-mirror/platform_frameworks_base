@@ -206,6 +206,7 @@ public final class MediaController {
                 } catch (RuntimeException e) {
                     Log.wtf(TAG, "Error calling adjustVolumeBy", e);
                 }
+                break;
             }
 
             case KeyEvent.ACTION_UP: {
@@ -319,7 +320,7 @@ public final class MediaController {
      *
      * @return The current set of flags for the session.
      */
-    public @MediaSession.SessionFlags long getFlags() {
+    public long getFlags() {
         try {
             return mSessionBinder.getFlags();
         } catch (RuntimeException e) {
@@ -582,7 +583,7 @@ public final class MediaController {
         return null;
     }
 
-    private final void postMessage(int what, Object obj, Bundle data) {
+    private void postMessage(int what, Object obj, Bundle data) {
         synchronized (mLock) {
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
                 mCallbacks.get(i).post(what, obj, data);
@@ -594,7 +595,7 @@ public final class MediaController {
      * Callback for receiving updates from the session. A Callback can be
      * registered using {@link #registerCallback}.
      */
-    public static abstract class Callback {
+    public abstract static class Callback {
         /**
          * Override to handle the session being destroyed. The session is no
          * longer valid after this call and calls to it will be ignored.
@@ -1191,11 +1192,11 @@ public final class MediaController {
         }
     }
 
-    private final static class MessageHandler extends Handler {
+    private static final class MessageHandler extends Handler {
         private final MediaController.Callback mCallback;
         private boolean mRegistered = false;
 
-        public MessageHandler(Looper looper, MediaController.Callback cb) {
+        MessageHandler(Looper looper, MediaController.Callback cb) {
             super(looper);
             mCallback = cb;
         }
