@@ -20,14 +20,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
+
+import java.util.ArrayList;
 
 @ProvidesInterface(action = NotificationMenuRowPlugin.ACTION,
         version = NotificationMenuRowPlugin.VERSION)
@@ -147,6 +147,12 @@ public interface NotificationMenuRowPlugin extends Plugin {
      * @return true if the menu's parent notification is dismissable, false otherwise.
      */
     public boolean canBeDismissed();
+
+    /**
+     * Informs the menu whether dismiss gestures are left-to-right or right-to-left.
+     */
+    default void setDismissRtl(boolean dismissRtl) {
+    }
 
     /**
      * Determines whether the menu should remain open given its current state, or snap closed.
