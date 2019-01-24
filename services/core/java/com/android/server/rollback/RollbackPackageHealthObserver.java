@@ -86,7 +86,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
         // TODO(zezeozue): Log initiated metrics
         mHandler.post(() ->
-                mRollbackManager.commitRollback(rollback, rollbackReceiver.getIntentSender()));
+                mRollbackManager.commitRollback(rollback.getRollbackId(),
+                    rollbackReceiver.getIntentSender()));
         // Assume rollback executed successfully
         return true;
     }

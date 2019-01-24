@@ -26,7 +26,7 @@ interface IRollbackManager {
     ParceledListSlice getAvailableRollbacks();
     ParceledListSlice getRecentlyExecutedRollbacks();
 
-    void executeRollback(in RollbackInfo rollback, String callerPackageName,
+    void commitRollback(int rollbackId, String callerPackageName,
             in IntentSender statusReceiver);
 
     // Exposed for use from the system server only. Callback from the package
