@@ -24,11 +24,13 @@ import android.os.PowerManagerInternal;
 import android.os.SystemClock;
 import android.service.attention.AttentionService;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Class responsible for checking if the user is currently paying attention to the phone and
@@ -79,6 +81,11 @@ public class AttentionDetector {
      */
     private int mWakefulness;
 
+    /**
+     * Describes how many times in a row was the timeout extended.
+     */
+    private AtomicLong mConsecutiveTimeoutExtendedCount = new AtomicLong(0);
+
     @VisibleForTesting
     final AttentionCallbackInternal mCallback = new AttentionCallbackInternal() {
 
@@ -95,6 +102,8 @@ public class AttentionDetector {
                     }
                     if (result == AttentionService.ATTENTION_SUCCESS_PRESENT) {
                         mOnUserAttention.run();
+                    } else {
+                        resetConsecutiveExtensionCount();
                     }
                 }
             }
@@ -176,6 +185,7 @@ public class AttentionDetector {
     public int onUserActivity(long eventTime, int event) {
         switch (event) {
             case PowerManager.USER_ACTIVITY_EVENT_ATTENTION:
+                mConsecutiveTimeoutExtendedCount.incrementAndGet();
                 return 0;
             case PowerManager.USER_ACTIVITY_EVENT_OTHER:
             case PowerManager.USER_ACTIVITY_EVENT_BUTTON:
@@ -183,6 +193,7 @@ public class AttentionDetector {
             case PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY:
                 cancelCurrentRequestIfAny();
                 mLastUserActivityTime = eventTime;
+                resetConsecutiveExtensionCount();
                 return 1;
             default:
                 if (DEBUG) {
@@ -196,6 +207,7 @@ public class AttentionDetector {
         mWakefulness = wakefulness;
         if (wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE) {
             cancelCurrentRequestIfAny();
+            resetConsecutiveExtensionCount();
         }
     }
 
@@ -203,6 +215,13 @@ public class AttentionDetector {
         if (mRequested) {
             mAttentionManager.cancelAttentionCheck(getRequestCode());
             mRequested = false;
+        }
+    }
+
+    private void resetConsecutiveExtensionCount() {
+        final long previousCount = mConsecutiveTimeoutExtendedCount.getAndSet(0);
+        if (previousCount > 0) {
+            StatsLog.write(StatsLog.SCREEN_TIMEOUT_EXTENSION_REPORTED, previousCount);
         }
     }
 
