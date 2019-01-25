@@ -115,8 +115,10 @@ public class WallpaperBackupAgent extends BackupAgent {
             // We always back up this 'empty' file to ensure that the absence of
             // storable wallpaper imagery still produces a non-empty backup data
             // stream, otherwise it'd simply be ignored in preflight.
-            FileOutputStream touch = new FileOutputStream(empty);
-            touch.close();
+            if (!empty.exists()) {
+                FileOutputStream touch = new FileOutputStream(empty);
+                touch.close();
+            }
             fullBackupFile(empty, data);
 
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
