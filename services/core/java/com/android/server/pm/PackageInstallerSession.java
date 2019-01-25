@@ -155,6 +155,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_IS_FAILED = "isFailed";
     private static final String ATTR_IS_APPLIED = "isApplied";
     private static final String ATTR_STAGED_SESSION_ERROR_CODE = "errorCode";
+    private static final String ATTR_STAGED_SESSION_ERROR_MESSAGE = "errorMessage";
     private static final String ATTR_MODE = "mode";
     private static final String ATTR_INSTALL_FLAGS = "installFlags";
     private static final String ATTR_INSTALL_LOCATION = "installLocation";
@@ -267,6 +268,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean mStagedSessionFailed;
     @GuardedBy("mLock")
     private int mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+    @GuardedBy("mLock")
+    private String mStagedSessionErrorMessage;
 
     /**
      * Path to the validated base APK for this session, which may point at an
@@ -413,7 +416,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             String installerPackageName, int installerUid, SessionParams params, long createdMillis,
             File stageDir, String stageCid, boolean prepared, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
-            boolean isFailed, boolean isApplied, int stagedSessionErrorCode) {
+            boolean isFailed, boolean isApplied, int stagedSessionErrorCode,
+            String stagedSessionErrorMessage) {
         mCallback = callback;
         mContext = context;
         mPm = pm;
@@ -447,6 +451,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStagedSessionFailed = isFailed;
         mStagedSessionApplied = isApplied;
         mStagedSessionErrorCode = stagedSessionErrorCode;
+        mStagedSessionErrorMessage =
+                stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
         if (sealed) {
             synchronized (mLock) {
                 try {
@@ -499,7 +505,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.isSessionApplied = mStagedSessionApplied;
             info.isSessionReady = mStagedSessionReady;
             info.isSessionFailed = mStagedSessionFailed;
-            info.setStagedSessionErrorCode(mStagedSessionErrorCode);
+            info.setStagedSessionErrorCode(mStagedSessionErrorCode, mStagedSessionErrorMessage);
         }
         return info;
     }
@@ -1971,17 +1977,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionApplied = false;
             mStagedSessionFailed = false;
             mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+            mStagedSessionErrorMessage = "";
         }
         mCallback.onStagedSessionChanged(this);
     }
 
     /** {@hide} */
-    void setStagedSessionFailed(@StagedSessionErrorCode int errorCode) {
+    void setStagedSessionFailed(@StagedSessionErrorCode int errorCode,
+                                String errorMessage) {
         synchronized (mLock) {
             mStagedSessionReady = false;
             mStagedSessionApplied = false;
             mStagedSessionFailed = true;
             mStagedSessionErrorCode = errorCode;
+            mStagedSessionErrorMessage = errorMessage;
+            Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
         }
         mCallback.onStagedSessionChanged(this);
     }
@@ -1993,6 +2003,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionApplied = true;
             mStagedSessionFailed = false;
             mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+            mStagedSessionErrorMessage = "";
         }
         mCallback.onStagedSessionChanged(this);
     }
@@ -2015,6 +2026,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** {@hide} */
     @StagedSessionErrorCode int getStagedSessionErrorCode() {
         return mStagedSessionErrorCode;
+    }
+
+    /** {@hide} */
+    String getStagedSessionErrorMessage() {
+        return mStagedSessionErrorMessage;
     }
 
     private void destroyInternal() {
@@ -2133,6 +2149,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeBooleanAttribute(out, ATTR_IS_FAILED, mStagedSessionFailed);
             writeBooleanAttribute(out, ATTR_IS_APPLIED, mStagedSessionApplied);
             writeIntAttribute(out, ATTR_STAGED_SESSION_ERROR_CODE, mStagedSessionErrorCode);
+            writeStringAttribute(out, ATTR_STAGED_SESSION_ERROR_MESSAGE,
+                    mStagedSessionErrorMessage);
             // TODO(patb,109941548): avoid writing to xml and instead infer / validate this after
             //                       we've read all sessions.
             writeIntAttribute(out, ATTR_PARENT_SESSION_ID, mParentSessionId);
@@ -2253,6 +2271,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isApplied = readBooleanAttribute(in, ATTR_IS_APPLIED);
         final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE,
                 SessionInfo.NO_ERROR);
+        final String stagedSessionErrorMessage = readStringAttribute(in,
+                ATTR_STAGED_SESSION_ERROR_MESSAGE);
 
         if (!isStagedSessionStateValid(isReady, isApplied, isFailed)) {
             throw new IllegalArgumentException("Can't restore staged session with invalid state.");
@@ -2296,7 +2316,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 installerThread, stagingManager, sessionId, userId, installerPackageName,
                 installerUid, params, createdMillis, stageDir, stageCid, prepared, sealed,
                 childSessionIdsArray, parentSessionId, isReady, isFailed, isApplied,
-                stagedSessionErrorCode);
+                stagedSessionErrorCode, stagedSessionErrorMessage);
     }
 
     /**
