@@ -41,6 +41,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -520,6 +522,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     public void unregisterConfigurationChangeListener(ConfigurationContainerListener listener) {
         mChangeListeners.remove(listener);
+    }
+
+    @VisibleForTesting
+    boolean containsListener(ConfigurationContainerListener listener) {
+        return mChangeListeners.contains(listener);
     }
 
     /**
