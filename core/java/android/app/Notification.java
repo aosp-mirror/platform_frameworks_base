@@ -8243,6 +8243,7 @@ public class Notification implements Parcelable
 
         private void buildIntoRemoteViewContent(RemoteViews remoteViews,
                 RemoteViews customContent, TemplateBindResult result) {
+            int childIndex = -1;
             if (customContent != null) {
                 // Need to clone customContent before adding, because otherwise it can no longer be
                 // parceled independently of remoteViews.
@@ -8250,7 +8251,11 @@ public class Notification implements Parcelable
                 remoteViews.removeAllViewsExceptId(R.id.notification_main_column, R.id.progress);
                 remoteViews.addView(R.id.notification_main_column, customContent, 0 /* index */);
                 remoteViews.addFlags(RemoteViews.FLAG_REAPPLY_DISALLOWED);
+                childIndex = 0;
             }
+            remoteViews.setIntTag(R.id.notification_main_column,
+                    com.android.internal.R.id.notification_custom_view_index_tag,
+                    childIndex);
             // also update the end margin if there is an image
             Resources resources = mBuilder.mContext.getResources();
             int endMargin = resources.getDimensionPixelSize(
