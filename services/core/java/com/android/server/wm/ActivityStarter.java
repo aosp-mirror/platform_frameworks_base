@@ -827,6 +827,8 @@ class ActivityStarter {
                 final int flags = intent.getFlags();
                 Intent newIntent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
                 newIntent.setFlags(flags
+                        | FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 newIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
                 newIntent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
