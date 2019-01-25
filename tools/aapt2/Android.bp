@@ -182,7 +182,8 @@ cc_test_host {
     defaults: ["aapt2_defaults"],
     data: [
          "integration-tests/CompileTest/**/*",
-         "integration-tests/CommandTests/**/*"
+         "integration-tests/CommandTests/**/*",
+         "integration-tests/ConvertTest/**/*"
     ],
 }
 
