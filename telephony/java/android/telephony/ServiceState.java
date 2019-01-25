@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.NetworkRegistrationState.Domain;
+import android.telephony.NetworkRegistrationState.NRStatus;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
@@ -1359,6 +1360,18 @@ public class ServiceState implements Parcelable {
     }
 
     /**
+     * Get the NR 5G status of the mobile data network.
+     * @return the NR 5G status.
+     * @hide
+     */
+    public @NRStatus int getNrStatus() {
+        final NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState == null) return NetworkRegistrationState.NR_STATUS_NONE;
+        return regState.getNrStatus();
+    }
+
+    /**
      * @param nrFrequencyRange the frequency range of 5G NR.
      * @hide
      */
@@ -1533,7 +1546,6 @@ public class ServiceState implements Parcelable {
                 return ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN;
         }
     }
-
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
