@@ -16,6 +16,7 @@
 
 #include "TestSceneBase.h"
 #include "tests/common/TestListViewSceneBase.h"
+#include "hwui/Paint.h"
 #include <SkFont.h>
 #include <cstdio>
 
@@ -83,14 +84,14 @@ class ListViewAnimation : public TestListViewSceneBase {
         roundRectPaint.setColor(Color::White);
         canvas.drawRoundRect(0, 0, itemWidth, itemHeight, dp(6), dp(6), roundRectPaint);
 
-        SkPaint textPaint;
+        Paint textPaint;
         textPaint.setColor(rand() % 2 ? Color::Black : Color::Grey_500);
-        textPaint.setTextSize(dp(20));
+        textPaint.getSkFont().setSize(dp(20));
         textPaint.setAntiAlias(true);
         char buf[256];
         snprintf(buf, sizeof(buf), "This card is #%d", cardId);
         TestUtils::drawUtf8ToCanvas(&canvas, buf, textPaint, itemHeight, dp(25));
-        textPaint.setTextSize(dp(15));
+        textPaint.getSkFont().setSize(dp(15));
         TestUtils::drawUtf8ToCanvas(&canvas, "This is some more text on the card", textPaint,
                                     itemHeight, dp(45));
 

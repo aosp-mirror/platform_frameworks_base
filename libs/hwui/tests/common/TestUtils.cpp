@@ -78,24 +78,21 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
     return layerUpdater;
 }
 
-void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const Paint& paint, float x,
                                  float y) {
     auto utf16 = asciiToUtf16(text);
     uint32_t length = strlen(text);
-    Paint glyphPaint(paint);
-    glyphPaint.setTextEncoding(kGlyphID_SkTextEncoding);
+
     canvas->drawText(utf16.get(), length,  // text buffer
                      0, length,            // draw range
                      0, length,            // context range
-                     x, y, minikin::Bidi::LTR, glyphPaint, nullptr, nullptr /* measured text */);
+                     x, y, minikin::Bidi::LTR, paint, nullptr, nullptr /* measured text */);
 }
 
-void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const Paint& paint,
                                  const SkPath& path) {
     auto utf16 = asciiToUtf16(text);
-    Paint glyphPaint(paint);
-    glyphPaint.setTextEncoding(kGlyphID_SkTextEncoding);
-    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, glyphPaint,
+    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, paint,
                            nullptr);
 }
 

@@ -30,16 +30,17 @@ namespace android {
 minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
                                                         const Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
+    const SkFont& font = paint->getSkFont();
 
     minikin::MinikinPaint minikinPaint(resolvedFace->fFontCollection);
     /* Prepare minikin Paint */
     minikinPaint.size =
-            paint->isLinearText() ? paint->getTextSize() : static_cast<int>(paint->getTextSize());
-    minikinPaint.scaleX = paint->getTextScaleX();
-    minikinPaint.skewX = paint->getTextSkewX();
+            font.isLinearMetrics() ? font.getSize() : static_cast<int>(font.getSize());
+    minikinPaint.scaleX = font.getScaleX();
+    minikinPaint.skewX = font.getSkewX();
     minikinPaint.letterSpacing = paint->getLetterSpacing();
     minikinPaint.wordSpacing = paint->getWordSpacing();
-    minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
+    minikinPaint.fontFlags = MinikinFontSkia::packFontFlags(font);
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
     minikinPaint.familyVariant = paint->getFamilyVariant();
     minikinPaint.fontStyle = resolvedFace->fStyle;
