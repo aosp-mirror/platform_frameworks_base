@@ -2008,7 +2008,7 @@ final class ActivityRecord extends ConfigurationContainer {
     /**
      * Check if activity is eligible to be made active (resumed of paused). The activity:
      * - should be paused, stopped or stopping
-     * - should not be the currently active one
+     * - should not be the currently active one or launching behind other tasks
      * - should be either the topmost in task, or right below the top activity that is finishing
      * If all of these conditions are not met at the same time, the activity cannot be made active.
      */
@@ -2024,6 +2024,12 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         if (this == activeActivity) {
+            return false;
+        }
+
+        if (this.mLaunchTaskBehind) {
+            // This activity is being launched from behind, which means that it's not intended to be
+            // presented to user right now, even if it's set to be visible.
             return false;
         }
 
