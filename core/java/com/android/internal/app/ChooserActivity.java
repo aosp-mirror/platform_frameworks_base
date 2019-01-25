@@ -513,6 +513,7 @@ public class ChooserActivity extends ResolverActivity {
 
     void queryTargetServices(ChooserListAdapter adapter) {
         final PackageManager pm = getPackageManager();
+        ShortcutManager sm = (ShortcutManager) getSystemService(ShortcutManager.class);
         int targetsToQuery = 0;
         for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i < N; i++) {
             final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
@@ -522,6 +523,11 @@ public class ChooserActivity extends ResolverActivity {
                 continue;
             }
             final ActivityInfo ai = dri.getResolveInfo().activityInfo;
+            if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS
+                    && sm.hasShareTargets(ai.packageName)) {
+                // Share targets will be queried from ShortcutManager
+                continue;
+            }
             final Bundle md = ai.metaData;
             final String serviceName = md != null ? convertServiceName(ai.packageName,
                     md.getString(ChooserTargetService.META_DATA_NAME)) : null;

@@ -635,4 +635,21 @@ public class ShortcutManager {
                     }
                 };
     }
+
+    /**
+     * Used by framework's ShareSheet (ChooserActivity.java) to check if a given package has share
+     * target definitions in it's resources.
+     *
+     * @param packageName Package to check for share targets.
+     * @return True if the package has any share target definitions, False otherwise.
+     * @hide
+     */
+    public boolean hasShareTargets(@NonNull String packageName) {
+        try {
+            return mService.hasShareTargets(mContext.getPackageName(), packageName,
+                    injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
