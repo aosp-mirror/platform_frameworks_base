@@ -55,9 +55,12 @@ DisplayInfo QueryDisplayInfo() {
         return sDummyDisplay;
     }
 
+    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
+    LOG_ALWAYS_FATAL_IF(token == nullptr,
+                        "Failed to get display info because internal display is disconnected");
+
     DisplayInfo displayInfo;
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &displayInfo);
+    status_t status = SurfaceComposerClient::getDisplayInfo(token, &displayInfo);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
     return displayInfo;
 }

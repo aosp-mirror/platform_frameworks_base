@@ -68,7 +68,7 @@ status_t DisplayEventDispatcher::scheduleVsync() {
 
         // Drain all pending events.
         nsecs_t vsyncTimestamp;
-        int32_t vsyncDisplayId;
+        PhysicalDisplayId vsyncDisplayId;
         uint32_t vsyncCount;
         if (processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
             ALOGE("dispatcher %p ~ last event processed while scheduling was for %" PRId64 "",
@@ -101,10 +101,11 @@ int DisplayEventDispatcher::handleEvent(int, int events, void*) {
 
     // Drain all pending events, keep the last vsync.
     nsecs_t vsyncTimestamp;
-    int32_t vsyncDisplayId;
+    PhysicalDisplayId vsyncDisplayId;
     uint32_t vsyncCount;
     if (processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
-        ALOGV("dispatcher %p ~ Vsync pulse: timestamp=%" PRId64 ", id=%d, count=%d",
+        ALOGV("dispatcher %p ~ Vsync pulse: timestamp=%" PRId64 ", displayId=%"
+                ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ", count=%d",
                 this, ns2ms(vsyncTimestamp), vsyncDisplayId, vsyncCount);
         mWaitingForVsync = false;
         dispatchVsync(vsyncTimestamp, vsyncDisplayId, vsyncCount);
@@ -114,7 +115,7 @@ int DisplayEventDispatcher::handleEvent(int, int events, void*) {
 }
 
 bool DisplayEventDispatcher::processPendingEvents(
-        nsecs_t* outTimestamp, int32_t* outId, uint32_t* outCount) {
+        nsecs_t* outTimestamp, PhysicalDisplayId* outDisplayId, uint32_t* outCount) {
     bool gotVsync = false;
     DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
     ssize_t n;
@@ -128,11 +129,11 @@ bool DisplayEventDispatcher::processPendingEvents(
                 // ones. That's fine, we only care about the most recent.
                 gotVsync = true;
                 *outTimestamp = ev.header.timestamp;
-                *outId = ev.header.id;
+                *outDisplayId = ev.header.displayId;
                 *outCount = ev.vsync.count;
                 break;
             case DisplayEventReceiver::DISPLAY_EVENT_HOTPLUG:
-                dispatchHotplug(ev.header.timestamp, ev.header.id, ev.hotplug.connected);
+                dispatchHotplug(ev.header.timestamp, ev.header.displayId, ev.hotplug.connected);
                 break;
             default:
                 ALOGW("dispatcher %p ~ ignoring unknown event type %#x", this, ev.header.type);

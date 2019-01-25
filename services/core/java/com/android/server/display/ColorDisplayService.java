@@ -23,6 +23,7 @@ import static android.hardware.display.ColorDisplayManager.COLOR_MODE_AUTOMATIC;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_BOOSTED;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_NATURAL;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_SATURATED;
+
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION;
@@ -65,10 +66,9 @@ import android.provider.Settings.System;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.DisplayPrimaries;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
-import android.view.SurfaceControl;
-import android.view.SurfaceControl.DisplayPrimaries;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -79,6 +79,7 @@ import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -315,8 +316,7 @@ public final class ColorDisplayService extends SystemService {
         }
 
         private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
-            IBinder displayToken = SurfaceControl.getBuiltInDisplay(
-                    SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
             if (displayToken == null) {
                 return null;
             }

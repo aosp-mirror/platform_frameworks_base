@@ -136,12 +136,11 @@ public abstract class DisplayEventReceiver {
      *
      * @param timestampNanos The timestamp of the pulse, in the {@link System#nanoTime()}
      * timebase.
-     * @param builtInDisplayId The surface flinger built-in display id such as
-     * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_MAIN}.
+     * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
      * @param frame The frame number.  Increases by one for each vertical sync interval.
      */
     @UnsupportedAppUsage
-    public void onVsync(long timestampNanos, int builtInDisplayId, int frame) {
+    public void onVsync(long timestampNanos, long physicalDisplayId, int frame) {
     }
 
     /**
@@ -149,12 +148,11 @@ public abstract class DisplayEventReceiver {
      *
      * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
      * timebase.
-     * @param builtInDisplayId The surface flinger built-in display id such as
-     * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_HDMI}.
+     * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
      * @param connected True if the display is connected, false if it disconnected.
      */
     @UnsupportedAppUsage
-    public void onHotplug(long timestampNanos, int builtInDisplayId, boolean connected) {
+    public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
     }
 
     /**
@@ -174,14 +172,14 @@ public abstract class DisplayEventReceiver {
     // Called from native code.
     @SuppressWarnings("unused")
     @UnsupportedAppUsage
-    private void dispatchVsync(long timestampNanos, int builtInDisplayId, int frame) {
-        onVsync(timestampNanos, builtInDisplayId, frame);
+    private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame) {
+        onVsync(timestampNanos, physicalDisplayId, frame);
     }
 
     // Called from native code.
     @SuppressWarnings("unused")
     @UnsupportedAppUsage
-    private void dispatchHotplug(long timestampNanos, int builtInDisplayId, boolean connected) {
-        onHotplug(timestampNanos, builtInDisplayId, connected);
+    private void dispatchHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
+        onHotplug(timestampNanos, physicalDisplayId, connected);
     }
 }
