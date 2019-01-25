@@ -131,10 +131,9 @@ final class InputMethodUtils {
     }
     // ----------------------------------------------------------------------
 
-    public static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
-            final Context context, final boolean checkDefaultAttribute,
-            @Nullable final Locale requiredLocale, final boolean checkCountry,
-            final String requiredSubtypeMode) {
+    public static boolean isSystemImeThatHasSubtypeOf(InputMethodInfo imi, Context context,
+            boolean checkDefaultAttribute, @Nullable Locale requiredLocale, boolean checkCountry,
+            String requiredSubtypeMode) {
         if (!imi.isSystem()) {
             return false;
         }
@@ -148,8 +147,8 @@ final class InputMethodUtils {
     }
 
     @Nullable
-    public static Locale getFallbackLocaleForDefaultIme(final ArrayList<InputMethodInfo> imis,
-            final Context context) {
+    public static Locale getFallbackLocaleForDefaultIme(ArrayList<InputMethodInfo> imis,
+            Context context) {
         // At first, find the fallback locale from the IMEs that are declared as "default" in the
         // current locale.  Note that IME developers can declare an IME as "default" only for
         // some particular locales but "not default" for other locales.
@@ -177,8 +176,8 @@ final class InputMethodUtils {
         return null;
     }
 
-    private static boolean isSystemAuxilialyImeThatHasAutomaticSubtype(final InputMethodInfo imi,
-            final Context context, final boolean checkDefaultAttribute) {
+    private static boolean isSystemAuxilialyImeThatHasAutomaticSubtype(InputMethodInfo imi,
+            Context context, boolean checkDefaultAttribute) {
         if (!imi.isSystem()) {
             return false;
         }
@@ -198,7 +197,7 @@ final class InputMethodUtils {
         return false;
     }
 
-    public static Locale getSystemLocaleFromContext(final Context context) {
+    public static Locale getSystemLocaleFromContext(Context context) {
         try {
             return context.getResources().getConfiguration().locale;
         } catch (Resources.NotFoundException ex) {
@@ -212,10 +211,9 @@ final class InputMethodUtils {
         @NonNull
         private final LinkedHashSet<InputMethodInfo> mInputMethodSet = new LinkedHashSet<>();
 
-        public InputMethodListBuilder fillImes(final ArrayList<InputMethodInfo> imis,
-                final Context context, final boolean checkDefaultAttribute,
-                @Nullable final Locale locale, final boolean checkCountry,
-                final String requiredSubtypeMode) {
+        public InputMethodListBuilder fillImes(ArrayList<InputMethodInfo> imis, Context context,
+                boolean checkDefaultAttribute, @Nullable Locale locale, boolean checkCountry,
+                String requiredSubtypeMode) {
             for (int i = 0; i < imis.size(); ++i) {
                 final InputMethodInfo imi = imis.get(i);
                 if (isSystemImeThatHasSubtypeOf(imi, context, checkDefaultAttribute, locale,
@@ -228,8 +226,8 @@ final class InputMethodUtils {
 
         // TODO: The behavior of InputMethodSubtype#overridesImplicitlyEnabledSubtype() should be
         // documented more clearly.
-        public InputMethodListBuilder fillAuxiliaryImes(final ArrayList<InputMethodInfo> imis,
-                final Context context) {
+        public InputMethodListBuilder fillAuxiliaryImes(ArrayList<InputMethodInfo> imis,
+                Context context) {
             // If one or more auxiliary input methods are available, OK to stop populating the list.
             for (final InputMethodInfo imi : mInputMethodSet) {
                 if (imi.isAuxiliaryIme()) {
@@ -269,8 +267,8 @@ final class InputMethodUtils {
     }
 
     private static InputMethodListBuilder getMinimumKeyboardSetWithSystemLocale(
-            final ArrayList<InputMethodInfo> imis, final Context context,
-            @Nullable final Locale systemLocale, @Nullable final Locale fallbackLocale) {
+            ArrayList<InputMethodInfo> imis, Context context, @Nullable Locale systemLocale,
+            @Nullable Locale fallbackLocale) {
         // Once the system becomes ready, we pick up at least one keyboard in the following order.
         // Secondary users fall into this category in general.
         // 1. checkDefaultAttribute: true, locale: systemLocale, checkCountry: true
@@ -341,8 +339,8 @@ final class InputMethodUtils {
         return getDefaultEnabledImes(context, imis, false /* onlyMinimum */);
     }
 
-    public static boolean containsSubtypeOf(final InputMethodInfo imi,
-            @Nullable final Locale locale, final boolean checkCountry, final String mode) {
+    public static boolean containsSubtypeOf(InputMethodInfo imi, @Nullable Locale locale,
+            boolean checkCountry, String mode) {
         if (locale == null) {
             return false;
         }
@@ -730,8 +728,8 @@ final class InputMethodUtils {
      * @param packageName the package name.
      * @return {@code true} if the package name belongs to the UID.
      */
-    public static boolean checkIfPackageBelongsToUid(final AppOpsManager appOpsManager,
-            final int uid, final String packageName) {
+    public static boolean checkIfPackageBelongsToUid(AppOpsManager appOpsManager,
+            @UserIdInt int uid, String packageName) {
         try {
             appOpsManager.checkPackage(uid, packageName);
             return true;
@@ -834,7 +832,7 @@ final class InputMethodUtils {
             // TODO: mCurrentProfileIds should be updated here.
         }
 
-        private void putString(@NonNull final String key, @Nullable final String str) {
+        private void putString(@NonNull String key, @Nullable String str) {
             if (mCopyOnWrite) {
                 mCopyOnWriteDataStore.put(key, str);
             } else {
@@ -843,7 +841,7 @@ final class InputMethodUtils {
         }
 
         @Nullable
-        private String getString(@NonNull final String key, @Nullable final String defaultValue) {
+        private String getString(@NonNull String key, @Nullable String defaultValue) {
             final String result;
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 result = mCopyOnWriteDataStore.get(key);
@@ -853,7 +851,7 @@ final class InputMethodUtils {
             return result != null ? result : defaultValue;
         }
 
-        private void putInt(final String key, final int value) {
+        private void putInt(String key, int value) {
             if (mCopyOnWrite) {
                 mCopyOnWriteDataStore.put(key, String.valueOf(value));
             } else {
@@ -861,7 +859,7 @@ final class InputMethodUtils {
             }
         }
 
-        private int getInt(final String key, final int defaultValue) {
+        private int getInt(String key, int defaultValue) {
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 final String result = mCopyOnWriteDataStore.get(key);
                 return result != null ? Integer.parseInt(result) : 0;
@@ -869,11 +867,11 @@ final class InputMethodUtils {
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
 
-        private void putBoolean(final String key, final boolean value) {
+        private void putBoolean(String key, boolean value) {
             putInt(key, value ? 1 : 0);
         }
 
-        private boolean getBoolean(final String key, final boolean defaultValue) {
+        private boolean getBoolean(String key, boolean defaultValue) {
             return getInt(key, defaultValue ? 1 : 0) == 1;
         }
 
