@@ -74,7 +74,7 @@ public class WifiUsabilityStatsEntryTest {
 
     private static WifiUsabilityStatsEntry createResult() {
         return new WifiUsabilityStatsEntry(
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
         );
     }
 
@@ -100,5 +100,10 @@ public class WifiUsabilityStatsEntryTest {
         assertEquals(expected.totalCcaBusyFreqTimeMs, actual.totalCcaBusyFreqTimeMs);
         assertEquals(expected.totalRadioOnFreqTimeMs, actual.totalRadioOnFreqTimeMs);
         assertEquals(expected.totalBeaconRx, actual.totalBeaconRx);
+        assertEquals(expected.probeStatusSinceLastUpdate, actual.probeStatusSinceLastUpdate);
+        assertEquals(expected.probeElapsedTimeMsSinceLastUpdate,
+                actual.probeElapsedTimeMsSinceLastUpdate);
+        assertEquals(expected.probeMcsRateSinceLastUpdate, actual.probeMcsRateSinceLastUpdate);
+        assertEquals(expected.rxLinkSpeedMbps, actual.rxLinkSpeedMbps);
     }
 }

@@ -1754,6 +1754,21 @@ message WifiLinkLayerUsageStats {
 }
 
 message WifiUsabilityStatsEntry {
+  // Status codes for link probe status
+  enum LinkProbeStatus {
+    // Link probe status is unknown
+    PROBE_STATUS_UNKNOWN = 0;
+
+    // Link probe is not triggered
+    PROBE_STATUS_NO_PROBE = 1;
+
+    // Link probe is triggered and the result is success
+    PROBE_STATUS_SUCCESS = 2;
+
+    // Link probe is triggered and the result is failure
+    PROBE_STATUS_FAILURE = 3;
+  }
+
   // Absolute milliseconds from device boot when these stats were sampled
   optional int64 time_stamp_ms = 1;
 
@@ -1826,6 +1841,18 @@ message WifiUsabilityStatsEntry {
   // Prediction horizon (in second) of Wifi usability score provided by external
   // system app
   optional int32 prediction_horizon_sec = 23;
+
+  // The link probe status since last stats update
+  optional LinkProbeStatus probe_status_since_last_update = 24;
+
+  // The elapsed time of the most recent link probe since last stats update;
+  optional int32 probe_elapsed_time_ms_since_last_update = 25;
+
+  // The MCS rate of the most recent link probe since last stats update
+  optional int32 probe_mcs_rate_since_last_update = 26;
+
+  // Rx link speed at the sample time in Mbps
+  optional int32 rx_link_speed_mbps = 27;
 }
 
 message WifiUsabilityStats {
