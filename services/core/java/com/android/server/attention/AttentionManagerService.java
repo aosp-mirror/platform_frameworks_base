@@ -174,10 +174,11 @@ public class AttentionManagerService extends SystemService {
                         @Override
                         public void onSuccess(int requestCode, int result, long timestamp) {
                             callback.onSuccess(requestCode, result, timestamp);
-                            userState.mAttentionCheckCache = new AttentionCheckCache(
-                                    SystemClock.uptimeMillis(), result,
-                                    timestamp);
-
+                            synchronized (mLock) {
+                                userState.mAttentionCheckCache = new AttentionCheckCache(
+                                        SystemClock.uptimeMillis(), result,
+                                        timestamp);
+                            }
                             StatsLog.write(StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
                                     result);
                         }
