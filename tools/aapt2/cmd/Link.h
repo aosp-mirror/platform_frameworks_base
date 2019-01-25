@@ -82,6 +82,9 @@ struct LinkOptions {
   std::vector<SplitConstraints> split_constraints;
   std::vector<std::string> split_paths;
 
+  // Configurations to exclude
+  std::vector<std::string> exclude_configs_;
+
   // Stable ID options.
   std::unordered_map<ResourceName, ResourceId> stable_id_map;
   Maybe<std::string> resource_id_map_path;
@@ -255,6 +258,9 @@ class LinkCommand : public Command {
             "Syntax: path/to/output.apk:<config>[,<config>[...]].\n"
             "On Windows, use a semicolon ';' separator instead.",
         &split_args_);
+    AddOptionalFlagList("--exclude-configs",
+        "Excludes values of resources whose configs contain the specified qualifiers.",
+        &options_.exclude_configs_);
     AddOptionalSwitch("--debug-mode",
         "Inserts android:debuggable=\"true\" in to the application node of the\n"
             "manifest, making the application debuggable even on production devices.",

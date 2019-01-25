@@ -108,6 +108,7 @@ cc_library_host_static {
         "link/ProductFilter.cpp",
         "link/PrivateAttributeMover.cpp",
         "link/ReferenceLinker.cpp",
+        "link/ResourceExcluder.cpp",
         "link/TableMerger.cpp",
         "link/XmlCompatVersioner.cpp",
         "link/XmlNamespaceRemover.cpp",
