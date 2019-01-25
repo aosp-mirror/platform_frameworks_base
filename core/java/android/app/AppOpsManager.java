@@ -39,6 +39,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -1711,6 +1712,12 @@ public class AppOpsManager {
 
     /** @hide */
     public static final String KEY_HISTORICAL_OPS = "historical_ops";
+
+    /** System properties for debug logging of noteOp call sites */
+    private static final String DEBUG_LOGGING_ENABLE_PROP = "appops.logging_enabled";
+    private static final String DEBUG_LOGGING_PACKAGES_PROP = "appops.logging_packages";
+    private static final String DEBUG_LOGGING_OPS_PROP = "appops.logging_ops";
+    private static final String DEBUG_LOGGING_TAG = "AppOpsManager";
 
     /**
      * Retrieve the op switch that controls the given operation.
@@ -4469,6 +4476,7 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int noteOpNoThrow(int op, int uid, String packageName) {
+        logNoteOpIfNeeded(op, packageName);
         try {
             return mService.noteOperation(op, uid, packageName);
         } catch (RemoteException e) {
@@ -4833,5 +4841,46 @@ public class AppOpsManager {
         }
 
         return AppOpsManager.MODE_DEFAULT;
+    }
+
+    private static void logNoteOpIfNeeded(int op, String callingPackage) {
+        // Check if debug logging propety is enabled.
+        if (!SystemProperties.getBoolean(DEBUG_LOGGING_ENABLE_PROP, false)) {
+            return;
+        }
+        // Check if this package should be logged.
+        String packages = SystemProperties.get(DEBUG_LOGGING_PACKAGES_PROP, "");
+        if (!"".equals(packages) && callingPackage != null) {
+            boolean found = false;
+            for (String pkg : packages.split(",")) {
+                if (callingPackage.equals(pkg)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return;
+            }
+        }
+        String opStr = opToName(op);
+        // Check if this app op should be logged
+        String logOps = SystemProperties.get(DEBUG_LOGGING_OPS_PROP, "");
+        if (!"".equals(logOps)) {
+            boolean found = false;
+            for (String logOp : logOps.split(",")) {
+                if (opStr.equals(logOp)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return;
+            }
+        }
+
+        // Log a stack trace
+        Exception here = new Exception("HERE!");
+        android.util.Log.i(DEBUG_LOGGING_TAG, "Note operation package= " + callingPackage
+                + " op= " + opStr, here);
     }
 }
