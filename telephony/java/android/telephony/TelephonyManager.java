@@ -7581,9 +7581,6 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
-        if (slotIndex < 0 || slotIndex > getPhoneCount()) {
-            return -1;
-        }
         try {
             ITelephony service = getITelephony();
             if (service != null) {
