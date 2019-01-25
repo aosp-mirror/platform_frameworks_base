@@ -154,4 +154,7 @@ interface IBatteryStats {
     oneway void noteBluetoothControllerActivity(in BluetoothActivityEnergyInfo info);
     oneway void noteModemControllerActivity(in ModemActivityInfo info);
     oneway void noteWifiControllerActivity(in WifiActivityEnergyInfo info);
+
+    /** {@hide} */
+    boolean setChargingStateUpdateDelayMillis(int delay);
 }

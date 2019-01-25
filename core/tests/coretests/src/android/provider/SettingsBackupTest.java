@@ -131,6 +131,7 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS,
                     Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
                     Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED,
+                    Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
                     Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
