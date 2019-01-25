@@ -140,7 +140,8 @@ public class NotificationPanelView extends PanelView implements
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
-    private KeyguardStatusBarView mKeyguardStatusBar;
+    @VisibleForTesting
+    protected KeyguardStatusBarView mKeyguardStatusBar;
     private ViewGroup mBigClockContainer;
     private QS mQs;
     private FrameLayout mQsFrame;
@@ -2792,6 +2793,7 @@ public class NotificationPanelView extends PanelView implements
         if (mDozing) {
             mNotificationStackScroller.setShowDarkShelf(!hasCustomClock());
         }
+        mKeyguardStatusBar.setDozing(mDozing);
 
         if (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED) {
