@@ -1094,6 +1094,22 @@ public class NotificationManager {
     }
 
     /**
+     * Returns whether notifications from this package are temporarily hidden. This
+     * could be done because the package was marked as distracting to the user via
+     * {@code PackageManager#setDistractingPackageRestrictions(String[], int)} or because the
+     * package is {@code PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, SuspendDialogInfo) suspended}.
+     */
+    public boolean areNotificationsPaused() {
+        INotificationManager service = getService();
+        try {
+            return service.isPackagePaused(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks the ability to modify notification do not disturb policy for the calling package.
      *
      * <p>

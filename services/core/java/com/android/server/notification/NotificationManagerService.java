@@ -121,6 +121,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -3852,6 +3853,24 @@ public class NotificationManagerService extends SystemService {
                         "Requires CONTROL_KEYGUARD_SECURE_NOTIFICATIONS permission");
             }
             return mLockScreenAllowSecureNotifications;
+        }
+
+        @Override
+        public boolean isPackagePaused(String pkg) {
+            Preconditions.checkNotNull(pkg);
+            checkCallerIsSameApp(pkg);
+
+            boolean isPaused;
+
+            final PackageManagerInternal pmi = LocalServices.getService(
+                    PackageManagerInternal.class);
+            int flags = pmi.getDistractingPackageRestrictions(
+                    pkg, Binder.getCallingUserHandle().getIdentifier());
+            isPaused = ((flags & PackageManager.RESTRICTION_HIDE_NOTIFICATIONS) != 0);
+
+            isPaused |= isPackageSuspendedForUser(pkg, Binder.getCallingUid());
+
+            return isPaused;
         }
 
         private void verifyPrivilegedListener(INotificationListener token, UserHandle user,
