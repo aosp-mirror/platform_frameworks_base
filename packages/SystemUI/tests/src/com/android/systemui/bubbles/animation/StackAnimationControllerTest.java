@@ -30,6 +30,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.systemui.R;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
@@ -89,6 +90,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     }
 
     @Test
+    @Ignore("Sporadically failing due to DynamicAnimation not settling.")
     public void testFlingSideways() throws InterruptedException {
         // Hard fling directly upwards, no X velocity. The X fling should terminate pretty much
         // immediately, and spring to 0f, the y fling is hard enough that it will overshoot the top
@@ -119,6 +121,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     }
 
     @Test
+    @Ignore("Sporadically failing due to DynamicAnimation not settling.")
     public void testFlingUpFromBelowBottomCenter() throws InterruptedException {
         // Move to the center of the screen, just past the bottom.
         mStackController.moveFirstBubbleWithStackFollowing(mWidth / 2f, mHeight + 100);

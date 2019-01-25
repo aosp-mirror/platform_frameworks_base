@@ -211,7 +211,9 @@ public class StackAnimationController extends
                             - mBubblePadding
                             + Math.max(
                             insets.getSystemWindowInsetLeft(),
-                            insets.getDisplayCutout().getSafeInsetLeft());
+                            insets.getDisplayCutout() != null
+                                    ? insets.getDisplayCutout().getSafeInsetLeft()
+                                    : 0);
             mAllowableStackPositionRegion.right =
                     mLayout.getWidth()
                             - mIndividualBubbleSize
@@ -219,20 +221,26 @@ public class StackAnimationController extends
                             - mBubblePadding
                             - Math.max(
                             insets.getSystemWindowInsetRight(),
-                            insets.getDisplayCutout().getSafeInsetRight());
+                            insets.getDisplayCutout() != null
+                                ? insets.getDisplayCutout().getSafeInsetRight()
+                                : 0);
 
             mAllowableStackPositionRegion.top =
                     mBubblePadding
                             + Math.max(
                             insets.getSystemWindowInsetTop(),
-                            insets.getDisplayCutout().getSafeInsetTop());
+                            insets.getDisplayCutout() != null
+                                ? insets.getDisplayCutout().getSafeInsetTop()
+                                : 0);
             mAllowableStackPositionRegion.bottom =
                     mLayout.getHeight()
                             - mIndividualBubbleSize
                             - mBubblePadding
                             - Math.max(
                             insets.getSystemWindowInsetBottom(),
-                            insets.getDisplayCutout().getSafeInsetBottom());
+                            insets.getDisplayCutout() != null
+                                    ? insets.getDisplayCutout().getSafeInsetBottom()
+                                    : 0);
         }
 
         return mAllowableStackPositionRegion;
