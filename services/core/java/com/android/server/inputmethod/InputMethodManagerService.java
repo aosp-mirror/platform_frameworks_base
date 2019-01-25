@@ -1405,7 +1405,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
-                mRes, context.getContentResolver(), mMethodMap, mMethodList, userId, !mSystemReady);
+                mRes, context.getContentResolver(), mMethodMap, userId, !mSystemReady);
 
         updateCurrentProfileIds();
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
@@ -1694,7 +1694,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
                 methodList);
         final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
-                mContext.getContentResolver(), methodMap, methodList, userId, true);
+                mContext.getContentResolver(), methodMap, userId, true);
         return settings.getEnabledInputMethodListLocked();
     }
 
@@ -1750,7 +1750,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return Collections.emptyList();
         }
         final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
-                mContext.getContentResolver(), methodMap, methodList, userId, true);
+                mContext.getContentResolver(), methodMap, userId, true);
         return settings.getEnabledInputMethodSubtypeListLocked(
                 mContext, imi, allowsImplicitlySelectedSubtypes);
     }

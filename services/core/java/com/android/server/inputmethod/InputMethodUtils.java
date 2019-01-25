@@ -799,8 +799,8 @@ final class InputMethodUtils {
         }
 
         InputMethodSettings(Resources res, ContentResolver resolver,
-                ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
-                @UserIdInt int userId, boolean copyOnWrite) {
+                ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
+                boolean copyOnWrite) {
             mRes = res;
             mResolver = resolver;
             mMethodMap = methodMap;
