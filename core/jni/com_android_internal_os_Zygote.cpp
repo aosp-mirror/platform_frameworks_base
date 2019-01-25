@@ -1252,7 +1252,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     fds_to_close.insert(fds_to_close.end(), blastula_pipes.begin(), blastula_pipes.end());
     fds_to_ignore.insert(fds_to_ignore.end(), blastula_pipes.begin(), blastula_pipes.end());
 
-//    fds_to_close.push_back(gBlastulaPoolSocketFD);
+    fds_to_close.push_back(gBlastulaPoolSocketFD);
 
     if (gBlastulaPoolEventFD != -1) {
       fds_to_close.push_back(gBlastulaPoolEventFD);
@@ -1277,7 +1277,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   std::vector<int> fds_to_close(MakeBlastulaPipeReadFDVector()),
                    fds_to_ignore(fds_to_close);
 
-//  fds_to_close.push_back(gBlastulaPoolSocketFD);
+  fds_to_close.push_back(gBlastulaPoolSocketFD);
 
   if (gBlastulaPoolEventFD != -1) {
     fds_to_close.push_back(gBlastulaPoolEventFD);
