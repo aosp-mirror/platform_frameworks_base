@@ -37,7 +37,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     protected final View mView;
     protected final ExpandableNotificationRow mRow;
 
-    private int mBackgroundColor = 0;
+    protected int mBackgroundColor = 0;
 
     public static NotificationViewWrapper wrap(Context ctx, View v, ExpandableNotificationRow row) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
