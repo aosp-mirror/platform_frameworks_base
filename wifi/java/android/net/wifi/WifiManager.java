@@ -1404,7 +1404,6 @@ public class WifiManager {
      * {@link #reject()} to return the user's selection back to the platform via this callback.
      * @hide
      */
-    @SystemApi
     public interface NetworkRequestUserSelectionCallback {
         /**
          * User selected this network to connect to.
@@ -1428,7 +1427,6 @@ public class WifiManager {
      * or reject the request by the app.
      * @hide
      */
-    @SystemApi
     public interface NetworkRequestMatchCallback {
         /**
          * Invoked to register a callback to be invoked to convey user selection. The callback
@@ -1605,7 +1603,6 @@ public class WifiManager {
      *                 object. If null, then the application's main thread will be used.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void registerNetworkRequestMatchCallback(@NonNull NetworkRequestMatchCallback callback,
                                                     @Nullable Handler handler) {
@@ -1635,7 +1632,6 @@ public class WifiManager {
      * @param callback Callback for network match events
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void unregisterNetworkRequestMatchCallback(
             @NonNull NetworkRequestMatchCallback callback) {

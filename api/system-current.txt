@@ -4694,7 +4694,6 @@ package android.net.wifi {
     method public boolean isPortableHotspotSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
-    method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void registerNetworkRequestMatchCallback(@NonNull android.net.wifi.WifiManager.NetworkRequestMatchCallback, @Nullable android.os.Handler);
     method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void removeWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.WifiUsabilityStatsListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void save(android.net.wifi.WifiConfiguration, android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission("android.permission.WIFI_SET_DEVICE_MOBILITY_STATE") public void setDeviceMobilityState(int);
@@ -4704,7 +4703,6 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public boolean startScan(android.os.WorkSource);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void startSubscriptionProvisioning(android.net.wifi.hotspot2.OsuProvider, android.net.wifi.hotspot2.ProvisioningCallback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void stopEasyConnectSession();
-    method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void unregisterNetworkRequestMatchCallback(@NonNull android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void updateWifiUsabilityScore(int, int, int);
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
     field public static final int CHANGE_REASON_CONFIG_CHANGE = 2; // 0x2
@@ -4739,19 +4737,6 @@ package android.net.wifi {
   public static interface WifiManager.ActionListener {
     method public void onFailure(int);
     method public void onSuccess();
-  }
-
-  public static interface WifiManager.NetworkRequestMatchCallback {
-    method public void onAbort();
-    method public void onMatch(@NonNull java.util.List<android.net.wifi.ScanResult>);
-    method public void onUserSelectionCallbackRegistration(@NonNull android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback);
-    method public void onUserSelectionConnectFailure(@NonNull android.net.wifi.WifiConfiguration);
-    method public void onUserSelectionConnectSuccess(@NonNull android.net.wifi.WifiConfiguration);
-  }
-
-  public static interface WifiManager.NetworkRequestUserSelectionCallback {
-    method public void reject();
-    method public void select(@NonNull android.net.wifi.WifiConfiguration);
   }
 
   public static interface WifiManager.WifiUsabilityStatsListener {
