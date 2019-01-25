@@ -147,6 +147,10 @@ public class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     protected final ActiveSource mActiveSource = new ActiveSource();
 
+    // Whether System Audio Mode is activated or not.
+    @GuardedBy("mLock")
+    private boolean mSystemAudioActivated = false;
+
     private static final boolean isHdmiCecNeverClaimPlaybackLogicAddr =
             SystemProperties.getBoolean(
                     Constants.PROPERTY_HDMI_CEC_NEVER_CLAIM_PLAYBACK_LOGICAL_ADDRESS, false);
@@ -2010,6 +2014,7 @@ public class HdmiControlService extends SystemService {
             pw.increaseIndent();
             pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
             pw.println("mMhlInputChangeEnabled: " + mMhlInputChangeEnabled);
+            pw.println("mSystemAudioActivated: " + isSystemAudioActivated());
             pw.decreaseIndent();
 
             pw.println("mMhlController: ");
@@ -2633,6 +2638,18 @@ public class HdmiControlService extends SystemService {
     void setProhibitMode(boolean enabled) {
         synchronized (mLock) {
             mProhibitMode = enabled;
+        }
+    }
+
+    boolean isSystemAudioActivated() {
+        synchronized (mLock) {
+            return mSystemAudioActivated;
+        }
+    }
+
+    void setSystemAudioActivated(boolean on) {
+        synchronized (mLock) {
+            mSystemAudioActivated = on;
         }
     }
 
