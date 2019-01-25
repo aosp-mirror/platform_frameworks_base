@@ -275,6 +275,23 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @Override
+    protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
+        // System Audio Mode only turns on/off when Audio System broadcasts on/off message.
+        // For device with type 4 and 5, it can set system audio mode on/off
+        // when there is another audio system device connected into the system first.
+        if (message.getDestination() != Constants.ADDR_BROADCAST
+                || message.getSource() != Constants.ADDR_AUDIO_SYSTEM
+                || mService.audioSystem() != null) {
+            return true;
+        }
+        boolean setSystemAudioModeOn = HdmiUtils.parseCommandParamSystemAudioStatus(message);
+        if (mService.isSystemAudioActivated() != setSystemAudioModeOn) {
+            mService.setSystemAudioActivated(setSystemAudioModeOn);
+        }
+        return true;
+    }
+
+    @Override
     protected int findKeyReceiverAddress() {
         return Constants.ADDR_TV;
     }
