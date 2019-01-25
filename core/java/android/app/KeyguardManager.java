@@ -101,12 +101,6 @@ public class KeyguardManager {
     public static final String EXTRA_DESCRIPTION = "android.app.extra.DESCRIPTION";
 
     /**
-     * A boolean value to forward to {@link android.hardware.biometrics.BiometricPrompt}.
-     * @hide
-     */
-    public static final String EXTRA_USE_IMPLICIT = "android.app.extra.USE_IMPLICIT";
-
-    /**
      * A CharSequence description to show to the user on the alternate button when used with
      * {@link #ACTION_CONFIRM_FRP_CREDENTIAL}.
      * @hide
@@ -129,39 +123,14 @@ public class KeyguardManager {
      * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
      * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
      *
-     * @param title Title to be shown on the dialog.
-     * @param description Description to be shown on the dialog.
      * @return the intent for launching the activity or null if no password is required.
      **/
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public Intent createConfirmDeviceCredentialIntent(CharSequence title, CharSequence description) {
-        return createConfirmDeviceCredentialIntent(title, description, false /* useImplicit */);
-    }
-
-    /**
-     * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
-     * for the current user of the device. The caller is expected to launch this activity using
-     * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
-     * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
-     *
-     * @param title Title to be shown on the dialog.
-     * @param description Description to be shown on the dialog.
-     * @param useImplicit If useImplicit is set to true, ConfirmDeviceCredentials will invoke
-     *      {@link android.hardware.biometrics.BiometricPrompt} with
-     *      {@link android.hardware.biometrics.BiometricPrompt.Builder#setRequireConfirmation(
-     *      boolean)} set to false.
-     * @return the intent for launching the activity or null if no password is required.
-     * @hide
-     */
-    public Intent createConfirmDeviceCredentialIntent(CharSequence title, CharSequence description,
-            boolean useImplicit) {
-        if (!isDeviceSecure()) {
-            return null;
-        }
+        if (!isDeviceSecure()) return null;
         Intent intent = new Intent(ACTION_CONFIRM_DEVICE_CREDENTIAL);
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
-        intent.putExtra(EXTRA_USE_IMPLICIT, useImplicit);
 
         // explicitly set the package for security
         intent.setPackage(getSettingsPackageForIntent(intent));
