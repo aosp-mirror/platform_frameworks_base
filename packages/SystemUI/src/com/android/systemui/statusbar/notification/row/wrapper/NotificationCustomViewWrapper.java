@@ -17,8 +17,15 @@
 package com.android.systemui.statusbar.notification.row.wrapper;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.os.Build;
 import android.view.View;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -39,6 +46,47 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         mView.setAlpha(visible ? 1.0f : 0.0f);
+    }
+
+    @Override
+    public void onReinflated() {
+        super.onReinflated();
+
+        Configuration configuration = mView.getResources().getConfiguration();
+        boolean nightMode = (configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+
+        float[] hsl = new float[] {0f, 0f, 0f};
+        ColorUtils.colorToHSL(mBackgroundColor, hsl);
+        boolean backgroundIsDark = Color.alpha(mBackgroundColor) == 0
+                || hsl[1] == 0 && hsl[2] < 0.5;
+        boolean backgroundHasColor = hsl[1] > 0;
+
+        // Let's invert the notification colors when we're in night mode and
+        // the notification background isn't colorized.
+        if (!backgroundIsDark && !backgroundHasColor && nightMode
+                && mRow.getEntry().targetSdk < Build.VERSION_CODES.Q) {
+            Paint paint = new Paint();
+            ColorMatrix matrix = new ColorMatrix();
+            ColorMatrix tmp = new ColorMatrix();
+            // Inversion should happen on Y'UV space to conseve the colors and
+            // only affect the luminosity.
+            matrix.setRGB2YUV();
+            tmp.set(new float[]{
+                    -1f, 0f, 0f, 0f, 255f,
+                    0f, 1f, 0f, 0f, 0f,
+                    0f, 0f, 1f, 0f, 0f,
+                    0f, 0f, 0f, 1f, 0f
+            });
+            matrix.postConcat(tmp);
+            tmp.setYUV2RGB();
+            matrix.postConcat(tmp);
+            paint.setColorFilter(new ColorMatrixColorFilter(matrix));
+            mView.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
+
+            hsl[2] = 1f - hsl[2];
+            mBackgroundColor = ColorUtils.HSLToColor(hsl);
+        }
     }
 
     @Override
