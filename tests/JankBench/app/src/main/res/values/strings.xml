@@ -33,6 +33,8 @@
     <string name="edit_text_input_description">Tests edit text input</string>
     <string name="overdraw_name">Overdraw Test</string>
     <string name="overdraw_description">Tests how the device handles overdraw</string>
+    <string name="bitmap_upload_name">Bitmap Upload Test</string>
+    <string name="bitmap_upload_description">Tests bitmap upload</string>
     <string name="memory_bandwidth_name">Memory Bandwidth</string>
     <string name="memory_bandwidth_description">Test device\'s memory bandwidth</string>
     <string name="memory_latency_name">Memory Latency</string>
