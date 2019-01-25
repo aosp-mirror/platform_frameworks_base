@@ -9976,9 +9976,21 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
+    public void writeToProto(ProtoOutputStream proto) {
+        // Same input parameters that toString() gives to toShortString().
+        writeToProtoWithoutFieldId(proto, true, true, true, false);
+    }
+
+    /** @hide */
     public void writeToProto(ProtoOutputStream proto, long fieldId, boolean secure, boolean comp,
             boolean extras, boolean clip) {
         long token = proto.start(fieldId);
+        writeToProtoWithoutFieldId(proto, secure, comp, extras, clip);
+        proto.end(token);
+    }
+
+    private void writeToProtoWithoutFieldId(ProtoOutputStream proto, boolean secure, boolean comp,
+            boolean extras, boolean clip) {
         if (mAction != null) {
             proto.write(IntentProto.ACTION, mAction);
         }
@@ -10023,7 +10035,6 @@ public class Intent implements Parcelable, Cloneable {
         if (mSelector != null) {
             proto.write(IntentProto.SELECTOR, mSelector.toShortString(secure, comp, extras, clip));
         }
-        proto.end(token);
     }
 
     /**
