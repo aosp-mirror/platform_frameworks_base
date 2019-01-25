@@ -226,6 +226,10 @@ message SystemMessage {
     // Inform that user that the USB port is free of contaminants.
     NOTE_USB_CONTAMINANT_NOT_DETECTED = 53;
 
+    // Inform the user that Test Harness Mode is active.
+    // Package: android
+    NOTE_TEST_HARNESS_MODE_ENABLED = 54;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
