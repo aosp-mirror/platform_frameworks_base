@@ -62,6 +62,12 @@
         benchmark:category="ui"
         benchmark:description="@string/overdraw_description" />
 
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/bitmap_upload_name"
+        benchmark:id="@id/benchmark_bitmap_upload"
+        benchmark:category="ui"
+        benchmark:description="@string/bitmap_upload_description" />
+
     <!--
     <com.android.benchmark.Benchmark
         benchmark:name="@string/memory_bandwidth_name"

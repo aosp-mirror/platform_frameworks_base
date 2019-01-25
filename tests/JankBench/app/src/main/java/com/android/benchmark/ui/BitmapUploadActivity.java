@@ -32,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.benchmark.R;
+import com.android.benchmark.registry.BenchmarkRegistry;
 import com.android.benchmark.ui.automation.Automator;
 import com.android.benchmark.ui.automation.Interaction;
 
@@ -124,7 +125,9 @@ public class BitmapUploadActivity extends AppCompatActivity {
         final int runId = getIntent().getIntExtra("com.android.benchmark.RUN_ID", 0);
         final int iteration = getIntent().getIntExtra("com.android.benchmark.ITERATION", -1);
 
-        mAutomator = new Automator("BMUpload", runId, iteration, getWindow(),
+        String name = BenchmarkRegistry.getBenchmarkName(this, R.id.benchmark_bitmap_upload);
+
+        mAutomator = new Automator(name, runId, iteration, getWindow(),
                 new Automator.AutomateCallback() {
                     @Override
                     public void onPostAutomate() {
