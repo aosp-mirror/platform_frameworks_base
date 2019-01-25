@@ -972,6 +972,14 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME = 12;
 
+    /**
+     * <p>The camera device is capable of writing image data into a region of memory
+     * inaccessible to Android userspace or the Android kernel, and only accessible to
+     * trusted execution environments (TEE).</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA = 13;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
