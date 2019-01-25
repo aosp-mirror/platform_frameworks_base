@@ -237,16 +237,6 @@ public class GestureDetector {
     private static final int LONG_PRESS = 2;
     private static final int TAP = 3;
 
-    /**
-     * If a MotionEvent has CLASSIFICATION_AMBIGUOUS_GESTURE set, then certain actions, such as
-     * scrolling, will be inhibited. However, to account for the possibility of incorrect
-     * classification, the default scrolling will only be inhibited if the gesture moves beyond
-     * (default touch slop * AMBIGUOUS_GESTURE_MULTIPLIER). Likewise, the default long press
-     * timeout will be increased for some situations where the default behaviour
-     * is to cancel it.
-     */
-    private static final int AMBIGUOUS_GESTURE_MULTIPLIER = 2;
-
     private final Handler mHandler;
     @UnsupportedAppUsage
     private final OnGestureListener mListener;
@@ -636,6 +626,7 @@ public class GestureDetector {
                             hasPendingLongPress && ambiguousGesture;
                     if (shouldInhibitDefaultAction) {
                         // Inhibit default long press
+                        final float multiplier = ViewConfiguration.getAmbiguousGestureMultiplier();
                         if (distance > slopSquare) {
                             // The default action here is to remove long press. But if the touch
                             // slop below gets increased, and we never exceed the modified touch
@@ -643,15 +634,15 @@ public class GestureDetector {
                             // will happen in response to user input. To prevent this,
                             // reschedule long press with a modified timeout.
                             mHandler.removeMessages(LONG_PRESS);
-                            final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+                            final long longPressTimeout = ViewConfiguration.getLongPressTimeout();
                             mHandler.sendEmptyMessageAtTime(LONG_PRESS, ev.getDownTime()
-                                    + longPressTimeout * AMBIGUOUS_GESTURE_MULTIPLIER);
+                                    + (long) (longPressTimeout * multiplier));
                         }
                         // Inhibit default scroll. If a gesture is ambiguous, we prevent scroll
                         // until the gesture is resolved.
                         // However, for safety, simply increase the touch slop in case the
                         // classification is erroneous. Since the value is squared, multiply twice.
-                        slopSquare *= AMBIGUOUS_GESTURE_MULTIPLIER * AMBIGUOUS_GESTURE_MULTIPLIER;
+                        slopSquare *= multiplier * multiplier;
                     }
 
                     if (distance > slopSquare) {
