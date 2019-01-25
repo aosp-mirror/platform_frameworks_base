@@ -26,6 +26,8 @@ import android.system.StructPollfd;
 import android.util.Log;
 import android.util.Slog;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,18 +42,17 @@ import java.util.ArrayList;
  * client protocol.
  */
 class ZygoteServer {
+    // TODO (chriswailes): Change this so it is set with Zygote or ZygoteSecondary as appropriate
     public static final String TAG = "ZygoteServer";
-
-    private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
 
     /**
      * Listening socket that accepts new server connections.
      */
-    private LocalServerSocket mServerSocket;
+    private LocalServerSocket mZygoteSocket;
 
     /**
-     * Whether or not mServerSocket's underlying FD should be closed directly.
-     * If mServerSocket is created with an existing FD, closing the socket does
+     * Whether or not mZygoteSocket's underlying FD should be closed directly.
+     * If mZygoteSocket is created with an existing FD, closing the socket does
      * not close the FD and it must be closed explicitly. If the socket is created
      * with a name instead, then closing the socket will close the underlying FD
      * and it should not be double-closed.
@@ -70,31 +71,17 @@ class ZygoteServer {
     }
 
     /**
-     * Registers a server socket for zygote command connections. This locates the server socket
-     * file descriptor through an ANDROID_SOCKET_ environment variable.
+     * Creates a managed object representing the Zygote socket that has already
+     * been initialized and bound by init.
+     *
+     * TODO (chriswailes): Move the name selection logic into this function.
      *
      * @throws RuntimeException when open fails
      */
-    void registerServerSocketFromEnv(String socketName) {
-        if (mServerSocket == null) {
-            int fileDesc;
-            final String fullSocketName = ANDROID_SOCKET_PREFIX + socketName;
-            try {
-                String env = System.getenv(fullSocketName);
-                fileDesc = Integer.parseInt(env);
-            } catch (RuntimeException ex) {
-                throw new RuntimeException(fullSocketName + " unset or invalid", ex);
-            }
-
-            try {
-                FileDescriptor fd = new FileDescriptor();
-                fd.setInt$(fileDesc);
-                mServerSocket = new LocalServerSocket(fd);
-                mCloseSocketFd = true;
-            } catch (IOException ex) {
-                throw new RuntimeException(
-                        "Error binding to local socket '" + fileDesc + "'", ex);
-            }
+    void createZygoteSocket(String socketName) {
+        if (mZygoteSocket == null) {
+            mZygoteSocket = Zygote.createManagedSocketFromInitSocket(socketName);
+            mCloseSocketFd = true;
         }
     }
 
@@ -103,9 +90,9 @@ class ZygoteServer {
      * at the specified name in the abstract socket namespace.
      */
     void registerServerSocketAtAbstractName(String socketName) {
-        if (mServerSocket == null) {
+        if (mZygoteSocket == null) {
             try {
-                mServerSocket = new LocalServerSocket(socketName);
+                mZygoteSocket = new LocalServerSocket(socketName);
                 mCloseSocketFd = false;
             } catch (IOException ex) {
                 throw new RuntimeException(
@@ -120,7 +107,7 @@ class ZygoteServer {
      */
     private ZygoteConnection acceptCommandPeer(String abiList) {
         try {
-            return createNewConnection(mServerSocket.accept(), abiList);
+            return createNewConnection(mZygoteSocket.accept(), abiList);
         } catch (IOException ex) {
             throw new RuntimeException(
                     "IOException during accept()", ex);
@@ -138,9 +125,9 @@ class ZygoteServer {
      */
     void closeServerSocket() {
         try {
-            if (mServerSocket != null) {
-                FileDescriptor fd = mServerSocket.getFileDescriptor();
-                mServerSocket.close();
+            if (mZygoteSocket != null) {
+                FileDescriptor fd = mZygoteSocket.getFileDescriptor();
+                mZygoteSocket.close();
                 if (fd != null && mCloseSocketFd) {
                     Os.close(fd);
                 }
@@ -151,7 +138,7 @@ class ZygoteServer {
             Log.e(TAG, "Zygote:  error closing descriptor", ex);
         }
 
-        mServerSocket = null;
+        mZygoteSocket = null;
     }
 
     /**
@@ -160,8 +147,8 @@ class ZygoteServer {
      * closure after a child process is forked off.
      */
 
-    FileDescriptor getServerSocketFileDescriptor() {
-        return mServerSocket.getFileDescriptor();
+    FileDescriptor getZygoteSocketFileDescriptor() {
+        return mZygoteSocket.getFileDescriptor();
     }
 
     /**
@@ -170,36 +157,67 @@ class ZygoteServer {
      * worth at a time.
      */
     Runnable runSelectLoop(String abiList) {
-        ArrayList<FileDescriptor> fds = new ArrayList<FileDescriptor>();
+        ArrayList<FileDescriptor> socketFDs = new ArrayList<FileDescriptor>();
         ArrayList<ZygoteConnection> peers = new ArrayList<ZygoteConnection>();
 
-        fds.add(mServerSocket.getFileDescriptor());
+        socketFDs.add(mZygoteSocket.getFileDescriptor());
         peers.add(null);
 
         while (true) {
-            StructPollfd[] pollFds = new StructPollfd[fds.size()];
-            for (int i = 0; i < pollFds.length; ++i) {
-                pollFds[i] = new StructPollfd();
-                pollFds[i].fd = fds.get(i);
-                pollFds[i].events = (short) POLLIN;
+            int[] blastulaPipeFDs = Zygote.getBlastulaPipeFDs();
+
+            // Space for all of the socket FDs, the Blastula Pool Event FD, and
+            // all of the open blastula read pipe FDs.
+            StructPollfd[] pollFDs =
+                new StructPollfd[socketFDs.size() + 1 + blastulaPipeFDs.length];
+
+            int pollIndex = 0;
+            for (FileDescriptor socketFD : socketFDs) {
+                pollFDs[pollIndex] = new StructPollfd();
+                pollFDs[pollIndex].fd = socketFD;
+                pollFDs[pollIndex].events = (short) POLLIN;
+                ++pollIndex;
             }
+
+            final int blastulaPoolEventFDIndex = pollIndex;
+            pollFDs[pollIndex] = new StructPollfd();
+            pollFDs[pollIndex].fd = Zygote.sBlastulaPoolEventFD;
+            pollFDs[pollIndex].events = (short) POLLIN;
+            ++pollIndex;
+
+            for (int blastulaPipeFD : blastulaPipeFDs) {
+                FileDescriptor managedFd = new FileDescriptor();
+                managedFd.setInt$(blastulaPipeFD);
+
+                pollFDs[pollIndex] = new StructPollfd();
+                pollFDs[pollIndex].fd = managedFd;
+                pollFDs[pollIndex].events = (short) POLLIN;
+                ++pollIndex;
+            }
+
             try {
-                Os.poll(pollFds, -1);
+                Os.poll(pollFDs, -1);
             } catch (ErrnoException ex) {
                 throw new RuntimeException("poll failed", ex);
             }
-            for (int i = pollFds.length - 1; i >= 0; --i) {
-                if ((pollFds[i].revents & POLLIN) == 0) {
+
+            while (--pollIndex >= 0) {
+                if ((pollFDs[pollIndex].revents & POLLIN) == 0) {
                     continue;
                 }
 
-                if (i == 0) {
+                if (pollIndex == 0) {
+                    // Zygote server socket
+
                     ZygoteConnection newPeer = acceptCommandPeer(abiList);
                     peers.add(newPeer);
-                    fds.add(newPeer.getFileDescriptor());
-                } else {
+                    socketFDs.add(newPeer.getFileDescriptor());
+
+                } else if (pollIndex < blastulaPoolEventFDIndex) {
+                    // Session socket accepted from the Zygote server socket
+
                     try {
-                        ZygoteConnection connection = peers.get(i);
+                        ZygoteConnection connection = peers.get(pollIndex);
                         final Runnable command = connection.processOneCommand(this);
 
                         if (mIsForkChild) {
@@ -217,12 +235,12 @@ class ZygoteServer {
                             }
 
                             // We don't know whether the remote side of the socket was closed or
-                            // not until we attempt to read from it from processOneCommand. This shows up as
-                            // a regular POLLIN event in our regular processing loop.
+                            // not until we attempt to read from it from processOneCommand. This
+                            // shows up as a regular POLLIN event in our regular processing loop.
                             if (connection.isClosedByPeer()) {
                                 connection.closeSocket();
-                                peers.remove(i);
-                                fds.remove(i);
+                                peers.remove(pollIndex);
+                                socketFDs.remove(pollIndex);
                             }
                         }
                     } catch (Exception e) {
@@ -234,13 +252,13 @@ class ZygoteServer {
 
                             Slog.e(TAG, "Exception executing zygote command: ", e);
 
-                            // Make sure the socket is closed so that the other end knows immediately
-                            // that something has gone wrong and doesn't time out waiting for a
-                            // response.
-                            ZygoteConnection conn = peers.remove(i);
+                            // Make sure the socket is closed so that the other end knows
+                            // immediately that something has gone wrong and doesn't time out
+                            // waiting for a response.
+                            ZygoteConnection conn = peers.remove(pollIndex);
                             conn.closeSocket();
 
-                            fds.remove(i);
+                            socketFDs.remove(pollIndex);
                         } else {
                             // We're in the child so any exception caught here has happened post
                             // fork and before we execute ActivityThread.main (or any other main()
@@ -253,6 +271,55 @@ class ZygoteServer {
                         // zygote. The flag will not be consulted this loop pass after the Runnable
                         // is returned.
                         mIsForkChild = false;
+                    }
+                } else {
+                    // Either the blastula pool event FD or a blastula reporting pipe.
+
+                    // If this is the event FD the payload will be the number of blastulas removed.
+                    // If this is a reporting pipe FD the payload will be the PID of the blastula
+                    // that was just specialized.
+                    long messagePayload = -1;
+
+                    try {
+                        byte[] buffer = new byte[Zygote.BLASTULA_MANAGEMENT_MESSAGE_BYTES];
+                        int readBytes = Os.read(pollFDs[pollIndex].fd, buffer, 0, buffer.length);
+
+                        if (readBytes == Zygote.BLASTULA_MANAGEMENT_MESSAGE_BYTES) {
+                            DataInputStream inputStream =
+                                    new DataInputStream(new ByteArrayInputStream(buffer));
+
+                            messagePayload = inputStream.readLong();
+                        } else {
+                            Log.e(TAG, "Incomplete read from blastula management FD of size "
+                                    + readBytes);
+                            continue;
+                        }
+                    } catch (Exception ex) {
+                        if (pollIndex == blastulaPoolEventFDIndex) {
+                            Log.e(TAG, "Failed to read from blastula pool event FD: "
+                                    + ex.getMessage());
+                        } else {
+                            Log.e(TAG, "Failed to read from blastula reporting pipe: "
+                                    + ex.getMessage());
+                        }
+
+                        continue;
+                    }
+
+                    if (pollIndex > blastulaPoolEventFDIndex) {
+                        Zygote.removeBlastulaTableEntry((int) messagePayload);
+                    }
+
+                    int[] sessionSocketRawFDs =
+                            socketFDs.subList(1, socketFDs.size())
+                                    .stream()
+                                    .mapToInt(fd -> fd.getInt$())
+                                    .toArray();
+
+                    final Runnable command = Zygote.fillBlastulaPool(sessionSocketRawFDs);
+
+                    if (command != null) {
+                        return command;
                     }
                 }
             }
