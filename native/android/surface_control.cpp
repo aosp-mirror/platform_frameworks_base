@@ -47,32 +47,13 @@ using Transaction = SurfaceComposerClient::Transaction;
 static bool getWideColorSupport(const sp<SurfaceControl>& surfaceControl) {
     sp<SurfaceComposerClient> client = surfaceControl->getClient();
     sp<IBinder> display(client->getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
-
-    Vector<ui::ColorMode> colorModes;
-    status_t err = client->getDisplayColorModes(display, &colorModes);
+    bool isWideColorDisplay = false;
+    status_t err = client->isWideColorDisplay(display, &isWideColorDisplay);
     if (err) {
         ALOGE("unable to get wide color support");
         return false;
     }
-
-    bool wideColorBoardConfig =
-        getBool<ISurfaceFlingerConfigs,
-                &ISurfaceFlingerConfigs::hasWideColorDisplay>(false);
-
-    for (android::ui::ColorMode colorMode : colorModes) {
-        switch (colorMode) {
-            case ui::ColorMode::DISPLAY_P3:
-            case ui::ColorMode::ADOBE_RGB:
-            case ui::ColorMode::DCI_P3:
-                if (wideColorBoardConfig) {
-                    return true;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    return false;
+    return isWideColorDisplay;
 }
 
 static bool getHdrSupport(const sp<SurfaceControl>& surfaceControl) {
