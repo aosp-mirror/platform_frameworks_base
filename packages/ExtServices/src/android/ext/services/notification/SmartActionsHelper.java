@@ -291,7 +291,7 @@ public class SmartActionsHelper {
         Parcelable[] messages = notification.extras.getParcelableArray(Notification.EXTRA_MESSAGES);
         if (messages == null || messages.length == 0) {
             return Arrays.asList(new ConversationActions.Message.Builder(
-                    ConversationActions.Message.PERSON_USER_REMOTE)
+                    ConversationActions.Message.PERSON_USER_OTHERS)
                     .setText(notification.extras.getCharSequence(Notification.EXTRA_TEXT))
                     .build());
         }
@@ -310,7 +310,7 @@ public class SmartActionsHelper {
                 break;
             }
             Person author = localUser != null && localUser.equals(senderPerson)
-                    ? ConversationActions.Message.PERSON_USER_LOCAL : senderPerson;
+                    ? ConversationActions.Message.PERSON_USER_SELF : senderPerson;
             extractMessages.push(new ConversationActions.Message.Builder(author)
                     .setText(message.getText())
                     .setReferenceTime(

@@ -16,8 +16,8 @@
 
 package android.view.textclassifier;
 
-import static android.view.textclassifier.ConversationActions.Message.PERSON_USER_LOCAL;
-import static android.view.textclassifier.ConversationActions.Message.PERSON_USER_REMOTE;
+import static android.view.textclassifier.ConversationActions.Message.PERSON_USER_OTHERS;
+import static android.view.textclassifier.ConversationActions.Message.PERSON_USER_SELF;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -58,7 +58,7 @@ public class ActionsSuggestionsHelperTest {
     @Test
     public void testToNativeMessages_noTextMessages() {
         ConversationActions.Message messageWithoutText =
-                new ConversationActions.Message.Builder(PERSON_USER_REMOTE).build();
+                new ConversationActions.Message.Builder(PERSON_USER_OTHERS).build();
 
         ActionsSuggestionsModel.ConversationMessage[] conversationMessages =
                 ActionsSuggestionsHelper.toNativeMessages(
@@ -81,7 +81,7 @@ public class ActionsSuggestionsHelperTest {
                         .setText("second")
                         .build();
         ConversationActions.Message thirdMessage =
-                new ConversationActions.Message.Builder(PERSON_USER_LOCAL)
+                new ConversationActions.Message.Builder(PERSON_USER_SELF)
                         .setText("third")
                         .build();
         ConversationActions.Message fourthMessage =
@@ -104,16 +104,16 @@ public class ActionsSuggestionsHelperTest {
     @Test
     public void testToNativeMessages_referenceTime() {
         ConversationActions.Message firstMessage =
-                new ConversationActions.Message.Builder(PERSON_USER_REMOTE)
+                new ConversationActions.Message.Builder(PERSON_USER_OTHERS)
                         .setText("first")
                         .setReferenceTime(createZonedDateTimeFromMsUtc(1000))
                         .build();
         ConversationActions.Message secondMessage =
-                new ConversationActions.Message.Builder(PERSON_USER_REMOTE)
+                new ConversationActions.Message.Builder(PERSON_USER_OTHERS)
                         .setText("second")
                         .build();
         ConversationActions.Message thirdMessage =
-                new ConversationActions.Message.Builder(PERSON_USER_REMOTE)
+                new ConversationActions.Message.Builder(PERSON_USER_OTHERS)
                         .setText("third")
                         .setReferenceTime(createZonedDateTimeFromMsUtc(2000))
                         .build();

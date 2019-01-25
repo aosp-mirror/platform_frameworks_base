@@ -115,7 +115,7 @@ public final class ActionsSuggestionsHelper {
         private int mNextUserId = FIRST_NON_LOCAL_USER;
 
         private int encode(Person person) {
-            if (ConversationActions.Message.PERSON_USER_LOCAL.equals(person)) {
+            if (ConversationActions.Message.PERSON_USER_SELF.equals(person)) {
                 return USER_LOCAL;
             }
             Integer result = mMapping.get(person);

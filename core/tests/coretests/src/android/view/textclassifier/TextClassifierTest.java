@@ -378,7 +378,7 @@ public class TextClassifierTest {
         if (isTextClassifierDisabled()) return;
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
-                        ConversationActions.Message.PERSON_USER_REMOTE)
+                        ConversationActions.Message.PERSON_USER_OTHERS)
                         .setText("Where are you?")
                         .build();
         TextClassifier.EntityConfig typeConfig =
@@ -407,7 +407,7 @@ public class TextClassifierTest {
         if (isTextClassifierDisabled()) return;
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
-                        ConversationActions.Message.PERSON_USER_REMOTE)
+                        ConversationActions.Message.PERSON_USER_OTHERS)
                         .setText("Where are you?")
                         .build();
         TextClassifier.EntityConfig typeConfig =
