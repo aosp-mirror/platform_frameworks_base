@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_DRAW_GL_INFO_H
 #define ANDROID_HWUI_DRAW_GL_INFO_H
 
+#include <SkColorSpace.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -40,6 +42,9 @@ struct DrawGlInfo {
 
     // Input: current transform matrix, in OpenGL format
     float transform[16];
+
+    // Input: Color space.
+    const SkColorSpace* color_space_ptr;
 
     // Output: dirty region to redraw
     float dirtyLeft;
