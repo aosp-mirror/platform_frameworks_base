@@ -20,8 +20,6 @@ import android.content.Context;
 import android.location.Address;
 import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
-import android.os.RemoteException;
-import android.util.Log;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.server.ServiceWatcher;
@@ -68,35 +66,22 @@ public class GeocoderProxy {
 
     public String getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
-        final String[] result = new String[]{"Service not Available"};
-        mServiceWatcher.runOnBinder(binder -> {
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
             IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
-            try {
-                result[0] = provider.getFromLocation(
-                        latitude, longitude, maxResults, params, addrs);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
-            }
-        });
-        return result[0];
+            return provider.getFromLocation(latitude, longitude, maxResults, params, addrs);
+        }, "Service not Available");
     }
 
     public String getFromLocationName(String locationName,
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
-        final String[] result = new String[]{"Service not Available"};
-        mServiceWatcher.runOnBinder(binder -> {
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
             IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
-            try {
-                result[0] = provider.getFromLocationName(locationName, lowerLeftLatitude,
-                        lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                        maxResults, params, addrs);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
-            }
-        });
-        return result[0];
+            return provider.getFromLocationName(locationName, lowerLeftLatitude,
+                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
+                    maxResults, params, addrs);
+        }, "Service not Available");
     }
 
 }

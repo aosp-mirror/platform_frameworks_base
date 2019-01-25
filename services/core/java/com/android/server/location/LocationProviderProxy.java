@@ -127,20 +127,16 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         return mServiceWatcher.start();
     }
 
-    private void initializeService(IBinder binder) {
+    private void initializeService(IBinder binder) throws RemoteException {
         ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
         if (D) Log.d(TAG, "applying state to connected service " + mServiceWatcher);
 
-        try {
-            service.setLocationProviderManager(mManager);
+        service.setLocationProviderManager(mManager);
 
-            synchronized (mRequestLock) {
-                if (mRequest != null) {
-                    service.setRequest(mRequest, mWorkSource);
-                }
+        synchronized (mRequestLock) {
+            if (mRequest != null) {
+                service.setRequest(mRequest, mWorkSource);
             }
-        } catch (RemoteException e) {
-            Log.w(TAG, e);
         }
     }
 
@@ -157,63 +153,44 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         }
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            try {
-                service.setRequest(request, source);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
-            }
+            service.setRequest(request, source);
         });
     }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(" service=" + mServiceWatcher);
-        mServiceWatcher.runOnBinder(binder -> {
+        mServiceWatcher.runOnBinderBlocking(binder -> {
             try {
                 TransferPipe.dumpAsync(binder, fd, args);
             } catch (IOException | RemoteException e) {
-                pw.println(" failed to dump location provider: " + e);
+                pw.println(" failed to dump location provider");
             }
-        });
+            return null;
+        }, null);
     }
 
     @Override
     public int getStatus(Bundle extras) {
-        int[] status = new int[] {LocationProvider.TEMPORARILY_UNAVAILABLE};
-        mServiceWatcher.runOnBinder(binder -> {
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            try {
-                status[0] = service.getStatus(extras);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
-            }
-        });
-        return status[0];
+            return service.getStatus(extras);
+        }, LocationProvider.TEMPORARILY_UNAVAILABLE);
     }
 
     @Override
     public long getStatusUpdateTime() {
-        long[] updateTime = new long[] {0L};
-        mServiceWatcher.runOnBinder(binder -> {
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            try {
-                updateTime[0] = service.getStatusUpdateTime();
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
-            }
-        });
-        return updateTime[0];
+            return service.getStatusUpdateTime();
+        }, 0L);
     }
 
     @Override
     public void sendExtraCommand(String command, Bundle extras) {
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            try {
-                service.sendExtraCommand(command, extras);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
-            }
+            service.sendExtraCommand(command, extras);
         });
     }
 }
