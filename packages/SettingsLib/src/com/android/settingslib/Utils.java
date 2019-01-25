@@ -56,37 +56,25 @@ public class Utils {
 
     public static void updateLocationEnabled(Context context, boolean enabled, int userId,
             int source) {
+        LocationManager locationManager = context.getSystemService(LocationManager.class);
+
         Settings.Secure.putIntForUser(
                 context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
                 userId);
-        Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
 
-        final int oldMode = Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF, userId);
+        Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
+        final int oldMode = locationManager.isLocationEnabled()
+                ? Settings.Secure.LOCATION_MODE_ON
+                : Settings.Secure.LOCATION_MODE_OFF;
         final int newMode = enabled
-                ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
+                ? Settings.Secure.LOCATION_MODE_ON
                 : Settings.Secure.LOCATION_MODE_OFF;
         intent.putExtra(CURRENT_MODE_KEY, oldMode);
         intent.putExtra(NEW_MODE_KEY, newMode);
         context.sendBroadcastAsUser(
                 intent, UserHandle.of(userId), android.Manifest.permission.WRITE_SECURE_SETTINGS);
-        LocationManager locationManager =
-                (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        locationManager.setLocationEnabledForUser(enabled, UserHandle.of(userId));
-    }
 
-    public static boolean updateLocationMode(Context context, int oldMode, int newMode, int userId,
-            int source) {
-        Settings.Secure.putIntForUser(
-                context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
-                userId);
-        Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
-        intent.putExtra(CURRENT_MODE_KEY, oldMode);
-        intent.putExtra(NEW_MODE_KEY, newMode);
-        context.sendBroadcastAsUser(
-                intent, UserHandle.of(userId), android.Manifest.permission.WRITE_SECURE_SETTINGS);
-        return Settings.Secure.putIntForUser(
-                context.getContentResolver(), Settings.Secure.LOCATION_MODE, newMode, userId);
+        locationManager.setLocationEnabledForUser(enabled, UserHandle.of(userId));
     }
 
     /**

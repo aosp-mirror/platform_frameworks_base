@@ -38,7 +38,6 @@ import android.media.AudioManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.telephony.ServiceState;
 import android.text.TextUtils;
 
@@ -83,25 +82,6 @@ public class UtilsTest {
         when(mContext.getSystemService(Context.LOCATION_SERVICE)).thenReturn(mLocationManager);
         ShadowSecure.reset();
         mAudioManager = mContext.getSystemService(AudioManager.class);
-    }
-
-    @Test
-    public void testUpdateLocationMode_sendBroadcast() {
-        int currentUserId = ActivityManager.getCurrentUser();
-        Utils.updateLocationMode(
-                mContext,
-                Secure.LOCATION_MODE_OFF,
-                Secure.LOCATION_MODE_HIGH_ACCURACY,
-                currentUserId,
-                Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
-
-        verify(mContext).sendBroadcastAsUser(
-                argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
-                ArgumentMatchers.eq(UserHandle.of(currentUserId)),
-                ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
-        assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.LOCATION_CHANGER, Settings.Secure.LOCATION_CHANGER_UNKNOWN))
-                .isEqualTo(Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
     }
 
     @Test
