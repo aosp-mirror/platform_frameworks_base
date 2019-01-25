@@ -173,7 +173,8 @@ public class PackageInstallerSessionTest {
                 /* isReady */ staged ? true : false,
                 /* isFailed */ false,
                 /* isApplied */false,
-                /* stagedSessionErrorCode */ PackageInstaller.SessionInfo.VERIFICATION_FAILED);
+                /* stagedSessionErrorCode */ PackageInstaller.SessionInfo.VERIFICATION_FAILED,
+                /* stagedSessionErrorMessage */ "some error");
     }
 
     private void dumpSession(PackageInstallerSession session) {
@@ -295,6 +296,8 @@ public class PackageInstallerSessionTest {
         assertEquals(expected.isStagedSessionFailed(), actual.isStagedSessionFailed());
         assertEquals(expected.isStagedSessionReady(), actual.isStagedSessionReady());
         assertEquals(expected.getStagedSessionErrorCode(), actual.getStagedSessionErrorCode());
+        assertEquals(expected.getStagedSessionErrorMessage(),
+                actual.getStagedSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isSealed(), actual.isSealed());
         assertEquals(expected.isMultiPackage(), actual.isMultiPackage());
