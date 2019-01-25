@@ -5257,7 +5257,11 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews makeAmbientNotification() {
-            return createHeadsUpContentView(false /* increasedHeight */);
+            RemoteViews headsUpContentView = createHeadsUpContentView(false /* increasedHeight */);
+            if (headsUpContentView != null) {
+                return headsUpContentView;
+            }
+            return createContentView();
         }
 
         private void hideLine1Text(RemoteViews result) {
