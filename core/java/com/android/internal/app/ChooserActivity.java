@@ -18,6 +18,10 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.prediction.AppPredictionContext;
+import android.app.prediction.AppPredictionManager;
+import android.app.prediction.AppPredictor;
+import android.app.prediction.AppTarget;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -97,6 +101,20 @@ public class ChooserActivity extends ResolverActivity {
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
     private static final boolean DEBUG = false;
+
+
+    /**
+     * If {@link #USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS} and this is set to true,
+     * {@link AppPredictionManager} will be queried for direct share targets.
+     */
+    // TODO(b/123089490): Replace with system flag
+    private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = false;
+    // TODO(b/123088566) Share these in a better way.
+    private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
+    private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
+    public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
+    private AppPredictor mAppPredictor;
+    private AppPredictor.Callback mAppPredictorCallback;
 
     /**
      * If set to true, use ShortcutManager to retrieve the matching direct share targets, instead of
@@ -309,6 +327,35 @@ public class ChooserActivity extends ResolverActivity {
         mChooserShownTime = System.currentTimeMillis();
         final long systemCost = mChooserShownTime - intentReceivedTime;
         MetricsLogger.histogram(null, "system_cost_for_smart_sharing", (int) systemCost);
+
+        if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+            final IntentFilter filter = getTargetIntentFilter();
+            Bundle extras = new Bundle();
+            extras.putParcelable(APP_PREDICTION_INTENT_FILTER_KEY, filter);
+            AppPredictionManager appPredictionManager =
+                    getSystemService(AppPredictionManager.class);
+            mAppPredictor = appPredictionManager.createAppPredictionSession(
+                new AppPredictionContext.Builder(this)
+                    .setPredictedTargetCount(APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT)
+                    .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
+                    .setExtras(extras)
+                    .build());
+            mAppPredictorCallback = resultList -> {
+                final List<DisplayResolveInfo> driList =
+                        getDisplayResolveInfos(mChooserListAdapter);
+                final List<ShortcutManager.ShareShortcutInfo> shareShortcutInfos =
+                        new ArrayList<>();
+                for (AppTarget appTarget : resultList) {
+                    shareShortcutInfos.add(new ShortcutManager.ShareShortcutInfo(
+                            appTarget.getShortcutInfo(),
+                            new ComponentName(
+                                appTarget.getPackageName(), appTarget.getClassName())));
+                }
+                sendShareShortcutInfoList(shareShortcutInfos, driList);
+            };
+            mAppPredictor.registerPredictionUpdates(this.getMainExecutor(), mAppPredictorCallback);
+        }
+
         if (DEBUG) {
             Log.d(TAG, "System Time Cost is " + systemCost);
         }
@@ -339,6 +386,10 @@ public class ChooserActivity extends ResolverActivity {
         }
         unbindRemainingServices();
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
+        if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+            mAppPredictor.unregisterPredictionUpdates(mAppPredictorCallback);
+            mAppPredictor.destroy();
+        }
     }
 
     @Override
@@ -606,15 +657,10 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
-    private void queryDirectShareTargets(ChooserListAdapter adapter) {
-        final IntentFilter filter = getTargetIntentFilter();
-        if (filter == null) {
-            return;
-        }
-
+    private List<DisplayResolveInfo> getDisplayResolveInfos(ChooserListAdapter adapter) {
         // Need to keep the original DisplayResolveInfos to be able to reconstruct ServiceResultInfo
         // and use the old code path. This Ugliness should go away when Sharesheet is refactored.
-        final List<DisplayResolveInfo> driList = new ArrayList<>();
+        List<DisplayResolveInfo> driList = new ArrayList<>();
         int targetsToQuery = 0;
         for (int i = 0, n = adapter.getDisplayResolveInfoCount(); i < n; i++) {
             final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
@@ -634,40 +680,57 @@ public class ChooserActivity extends ResolverActivity {
                 break;
             }
         }
+        return driList;
+    }
+
+    private void queryDirectShareTargets(ChooserListAdapter adapter) {
+        if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+            mAppPredictor.requestPredictionUpdate();
+            return;
+        }
+        final IntentFilter filter = getTargetIntentFilter();
+        if (filter == null) {
+            return;
+        }
+        final List<DisplayResolveInfo> driList = getDisplayResolveInfos(adapter);
 
         AsyncTask.execute(() -> {
             ShortcutManager sm = (ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
             List<ShortcutManager.ShareShortcutInfo> resultList = sm.getShareTargets(filter);
-
-            // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
-            // for direct share targets. After ShareSheet is refactored we should use the
-            // ShareShortcutInfos directly.
-            boolean resultMessageSent = false;
-            for (int i = 0; i < driList.size(); i++) {
-                List<ChooserTarget> chooserTargets = new ArrayList<>();
-                for (int j = 0; j < resultList.size(); j++) {
-                    if (driList.get(i).getResolvedComponentName().equals(
-                            resultList.get(j).getTargetComponent())) {
-                        chooserTargets.add(convertToChooserTarget(resultList.get(j)));
-                    }
-                }
-                if (chooserTargets.isEmpty()) {
-                    continue;
-                }
-
-                final Message msg = Message.obtain();
-                msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
-                msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null);
-                mChooserHandler.sendMessage(msg);
-                resultMessageSent = true;
-            }
-
-            if (resultMessageSent) {
-                final Message msg = Message.obtain();
-                msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
-                mChooserHandler.sendMessage(msg);
-            }
+            sendShareShortcutInfoList(resultList, driList);
         });
+    }
+
+    private void sendShareShortcutInfoList(
+                List<ShortcutManager.ShareShortcutInfo> resultList,
+                List<DisplayResolveInfo> driList) {
+        // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
+        // for direct share targets. After ShareSheet is refactored we should use the
+        // ShareShortcutInfos directly.
+        boolean resultMessageSent = false;
+        for (int i = 0; i < driList.size(); i++) {
+            List<ChooserTarget> chooserTargets = new ArrayList<>();
+            for (int j = 0; j < resultList.size(); j++) {
+                if (driList.get(i).getResolvedComponentName().equals(
+                            resultList.get(j).getTargetComponent())) {
+                    chooserTargets.add(convertToChooserTarget(resultList.get(j)));
+                }
+            }
+            if (chooserTargets.isEmpty()) {
+                continue;
+            }
+            final Message msg = Message.obtain();
+            msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
+            msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null);
+            mChooserHandler.sendMessage(msg);
+            resultMessageSent = true;
+        }
+
+        if (resultMessageSent) {
+            final Message msg = Message.obtain();
+            msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
+            mChooserHandler.sendMessage(msg);
+        }
     }
 
     private ChooserTarget convertToChooserTarget(ShortcutManager.ShareShortcutInfo shareShortcut) {
@@ -724,6 +787,7 @@ public class ChooserActivity extends ResolverActivity {
         // Do nothing. We'll send the voice stuff ourselves.
     }
 
+    // TODO(b/123377860) Send clicked ShortcutInfo to mAppPredictor
     void updateModelAndChooserCounts(TargetInfo info) {
         if (info != null) {
             final ResolveInfo ri = info.getResolveInfo();
