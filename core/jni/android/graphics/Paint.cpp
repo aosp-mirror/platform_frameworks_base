@@ -29,6 +29,7 @@
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
 #include "SkFont.h"
+#include "SkFontMetrics.h"
 #include "SkFontTypes.h"
 #include "SkMaskFilter.h"
 #include "SkPath.h"
