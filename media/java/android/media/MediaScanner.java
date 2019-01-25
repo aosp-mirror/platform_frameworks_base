@@ -335,7 +335,7 @@ public class MediaScanner implements AutoCloseable {
     private final Uri mPlaylistsUri;
     @UnsupportedAppUsage
     private final Uri mFilesUri;
-    private final Uri mFilesUriNoNotify;
+    private final Uri mFilesFullUri;
     private final boolean mProcessPlaylists;
     private final boolean mProcessGenres;
     private int mMtpObjectHandle;
@@ -445,7 +445,11 @@ public class MediaScanner implements AutoCloseable {
         mVideoUri = Video.Media.getContentUri(volumeName);
         mImagesUri = Images.Media.getContentUri(volumeName);
         mFilesUri = Files.getContentUri(volumeName);
-        mFilesUriNoNotify = mFilesUri.buildUpon().appendQueryParameter("nonotify", "1").build();
+
+        Uri filesFullUri = mFilesUri.buildUpon().appendQueryParameter("nonotify", "1").build();
+        filesFullUri = MediaStore.setIncludePending(filesFullUri);
+        filesFullUri = MediaStore.setIncludeTrashed(filesFullUri);
+        mFilesFullUri = filesFullUri;
 
         if (!volumeName.equals("internal")) {
             // we only support playlists on external media
@@ -1625,7 +1629,7 @@ public class MediaScanner implements AutoCloseable {
         try {
             where = Files.FileColumns.DATA + "=?";
             selectionArgs = new String[] { path };
-            c = mMediaProvider.query(mFilesUriNoNotify, FILES_PRESCAN_PROJECTION,
+            c = mMediaProvider.query(mFilesFullUri, FILES_PRESCAN_PROJECTION,
                     where, selectionArgs, null, null);
             if (c != null && c.moveToFirst()) {
                 long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);

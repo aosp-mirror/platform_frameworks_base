@@ -39,6 +39,7 @@ import static android.system.OsConstants.W_OK;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
@@ -852,6 +853,7 @@ public class FileUtils {
      *
      * @hide
      */
+    @TestApi
     public static boolean contains(File dir, File file) {
         if (dir == null || file == null) return false;
         return contains(dir.getAbsolutePath(), file.getAbsolutePath());

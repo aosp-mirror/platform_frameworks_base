@@ -901,7 +901,6 @@ Landroid/os/ParcelableParcel;->getClassLoader()Ljava/lang/ClassLoader;
 Landroid/os/ParcelableParcel;->getParcel()Landroid/os/Parcel;
 Landroid/os/ParcelFileDescriptor;-><init>(Ljava/io/FileDescriptor;)V
 Landroid/os/ParcelFileDescriptor;->fromData([BLjava/lang/String;)Landroid/os/ParcelFileDescriptor;
-Landroid/os/ParcelFileDescriptor;->getFile(Ljava/io/FileDescriptor;)Ljava/io/File;
 Landroid/os/ParcelFileDescriptor;->seekTo(J)J
 Landroid/os/PerformanceCollector;-><init>()V
 Landroid/os/PerformanceCollector;->beginSnapshot(Ljava/lang/String;)V

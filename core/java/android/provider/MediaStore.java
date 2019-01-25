@@ -104,6 +104,11 @@ public final class MediaStore {
      */
     public static final String VOLUME_EXTERNAL = "external";
 
+    /** {@hide} */ @TestApi
+    public static final String SCAN_FILE_CALL = "scan_file";
+    /** {@hide} */ @TestApi
+    public static final String SCAN_VOLUME_CALL = "scan_volume";
+
     /**
      * The method name used by the media scanner and mtp to tell the media provider to
      * rescan and reclassify that have become unhidden because of renaming folders or
@@ -2992,6 +2997,7 @@ public final class MediaStore {
      *
      * @hide
      */
+    @TestApi
     public static @NonNull File getVolumePath(@NonNull String volumeName)
             throws FileNotFoundException {
         if (TextUtils.isEmpty(volumeName)) {
@@ -3022,6 +3028,7 @@ public final class MediaStore {
      *
      * @hide
      */
+    @TestApi
     public static @NonNull Collection<File> getVolumeScanPaths(@NonNull String volumeName)
             throws FileNotFoundException {
         if (TextUtils.isEmpty(volumeName)) {
