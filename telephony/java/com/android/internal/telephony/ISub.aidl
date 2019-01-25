@@ -220,7 +220,7 @@ interface ISub {
      * @hide
      *
      */
-    int setPreferredDataSubscriptionId(int subId);
+    void setPreferredDataSubscriptionId(int subId);
 
     /**
      * Get which subscription is preferred for cellular data.
