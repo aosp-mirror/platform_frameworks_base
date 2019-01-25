@@ -11,6 +11,7 @@ package android {
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 

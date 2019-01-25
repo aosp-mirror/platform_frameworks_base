@@ -2119,7 +2119,7 @@
     <!-- ================================== -->
     <eat-comment />
 
-    <!-- @SystemApi Allows an application to write to internal media storage
+    <!-- @SystemApi @TestApi Allows an application to write to internal media storage
          @hide  -->
     <permission android:name="android.permission.WRITE_MEDIA_STORAGE"
         android:protectionLevel="signature|privileged" />
