@@ -875,6 +875,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     public boolean appNotResponding(String info, Runnable killAppCallback,
             Runnable serviceTimeoutCallback) {
+        Runnable targetRunnable = null;
         synchronized (mAtm.mGlobalLock) {
             if (mAtm.mController == null) {
                 return false;
@@ -885,18 +886,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 int res = mAtm.mController.appNotResponding(mName, mPid, info);
                 if (res != 0) {
                     if (res < 0 && mPid != MY_PID) {
-                        killAppCallback.run();
+                        targetRunnable = killAppCallback;
                     } else {
-                        serviceTimeoutCallback.run();
+                        targetRunnable = serviceTimeoutCallback;
                     }
-                    return true;
                 }
             } catch (RemoteException e) {
                 mAtm.mController = null;
                 Watchdog.getInstance().setActivityController(null);
+                return false;
             }
-            return false;
         }
+        if (targetRunnable != null) {
+            targetRunnable.run();
+            return true;
+        }
+        return false;
     }
 
     public void onTopProcChanged() {
