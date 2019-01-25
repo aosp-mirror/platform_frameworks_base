@@ -19,6 +19,7 @@ package com.android.server.rollback;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
+import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Handler;
@@ -51,11 +52,14 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     @Override
     public boolean onHealthCheckFailed(String packageName) {
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
-        RollbackInfo rollback = rollbackManager.getAvailableRollback(packageName);
-        if (rollback != null) {
-            // TODO(zezeozue): Only rollback if rollback version == failed package version
-            mHandler.post(() -> executeRollback(rollbackManager, rollback));
-            return true;
+        for (RollbackInfo rollback : rollbackManager.getAvailableRollbacks()) {
+            for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
+                if (packageName.equals(packageRollback.getPackageName())) {
+                    // TODO(zezeozue): Only rollback if rollback version == failed package version
+                    mHandler.post(() -> executeRollback(rollbackManager, rollback));
+                    return true;
+                }
+            }
         }
         // Don't handle the notification, no rollbacks available
         return false;
