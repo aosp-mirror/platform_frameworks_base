@@ -14603,6 +14603,17 @@ public final class Settings {
                 "android.settings.panel.action.INTERNET_CONNECTIVITY";
 
         /**
+         * Activity Action: Show a settings dialog containing NFC-related settings.
+         * <p>
+         * Input: Nothing.
+         * <p>
+         * Output: Nothing.
+         */
+        @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_NFC =
+                "android.settings.panel.action.NFC";
+
+        /**
          * Activity Action: Show a settings dialog containing all volume streams.
          * <p>
          * Input: Nothing.
