@@ -4092,23 +4092,8 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
   }
 
-  public final class IpSecTransform implements java.lang.AutoCloseable {
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "android.permission.PACKET_KEEPALIVE_OFFLOAD"}) public void startNattKeepalive(@NonNull android.net.IpSecTransform.NattKeepaliveCallback, int, @NonNull android.os.Handler) throws java.io.IOException;
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "android.permission.PACKET_KEEPALIVE_OFFLOAD"}) public void stopNattKeepalive();
-  }
-
   public static class IpSecTransform.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecTransform buildTunnelModeTransform(@NonNull java.net.InetAddress, @NonNull android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
-  }
-
-  public static class IpSecTransform.NattKeepaliveCallback {
-    ctor public IpSecTransform.NattKeepaliveCallback();
-    method public void onError(int);
-    method public void onStarted();
-    method public void onStopped();
-    field public static final int ERROR_HARDWARE_ERROR = 3; // 0x3
-    field public static final int ERROR_HARDWARE_UNSUPPORTED = 2; // 0x2
-    field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
   }
 
   public class LinkAddress implements android.os.Parcelable {
