@@ -473,6 +473,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final SessionInfo info = new SessionInfo();
         synchronized (mLock) {
             info.sessionId = sessionId;
+            info.userId = userId;
             info.installerPackageName = mInstallerPackageName;
             info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
                     mResolvedBaseFile.getAbsolutePath() : null;

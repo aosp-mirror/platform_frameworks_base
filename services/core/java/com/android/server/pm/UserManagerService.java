@@ -1109,14 +1109,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public int getManagedProfileBadge(@UserIdInt int userId) {
-        int callingUserId = UserHandle.getCallingUserId();
-        if (callingUserId != userId && !hasManageUsersPermission()) {
-            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
-                throw new SecurityException(
-                        "You need MANAGE_USERS permission to: check if specified user a " +
-                        "managed profile outside your profile group");
-            }
-        }
+        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getManagedProfileBadge");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null ? userInfo.profileBadge : 0;
@@ -1125,14 +1118,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isManagedProfile(int userId) {
-        int callingUserId = UserHandle.getCallingUserId();
-        if (callingUserId != userId && !hasManageUsersPermission()) {
-            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
-                throw new SecurityException(
-                        "You need MANAGE_USERS permission to: check if specified user a " +
-                        "managed profile outside your profile group");
-            }
-        }
+        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isManagedProfile");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isManagedProfile();

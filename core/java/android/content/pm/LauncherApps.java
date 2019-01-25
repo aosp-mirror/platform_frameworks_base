@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +33,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInstaller.SessionCallback;
+import android.content.pm.PackageInstaller.SessionCallbackDelegate;
+import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -65,7 +69,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Class for retrieving a list of launchable activities for the current user and any associated
@@ -154,8 +160,8 @@ public class LauncherApps {
     private final PackageManager mPm;
     private final UserManager mUserManager;
 
-    private List<CallbackMessageHandler> mCallbacks
-            = new ArrayList<CallbackMessageHandler>();
+    private final List<CallbackMessageHandler> mCallbacks = new ArrayList<>();
+    private final List<SessionCallbackDelegate> mDelegates = new ArrayList<>();
 
     /**
      * Callbacks for package changes to this and related managed profiles.
@@ -566,6 +572,24 @@ public class LauncherApps {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
                     mContext.getPackageName(),
                     component, sourceBounds, opts, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts an activity to show the details of the specified session.
+     *
+     * @param sessionInfo The SessionInfo of the session
+     * @param sourceBounds The Rect containing the source bounds of the clicked icon
+     * @param opts Options to pass to startActivity
+     */
+    public void startPackageInstallerSessionDetailsActivity(SessionInfo sessionInfo,
+            Rect sourceBounds, Bundle opts) {
+        try {
+            mService.startSessionDetailsActivityAsUser(mContext.getIApplicationThread(),
+                    mContext.getPackageName(), sessionInfo, sourceBounds, opts,
+                    sessionInfo.getUser());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1128,7 +1152,7 @@ public class LauncherApps {
     }
 
     /**
-     * Registers a callback for changes to packages in current and managed profiles.
+     * Registers a callback for changes to packages in this user and managed profiles.
      *
      * @param callback The callback to register.
      */
@@ -1137,7 +1161,7 @@ public class LauncherApps {
     }
 
     /**
-     * Registers a callback for changes to packages in current and managed profiles.
+     * Registers a callback for changes to packages in this user and managed profiles.
      *
      * @param callback The callback to register.
      * @param handler that should be used to post callbacks on, may be null.
@@ -1439,6 +1463,64 @@ public class LauncherApps {
             info.user = user;
             info.shortcuts = shortcuts;
             obtainMessage(MSG_SHORTCUT_CHANGED, info).sendToTarget();
+        }
+    }
+
+    /**
+     * Register a callback to watch for session lifecycle events in this user and managed profiles.
+     * @param callback The callback to register.
+     * @param executor {@link Executor} to handle the callbacks, cannot be null.
+     *
+     * @see PackageInstaller#registerSessionCallback(SessionCallback)
+     */
+    public void registerPackageInstallerSessionCallback(
+            @NonNull @CallbackExecutor Executor executor, @NonNull SessionCallback callback) {
+        if (executor == null) {
+            throw new NullPointerException("Executor must not be null");
+        }
+
+        synchronized (mDelegates) {
+            final SessionCallbackDelegate delegate = new SessionCallbackDelegate(callback,
+                    executor);
+            try {
+                mService.registerPackageInstallerCallback(mContext.getPackageName(),
+                        delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mDelegates.add(delegate);
+        }
+    }
+
+    /**
+     * Unregisters a callback that was previously registered.
+     *
+     * @param callback The callback to unregister.
+     * @see #registerPackageInstallerSessionCallback(Executor, SessionCallback)
+     */
+    public void unregisterPackageInstallerSessionCallback(SessionCallback callback) {
+        synchronized (mDelegates) {
+            for (Iterator<SessionCallbackDelegate> i = mDelegates.iterator(); i.hasNext();) {
+                final SessionCallbackDelegate delegate = i.next();
+                if (delegate.mCallback == callback) {
+                    mPm.getPackageInstaller().unregisterSessionCallback(delegate.mCallback);
+                    i.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Return list of all known install sessions in this user and managed profiles, regardless
+     * of the installer.
+     *
+     * @see PackageInstaller#getAllSessions()
+     */
+    public @NonNull List<SessionInfo> getAllPackageInstallerSessions() {
+        try {
+            return mService.getAllSessions(mContext.getPackageName()).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
