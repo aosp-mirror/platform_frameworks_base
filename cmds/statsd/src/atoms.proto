@@ -2492,24 +2492,32 @@ message PhenotypeFlagStateChanged {
 
 /*
  * Logs when a binary push state changes.
- * Logged in Play store
+ * Logged by the installer via public api.
  */
 message BinaryPushStateChanged {
-    // Binary package name.
-    optional string binary_name = 1;
-    // Version code.
-    optional int64 version = 2;
-    // State
+    // Name of the train.
+    optional string train_name = 1;
+    // Version code for a "train" of packages that need to be installed atomically
+    optional int64 train_version_code = 2;
+    // After installation of this package, device requires a restart.
+    optional bool requires_staging = 3;
+    // Rollback should be enabled for this install.
+    optional bool rollback_enabled = 4;
+    // Requires low latency monitoring if possible.
+    optional bool requires_low_latency_monitor = 5;
+
     enum State {
-        STATE_UNKNOWN = 0;
-        DOWNLOAD_START = 1;
-        DOWNLOAD_DONE = 2;
-        INSTALL_START = 3;
-        INSTALL_DONE = 4;
-        REBOOT_START = 5;
-        REBOOT_DONE = 6;
+        UNKNOWN = 0;
+        INSTALL_REQUESTED = 1;
+        INSTALL_STARTED = 2;
+        INSTALL_STAGED_NOT_READY = 3;
+        INSTALL_STAGED_READY = 4;
+        INSTALL_SUCCESS = 5;
+        INSTALL_FAILURE = 6;
+        INSTALL_CANCELLED = 7;
+        INSTALLER_ROLLBACK_REQUESTED = 8;
     }
-    optional State state = 3;
+    optional State state = 6;
 }
 
 /** Represents USB port overheat event. */
