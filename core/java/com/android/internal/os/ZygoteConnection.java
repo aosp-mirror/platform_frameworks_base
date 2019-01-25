@@ -224,7 +224,7 @@ class ZygoteConnection {
             fdsToClose[0] = fd.getInt$();
         }
 
-        fd = zygoteServer.getServerSocketFileDescriptor();
+        fd = zygoteServer.getZygoteSocketFileDescriptor();
 
         if (fd != null) {
             fdsToClose[1] = fd.getInt$();
