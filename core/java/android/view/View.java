@@ -9067,35 +9067,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'appeared' on " + this + ": laid="
                             + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
                             + ", visible=" + (getVisibility() == VISIBLE)
-                            + ": alreadyNotifiedAppeared="
-                            + ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0));
-                }
-                return;
-            }
-            // All good: notify it...
-            final ViewStructure structure = session.newViewStructure(this);
-            onProvideContentCaptureStructure(structure, /* flags= */ 0);
-            session.notifyViewAppeared(structure);
-            // ...and set the flags
-            mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
-            mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
-        } else {
-            if ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) == 0
-                    || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0) {
-                if (Log.isLoggable(CONTENT_CAPTURE_LOG_TAG, Log.VERBOSE)) {
-                    Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'disappeared' on " + this
-                            + ": notifiedAppeared="
-                            + ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
+                            + ": alreadyNotifiedAppeared=" + ((mPrivateFlags4
+                                    & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
                             + ", alreadyNotifiedDisappeared=" + ((mPrivateFlags4
                                     & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
                 }
                 return;
             }
-            // All good: notify it...
-            session.notifyViewDisappeared(getAutofillId());
-            // ...and set the flags
+            mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
+            mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
+
+            // The code below doesn't take much for a unique view, but it's called for all views
+            // the first time the view hiearchy is laid off, which could acccumulative delay the
+            // initial layout. Hence, we're postponing it to a later stage - it might still cost a
+            // lost frame (or more), but that jank cost would only happen after the 1st layout.
+            Choreographer.getInstance().postCallback(Choreographer.CALLBACK_COMMIT, () -> {
+                final ViewStructure structure = session.newViewStructure(this);
+                onProvideContentCaptureStructure(structure, /* flags= */ 0);
+                session.notifyViewAppeared(structure);
+            }, /* token= */ null);
+        } else {
+            if ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) == 0
+                    || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0) {
+                if (Log.isLoggable(CONTENT_CAPTURE_LOG_TAG, Log.VERBOSE)) {
+                    Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'disappeared' on " + this + ": laid="
+                            + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
+                            + ", visible=" + (getVisibility() == VISIBLE)
+                            + ": alreadyNotifiedAppeared=" + ((mPrivateFlags4
+                                    & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
+                            + ", alreadyNotifiedDisappeared=" + ((mPrivateFlags4
+                                    & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
+                }
+                return;
+            }
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
+            Choreographer.getInstance().postCallback(Choreographer.CALLBACK_COMMIT,
+                    () -> session.notifyViewDisappeared(getAutofillId()), /* token= */ null);
         }
     }
 
