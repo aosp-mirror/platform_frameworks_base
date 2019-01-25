@@ -1493,6 +1493,16 @@ package android.provider {
     field public static final android.net.Uri CORP_CONTENT_URI;
   }
 
+  public final class DeviceConfig {
+    method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static boolean setProperty(String, String, String, boolean);
+  }
+
+  public static interface DeviceConfig.Privacy {
+    field public static final String NAMESPACE = "privacy";
+    field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "enable_location_access_check";
+  }
+
   public final class MediaStore {
     method @RequiresPermission("android.permission.CLEAR_APP_USER_DATA") public static void deleteContributedMedia(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
     method @RequiresPermission("android.permission.CLEAR_APP_USER_DATA") public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
@@ -1500,6 +1510,7 @@ package android.provider {
 
   public final class Settings {
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
+    field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {

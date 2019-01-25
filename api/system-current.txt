@@ -5698,6 +5698,7 @@ package android.provider {
 
   public static interface DeviceConfig.Privacy {
     field public static final String NAMESPACE = "privacy";
+    field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "enable_location_access_check";
     field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
   }
 
