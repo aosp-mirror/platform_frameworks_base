@@ -10470,8 +10470,10 @@ public final class Settings {
         /**
          * Setting to enable connected MAC randomization in Wi-Fi; disabled by default, and
          * setting to 1 will enable it. In the future, additional values may be supported.
+         * @deprecated MAC randomization is now a per-network setting
          * @hide
          */
+        @Deprecated
         public static final String WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED =
                 "wifi_connected_mac_randomization_enabled";
 

@@ -1517,9 +1517,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
                 GlobalSettingsProto.Wifi.VERBOSE_LOGGING_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                GlobalSettingsProto.Wifi.CONNECTED_MAC_RANDOMIZATION_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
                 GlobalSettingsProto.Wifi.MAX_DHCP_RETRY_COUNT);
         dumpSetting(s, p,
