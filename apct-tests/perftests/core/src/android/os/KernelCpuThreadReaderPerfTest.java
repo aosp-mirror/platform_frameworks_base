@@ -39,7 +39,8 @@ public class KernelCpuThreadReaderPerfTest {
     @Rule
     public final PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    private final KernelCpuThreadReader mKernelCpuThreadReader = KernelCpuThreadReader.create();
+    private final KernelCpuThreadReader mKernelCpuThreadReader =
+            KernelCpuThreadReader.create(8, uid -> 1000 <= uid && uid < 2000);
 
     @Test
     public void timeReadCurrentProcessCpuUsage() {

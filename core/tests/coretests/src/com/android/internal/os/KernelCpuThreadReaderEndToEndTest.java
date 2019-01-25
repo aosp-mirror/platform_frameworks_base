@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import android.os.Process;
 import android.os.SystemClock;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -121,7 +122,8 @@ public class KernelCpuThreadReaderEndToEndTest {
         workFinishedLatch.await();
 
         // Get thread data from KernelCpuThreadReader
-        final KernelCpuThreadReader kernelCpuThreadReader = KernelCpuThreadReader.create();
+        final KernelCpuThreadReader kernelCpuThreadReader =
+                KernelCpuThreadReader.create(8, uid -> uid == Process.myUid());
         assertNotNull(kernelCpuThreadReader);
         final ProcessCpuUsage currentProcessCpuUsage =
                 kernelCpuThreadReader.getCurrentProcessCpuUsage();

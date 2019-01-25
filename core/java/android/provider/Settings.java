@@ -14212,6 +14212,19 @@ public final class Settings {
         public static final String LOOPER_STATS = "looper_stats";
 
         /**
+         * Settings for collecting statistics on CPU usage per thread
+         *
+         * The following strings are supported as keys:
+         * <pre>
+         *     num_buckets          (int)
+         *     collected_uids       (string)
+         * </pre>
+         *
+         * @hide
+         */
+        public static final String KERNEL_CPU_THREAD_READER = "kernel_cpu_thread_reader";
+
+        /**
          * Default user id to boot into. They map to user ids, for example, 10, 11, 12.
          *
          * @hide

@@ -18,8 +18,10 @@ package com.android.internal.os;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertThrows;
 
 import android.content.Context;
 import android.os.FileUtils;
@@ -99,6 +101,8 @@ public class KernelCpuThreadReaderTest {
                 THREAD_NAMES, THREAD_CPU_FREQUENCIES, THREAD_CPU_TIMES);
 
         final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
+                8,
+                uid -> 1000 <= uid && uid < 2000,
                 mProcDirectory.toPath(),
                 mProcDirectory.toPath().resolve("self/task/" + THREAD_IDS[0] + "/time_in_state"),
                 processUtils);
@@ -138,11 +142,13 @@ public class KernelCpuThreadReaderTest {
                     new int[][]{{uid}});
         }
         final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
+                8,
+                uidPredicate,
                 mProcDirectory.toPath(),
                 mProcDirectory.toPath().resolve(uids[0] + "/task/" + uids[0] + "/time_in_state"),
                 processUtils);
         ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsageByUids =
-                kernelCpuThreadReader.getProcessCpuUsageByUids(uidPredicate);
+                kernelCpuThreadReader.getProcessCpuUsageByUids();
         processCpuUsageByUids.sort(Comparator.comparing(usage -> usage.processId));
 
         assertEquals(expectedUids.length, processCpuUsageByUids.size());
@@ -349,5 +355,107 @@ public class KernelCpuThreadReaderTest {
         assertEquals(
                 4, KernelCpuThreadReader.FrequencyBucketCreator.getBigFrequenciesStartIndex(
                         new long[]{1, 2, 3, 4}));
+    }
+
+    @Test
+    public void testUidPredicate_singleRange() {
+        KernelCpuThreadReaderSettingsObserver.UidPredicate uidPredicate =
+                KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString("1000-1999");
+        assertTrue(uidPredicate.test(1000));
+        assertTrue(uidPredicate.test(1050));
+        assertTrue(uidPredicate.test(1999));
+        assertFalse(uidPredicate.test(2000));
+        assertFalse(uidPredicate.test(0));
+        assertFalse(uidPredicate.test(10000));
+        assertFalse(uidPredicate.test(-100));
+    }
+
+    @Test
+    public void testUidPredicate_singleUid() {
+        KernelCpuThreadReaderSettingsObserver.UidPredicate uidPredicate =
+                KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString("1234-1234");
+        assertTrue(uidPredicate.test(1234));
+        assertFalse(uidPredicate.test(1235));
+        assertFalse(uidPredicate.test(1232));
+        assertFalse(uidPredicate.test(0));
+        assertFalse(uidPredicate.test(-1234));
+    }
+
+    @Test
+    public void testUidPredicate_uidAndRange() {
+        KernelCpuThreadReaderSettingsObserver.UidPredicate uidPredicate =
+                KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString(
+                        "1000-1000;1050-1060");
+        assertTrue(uidPredicate.test(1000));
+        assertTrue(uidPredicate.test(1050));
+        assertTrue(uidPredicate.test(1054));
+        assertTrue(uidPredicate.test(1060));
+        assertFalse(uidPredicate.test(1040));
+        assertFalse(uidPredicate.test(1001));
+        assertFalse(uidPredicate.test(0));
+        assertFalse(uidPredicate.test(-1000));
+    }
+
+    @Test
+    public void testUidPredicate_multiple() {
+        KernelCpuThreadReaderSettingsObserver.UidPredicate uidPredicate =
+                KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString(
+                        "1000-1000;1050-1060;1001-1001;2000-3000");
+        assertTrue(uidPredicate.test(1000));
+        assertTrue(uidPredicate.test(1001));
+        assertTrue(uidPredicate.test(1050));
+        assertTrue(uidPredicate.test(1054));
+        assertTrue(uidPredicate.test(1060));
+        assertTrue(uidPredicate.test(1001));
+        assertTrue(uidPredicate.test(2000));
+        assertTrue(uidPredicate.test(2444));
+        assertTrue(uidPredicate.test(3000));
+        assertFalse(uidPredicate.test(0));
+        assertFalse(uidPredicate.test(1040));
+        assertFalse(uidPredicate.test(3001));
+        assertFalse(uidPredicate.test(1999));
+    }
+
+    @Test
+    public void testUidPredicate_emptyRangeString() {
+        assertThrows(
+                NumberFormatException.class,
+                () -> KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString(""));
+    }
+
+    @Test
+    public void testUidPredicate_singleNumber() {
+        assertThrows(
+                NumberFormatException.class,
+                () -> KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString("1000"));
+    }
+
+    @Test
+    public void testUidPredicate_lettersInRange() {
+        assertThrows(
+                NumberFormatException.class,
+                () -> KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString(
+                        "0-0;1-1;a;3-3"));
+    }
+
+    @Test
+    public void testUidPredicate_onlyLetters() {
+        assertThrows(
+                NumberFormatException.class,
+                () -> KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString("abc"));
+    }
+
+    @Test
+    public void testUidPredicate_backwardsRange() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString("20-10"));
+    }
+
+    @Test
+    public void testUidPredicate_comma() {
+        assertThrows(
+                NumberFormatException.class,
+                () -> KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString("1-1,2-2,3-3"));
     }
 }
