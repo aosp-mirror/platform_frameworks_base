@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.SurfaceControl.METADATA_OWNER_UID;
+import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
+
 import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
 import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
@@ -82,7 +85,8 @@ class AppWindowThumbnail implements Animatable {
                 .setName("thumbnail anim: " + appToken.toString())
                 .setBufferSize(mWidth, mHeight)
                 .setFormat(PixelFormat.TRANSLUCENT)
-                .setMetadata(appToken.windowType,
+                .setMetadata(METADATA_WINDOW_TYPE, appToken.windowType)
+                .setMetadata(METADATA_OWNER_UID,
                         window != null ? window.mOwnerUid : Binder.getCallingUid())
                 .build();
 

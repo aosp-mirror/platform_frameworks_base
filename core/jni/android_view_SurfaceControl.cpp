@@ -124,7 +124,7 @@ static jlong nativeGetNativeTransactionFinalizer(JNIEnv* env, jclass clazz) {
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         jstring nameStr, jint w, jint h, jint format, jint flags, jlong parentObject,
-        jint windowType, jint ownerUid) {
+        jobject metadataParcel) {
     ScopedUtfChars name(env, nameStr);
     sp<SurfaceComposerClient> client;
     if (sessionObj != NULL) {
@@ -134,8 +134,18 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
     }
     SurfaceControl *parent = reinterpret_cast<SurfaceControl*>(parentObject);
     sp<SurfaceControl> surface;
+    LayerMetadata metadata;
+    Parcel* parcel = parcelForJavaObject(env, metadataParcel);
+    if (parcel && !parcel->objectsCount()) {
+        status_t err = metadata.readFromParcel(parcel);
+        if (err != NO_ERROR) {
+          jniThrowException(env, "java/lang/IllegalArgumentException",
+                            "Metadata parcel has wrong format");
+        }
+    }
+
     status_t err = client->createSurfaceChecked(
-            String8(name.c_str()), w, h, format, &surface, flags, parent, windowType, ownerUid);
+            String8(name.c_str()), w, h, format, &surface, flags, parent, std::move(metadata));
     if (err == NAME_NOT_FOUND) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return 0;
@@ -375,6 +385,28 @@ static void nativeTransferTouchFocus(JNIEnv* env, jclass clazz, jlong transactio
     sp<IBinder> fromToken(ibinderForJavaObject(env, fromTokenObj));
     sp<IBinder> toToken(ibinderForJavaObject(env, toTokenObj));
     transaction->transferTouchFocus(fromToken, toToken);
+}
+
+static void nativeSetMetadata(JNIEnv* env, jclass clazz, jlong transactionObj,
+        jlong nativeObject, jint id, jobject parcelObj) {
+    Parcel* parcel = parcelForJavaObject(env, parcelObj);
+    if (!parcel) {
+        jniThrowNullPointerException(env, "attribute data");
+        return;
+    }
+    if (parcel->objectsCount()) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Tried to marshall a Parcel that contained Binder objects.");
+        return;
+    }
+
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    std::vector<uint8_t> byteData(parcel->dataSize());
+    memcpy(byteData.data(), parcel->data(), parcel->dataSize());
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setMetadata(ctrl, id, std::move(byteData));
 }
 
 static void nativeSetColor(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -981,7 +1013,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
-    {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJII)J",
+    {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJLandroid/os/Parcel;)J",
             (void*)nativeCreate },
     {"nativeReadFromParcel", "(Landroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
@@ -1099,6 +1131,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetInputWindowInfo },
     {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)V",
             (void*)nativeTransferTouchFocus },
+    {"nativeSetMetadata", "(JILandroid/os/Parcel;)V",
+            (void*)nativeSetMetadata },
     {"nativeGetDisplayedContentSamplingAttributes",
             "(Landroid/os/IBinder;)Landroid/hardware/display/DisplayedContentSamplingAttributes;",
             (void*)nativeGetDisplayedContentSamplingAttributes },
