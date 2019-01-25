@@ -432,6 +432,7 @@ public class UsageStatsService extends SystemService implements
         synchronized (mLock) {
             mHandler.removeMessages(MSG_REPORT_EVENT);
             Event event = new Event(DEVICE_SHUTDOWN, SystemClock.elapsedRealtime());
+            event.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
             // orderly shutdown, the last event is DEVICE_SHUTDOWN.
             reportEventToAllUserId(event);
             flushToDiskLocked();
@@ -449,6 +450,7 @@ public class UsageStatsService extends SystemService implements
      */
     void prepareForPossibleShutdown() {
         Event event = new Event(DEVICE_SHUTDOWN, SystemClock.elapsedRealtime());
+        event.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
         mHandler.obtainMessage(MSG_REPORT_EVENT_TO_ALL_USERID, event).sendToTarget();
         mHandler.sendEmptyMessage(MSG_FLUSH_TO_DISK);
     }

@@ -52,6 +52,14 @@ public final class UsageEvents implements Parcelable {
         public static final int NONE = 0;
 
         /**
+         * A device level event like {@link #DEVICE_SHUTDOWN} does not have package name, but some
+         * user code always expect a non-null {@link #mPackage} for every event. Use
+         * {@link #DEVICE_EVENT_PACKAGE_NAME} as packageName for these device level events.
+         * @hide
+         */
+        public static final String DEVICE_EVENT_PACKAGE_NAME = "android";
+
+        /**
          * @deprecated by {@link #ACTIVITY_RESUMED}
          */
         @Deprecated

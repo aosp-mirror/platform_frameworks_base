@@ -143,6 +143,7 @@ class UserUsageStatsService {
             if (size == 0 || currentDailyStats.events.get(size - 1).mEventType != DEVICE_SHUTDOWN) {
                 // The last event in event list is not DEVICE_SHUTDOWN, then we insert one.
                 final Event event = new Event(DEVICE_SHUTDOWN, currentDailyStats.lastTimeSaved);
+                event.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
                 currentDailyStats.addEvent(event);
             }
         }
