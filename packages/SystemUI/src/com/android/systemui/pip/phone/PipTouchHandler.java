@@ -346,12 +346,11 @@ public class PipTouchHandler {
     }
 
     private void animateToOffset(Rect animatingBounds, Rect toAdjustedBounds) {
-        final Rect bounds = new Rect(animatingBounds);
-        bounds.offset(0, toAdjustedBounds.bottom - bounds.top);
+        int offset = toAdjustedBounds.bottom - animatingBounds.top;
         // In landscape mode, PIP window can go offset while launching IME. We want to align the
         // the top of the PIP window with the top of the movement bounds in that case.
-        bounds.offset(0, Math.max(0, mMovementBounds.top - bounds.top));
-        mMotionHelper.animateToOffset(bounds);
+        offset += Math.max(0, mMovementBounds.top - animatingBounds.top);
+        mMotionHelper.animateToOffset(animatingBounds, offset);
     }
 
     private void onRegistrationChanged(boolean isRegistered) {
