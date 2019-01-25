@@ -91,9 +91,7 @@ class KeyguardController {
      */
     boolean isKeyguardOrAodShowing(int displayId) {
         return (mKeyguardShowing || mAodShowing) && !mKeyguardGoingAway
-                && (displayId == DEFAULT_DISPLAY
-                        ? !isDisplayOccluded(DEFAULT_DISPLAY)
-                        : isShowingOnSecondaryDisplay(displayId));
+                && !isDisplayOccluded(displayId);
     }
 
     /**
@@ -101,10 +99,7 @@ class KeyguardController {
      *         display, false otherwise
      */
     boolean isKeyguardShowing(int displayId) {
-        return mKeyguardShowing && !mKeyguardGoingAway
-                && (displayId == DEFAULT_DISPLAY
-                        ? !isDisplayOccluded(DEFAULT_DISPLAY)
-                        : isShowingOnSecondaryDisplay(displayId));
+        return mKeyguardShowing && !mKeyguardGoingAway && !isDisplayOccluded(displayId);
     }
 
     /**
@@ -150,14 +145,6 @@ class KeyguardController {
         }
         mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         updateKeyguardSleepToken();
-    }
-
-    private boolean isShowingOnSecondaryDisplay(int displayId) {
-        if (mSecondaryDisplayIdsShowing == null) return false;
-        for (int showingId : mSecondaryDisplayIdsShowing) {
-            if (displayId == showingId) return true;
-        }
-        return false;
     }
 
     /**
@@ -473,8 +460,16 @@ class KeyguardController {
                 if (stack.getTopDismissingKeyguardActivity() != null) {
                     mDismissingKeyguardActivity = stack.getTopDismissingKeyguardActivity();
                 }
+                // FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD only apply for secondary display.
+                if (mDisplayId != DEFAULT_DISPLAY) {
+                    mOccluded |= stack.canShowWithInsecureKeyguard()
+                            && controller.canDismissKeyguard();
+                }
             }
-            mOccluded |= controller.mWindowManager.isShowingDream();
+            // TODO(b/123372519): isShowingDream can only works on default display.
+            if (mDisplayId == DEFAULT_DISPLAY) {
+                mOccluded |= controller.mWindowManager.isShowingDream();
+            }
 
             // TODO(b/113840485): Handle app transition for individual display, and apply occluded
             // state change to secondary displays.

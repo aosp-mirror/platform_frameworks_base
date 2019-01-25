@@ -2286,7 +2286,7 @@ class ActivityStack extends ConfigurationContainer {
      * Check if the display to which this stack is attached has
      * {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
      */
-    private boolean canShowWithInsecureKeyguard() {
+    boolean canShowWithInsecureKeyguard() {
         final ActivityDisplay activityDisplay = getDisplay();
         if (activityDisplay == null) {
             throw new IllegalStateException("Stack is not attached to any display, stackId="
