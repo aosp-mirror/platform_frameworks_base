@@ -132,7 +132,6 @@ filegroup {
         "apex/java/android/media/Session2Command.java",
         "apex/java/android/media/Session2CommandGroup.java",
         "apex/java/android/media/Session2Link.java",
-        "apex/java/android/media/Session2Token.java",
     ],
 }
 

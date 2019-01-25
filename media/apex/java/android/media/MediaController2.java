@@ -20,9 +20,11 @@ import static android.media.MediaConstants.KEY_ALLOWED_COMMANDS;
 import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
 import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
-import static android.media.MediaConstants.KEY_SESSION2LINK;
+import static android.media.MediaConstants.KEY_SESSION2_LINK;
+import static android.media.MediaConstants.KEY_SESSION2_TOKEN;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
+import static android.media.Session2Token.SESSION_SERVICE_INTERFACE;
 import static android.media.Session2Token.TYPE_SESSION;
 
 import android.annotation.NonNull;
@@ -260,7 +262,8 @@ public class MediaController2 implements AutoCloseable {
 
     // Called by Controller2Link.onConnected
     void onConnected(int seq, Bundle connectionResult) {
-        Session2Link sessionBinder = connectionResult.getParcelable(KEY_SESSION2LINK);
+        Session2Token token = connectionResult.getParcelable(KEY_SESSION2_TOKEN);
+        Session2Link sessionBinder = token.getExtras().getParcelable(KEY_SESSION2_LINK);
         Session2CommandGroup allowedCommands =
                 connectionResult.getParcelable(KEY_ALLOWED_COMMANDS);
         boolean playbackActive = connectionResult.getBoolean(KEY_PLAYBACK_ACTIVE);
@@ -281,8 +284,7 @@ public class MediaController2 implements AutoCloseable {
             // Implementation for the local binder is no-op,
             // so can be used without worrying about deadlock.
             sessionBinder.linkToDeath(mDeathRecipient, 0);
-            mConnectedToken = new Session2Token(mSessionToken.getUid(), TYPE_SESSION,
-                    mSessionToken.getPackageName(), sessionBinder);
+            mConnectedToken = token;
         }
         mCallbackExecutor.execute(() -> {
             mCallback.onConnected(MediaController2.this, allowedCommands);
@@ -353,7 +355,7 @@ public class MediaController2 implements AutoCloseable {
     }
 
     private boolean requestConnectToSession() {
-        Session2Link sessionBinder = mSessionToken.getSessionLink();
+        Session2Link sessionBinder = mSessionToken.getExtras().getParcelable(KEY_SESSION2_LINK);
         Bundle connectionRequest = createConnectionRequest();
         try {
             sessionBinder.connect(mControllerStub, getNextSeqNumber(), connectionRequest);
@@ -366,7 +368,7 @@ public class MediaController2 implements AutoCloseable {
 
     private boolean requestConnectToService() {
         // Service. Needs to get fresh binder whenever connection is needed.
-        final Intent intent = new Intent(MediaSession2Service.SERVICE_INTERFACE);
+        final Intent intent = new Intent(SESSION_SERVICE_INTERFACE);
         intent.setClassName(mSessionToken.getPackageName(), mSessionToken.getServiceName());
 
         // Use bindService() instead of startForegroundService() to start session service for three
