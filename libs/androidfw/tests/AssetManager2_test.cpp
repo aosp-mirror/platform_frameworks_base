@@ -210,6 +210,16 @@ TEST_F(AssetManager2Test, FindsResourceFromAppLoadedAsSharedLibrary) {
   EXPECT_EQ(fix_package_id(appaslib::R::array::integerArray1, 0x02), value.data);
 }
 
+TEST_F(AssetManager2Test, GetSharedLibraryResourceName) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({lib_one_assets_.get()});
+
+  AssetManager2::ResourceName name;
+  ASSERT_TRUE(assetmanager.GetResourceName(lib_one::R::string::foo, &name));
+  std::string formatted_name = ToFormattedResourceString(&name);
+  ASSERT_EQ(formatted_name, "com.android.lib_one:string/foo");
+}
+
 TEST_F(AssetManager2Test, FindsBagResourceFromSingleApkAssets) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({basic_assets_.get()});
