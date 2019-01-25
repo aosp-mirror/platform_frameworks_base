@@ -1057,11 +1057,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void setInsetProvider(@InternalInsetType int type, WindowState win,
             @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
-        if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL) {
-            if (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR) {
-                return;
-            }
-        }
         mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider);
     }
 
