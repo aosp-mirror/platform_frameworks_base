@@ -99,7 +99,7 @@ void Paint::setAntiAlias(bool aa) {
 
 ////////////////// Java flags compatibility //////////////////
 
-/*	Flags are tricky. Java has its own idea of the "paint" flags, but they don't really
+/*  Flags are tricky. Java has its own idea of the "paint" flags, but they don't really
     match up with skia anymore, so we have to do some shuffling in get/set flags()
 
 	3 flags apply to SkPaint (antialias, dither, filter -> enum)
