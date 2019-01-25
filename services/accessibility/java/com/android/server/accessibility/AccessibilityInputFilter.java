@@ -402,7 +402,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 MagnificationGestureHandler magnificationGestureHandler =
                         new MagnificationGestureHandler(mContext,
                                 mAms.getMagnificationController(),
-                                detectControlGestures, triggerable);
+                                detectControlGestures, triggerable, displayId);
                 addFirstEventHandler(displayId, magnificationGestureHandler);
                 mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
             }

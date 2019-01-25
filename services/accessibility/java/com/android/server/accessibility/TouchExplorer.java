@@ -435,7 +435,7 @@ class TouchExplorer extends BaseEventStreamTransformation
         MotionEvent click_event = MotionEvent.obtain(event.getDownTime(),
                 event.getEventTime(), MotionEvent.ACTION_DOWN, 1, properties,
                 coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0,
-                event.getSource(), event.getFlags());
+                event.getSource(), event.getDisplayId(), event.getFlags());
         final boolean targetAccessibilityFocus = (result == CLICK_LOCATION_ACCESSIBILITY_FOCUS);
         sendActionDownAndUp(click_event, policyFlags, targetAccessibilityFocus);
         click_event.recycle();
@@ -1029,7 +1029,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                 event.getEventTime(), event.getAction(), event.getPointerCount(),
                 props, coords, event.getMetaState(), event.getButtonState(),
                 1.0f, 1.0f, event.getDeviceId(), event.getEdgeFlags(),
-                event.getSource(), event.getFlags());
+                event.getSource(), event.getDisplayId(), event.getFlags());
     }
 
     /**
