@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MediaMetricsJNI"
+
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
@@ -21,7 +23,10 @@
 #include <media/MediaAnalyticsItem.h>
 
 
-// Copeid from core/jni/ (libandroid_runtime.so)
+// This source file is compiled and linked into both:
+// core/jni/ (libandroid_runtime.so)
+// media/jni (libmedia2_jni.so)
+
 namespace android {
 
 // place the attributes into a java PersistableBundle object
@@ -29,7 +34,7 @@ jobject MediaMetricsJNI::writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *i
 
     jclass clazzBundle = env->FindClass("android/os/PersistableBundle");
     if (clazzBundle==NULL) {
-        ALOGD("can't find android/os/PersistableBundle");
+        ALOGE("can't find android/os/PersistableBundle");
         return NULL;
     }
     // sometimes the caller provides one for us to fill
@@ -84,6 +89,139 @@ jobject MediaMetricsJNI::writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *i
     }
 
     return mybundle;
+}
+
+// convert the specified batch  metrics attributes to a persistent bundle.
+// The encoding of the byte array is specified in
+//     frameworks/av/media/libmediametrics/MediaAnalyticsItem.cpp
+//
+// type encodings; matches frameworks/av/media/libmediametrics/MediaAnalyticsItem.cpp
+enum { kInt32 = 0, kInt64, kDouble, kRate, kCString};
+
+jobject MediaMetricsJNI::writeAttributesToBundle(JNIEnv* env, jobject mybundle, char *buffer, size_t length) {
+    ALOGV("writeAttributes()");
+
+    if (buffer == NULL || length <= 0) {
+        ALOGW("bad parameters to writeAttributesToBundle()");
+        return NULL;
+    }
+
+    jclass clazzBundle = env->FindClass("android/os/PersistableBundle");
+    if (clazzBundle==NULL) {
+        ALOGE("can't find android/os/PersistableBundle");
+        return NULL;
+    }
+    // sometimes the caller provides one for us to fill
+    if (mybundle == NULL) {
+        // create the bundle
+        jmethodID constructID = env->GetMethodID(clazzBundle, "<init>", "()V");
+        mybundle = env->NewObject(clazzBundle, constructID);
+        if (mybundle == NULL) {
+            ALOGD("unable to create mybundle");
+            return NULL;
+        }
+    }
+
+    int left = length;
+    char *buf = buffer;
+
+    // grab methods that we can invoke
+    jmethodID setIntID = env->GetMethodID(clazzBundle, "putInt", "(Ljava/lang/String;I)V");
+    jmethodID setLongID = env->GetMethodID(clazzBundle, "putLong", "(Ljava/lang/String;J)V");
+    jmethodID setDoubleID = env->GetMethodID(clazzBundle, "putDouble", "(Ljava/lang/String;D)V");
+    jmethodID setStringID = env->GetMethodID(clazzBundle, "putString", "(Ljava/lang/String;Ljava/lang/String;)V");
+
+
+#define _EXTRACT(size, val) \
+    { if ((size) > left) goto badness; memcpy(&val, buf, (size)); buf += (size); left -= (size);}
+#define _SKIP(size) \
+    { if ((size) > left) goto badness; buf += (size); left -= (size);}
+
+    int32_t bufsize;
+    _EXTRACT(sizeof(int32_t), bufsize);
+    if (bufsize != length) {
+        goto badness;
+    }
+    int32_t proto;
+    _EXTRACT(sizeof(int32_t), proto);
+    if (proto != 0) {
+        ALOGE("unsupported wire protocol %d", proto);
+        goto badness;
+    }
+
+    int32_t count;
+    _EXTRACT(sizeof(int32_t), count);
+
+    // iterate through my attributes
+    // -- get name, get type, get value, insert into bundle appropriately.
+    for (int i = 0 ; i < count; i++ ) {
+            // prop name len (int16)
+            int16_t keylen;
+            _EXTRACT(sizeof(int16_t), keylen);
+            if (keylen <= 0) goto badness;
+            // prop name itself
+            char *key = buf;
+            jstring keyName = env->NewStringUTF(buf);
+            _SKIP(keylen);
+
+            // prop type (int8_t)
+            int8_t attrType;
+            _EXTRACT(sizeof(int8_t), attrType);
+
+	    int16_t attrSize;
+            _EXTRACT(sizeof(int16_t), attrSize);
+
+            switch (attrType) {
+                case kInt32:
+                    {
+                        int32_t i32;
+                        _EXTRACT(sizeof(int32_t), i32);
+                        env->CallVoidMethod(mybundle, setIntID,
+                                            keyName, (jint) i32);
+                        break;
+                    }
+                case kInt64:
+                    {
+                        int64_t i64;
+                        _EXTRACT(sizeof(int64_t), i64);
+                        env->CallVoidMethod(mybundle, setLongID,
+                                            keyName, (jlong) i64);
+                        break;
+                    }
+                case kDouble:
+                    {
+                        double d64;
+                        _EXTRACT(sizeof(double), d64);
+                        env->CallVoidMethod(mybundle, setDoubleID,
+                                            keyName, (jdouble) d64);
+                        break;
+                    }
+                case kCString:
+                    {
+                        jstring value = env->NewStringUTF(buf);
+                        env->CallVoidMethod(mybundle, setStringID,
+                                            keyName, value);
+                        _SKIP(attrSize);
+                        break;
+                    }
+                default:
+                        ALOGW("ignoring Attribute '%s' unknown type: %d",
+                              key, attrType);
+			_SKIP(attrSize);
+                        break;
+            }
+    }
+
+    // should have consumed it all
+    if (left != 0) {
+        ALOGW("did not consume entire buffer; left(%d) != 0", left);
+	goto badness;
+    }
+
+    return mybundle;
+
+  badness:
+    return NULL;
 }
 
 };  // namespace android
