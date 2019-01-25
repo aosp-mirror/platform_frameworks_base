@@ -5656,6 +5656,14 @@ public final class Settings {
                 "autofill_user_data_min_value_length";
 
         /**
+         * Defines whether Content Capture is enabled  for the user.
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead
          */
         @Deprecated

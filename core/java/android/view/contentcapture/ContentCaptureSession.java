@@ -99,7 +99,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_FLAG_SECURE = 0x20;
 
     /**
-     * Session is disabled manually by the specific app.
+     * Session is disabled manually by the specific app
+     * (through {@link ContentCaptureManager#setContentCaptureEnabled(boolean)}).
      *
      * @hide
      */

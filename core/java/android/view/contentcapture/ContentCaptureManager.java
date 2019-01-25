@@ -19,6 +19,7 @@ import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UiThread;
 import android.content.ComponentName;
@@ -108,9 +109,7 @@ public final class ContentCaptureManager {
             if (mMainSession == null) {
                 mMainSession = new MainContentCaptureSession(mContext, mHandler, mService,
                         mDisabled);
-                if (VERBOSE) {
-                    Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
-                }
+                if (VERBOSE) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
         }
@@ -147,13 +146,9 @@ public final class ContentCaptureManager {
      */
     @Nullable
     public ComponentName getServiceComponentName() {
-        if (!isContentCaptureEnabled()) {
-            return null;
-        }
-        // Wait for system server to return the component name.
+        if (!isContentCaptureEnabled()) return null;
+
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-
-
         try {
             mService.getServiceComponentName(resultReceiver);
             return resultReceiver.getParcelableResult();
@@ -164,6 +159,17 @@ public final class ContentCaptureManager {
 
     /**
      * Checks whether content capture is enabled for this activity.
+     *
+     * <p>There are many reasons it could be disabled, such as:
+     * <ul>
+     *   <li>App itself disabled content capture through {@link #setContentCaptureEnabled(boolean)}.
+     *   <li>Service disabled content capture for this specific activity.
+     *   <li>Service disabled content capture for all activities of this package.
+     *   <li>Service disabled content capture globally.
+     *   <li>User disabled content capture globally (through Settings).
+     *   <li>OEM disabled content capture globally.
+     *   <li>Transient errors.
+     * </ul>
      */
     public boolean isContentCaptureEnabled() {
         synchronized (mLock) {
@@ -180,6 +186,28 @@ public final class ContentCaptureManager {
     public void setContentCaptureEnabled(boolean enabled) {
         synchronized (mLock) {
             mFlags |= enabled ? 0 : ContentCaptureContext.FLAG_DISABLED_BY_APP;
+        }
+    }
+
+    /**
+     * Gets whether Content Capture is enabled for the given user.
+     *
+     * <p>This method is typically used by the Content Capture Service settings page, so it can
+     * provide a toggle to enable / disable it.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isContentCaptureFeatureEnabled() {
+        if (mService == null) return false;
+
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            mService.isContentCaptureFeatureEnabled(resultReceiver);
+            return resultReceiver.getIntResult() == 1;
+        } catch (RemoteException e) {
+            // Unable to retrieve component name in a reasonable amount of time.
+            throw e.rethrowFromSystemServer();
         }
     }
 
