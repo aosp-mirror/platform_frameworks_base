@@ -16,13 +16,19 @@
 
 package android.processor.view.inspector;
 
+import android.processor.view.inspector.InspectableClassModel.IntEnumEntry;
+import android.processor.view.inspector.InspectableClassModel.IntFlagEntry;
 import android.processor.view.inspector.InspectableClassModel.Property;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -63,6 +69,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
 
     /**
      * Set of android and androidx annotation qualified names for colors packed into {@code long}.
+     *
      * @see android.annotation.ColorLong
      */
     private static final String[] COLOR_LONG_ANNOTATION_NAMES = {
@@ -71,7 +78,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
 
     /**
      * @param annotationQualifiedName The qualified name of the annotation to process
-     * @param processingEnv The processing environment from the parent processor
+     * @param processingEnv           The processing environment from the parent processor
      */
     public InspectablePropertyProcessor(
             String annotationQualifiedName,
@@ -109,8 +116,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * Check that an element is shaped like a getter.
      *
      * @param element An element that hopefully represents a getter
-     * @throws ProcessingException if the element isn't a getter
      * @return An {@link ExecutableElement} that represents a getter method.
+     * @throws ProcessingException if the element isn't a getter
      */
     private ExecutableElement ensureGetter(Element element) {
         if (element.getKind() != ElementKind.METHOD) {
@@ -144,7 +151,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
             throw new ProcessingException(
                     String.format(
                             "Expected a getter method to take no parameters, "
-                            + "but got %d parameters.",
+                                    + "but got %d parameters.",
                             method.getParameters().size()),
                     element);
         }
@@ -167,10 +174,10 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
     /**
      * Build a {@link Property} from a getter and an inspectable property annotation.
      *
-     * @param getter An element representing the getter to build from
+     * @param getter     An element representing the getter to build from
      * @param annotation A mirror of an inspectable property-shaped annotation
-     * @throws ProcessingException If the supplied data is invalid and a property cannot be modeled
      * @return A property for the getter and annotation
+     * @throws ProcessingException If the supplied data is invalid and a property cannot be modeled
      */
     private Property buildProperty(ExecutableElement getter, AnnotationMirror annotation) {
         final String name = mAnnotationUtils
@@ -190,16 +197,25 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
                 .typedValueByName("attributeId", Integer.class, getter, annotation)
                 .ifPresent(property::setAttributeId);
 
+        switch (property.getType()) {
+            case INT_ENUM:
+                property.setIntEnumEntries(processEnumMapping(getter, annotation));
+                break;
+            case INT_FLAG:
+                property.setIntFlagEntries(processFlagMapping(getter, annotation));
+                break;
+        }
+
         return property;
     }
 
     /**
      * Determine the property type from the annotation, return type, or context clues.
      *
-     * @param getter An element representing the getter to build from
+     * @param getter     An element representing the getter to build from
      * @param annotation A mirror of an inspectable property-shaped annotation
      * @return The resolved property type
-     * @throws ProcessingException If the property type cannot be resolved
+     * @throws ProcessingException If the property type cannot be resolved or is invalid
      * @see android.view.inspector.InspectableProperty#valueType()
      */
     private Property.Type determinePropertyType(
@@ -213,10 +229,62 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
 
         final Property.Type returnType = convertReturnTypeToPropertyType(getter);
 
+        final boolean hasColor = hasColorAnnotation(getter);
+        final Optional<AnnotationValue> enumMapping =
+                mAnnotationUtils.valueByName("enumMapping", annotation);
+        final Optional<AnnotationValue> flagMapping =
+                mAnnotationUtils.valueByName("flagMapping", annotation);
+
+        if (returnType != Property.Type.INT) {
+            enumMapping.ifPresent(value -> {
+                throw new ProcessingException(
+                        String.format(
+                                "Can only use enumMapping on int types, got %s.",
+                                returnType.toString().toLowerCase()),
+                        getter,
+                        annotation,
+                        value);
+            });
+            flagMapping.ifPresent(value -> {
+                throw new ProcessingException(
+                        String.format(
+                                "Can only use flagMapping on int types, got %s.",
+                                returnType.toString().toLowerCase()),
+                        getter,
+                        annotation,
+                        value);
+            });
+        }
+
         switch (valueType) {
             case "INFERRED":
-                if (hasColorAnnotation(getter)) {
+                if (hasColor) {
+                    enumMapping.ifPresent(value -> {
+                        throw new ProcessingException(
+                                "Cannot use enumMapping on a color type.",
+                                getter,
+                                annotation,
+                                value);
+                    });
+                    flagMapping.ifPresent(value -> {
+                        throw new ProcessingException(
+                                "Cannot use flagMapping on a color type.",
+                                getter,
+                                annotation,
+                                value);
+                    });
                     return Property.Type.COLOR;
+                } else if (enumMapping.isPresent()) {
+                    flagMapping.ifPresent(value -> {
+                        throw new ProcessingException(
+                                "Cannot use flagMapping and enumMapping simultaneously.",
+                                getter,
+                                annotation,
+                                value);
+                    });
+                    return Property.Type.INT_ENUM;
+                } else if (flagMapping.isPresent()) {
+                    return Property.Type.INT_FLAG;
                 } else {
                     return returnType;
                 }
@@ -235,17 +303,14 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
                                 annotation);
                 }
             case "GRAVITY":
-                if (returnType == Property.Type.INT) {
-                    return Property.Type.GRAVITY;
-                } else {
-                    throw new ProcessingException(
-                            String.format("Gravity must be an integer, got %s", returnType),
-                            getter,
-                            annotation);
-                }
+                requirePackedIntToReturnInt("Gravity", returnType, getter, annotation);
+                return Property.Type.GRAVITY;
             case "INT_ENUM":
+                requirePackedIntToReturnInt("IntEnum", returnType, getter, annotation);
+                return Property.Type.INT_ENUM;
             case "INT_FLAG":
-                throw new ProcessingException("Not implemented", getter, annotation);
+                requirePackedIntToReturnInt("IntFlag", returnType, getter, annotation);
+                return Property.Type.INT_FLAG;
             default:
                 throw new ProcessingException(
                         String.format("Unknown value type enumeration value: %s", valueType),
@@ -258,8 +323,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * Get a property type from the return type of a getter.
      *
      * @param getter The getter to extract the return type of
-     * @throws ProcessingException If the return type is not a primitive or an object
      * @return The property type returned by the getter
+     * @throws ProcessingException If the return type is not a primitive or an object
      */
     private Property.Type convertReturnTypeToPropertyType(ExecutableElement getter) {
         final TypeMirror returnType = getter.getReturnType();
@@ -295,6 +360,31 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
     }
 
     /**
+     * Require that a value type packed into an integer be on a getter that returns an int.
+     *
+     * @param typeName   The name of the type to use in the exception
+     * @param returnType The return type of the getter to check
+     * @param getter     The getter, to use in the exception
+     * @param annotation The annotation, to use in the exception
+     * @throws ProcessingException If the return type is not an int
+     */
+    private static void requirePackedIntToReturnInt(
+            String typeName,
+            Property.Type returnType,
+            ExecutableElement getter,
+            AnnotationMirror annotation) {
+        if (returnType != Property.Type.INT) {
+            throw new ProcessingException(
+                    String.format(
+                            "%s can only be defined on a method that returns int, got %s.",
+                            typeName,
+                            returnType.toString().toLowerCase()),
+                    getter,
+                    annotation);
+        }
+    }
+
+    /**
      * Determine if a getter is annotated with color annotation matching its return type.
      *
      * Note that an {@code int} return value annotated with {@link android.annotation.ColorLong} is
@@ -303,7 +393,6 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      *
      * @param getter The getter to query
      * @return True if the getter has a color annotation, false otherwise
-     *
      */
     private boolean hasColorAnnotation(ExecutableElement getter) {
         switch (unboxType(getter.getReturnType())) {
@@ -350,6 +439,117 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
         } else {
             return name;
         }
+    }
+
+    /**
+     * Build a model of an {@code int} enumeration mapping from annotation values.
+     *
+     * This method only handles the one-to-one mapping of mirrors of
+     * {@link android.view.inspector.InspectableProperty.EnumMap} annotations into
+     * {@link IntEnumEntry} objects. Further validation should be handled elsewhere
+     *
+     * @see android.view.inspector.IntEnumMapping
+     * @see android.view.inspector.InspectableProperty#enumMapping()
+     * @param getter The getter of the property, used for exceptions
+     * @param annotation The {@link android.view.inspector.InspectableProperty} annotation to
+     *                   extract enum mapping values from.
+     * @return A list of int enum entries, in the order specified in source
+     * @throws ProcessingException if mapping doesn't exist or is invalid
+     */
+    private List<IntEnumEntry> processEnumMapping(
+            ExecutableElement getter,
+            AnnotationMirror annotation) {
+        List<AnnotationMirror> enumAnnotations = mAnnotationUtils.typedArrayValuesByName(
+                "enumMapping", AnnotationMirror.class, getter, annotation);
+        List<IntEnumEntry> enumEntries = new ArrayList<>(enumAnnotations.size());
+
+        if (enumAnnotations.isEmpty()) {
+            throw new ProcessingException(
+                    "Encountered an empty array for enumMapping", getter, annotation);
+        }
+
+        for (AnnotationMirror enumAnnotation : enumAnnotations) {
+            final String name = mAnnotationUtils.typedValueByName(
+                    "name", String.class, getter, enumAnnotation)
+                    .orElseThrow(() -> {
+                        throw new ProcessingException(
+                                "Name is required for @EnumMap",
+                                getter,
+                                enumAnnotation);
+                    });
+
+            final int value = mAnnotationUtils.typedValueByName(
+                    "value", Integer.class, getter, enumAnnotation)
+                    .orElseThrow(() -> {
+                        throw new ProcessingException(
+                                "Value is required for @EnumMap",
+                                getter,
+                                enumAnnotation);
+                    });
+
+            enumEntries.add(new IntEnumEntry(name, value));
+        }
+
+        return enumEntries;
+    }
+
+    /**
+     * Build a model of an {@code int} flag mapping from annotation values.
+     *
+     * This method only handles the one-to-one mapping of mirrors of
+     * {@link android.view.inspector.InspectableProperty.FlagMap} annotations into
+     * {@link IntFlagEntry} objects. Further validation should be handled elsewhere
+     *
+     * @see android.view.inspector.IntFlagMapping
+     * @see android.view.inspector.InspectableProperty#flagMapping()
+     * @param getter The getter of the property, used for exceptions
+     * @param annotation The {@link android.view.inspector.InspectableProperty} annotation to
+     *                   extract flag mapping values from.
+     * @return A list of int flags entries, in the order specified in source
+     * @throws ProcessingException if mapping doesn't exist or is invalid
+     */
+    private List<IntFlagEntry> processFlagMapping(
+            ExecutableElement getter,
+            AnnotationMirror annotation) {
+        List<AnnotationMirror> flagAnnotations = mAnnotationUtils.typedArrayValuesByName(
+                "flagMapping", AnnotationMirror.class, getter, annotation);
+        List<IntFlagEntry> flagEntries = new ArrayList<>(flagAnnotations.size());
+
+        if (flagAnnotations.isEmpty()) {
+            throw new ProcessingException(
+                    "Encountered an empty array for flagMapping", getter, annotation);
+        }
+
+        for (AnnotationMirror flagAnnotation : flagAnnotations) {
+            final String name = mAnnotationUtils.typedValueByName(
+                    "name", String.class, getter, flagAnnotation)
+                    .orElseThrow(() -> {
+                        throw new ProcessingException(
+                                "Name is required for @FlagMap",
+                                getter,
+                                flagAnnotation);
+                    });
+
+            final int target = mAnnotationUtils.typedValueByName(
+                    "target", Integer.class, getter, flagAnnotation)
+                    .orElseThrow(() -> {
+                        throw new ProcessingException(
+                                "Target is required for @FlagMap",
+                                getter,
+                                flagAnnotation);
+                    });
+
+            final Optional<Integer> mask = mAnnotationUtils.typedValueByName(
+                    "mask", Integer.class, getter, flagAnnotation);
+
+            if (mask.isPresent()) {
+                flagEntries.add(new IntFlagEntry(name, target, mask.get()));
+            } else {
+                flagEntries.add(new IntFlagEntry(name, target));
+            }
+        }
+
+        return flagEntries;
     }
 
     /**

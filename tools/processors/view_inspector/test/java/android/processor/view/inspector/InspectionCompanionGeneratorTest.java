@@ -16,11 +16,13 @@
 
 package android.processor.view.inspector;
 
-import android.processor.view.inspector.InspectableClassModel.Property;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.fail;
+import android.processor.view.inspector.InspectableClassModel.IntEnumEntry;
+import android.processor.view.inspector.InspectableClassModel.IntFlagEntry;
+import android.processor.view.inspector.InspectableClassModel.Property;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -31,6 +33,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -40,7 +43,7 @@ public class InspectionCompanionGeneratorTest {
     private static final String RESOURCE_PATH_TEMPLATE =
             "android/processor/view/inspector/InspectionCompanionGeneratorTest/%s.java.txt";
     private static final ClassName TEST_CLASS_NAME =
-            ClassName.get("com.android.inspectable", "TestInspectable");
+            ClassName.get("com.android.node", "TestNode");
     private InspectableClassModel mModel;
     private InspectionCompanionGenerator mGenerator;
 
@@ -59,7 +62,7 @@ public class InspectionCompanionGeneratorTest {
     @Test
     public void testNestedClass() {
         mModel = new InspectableClassModel(
-                ClassName.get("com.android.inspectable", "Outer", "Inner"));
+                ClassName.get("com.android.node", "Outer", "Inner"));
         assertGeneratedFileEquals("NestedClass");
     }
 
@@ -103,6 +106,42 @@ public class InspectionCompanionGeneratorTest {
         mModel.putProperty(property);
 
         assertGeneratedFileEquals("SuppliedAttributeId");
+    }
+
+    @Test
+    public void testIntEnum() {
+        final Property property = new Property(
+                "intEnumProperty",
+                "getIntEnumProperty",
+                Property.Type.INT_ENUM);
+
+        property.setIntEnumEntries(Arrays.asList(
+                new IntEnumEntry("THREE", 3),
+                new IntEnumEntry("TWO", 2),
+                new IntEnumEntry("ONE", 1)));
+
+        mModel.putProperty(property);
+
+        assertGeneratedFileEquals("IntEnum");
+    }
+
+    @Test
+    public void testIntFlag() {
+        final Property property = new Property(
+                "intFlag",
+                "getIntFlag",
+                Property.Type.INT_FLAG);
+
+        property.setAttributeIdInferrableFromR(false);
+        property.setIntFlagEntries(Arrays.asList(
+                new IntFlagEntry("TURBO", 0x1, 0x3),
+                new IntFlagEntry("OVERDRIVE", 0x2, 0x3),
+                new IntFlagEntry("WARP", 0x4)
+        ));
+
+        mModel.putProperty(property);
+
+        assertGeneratedFileEquals("IntFlag");
     }
 
     private Property addProperty(String name, String getter, Property.Type type) {
