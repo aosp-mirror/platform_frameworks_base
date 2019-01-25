@@ -22,7 +22,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -280,24 +280,24 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
     }
 
     @Override
-    public void setPosition(int x, int y) {
+    public void setPosition(float x, float y) {
         setPositionX(x);
         setPositionY(y);
     }
 
     @Override
-    public void setPositionX(int x) {
+    public void setPositionX(float x) {
         setTranslationX(x);
     }
 
     @Override
-    public void setPositionY(int y) {
+    public void setPositionY(float y) {
         setTranslationY(y);
     }
 
     @Override
-    public Point getPosition() {
-        return new Point((int) getTranslationX(), (int) getTranslationY());
+    public PointF getPosition() {
+        return new PointF(getTranslationX(), getTranslationY());
     }
 
     /**

@@ -57,7 +57,7 @@ public class BadgedImageView extends ImageView {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setScaleType(ScaleType.CENTER_CROP);
-        mIconSize = getResources().getDimensionPixelSize(R.dimen.bubble_size);
+        mIconSize = getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
         mDotRenderer = new BadgeRenderer(mIconSize);
     }
 

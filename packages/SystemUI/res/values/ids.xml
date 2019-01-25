@@ -116,6 +116,14 @@
     <item type="id" name="aod_mask_transition_progress_end_tag" />
     <item type="id" name="aod_mask_transition_progress_start_tag" />
 
+    <!-- For saving DynamicAnimation physics animations as view tags. -->
+    <item type="id" name="translation_x_dynamicanimation_tag"/>
+    <item type="id" name="translation_y_dynamicanimation_tag"/>
+    <item type="id" name="translation_z_dynamicanimation_tag"/>
+    <item type="id" name="alpha_dynamicanimation_tag"/>
+    <item type="id" name="scale_x_dynamicanimation_tag"/>
+    <item type="id" name="scale_y_dynamicanimation_tag"/>
+
     <!-- Global Actions Menu -->
     <item type="id" name="global_actions_view" />
 </resources>

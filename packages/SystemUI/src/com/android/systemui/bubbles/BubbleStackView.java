@@ -16,59 +16,88 @@
 
 package com.android.systemui.bubbles;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.app.ActivityView;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringAnimation;
+import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.animation.ExpandedAnimationController;
+import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
+import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
-import com.android.systemui.statusbar.notification.stack.ViewState;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
  */
 public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.FloatingView {
-
     private static final String TAG = "BubbleStackView";
+
+    /**
+     * Friction applied to fling animations. Since the stack must land on one of the sides of the
+     * screen, we want less friction horizontally so that the stack has a better chance of making it
+     * to the side without needing a spring.
+     */
+    private static final float FLING_FRICTION_X = 1.15f;
+    private static final float FLING_FRICTION_Y = 1.5f;
+
+    /**
+     * Damping ratio to use for the stack spring animation used to spring the stack to its final
+     * position after a fling.
+     */
+    private static final float SPRING_DAMPING_RATIO = 0.85f;
+
+    /**
+     * Minimum fling velocity required to trigger moving the stack from one side of the screen to
+     * the other.
+     */
+    private static final float ESCAPE_VELOCITY = 750f;
+
     private Point mDisplaySize;
 
-    private FrameLayout mBubbleContainer;
+    private final SpringAnimation mExpandedViewXAnim;
+    private final SpringAnimation mExpandedViewYAnim;
+
+    private PhysicsAnimationLayout mBubbleContainer;
+    private StackAnimationController mStackAnimationController;
+    private ExpandedAnimationController mExpandedAnimationController;
+
     private BubbleExpandedViewContainer mExpandedViewContainer;
 
     private int mBubbleSize;
     private int mBubblePadding;
+    private int mExpandedAnimateXDistance;
+    private int mExpandedAnimateYDistance;
 
     private boolean mIsExpanded;
     private int mExpandedBubbleHeight;
     private BubbleTouchHandler mTouchHandler;
     private BubbleView mExpandedBubble;
-    private Point mCollapsedPosition;
     private BubbleController.BubbleExpandListener mExpandListener;
 
     private boolean mViewUpdatedRequested = false;
@@ -110,8 +139,12 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         setOnTouchListener(mTouchHandler);
 
         Resources res = getResources();
-        mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
+        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubblePadding = res.getDimensionPixelSize(R.dimen.bubble_padding);
+        mExpandedAnimateXDistance =
+                res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_x_distance);
+        mExpandedAnimateYDistance =
+                res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_y_distance);
 
         mExpandedBubbleHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
         mDisplaySize = new Point();
@@ -120,6 +153,19 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
         int padding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
+
+        mStackAnimationController = new StackAnimationController();
+        mExpandedAnimationController = new ExpandedAnimationController();
+
+        mBubbleContainer = new PhysicsAnimationLayout(context);
+        mBubbleContainer.setMaxRenderedChildren(
+                getResources().getInteger(R.integer.bubbles_max_rendered));
+        mBubbleContainer.setController(mStackAnimationController);
+        mBubbleContainer.setElevation(elevation);
+        mBubbleContainer.setPadding(padding, 0, padding, 0);
+        mBubbleContainer.setClipChildren(false);
+        addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+
         mExpandedViewContainer = (BubbleExpandedViewContainer)
                 LayoutInflater.from(context).inflate(R.layout.bubble_expanded_view,
                         this /* parent */, false /* attachToRoot */);
@@ -128,11 +174,19 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         mExpandedViewContainer.setClipChildren(false);
         addView(mExpandedViewContainer);
 
-        mBubbleContainer = new FrameLayout(context);
-        mBubbleContainer.setElevation(elevation);
-        mBubbleContainer.setPadding(padding, 0, padding, 0);
-        mBubbleContainer.setClipChildren(false);
-        addView(mBubbleContainer);
+        mExpandedViewXAnim =
+                new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_X);
+        mExpandedViewXAnim.setSpring(
+                new SpringForce()
+                        .setStiffness(SpringForce.STIFFNESS_LOW)
+                        .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
+
+        mExpandedViewYAnim =
+                new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_Y);
+        mExpandedViewYAnim.setSpring(
+                new SpringForce()
+                        .setStiffness(SpringForce.STIFFNESS_LOW)
+                        .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
 
         setClipChildren(false);
     }
@@ -141,38 +195,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
-    }
-
-    @Override
-    public void onMeasure(int widthSpec, int heightSpec) {
-        super.onMeasure(widthSpec, heightSpec);
-
-        int bubbleHeightSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightSpec),
-                MeasureSpec.UNSPECIFIED);
-        if (mIsExpanded) {
-            ViewGroup parent = (ViewGroup) getParent();
-            int parentWidth = MeasureSpec.makeMeasureSpec(
-                    MeasureSpec.getSize(parent.getWidth()), MeasureSpec.EXACTLY);
-            int parentHeight = MeasureSpec.makeMeasureSpec(
-                    MeasureSpec.getSize(parent.getHeight()), MeasureSpec.EXACTLY);
-            measureChild(mBubbleContainer, parentWidth, bubbleHeightSpec);
-
-            int expandedViewHeight = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightSpec),
-                    MeasureSpec.UNSPECIFIED);
-            measureChild(mExpandedViewContainer, parentWidth, expandedViewHeight);
-            setMeasuredDimension(widthSpec, parentHeight);
-        } else {
-            // Not expanded
-            measureChild(mExpandedViewContainer, 0, 0);
-
-            // Bubbles are translated a little to stack on top of each other
-            widthSpec = MeasureSpec.makeMeasureSpec(getStackWidth(), MeasureSpec.EXACTLY);
-            measureChild(mBubbleContainer, widthSpec, bubbleHeightSpec);
-
-            heightSpec = MeasureSpec.makeMeasureSpec(mBubbleContainer.getMeasuredHeight(),
-                    MeasureSpec.EXACTLY);
-            setMeasuredDimension(widthSpec, heightSpec);
-        }
     }
 
     @Override
@@ -293,9 +315,11 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             boolean updatePosition) {
         bubbleView.update(entry);
         if (updatePosition && !mIsExpanded) {
-            // If alerting it gets promoted to top of the stack
-            mBubbleContainer.removeView(bubbleView);
-            mBubbleContainer.addView(bubbleView, 0);
+            // If alerting it gets promoted to top of the stack.
+            if (mBubbleContainer.indexOfChild(bubbleView) != 0) {
+                mBubbleContainer.removeViewAndThen(bubbleView,
+                        () -> mBubbleContainer.addView(bubbleView, 0));
+            }
             requestUpdate();
         }
         if (mIsExpanded && bubbleView.equals(mExpandedBubble)) {
@@ -359,36 +383,51 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         if (mIsExpanded != shouldExpand) {
             mIsExpanded = shouldExpand;
             updateExpandedBubble();
+            applyCurrentState();
+            //requestUpdate();
+
+            mIsAnimating = true;
+
+            Runnable updateAfter = () -> {
+                applyCurrentState();
+                mIsAnimating = false;
+                requestUpdate();
+            };
 
             if (shouldExpand) {
-                // Save current position so that we might return there
-                savePosition();
+                mBubbleContainer.setController(mExpandedAnimationController);
+                mExpandedAnimationController.expandFromStack(
+                                mStackAnimationController.getStackPosition(), updateAfter);
+            } else {
+                mBubbleContainer.cancelAllAnimations();
+                mExpandedAnimationController.collapseBackToStack(
+                        () -> {
+                            mBubbleContainer.setController(mStackAnimationController);
+                            updateAfter.run();
+                        });
             }
 
-            // Determine the translation for the stack
-            Point position = shouldExpand
-                    ? BubbleController.getExpandPoint(this, mBubbleSize, mDisplaySize)
-                    : mCollapsedPosition;
-            int delay = shouldExpand ? 0 : 100;
-            AnimatorSet translationAnim = BubbleMovementHelper.getTranslateAnim(this, position,
-                    200, delay, null);
-            if (!shouldExpand) {
-                // First collapse the stack, then translate, maybe should expand at same time?
-                animateStackExpansion(() -> translationAnim.start());
-            } else {
-                // First translate, then expand
-                translationAnim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        mIsAnimating = true;
-                    }
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        animateStackExpansion(() -> mIsAnimating = false);
-                    }
-                });
-                translationAnim.start();
+            final float xStart =
+                    mStackAnimationController.getStackPosition().x < getWidth() / 2
+                            ? -mExpandedAnimateXDistance
+                            : mExpandedAnimateXDistance;
+
+            final float yStart = Math.min(
+                    mStackAnimationController.getStackPosition().y,
+                    mExpandedAnimateYDistance);
+            final float yDest = getStatusBarHeight() + mExpandedBubble.getHeight() + mBubblePadding;
+
+            if (shouldExpand) {
+                mExpandedViewContainer.setTranslationX(xStart);
+                mExpandedViewContainer.setTranslationY(yStart);
+                mExpandedViewContainer.setAlpha(0f);
             }
+
+            mExpandedViewXAnim.animateToFinalPosition(shouldExpand ? 0f : xStart);
+            mExpandedViewYAnim.animateToFinalPosition(shouldExpand ? yDest : yStart);
+            mExpandedViewContainer.animate()
+                    .setDuration(100)
+                    .alpha(shouldExpand ? 1f : 0f);
         }
     }
 
@@ -399,14 +438,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         return mBubblePadding * (mBubbleContainer.getChildCount() - 1)
                 + mBubbleSize + mBubbleContainer.getPaddingEnd()
                 + mBubbleContainer.getPaddingStart();
-    }
-
-    /**
-     * Saves the current position of the stack, used to save user placement of the stack to
-     * return to after an animation.
-     */
-    private void savePosition() {
-        mCollapsedPosition = getPosition();
     }
 
     private void notifyExpansionChanged(BubbleView bubbleView, boolean expanded) {
@@ -420,31 +451,151 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         return getBubbleAt(0);
     }
 
-    private BubbleView getBubbleAt(int i) {
+    /** Return the BubbleView at the given index from the bubble container. */
+    public BubbleView getBubbleAt(int i) {
         return mBubbleContainer.getChildCount() > i
                 ? (BubbleView) mBubbleContainer.getChildAt(i)
                 : null;
     }
 
     @Override
-    public void setPosition(int x, int y) {
-        setPositionX(x);
-        setPositionY(y);
+    public void setPosition(float x, float y) {
+        mStackAnimationController.moveFirstBubbleWithStackFollowing(x, y);
     }
 
     @Override
-    public void setPositionX(int x) {
-        setTranslationX(x);
+    public void setPositionX(float x) {
+        // Unsupported, use setPosition(x, y).
     }
 
     @Override
-    public void setPositionY(int y) {
-        setTranslationY(y);
+    public void setPositionY(float y) {
+        // Unsupported, use setPosition(x, y).
     }
 
     @Override
-    public Point getPosition() {
-        return new Point((int) getTranslationX(), (int) getTranslationY());
+    public PointF getPosition() {
+        return mStackAnimationController.getStackPosition();
+    }
+
+    /** Called when a drag operation on an individual bubble has started. */
+    public void onBubbleDragStart(BubbleView bubble) {
+        // TODO: Save position and snap back if not dismissed.
+    }
+
+    /** Called with the coordinates to which an individual bubble has been dragged. */
+    public void onBubbleDragged(BubbleView bubble, float x, float y) {
+        bubble.setTranslationX(x);
+        bubble.setTranslationY(y);
+    }
+
+    /** Called when a drag operation on an individual bubble has finished. */
+    public void onBubbleDragFinish(BubbleView bubble, float x, float y, float velX, float velY) {
+        // TODO: Add fling to bottom to dismiss.
+    }
+
+    void onDragStart() {
+        if (mIsExpanded) {
+            return;
+        }
+
+        mStackAnimationController.cancelStackPositionAnimations();
+        mBubbleContainer.setController(mStackAnimationController);
+        mIsAnimating = false;
+    }
+
+    void onDragged(float x, float y) {
+        // TODO: We can drag if animating - just need to reroute inflight anims to drag point.
+        if (mIsExpanded) {
+            return;
+        }
+
+        mStackAnimationController.moveFirstBubbleWithStackFollowing(x, y);
+    }
+
+    void onDragFinish(float x, float y, float velX, float velY) {
+        // TODO: Add fling to bottom to dismiss.
+
+        if (mIsExpanded || mIsAnimating) {
+            return;
+        }
+
+        final boolean stackOnLeftSide = x
+                - mBubbleContainer.getChildAt(0).getWidth() / 2
+                < mDisplaySize.x / 2;
+
+        final boolean stackShouldFlingLeft = stackOnLeftSide
+                ? velX < ESCAPE_VELOCITY
+                : velX < -ESCAPE_VELOCITY;
+
+        final RectF stackBounds = mStackAnimationController.getAllowableStackPositionRegion();
+
+        // Target X translation (either the left or right side of the screen).
+        final float destinationRelativeX = stackShouldFlingLeft
+                ? stackBounds.left : stackBounds.right;
+
+        // Minimum velocity required for the stack to make it to the side of the screen.
+        final float escapeVelocity = getMinXVelocity(
+                x,
+                destinationRelativeX,
+                FLING_FRICTION_X);
+
+        // Use the touch event's velocity if it's sufficient, otherwise use the minimum velocity so
+        // that it'll make it all the way to the side of the screen.
+        final float startXVelocity = stackShouldFlingLeft
+                ? Math.min(escapeVelocity, velX)
+                : Math.max(escapeVelocity, velX);
+
+        mStackAnimationController.flingThenSpringFirstBubbleWithStackFollowing(
+                DynamicAnimation.TRANSLATION_X,
+                startXVelocity,
+                FLING_FRICTION_X,
+                new SpringForce()
+                        .setStiffness(SpringForce.STIFFNESS_LOW)
+                        .setDampingRatio(SPRING_DAMPING_RATIO),
+                destinationRelativeX);
+
+        mStackAnimationController.flingThenSpringFirstBubbleWithStackFollowing(
+                DynamicAnimation.TRANSLATION_Y,
+                velY,
+                FLING_FRICTION_Y,
+                new SpringForce()
+                        .setStiffness(SpringForce.STIFFNESS_LOW)
+                        .setDampingRatio(SPRING_DAMPING_RATIO),
+                /* destination */ null);
+    }
+
+    /**
+     * Minimum velocity, in pixels/second, required to get from x to destX while being slowed by a
+     * given frictional force.
+     *
+     * This is not derived using real math, I just made it up because the math in FlingAnimation
+     * looks hard and this seems to work. It doesn't actually matter because if it doesn't make it
+     * to the edge via Fling, it'll get Spring'd there anyway.
+     *
+     * TODO(tsuji, or someone who likes math): Figure out math.
+     */
+    private float getMinXVelocity(float x, float destX, float friction) {
+        return (destX - x) * (friction * 5) + ESCAPE_VELOCITY;
+    }
+
+    @Override
+    public void getBoundsOnScreen(Rect outRect) {
+        if (!mIsExpanded) {
+            mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
+        } else {
+            mBubbleContainer.getBoundsOnScreen(outRect);
+        }
+    }
+
+    private int getStatusBarHeight() {
+        if (getRootWindowInsets() != null) {
+            return Math.max(
+                    getRootWindowInsets().getSystemWindowInsetTop(),
+                    getRootWindowInsets().getDisplayCutout().getSafeInsetTop());
+        }
+
+        return 0;
     }
 
     private boolean isIntersecting(View view, float x, float y) {
@@ -494,9 +645,8 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             mExpandedViewContainer.setHeaderText(null);
 
         }
-        int pointerPosition = mExpandedBubble.getPosition().x
-                + (mExpandedBubble.getWidth() / 2);
-        mExpandedViewContainer.setPointerPosition(pointerPosition);
+        float pointerPosition = mExpandedBubble.getPosition().x + (mExpandedBubble.getWidth() / 2);
+        mExpandedViewContainer.setPointerPosition((int) pointerPosition);
     }
 
     private void applyCurrentState() {
@@ -506,7 +656,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         if (!mIsExpanded) {
             mExpandedViewContainer.setExpandedView(null);
         } else {
-            mExpandedViewContainer.setTranslationY(mBubbleContainer.getHeight());
             View expandedView = mExpandedViewContainer.getExpandedView();
             if (expandedView instanceof ActivityView) {
                 if (expandedView.isAttachedToWindow()) {
@@ -521,53 +670,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
             bv.updateDotVisibility();
             bv.setZ(bubbsCount - i);
-
-            int transX = mIsExpanded ? (bv.getWidth() + mBubblePadding) * i : mBubblePadding * i;
-            ViewState viewState = new ViewState();
-            viewState.initFrom(bv);
-            viewState.xTranslation = transX;
-            viewState.applyToView(bv);
-
-            if (mIsExpanded) {
-                // Save the position so we can magnet back, tag is retrieved in BubbleTouchHandler
-                bv.setTag(new Point(transX, 0));
-            }
-        }
-    }
-
-    private void animateStackExpansion(Runnable endRunnable) {
-        int childCount = mBubbleContainer.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            BubbleView child = (BubbleView) mBubbleContainer.getChildAt(i);
-            int transX = mIsExpanded ? (mBubbleSize + mBubblePadding) * i : mBubblePadding * i;
-            int duration = childCount > 1 ? 200 : 0;
-            if (mIsExpanded) {
-                // Save the position so we can magnet back, tag is retrieved in BubbleTouchHandler
-                child.setTag(new Point(transX, 0));
-            }
-            ViewPropertyAnimator anim = child
-                    .animate()
-                    .setStartDelay(15 * i)
-                    .setDuration(duration)
-                    .setInterpolator(mIsExpanded
-                            ? new OvershootInterpolator()
-                            : new AccelerateInterpolator())
-                    .translationY(0)
-                    .translationX(transX);
-            final int fi = i;
-            // Probably want this choreographed with translation somehow / make it snappier
-            anim.withStartAction(() -> mIsAnimating = true);
-            anim.withEndAction(() -> {
-                if (endRunnable != null) {
-                    endRunnable.run();
-                }
-                if (fi == mBubbleContainer.getChildCount() - 1) {
-                    applyCurrentState();
-                    mIsAnimating = false;
-                    requestUpdate();
-                }
-            });
-            anim.start();
         }
     }
 
