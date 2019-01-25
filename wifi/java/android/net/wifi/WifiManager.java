@@ -947,8 +947,8 @@ public class WifiManager {
     /**
      * Directed broadcast intent action indicating that the device has connected to one of the
      * network suggestions provided by the app. This will be sent post connection to a network
-     * which was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag
-     * set.
+     * which was created with {@link WifiNetworkSuggestion.Builder#setIsAppInteractionRequired()}
+     * flag set.
      * <p>
      * Note: The broadcast is sent to the app only if it holds
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
@@ -1171,7 +1171,7 @@ public class WifiManager {
      * of {@link WifiConfiguration} objects.
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1326,7 +1326,7 @@ public class WifiManager {
      *         Returns {@code -1} on failure.
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1361,7 +1361,7 @@ public class WifiManager {
      *         existing network.
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1650,8 +1650,8 @@ public class WifiManager {
      * for a detailed explanation of the parameters.
      * When the device decides to connect to one of the provided network suggestions, platform sends
      * a directed broadcast {@link #ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION} to the app if
-     * the network was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()}
-     * flag set and the app holds
+     * the network was created with {@link WifiNetworkSuggestion.Builder
+     * #setIsAppInteractionRequired()} flag set and the app holds
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
      *<p>
      * NOTE:
@@ -1839,7 +1839,7 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1883,7 +1883,7 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1915,7 +1915,7 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1938,7 +1938,7 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1962,7 +1962,7 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
@@ -1986,7 +1986,7 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      *
      * @deprecated
-     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * a) See {@link WifiNetworkSpecifier.Builder#build()} for new
      * mechanism to trigger connection to a Wi-Fi network.
      * b) See {@link #addNetworkSuggestions(List)},
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
