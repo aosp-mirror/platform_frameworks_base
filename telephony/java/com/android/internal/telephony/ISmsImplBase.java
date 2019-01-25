@@ -18,6 +18,8 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.net.Uri;
+import android.os.Bundle;
+import android.telephony.IFinancialSmsCallback;
 
 import java.util.List;
 
@@ -192,6 +194,12 @@ public class ISmsImplBase extends ISms.Stub {
     @Override
     public String createAppSpecificSmsTokenWithPackageInfo(
             int subId, String callingPkg, String prefixes, PendingIntent intent) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void getSmsMessagesForFinancialApp(
+            int subId, String callingPkg, Bundle params, IFinancialSmsCallback callback) {
         throw new UnsupportedOperationException();
     }
 }

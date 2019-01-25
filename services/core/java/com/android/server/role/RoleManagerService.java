@@ -33,16 +33,24 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
+import android.database.CursorWindow;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.service.sms.FinancialSmsService;
+import android.telephony.IFinancialSmsCallback;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.PackageUtils;
@@ -619,6 +627,52 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             }
 
             dumpOutputStream.flush();
+        }
+
+        /**
+         * Get filtered SMS messages for financial app.
+         */
+        @Override
+        public void getSmsMessagesForFinancialApp(
+                String callingPkg, Bundle params, IFinancialSmsCallback callback) {
+            int mode = PermissionChecker.checkCallingOrSelfPermission(
+                    getContext(),
+                    AppOpsManager.OPSTR_SMS_FINANCIAL_TRANSACTIONS);
+
+            if (mode == PermissionChecker.PERMISSION_GRANTED) {
+                FinancialSmsManager financialSmsManager = new FinancialSmsManager(getContext());
+                financialSmsManager.getSmsMessages(new RemoteCallback((result) -> {
+                    CursorWindow messages = null;
+                    if (result == null) {
+                        Slog.w(LOG_TAG, "result is null.");
+                    } else {
+                        messages = result.getParcelable(FinancialSmsService.EXTRA_SMS_MSGS);
+                    }
+                    try {
+                        callback.onGetSmsMessagesForFinancialApp(messages);
+                    } catch (RemoteException e) {
+                        // do nothing
+                    }
+                }), params);
+            } else {
+                try {
+                    callback.onGetSmsMessagesForFinancialApp(null);
+                } catch (RemoteException e) {
+                    // do nothing
+                }
+            }
+        }
+
+        private int getUidForPackage(String packageName) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return getContext().getPackageManager().getApplicationInfo(packageName,
+                        PackageManager.MATCH_ANY_USER).uid;
+            } catch (NameNotFoundException nnfe) {
+                return -1;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 }
