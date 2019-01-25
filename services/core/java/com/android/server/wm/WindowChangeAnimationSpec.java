@@ -53,13 +53,15 @@ public class WindowChangeAnimationSpec implements AnimationSpec {
     private Animation mAnimation;
     private final boolean mIsThumbnail;
 
+    static final int ANIMATION_DURATION = AppTransition.DEFAULT_APP_TRANSITION_DURATION;
+
     public WindowChangeAnimationSpec(Rect startBounds, Rect endBounds, DisplayInfo displayInfo,
-            long duration, boolean isAppAnimation, boolean isThumbnail) {
+            float durationScale, boolean isAppAnimation, boolean isThumbnail) {
         mStartBounds = new Rect(startBounds);
         mEndBounds = new Rect(endBounds);
         mIsAppAnimation = isAppAnimation;
         mIsThumbnail = isThumbnail;
-        createBoundsInterpolator(duration, displayInfo);
+        createBoundsInterpolator((int) (ANIMATION_DURATION * durationScale), displayInfo);
     }
 
     @Override
