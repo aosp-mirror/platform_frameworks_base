@@ -112,14 +112,12 @@ public final class DeviceConfig {
     @SystemApi
     public interface IntelligenceAttention {
         String NAMESPACE = "intelligence_attention";
-        /**
-         * If {@code true}, enables the attention check.
-         */
-        String PROPERTY_ATTENTION_CHECK_ENABLED = "attention_check_enabled";
-        /**
-         * Settings for performing the attention check.
-         */
-        String PROPERTY_ATTENTION_CHECK_SETTINGS = "attention_check_settings";
+
+        /** If {@code true}, enables the attention features. */
+        String PROPERTY_ATTENTION_ENABLED = "attention_enabled";
+
+        /** Settings for the attention features. */
+        String PROPERTY_ATTENTION_SETTINGS = "attention_settings";
     }
 
     /**
@@ -179,6 +177,22 @@ public final class DeviceConfig {
          * {@link com.android.server.am.ActivityManagerConstants}.
          */
         String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
+    }
+
+    /**
+     * Namespace for {@link AttentionManagerService} related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface AttentionManagerService {
+        String NAMESPACE = "attention_manager_service";
+
+        /** If {@code true}, enables {@link AttentionManagerService} features. */
+        String PROPERTY_SERVICE_ENABLED = "service_enabled";
+
+        /** Allows a CTS to inject a fake implementation. */
+        String PROPERTY_COMPONENT_NAME = "component_name";
     }
 
     /**

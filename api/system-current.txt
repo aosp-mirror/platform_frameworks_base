@@ -5743,6 +5743,12 @@ package android.provider {
     field public static final String NAMESPACE = "activity_manager";
   }
 
+  public static interface DeviceConfig.AttentionManagerService {
+    field public static final String NAMESPACE = "attention_manager_service";
+    field public static final String PROPERTY_COMPONENT_NAME = "component_name";
+    field public static final String PROPERTY_SERVICE_ENABLED = "service_enabled";
+  }
+
   public static interface DeviceConfig.FsiBoot {
     field public static final String NAMESPACE = "fsi_boot";
     field public static final String OOB_ENABLED = "oob_enabled";
@@ -5751,8 +5757,8 @@ package android.provider {
 
   public static interface DeviceConfig.IntelligenceAttention {
     field public static final String NAMESPACE = "intelligence_attention";
-    field public static final String PROPERTY_ATTENTION_CHECK_ENABLED = "attention_check_enabled";
-    field public static final String PROPERTY_ATTENTION_CHECK_SETTINGS = "attention_check_settings";
+    field public static final String PROPERTY_ATTENTION_ENABLED = "attention_enabled";
+    field public static final String PROPERTY_ATTENTION_SETTINGS = "attention_settings";
   }
 
   public static interface DeviceConfig.OnPropertyChangedListener {
