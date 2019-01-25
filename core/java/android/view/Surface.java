@@ -57,7 +57,8 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
 
     private static native long nativeCreateFromSurfaceControl(long surfaceControlNativeObject);
-    private static native long nativeGetFromSurfaceControl(long surfaceControlNativeObject);
+    private static native long nativeGetFromSurfaceControl(long surfaceObject,
+            long surfaceControlNativeObject);
 
     private static native long nativeLockCanvas(long nativeObject, Canvas canvas, Rect dirty)
             throws OutOfResourcesException;
@@ -519,9 +520,12 @@ public class Surface implements Parcelable {
             throw new NullPointerException(
                     "null SurfaceControl native object. Are you using a released SurfaceControl?");
         }
-        long newNativeObject = nativeGetFromSurfaceControl(surfaceControlPtr);
+        long newNativeObject = nativeGetFromSurfaceControl(mNativeObject, surfaceControlPtr);
 
         synchronized (mLock) {
+            if (newNativeObject == mNativeObject) {
+                return;
+            }
             if (mNativeObject != 0) {
                 nativeRelease(mNativeObject);
             }
