@@ -87,6 +87,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>For more information about using a ContentResolver with content providers, read the
  * <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
  * developer guide.</p>
+ * </div>
  */
 public abstract class ContentResolver implements ContentInterface {
     /**
