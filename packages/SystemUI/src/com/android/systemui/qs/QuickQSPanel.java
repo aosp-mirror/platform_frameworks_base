@@ -274,8 +274,6 @@ public class QuickQSPanel extends QSPanel {
                     if (record.tileView.getVisibility() == GONE) continue;
                     previousView = record.tileView.updateAccessibilityOrder(previousView);
                 }
-                mRecords.get(0).tileView.setAccessibilityTraversalAfter(
-                        R.id.alarm_status_collapsed);
                 mRecords.get(mRecords.size() - 1).tileView.setAccessibilityTraversalBefore(
                         R.id.expand_indicator);
             }
