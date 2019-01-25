@@ -39,6 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:id="@+id/notification_media_content"
         >
         <LinearLayout
             android:id="@+id/notification_main_column"
@@ -84,5 +85,9 @@
                 android:id="@+id/media_seamless"
             />
         </LinearLayout>
+        <ViewStub android:id="@+id/notification_media_seekbar_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+        />
     </LinearLayout>
 </com.android.internal.widget.MediaNotificationView>
