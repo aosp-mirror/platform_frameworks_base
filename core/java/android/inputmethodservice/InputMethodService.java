@@ -346,6 +346,13 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public static final int IME_VISIBLE = 0x2;
 
+    /**
+     * @hide
+     * The IME is active and ready with views but set invisible.
+     * This flag cannot be combined with {@link #IME_VISIBLE}.
+     */
+    public static final int IME_INVISIBLE = 0x4;
+
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
     private static final int BACK_DISPOSITION_MAX = BACK_DISPOSITION_ADJUST_NOTHING;
@@ -362,10 +369,19 @@ public class InputMethodService extends AbstractInputMethodService {
     View mRootView;
     SoftInputWindow mWindow;
     boolean mInitialized;
-    boolean mWindowCreated;
-    boolean mWindowVisible;
-    boolean mWindowWasVisible;
+    boolean mViewsCreated;
+    // IME views visibility.
+    boolean mDecorViewVisible;
+    boolean mDecorViewWasVisible;
     boolean mInShowWindow;
+    // True if pre-rendering of IME views/window is supported.
+    boolean mCanPreRender;
+    // If IME is pre-rendered.
+    boolean mIsPreRendered;
+    // IME window visibility.
+    // Use (mDecorViewVisible && mWindowVisible) to check if IME is visible to the user.
+    boolean mWindowVisible;
+
     ViewGroup mFullscreenArea;
     FrameLayout mExtractFrame;
     FrameLayout mCandidatesFrame;
@@ -552,15 +568,18 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
+        public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
-                @NonNull IBinder startInputToken) {
+                @NonNull IBinder startInputToken, boolean shouldPreRenderIme) {
             mPrivOps.reportStartInput(startInputToken);
-            // This needs to be dispatched to interface methods rather than doStartInput().
-            // Otherwise IME developers who have overridden those interface methods will lose
-            // notifications.
-            super.dispatchStartInputWithToken(inputConnection, editorInfo, restarting,
-                    startInputToken);
+            mCanPreRender = shouldPreRenderIme;
+            if (DEBUG) Log.v(TAG, "Will Pre-render IME: " + mCanPreRender);
+
+            if (restarting) {
+                restartInput(inputConnection, editorInfo);
+            } else {
+                startInput(inputConnection, editorInfo);
+            }
         }
 
         /**
@@ -570,14 +589,27 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
-            boolean wasVis = isInputViewShown();
-            mShowInputFlags = 0;
-            mShowInputRequested = false;
-            doHideWindow();
+            final boolean wasVisible = mIsPreRendered
+                    ? mDecorViewVisible && mWindowVisible : isInputViewShown();
+            if (mIsPreRendered) {
+                // TODO: notify visibility to insets consumer.
+                if (DEBUG) {
+                    Log.v(TAG, "Making IME window invisible");
+                }
+                setImeWindowStatus(IME_ACTIVE | IME_INVISIBLE, mBackDisposition);
+                onPreRenderedWindowVisibilityChanged(false /* setVisible */);
+            } else {
+                mShowInputFlags = 0;
+                mShowInputRequested = false;
+                doHideWindow();
+            }
+            final boolean isVisible = mIsPreRendered
+                    ? mDecorViewVisible && mWindowVisible : isInputViewShown();
+            final boolean visibilityChanged = isVisible != wasVisible;
             if (resultReceiver != null) {
-                resultReceiver.send(wasVis != isInputViewShown()
+                resultReceiver.send(visibilityChanged
                         ? InputMethodManager.RESULT_HIDDEN
-                        : (wasVis ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                        : (wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
         }
@@ -589,17 +621,28 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void showSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
-            boolean wasVis = isInputViewShown();
+            final boolean wasVisible = mIsPreRendered
+                    ? mDecorViewVisible && mWindowVisible : isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
-                showWindow(true);
+                if (mIsPreRendered) {
+                    // TODO: notify visibility to insets consumer.
+                    if (DEBUG) {
+                        Log.v(TAG, "Making IME window visible");
+                    }
+                    onPreRenderedWindowVisibilityChanged(true /* setVisible */);
+                } else {
+                    showWindow(true);
+                }
             }
             // If user uses hard keyboard, IME button should always be shown.
-            setImeWindowStatus(mapToImeWindowStatus(isInputViewShown()), mBackDisposition);
-
+            setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+            final boolean isVisible = mIsPreRendered
+                    ? mDecorViewVisible && mWindowVisible : isInputViewShown();
+            final boolean visibilityChanged = isVisible != wasVisible;
             if (resultReceiver != null) {
-                resultReceiver.send(wasVis != isInputViewShown()
+                resultReceiver.send(visibilityChanged
                         ? InputMethodManager.RESULT_SHOWN
-                        : (wasVis ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                        : (wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
         }
@@ -972,7 +1015,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     void initViews() {
         mInitialized = false;
-        mWindowCreated = false;
+        mViewsCreated = false;
         mShowInputRequested = false;
         mShowInputFlags = 0;
 
@@ -1046,7 +1089,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void resetStateForNewConfiguration() {
-        boolean visible = mWindowVisible;
+        boolean visible = mDecorViewVisible;
         int showFlags = mShowInputFlags;
         boolean showingInput = mShowInputRequested;
         CompletionInfo[] completions = mCurCompletions;
@@ -1129,7 +1172,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         mBackDisposition = disposition;
-        setImeWindowStatus(mapToImeWindowStatus(isInputViewShown()), mBackDisposition);
+        setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
     }
 
     /**
@@ -1380,7 +1423,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mExtractFrame.setVisibility(View.GONE);
         }
         updateCandidatesVisibility(mCandidatesVisibility == View.VISIBLE);
-        if (mWindowWasVisible && mFullscreenArea.getVisibility() != vis) {
+        if (mDecorViewWasVisible && mFullscreenArea.getVisibility() != vis) {
             int animRes = mThemeAttrs.getResourceId(vis == View.VISIBLE
                     ? com.android.internal.R.styleable.InputMethodService_imeExtractEnterAnimation
                     : com.android.internal.R.styleable.InputMethodService_imeExtractExitAnimation,
@@ -1439,7 +1482,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void updateInputViewShown() {
         boolean isShown = mShowInputRequested && onEvaluateInputViewShown();
-        if (mIsInputViewShown != isShown && mWindowVisible) {
+        if (mIsInputViewShown != isShown && mDecorViewVisible) {
             mIsInputViewShown = isShown;
             mInputFrame.setVisibility(isShown ? View.VISIBLE : View.GONE);
             if (mInputView == null) {
@@ -1458,14 +1501,14 @@ public class InputMethodService extends AbstractInputMethodService {
     public boolean isShowInputRequested() {
         return mShowInputRequested;
     }
-    
+
     /**
      * Return whether the soft input view is <em>currently</em> shown to the
      * user.  This is the state that was last determined and
      * applied by {@link #updateInputViewShown()}.
      */
     public boolean isInputViewShown() {
-        return mIsInputViewShown && mWindowVisible;
+        return mCanPreRender ? mWindowVisible : mIsInputViewShown && mDecorViewVisible;
     }
 
     /**
@@ -1499,7 +1542,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void setCandidatesViewShown(boolean shown) {
         updateCandidatesVisibility(shown);
-        if (!mShowInputRequested && mWindowVisible != shown) {
+        if (!mShowInputRequested && mDecorViewVisible != shown) {
             // If we are being asked to show the candidates view while the app
             // has not asked for the input view to be shown, then we need
             // to update whether the window is shown.
@@ -1804,7 +1847,8 @@ public class InputMethodService extends AbstractInputMethodService {
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
-                + " mWindowCreated=" + mWindowCreated
+                + " mViewsCreated=" + mViewsCreated
+                + " mDecorViewVisible=" + mDecorViewVisible
                 + " mWindowVisible=" + mWindowVisible
                 + " mInputStarted=" + mInputStarted
                 + " mShowInputFlags=" + mShowInputFlags);
@@ -1814,18 +1858,42 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
 
-        mWindowWasVisible = mWindowVisible;
+        mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
-        showWindowInner(showInput);
-        mWindowWasVisible = true;
+        boolean isPreRenderedAndInvisible = mIsPreRendered && !mWindowVisible;
+        final int previousImeWindowStatus =
+                (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
+                        ? (isPreRenderedAndInvisible ? IME_INVISIBLE : IME_VISIBLE) : 0);
+        startViews(prepareWindow(showInput));
+        final int nextImeWindowStatus = mapToImeWindowStatus();
+        if (previousImeWindowStatus != nextImeWindowStatus) {
+            setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
+        }
+
+        // compute visibility
+        onWindowShown();
+        mIsPreRendered = mCanPreRender;
+        if (mIsPreRendered) {
+            onPreRenderedWindowVisibilityChanged(true /* setVisible */);
+        } else {
+            // Pre-rendering not supported.
+            if (DEBUG) Log.d(TAG, "No pre-rendering supported");
+            mWindowVisible = true;
+        }
+
+        // request draw for the IME surface.
+        // When IME is not pre-rendered, this will actually show the IME.
+        if ((previousImeWindowStatus & IME_ACTIVE) == 0) {
+            if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
+            mWindow.show();
+        }
+        mDecorViewWasVisible = true;
         mInShowWindow = false;
     }
 
-    void showWindowInner(boolean showInput) {
+    private boolean prepareWindow(boolean showInput) {
         boolean doShowInput = false;
-        final int previousImeWindowStatus =
-                (mWindowVisible ? IME_ACTIVE : 0) | (isInputViewShown() ? IME_VISIBLE : 0);
-        mWindowVisible = true;
+        mDecorViewVisible = true;
         if (!mShowInputRequested && mInputStarted && showInput) {
             doShowInput = true;
             mShowInputRequested = true;
@@ -1836,8 +1904,8 @@ public class InputMethodService extends AbstractInputMethodService {
         updateFullscreenMode();
         updateInputViewShown();
 
-        if (!mWindowCreated) {
-            mWindowCreated = true;
+        if (!mViewsCreated) {
+            mViewsCreated = true;
             initialize();
             if (DEBUG) Log.v(TAG, "CALL: onCreateCandidatesView");
             View v = onCreateCandidatesView();
@@ -1846,6 +1914,10 @@ public class InputMethodService extends AbstractInputMethodService {
                 setCandidatesView(v);
             }
         }
+        return doShowInput;
+    }
+
+    private void startViews(boolean doShowInput) {
         if (mShowInputRequested) {
             if (!mInputViewStarted) {
                 if (DEBUG) Log.v(TAG, "CALL: onStartInputView");
@@ -1857,29 +1929,26 @@ public class InputMethodService extends AbstractInputMethodService {
             mCandidatesViewStarted = true;
             onStartCandidatesView(mInputEditorInfo, false);
         }
-        
-        if (doShowInput) {
-            startExtractingText(false);
-        }
+        if (doShowInput) startExtractingText(false);
+    }
 
-        final int nextImeWindowStatus = mapToImeWindowStatus(isInputViewShown());
-        if (previousImeWindowStatus != nextImeWindowStatus) {
-            setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
-        }
-        if ((previousImeWindowStatus & IME_ACTIVE) == 0) {
-            if (DEBUG) Log.v(TAG, "showWindow: showing!");
+    private void onPreRenderedWindowVisibilityChanged(boolean setVisible) {
+        mWindowVisible = setVisible;
+        mShowInputFlags = setVisible ? mShowInputFlags : 0;
+        mShowInputRequested = setVisible;
+        mDecorViewVisible = setVisible;
+        if (setVisible) {
             onWindowShown();
-            mWindow.show();
         }
     }
 
-    private void finishViews() {
+    private void finishViews(boolean finishingInput) {
         if (mInputViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishInputView");
-            onFinishInputView(false);
+            onFinishInputView(finishingInput);
         } else if (mCandidatesViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishCandidatesView");
-            onFinishCandidatesView(false);
+            onFinishCandidatesView(finishingInput);
         }
         mInputViewStarted = false;
         mCandidatesViewStarted = false;
@@ -1891,12 +1960,15 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     public void hideWindow() {
-        finishViews();
-        if (mWindowVisible) {
+        if (DEBUG) Log.v(TAG, "CALL: hideWindow");
+        mIsPreRendered = false;
+        mWindowVisible = false;
+        finishViews(false /* finishingInput */);
+        if (mDecorViewVisible) {
             mWindow.hide();
-            mWindowVisible = false;
+            mDecorViewVisible = false;
             onWindowHidden();
-            mWindowWasVisible = false;
+            mDecorViewWasVisible = false;
         }
         updateFullscreenMode();
     }
@@ -1956,15 +2028,8 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     void doFinishInput() {
-        if (mInputViewStarted) {
-            if (DEBUG) Log.v(TAG, "CALL: onFinishInputView");
-            onFinishInputView(true);
-        } else if (mCandidatesViewStarted) {
-            if (DEBUG) Log.v(TAG, "CALL: onFinishCandidatesView");
-            onFinishCandidatesView(true);
-        }
-        mInputViewStarted = false;
-        mCandidatesViewStarted = false;
+        if (DEBUG) Log.v(TAG, "CALL: doFinishInput");
+        finishViews(true /* finishingInput */);
         if (mInputStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishInput");
             onFinishInput();
@@ -1984,7 +2049,7 @@ public class InputMethodService extends AbstractInputMethodService {
         initialize();
         if (DEBUG) Log.v(TAG, "CALL: onStartInput");
         onStartInput(attribute, restarting);
-        if (mWindowVisible) {
+        if (mDecorViewVisible) {
             if (mShowInputRequested) {
                 if (DEBUG) Log.v(TAG, "CALL: onStartInputView");
                 mInputViewStarted = true;
@@ -1995,6 +2060,31 @@ public class InputMethodService extends AbstractInputMethodService {
                 mCandidatesViewStarted = true;
                 onStartCandidatesView(mInputEditorInfo, restarting);
             }
+        } else if (mCanPreRender && mInputEditorInfo != null && mStartedInputConnection != null) {
+            // Pre-render IME views and window when real EditorInfo is available.
+            // pre-render IME window and keep it invisible.
+            if (DEBUG) Log.v(TAG, "Pre-Render IME for " + mInputEditorInfo.fieldName);
+            if (mInShowWindow) {
+                Log.w(TAG, "Re-entrance in to showWindow");
+                return;
+            }
+
+            mDecorViewWasVisible = mDecorViewVisible;
+            mInShowWindow = true;
+            startViews(prepareWindow(true /* showInput */));
+
+            // compute visibility
+            mIsPreRendered = true;
+            onPreRenderedWindowVisibilityChanged(false /* setVisible */);
+
+            // request draw for the IME surface.
+            // When IME is not pre-rendered, this will actually show the IME.
+            if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
+            mWindow.show();
+            mDecorViewWasVisible = true;
+            mInShowWindow = false;
+        } else {
+            mIsPreRendered = false;
         }
     }
     
@@ -2153,7 +2243,7 @@ public class InputMethodService extends AbstractInputMethodService {
             // consume the back key.
             if (doIt) requestHideSelf(0);
             return true;
-        } else if (mWindowVisible) {
+        } else if (mDecorViewVisible) {
             if (mCandidatesVisibility == View.VISIBLE) {
                 // If we are showing candidates even if no input area, then
                 // hide them.
@@ -2179,7 +2269,6 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         return mExtractEditText;
     }
-
 
     /**
      * Called back when a {@link KeyEvent} is forwarded from the target application.
@@ -2893,8 +2982,11 @@ public class InputMethodService extends AbstractInputMethodService {
         inputContentInfo.setUriToken(uriToken);
     }
 
-    private static int mapToImeWindowStatus(boolean isInputViewShown) {
-        return IME_ACTIVE | (isInputViewShown ? IME_VISIBLE : 0);
+    private int mapToImeWindowStatus() {
+        return IME_ACTIVE
+                | (isInputViewShown()
+                        ? (mCanPreRender ? (mWindowVisible ? IME_VISIBLE : IME_INVISIBLE)
+                        : IME_VISIBLE) : 0);
     }
 
     /**
@@ -2904,9 +2996,10 @@ public class InputMethodService extends AbstractInputMethodService {
     @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method service state for " + this + ":");
-        p.println("  mWindowCreated=" + mWindowCreated);
-        p.println("  mWindowVisible=" + mWindowVisible
-                + " mWindowWasVisible=" + mWindowWasVisible
+        p.println("  mViewsCreated=" + mViewsCreated);
+        p.println("  mDecorViewVisible=" + mDecorViewVisible
+                + " mDecorViewWasVisible=" + mDecorViewWasVisible
+                + " mWindowVisible=" + mWindowVisible
                 + " mInShowWindow=" + mInShowWindow);
         p.println("  Configuration=" + getResources().getConfiguration());
         p.println("  mToken=" + mToken);
@@ -2926,6 +3019,8 @@ public class InputMethodService extends AbstractInputMethodService {
         
         p.println("  mShowInputRequested=" + mShowInputRequested
                 + " mLastShowInputRequested=" + mLastShowInputRequested
+                + " mCanPreRender=" + mCanPreRender
+                + " mIsPreRendered=" + mIsPreRendered
                 + " mShowInputFlags=0x" + Integer.toHexString(mShowInputFlags));
         p.println("  mCandidatesVisibility=" + mCandidatesVisibility
                 + " mFullscreenApplied=" + mFullscreenApplied
