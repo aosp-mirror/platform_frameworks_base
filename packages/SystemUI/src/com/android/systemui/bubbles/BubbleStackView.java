@@ -33,6 +33,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -590,9 +591,12 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
     private int getStatusBarHeight() {
         if (getRootWindowInsets() != null) {
+            WindowInsets insets = getRootWindowInsets();
             return Math.max(
-                    getRootWindowInsets().getSystemWindowInsetTop(),
-                    getRootWindowInsets().getDisplayCutout().getSafeInsetTop());
+                    insets.getSystemWindowInsetTop(),
+                    insets.getDisplayCutout() != null
+                            ? insets.getDisplayCutout().getSafeInsetTop()
+                            : 0);
         }
 
         return 0;

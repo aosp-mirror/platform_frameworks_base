@@ -98,7 +98,9 @@ public class ExpandedAnimationController
         if (insets != null) {
             return mBubblePaddingPx + Math.max(
                     insets.getSystemWindowInsetTop(),
-                    insets.getDisplayCutout().getSafeInsetTop());
+                    insets.getDisplayCutout() != null
+                            ? insets.getDisplayCutout().getSafeInsetTop()
+                            : 0);
         }
 
         return mBubblePaddingPx;
