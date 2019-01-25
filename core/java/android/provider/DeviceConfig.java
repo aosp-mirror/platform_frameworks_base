@@ -175,6 +175,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
 
     /**
+     * Namespace for features related to the Package Manager Service.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
+
+    /**
      * Namespace for Rollback flags that are applied immediately.
      *
      * @hide
