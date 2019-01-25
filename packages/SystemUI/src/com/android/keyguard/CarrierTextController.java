@@ -46,17 +46,11 @@ public class CarrierTextController {
     private static final String TAG = "CarrierTextController";
 
     private final boolean mIsEmergencyCallCapable;
-
     private boolean mTelephonyCapable;
-
     private boolean mShowMissingSim;
-
     private boolean mShowAirplaneMode;
-
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-
     private WifiManager mWifiManager;
-
     private boolean[] mSimErrorState = new boolean[TelephonyManager.getDefault().getPhoneCount()];
     private CarrierTextCallback mCarrierTextCallback;
     private Context mContext;
@@ -132,10 +126,8 @@ public class CarrierTextController {
     /**
      * Controller that provides updates on text with carriers names or SIM status.
      * Used by {@link CarrierText}.
-     * @param context
+     *
      * @param separator Separator between different parts of the text
-     * @param showAirplaneMode
-     * @param showMissingSim
      */
     public CarrierTextController(Context context, CharSequence separator, boolean showAirplaneMode,
             boolean showMissingSim) {
@@ -186,6 +178,7 @@ public class CarrierTextController {
     /**
      * Sets the listening status of this controller. If the callback is null, it is set to
      * not listening
+     *
      * @param callback Callback to provide text updates
      */
     public void setListening(CarrierTextCallback callback) {
@@ -199,7 +192,7 @@ public class CarrierTextController {
             } else {
                 // Don't listen and clear out the text when the device isn't a phone.
                 mKeyguardUpdateMonitor = null;
-                callback.updateCarrierText("", false);
+                callback.updateCarrierInfo(new CarrierTextCallbackInfo("", null, false, null));
             }
         } else {
             mCarrierTextCallback = null;
@@ -217,9 +210,11 @@ public class CarrierTextController {
 
         List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
         final int numSubs = subs.size();
+        final int[] subsIds = new int[numSubs];
         if (DEBUG) Log.d(TAG, "updateCarrierText(): " + numSubs);
         for (int i = 0; i < numSubs; i++) {
             int subId = subs.get(i).getSubscriptionId();
+            subsIds[i] = subId;
             IccCardConstants.State simState = mKeyguardUpdateMonitor.getSimState(subId);
             CharSequence carrierName = subs.get(i).getCarrierName();
             CharSequence carrierTextForSimState = getCarrierTextForSimState(simState, carrierName);
@@ -294,9 +289,11 @@ public class CarrierTextController {
         }
 
         if (mCarrierTextCallback != null) {
-            mCarrierTextCallback.updateCarrierText(displayText, anySimReadyAndInService);
-            mCarrierTextCallback.updateCarrierList(
-                    displayText.toString().split(mSeparator.toString()), anySimReadyAndInService);
+            mCarrierTextCallback.updateCarrierInfo(new CarrierTextCallbackInfo(
+                    displayText,
+                    displayText.toString().split(mSeparator.toString()),
+                    anySimReadyAndInService,
+                    subsIds));
         }
 
     }
@@ -482,22 +479,31 @@ public class CarrierTextController {
     }
 
     /**
+     * Data structure for passing information to CarrierTextController subscribers
+     */
+    public static final class CarrierTextCallbackInfo {
+        public final CharSequence carrierText;
+        public final CharSequence[] listOfCarriers;
+        public final boolean anySimReady;
+        public final int[] subscriptionIds;
+
+        CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
+                boolean anySimReady, int[] subscriptionIds) {
+            this.carrierText = carrierText;
+            this.listOfCarriers = listOfCarriers;
+            this.anySimReady = anySimReady;
+            this.subscriptionIds = subscriptionIds;
+        }
+    }
+
+    /**
      * Callback to communicate to Views
      */
     public interface CarrierTextCallback {
         /**
-         * Provides an updated list of carrier names
-         * @param listOfCarriers
-         * @param simsReady Whether at least one SIM is ready and with service
+         * Provides updated carrier information.
          */
-        default void updateCarrierList(CharSequence[] listOfCarriers, boolean simsReady) {};
-
-        /**
-         * Provides an updated full carrier text
-         * @param carrierText
-         * @param simsReady Whether at least one SIM is ready and with service
-         */
-        default void updateCarrierText(CharSequence carrierText, boolean simsReady) {};
+        default void updateCarrierInfo(CarrierTextCallbackInfo info) {};
 
         /**
          * Notifies the View that the device is going to sleep
