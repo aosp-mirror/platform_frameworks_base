@@ -78,15 +78,6 @@ public abstract class RuntimePermissionPresenterService extends Service {
     public abstract List<RuntimePermissionPresentationInfo> onGetAppPermissions(
             @NonNull String packageName);
 
-    /**
-     * Revokes the permission {@code permissionName} for app {@code packageName}
-     *
-     * @param packageName The package for which to revoke
-     * @param permissionName The permission to revoke
-     */
-    public abstract void onRevokeRuntimePermission(@NonNull String packageName,
-            @NonNull String permissionName);
-
     @Override
     public final IBinder onBind(Intent intent) {
         return new IRuntimePermissionPresenter.Stub() {
@@ -98,17 +89,6 @@ public abstract class RuntimePermissionPresenterService extends Service {
                 mHandler.sendMessage(
                         obtainMessage(RuntimePermissionPresenterService::getAppPermissions,
                                 RuntimePermissionPresenterService.this, packageName, callback));
-            }
-
-            @Override
-            public void revokeRuntimePermission(String packageName, String permissionName) {
-                checkNotNull(packageName, "packageName");
-                checkNotNull(permissionName, "permissionName");
-
-                mHandler.sendMessage(
-                        obtainMessage(RuntimePermissionPresenterService::onRevokeRuntimePermission,
-                                RuntimePermissionPresenterService.this, packageName,
-                                permissionName));
             }
         };
     }
