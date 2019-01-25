@@ -450,8 +450,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final boolean ENABLE_FREE_CACHE_V2 =
             SystemProperties.getBoolean("fw.free_cache_v2", true);
 
-    private static final boolean PRECOMPILED_LAYOUT_ENABLED =
-            SystemProperties.getBoolean("view.precompiled_layout_enabled", false);
+    private static final String PRECOMPILE_LAYOUTS = "pm.precompile_layouts";
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -9180,7 +9179,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
-            if (PRECOMPILED_LAYOUT_ENABLED) {
+            if (SystemProperties.getBoolean(PRECOMPILE_LAYOUTS, false)) {
                 mArtManagerService.compileLayouts(pkg);
             }
 
@@ -17747,7 +17746,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (performDexopt) {
             // Compile the layout resources.
-            if (PRECOMPILED_LAYOUT_ENABLED) {
+            if (SystemProperties.getBoolean(PRECOMPILE_LAYOUTS, false)) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "compileLayouts");
                 mArtManagerService.compileLayouts(pkg);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
