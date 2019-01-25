@@ -46,9 +46,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.InetAddresses;
 import android.net.INetd;
-import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
 import android.net.ITetheringStatsProvider;
 import android.net.InterfaceConfiguration;
@@ -63,6 +61,7 @@ import android.net.RouteInfo;
 import android.net.TetherStatsParcel;
 import android.net.UidRange;
 import android.net.shared.NetdService;
+import android.net.shared.NetworkObserverRegistry;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
@@ -206,15 +205,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private INetd mNetdService;
 
-    private final NetdUnsolicitedEventListener mNetdUnsolicitedEventListener;
+    private NMSNetworkObserverRegistry mNetworkObserverRegistry;
 
     private IBatteryStats mBatteryStats;
 
     private final Thread mThread;
     private CountDownLatch mConnectedSignal = new CountDownLatch(1);
-
-    private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
-            new RemoteCallbackList<>();
 
     private final NetworkStatsFactory mStatsFactory = new NetworkStatsFactory();
 
@@ -325,8 +321,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
-        mNetdUnsolicitedEventListener = new NetdUnsolicitedEventListener();
-
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
@@ -345,7 +339,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mFgHandler = null;
         mThread = null;
         mServices = null;
-        mNetdUnsolicitedEventListener = null;
+        mNetworkObserverRegistry = null;
     }
 
     static NetworkManagementService create(Context context, String socket, SystemServices services)
@@ -393,14 +387,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void registerObserver(INetworkManagementEventObserver observer) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        mObservers.register(observer);
+        mNetworkObserverRegistry.registerObserver(observer);
     }
 
     @Override
     public void unregisterObserver(INetworkManagementEventObserver observer) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        mObservers.unregister(observer);
+        mNetworkObserverRegistry.unregisterObserver(observer);
     }
 
     @FunctionalInterface
@@ -408,123 +400,97 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public void sendCallback(INetworkManagementEventObserver o) throws RemoteException;
     }
 
-    private void invokeForAllObservers(NetworkManagementEventCallback eventCallback) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    eventCallback.sendCallback(mObservers.getBroadcastItem(i));
-                } catch (RemoteException | RuntimeException e) {
+    private class NMSNetworkObserverRegistry extends NetworkObserverRegistry {
+        NMSNetworkObserverRegistry(Context context, Handler handler, INetd netd)
+                throws RemoteException {
+            super(context, handler, netd);
+        }
+
+        /**
+         * Notify our observers of a change in the data activity state of the interface
+         */
+        @Override
+        public void notifyInterfaceClassActivity(int type, boolean isActive, long tsNanos,
+                int uid, boolean fromRadio) {
+            final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
+            int powerState = isActive
+                    ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                    : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+
+            if (isMobile) {
+                if (!fromRadio) {
+                    if (mMobileActivityFromRadio) {
+                        // If this call is not coming from a report from the radio itself, but we
+                        // have previously received reports from the radio, then we will take the
+                        // power state to just be whatever the radio last reported.
+                        powerState = mLastPowerStateFromRadio;
+                    }
+                } else {
+                    mMobileActivityFromRadio = true;
+                }
+                if (mLastPowerStateFromRadio != powerState) {
+                    mLastPowerStateFromRadio = powerState;
+                    try {
+                        getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
+                    } catch (RemoteException e) {
+                    }
                 }
             }
-        } finally {
-            mObservers.finishBroadcast();
-        }
-    }
 
-    /**
-     * Notify our observers of an interface status change
-     */
-    private void notifyInterfaceStatusChanged(String iface, boolean up) {
-        invokeForAllObservers(o -> o.interfaceStatusChanged(iface, up));
-    }
-
-    /**
-     * Notify our observers of an interface link state change
-     * (typically, an Ethernet cable has been plugged-in or unplugged).
-     */
-    private void notifyInterfaceLinkStateChanged(String iface, boolean up) {
-        invokeForAllObservers(o -> o.interfaceLinkStateChanged(iface, up));
-    }
-
-    /**
-     * Notify our observers of an interface addition.
-     */
-    private void notifyInterfaceAdded(String iface) {
-        invokeForAllObservers(o -> o.interfaceAdded(iface));
-    }
-
-    /**
-     * Notify our observers of an interface removal.
-     */
-    private void notifyInterfaceRemoved(String iface) {
-        // netd already clears out quota and alerts for removed ifaces; update
-        // our sanity-checking state.
-        mActiveAlerts.remove(iface);
-        mActiveQuotas.remove(iface);
-        invokeForAllObservers(o -> o.interfaceRemoved(iface));
-    }
-
-    /**
-     * Notify our observers of a limit reached.
-     */
-    private void notifyLimitReached(String limitName, String iface) {
-        invokeForAllObservers(o -> o.limitReached(limitName, iface));
-    }
-
-    /**
-     * Notify our observers of a change in the data activity state of the interface
-     */
-    private void notifyInterfaceClassActivity(int type, int powerState, long tsNanos,
-            int uid, boolean fromRadio) {
-        final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
-        if (isMobile) {
-            if (!fromRadio) {
-                if (mMobileActivityFromRadio) {
-                    // If this call is not coming from a report from the radio itself, but we
-                    // have previously received reports from the radio, then we will take the
-                    // power state to just be whatever the radio last reported.
-                    powerState = mLastPowerStateFromRadio;
-                }
-            } else {
-                mMobileActivityFromRadio = true;
-            }
-            if (mLastPowerStateFromRadio != powerState) {
-                mLastPowerStateFromRadio = powerState;
-                try {
-                    getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
-                } catch (RemoteException e) {
+            if (ConnectivityManager.isNetworkTypeWifi(type)) {
+                if (mLastPowerStateFromWifi != powerState) {
+                    mLastPowerStateFromWifi = powerState;
+                    try {
+                        getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
+                    } catch (RemoteException e) {
+                    }
                 }
             }
-        }
 
-        if (ConnectivityManager.isNetworkTypeWifi(type)) {
-            if (mLastPowerStateFromWifi != powerState) {
-                mLastPowerStateFromWifi = powerState;
-                try {
-                    getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
-                } catch (RemoteException e) {
+            if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
+                // Report the change in data activity.  We don't do this if this is a change
+                // on the mobile network, that is not coming from the radio itself, and we
+                // have previously seen change reports from the radio.  In that case only
+                // the radio is the authority for the current state.
+                final boolean active = isActive;
+                super.notifyInterfaceClassActivity(type, isActive, tsNanos, uid, fromRadio);
+            }
+
+            boolean report = false;
+            synchronized (mIdleTimerLock) {
+                if (mActiveIdleTimers.isEmpty()) {
+                    // If there are no idle timers, we are not monitoring activity, so we
+                    // are always considered active.
+                    isActive = true;
+                }
+                if (mNetworkActive != isActive) {
+                    mNetworkActive = isActive;
+                    report = isActive;
                 }
             }
-        }
-
-        boolean isActive = powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
-                || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
-
-        if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
-            // Report the change in data activity.  We don't do this if this is a change
-            // on the mobile network, that is not coming from the radio itself, and we
-            // have previously seen change reports from the radio.  In that case only
-            // the radio is the authority for the current state.
-            final boolean active = isActive;
-            invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
-                    Integer.toString(type), active, tsNanos));
-        }
-
-        boolean report = false;
-        synchronized (mIdleTimerLock) {
-            if (mActiveIdleTimers.isEmpty()) {
-                // If there are no idle timers, we are not monitoring activity, so we
-                // are always considered active.
-                isActive = true;
-            }
-            if (mNetworkActive != isActive) {
-                mNetworkActive = isActive;
-                report = isActive;
+            if (report) {
+                reportNetworkActive();
             }
         }
-        if (report) {
-            reportNetworkActive();
+
+        /**
+         * Notify our observers of an interface removal.
+         */
+        @Override
+        public void notifyInterfaceRemoved(String iface) {
+            // netd already clears out quota and alerts for removed ifaces; update
+            // our sanity-checking state.
+            mActiveAlerts.remove(iface);
+            mActiveQuotas.remove(iface);
+            super.notifyInterfaceRemoved(iface);
+        }
+
+        @Override
+        public void onStrictCleartextDetected(int uid, String hex) throws RemoteException {
+            // Don't need to post to mDaemonHandler because the only thing
+            // that notifyCleartextNetwork does is post to a handler
+            ActivityManager.getService().notifyCleartextNetwork(uid,
+                    HexDump.hexStringToByteArray(hex));
         }
     }
 
@@ -553,7 +519,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return;
             }
             // No current code examines the interface parameter in a global alert. Just pass null.
-            mDaemonHandler.post(() -> notifyLimitReached(LIMIT_GLOBAL_ALERT, null));
+            mDaemonHandler.post(() -> mNetworkObserverRegistry.notifyLimitReached(
+                    LIMIT_GLOBAL_ALERT, null));
         }
     }
 
@@ -585,10 +552,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private void connectNativeNetdService() {
         mNetdService = mServices.getNetd();
         try {
-            mNetdService.registerUnsolicitedEventListener(mNetdUnsolicitedEventListener);
-            if (DBG) Slog.d(TAG, "Register unsolicited event listener");
+            mNetworkObserverRegistry = new NMSNetworkObserverRegistry(
+                    mContext, mDaemonHandler, mNetdService);
+            if (DBG) Slog.d(TAG, "Registered NetworkObserverRegistry");
         } catch (RemoteException | ServiceSpecificException e) {
-            Slog.e(TAG, "Failed to set Netd unsolicited event listener " + e);
+            Slog.wtf(TAG, "Failed to register NetworkObserverRegistry: " + e);
         }
     }
 
@@ -692,120 +660,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     }
 
-    /**
-     * Notify our observers of a new or updated interface address.
-     */
-    private void notifyAddressUpdated(String iface, LinkAddress address) {
-        invokeForAllObservers(o -> o.addressUpdated(iface, address));
-    }
-
-    /**
-     * Notify our observers of a deleted interface address.
-     */
-    private void notifyAddressRemoved(String iface, LinkAddress address) {
-        invokeForAllObservers(o -> o.addressRemoved(iface, address));
-    }
-
-    /**
-     * Notify our observers of DNS server information received.
-     */
-    private void notifyInterfaceDnsServerInfo(String iface, long lifetime, String[] addresses) {
-        invokeForAllObservers(o -> o.interfaceDnsServerInfo(iface, lifetime, addresses));
-    }
-
-    /**
-     * Notify our observers of a route change.
-     */
-    private void notifyRouteChange(boolean updated, RouteInfo route) {
-        if (updated) {
-            invokeForAllObservers(o -> o.routeUpdated(route));
-        } else {
-            invokeForAllObservers(o -> o.routeRemoved(route));
-        }
-    }
-
-    private class NetdUnsolicitedEventListener extends INetdUnsolicitedEventListener.Stub {
-        @Override
-        public void onInterfaceClassActivityChanged(boolean isActive,
-                int label, long timestamp, int uid) throws RemoteException {
-            final long timestampNanos;
-            if (timestamp <= 0) {
-                timestampNanos = SystemClock.elapsedRealtimeNanos();
-            } else {
-                timestampNanos = timestamp;
-            }
-            mDaemonHandler.post(() -> notifyInterfaceClassActivity(label,
-                    isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
-                    : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                    timestampNanos, uid, false));
-        }
-
-        @Override
-        public void onQuotaLimitReached(String alertName, String ifName)
-                throws RemoteException {
-            mDaemonHandler.post(() -> notifyLimitReached(alertName, ifName));
-        }
-
-        @Override
-        public void onInterfaceDnsServerInfo(String ifName,
-                long lifetime, String[] servers) throws RemoteException {
-            mDaemonHandler.post(() -> notifyInterfaceDnsServerInfo(ifName, lifetime, servers));
-        }
-
-        @Override
-        public void onInterfaceAddressUpdated(String addr,
-                String ifName, int flags, int scope) throws RemoteException {
-            final LinkAddress address = new LinkAddress(addr, flags, scope);
-            mDaemonHandler.post(() -> notifyAddressUpdated(ifName, address));
-        }
-
-        @Override
-        public void onInterfaceAddressRemoved(String addr,
-                String ifName, int flags, int scope) throws RemoteException {
-            final LinkAddress address = new LinkAddress(addr, flags, scope);
-            mDaemonHandler.post(() -> notifyAddressRemoved(ifName, address));
-        }
-
-        @Override
-        public void onInterfaceAdded(String ifName) throws RemoteException {
-            mDaemonHandler.post(() -> notifyInterfaceAdded(ifName));
-        }
-
-        @Override
-        public void onInterfaceRemoved(String ifName) throws RemoteException {
-            mDaemonHandler.post(() -> notifyInterfaceRemoved(ifName));
-        }
-
-        @Override
-        public void onInterfaceChanged(String ifName, boolean up)
-                throws RemoteException {
-            mDaemonHandler.post(() -> notifyInterfaceStatusChanged(ifName, up));
-        }
-
-        @Override
-        public void onInterfaceLinkStateChanged(String ifName, boolean up)
-                throws RemoteException {
-            mDaemonHandler.post(() -> notifyInterfaceLinkStateChanged(ifName, up));
-        }
-
-        @Override
-        public void onRouteChanged(boolean updated,
-                String route, String gateway, String ifName) throws RemoteException {
-            final RouteInfo processRoute = new RouteInfo(new IpPrefix(route),
-                    ("".equals(gateway)) ? null : InetAddresses.parseNumericAddress(gateway),
-                    ifName);
-            mDaemonHandler.post(() -> notifyRouteChange(updated, processRoute));
-        }
-
-        @Override
-        public void onStrictCleartextDetected(int uid, String hex) throws RemoteException {
-            // Don't need to post to mDaemonHandler because the only thing
-            // that notifyCleartextNetwork does is post to a handler
-            ActivityManager.getService().notifyCleartextNetwork(uid,
-                    HexDump.hexStringToByteArray(hex));
-        }
-    }
-
     //
     // Netd Callback handling
     //
@@ -854,16 +708,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         throw new IllegalStateException(errorMessage);
                     }
                     if (cooked[2].equals("added")) {
-                        notifyInterfaceAdded(cooked[3]);
+                        mNetworkObserverRegistry.notifyInterfaceAdded(cooked[3]);
                         return true;
                     } else if (cooked[2].equals("removed")) {
-                        notifyInterfaceRemoved(cooked[3]);
+                        mNetworkObserverRegistry.notifyInterfaceRemoved(cooked[3]);
                         return true;
                     } else if (cooked[2].equals("changed") && cooked.length == 5) {
-                        notifyInterfaceStatusChanged(cooked[3], cooked[4].equals("up"));
+                        mNetworkObserverRegistry.notifyInterfaceStatusChanged(
+                                cooked[3], cooked[4].equals("up"));
                         return true;
                     } else if (cooked[2].equals("linkstate") && cooked.length == 5) {
-                        notifyInterfaceLinkStateChanged(cooked[3], cooked[4].equals("up"));
+                        mNetworkObserverRegistry.notifyInterfaceLinkStateChanged(
+                                cooked[3], cooked[4].equals("up"));
                         return true;
                     }
                     throw new IllegalStateException(errorMessage);
@@ -877,7 +733,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         throw new IllegalStateException(errorMessage);
                     }
                     if (cooked[2].equals("alert")) {
-                        notifyLimitReached(cooked[3], cooked[4]);
+                        mNetworkObserverRegistry.notifyLimitReached(cooked[3], cooked[4]);
                         return true;
                     }
                     throw new IllegalStateException(errorMessage);
@@ -903,9 +759,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         timestampNanos = SystemClock.elapsedRealtimeNanos();
                     }
                     boolean isActive = cooked[2].equals("active");
-                    notifyInterfaceClassActivity(Integer.parseInt(cooked[3]),
-                            isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
-                            : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                    mNetworkObserverRegistry.notifyInterfaceClassActivity(
+                            Integer.parseInt(cooked[3]), isActive,
                             timestampNanos, processUid, false);
                     return true;
                     // break;
@@ -932,9 +787,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     }
 
                     if (cooked[2].equals("updated")) {
-                        notifyAddressUpdated(iface, address);
+                        mNetworkObserverRegistry.notifyAddressUpdated(iface, address);
                     } else {
-                        notifyAddressRemoved(iface, address);
+                        mNetworkObserverRegistry.notifyAddressRemoved(iface, address);
                     }
                     return true;
                     // break;
@@ -954,7 +809,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                             throw new IllegalStateException(errorMessage);
                         }
                         String[] servers = cooked[5].split(",");
-                        notifyInterfaceDnsServerInfo(cooked[3], lifetime, servers);
+                        mNetworkObserverRegistry.notifyInterfaceDnsServerInfo(
+                                cooked[3], lifetime, servers);
                     }
                     return true;
                     // break;
@@ -993,7 +849,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                             InetAddress gateway = null;
                             if (via != null) gateway = InetAddress.parseNumericAddress(via);
                             RouteInfo route = new RouteInfo(new IpPrefix(cooked[3]), gateway, dev);
-                            notifyRouteChange(cooked[2].equals("updated"), route);
+                            mNetworkObserverRegistry.notifyRouteChange(
+                                    cooked[2].equals("updated"), route);
                             return true;
                         } catch (IllegalArgumentException e) {}
                     }
@@ -1456,9 +1313,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (ConnectivityManager.isNetworkTypeMobile(type)) {
                 mNetworkActive = false;
             }
-            mDaemonHandler.post(() -> notifyInterfaceClassActivity(type,
-                    DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
-                    SystemClock.elapsedRealtimeNanos(), -1, false));
+            mDaemonHandler.post(() -> mNetworkObserverRegistry.notifyInterfaceClassActivity(
+                    type, true /* isActive */, SystemClock.elapsedRealtimeNanos(), -1, false));
         }
     }
 
@@ -1481,9 +1337,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 throw new IllegalStateException(e);
             }
             mActiveIdleTimers.remove(iface);
-            mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type,
-                    DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                    SystemClock.elapsedRealtimeNanos(), -1, false));
+            mDaemonHandler.post(() -> mNetworkObserverRegistry.notifyInterfaceClassActivity(
+                    params.type, false /* isActive */, SystemClock.elapsedRealtimeNanos(), -1,
+                    false));
         }
     }
 
