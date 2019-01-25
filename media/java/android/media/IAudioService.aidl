@@ -151,8 +151,6 @@ interface IAudioService {
     void setWiredDeviceConnectionState(int type, int state, String address, String name,
             String caller);
 
-    int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state, int profile);
-
     void handleBluetoothA2dpDeviceConfigChange(in BluetoothDevice device);
 
     int handleBluetoothA2dpActiveDeviceChange(in BluetoothDevice device,
