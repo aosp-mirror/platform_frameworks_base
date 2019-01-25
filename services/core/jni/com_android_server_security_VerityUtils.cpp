@@ -29,12 +29,9 @@
 
 #include <android-base/unique_fd.h>
 
-// TODO(112037636): Always include once fsverity.h is upstreamed and backported.
-#define HAS_FSVERITY 0
-
-#if HAS_FSVERITY
+// TODO(112037636): Always include once fsverity.h is upstreamed.
+#if __has_include(<linux/fsverity.h>)
 #include <linux/fsverity.h>
-
 const int kSha256Bytes = 32;
 #endif
 
@@ -76,7 +73,7 @@ class JavaByteArrayHolder {
 };
 
 int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
-#if HAS_FSVERITY
+#if __has_include(<linux/fsverity.h>)
     const char* path = env->GetStringUTFChars(filePath, nullptr);
     ::android::base::unique_fd rfd(open(path, O_RDONLY | O_CLOEXEC));
     if (rfd.get() < 0) {
@@ -89,11 +86,11 @@ int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
 #else
     LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
     return ENOSYS;
-#endif  // HAS_FSVERITY
+#endif
 }
 
 int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
-#if HAS_FSVERITY
+#if __has_include(<linux/fsverity.h>)
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest) + kSha256Bytes);
     fsverity_digest* data = reinterpret_cast<fsverity_digest*>(raii->getRaw());
     data->digest_size = kSha256Bytes;  // the only input/output parameter
@@ -110,11 +107,11 @@ int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
 #else
     LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
     return ENOSYS;
-#endif  // HAS_FSVERITY
+#endif
 }
 
 jbyteArray constructFsveritySignedData(JNIEnv* env, jobject /* clazz */, jbyteArray digest) {
-#if HAS_FSVERITY
+#if __has_include(<linux/fsverity.h>)
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest_disk) + kSha256Bytes);
     fsverity_digest_disk* data = reinterpret_cast<fsverity_digest_disk*>(raii->getRaw());
 
@@ -132,12 +129,12 @@ jbyteArray constructFsveritySignedData(JNIEnv* env, jobject /* clazz */, jbyteAr
 #else
     LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
     return 0;
-#endif  // HAS_FSVERITY
+#endif
 }
 
 
 jbyteArray constructFsverityDescriptor(JNIEnv* env, jobject /* clazz */, jlong fileSize) {
-#if HAS_FSVERITY
+#if __has_include(<linux/fsverity.h>)
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_descriptor));
     fsverity_descriptor* desc = reinterpret_cast<fsverity_descriptor*>(raii->getRaw());
 
@@ -156,12 +153,12 @@ jbyteArray constructFsverityDescriptor(JNIEnv* env, jobject /* clazz */, jlong f
 #else
     LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
     return 0;
-#endif  // HAS_FSVERITY
+#endif
 }
 
 jbyteArray constructFsverityExtension(JNIEnv* env, jobject /* clazz */, jshort extensionId,
         jint extensionDataSize) {
-#if HAS_FSVERITY
+#if __has_include(<linux/fsverity.h>)
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_extension));
     fsverity_extension* ext = reinterpret_cast<fsverity_extension*>(raii->getRaw());
 
@@ -172,12 +169,12 @@ jbyteArray constructFsverityExtension(JNIEnv* env, jobject /* clazz */, jshort e
 #else
     LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
     return 0;
-#endif  // HAS_FSVERITY
+#endif
 }
 
 jbyteArray constructFsverityFooter(JNIEnv* env, jobject /* clazz */,
         jint offsetToDescriptorHead) {
-#if HAS_FSVERITY
+#if __has_include(<linux/fsverity.h>)
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_footer));
     fsverity_footer* footer = reinterpret_cast<fsverity_footer*>(raii->getRaw());
 
@@ -188,7 +185,7 @@ jbyteArray constructFsverityFooter(JNIEnv* env, jobject /* clazz */,
 #else
     LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
     return 0;
-#endif  // HAS_FSVERITY
+#endif
 }
 
 const JNINativeMethod sMethods[] = {
