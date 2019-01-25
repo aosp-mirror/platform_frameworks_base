@@ -810,6 +810,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             MAX_JOB_COUNTS_SCREEN_OFF.low.parse(mParser);
             MAX_JOB_COUNTS_SCREEN_OFF.critical.parse(mParser);
 
+            SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.parse(mParser);
+
             MAX_STANDARD_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_STANDARD_RESCHEDULE_COUNT,
                     DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
             MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,

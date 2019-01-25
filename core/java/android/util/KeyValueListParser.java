@@ -373,4 +373,57 @@ public class KeyValueListParser {
             proto.write(tag, mValue);
         }
     }
+
+    /** Represents an float config value. */
+    public static class FloatValue {
+        private final String mKey;
+        private final float mDefaultValue;
+        private float mValue;
+
+        /** Constructor, initialize with a config key and a default value. */
+        public FloatValue(String key, float defaultValue) {
+            mKey = key;
+            mDefaultValue = defaultValue;
+            mValue = mDefaultValue;
+        }
+
+        /** Read a value from {@link KeyValueListParser} */
+        public void parse(KeyValueListParser parser) {
+            mValue = parser.getFloat(mKey, mDefaultValue);
+        }
+
+        /** Return the config key. */
+        public String getKey() {
+            return mKey;
+        }
+
+        /** Return the default value. */
+        public float getDefaultValue() {
+            return mDefaultValue;
+        }
+
+        /** Return the actual config value. */
+        public float getValue() {
+            return mValue;
+        }
+
+        /** Overwrites with a value. */
+        public void setValue(float value) {
+            mValue = value;
+        }
+
+        /** Used for dumpsys */
+        public void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix);
+            pw.print(mKey);
+            pw.print("=");
+            pw.print(mValue);
+            pw.println();
+        }
+
+        /** Used for proto dumpsys */
+        public void dumpProto(ProtoOutputStream proto, long tag) {
+            proto.write(tag, mValue);
+        }
+    }
 }
