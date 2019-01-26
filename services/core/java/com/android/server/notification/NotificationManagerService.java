@@ -1087,7 +1087,8 @@ public class NotificationManagerService extends SystemService {
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)
                     || action.equals(Intent.ACTION_PACKAGES_SUSPENDED)
-                    || action.equals(Intent.ACTION_PACKAGES_UNSUSPENDED)) {
+                    || action.equals(Intent.ACTION_PACKAGES_UNSUSPENDED)
+                    || action.equals(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED)) {
                 int changeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                         UserHandle.USER_ALL);
                 String pkgList[] = null;
@@ -1108,6 +1109,23 @@ public class NotificationManagerService extends SystemService {
                     uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                     cancelNotifications = false;
                     unhideNotifications = true;
+                } else if (action.equals(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED)) {
+                    final int distractionRestrictions =
+                            intent.getIntExtra(Intent.EXTRA_DISTRACTION_RESTRICTIONS,
+                                    PackageManager.RESTRICTION_NONE);
+                    if ((distractionRestrictions
+                            & PackageManager.RESTRICTION_HIDE_NOTIFICATIONS) != 0) {
+                        pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                        uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
+                        cancelNotifications = false;
+                        hideNotifications = true;
+                    } else {
+                        pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                        uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
+                        cancelNotifications = false;
+                        unhideNotifications = true;
+                    }
+
                 } else if (queryRestart) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                     uidList = new int[] {intent.getIntExtra(Intent.EXTRA_UID, -1)};
@@ -1651,6 +1669,7 @@ public class NotificationManagerService extends SystemService {
         IntentFilter suspendedPkgFilter = new IntentFilter();
         suspendedPkgFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
         suspendedPkgFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        suspendedPkgFilter.addAction(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
         getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL,
                 suspendedPkgFilter, null, null);
 
@@ -7738,6 +7757,20 @@ public class NotificationManagerService extends SystemService {
         final String action = suspend ? Intent.ACTION_PACKAGES_SUSPENDED
                 : Intent.ACTION_PACKAGES_UNSUSPENDED;
         final Intent intent = new Intent(action);
+        intent.putExtras(extras);
+
+        mPackageIntentReceiver.onReceive(getContext(), intent);
+    }
+
+    @VisibleForTesting
+    protected void simulatePackageDistractionBroadcast(int flag, String[] pkgs) {
+        // only use for testing: mimic receive broadcast that package is (un)distracting
+        // but does not actually register that info with packagemanager
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgs);
+        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, flag);
+
+        final Intent intent = new Intent(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
         intent.putExtras(extras);
 
         mPackageIntentReceiver.onReceive(getContext(), intent);

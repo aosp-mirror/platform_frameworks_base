@@ -176,6 +176,14 @@ public class NotificationShellCmd extends ShellCommand {
                     // only use for testing
                     mDirectService.simulatePackageSuspendBroadcast(false, getNextArgRequired());
                 }
+                case "distract_package": {
+                    // only use for testing
+                    // Flag values are in
+                    // {@link android.content.pm.PackageManager.DistractionRestriction}.
+                    mDirectService.simulatePackageDistractionBroadcast(
+                            Integer.parseInt(getNextArgRequired()),
+                            getNextArgRequired().split(","));
+                }
                 break;
                 case "post":
                 case "notify":
