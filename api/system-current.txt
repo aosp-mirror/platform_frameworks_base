@@ -5534,7 +5534,6 @@ package android.permissionpresenterservice {
     method @Deprecated public final void attachBaseContext(android.content.Context);
     method @Deprecated public final android.os.IBinder onBind(android.content.Intent);
     method @Deprecated public abstract java.util.List<android.content.pm.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(@NonNull String);
-    method @Deprecated public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
     field @Deprecated public static final String SERVICE_INTERFACE = "android.permissionpresenterservice.RuntimePermissionPresenterService";
   }
 
