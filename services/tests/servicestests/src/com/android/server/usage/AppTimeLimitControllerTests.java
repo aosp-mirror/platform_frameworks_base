@@ -964,26 +964,6 @@ public class AppTimeLimitControllerTests {
         assertFalse(hasAppUsageObserver(UID, OBS_ID1));
     }
 
-    /** Verify app usage limit observer added correctly reports it being a group limit */
-    @Test
-    public void testAppUsageLimitObserver_IsGroupLimit() {
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        AppTimeLimitController.AppUsageLimitGroup group = getAppUsageLimitObserver(UID, OBS_ID1);
-        assertNotNull("Observer wasn't added", group);
-        assertTrue("Observer didn't correctly report being a group limit",
-                group.isGroupLimit());
-    }
-
-    /** Verify app usage limit observer added correctly reports it being not a group limit */
-    @Test
-    public void testAppUsageLimitObserver_IsNotGroupLimit() {
-        addAppUsageLimitObserver(OBS_ID1, new String[]{PKG_PROD}, TIME_30_MIN);
-        AppTimeLimitController.AppUsageLimitGroup group = getAppUsageLimitObserver(UID, OBS_ID1);
-        assertNotNull("Observer wasn't added", group);
-        assertFalse("Observer didn't correctly report not being a group limit",
-                group.isGroupLimit());
-    }
-
     /** Verify app usage limit observer added correctly reports its total usage limit */
     @Test
     public void testAppUsageLimitObserver_GetTotalUsageLimit() {
