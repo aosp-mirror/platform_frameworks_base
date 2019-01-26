@@ -275,6 +275,7 @@ cc_library_shared {
         "libselinux",
         "libandroidicu",
         "libmedia",
+        "libmedia_helper",
         "libmediametrics",
         "libmeminfo",
         "libaudioclient",
