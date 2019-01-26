@@ -701,6 +701,9 @@
     <!-- Indicates that connected MAC randomization is supported on this device -->
     <bool translatable="false" name="config_wifi_connected_mac_randomization_supported">false</bool>
 
+    <!-- Indicates that wifi link probing is supported on this device -->
+    <bool translatable="false" name="config_wifi_link_probing_supported">false</bool>
+
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
