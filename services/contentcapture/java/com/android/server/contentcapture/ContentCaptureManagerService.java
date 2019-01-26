@@ -26,6 +26,8 @@ import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
@@ -40,6 +42,7 @@ import android.provider.Settings;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
 import android.view.contentcapture.UserDataRemovalRequest;
 
@@ -278,6 +281,57 @@ public final class ContentCaptureManagerService extends
         return mAm;
     }
 
+    @GuardedBy("mLock")
+    private boolean assertCalledByServiceLocked(@NonNull String methodName, @UserIdInt int userId,
+            int callingUid, @NonNull IResultReceiver result) {
+        final boolean isService = isCalledByServiceLocked(methodName, userId, callingUid);
+        if (isService) return true;
+
+        try {
+            result.send(ContentCaptureManager.RESULT_CODE_NOT_SERVICE,
+                    /* resultData= */ null);
+        } catch (RemoteException e) {
+            Slog.w(mTag, "Unable to send isContentCaptureFeatureEnabled(): " + e);
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    private boolean isCalledByServiceLocked(@NonNull String methodName, @UserIdInt int userId,
+            int callingUid) {
+
+        final String serviceName = mServiceNameResolver.getServiceName(userId);
+        if (serviceName == null) {
+            Slog.e(mTag, methodName + ": called by UID " + callingUid
+                    + ", but there's no service set for user " + userId);
+            return false;
+        }
+
+        final ComponentName serviceComponent  = ComponentName.unflattenFromString(serviceName);
+        if (serviceComponent == null) {
+            Slog.w(mTag, methodName + ": invalid service name: " + serviceName);
+            return false;
+        }
+
+        final String servicePackageName = serviceComponent.getPackageName();
+
+        final PackageManager pm = getContext().getPackageManager();
+        final int serviceUid;
+        try {
+            serviceUid = pm.getPackageUidAsUser(servicePackageName, UserHandle.getCallingUserId());
+        } catch (NameNotFoundException e) {
+            Slog.w(mTag, methodName + ": could not verify UID for " + serviceName);
+            return false;
+        }
+        if (callingUid != serviceUid) {
+            Slog.e(mTag, methodName + ": called by UID " + callingUid + ", but service UID is "
+                    + serviceUid);
+            return false;
+        }
+
+        return true;
+    }
+
     @Override // from AbstractMasterSystemService
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);
@@ -352,12 +406,42 @@ public final class ContentCaptureManagerService extends
             final int userId = UserHandle.getCallingUserId();
             boolean enabled;
             synchronized (mLock) {
+                final boolean isService = assertCalledByServiceLocked(
+                        "isContentCaptureFeatureEnabled()", userId, Binder.getCallingUid(), result);
+                if (!isService) return;
+
                 enabled = !isDisabledBySettingsLocked(userId);
             }
             try {
-                result.send(enabled ? 1 : 0, /* resultData= */null);
+                result.send(enabled ? ContentCaptureManager.RESULT_CODE_TRUE
+                        : ContentCaptureManager.RESULT_CODE_FALSE, /* resultData= */null);
             } catch (RemoteException e) {
                 Slog.w(mTag, "Unable to send isContentCaptureFeatureEnabled(): " + e);
+            }
+        }
+
+        @Override
+        public void setContentCaptureFeatureEnabled(boolean enabled,
+                @NonNull IResultReceiver result) {
+            final int userId = UserHandle.getCallingUserId();
+            final boolean isService;
+            synchronized (mLock) {
+                isService = assertCalledByServiceLocked("setContentCaptureFeatureEnabled()", userId,
+                        Binder.getCallingUid(), result);
+            }
+            if (!isService) return;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                        Settings.Secure.CONTENT_CAPTURE_ENABLED, Boolean.toString(enabled), userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            try {
+                result.send(ContentCaptureManager.RESULT_CODE_TRUE, /* resultData= */null);
+            } catch (RemoteException e) {
+                Slog.w(mTag, "Unable to send setContentCaptureFeatureEnabled(): " + e);
             }
         }
 

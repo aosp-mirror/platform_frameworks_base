@@ -9203,6 +9203,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
+    method public void setContentCaptureFeatureEnabled(boolean);
   }
 
   public final class UserDataRemovalRequest implements android.os.Parcelable {
