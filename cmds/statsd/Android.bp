@@ -71,6 +71,7 @@ cc_defaults {
         "src/external/Perfetto.cpp",
         "src/external/Perfprofd.cpp",
         "src/external/StatsPuller.cpp",
+        "src/external/StatsCallbackPuller.cpp",
         "src/external/StatsCompanionServicePuller.cpp",
         "src/external/SubsystemSleepStatePuller.cpp",
         "src/external/PowerStatsPuller.cpp",

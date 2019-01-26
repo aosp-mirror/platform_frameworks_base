@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.os.IStatsPullerCallback;
+
 /**
   * Binder interface to communicate with the statistics management service.
   * {@hide}
@@ -178,4 +180,20 @@ interface IStatsManager {
      * this label. This allows building custom metrics and predicates.
      */
     void sendAppBreadcrumbAtom(int label, int state);
+
+    /**
+     * Registers a puller callback function that, when invoked, pulls the data
+     * for the specified vendor atom tag.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
+     */
+    oneway void registerPullerCallback(int atomTag, IStatsPullerCallback pullerCallback,
+                                       String packageName);
+
+   /**
+    * Unregisters a puller callback function for the given vendor atom.
+    *
+    * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
+    */
+   oneway void unregisterPullerCallback(int atomTag, String packageName);
 }

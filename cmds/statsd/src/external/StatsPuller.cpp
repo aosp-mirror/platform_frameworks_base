@@ -33,7 +33,7 @@ sp<UidMap> StatsPuller::mUidMap = nullptr;
 void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 
 StatsPuller::StatsPuller(const int tagId)
-    : mTagId(tagId) {
+    : mTagId(tagId), mLastPullTimeNs(0) {
 }
 
 bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {

@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include <android/os/IStatsCompanionService.h>
+#include <android/os/IStatsPullerCallback.h>
 #include <cutils/log.h>
 #include <math.h>
 #include <stdint.h>
@@ -29,6 +30,7 @@
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
+#include "StatsCallbackPuller.h"
 #include "StatsPullerManager.h"
 #include "SubsystemSleepStatePuller.h"
 #include "statslog.h"
@@ -49,7 +51,7 @@ namespace statsd {
 // Values smaller than this may require to update the alarm.
 const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
-const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
+std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // wifi_bytes_transfer
         {android::util::WIFI_BYTES_TRANSFER,
          {.additiveFields = {2, 3, 4, 5},
@@ -418,6 +420,30 @@ int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
         totalCleared += pulledAtom.second.puller->ClearCacheIfNecessary(timestampNs);
     }
     return totalCleared;
+}
+
+void StatsPullerManager::RegisterPullerCallback(int32_t atomTag,
+        const sp<IStatsPullerCallback>& callback) {
+    AutoMutex _l(mLock);
+    // Platform pullers cannot be changed.
+    if (atomTag < StatsdStats::kMaxPlatformAtomTag) {
+        VLOG("RegisterPullerCallback: atom tag %d is less than min tag %d",
+                atomTag, StatsdStats::kMaxPlatformAtomTag);
+        return;
+    }
+    VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
+    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
+    kAllPullAtomInfo[atomTag] = {.puller = new StatsCallbackPuller(atomTag, callback)};
+}
+
+void StatsPullerManager::UnregisterPullerCallback(int32_t atomTag) {
+    AutoMutex _l(mLock);
+    // Platform pullers cannot be changed.
+    if (atomTag < StatsdStats::kMaxPlatformAtomTag) {
+        return;
+    }
+    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/false);
+    kAllPullAtomInfo.erase(atomTag);
 }
 
 }  // namespace statsd

@@ -173,6 +173,19 @@ public:
     virtual Status sendAppBreadcrumbAtom(int32_t label, int32_t state) override;
 
     /**
+     * Binder call to register a callback function for a vendor pulled atom.
+     * Note: this atom must NOT have uid as a field.
+     */
+    virtual Status registerPullerCallback(int32_t atomTag,
+        const sp<android::os::IStatsPullerCallback>& pullerCallback,
+        const String16& packageName) override;
+
+    /**
+     * Binder call to unregister any existing callback function for a vendor pulled atom.
+     */
+    virtual Status unregisterPullerCallback(int32_t atomTag, const String16& packageName) override;
+
+    /**
      * Binder call to get SpeakerImpedance atom.
      */
     virtual Return<void> reportSpeakerImpedance(const SpeakerImpedance& speakerImpedance) override;

@@ -259,6 +259,10 @@ TEST(StatsdStatsTest, TestPullAtomStats) {
     stats.notePullDelay(android::util::DISK_SPACE, 3335L);
     stats.notePull(android::util::DISK_SPACE);
     stats.notePullFromCache(android::util::DISK_SPACE);
+    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, true);
+    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, false);
+    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, true);
+
 
     vector<uint8_t> output;
     stats.dumpStats(&output, false);
@@ -276,6 +280,8 @@ TEST(StatsdStatsTest, TestPullAtomStats) {
     EXPECT_EQ(3333L, report.pulled_atom_stats(0).max_pull_time_nanos());
     EXPECT_EQ(2223L, report.pulled_atom_stats(0).average_pull_delay_nanos());
     EXPECT_EQ(3335L, report.pulled_atom_stats(0).max_pull_delay_nanos());
+    EXPECT_EQ(2L, report.pulled_atom_stats(0).registered_count());
+    EXPECT_EQ(1L, report.pulled_atom_stats(0).unregistered_count());
 }
 
 TEST(StatsdStatsTest, TestAtomMetricsStats) {

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <android/os/IStatsCompanionService.h>
+#include <android/os/IStatsPullerCallback.h>
 #include <binder/IServiceManager.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
@@ -91,7 +92,12 @@ public:
 
     void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
 
-    const static std::map<int, PullAtomInfo> kAllPullAtomInfo;
+    void RegisterPullerCallback(int32_t atomTag,
+                                const sp<IStatsPullerCallback>& callback);
+
+    void UnregisterPullerCallback(int32_t atomTag);
+
+    static std::map<int, PullAtomInfo> kAllPullAtomInfo;
 
 private:
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;

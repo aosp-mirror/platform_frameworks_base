@@ -423,6 +423,15 @@ void StatsdStats::noteEmptyData(int atomId) {
     mPulledAtomStats[atomId].emptyData++;
 }
 
+void StatsdStats::notePullerCallbackRegistrationChanged(int atomId, bool registered) {
+    lock_guard<std::mutex> lock(mLock);
+    if (registered) {
+        mPulledAtomStats[atomId].registeredCount++;
+    } else {
+        mPulledAtomStats[atomId].unregisteredCount++;
+    }
+}
+
 void StatsdStats::noteHardDimensionLimitReached(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).hardDimensionLimitReached++;
@@ -514,6 +523,8 @@ void StatsdStats::resetInternalLocked() {
         pullStats.second.dataError = 0;
         pullStats.second.pullTimeout = 0;
         pullStats.second.pullExceedMaxDelay = 0;
+        pullStats.second.registeredCount = 0;
+        pullStats.second.unregisteredCount = 0;
     }
     mAtomMetricStats.clear();
 }
@@ -625,12 +636,14 @@ void StatsdStats::dumpStats(int out) const {
                 "  (average pull time nanos)%lld, (max pull time nanos)%lld, (average pull delay "
                 "nanos)%lld, "
                 "  (max pull delay nanos)%lld, (data error)%ld\n"
-                "  (pull timeout)%ld, (pull exceed max delay)%ld\n",
+                "  (pull timeout)%ld, (pull exceed max delay)%ld\n"
+                "  (registered count) %ld, (unregistered count) %ld\n",
                 (int)pair.first, (long)pair.second.totalPull, (long)pair.second.totalPullFromCache,
                 (long)pair.second.minPullIntervalSec, (long long)pair.second.avgPullTimeNs,
                 (long long)pair.second.maxPullTimeNs, (long long)pair.second.avgPullDelayNs,
                 (long long)pair.second.maxPullDelayNs, pair.second.dataError,
-                pair.second.pullTimeout, pair.second.pullExceedMaxDelay);
+                pair.second.pullTimeout, pair.second.pullExceedMaxDelay,
+                pair.second.registeredCount, pair.second.unregisteredCount);
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {

@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.IStatsManager;
+import android.os.IStatsPullerCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.AndroidException;
@@ -405,6 +406,39 @@ public final class StatsManager {
             return getStatsMetadata();
         } catch (StatsUnavailableException e) {
             return null;
+        }
+    }
+
+    /**
+     * Registers a callback for an atom when that atom is to be pulled. The stats service will
+     * invoke pullData in the callback when the stats service determines that this atom needs to be
+     * pulled. Currently, this only works for atoms with tags above 100,000 that do not have a uid.
+     *
+     * @param atomTag   The tag of the atom for this puller callback. Must be at least 100000.
+     * @param callback  The callback to be invoked when the stats service pulls the atom.
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
+    public void setPullerCallback(int atomTag, IStatsPullerCallback callback)
+            throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (callback == null) {
+                    service.unregisterPullerCallback(atomTag, mContext.getOpPackageName());
+                } else {
+                    service.registerPullerCallback(atomTag, callback,
+                            mContext.getOpPackageName());
+                }
+
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
+                throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
+            }
         }
     }
 

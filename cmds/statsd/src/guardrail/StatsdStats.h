@@ -146,6 +146,10 @@ public:
 
     // Max time to do a pull.
     static const int64_t kPullMaxDelayNs = 10 * NS_PER_SEC;
+
+    // Max platform atom tag number.
+    static const int32_t kMaxPlatformAtomTag = 100000;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *
@@ -340,6 +344,13 @@ public:
     void noteEmptyData(int atomId);
 
     /**
+     * Records that a puller callback for the given atomId was registered or unregistered.
+     *
+     * @param registered True if the callback was registered, false if was unregistered.
+     */
+    void notePullerCallbackRegistrationChanged(int atomId, bool registered);
+
+    /**
      * Hard limit was reached in the cardinality of an atom
      */
     void noteHardDimensionLimitReached(int64_t metricId);
@@ -416,6 +427,8 @@ public:
         long statsCompanionPullFailed = 0;
         long statsCompanionPullBinderTransactionFailed = 0;
         long emptyData = 0;
+        long registeredCount = 0;
+        long unregisteredCount = 0;
     } PulledAtomStats;
 
     typedef struct {
