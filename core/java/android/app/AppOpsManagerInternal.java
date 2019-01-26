@@ -78,7 +78,7 @@ public abstract class AppOpsManagerInternal {
     /**
      * Sets the app-ops mode for a certain app-op and uid.
      *
-     * <p>Similar as {@link AppOpsManager#setMode} but does not require the package manager to be
+     * <p>Similar as {@link AppOpsManager#setUidMode} but does not require the package manager to be
      * working. Hence this can be used very early during boot.
      *
      * <p>Only for internal callers. Does <u>not</u> verify that package name belongs to uid.
@@ -88,4 +88,12 @@ public abstract class AppOpsManagerInternal {
      * @param mode The new mode to set.
      */
     public abstract void setUidMode(int code, int uid, int mode);
+
+    /**
+     * Set all {@link #setMode (package) modes} for this uid to the default value.
+     *
+     * @param code The app-op
+     * @param uid The uid
+     */
+    public abstract void setAllPkgModesToDefault(int code, int uid);
 }
