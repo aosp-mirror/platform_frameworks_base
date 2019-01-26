@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.app.UiAutomation;
 import android.content.Context;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
@@ -147,7 +148,7 @@ public final class DexLoggerIntegrationTests {
         String expectedNameHash =
                 "996223BAD4B4FE75C57A3DEC61DB9C0B38E0A7AD479FC95F33494F4BC55A0F0E";
         String expectedContentHash =
-                copyAndHashResource("/DexLoggerNativeTestLibrary.so", privateCopyFile);
+                copyAndHashResource(libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
 
         System.load(privateCopyFile.toString());
 
@@ -170,7 +171,7 @@ public final class DexLoggerIntegrationTests {
         String expectedNameHash =
                 "8C39990C560B4F36F83E208E279F678746FE23A790E4C50F92686584EA2041CA";
         String expectedContentHash =
-                copyAndHashResource("/DexLoggerNativeTestLibrary.so", privateCopyFile);
+                copyAndHashResource(libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
 
         System.load(privateCopyFile.toString());
 
@@ -305,6 +306,12 @@ public final class DexLoggerIntegrationTests {
 
     private static File privateFile(String name) {
         return new File(sContext.getDir("dcl", Context.MODE_PRIVATE), name);
+    }
+
+    private String libraryPath(final String libraryName) {
+        // This may be deprecated. but it tells us the ABI of this process which is exactly what we
+        // want.
+        return "/lib/" + Build.CPU_ABI + "/" + libraryName;
     }
 
     private static String copyAndHashResource(String resourcePath, File copyTo) throws Exception {

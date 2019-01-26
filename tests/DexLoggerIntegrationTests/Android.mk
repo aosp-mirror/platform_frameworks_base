@@ -35,7 +35,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE := DexLoggerNativeTestLibrary
-LOCAL_MULTILIB := first
 LOCAL_SRC_FILES := src/cpp/com_android_dcl_Jni.cpp
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE)
@@ -43,8 +42,6 @@ LOCAL_SDK_VERSION := 28
 LOCAL_NDK_STL_VARIANT := c++_static
 
 include $(BUILD_SHARED_LIBRARY)
-
-dexloggertest_so := $(LOCAL_BUILT_MODULE)
 
 # And a standalone native executable that we can exec.
 
@@ -73,11 +70,15 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     truth-prebuilt \
 
+# Include both versions of the .so if we have 2 arch
+LOCAL_MULTILIB := both
+LOCAL_JNI_SHARED_LIBRARIES := \
+    DexLoggerNativeTestLibrary \
+
 # This gets us the javalib.jar built by DexLoggerTestLibrary above as well as the various
 # native binaries.
 LOCAL_JAVA_RESOURCE_FILES := \
     $(dexloggertest_jar) \
-    $(dexloggertest_so) \
-    $(dexloggertest_executable)
+    $(dexloggertest_executable) \
 
 include $(BUILD_PACKAGE)
