@@ -5836,6 +5836,10 @@ package android.provider {
     field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
   }
 
+  public static interface DeviceConfig.RuntimeNative {
+    field public static final String NAMESPACE = "runtime_native";
+  }
+
   public static interface DeviceConfig.Storage {
     field public static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
     field public static final String NAMESPACE = "storage";
