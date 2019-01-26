@@ -28,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.StringParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
@@ -56,12 +55,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * Implementation of service that manages APK level rollbacks.
@@ -200,48 +197,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public RollbackInfo getAvailableRollback(String packageName) {
+    public ParceledListSlice getAvailableRollbacks() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getAvailableRollback");
+                "getAvailableRollbacks");
 
-        RollbackData data = getRollbackForPackage(packageName);
-        if (data == null) {
-            return null;
-        }
-
-        // Note: The rollback for the package ought to be for the currently
-        // installed version, otherwise the rollback data is out of date. In
-        // that rare case, we'll check when we execute the rollback whether
-        // it's out of date or not, so no need to check package versions here.
-
-        for (PackageRollbackInfo info : data.packages) {
-            if (info.getPackageName().equals(packageName)) {
-                // TODO: Once the RollbackInfo API supports info about
-                // dependant packages, add that info here.
-                return new RollbackInfo(data.rollbackId, info);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public StringParceledListSlice getPackagesWithAvailableRollbacks() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getPackagesWithAvailableRollbacks");
-
-        final Set<String> packageNames = new HashSet<>();
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
+            List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                for (PackageRollbackInfo info : data.packages) {
-                    packageNames.add(info.getPackageName());
-                }
+                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages));
             }
+            return new ParceledListSlice<>(rollbacks);
         }
-        return new StringParceledListSlice(new ArrayList<>(packageNames));
     }
 
     @Override
@@ -279,18 +248,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void executeRollbackInternal(RollbackInfo rollback,
             String callerPackageName, IntentSender statusReceiver) {
-        String targetPackageName = rollback.targetPackage.getPackageName();
-        Log.i(TAG, "Initiating rollback of " + targetPackageName);
+        Log.i(TAG, "Initiating rollback");
 
-        // Get the latest RollbackData for the target package.
-        final RollbackData data = getRollbackForPackage(targetPackageName);
+        RollbackData data = getRollbackForId(rollback.getRollbackId());
         if (data == null) {
-            sendFailure(statusReceiver, "No rollback available for package.");
-            return;
-        }
-
-        if (data.rollbackId != rollback.getRollbackId()) {
-            sendFailure(statusReceiver, "Rollback for package is out of date.");
+            sendFailure(statusReceiver, "Rollback unavailable");
             return;
         }
 
@@ -335,14 +297,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = context.getPackageManager();
         try {
             PackageInstaller packageInstaller = pm.getPackageInstaller();
-            String installerPackageName = pm.getInstallerPackageName(targetPackageName);
-            if (installerPackageName == null) {
-                sendFailure(statusReceiver, "Cannot find installer package");
-                return;
-            }
             PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            parentParams.setInstallerPackageName(installerPackageName);
             parentParams.setAllowDowngrade(true);
             parentParams.setMultiPackage();
             int parentSessionId = packageInstaller.createSession(parentParams);
@@ -351,6 +307,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (PackageRollbackInfo info : data.packages) {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
+                if (installerPackageName == null) {
+                    sendFailure(statusReceiver, "Cannot find installer package");
+                    return;
+                }
                 params.setInstallerPackageName(installerPackageName);
                 params.setAllowDowngrade(true);
                 int sessionId = packageInstaller.createSession(params);
@@ -392,7 +353,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             addRecentlyExecutedRollback(rollback);
                             sendSuccess(statusReceiver);
 
-                            Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
+                            Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
 
                             // TODO: This call emits the warning "Calling a method in the
                             // system process without a qualified user". Fix that.
@@ -406,7 +367,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             data.inProgress = true;
             parentSession.commit(receiver.getIntentSender());
         } catch (IOException e) {
-            Log.e(TAG, "Unable to roll back " + targetPackageName, e);
+            Log.e(TAG, "Rollback failed", e);
             sendFailure(statusReceiver, "IOException: " + e.toString());
             return;
         }
@@ -537,9 +498,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             boolean changed = false;
             while (iter.hasNext()) {
                 RollbackInfo rollback = iter.next();
-                if (packageName.equals(rollback.targetPackage.getPackageName())) {
-                    iter.remove();
-                    changed = true;
+                for (PackageRollbackInfo info : rollback.getPackages()) {
+                    if (packageName.equals(info.getPackageName())) {
+                        iter.remove();
+                        changed = true;
+                        break;
+                    }
                 }
             }
 
@@ -929,6 +893,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     if (info.getPackageName().equals(packageName)) {
                         return data;
                     }
+                }
+            }
+        }
+        return null;
+    }
+
+    /*
+     * Returns the RollbackData, if any, for an available rollback with the
+     * given rollbackId.
+     */
+    private RollbackData getRollbackForId(int rollbackId) {
+        synchronized (mLock) {
+            // TODO: Have ensureRollbackDataLoadedLocked return the list of
+            // available rollbacks, to hopefully avoid forgetting to call it?
+            ensureRollbackDataLoadedLocked();
+            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                RollbackData data = mAvailableRollbacks.get(i);
+                if (data.rollbackId == rollbackId) {
+                    return data;
                 }
             }
         }

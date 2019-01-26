@@ -17,7 +17,6 @@
 package android.content.rollback;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -50,55 +49,26 @@ public final class RollbackManager {
     }
 
     /**
-     * Returns the rollback currently available to be executed for the given
-     * package.
-     * <p>
-     * The returned RollbackInfo describes what packages would be rolled back,
-     * including package version codes before and after rollback. The rollback
-     * can be initiated using {@link #executeRollback(RollbackInfo,IntentSender)}.
-     * <p>
-     * TODO: What if there is no package installed on device for packageName?
+     * Returns a list of all currently available rollbacks.
      *
-     * @param packageName name of the package to get the availble RollbackInfo for.
-     * @return the rollback available for the package, or null if no rollback
-     *         is available for the package.
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public @Nullable RollbackInfo getAvailableRollback(@NonNull String packageName) {
+    public List<RollbackInfo> getAvailableRollbacks() {
         try {
-            return mBinder.getAvailableRollback(packageName);
+            return mBinder.getAvailableRollbacks().getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Gets the names of packages that are available for rollback.
-     * Call {@link #getAvailableRollback(String)} to get more information
-     * about the rollback available for a particular package.
-     *
-     * @return the names of packages that are available for rollback.
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public @NonNull List<String> getPackagesWithAvailableRollbacks() {
-        try {
-            return mBinder.getPackagesWithAvailableRollbacks().getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-
-    /**
-     * Gets the list of all recently executed rollbacks.
+     * Gets the list of all recently committed rollbacks.
      * This is for the purposes of preventing re-install of a bad version of a
-     * package.
+     * package and monitoring the status of a staged rollback.
      * <p>
-     * Returns an empty list if there are no recently executed rollbacks.
+     * Returns an empty list if there are no recently committed rollbacks.
      * <p>
      * To avoid having to keep around complete rollback history forever on a
      * device, the returned list of rollbacks is only guaranteed to include
@@ -107,12 +77,12 @@ public final class RollbackManager {
      * (without the possibility of rollback) to a higher version code than was
      * rolled back from.
      *
-     * @return the recently executed rollbacks
+     * @return the recently committed rollbacks
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public @NonNull List<RollbackInfo> getRecentlyExecutedRollbacks() {
+    public @NonNull List<RollbackInfo> getRecentlyCommittedRollbacks() {
         try {
             return mBinder.getRecentlyExecutedRollbacks().getList();
         } catch (RemoteException e) {
@@ -121,25 +91,24 @@ public final class RollbackManager {
     }
 
     /**
-     * Execute the given rollback, rolling back all versions of the packages
-     * to the last good versions previously installed on the device as
-     * specified in the given rollback object. The rollback will fail if any
-     * of the installed packages or available rollbacks are inconsistent with
-     * the versions specified in the given rollback object, which can happen
-     * if a package has been updated or a rollback expired since the rollback
-     * object was retrieved from {@link #getAvailableRollback(String)}.
+     * Commit the rollback with given id, rolling back all versions of the
+     * packages to the last good versions previously installed on the device
+     * as specified in the corresponding RollbackInfo object. The
+     * rollback will fail if any of the installed packages or available
+     * rollbacks are inconsistent with the versions specified in the given
+     * rollback object, which can happen if a package has been updated or a
+     * rollback expired since the rollback object was retrieved from
+     * {@link #getAvailableRollbacks()}.
      * <p>
      * TODO: Specify the returns status codes.
-     * TODO: What happens in case reboot is required for the rollback to take
-     * effect for staged installs?
      *
-     * @param rollback to execute
+     * @param rollback to commit
      * @param statusReceiver where to deliver the results
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public void executeRollback(@NonNull RollbackInfo rollback,
+    public void commitRollback(@NonNull RollbackInfo rollback,
             @NonNull IntentSender statusReceiver) {
         try {
             mBinder.executeRollback(rollback, mCallerPackageName, statusReceiver);
