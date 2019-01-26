@@ -426,6 +426,9 @@ static bool throwExceptionAsNecessary(
     if (err == BAD_VALUE || err == ERROR_DRM_CANNOT_HANDLE) {
         jniThrowException(env, "java/lang/IllegalArgumentException", msg);
         return true;
+    } else if (err == ERROR_UNSUPPORTED) {
+        jniThrowException(env, "java/lang/UnsupportedOperationException", msg);
+        return true;
     } else if (err == ERROR_DRM_NOT_PROVISIONED) {
         jniThrowException(env, "android/media/NotProvisionedException", msg);
         return true;
@@ -542,15 +545,15 @@ void JDrm::disconnect() {
 
 
 // static
-bool JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType,
-                                   DrmPlugin::SecurityLevel securityLevel) {
+status_t JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType,
+                                       DrmPlugin::SecurityLevel securityLevel, bool *isSupported) {
     sp<IDrm> drm = MakeDrm();
 
     if (drm == NULL) {
-        return false;
+        return BAD_VALUE;
     }
 
-    return drm->isCryptoSchemeSupported(uuid, mimeType, securityLevel);
+    return drm->isCryptoSchemeSupported(uuid, mimeType, securityLevel, isSupported);
 }
 
 status_t JDrm::initCheck() const {
@@ -977,7 +980,14 @@ static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
     }
     DrmPlugin::SecurityLevel securityLevel = jintToSecurityLevel(jSecurityLevel);
 
-    return JDrm::IsCryptoSchemeSupported(uuid.array(), mimeType, securityLevel);
+    bool isSupported;
+    status_t err = JDrm::IsCryptoSchemeSupported(uuid.array(), mimeType,
+            securityLevel, &isSupported);
+
+    if (throwExceptionAsNecessary(env, err, "Failed to query crypto scheme support")) {
+        return false;
+    }
+    return isSupported;
 }
 
 static jbyteArray android_media_MediaDrm_openSession(
