@@ -24,6 +24,8 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.util.List;
+
 /**
  * A mock {@link android.database.Cursor} class that isolates the test code from real
  * Cursor implementation.
@@ -226,7 +228,17 @@ public class MockCursor implements Cursor {
     }
 
     @Override
+    public void setNotificationUris(ContentResolver cr, List<Uri> uris) {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    @Override
     public Uri getNotificationUri() {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    @Override
+    public List<Uri> getNotificationUris() {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
