@@ -116,6 +116,20 @@ print_warning(const char* format, ...)
 }
 
 void
+print_info(const char* format, ...)
+{
+    fputs(g_escapeBold, stdout);
+
+    va_list args;
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
+
+    fputs(g_escapeEndColor, stdout);
+    fputc('\n', stdout);
+}
+
+void
 print_one_line(const char* format, ...)
 {
     if (g_stdoutIsTty) {
