@@ -100,6 +100,7 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetSystemAudioModeOn_audioSystemBroadcast() {
+        mHdmiControlService.setSystemAudioActivated(false);
         assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isFalse();
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
@@ -118,6 +119,17 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         Constants.ADDR_AUDIO_SYSTEM, mHdmiCecLocalDevicePlayback.mAddress, false);
         assertThat(mHdmiCecLocalDevicePlayback.handleSetSystemAudioMode(message)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isTrue();
+    }
+
+    @Test
+    public void handleSystemAudioModeStatusOn_DirectltToLocalDeviceFromAudioSystem() {
+        mHdmiControlService.setSystemAudioActivated(false);
+        assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isFalse();
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        Constants.ADDR_AUDIO_SYSTEM, mHdmiCecLocalDevicePlayback.mAddress, true);
+        assertThat(mHdmiCecLocalDevicePlayback.handleSystemAudioModeStatus(message)).isTrue();
         assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isTrue();
     }
 }
