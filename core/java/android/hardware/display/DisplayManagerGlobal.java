@@ -20,6 +20,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
+import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.projection.IMediaProjection;
@@ -80,12 +81,20 @@ public final class DisplayManagerGlobal {
             new ArrayList<DisplayListenerDelegate>();
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<DisplayInfo>();
+    private final ColorSpace mWideColorSpace;
     private int[] mDisplayIdCache;
 
     private int mWifiDisplayScanNestCount;
 
     private DisplayManagerGlobal(IDisplayManager dm) {
         mDm = dm;
+        try {
+            mWideColorSpace =
+                    ColorSpace.get(
+                            ColorSpace.Named.values()[mDm.getPreferredWideGamutColorSpaceId()]);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -492,6 +501,17 @@ public final class DisplayManagerGlobal {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Gets the preferred wide gamut color space for all displays.
+     * The wide gamut color space is returned from composition pipeline
+     * based on hardware capability.
+     *
+     * @hide
+     */
+    public ColorSpace getPreferredWideGamutColorSpace() {
+        return mWideColorSpace;
     }
 
     /**
