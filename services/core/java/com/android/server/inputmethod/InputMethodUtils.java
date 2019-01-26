@@ -34,6 +34,7 @@ import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Printer;
@@ -756,6 +757,14 @@ final class InputMethodUtils {
          */
         private final ArrayMap<String, String> mCopyOnWriteDataStore = new ArrayMap<>();
 
+        private static final ArraySet<String> CLONE_TO_MANAGED_PROFILE = new ArraySet<>();
+        static {
+            Settings.Secure.getCloneToManagedProfileSettings(CLONE_TO_MANAGED_PROFILE);
+        }
+
+        private static final UserManagerInternal sUserManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+
         private boolean mCopyOnWrite = false;
         @NonNull
         private String mEnabledInputMethodsStrCache = "";
@@ -833,7 +842,9 @@ final class InputMethodUtils {
             if (mCopyOnWrite) {
                 mCopyOnWriteDataStore.put(key, str);
             } else {
-                Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
+                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
+                Settings.Secure.putStringForUser(mResolver, key, str, userId);
             }
         }
 
@@ -852,7 +863,9 @@ final class InputMethodUtils {
             if (mCopyOnWrite) {
                 mCopyOnWriteDataStore.put(key, String.valueOf(value));
             } else {
-                Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
+                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
+                Settings.Secure.putIntForUser(mResolver, key, value, userId);
             }
         }
 
