@@ -726,7 +726,7 @@ java_defaults {
         "ext",
     ],
 
-    jarjar_rules: ":framework-hidl-jarjar",
+    jarjar_rules: "jarjar_rules_hidl.txt",
 
     static_libs: [
         "apex_aidl_interface-java",
@@ -738,6 +738,15 @@ java_defaults {
         "android.hardware.cas-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.0-java",
+        "android.hardware.radio-V1.1-java",
+        "android.hardware.radio-V1.2-java",
+        "android.hardware.radio-V1.3-java",
+        "android.hardware.radio-V1.4-java",
+        "android.hardware.radio.config-V1.0-java",
+        "android.hardware.radio.config-V1.1-java",
+        "android.hardware.radio.config-V1.2-java",
+        "android.hardware.radio.deprecated-V1.0-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V1.0-java",
         "android.hardware.thermal-V1.1-java",
@@ -746,15 +755,12 @@ java_defaults {
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb-V1.2-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
         "android.hardware.wifi-V1.0-java-constants",
-        "android.hardware.radio-V1.0-java",
-        "android.hardware.radio-V1.3-java",
-        "android.hardware.radio-V1.4-java",
-        "android.hardware.usb.gadget-V1.0-java",
         "networkstack-aidl-interfaces-java",
         "netd_aidl_interface-java",
         "devicepolicyprotosnano",
@@ -786,11 +792,6 @@ filegroup {
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
     ],
-}
-
-filegroup {
-    name: "framework-hidl-jarjar",
-    srcs: ["jarjar_rules_hidl.txt"],
 }
 
 java_library {
