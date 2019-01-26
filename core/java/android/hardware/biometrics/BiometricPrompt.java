@@ -77,6 +77,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final String KEY_REQUIRE_CONFIRMATION = "require_confirmation";
+    /**
+     * @hide
+     */
+    public static final String KEY_ENABLE_FALLBACK = "enable_fallback";
 
     /**
      * Error/help message will show for this amount of time.
@@ -242,6 +246,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * The user will first be prompted to authenticate with biometrics, but also given the
+         * option to authenticate with their device PIN, pattern, or password.
+         * @param enable When true, the prompt will fall back to ask for the user's device
+         *               credentials (PIN, pattern, or password).
+         * @return
+         */
+        public Builder setEnableFallback(boolean enable) {
+            mBundle.putBoolean(KEY_ENABLE_FALLBACK, enable);
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          * @return a {@link BiometricPrompt}
          * @throws IllegalArgumentException if any of the required fields are not set.
@@ -250,11 +266,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             final CharSequence title = mBundle.getCharSequence(KEY_TITLE);
             final CharSequence negative = mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
             final boolean useDefaultTitle = mBundle.getBoolean(KEY_USE_DEFAULT_TITLE);
+            final boolean enableFallback = mBundle.getBoolean(KEY_ENABLE_FALLBACK);
 
             if (TextUtils.isEmpty(title) && !useDefaultTitle) {
                 throw new IllegalArgumentException("Title must be set and non-empty");
-            } else if (TextUtils.isEmpty(negative)) {
+            } else if (TextUtils.isEmpty(negative) && !enableFallback) {
                 throw new IllegalArgumentException("Negative text must be set and non-empty");
+            } else if (!TextUtils.isEmpty(negative) && enableFallback) {
+                throw new IllegalArgumentException("Can't have both negative button behavior"
+                        + " and fallback enabled");
             }
             return new BiometricPrompt(mContext, mBundle, mPositiveButtonInfo, mNegativeButtonInfo);
         }
@@ -513,6 +533,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
+        }
+        if (mBundle.getBoolean(KEY_ENABLE_FALLBACK)) {
+            throw new IllegalArgumentException("Fallback not supported with crypto");
         }
         authenticateInternal(crypto, cancel, executor, callback, mContext.getUserId());
     }

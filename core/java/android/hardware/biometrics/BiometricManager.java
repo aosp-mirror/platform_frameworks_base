@@ -171,5 +171,39 @@ public class BiometricManager {
             Slog.w(TAG, "resetTimeout(): Service not connected");
         }
     }
+
+    /**
+     * TODO(b/123378871): Remove when moved.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onConfirmDeviceCredentialSuccess() {
+        if (mService != null) {
+            try {
+                mService.onConfirmDeviceCredentialSuccess();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "onConfirmDeviceCredentialSuccess(): Service not connected");
+        }
+    }
+
+    /**
+     * TODO(b/123378871): Remove when moved.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onConfirmDeviceCredentialError(int error, String message) {
+        if (mService != null) {
+            try {
+                mService.onConfirmDeviceCredentialError(error, message);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "onConfirmDeviceCredentialError(): Service not connected");
+        }
+    }
 }
 
