@@ -669,12 +669,12 @@ namespace PaintGlue {
     }
 
     static jint getHinting(jlong paintHandle) {
-        return (SkFontHinting)reinterpret_cast<Paint*>(paintHandle)->getHinting()
+        return (SkFontHinting)reinterpret_cast<Paint*>(paintHandle)->getSkFont().getHinting()
                 == kNo_SkFontHinting ? 0 : 1;
     }
 
     static void setHinting(jlong paintHandle, jint mode) {
-        reinterpret_cast<Paint*>(paintHandle)->setHinting(
+        reinterpret_cast<Paint*>(paintHandle)->getSkFont().setHinting(
                 mode == 0 ? kNo_SkFontHinting : kNormal_SkFontHinting);
     }
 
