@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
@@ -2137,6 +2139,79 @@ public final class SmsManager {
             ISms iccSms = getISmsServiceOrThrow();
             return iccSms.createAppSpecificSmsToken(getSubscriptionId(),
                     ActivityThread.currentPackageName(), intent);
+
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The prefixes is a list of prefix {@code String} separated by this delimiter.
+     * @hide
+     */
+    public static final String REGEX_PREFIX_DELIMITER = ",";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The success status to be added into the intent to be sent to the calling package.
+     * @hide
+     */
+    public static final int RESULT_STATUS_SUCCESS = 0;
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The timeout status to be added into the intent to be sent to the calling package.
+     * @hide
+     */
+    public static final int RESULT_STATUS_TIMEOUT = 1;
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * Intent extra key of the retrieved SMS message as a {@code String}.
+     * @hide
+     */
+    public static final String EXTRA_SMS_MESSAGE = "android.telephony.extra.SMS_MESSAGE";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * Intent extra key of SMS retriever status, which indicates whether the request for the
+     * coming SMS message is SUCCESS or TIMEOUT
+     * @hide
+     */
+    public static final String EXTRA_STATUS = "android.telephony.extra.STATUS";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * [Optional] Intent extra key of the retrieved Sim card subscription Id if any. {@code int}
+     * @hide
+     */
+    public static final String EXTRA_SIM_SUBSCRIPTION_ID =
+            "android.telephony.extra.SIM_SUBSCRIPTION_ID";
+
+    /**
+     * Create a single use app specific incoming SMS request for the calling package.
+     *
+     * This method returns a token that if included in a subsequent incoming SMS message, and the
+     * SMS message has a prefix from the given prefixes list, the provided {@code intent} will be
+     * sent with the SMS data to the calling package.
+     *
+     * The token is only good for one use within a reasonable amount of time. After an SMS has been
+     * received containing the token all subsequent SMS messages with the token will be routed as
+     * normal.
+     *
+     * An app can only have one request at a time, if the app already has a request pending it will
+     * be replaced with a new request.
+     *
+     * @param prefixes this is a list of prefixes string separated by REGEX_PREFIX_DELIMITER. The
+     *  matching SMS message should have at least one of the prefixes in the beginning of the
+     *  message.
+     * @param intent this intent is sent when the matching SMS message is received.
+     * @return Token to include in an SMS message.
+     */
+    @Nullable
+    public String createAppSpecificSmsTokenWithPackageInfo(
+            @Nullable String prefixes, @NonNull PendingIntent intent) {
+        try {
+            ISms iccSms = getISmsServiceOrThrow();
+            return iccSms.createAppSpecificSmsTokenWithPackageInfo(getSubscriptionId(),
+                ActivityThread.currentPackageName(), prefixes, intent);
 
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
