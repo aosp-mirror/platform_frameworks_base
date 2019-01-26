@@ -418,13 +418,13 @@ bool FileDescriptorInfo::GetSocketName(const int fd, std::string* result) {
 }
 
 void FileDescriptorInfo::DetachSocket(fail_fn_t fail_fn) const {
-  const int dev_null_fd = open("/dev/null", O_RDWR);
+  const int dev_null_fd = open("/dev/null", O_RDWR | O_CLOEXEC);
   if (dev_null_fd < 0) {
     fail_fn(std::string("Failed to open /dev/null: ").append(strerror(errno)));
   }
 
-  if (dup2(dev_null_fd, fd) == -1) {
-    fail_fn(android::base::StringPrintf("Failed dup2 on socket descriptor %d: %s",
+  if (dup3(dev_null_fd, fd, O_CLOEXEC) == -1) {
+    fail_fn(android::base::StringPrintf("Failed dup3 on socket descriptor %d: %s",
                                         fd,
                                         strerror(errno)));
   }
