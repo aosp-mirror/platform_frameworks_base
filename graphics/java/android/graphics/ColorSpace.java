@@ -1821,6 +1821,8 @@ public abstract class ColorSpace {
      * @param cct The correlated color temperature, in Kelvin
      * @return Corresponding XYZ values
      * @throws IllegalArgumentException If cct is invalid
+     *
+     * @hide
      */
     @NonNull
     @Size(3)
@@ -1851,6 +1853,8 @@ public abstract class ColorSpace {
      * @param srcWhitePoint The white point to adapt from
      * @param dstWhitePoint The white point to adapt to
      * @return A 3x3 matrix as a non-null array of 9 floats
+     *
+     * @hide
      */
     @NonNull
     @Size(9)
