@@ -271,6 +271,7 @@ java_defaults {
         "core/java/android/os/IThermalService.aidl",
         "core/java/android/os/IUpdateLock.aidl",
         "core/java/android/os/IUserManager.aidl",
+        ":libvibrator_aidl",
         "core/java/android/os/IVibratorService.aidl",
         "core/java/android/os/storage/IStorageManager.aidl",
         "core/java/android/os/storage/IStorageEventListener.aidl",
@@ -791,6 +792,14 @@ filegroup {
     srcs: [
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
+    ],
+}
+
+filegroup {
+    name: "libvibrator_aidl",
+    srcs: [
+        "core/java/android/os/IExternalVibrationController.aidl",
+        "core/java/android/os/IExternalVibratorService.aidl",
     ],
 }
 
