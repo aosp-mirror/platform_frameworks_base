@@ -20,12 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.app.RemoteAction;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.text.Layout;
 import android.text.Selection;
@@ -34,13 +36,16 @@ import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.textclassifier.ExtrasUtils;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
 import android.view.textclassifier.SelectionSessionLogger;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationConstants;
+import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextClassifierEvent;
 import android.view.textclassifier.TextSelection;
 import android.widget.Editor.SelectionModifierCursorController;
 
@@ -166,16 +171,17 @@ public final class SelectionActionModeHelper {
         }
     }
 
-    public void onSelectionAction(int menuItemId) {
+    /** Reports a selection action event. */
+    public void onSelectionAction(int menuItemId, @Nullable String actionLabel) {
         mSelectionTracker.onSelectionAction(
                 mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
-                getActionType(menuItemId), mTextClassification);
+                getActionType(menuItemId), actionLabel, mTextClassification);
     }
 
     public void onSelectionDrag() {
         mSelectionTracker.onSelectionAction(
                 mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
-                SelectionEvent.ACTION_DRAG, mTextClassification);
+                SelectionEvent.ACTION_DRAG, /* actionLabel= */ null, mTextClassification);
     }
 
     public void onTextChanged(int start, int end) {
@@ -511,8 +517,11 @@ public final class SelectionActionModeHelper {
             mOriginalEnd = mSelectionEnd = selectionEnd;
             mAllowReset = false;
             maybeInvalidateLogger();
-            mLogger.logSelectionStarted(mTextView.getTextClassificationSession(),
-                    text, selectionStart,
+            mLogger.logSelectionStarted(
+                    mTextView.getTextClassificationSession(),
+                    mTextView.getTextClassificationContext(),
+                    text,
+                    selectionStart,
                     isLink ? SelectionEvent.INVOCATION_LINK : SelectionEvent.INVOCATION_MANUAL);
         }
 
@@ -570,10 +579,12 @@ public final class SelectionActionModeHelper {
         public void onSelectionAction(
                 int selectionStart, int selectionEnd,
                 @SelectionEvent.ActionType int action,
+                @Nullable String actionLabel,
                 @Nullable TextClassification classification) {
             if (isSelectionStarted()) {
                 mAllowReset = false;
-                mLogger.logSelectionAction(selectionStart, selectionEnd, action, classification);
+                mLogger.logSelectionAction(
+                        selectionStart, selectionEnd, action, actionLabel, classification);
             }
         }
 
@@ -596,7 +607,8 @@ public final class SelectionActionModeHelper {
                     mSelectionEnd = editor.getTextView().getSelectionEnd();
                     mLogger.logSelectionAction(
                             textView.getSelectionStart(), textView.getSelectionEnd(),
-                            SelectionEvent.ACTION_RESET, null /* classification */);
+                            SelectionEvent.ACTION_RESET,
+                            /* actionLabel= */ null, /* classification= */ null);
                 }
                 return selected;
             }
@@ -605,7 +617,9 @@ public final class SelectionActionModeHelper {
 
         public void onTextChanged(int start, int end, TextClassification classification) {
             if (isSelectionStarted() && start == mSelectionStart && end == mSelectionEnd) {
-                onSelectionAction(start, end, SelectionEvent.ACTION_OVERTYPE, classification);
+                onSelectionAction(
+                        start, end, SelectionEvent.ACTION_OVERTYPE,
+                        /* actionLabel= */ null, classification);
             }
         }
 
@@ -644,7 +658,8 @@ public final class SelectionActionModeHelper {
                 if (mIsPending) {
                     mLogger.logSelectionAction(
                             mSelectionStart, mSelectionEnd,
-                            SelectionEvent.ACTION_ABANDON, null /* classification */);
+                            SelectionEvent.ACTION_ABANDON,
+                            /* actionLabel= */ null, /* classification= */ null);
                     mSelectionStart = mSelectionEnd = -1;
                     mLogger.endTextClassificationSession();
                     mIsPending = false;
@@ -679,6 +694,11 @@ public final class SelectionActionModeHelper {
         private final BreakIterator mTokenIterator;
 
         @Nullable private TextClassifier mClassificationSession;
+        @Nullable private TextClassificationContext mClassificationContext;
+
+        @Nullable private TextClassifierEvent mTranslateViewEvent;
+        @Nullable private TextClassifierEvent mTranslateClickEvent;
+
         private int mStartIndex;
         private String mText;
 
@@ -690,6 +710,7 @@ public final class SelectionActionModeHelper {
 
         public void logSelectionStarted(
                 TextClassifier classificationSession,
+                TextClassificationContext classificationContext,
                 CharSequence text, int index,
                 @InvocationMethod int invocationMethod) {
             try {
@@ -701,6 +722,7 @@ public final class SelectionActionModeHelper {
                 mTokenIterator.setText(mText);
                 mStartIndex = index;
                 mClassificationSession = classificationSession;
+                mClassificationContext = classificationContext;
                 if (hasActiveClassificationSession()) {
                     mClassificationSession.onSelectionEvent(
                             SelectionEvent.createSelectionStartedEvent(invocationMethod, 0));
@@ -731,6 +753,7 @@ public final class SelectionActionModeHelper {
                                 SelectionEvent.createSelectionModifiedEvent(
                                         wordIndices[0], wordIndices[1]));
                     }
+                    maybeGenerateTranslateViewEvent(classification);
                 }
             } catch (Exception e) {
                 // Avoid crashes due to logging.
@@ -741,6 +764,7 @@ public final class SelectionActionModeHelper {
         public void logSelectionAction(
                 int start, int end,
                 @SelectionEvent.ActionType int action,
+                @Nullable String actionLabel,
                 @Nullable TextClassification classification) {
             try {
                 if (hasActiveClassificationSession()) {
@@ -757,6 +781,9 @@ public final class SelectionActionModeHelper {
                                 SelectionEvent.createSelectionActionEvent(
                                         wordIndices[0], wordIndices[1], action));
                     }
+
+                    maybeGenerateTranslateClickEvent(classification, actionLabel);
+
                     if (SelectionEvent.isTerminal(action)) {
                         endTextClassificationSession();
                     }
@@ -773,6 +800,7 @@ public final class SelectionActionModeHelper {
 
         public void endTextClassificationSession() {
             if (hasActiveClassificationSession()) {
+                maybeReportTranslateEvents();
                 mClassificationSession.destroy();
             }
         }
@@ -842,6 +870,78 @@ public final class SelectionActionModeHelper {
 
         private boolean isWhitespace(int start, int end) {
             return PATTERN_WHITESPACE.matcher(mText.substring(start, end)).matches();
+        }
+
+        private void maybeGenerateTranslateViewEvent(@Nullable TextClassification classification) {
+            if (classification != null) {
+                final TextClassifierEvent event = generateTranslateEvent(
+                        TextClassifierEvent.TYPE_ACTIONS_SHOWN,
+                        classification, mClassificationContext, /* actionLabel= */null);
+                mTranslateViewEvent = (event != null) ? event : mTranslateViewEvent;
+            }
+        }
+
+        private void maybeGenerateTranslateClickEvent(
+                @Nullable TextClassification classification, String actionLabel) {
+            if (classification != null) {
+                mTranslateClickEvent = generateTranslateEvent(
+                        TextClassifierEvent.TYPE_SMART_ACTION,
+                        classification, mClassificationContext, actionLabel);
+            }
+        }
+
+        private void maybeReportTranslateEvents() {
+            // Translate view and click events should only be logged once per selection session.
+            if (mTranslateViewEvent != null) {
+                mClassificationSession.onTextClassifierEvent(mTranslateViewEvent);
+                mTranslateViewEvent = null;
+            }
+            if (mTranslateClickEvent != null) {
+                mClassificationSession.onTextClassifierEvent(mTranslateClickEvent);
+                mTranslateClickEvent = null;
+            }
+        }
+
+        @Nullable
+        private static TextClassifierEvent generateTranslateEvent(
+                int eventType, TextClassification classification,
+                TextClassificationContext classificationContext, @Nullable String actionLabel) {
+
+            // The platform attempts to log "views" and "clicks" of the "Translate" action.
+            // Views are logged if a user is presented with the translate action during a selection
+            // session.
+            // Clicks are logged if the user clicks on the translate action.
+            // The index of the translate action is also logged to indicate whether it might have
+            // been in the main panel or overflow panel of the selection toolbar.
+            // NOTE that the "views" metric may be flawed if a TextView removes the translate menu
+            // item via a custom action mode callback or does not show a selection menu item.
+
+            final RemoteAction translateAction = ExtrasUtils.findTranslateAction(classification);
+            if (translateAction == null) {
+                // No translate action present. Nothing to log. Exit.
+                return null;
+            }
+
+            if (eventType == TextClassifierEvent.TYPE_SMART_ACTION
+                    && !translateAction.getTitle().toString().equals(actionLabel)) {
+                // Clicked action is not a translate action. Nothing to log. Exit.
+                // Note that we don't expect an actionLabel for "view" events.
+                return null;
+            }
+
+            final Bundle foreignLanguageExtra = ExtrasUtils.getForeignLanguageExtra(classification);
+            final String language = ExtrasUtils.getEntityType(foreignLanguageExtra);
+            final float score = ExtrasUtils.getScore(foreignLanguageExtra);
+            final String model = ExtrasUtils.getModelName(foreignLanguageExtra);
+            return new TextClassifierEvent.Builder(
+                    TextClassifierEvent.CATEGORY_LANGUAGE_DETECTION, eventType)
+                    .setEventContext(classificationContext)
+                    .setResultId(classification.getId())
+                    .setEntityTypes(language)
+                    .setScore(score)
+                    .setActionIndices(classification.getActions().indexOf(translateAction))
+                    .setModelName(model)
+                    .build();
         }
     }
 

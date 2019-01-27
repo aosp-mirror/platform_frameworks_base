@@ -456,6 +456,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private TextClassifier mTextClassifier;
     private TextClassifier mTextClassificationSession;
+    private TextClassificationContext mTextClassificationContext;
 
     // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
     // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
@@ -12068,22 +12069,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else {
                     widgetType = TextClassifier.WIDGET_TYPE_UNSELECTABLE_TEXTVIEW;
                 }
-                final TextClassificationContext textClassificationContext =
-                        new TextClassificationContext.Builder(
-                                mContext.getPackageName(), widgetType)
-                                .build();
+                mTextClassificationContext = new TextClassificationContext.Builder(
+                        mContext.getPackageName(), widgetType)
+                        .build();
                 if (mTextClassifier != null) {
                     mTextClassificationSession = tcm.createTextClassificationSession(
-                            textClassificationContext, mTextClassifier);
+                            mTextClassificationContext, mTextClassifier);
                 } else {
                     mTextClassificationSession = tcm.createTextClassificationSession(
-                            textClassificationContext);
+                            mTextClassificationContext);
                 }
             } else {
                 mTextClassificationSession = TextClassifier.NO_OP;
             }
         }
         return mTextClassificationSession;
+    }
+
+    /**
+     * Returns the {@link TextClassificationContext} for the current TextClassifier session.
+     * @see #getTextClassificationSession()
+     */
+    @Nullable
+    TextClassificationContext getTextClassificationContext() {
+        return mTextClassificationContext;
     }
 
     /**

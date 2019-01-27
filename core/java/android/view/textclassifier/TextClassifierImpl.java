@@ -65,9 +65,6 @@ import java.util.Objects;
  */
 public final class TextClassifierImpl implements TextClassifier {
 
-    /** @hide */
-    public static final String ACTIONS_INTENTS = "actions-intents";
-
     private static final String LOG_TAG = DEFAULT_LOG_TAG;
 
     private static final boolean DEBUG = false;
@@ -343,7 +340,11 @@ public final class TextClassifierImpl implements TextClassifier {
         if (DEBUG) {
             Log.d(DEFAULT_LOG_TAG, "onTextClassifierEvent() called with: event = [" + event + "]");
         }
-        mTextClassifierEventTronLogger.writeEvent(event);
+        try {
+            mTextClassifierEventTronLogger.writeEvent(event);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error writing event", e);
+        }
     }
 
     /** @inheritDoc */
@@ -566,12 +567,16 @@ public final class TextClassifierImpl implements TextClassifier {
         final float foreignTextThreshold = mSettings.getLangIdThresholdOverride() >= 0
                 ? mSettings.getLangIdThresholdOverride()
                 : 0.5f /* TODO: Load this from the langId model. */;
+        final Bundle foreignLanguageBundle =
+                detectForeignLanguage(classifiedText, foreignTextThreshold);
+        builder.setForeignLanguageExtra(foreignLanguageBundle);
+
         boolean isPrimaryAction = true;
         final ArrayList<Intent> sourceIntents = new ArrayList<>();
         List<LabeledIntent> labeledIntents = mIntentFactory.create(
                 mContext,
                 classifiedText,
-                isForeignText(classifiedText, foreignTextThreshold),
+                foreignLanguageBundle != null,
                 referenceTime,
                 highestScoringResult);
         for (LabeledIntent labeledIntent : labeledIntents) {
@@ -590,28 +595,28 @@ public final class TextClassifierImpl implements TextClassifier {
                                 labeledIntent.getIntent(), labeledIntent.getRequestCode())));
                 isPrimaryAction = false;
             }
-            builder.addAction(action);
-            sourceIntents.add(labeledIntent.getIntent());
+            builder.addAction(action, labeledIntent.getIntent());
         }
 
-        final Bundle extras = new Bundle();
-        extras.putParcelableArrayList(ACTIONS_INTENTS, sourceIntents);
-
-        return builder.setId(createId(text, start, end))
-                .setExtras(extras)
-                .build();
+        return builder.setId(createId(text, start, end)).build();
     }
 
-    private boolean isForeignText(String text, float threshold) {
+    /**
+     * Returns a bundle with the language and confidence score if it finds the text to be
+     * in a foreign language. Otherwise returns null.
+     */
+    @Nullable
+    private Bundle detectForeignLanguage(String text, float threshold) {
         if (threshold > 1) {
-            return false;
+            return null;
         }
 
         // TODO: Revisit this algorithm.
         try {
-            final LangIdModel.LanguageResult[] langResults = getLangIdImpl().detectLanguages(text);
+            final LangIdModel langId = getLangIdImpl();
+            final LangIdModel.LanguageResult[] langResults = langId.detectLanguages(text);
             if (langResults.length <= 0) {
-                return false;
+                return null;
             }
 
             LangIdModel.LanguageResult highestScoringResult = langResults[0];
@@ -621,7 +626,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 }
             }
             if (highestScoringResult.getScore() < threshold) {
-                return false;
+                return null;
             }
             // TODO: Remove
             Log.d(LOG_TAG, String.format("Language detected: <%s:%s>",
@@ -632,14 +637,15 @@ public final class TextClassifierImpl implements TextClassifier {
             final int size = deviceLocales.size();
             for (int i = 0; i < size; i++) {
                 if (deviceLocales.get(i).getLanguage().equals(detected.getLanguage())) {
-                    return false;
+                    return null;
                 }
             }
-            return true;
+            return ExtrasUtils.createForeignLanguageExtra(
+                    detected.getLanguage(), highestScoringResult.getScore(), langId.getVersion());
         } catch (Throwable t) {
             Log.e(LOG_TAG, "Error detecting foreign text. Ignored.", t);
         }
-        return false;
+        return null;
     }
 
     @Override
@@ -773,3 +779,4 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 }
+

@@ -16,7 +16,6 @@
 package android.view.textclassifier;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXTCLASSIFIER_MODEL;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_EVENT_TIME;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_FIRST_ENTITY_TYPE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_SCORE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_SECOND_ENTITY_TYPE;
@@ -46,7 +45,7 @@ public final class TextClassifierEventTronLogger {
     private final MetricsLogger mMetricsLogger;
 
     public TextClassifierEventTronLogger() {
-        mMetricsLogger = new MetricsLogger();
+        this(new MetricsLogger());
     }
 
     @VisibleForTesting
@@ -57,6 +56,7 @@ public final class TextClassifierEventTronLogger {
     /** Emits a text classifier event to the logs. */
     public void writeEvent(TextClassifierEvent event) {
         Preconditions.checkNotNull(event);
+
         int category = getCategory(event);
         if (category == -1) {
             Log.w(TAG, "Unknown category: " + event.getEventCategory());
@@ -65,14 +65,12 @@ public final class TextClassifierEventTronLogger {
         final LogMaker log = new LogMaker(category)
                 .setSubtype(getLogType(event))
                 .addTaggedData(FIELD_TEXT_CLASSIFIER_SESSION_ID, event.getResultId())
-                .addTaggedData(FIELD_TEXT_CLASSIFIER_EVENT_TIME, event.getEventTime())
-                .addTaggedData(FIELD_TEXTCLASSIFIER_MODEL,
-                        SelectionSessionLogger.SignatureParser.getModelName(event.getResultId()))
+                .addTaggedData(FIELD_TEXTCLASSIFIER_MODEL, getModelName(event))
                 .addTaggedData(FIELD_TEXT_CLASSIFIER_SCORE, event.getScore());
 
         String[] entityTypes = event.getEntityTypes();
-        // TRON does not support a field of list type, and thus workaround by store them
-        // in three separate fields. This is no longer an issue once we have moved to Westworld.
+        // The old logger does not support a field of list type, and thus workaround by store them
+        // in three separate fields. This is not an issue with the new logger.
         if (entityTypes.length >= 1) {
             log.addTaggedData(FIELD_TEXT_CLASSIFIER_FIRST_ENTITY_TYPE, entityTypes[0]);
         }
@@ -91,6 +89,13 @@ public final class TextClassifierEventTronLogger {
         }
         mMetricsLogger.write(log);
         debugLog(log);
+    }
+
+    private static String getModelName(TextClassifierEvent event) {
+        if (event.getModelName() != null) {
+            return event.getModelName();
+        }
+        return SelectionSessionLogger.SignatureParser.getModelName(event.getResultId());
     }
 
     private static int getCategory(TextClassifierEvent event) {

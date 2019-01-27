@@ -141,6 +141,8 @@ public final class TextClassifierEvent implements Parcelable {
     @Nullable private final String mLanguage;
     private final float mScore;
 
+    @Nullable private final String mModelName;
+
     private TextClassifierEvent(
             int eventCategory,
             int eventType,
@@ -156,7 +158,8 @@ public final class TextClassifierEvent implements Parcelable {
             int relativeSuggestedWordEndIndex,
             int[] actionIndex,
             String language,
-            float score) {
+            float score,
+            String modelVersion) {
         mEventCategory = eventCategory;
         mEventType = eventType;
         mEntityTypes = entityTypes;
@@ -172,6 +175,7 @@ public final class TextClassifierEvent implements Parcelable {
         mActionIndices = actionIndex;
         mLanguage = language;
         mScore = score;
+        mModelName = modelVersion;
     }
 
     @Override
@@ -196,6 +200,7 @@ public final class TextClassifierEvent implements Parcelable {
         dest.writeIntArray(mActionIndices);
         dest.writeString(mLanguage);
         dest.writeFloat(mScore);
+        dest.writeString(mModelName);
     }
 
     private static TextClassifierEvent readFromParcel(Parcel in) {
@@ -214,7 +219,8 @@ public final class TextClassifierEvent implements Parcelable {
                 /* relativeSuggestedWordEndIndex= */ in.readInt(),
                 /* actionIndices= */ in.createIntArray(),
                 /* language= */ in.readString(),
-                /* score= */ in.readFloat());
+                /* score= */ in.readFloat(),
+                /* modelVersion= */ in.readString());
     }
 
     /**
@@ -264,6 +270,7 @@ public final class TextClassifierEvent implements Parcelable {
         return mEventIndex;
     }
 
+    // TODO: Remove this API.
     /**
      * Returns the time this event occurred. This is the number of milliseconds since
      * January 1, 1970, 00:00:00 GMT. 0 indicates not set.
@@ -339,6 +346,15 @@ public final class TextClassifierEvent implements Parcelable {
     }
 
     /**
+     * Returns the model name.
+     * @hide
+     */
+    @Nullable
+    public String getModelName() {
+        return mModelName;
+    }
+
+    /**
      * Builder to build a text classifier event.
      */
     public static final class Builder {
@@ -358,6 +374,8 @@ public final class TextClassifierEvent implements Parcelable {
         private int[] mActionIndices = new int[0];
         @Nullable private String mLanguage;
         private float mScore;
+
+        private String mModelName;
 
         /**
          * Creates a builder for building {@link TextClassifierEvent}s.
@@ -407,6 +425,7 @@ public final class TextClassifierEvent implements Parcelable {
             return this;
         }
 
+        // TODO: Remove this API.
         /**
          * Sets the time this event occurred. This is the number of milliseconds since
          * January 1, 1970, 00:00:00 GMT. 0 indicates not set.
@@ -501,6 +520,15 @@ public final class TextClassifierEvent implements Parcelable {
         }
 
         /**
+         * Sets the model name string.
+         * @hide
+         */
+        public Builder setModelName(@Nullable String modelVersion) {
+            mModelName = modelVersion;
+            return this;
+        }
+
+        /**
          * Builds and returns a text classifier event.
          */
         @NonNull
@@ -521,7 +549,8 @@ public final class TextClassifierEvent implements Parcelable {
                     mRelativeSuggestedWordEndIndex,
                     mActionIndices,
                     mLanguage,
-                    mScore);
+                    mScore,
+                    mModelName);
         }
         // TODO: Add build(boolean validate).
     }
@@ -544,6 +573,7 @@ public final class TextClassifierEvent implements Parcelable {
         out.append(", mActionIndices=").append(Arrays.toString(mActionIndices));
         out.append(", mLanguage=").append(mLanguage);
         out.append(", mScore=").append(mScore);
+        out.append(", mModelName=").append(mModelName);
         out.append("}");
         return out.toString();
     }

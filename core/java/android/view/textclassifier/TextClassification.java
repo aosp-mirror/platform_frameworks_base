@@ -378,6 +378,8 @@ public final class TextClassification implements Parcelable {
         @Nullable private OnClickListener mLegacyOnClickListener;
         @Nullable private String mId;
         @Nullable private Bundle mExtras;
+        @NonNull private final ArrayList<Intent> mActionIntents = new ArrayList<>();
+        @Nullable private Bundle mForeignLanguageExtra;
 
         /**
          * Sets the classified text.
@@ -412,8 +414,19 @@ public final class TextClassification implements Parcelable {
          */
         @NonNull
         public Builder addAction(@NonNull RemoteAction action) {
+            return addAction(action, null);
+        }
+
+        /**
+         * @param intent the intent in the remote action.
+         * @see #addAction(RemoteAction)
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public Builder addAction(RemoteAction action, @Nullable Intent intent) {
             Preconditions.checkArgument(action != null);
             mActions.add(action);
+            mActionIntents.add(intent);
             return this;
         }
 
@@ -499,13 +512,33 @@ public final class TextClassification implements Parcelable {
         }
 
         /**
+         * @see #setExtras(Bundle)
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public Builder setForeignLanguageExtra(@Nullable Bundle extra) {
+            mForeignLanguageExtra = extra;
+            return this;
+        }
+
+        /**
          * Builds and returns a {@link TextClassification} object.
          */
         @NonNull
         public TextClassification build() {
             return new TextClassification(mText, mLegacyIcon, mLegacyLabel, mLegacyIntent,
-                    mLegacyOnClickListener, mActions, mEntityConfidence, mId,
-                    mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
+                    mLegacyOnClickListener, mActions, mEntityConfidence, mId, buildExtras());
+        }
+
+        private Bundle buildExtras() {
+            final Bundle extras = mExtras == null ? new Bundle() : mExtras.deepCopy();
+            if (!mActionIntents.isEmpty()) {
+                ExtrasUtils.putActionsIntents(extras, mActionIntents);
+            }
+            if (mForeignLanguageExtra != null) {
+                ExtrasUtils.putForeignLanguageExtra(extras, mForeignLanguageExtra);
+            }
+            return extras.isEmpty() ? Bundle.EMPTY : extras;
         }
     }
 
