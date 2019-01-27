@@ -2429,7 +2429,7 @@ message BiometricAuthenticated {
     // specified and supported by the biometric modality, this is from the first ACQUIRED_GOOD to
     // AUTHENTICATED. for setRequireConfirmation(true), this is from PENDING_CONFIRMATION to
     // CONFIRMED.
-    optional int32 latency = 6;
+    optional int64 latency_millis = 6;
 }
 
 /**
