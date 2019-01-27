@@ -6,6 +6,7 @@ package android {
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
+    field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
@@ -1053,6 +1054,10 @@ package android.os {
     method public static java.io.File getStorageDirectory();
   }
 
+  public class FileUtils {
+    method public static boolean contains(java.io.File, java.io.File);
+  }
+
   public abstract class HwBinder implements android.os.IHwBinder {
     ctor public HwBinder();
     method public static final void configureRpcThreadpool(long, boolean);
@@ -1216,6 +1221,10 @@ package android.os {
     method public java.io.FileDescriptor[] getFileDescriptors();
     method public int[] getInts();
     method public boolean hasSingleFileDescriptor();
+  }
+
+  public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {
+    method public static java.io.File getFile(java.io.FileDescriptor) throws java.io.IOException;
   }
 
   public final class PowerManager {
@@ -1485,8 +1494,24 @@ package android.print {
 
 package android.provider {
 
+  public static final class CalendarContract.Calendars implements android.provider.BaseColumns android.provider.CalendarContract.CalendarColumns android.provider.CalendarContract.SyncColumns {
+    field public static final String[] SYNC_WRITABLE_COLUMNS;
+  }
+
+  public static final class CalendarContract.Events implements android.provider.BaseColumns android.provider.CalendarContract.CalendarColumns android.provider.CalendarContract.EventsColumns android.provider.CalendarContract.SyncColumns {
+    field public static final String[] SYNC_WRITABLE_COLUMNS;
+  }
+
+  public final class ContactsContract {
+    field public static final String HIDDEN_COLUMN_PREFIX = "x_";
+  }
+
   public static final class ContactsContract.CommonDataKinds.Phone implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     field public static final android.net.Uri ENTERPRISE_CONTENT_URI;
+  }
+
+  public static final class ContactsContract.PinnedPositions {
+    field public static final String UNDEMOTE_METHOD = "undemote";
   }
 
   public static final class ContactsContract.RawContactsEntity implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns {
@@ -1494,8 +1519,12 @@ package android.provider {
   }
 
   public final class MediaStore {
-    method @RequiresPermission("android.permission.CLEAR_APP_USER_DATA") public static void deleteContributedMedia(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
-    method @RequiresPermission("android.permission.CLEAR_APP_USER_DATA") public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static void deleteContributedMedia(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
+    method @NonNull public static java.io.File getVolumePath(@NonNull String) throws java.io.FileNotFoundException;
+    method @NonNull public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
+    field public static final String SCAN_FILE_CALL = "scan_file";
+    field public static final String SCAN_VOLUME_CALL = "scan_volume";
   }
 
   public final class Settings {
@@ -1553,6 +1582,10 @@ package android.provider {
 
   public static final class Telephony.Sms.Intents {
     field public static final String SMS_CARRIER_PROVISION_ACTION = "android.provider.Telephony.SMS_CARRIER_PROVISION";
+  }
+
+  public static final class VoicemailContract.Voicemails implements android.provider.BaseColumns android.provider.OpenableColumns {
+    field public static final String _DATA = "_data";
   }
 
 }
@@ -1829,10 +1862,15 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
     method public boolean isRttSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method public void setCarrierTestOverride(String, String, String, String, String, String, String);
+    field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
+    field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
+    field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
+    field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
 

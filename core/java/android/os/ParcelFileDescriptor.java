@@ -31,6 +31,7 @@ import static android.system.OsConstants.S_ISLNK;
 import static android.system.OsConstants.S_ISREG;
 import static android.system.OsConstants.S_IWOTH;
 
+import android.annotation.TestApi;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
@@ -580,6 +581,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *
      * @hide
      */
+    @TestApi
     public static File getFile(FileDescriptor fd) throws IOException {
         try {
             final String path = Os.readlink("/proc/self/fd/" + fd.getInt$());
