@@ -66,6 +66,7 @@ public class TestHarnessModeService extends SystemService {
     private static final String TEST_HARNESS_MODE_PROPERTY = "persist.sys.test_harness";
 
     private PersistentDataBlockManagerInternal mPersistentDataBlockManagerInternal;
+    private boolean mShouldSetUpTestHarnessMode;
 
     public TestHarnessModeService(Context context) {
         super(context);
@@ -96,6 +97,7 @@ public class TestHarnessModeService extends SystemService {
             // There's no data to apply, so leave it as-is.
             return;
         }
+        mShouldSetUpTestHarnessMode = true;
         PersistentData persistentData = PersistentData.fromBytes(testHarnessModeData);
 
         SystemProperties.set(TEST_HARNESS_MODE_PROPERTY, persistentData.mEnabled ? "1" : "0");
@@ -124,6 +126,9 @@ public class TestHarnessModeService extends SystemService {
     }
 
     private void disableAutoSync() {
+        if (!mShouldSetUpTestHarnessMode) {
+            return;
+        }
         UserInfo primaryUser = UserManager.get(getContext()).getPrimaryUser();
         ContentResolver
             .setMasterSyncAutomaticallyAsUser(false, primaryUser.getUserHandle().getIdentifier());
