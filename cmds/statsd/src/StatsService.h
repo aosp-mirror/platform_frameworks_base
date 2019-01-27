@@ -132,6 +132,17 @@ public:
                                             const String16& packageName) override;
 
     /**
+     * Binder call to let clients register the active configs changed operation.
+     */
+    virtual Status setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
+                                                    const String16& packageName,
+                                                    vector<int64_t>* output) override;
+
+    /**
+     * Binder call to remove the active configs changed operation for the specified package..
+     */
+    virtual Status removeActiveConfigsChangedOperation(const String16& packageName) override;
+    /**
      * Binder call to allow clients to remove the specified configuration.
      */
     virtual Status removeConfiguration(int64_t key,
