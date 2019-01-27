@@ -44,6 +44,8 @@ import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Set;
+
 /**
  * <p>
  * The contract between the calendar provider and applications. Contains
@@ -217,7 +219,7 @@ public final class CalendarContract {
      * The intent will have its action set to
      * {@link CalendarContract#ACTION_VIEW_WORK_CALENDAR_EVENT} and contain extras
      * corresponding to the API's arguments. A calendar app intending to support
-     * cross profile events viewing should handle this intent, parse the arguments
+     * cross-profile events viewing should handle this intent, parse the arguments
      * and show the appropriate UI.
      *
      * @param context the context.
@@ -767,9 +769,10 @@ public final class CalendarContract {
          * projection of the query to this uri that are not contained in the above list.
          *
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a managed profile, or cross profile calendar is disabled in Settings, or this uri is
+         * of a managed profile, or cross-profile calendar is disabled in Settings, or this uri is
          * queried from a package that is not whitelisted by profile owner of the managed profile
-         * via {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
+         * via
+         * {@link DevicePolicyManager#setCrossProfileCalendarPackages(ComponentName, Set)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
@@ -1758,9 +1761,10 @@ public final class CalendarContract {
          * projection of the query to this uri that are not contained in the above list.
          *
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a managed profile, or cross profile calendar is disabled in Settings, or this uri is
+         * of a managed profile, or cross-profile calendar is disabled in Settings, or this uri is
          * queried from a package that is not whitelisted by profile owner of the managed profile
-         * via {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
+         * via
+         * {@link DevicePolicyManager#setCrossProfileCalendarPackages(ComponentName, Set)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
@@ -1968,10 +1972,10 @@ public final class CalendarContract {
          * projection of the query to this uri that are not contained in the above list.
          *
          * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a managed profile, or cross profile calendar for the managed profile is disabled in
+         * of a managed profile, or cross-profile calendar for the managed profile is disabled in
          * Settings, or this uri is queried from a package that is not whitelisted by
          * profile owner of the managed profile via
-         * {@link DevicePolicyManager#addCrossProfileCalendarPackage(ComponentName, String)}.
+         * {@link DevicePolicyManager#setCrossProfileCalendarPackages(ComponentName, Set)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED

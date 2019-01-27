@@ -1900,6 +1900,20 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Return true if Hearing Aid Profile is supported.
+     *
+     * @return true if phone supports Hearing Aid Profile
+     */
+    private boolean isHearingAidProfileSupported() {
+        try {
+            return mManagerService.isHearingAidProfileSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "remote expection when calling isHearingAidProfileSupported", e);
+            return false;
+        }
+    }
+
+    /**
      * Get the maximum number of connected audio devices.
      *
      * @return the maximum number of connected audio devices
@@ -2050,6 +2064,11 @@ public final class BluetoothAdapter {
                         if ((supportedProfilesBitMask & (1 << i)) != 0) {
                             supportedProfiles.add(i);
                         }
+                    }
+                } else {
+                    // Bluetooth is disabled. Just fill in known supported Profiles
+                    if (isHearingAidProfileSupported()) {
+                        supportedProfiles.add(BluetoothProfile.HEARING_AID);
                     }
                 }
             }
@@ -2468,15 +2487,16 @@ public final class BluetoothAdapter {
      * Get the profile proxy object associated with the profile.
      *
      * <p>Profile can be one of {@link BluetoothProfile#HEADSET}, {@link BluetoothProfile#A2DP},
-     * {@link BluetoothProfile#GATT}, or {@link BluetoothProfile#GATT_SERVER}. Clients must
-     * implement {@link BluetoothProfile.ServiceListener} to get notified of the connection status
-     * and to get the proxy object.
+     * {@link BluetoothProfile#GATT}, {@link BluetoothProfile#HEARING_AID}, or {@link
+     * BluetoothProfile#GATT_SERVER}. Clients must implement {@link
+     * BluetoothProfile.ServiceListener} to get notified of the connection status and to get the
+     * proxy object.
      *
      * @param context Context of the application
      * @param listener The service Listener for connection callbacks.
      * @param profile The Bluetooth profile; either {@link BluetoothProfile#HEADSET},
-     * {@link BluetoothProfile#A2DP}. {@link BluetoothProfile#GATT} or
-     * {@link BluetoothProfile#GATT_SERVER}.
+     * {@link BluetoothProfile#A2DP}, {@link BluetoothProfile#GATT}, {@link
+     * BluetoothProfile#HEARING_AID} or {@link BluetoothProfile#GATT_SERVER}.
      * @return true on success, false on error
      */
     public boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
@@ -2525,8 +2545,11 @@ public final class BluetoothAdapter {
             BluetoothHidDevice hidDevice = new BluetoothHidDevice(context, listener);
             return true;
         } else if (profile == BluetoothProfile.HEARING_AID) {
-            BluetoothHearingAid hearingAid = new BluetoothHearingAid(context, listener);
-            return true;
+            if (isHearingAidProfileSupported()) {
+                BluetoothHearingAid hearingAid = new BluetoothHearingAid(context, listener);
+                return true;
+            }
+            return false;
         } else {
             return false;
         }
@@ -3253,7 +3276,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    public abstract class MetadataListener {
+    public abstract static class MetadataListener {
         /**
          * Callback triggered if the metadata of {@link BluetoothDevice} registered in
          * {@link #registerMetadataListener}.

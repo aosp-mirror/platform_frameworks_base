@@ -110,6 +110,8 @@ public final class RouteInfo implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
     public RouteInfo(IpPrefix destination, InetAddress gateway, String iface, int type) {
         switch (type) {
             case RTN_UNICAST:

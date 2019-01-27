@@ -1502,7 +1502,7 @@ public final class ProcessList {
                 mService.mNativeDebuggingApp = null;
             }
 
-            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PREFER_CODE_INTEGRITY) != 0
+            if (app.info.isCodeIntegrityPreferred()
                     || (app.info.isPrivilegedApp()
                         && DexManager.isPackageSelectedToRunOob(app.pkgList.mPkgList.keySet()))) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
@@ -1735,7 +1735,7 @@ public final class ProcessList {
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
-                        packageNames, visibleVolIds,
+                        packageNames, visibleVolIds, /*useBlastulaPool=*/ false,
                         new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
@@ -2384,14 +2384,14 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
-    void setAllHttpProxyLocked(String host, String port, String exclList, Uri pacFileUrl) {
+    void setAllHttpProxyLocked() {
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord r = mLruProcesses.get(i);
             // Don't dispatch to isolated processes as they can't access
             // ConnectivityManager and don't have network privileges anyway.
             if (r.thread != null && !r.isolated) {
                 try {
-                    r.thread.setHttpProxy(host, port, exclList, pacFileUrl);
+                    r.thread.updateHttpProxy();
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to update http proxy for: " +
                             r.info.processName);

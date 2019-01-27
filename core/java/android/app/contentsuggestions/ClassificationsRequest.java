@@ -26,6 +26,11 @@ import android.os.Parcelable;
 import java.util.List;
 
 /**
+ * Request object used when asking {@link ContentSuggestionsManager} to classify content selections.
+ *
+ * <p>The request contains a list of {@link ContentSelection} objects to be classified along with
+ * implementation specific extras.
+ *
  * @hide
  */
 @SystemApi
@@ -44,14 +49,14 @@ public final class ClassificationsRequest implements Parcelable {
     /**
      * Return request selections.
      */
-    public List<ContentSelection> getSelections() {
+    public @NonNull List<ContentSelection> getSelections() {
         return mSelections;
     }
 
     /**
-     * Return the request extras.
+     * Return the request extras or {@code null} if there are none.
      */
-    public Bundle getExtras() {
+    public @Nullable Bundle getExtras() {
         return mExtras;
     }
 

@@ -132,6 +132,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         info.width = mFBInfo.width();
         info.height = mFBInfo.height();
         mat4.asColMajorf(&info.transform[0]);
+        info.color_space_ptr = canvas->imageInfo().colorSpace();
 
         glViewport(0, 0, info.width, info.height);
 
@@ -179,8 +180,8 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     canvas->resetMatrix();
 
     auto functorImage = SkImage::MakeFromAHardwareBuffer(
-            reinterpret_cast<AHardwareBuffer*>(mFrameBuffer.get()), kPremul_SkAlphaType, nullptr,
-            kBottomLeft_GrSurfaceOrigin);
+            reinterpret_cast<AHardwareBuffer*>(mFrameBuffer.get()), kPremul_SkAlphaType,
+            canvas->imageInfo().refColorSpace(), kBottomLeft_GrSurfaceOrigin);
     canvas->drawImage(functorImage, 0, 0, &paint);
     canvas->restore();
 }

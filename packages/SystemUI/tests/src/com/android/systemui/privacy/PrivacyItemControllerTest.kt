@@ -45,9 +45,12 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -73,6 +76,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     private lateinit var userManager: UserManager
     @Captor
     private lateinit var argCaptor: ArgumentCaptor<List<PrivacyItem>>
+    @Captor
+    private lateinit var argCaptorCallback: ArgumentCaptor<AppOpsController.Callback>
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var privacyItemController: PrivacyItemController
@@ -95,7 +100,16 @@ class PrivacyItemControllerTest : SysuiTestCase() {
             }
         })).`when`(userManager).getProfiles(anyInt())
 
-        privacyItemController = PrivacyItemController(mContext, callback)
+        privacyItemController = PrivacyItemController(mContext)
+    }
+
+    @Test
+    fun testSetListeningTrueByAddingCallback() {
+        privacyItemController.addCallback(callback)
+        verify(appOpsController).addCallback(eq(PrivacyItemController.OPS),
+                any(AppOpsController.Callback::class.java))
+        testableLooper.processAllMessages()
+        verify(callback).privacyChanged(anyList())
     }
 
     @Test
@@ -103,8 +117,6 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         privacyItemController.setListening(true)
         verify(appOpsController).addCallback(eq(PrivacyItemController.OPS),
                 any(AppOpsController.Callback::class.java))
-        testableLooper.processAllMessages()
-        verify(callback).privacyChanged(anyList())
     }
 
     @Test
@@ -121,7 +133,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
                 AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, "", 1)))
                 .`when`(appOpsController).getActiveAppOpsForUser(anyInt())
 
-        privacyItemController.setListening(true)
+        privacyItemController.addCallback(callback)
         testableLooper.processAllMessages()
         verify(callback).privacyChanged(capture(argCaptor))
         assertEquals(1, argCaptor.value.size)
@@ -131,7 +143,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     fun testSystemApps() {
         doReturn(listOf(AppOpItem(AppOpsManager.OP_COARSE_LOCATION, SYSTEM_UID, TEST_PACKAGE_NAME,
                 0))).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
-        privacyItemController.setListening(true)
+        privacyItemController.addCallback(callback)
         testableLooper.processAllMessages()
         verify(callback).privacyChanged(capture(argCaptor))
         assertEquals(1, argCaptor.value.size)
@@ -142,8 +154,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     @Test
     fun testRegisterReceiver_allUsers() {
         val spiedContext = spy(mContext)
-        val itemController = PrivacyItemController(spiedContext, callback)
-
+        val itemController = PrivacyItemController(spiedContext)
+        itemController.setListening(true)
         verify(spiedContext, atLeastOnce()).registerReceiverAsUser(
                 eq(itemController.userSwitcherReceiver), eq(UserHandle.ALL), any(), eq(null),
                 eq(null))
@@ -169,5 +181,55 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         privacyItemController.userSwitcherReceiver.onReceive(context,
                 Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED))
         verify(userManager).getProfiles(anyInt())
+    }
+
+    @Test
+    fun testAddMultipleCallbacks() {
+        val otherCallback = mock(PrivacyItemController.Callback::class.java)
+        privacyItemController.addCallback(callback)
+        testableLooper.processAllMessages()
+        verify(callback).privacyChanged(anyList())
+
+        privacyItemController.addCallback(otherCallback)
+        testableLooper.processAllMessages()
+        verify(otherCallback).privacyChanged(anyList())
+        // Adding a callback should not unnecessarily call previous ones
+        verifyNoMoreInteractions(callback)
+    }
+
+    @Test
+    fun testMultipleCallbacksAreUpdated() {
+        doReturn(emptyList<AppOpItem>()).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        val otherCallback = mock(PrivacyItemController.Callback::class.java)
+        privacyItemController.addCallback(callback)
+        privacyItemController.addCallback(otherCallback)
+        testableLooper.processAllMessages()
+        reset(callback)
+        reset(otherCallback)
+
+        verify(appOpsController).addCallback(any<IntArray>(), capture(argCaptorCallback))
+        argCaptorCallback.value.onActiveStateChanged(0, TEST_UID, "", true)
+        testableLooper.processAllMessages()
+        verify(callback).privacyChanged(anyList())
+        verify(otherCallback).privacyChanged(anyList())
+    }
+
+    @Test
+    fun testRemoveCallback() {
+        doReturn(emptyList<AppOpItem>()).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+        val otherCallback = mock(PrivacyItemController.Callback::class.java)
+        privacyItemController.addCallback(callback)
+        privacyItemController.addCallback(otherCallback)
+        testableLooper.processAllMessages()
+        reset(callback)
+        reset(otherCallback)
+
+        verify(appOpsController).addCallback(any<IntArray>(), capture(argCaptorCallback))
+        privacyItemController.removeCallback(callback)
+        argCaptorCallback.value.onActiveStateChanged(0, TEST_UID, "", true)
+        testableLooper.processAllMessages()
+        verify(callback, never()).privacyChanged(anyList())
+        verify(otherCallback).privacyChanged(anyList())
     }
 }

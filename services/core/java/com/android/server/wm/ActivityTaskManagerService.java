@@ -4399,6 +4399,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    @Override
+    public void registerRemoteAnimationsForDisplay(int displayId,
+            RemoteAnimationDefinition definition) {
+        mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "registerRemoteAnimations");
+        definition.setCallingPid(Binder.getCallingPid());
+        synchronized (mGlobalLock) {
+            final ActivityDisplay display = mRootActivityContainer.getActivityDisplay(displayId);
+            if (display == null) {
+                Slog.e(TAG, "Couldn't find display with id: " + displayId);
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                display.mDisplayContent.registerRemoteAnimations(definition);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     @Override
     public void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
@@ -5630,6 +5651,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     int getUidStateLocked(int uid) {
         return mActiveUids.get(uid, PROCESS_STATE_NONEXISTENT);
+    }
+
+    boolean isUidForeground(int uid) {
+        return (getUidStateLocked(uid) == ActivityManager.PROCESS_STATE_TOP)
+                || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
     /**
@@ -7039,6 +7065,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
             synchronized (mGlobalLock) {
                 return ActivityTaskManagerService.this.getTaskSnapshot(taskId, reducedResolution);
+            }
+        }
+
+        @Override
+        public boolean isUidForeground(int uid) {
+            synchronized (mGlobalLock) {
+                return ActivityTaskManagerService.this.isUidForeground(uid);
             }
         }
     }

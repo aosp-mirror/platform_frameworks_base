@@ -21,7 +21,7 @@
 #include <cutils/compiler.h>
 #include <minikin/MinikinFont.h>
 
-class SkPaint;
+class SkFont;
 class SkTypeface;
 
 namespace android {
@@ -54,12 +54,12 @@ public:
     std::shared_ptr<minikin::MinikinFont> createFontWithVariation(
             const std::vector<minikin::FontVariation>&) const;
 
-    static uint32_t packPaintFlags(const SkPaint* paint);
-    static void unpackPaintFlags(SkPaint* paint, uint32_t paintFlags);
+    static uint32_t packFontFlags(const SkFont&);
+    static void unpackFontFlags(SkFont*, uint32_t fontFlags);
 
     // set typeface and fake bold/italic parameters
-    static void populateSkPaint(SkPaint* paint, const minikin::MinikinFont* font,
-                                minikin::FontFakery fakery);
+    static void populateSkFont(SkFont*, const minikin::MinikinFont* font,
+                               minikin::FontFakery fakery);
 
 private:
     sk_sp<SkTypeface> mTypeface;

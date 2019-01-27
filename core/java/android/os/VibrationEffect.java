@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.ContentResolver;
@@ -25,6 +26,8 @@ import android.hardware.vibrator.V1_2.Effect;
 import android.net.Uri;
 import android.util.MathUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -52,26 +55,20 @@ public abstract class VibrationEffect implements Parcelable {
      * A click effect.
      *
      * @see #get(int)
-     * @hide
      */
-    @TestApi
     public static final int EFFECT_CLICK = Effect.CLICK;
 
     /**
      * A double click effect.
      *
      * @see #get(int)
-     * @hide
      */
-    @TestApi
     public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
 
     /**
      * A tick effect.
      * @see #get(int)
-     * @hide
      */
-    @TestApi
     public static final int EFFECT_TICK = Effect.TICK;
 
     /**
@@ -93,9 +90,7 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * A heavy click effect.
      * @see #get(int)
-     * @hide
      */
-    @TestApi
     public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
 
     /** {@hide} */
@@ -135,6 +130,16 @@ public abstract class VibrationEffect implements Parcelable {
         Effect.RINGTONE_14,
         Effect.RINGTONE_15
     };
+
+    /** @hide */
+    @IntDef(prefix = { "EFFECT_" }, value = {
+            EFFECT_TICK,
+            EFFECT_CLICK,
+            EFFECT_HEAVY_CLICK,
+            EFFECT_DOUBLE_CLICK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EffectType {}
 
     /** @hide to prevent subclassing from outside of the framework */
     public VibrationEffect() { }
@@ -216,6 +221,27 @@ public abstract class VibrationEffect implements Parcelable {
         VibrationEffect effect = new Waveform(timings, amplitudes, repeat);
         effect.validate();
         return effect;
+    }
+
+    /**
+     * Create a predefined vibration effect.
+     *
+     * Predefined effects are a set of common vibration effects that should be identical, regardless
+     * of the app they come from, in order to provide a cohesive experience for users across
+     * the entire device. They also may be custom tailored to the device hardware in order to
+     * provide a better experience than you could otherwise build using the generic building
+     * blocks.
+     *
+     * This will fallback to a generic pattern if one exists and there does not exist a
+     * hardware-specific implementation of the effect.
+     *
+     * @param effectId The ID of the effect to perform:
+     *                 {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}, {@link #EFFECT_TICK}
+     *
+     * @return The desired effect.
+     */
+    public static VibrationEffect createPrebaked(@EffectType int effectId) {
+        return get(effectId, true);
     }
 
     /**

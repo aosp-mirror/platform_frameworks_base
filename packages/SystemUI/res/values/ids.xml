@@ -68,6 +68,7 @@
     <item type="id" name="panel_alpha_animator_tag"/>
     <item type="id" name="panel_alpha_animator_start_tag"/>
     <item type="id" name="panel_alpha_animator_end_tag"/>
+    <item type="id" name="cross_fade_layer_type_changed_tag"/>
 
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>
@@ -114,6 +115,14 @@
     <item type="id" name="aod_mask_transition_progress_tag" />
     <item type="id" name="aod_mask_transition_progress_end_tag" />
     <item type="id" name="aod_mask_transition_progress_start_tag" />
+
+    <!-- For saving DynamicAnimation physics animations as view tags. -->
+    <item type="id" name="translation_x_dynamicanimation_tag"/>
+    <item type="id" name="translation_y_dynamicanimation_tag"/>
+    <item type="id" name="translation_z_dynamicanimation_tag"/>
+    <item type="id" name="alpha_dynamicanimation_tag"/>
+    <item type="id" name="scale_x_dynamicanimation_tag"/>
+    <item type="id" name="scale_y_dynamicanimation_tag"/>
 
     <!-- Global Actions Menu -->
     <item type="id" name="global_actions_view" />

@@ -35,6 +35,7 @@ import android.os.UserManager;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.view.contentcapture.IContentCaptureManager;
+import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -220,6 +221,15 @@ public final class ContentCaptureManagerService extends
             } catch (RemoteException e) {
                 // Ignore exception as we need to be resilient against app behavior.
                 Slog.w(TAG, "Unable to send service component name: " + e);
+            }
+        }
+
+        @Override
+        public void removeUserData(@UserIdInt int userId, @NonNull UserDataRemovalRequest request) {
+            Preconditions.checkNotNull(request);
+            synchronized (mLock) {
+                final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+                service.removeUserDataLocked(request);
             }
         }
 

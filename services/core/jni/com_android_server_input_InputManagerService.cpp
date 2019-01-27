@@ -782,7 +782,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
             }
 
             sp<InputWindowHandle> windowHandle =
-                    android_server_InputWindowHandle_getHandle(env, windowHandleObj);
+                    android_view_InputWindowHandle_getHandle(env, windowHandleObj);
             if (windowHandle != nullptr) {
                 windowHandles.push(windowHandle);
             }
@@ -822,7 +822,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
 void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
         jobject applicationHandleObj) {
     sp<InputApplicationHandle> applicationHandle =
-            android_server_InputApplicationHandle_getHandle(env, applicationHandleObj);
+            android_view_InputApplicationHandle_getHandle(env, applicationHandleObj);
     mInputManager->getDispatcher()->setFocusedApplication(displayId, applicationHandle);
 }
 

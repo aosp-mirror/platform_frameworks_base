@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H
-#define _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H
+#ifndef _ANDROID_VIEW_INPUT_APPLICATION_HANDLE_H
+#define _ANDROID_VIEW_INPUT_APPLICATION_HANDLE_H
 
 #include <string>
 
@@ -40,9 +40,9 @@ private:
 };
 
 
-extern sp<InputApplicationHandle> android_server_InputApplicationHandle_getHandle(
+extern sp<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
         JNIEnv* env, jobject inputApplicationHandleObj);
 
 } // namespace android
 
-#endif // _ANDROID_SERVER_INPUT_APPLICATION_HANDLE_H
+#endif // _ANDROID_VIEW_INPUT_APPLICATION_HANDLE_H

@@ -247,7 +247,9 @@ public class SubscriptionManager {
     public static final String UNIQUE_KEY_SUBSCRIPTION_ID = "_id";
 
     /**
-     * TelephonyProvider column name for SIM ICC Identifier
+     * TelephonyProvider column name for a unique identifier for the subscription within the
+     * specific subscription type. For example, it contains SIM ICC Identifier subscriptions
+     * on Local SIMs. and Mac-address for Remote-SIM Subscriptions for Bluetooth devices.
      * <P>Type: TEXT (String)</P>
      */
     /** @hide */
@@ -263,6 +265,63 @@ public class SubscriptionManager {
     /** SIM is not inserted */
     /** @hide */
     public static final int SIM_NOT_INSERTED = -1;
+
+    /**
+     * The slot-index for Bluetooth Remote-SIM subscriptions
+     * @hide
+     */
+    public static final int SLOT_INDEX_FOR_REMOTE_SIM_SUB = INVALID_SIM_SLOT_INDEX;
+
+    /**
+     * TelephonyProvider column name Subscription-type.
+     * <P>Type: INTEGER (int)</P> {@link #SUBSCRIPTION_TYPE_LOCAL_SIM} for Local-SIM Subscriptions,
+     * {@link #SUBSCRIPTION_TYPE_REMOTE_SIM} for Remote-SIM Subscriptions.
+     * Default value is 0.
+     */
+    /** @hide */
+    public static final String SUBSCRIPTION_TYPE = "subscription_type";
+
+    /**
+     * This constant is to designate a subscription as a Local-SIM Subscription.
+     * <p> A Local-SIM can be a physical SIM inserted into a sim-slot in the device, or eSIM on the
+     * device.
+     * </p>
+     */
+    public static final int SUBSCRIPTION_TYPE_LOCAL_SIM = 0;
+
+    /**
+     * This constant is to designate a subscription as a Remote-SIM Subscription.
+     * <p>
+     * A Remote-SIM subscription is for a SIM on a phone connected to this device via some
+     * connectivity mechanism, for example bluetooth. Similar to Local SIM, this subscription can
+     * be used for SMS, Voice and data by proxying data through the connected device.
+     * Certain data of the SIM, such as IMEI, are not accessible for Remote SIMs.
+     * </p>
+     *
+     * <p>
+     * A Remote-SIM is available only as long the phone stays connected to this device.
+     * When the phone disconnects, Remote-SIM subscription is removed from this device and is
+     * no longer known. All data associated with the subscription, such as stored SMS, call logs,
+     * contacts etc, are removed from this device.
+     * </p>
+     *
+     * <p>
+     * If the phone re-connects to this device, a new Remote-SIM subscription is created for
+     * the phone. The Subscription Id associated with the new subscription is different from
+     * the Subscription Id of the previous Remote-SIM subscription created (and removed) for the
+     * phone; i.e., new Remote-SIM subscription treats the reconnected phone as a Remote-SIM that
+     * was never seen before.
+     * </p>
+     */
+    public static final int SUBSCRIPTION_TYPE_REMOTE_SIM = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SUBSCRIPTION_TYPE_"},
+        value = {
+            SUBSCRIPTION_TYPE_LOCAL_SIM,
+            SUBSCRIPTION_TYPE_REMOTE_SIM})
+    public @interface SubscriptionType {}
 
     /**
      * TelephonyProvider column name for user displayed name.
@@ -1145,7 +1204,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the SubscriptionInfo(s) of the currently inserted SIM(s). The records will be sorted
+     * Get the SubscriptionInfo(s) of the currently active SIM(s). The records will be sorted
      * by {@link SubscriptionInfo#getSimSlotIndex} then by {@link SubscriptionInfo#getSubscriptionId}.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -1427,21 +1486,84 @@ public class SubscriptionManager {
             logd("[addSubscriptionInfoRecord]- invalid slotIndex");
         }
 
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                // FIXME: This returns 1 on success, 0 on error should should we return it?
-                iSub.addSubInfoRecord(iccId, slotIndex);
-            } else {
-                logd("[addSubscriptionInfoRecord]- ISub service is null");
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
+        addSubscriptionInfoRecord(iccId, null, slotIndex, SUBSCRIPTION_TYPE_LOCAL_SIM);
 
         // FIXME: Always returns null?
         return null;
 
+    }
+
+    /**
+     * Add a new SubscriptionInfo to SubscriptionInfo database if needed
+     * @param uniqueId This is the unique identifier for the subscription within the
+     *                 specific subscription type.
+     * @param displayName human-readable name of the device the subscription corresponds to.
+     * @param slotIndex the slot assigned to this subscription. It is ignored for subscriptionType
+     *                  of {@link #SUBSCRIPTION_TYPE_REMOTE_SIM}.
+     * @param subscriptionType the {@link #SUBSCRIPTION_TYPE}
+     * @hide
+     */
+    public void addSubscriptionInfoRecord(String uniqueId, String displayName, int slotIndex,
+            int subscriptionType) {
+        if (VDBG) {
+            logd("[addSubscriptionInfoRecord]+ uniqueId:" + uniqueId
+                    + ", displayName:" + displayName + ", slotIndex:" + slotIndex
+                    + ", subscriptionType: " + subscriptionType);
+        }
+        if (uniqueId == null) {
+            Log.e(LOG_TAG, "[addSubscriptionInfoRecord]- uniqueId is null");
+            return;
+        }
+
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub == null) {
+                Log.e(LOG_TAG, "[addSubscriptionInfoRecord]- ISub service is null");
+                return;
+            }
+            int result = iSub.addSubInfo(uniqueId, displayName, slotIndex, subscriptionType);
+            if (result < 0) {
+                Log.e(LOG_TAG, "Adding of subscription didn't succeed: error = " + result);
+            } else {
+                logd("successfully added new subscription");
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+    }
+
+    /**
+     * Remove SubscriptionInfo record from the SubscriptionInfo database
+     * @param uniqueId This is the unique identifier for the subscription within the specific
+     *                 subscription type.
+     * @param subscriptionType the {@link #SUBSCRIPTION_TYPE}
+     * @hide
+     */
+    public void removeSubscriptionInfoRecord(String uniqueId, int subscriptionType) {
+        if (VDBG) {
+            logd("[removeSubscriptionInfoRecord]+ uniqueId:" + uniqueId
+                    + ", subscriptionType: " + subscriptionType);
+        }
+        if (uniqueId == null) {
+            Log.e(LOG_TAG, "[addSubscriptionInfoRecord]- uniqueId is null");
+            return;
+        }
+
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub == null) {
+                Log.e(LOG_TAG, "[removeSubscriptionInfoRecord]- ISub service is null");
+                return;
+            }
+            int result = iSub.removeSubInfo(uniqueId, subscriptionType);
+            if (result < 0) {
+                Log.e(LOG_TAG, "Removal of subscription didn't succeed: error = " + result);
+            } else {
+                logd("successfully removed subscription");
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
     }
 
     /**
@@ -2735,6 +2857,95 @@ public class SubscriptionManager {
             return availableList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
                     .collect(Collectors.toList());
         }
+    }
+
+    /**
+     * Enabled or disable a subscription. This is currently used in the settings page.
+     *
+     * <p>
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     *
+     * @param enable whether user is turning it on or off.
+     * @param subscriptionId Subscription to be enabled or disabled.
+     *                       It could be a eSIM or pSIM subscription.
+     *
+     * @return whether the operation is successful.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setSubscriptionEnabled(int subscriptionId, boolean enable) {
+        if (VDBG) {
+            logd("setSubscriptionActivated subId= " + subscriptionId + " enable " + enable);
+        }
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.setSubscriptionEnabled(enable, subscriptionId);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns whether the subscription is enabled or not. This is different from activated
+     * or deactivated for two aspects. 1) For when user disables a physical subscription, we
+     * actually disable the modem because we can't switch off the subscription. 2) For eSIM,
+     * user may enable one subscription but the system may activate another temporarily. In this
+     * case, user enabled one is different from current active one.
+
+     * @param subscriptionId The subscription it asks about.
+     * @return whether it's enabled or not. {@code true} if user set this subscription enabled
+     * earlier, or user never set subscription enable / disable on this slot explicitly, and
+     * this subscription is currently active. Otherwise, it returns {@code false}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isSubscriptionEnabled(int subscriptionId) {
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.isSubscriptionEnabled(subscriptionId);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return false;
+    }
+
+    /**
+     * Get which subscription is enabled on this slot. See {@link #isSubscriptionEnabled(int)}
+     * for more details.
+     *
+     * @param slotIndex which slot it asks about.
+     * @return which subscription is enabled on this slot. If there's no enabled subscription
+     *         in this slot, it will return {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getEnabledSubscriptionId(int slotIndex) {
+        int subId = INVALID_SUBSCRIPTION_ID;
+
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                subId = iSub.getEnabledSubscriptionId(slotIndex);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        if (VDBG) logd("getEnabledSubscriptionId, subId = " + subId);
+        return subId;
     }
 
     private interface CallISubMethodHelper {

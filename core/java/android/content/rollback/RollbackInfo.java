@@ -20,6 +20,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 /**
  * Information about a set of packages that can be, or already have been
  * rolled back together.
@@ -34,25 +36,20 @@ public final class RollbackInfo implements Parcelable {
      */
     private final int mRollbackId;
 
-    /**
-     * The package that needs to be rolled back.
-     */
-    public final PackageRollbackInfo targetPackage;
+    private final List<PackageRollbackInfo> mPackages;
 
-    // TODO: Add a list of additional packages rolled back due to atomic
-    // install dependencies when rollback of atomic installs is supported.
     // TODO: Add a flag to indicate if reboot is required, when rollback of
     // staged installs is supported.
 
     /** @hide */
-    public RollbackInfo(int rollbackId, PackageRollbackInfo targetPackage) {
+    public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages) {
         this.mRollbackId = rollbackId;
-        this.targetPackage = targetPackage;
+        this.mPackages = packages;
     }
 
     private RollbackInfo(Parcel in) {
         mRollbackId = in.readInt();
-        targetPackage = PackageRollbackInfo.CREATOR.createFromParcel(in);
+        mPackages = in.createTypedArrayList(PackageRollbackInfo.CREATOR);
     }
 
     /**
@@ -60,6 +57,13 @@ public final class RollbackInfo implements Parcelable {
      */
     public int getRollbackId() {
         return mRollbackId;
+    }
+
+    /**
+     * Returns the list of package that are rolled back.
+     */
+    public List<PackageRollbackInfo> getPackages() {
+        return mPackages;
     }
 
     @Override
@@ -70,7 +74,7 @@ public final class RollbackInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mRollbackId);
-        targetPackage.writeToParcel(out, flags);
+        out.writeTypedList(mPackages);
     }
 
     public static final Parcelable.Creator<RollbackInfo> CREATOR =

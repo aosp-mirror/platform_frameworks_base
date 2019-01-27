@@ -747,12 +747,23 @@ class ActivityStarter {
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
-        // not sure if we need to create START_ABORTED_BACKGROUND so for now piggybacking
-        // on START_ABORTED
+        boolean abortBackgroundStart = false;
         if (!abort) {
-            abort |= shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage,
-                    realCallingUid, callerApp, originatingPendingIntent,
+            abortBackgroundStart = shouldAbortBackgroundActivityStart(callingUid, callingPid,
+                    callingPackage, realCallingUid, callerApp, originatingPendingIntent,
                     allowBackgroundActivityStart, intent);
+            abort |= (abortBackgroundStart && !mService.isBackgroundActivityStartsEnabled());
+            // TODO: remove this toast after feature development is done
+            if (abortBackgroundStart) {
+                final String toastMsg = abort
+                        ? "Background activity start from " + callingPackage
+                                + " blocked. See go/q-bg-block."
+                        : "This background activity start from " + callingPackage
+                                + " will be blocked in future Q builds. See go/q-bg-block.";
+                mService.mUiHandler.post(() -> {
+                    Toast.makeText(mService.mContext, toastMsg, Toast.LENGTH_LONG).show();
+                });
+            }
         }
 
         // Merge the two options bundles, while realCallerOptions takes precedence.
@@ -798,8 +809,6 @@ class ActivityStarter {
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
             ActivityOptions.abort(checkedOptions);
-            maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp,
-                    null /*r*/, originatingPendingIntent, true /*abortedStart*/);
             return START_ABORTED;
         }
 
@@ -818,6 +827,8 @@ class ActivityStarter {
                 final int flags = intent.getFlags();
                 Intent newIntent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
                 newIntent.setFlags(flags
+                        | FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 newIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
                 newIntent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
@@ -892,8 +903,11 @@ class ActivityStarter {
         mService.onStartActivitySetDidAppSwitch();
         mController.doPendingActivityLaunches(false);
 
-        maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp, r,
-                originatingPendingIntent, false /*abortedStart*/);
+        // maybe log to TRON, but only if we haven't already in shouldAbortBackgroundActivityStart()
+        if (!abortBackgroundStart) {
+            maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp, r,
+                    originatingPendingIntent, false /*abortedStart*/);
+        }
 
         return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
                 true /* doResume */, checkedOptions, inTask, outActivity);
@@ -903,11 +917,9 @@ class ActivityStarter {
             final String callingPackage, int realCallingUid, WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart,
             Intent intent) {
-        if (mService.isBackgroundActivityStartsEnabled()) {
-            return false;
-        }
         // don't abort for the most important UIDs
-        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID) {
+        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID
+                || callingUid == Process.NFC_UID) {
             return false;
         }
         // don't abort if the callerApp has any visible activity
@@ -915,14 +927,15 @@ class ActivityStarter {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
-        final boolean isCallingUidForeground = isUidForeground(callingUid);
+        final boolean isCallingUidForeground = mService.isUidForeground(callingUid);
         final boolean isCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
                 callingUid);
         if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
             return false;
         }
         // take realCallingUid into consideration
-        final boolean isRealCallingUidForeground = isUidForeground(realCallingUid);
+        final boolean isRealCallingUidForeground = mService.isUidForeground(
+                realCallingUid);
         final boolean isRealCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
                 realCallingUid);
         if (realCallingUid != callingUid) {
@@ -949,8 +962,8 @@ class ActivityStarter {
         if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
             return false;
         }
-        // anything that has fallen through will currently be aborted
-        Slog.w(TAG, "Blocking background activity start [callingPackage: " + callingPackage
+        // anything that has fallen through would currently be aborted
+        Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
                 + "; isCallingUidForeground: " + isCallingUidForeground
                 + "; isCallingUidPersistentSystemProcess: " + isCallingUidPersistentSystemProcess
@@ -962,19 +975,9 @@ class ActivityStarter {
                 + "; isBgStartWhitelisted: " + allowBackgroundActivityStart
                 + "; intent: " + intent
                 + "]");
-        // TODO: remove this toast after feature development is done
-        mService.mUiHandler.post(() -> {
-            Toast.makeText(mService.mContext,
-                    "Blocking background activity start for " + callingPackage,
-                    Toast.LENGTH_SHORT).show();
-        });
+        maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp,
+                null /*r*/, originatingPendingIntent, true /*abortedStart*/);
         return true;
-    }
-
-    /** Returns true if uid has a visible window or its process is in a top state. */
-    private boolean isUidForeground(int uid) {
-        return (mService.getUidStateLocked(uid) == ActivityManager.PROCESS_STATE_TOP)
-            || mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
     /** Returns true if uid is in a persistent state. */

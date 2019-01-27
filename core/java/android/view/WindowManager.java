@@ -255,6 +255,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_CRASHING_ACTIVITY_CLOSE = 26;
 
     /**
+     * A task is changing windowing modes
+     * @hide
+     */
+    int TRANSIT_TASK_CHANGE_WINDOWING_MODE = 27;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {
@@ -280,7 +286,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_KEYGUARD_UNOCCLUDE,
             TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
             TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
-            TRANSIT_CRASHING_ACTIVITY_CLOSE
+            TRANSIT_CRASHING_ACTIVITY_CLOSE,
+            TRANSIT_TASK_CHANGE_WINDOWING_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}

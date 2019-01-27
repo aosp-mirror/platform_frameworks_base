@@ -17,17 +17,13 @@
 package android.content.rollback;
 
 import android.content.pm.ParceledListSlice;
-import android.content.pm.StringParceledListSlice;
 import android.content.rollback.RollbackInfo;
 import android.content.IntentSender;
 
 /** {@hide} */
 interface IRollbackManager {
 
-    RollbackInfo getAvailableRollback(String packageName);
-
-    StringParceledListSlice getPackagesWithAvailableRollbacks();
-
+    ParceledListSlice getAvailableRollbacks();
     ParceledListSlice getRecentlyExecutedRollbacks();
 
     void executeRollback(in RollbackInfo rollback, String callerPackageName,

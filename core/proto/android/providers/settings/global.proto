@@ -449,6 +449,10 @@ message GlobalSettingsProto {
         optional SettingProto gup_dev_opt_out_apps = 10;
         // GUP - List of Apps that are forbidden to use Game Update Package
         optional SettingProto gup_blacklist = 11;
+        // List of Apps that are allowed to use Game Driver package.
+        optional SettingProto game_driver_whitelist = 12;
+        // ANGLE - List of Apps that can check ANGLE rules
+        optional SettingProto angle_whitelist = 13;
     }
     optional Gpu gpu = 59;
 
@@ -518,6 +522,8 @@ message GlobalSettingsProto {
         optional SettingProto global_kill_switch = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto gnss_satellite_blacklist = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto gnss_hal_location_request_duration_millis = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Packages that are whitelisted for ignoring location settings (during emergencies)
+        optional SettingProto ignore_settings_package_whitelist = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Location location = 69;
 
@@ -535,6 +541,16 @@ message GlobalSettingsProto {
         // Whether automatic battery saver mode is controlled via percentage,
         // {@link #DYNAMIC_POWER_SAVINGS_ENABLED} or disabled.
         optional SettingProto automatic_power_saver_mode = 4 [ (android.privacy).dest = DEST_AUTOMATIC];
+        // If 1, battery saver (low_power_mode) will be re-activated after the device is
+        // unplugged from a charger or rebooted.
+        optional SettingProto sticky_enabled = 5;
+        // Whether sticky battery saver should be deactivated once the battery level has reached the
+        // threshold specified by sticky_disable_level.
+        optional SettingProto sticky_auto_disable_enabled = 6;
+        // When a device is unplugged from a changer (or is rebooted), do not re-activate battery
+        // saver even if {@link #LOW_POWER_MODE_STICKY} is 1, if the battery level is equal to or
+        // above this threshold.
+        optional SettingProto sticky_auto_disable_level = 7;
     }
     optional LowPowerMode low_power_mode = 70;
 

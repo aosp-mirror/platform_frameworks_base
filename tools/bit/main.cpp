@@ -623,12 +623,13 @@ run_phases(vector<Target*> targets, const Options& options)
     const string buildProduct = get_required_env("TARGET_PRODUCT", false);
     const string buildVariant = get_required_env("TARGET_BUILD_VARIANT", false);
     const string buildType = get_required_env("TARGET_BUILD_TYPE", false);
-
+    const string buildOut = get_out_dir();
     chdir_or_exit(buildTop.c_str());
 
-    const string buildDevice = get_build_var("TARGET_DEVICE", false);
-    const string buildId = get_build_var("BUILD_ID", false);
-    const string buildOut = get_out_dir();
+    BuildVars buildVars(buildOut, buildProduct, buildVariant, buildType);
+
+    const string buildDevice = buildVars.GetBuildVar("TARGET_DEVICE", false);
+    const string buildId = buildVars.GetBuildVar("BUILD_ID", false);
 
     // Get the modules for the targets
     map<string,Module> modules;
@@ -661,6 +662,7 @@ run_phases(vector<Target*> targets, const Options& options)
     string dataPath = buildOut + "/target/product/" + buildDevice + "/data/";
     bool syncSystem = false;
     bool alwaysSyncSystem = false;
+    vector<string> systemFiles;
     vector<InstallApk> installApks;
     for (size_t i=0; i<targets.size(); i++) {
         Target* target = targets[i];
@@ -670,6 +672,7 @@ run_phases(vector<Target*> targets, const Options& options)
                 // System partition
                 if (starts_with(file, systemPath)) {
                     syncSystem = true;
+                    systemFiles.push_back(file);
                     if (!target->build) {
                         // If a system partition target didn't get built then
                         // it won't change we will always need to do adb sync
@@ -690,6 +693,19 @@ run_phases(vector<Target*> targets, const Options& options)
     map<string,FileInfo> systemFilesBefore;
     if (syncSystem && !alwaysSyncSystem) {
         get_directory_contents(systemPath, &systemFilesBefore);
+    }
+
+    if (systemFiles.size() > 0){
+        print_info("System files:");
+        for (size_t i=0; i<systemFiles.size(); i++) {
+            printf("  %s\n", systemFiles[i].c_str());
+        }
+    }
+    if (installApks.size() > 0){
+        print_info("APKs to install:");
+        for (size_t i=0; i<installApks.size(); i++) {
+            printf("  %s\n", installApks[i].file.filename.c_str());
+        }
     }
 
     //
@@ -798,7 +814,8 @@ run_phases(vector<Target*> targets, const Options& options)
             for (size_t j=0; j<target->module.installed.size(); j++) {
                 string filename = target->module.installed[j];
 
-                if (!ends_with(filename, ".apk")) {
+                // Apk in the data partition
+                if (!starts_with(filename, dataPath) || !ends_with(filename, ".apk")) {
                     continue;
                 }
 
@@ -1004,13 +1021,16 @@ run_phases(vector<Target*> targets, const Options& options)
 void
 run_tab_completion(const string& word)
 {
-    const string buildTop = get_required_env("ANDROID_BUILD_TOP", true);
+    const string buildTop = get_required_env("ANDROID_BUILD_TOP", false);
     const string buildProduct = get_required_env("TARGET_PRODUCT", false);
+    const string buildVariant = get_required_env("TARGET_BUILD_VARIANT", false);
+    const string buildType = get_required_env("TARGET_BUILD_TYPE", false);
     const string buildOut = get_out_dir();
-
     chdir_or_exit(buildTop.c_str());
 
-    string buildDevice = sniff_device_name(buildOut, buildProduct);
+    BuildVars buildVars(buildOut, buildProduct, buildVariant, buildType);
+
+    string buildDevice = buildVars.GetBuildVar("TARGET_DEVICE", false);
 
     map<string,Module> modules;
     read_modules(buildOut, buildDevice, &modules, true);

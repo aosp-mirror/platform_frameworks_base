@@ -8512,6 +8512,7 @@ public class PackageParser {
             collectCerts ? PackageParser.PARSE_COLLECT_CERTIFICATES : 0);
 
         pi.packageName = apk.packageName;
+        ai.packageName = apk.packageName;
         pi.setLongVersionCode(apk.getLongVersionCode());
         ai.setVersionCode(apk.getLongVersionCode());
 

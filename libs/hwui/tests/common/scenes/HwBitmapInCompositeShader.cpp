@@ -50,7 +50,8 @@ public:
             pixels[4000 + 4 * i + 3] = 255;
         }
         buffer->unlock();
-        sk_sp<Bitmap> hardwareBitmap(Bitmap::createFrom(buffer, SkColorSpace::MakeSRGB()));
+        sk_sp<Bitmap> hardwareBitmap(Bitmap::createFrom(buffer, kRGBA_8888_SkColorType,
+                                                        SkColorSpace::MakeSRGB()));
         sk_sp<SkShader> hardwareShader(createBitmapShader(*hardwareBitmap));
 
         SkPoint center;

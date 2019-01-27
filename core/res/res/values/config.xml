@@ -126,6 +126,9 @@
          be sent during a change to the audio output device. -->
     <bool name="config_sendAudioBecomingNoisy">true</bool>
 
+    <!-- Whether Hearing Aid profile is supported -->
+    <bool name="config_hearing_aid_profile_supported">true</bool>
+
     <!-- Flag to disable all transition animations -->
     <bool name="config_disableTransitionAnimation">false</bool>
 
@@ -954,7 +957,7 @@
     <!-- Default mode to control how Night display is automatically activated.
          One of the following values (see ColorDisplayController.java):
              0 - AUTO_MODE_DISABLED
-             1 - AUTO_MODE_CUSTOM
+             1 - AUTO_MODE_CUSTOM_TIME
              2 - AUTO_MODE_TWILIGHT
     -->
     <integer name="config_defaultNightDisplayAutoMode">0</integer>
@@ -2208,6 +2211,10 @@
          has expired, then assume the device is receiving insufficient current to charge
          effectively and terminate the dream.  Use -1 to disable this safety feature.  -->
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
+    <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
+    <integer name="config_attentionMaximumExtension">240000</integer> <!-- 4 minutes -->
+    <!-- How long we should wait until we give up on receiving an attention API callback.  -->
+    <integer name="config_attentionApiTimeout">2000</integer> <!-- 2 seconds -->
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -3726,9 +3733,6 @@
     <!-- Whether or not the "SMS app service" feature is enabled -->
     <bool name="config_useSmsAppService">true</bool>
 
-    <!-- Component name for default assistant on this device -->
-    <string name="config_defaultAssistantComponentName">#+UNSET</string>
-
     <!-- Class name for the InputEvent compatibility processor override.
          Empty string means use the default compatibility processor
          (android.view.InputEventCompatProcessor). -->
@@ -3759,4 +3763,7 @@
 
     <!-- Whether cbrs is supported on the device or not -->
     <bool translatable="false" name="config_cbrs_supported">false</bool>
+
+    <!-- Whether or not aware is enabled by default -->
+    <bool name="config_awareSettingAvailable">false</bool>
 </resources>

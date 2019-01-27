@@ -26,6 +26,7 @@ import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.IWifiManager;
+import android.net.wifi.IWifiUsabilityStatsListener;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
@@ -462,6 +463,22 @@ public class BaseWifiService extends IWifiManager.Stub {
 
     @Override
     public void stopDppSession() throws RemoteException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addWifiUsabilityStatsListener(
+            IBinder binder, IWifiUsabilityStatsListener listener, int listenerIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeWifiUsabilityStatsListener(int listenerIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec) {
         throw new UnsupportedOperationException();
     }
 }

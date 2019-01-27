@@ -29,10 +29,12 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IActivityTaskManager;
+import android.app.KeyguardManager;
 import android.app.TaskStackListener;
 import android.app.UserSwitchObserver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -377,6 +379,13 @@ public class BiometricService extends SystemService {
                 new BiometricTaskStackListener();
         private final Random mRandom = new Random();
 
+        // TODO(b/123378871): Remove when moved.
+        // When BiometricPrompt#setEnableFallback is set to true, we need to store the client (app)
+        // receiver. BiometricService internally launches CDCA which invokes BiometricService to
+        // start authentication (normal path). When auth is success/rejected, CDCA will use an aidl
+        // method to poke BiometricService - the result will then be forwarded to this receiver.
+        private IBiometricServiceReceiver mConfirmDeviceCredentialReceiver;
+
         // The current authentication session, null if idle/done. We need to track both the current
         // and pending sessions since errors may be sent to either.
         private AuthSession mCurrentAuthSession;
@@ -705,6 +714,22 @@ public class BiometricService extends SystemService {
                 }
             }
 
+            // Launch CDC instead if necessary. CDC will return results through an AIDL call, since
+            // we can't get activity results. Store the receiver somewhere so we can forward the
+            // result back to the client.
+            // TODO(b/123378871): Remove when moved.
+            if (bundle.getBoolean(BiometricPrompt.KEY_ENABLE_FALLBACK)) {
+                mConfirmDeviceCredentialReceiver = receiver;
+                final KeyguardManager kgm = getContext().getSystemService(KeyguardManager.class);
+                // Use this so we don't need to duplicate logic..
+                final Intent intent = kgm.createConfirmDeviceCredentialIntent(null /* title */,
+                        null /* description */);
+                // Then give it the bundle to do magic behavior..
+                intent.putExtra(KeyguardManager.EXTRA_BIOMETRIC_PROMPT_BUNDLE, bundle);
+                getContext().startActivityAsUser(intent, UserHandle.CURRENT);
+                return;
+            }
+
             mHandler.post(() -> {
                 final Pair<Integer, Integer> result = checkAndGetBiometricModality(userId);
                 final int modality = result.first;
@@ -743,6 +768,36 @@ public class BiometricService extends SystemService {
                 authenticateInternal(token, sessionId, userId, receiver, opPackageName, bundle,
                         callingUid, callingPid, callingUserId, modality);
             });
+        }
+
+        @Override // Binder call
+        public void onConfirmDeviceCredentialSuccess() {
+            checkInternalPermission();
+            if (mConfirmDeviceCredentialReceiver == null) {
+                Slog.w(TAG, "onCDCASuccess null!");
+                return;
+            }
+            try {
+                mConfirmDeviceCredentialReceiver.onAuthenticationSucceeded();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException", e);
+            }
+            mConfirmDeviceCredentialReceiver = null;
+        }
+
+        @Override // Binder call
+        public void onConfirmDeviceCredentialError(int error, String message) {
+            checkInternalPermission();
+            if (mConfirmDeviceCredentialReceiver == null) {
+                Slog.w(TAG, "onCDCAError null! Error: " + error + " " + message);
+                return;
+            }
+            try {
+                mConfirmDeviceCredentialReceiver.onError(error, message);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException", e);
+            }
+            mConfirmDeviceCredentialReceiver = null;
         }
 
         /**

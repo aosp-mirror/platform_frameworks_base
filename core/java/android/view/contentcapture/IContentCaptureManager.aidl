@@ -19,6 +19,7 @@ package android.view.contentcapture;
 import android.content.ComponentName;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
+import android.view.contentcapture.UserDataRemovalRequest;
 import android.os.IBinder;
 
 import com.android.internal.os.IResultReceiver;
@@ -56,4 +57,9 @@ oneway interface IContentCaptureManager {
      *     provided {@code Bundle} with key "{@code EXTRA}".
      */
     void getReceiverServiceComponentName(int userId, in IResultReceiver result);
+
+    /**
+     * Requests the removal of user data for the provided {@code userId}.
+     */
+    void removeUserData(int userId, in UserDataRemovalRequest request);
 }

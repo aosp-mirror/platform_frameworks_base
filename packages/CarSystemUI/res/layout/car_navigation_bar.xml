@@ -65,8 +65,9 @@
         <com.android.systemui.statusbar.car.CarFacetButton
             android:id="@+id/music_nav"
             style="@style/NavigationBarButton"
+            systemui:categories="android.intent.category.APP_MUSIC"
             systemui:icon="@drawable/car_ic_music"
-            systemui:intent="intent:#Intent;component=com.android.car.media/.MediaActivity;launchFlags=0x14000000;end"
+            systemui:intent="intent:#Intent;action=android.car.intent.action.MEDIA_TEMPLATE;launchFlags=0x10000000;end"
             systemui:packages="com.android.car.media"
             systemui:selectedIcon="@drawable/car_ic_music_selected"
             systemui:useMoreIcon="false"

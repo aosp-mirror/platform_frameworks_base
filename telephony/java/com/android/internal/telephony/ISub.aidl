@@ -52,8 +52,8 @@ interface ISub {
     /**
      * Get the active SubscriptionInfo associated with the slotIndex
      * @param slotIndex the slot which the subscription is inserted
-     * @param callingPackage The package maing the call.
-     * @return SubscriptionInfo, maybe null if its not active
+     * @param callingPackage The package making the call.
+     * @return SubscriptionInfo, null for Remote-SIMs or non-active slotIndex.
      */
     SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIndex, String callingPackage);
 
@@ -113,6 +113,26 @@ interface ISub {
      * @return the URL of the newly created row or the updated row
      */
     int addSubInfoRecord(String iccId, int slotIndex);
+
+    /**
+     * Add a new subscription info record, if needed
+     * @param uniqueId This is the unique identifier for the subscription within the specific
+     *                 subscription type.
+     * @param displayName human-readable name of the device the subscription corresponds to.
+     * @param slotIndex the slot assigned to this device
+     * @param subscriptionType the type of subscription to be added.
+     * @return 0 if success, < 0 on error.
+     */
+    int addSubInfo(String uniqueId, String displayName, int slotIndex, int subscriptionType);
+
+    /**
+     * Remove subscription info record for the given device.
+     * @param uniqueId This is the unique identifier for the subscription within the specific
+     *                      subscription type.
+     * @param subscriptionType the type of subscription to be removed
+     * @return 0 if success, < 0 on error.
+     */
+    int removeSubInfo(String uniqueId, int subscriptionType);
 
     /**
      * Set SIM icon tint color by simInfo index
@@ -256,6 +276,11 @@ interface ISub {
 
     String getSubscriptionProperty(int subId, String propKey, String callingPackage);
 
+    boolean setSubscriptionEnabled(boolean enable, int subId);
+
+    boolean isSubscriptionEnabled(int subId);
+
+    int getEnabledSubscriptionId(int slotIndex);
     /**
      * Get the SIM state for the slot index
      * @return SIM state as the ordinal of IccCardConstants.State

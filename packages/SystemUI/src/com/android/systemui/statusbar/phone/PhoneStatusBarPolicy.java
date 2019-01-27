@@ -173,7 +173,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mLocationController = Dependency.get(LocationController.class);
-        mPrivacyItemController = new PrivacyItemController(mContext, this);
+        mPrivacyItemController = Dependency.get(PrivacyItemController.class);
 
         mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
@@ -266,7 +266,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mNextAlarmController.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
         mKeyguardMonitor.addCallback(this);
-        mPrivacyItemController.setListening(true);
+        mPrivacyItemController.addCallback(this);
 
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
@@ -294,7 +294,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mNextAlarmController.removeCallback(mNextAlarmCallback);
         mDataSaver.removeCallback(this);
         mKeyguardMonitor.removeCallback(this);
-        mPrivacyItemController.setListening(false);
+        mPrivacyItemController.removeCallback(this);
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallback(this);
         mContext.unregisterReceiver(mIntentReceiver);
 

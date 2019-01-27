@@ -57,6 +57,7 @@ android_library {
         "androidx.slice_slice-builders",
         "androidx.arch.core_core-runtime",
         "androidx.lifecycle_lifecycle-extensions",
+        "androidx.dynamicanimation_dynamicanimation",
         "SystemUI-tags",
         "SystemUI-proto",
         "dagger2-2.19",
@@ -73,7 +74,7 @@ android_library {
         "com.android.keyguard",
     ],
 
-    annotation_processors: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler-2.19"],
 }
 
 android_library {
@@ -108,6 +109,7 @@ android_library {
         "androidx.slice_slice-builders",
         "androidx.arch.core_core-runtime",
         "androidx.lifecycle_lifecycle-extensions",
+        "androidx.dynamicanimation_dynamicanimation",
         "SystemUI-tags",
         "SystemUI-proto",
         "metrics-helper-lib",
@@ -127,7 +129,7 @@ android_library {
         "--extra-packages",
         "com.android.keyguard:com.android.systemui",
     ],
-    annotation_processors: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler-2.19"],
 }
 
 android_app {

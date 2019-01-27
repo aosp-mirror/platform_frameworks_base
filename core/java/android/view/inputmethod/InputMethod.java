@@ -219,7 +219,7 @@ public interface InputMethod {
     @MainThread
     default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
             @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken) {
+            @NonNull IBinder startInputToken, boolean shouldPreRenderIme) {
         if (restarting) {
             restartInput(inputConnection, editorInfo);
         } else {

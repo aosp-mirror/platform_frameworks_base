@@ -1711,20 +1711,22 @@ public final class Bitmap implements Parcelable {
      */
     @Nullable
     public final ColorSpace getColorSpace() {
-        // A reconfigure can change the configuration and rgba16f is
-        // always linear scRGB at this time
-        if (getConfig() == Config.RGBA_F16) {
-            // Reset the color space for potential future reconfigurations
-            mColorSpace = null;
-            return ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
-        }
-
+        checkRecycled("getColorSpace called on a recycled bitmap");
         // Cache the color space retrieval since it can be fairly expensive
         if (mColorSpace == null) {
-            if (nativeIsSRGB(mNativePtr)) {
+            if (nativeIsConfigF16(mNativePtr)) {
+                // an F16 bitmaps is intended to always be linear extended, but due to
+                // inconsistencies in Bitmap.create() functions it is possible to have
+                // rendered into a bitmap in non-linear sRGB.
+                if (nativeIsSRGB(mNativePtr)) {
+                    mColorSpace = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);
+                } else {
+                    mColorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+                }
+            } else if (nativeIsSRGB(mNativePtr)) {
                 mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
-            } else if (getConfig() == Config.HARDWARE && nativeIsSRGBLinear(mNativePtr)) {
-                mColorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+            } else if (nativeIsSRGBLinear(mNativePtr)) {
+                mColorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_SRGB);
             } else {
                 float[] xyz = new float[9];
                 float[] params = new float[7];
@@ -2127,6 +2129,7 @@ public final class Bitmap implements Parcelable {
     private static native void nativeErase(long nativeBitmap, long colorSpacePtr, long color);
     private static native int nativeRowBytes(long nativeBitmap);
     private static native int nativeConfig(long nativeBitmap);
+    private static native boolean nativeIsConfigF16(long nativeBitmap);
 
     private static native int nativeGetPixel(long nativeBitmap, int x, int y);
     private static native void nativeGetPixels(long nativeBitmap, int[] pixels,

@@ -16,6 +16,10 @@
 
 package com.android.server.pm;
 
+import com.google.android.collect.Sets;
+
+import com.android.internal.util.Preconditions;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -37,10 +41,6 @@ import android.telephony.SubscriptionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-
-import com.android.internal.util.Preconditions;
-
-import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;

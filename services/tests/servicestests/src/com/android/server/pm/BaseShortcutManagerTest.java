@@ -43,6 +43,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.app.Person;
+import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -143,8 +144,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             switch (name) {
                 case Context.USER_SERVICE:
                     return mMockUserManager;
+                case Context.DEVICE_POLICY_SERVICE:
+                    return mMockDevicePolicyManager;
             }
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Couldn't find system service: " + name);
         }
 
         @Override
@@ -610,6 +613,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManager mMockPackageManager;
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
+    protected DevicePolicyManager mMockDevicePolicyManager;
     protected UserManagerInternal mMockUserManagerInternal;
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
@@ -750,6 +754,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
+        mMockDevicePolicyManager = mock(DevicePolicyManager.class);
         mMockUserManagerInternal = mock(UserManagerInternal.class);
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);

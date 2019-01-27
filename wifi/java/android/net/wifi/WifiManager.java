@@ -16,7 +16,7 @@
 
 package android.net.wifi;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.READ_WIFI_CREDENTIAL;
 
@@ -950,8 +950,7 @@ public class WifiManager {
      * which was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag
      * set.
      * <p>
-     * Note: The broadcast is sent to the app only if it holds either one of
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * Note: The broadcast is sent to the app only if it holds
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
      *
      * @see #EXTRA_NETWORK_SUGGESTION
@@ -1183,7 +1182,7 @@ public class WifiManager {
      * containing configurations which they created.
      */
     @Deprecated
-    @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_WIFI_STATE})
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE})
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -1199,7 +1198,7 @@ public class WifiManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_WIFI_STATE, READ_WIFI_CREDENTIAL})
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE, READ_WIFI_CREDENTIAL})
     public List<WifiConfiguration> getPrivilegedConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -1405,7 +1404,6 @@ public class WifiManager {
      * {@link #reject()} to return the user's selection back to the platform via this callback.
      * @hide
      */
-    @SystemApi
     public interface NetworkRequestUserSelectionCallback {
         /**
          * User selected this network to connect to.
@@ -1429,7 +1427,6 @@ public class WifiManager {
      * or reject the request by the app.
      * @hide
      */
-    @SystemApi
     public interface NetworkRequestMatchCallback {
         /**
          * Invoked to register a callback to be invoked to convey user selection. The callback
@@ -1606,7 +1603,6 @@ public class WifiManager {
      *                 object. If null, then the application's main thread will be used.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void registerNetworkRequestMatchCallback(@NonNull NetworkRequestMatchCallback callback,
                                                     @Nullable Handler handler) {
@@ -1636,7 +1632,6 @@ public class WifiManager {
      * @param callback Callback for network match events
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void unregisterNetworkRequestMatchCallback(
             @NonNull NetworkRequestMatchCallback callback) {
@@ -1656,8 +1651,7 @@ public class WifiManager {
      * When the device decides to connect to one of the provided network suggestions, platform sends
      * a directed broadcast {@link #ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION} to the app if
      * the network was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()}
-     * flag set and the app holds either one of
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * flag set and the app holds
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
      *<p>
      * NOTE:
@@ -2290,7 +2284,6 @@ public class WifiManager {
     /**
      * Return the results of the latest access point scan.
      * @return the list of access points found in the most recent scan. An app must hold
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
      * in order to get valid results.
      */
@@ -2601,7 +2594,7 @@ public class WifiManager {
      * <p>
      * Applications need to have the following permissions to start LocalOnlyHotspot: {@link
      * android.Manifest.permission#CHANGE_WIFI_STATE} and {@link
-     * android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION}.  Callers without
+     * android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}.  Callers without
      * the permissions will trigger a {@link java.lang.SecurityException}.
      * <p>
      * @param callback LocalOnlyHotspotCallback for the application to receive updates about
@@ -2684,7 +2677,7 @@ public class WifiManager {
      * {@link LocalOnlyHotspotObserver#onStopped()} callbacks.
      * <p>
      * Applications should have the
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION}
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}
      * permission.  Callers without the permission will trigger a
      * {@link java.lang.SecurityException}.
      * <p>
@@ -4775,6 +4768,116 @@ public class WifiManager {
             mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onProgress(status);
             });
+        }
+    }
+
+    /**
+     * Interface for Wi-Fi usability statistics listener. Should be implemented by applications and
+     * set when calling {@link WifiManager#addWifiUsabilityStatsListener(Executor,
+     * WifiUsabilityStatsListener)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface WifiUsabilityStatsListener {
+        /**
+         * Called when Wi-Fi usability statistics is updated.
+         *
+         * @param seqNum The sequence number of statistics, used to derive the timing of updated
+         *               Wi-Fi usability statistics, set by framework and incremented by one after
+         *               each update.
+         * @param isSameBssidAndFreq The flag to indicate whether the BSSID and the frequency of
+         *                           network stays the same or not relative to the last update of
+         *                           Wi-Fi usability stats.
+         * @param stats The updated Wi-Fi usability statistics.
+         */
+        void onStatsUpdated(int seqNum, boolean isSameBssidAndFreq,
+                WifiUsabilityStatsEntry stats);
+    }
+
+    /**
+     * Adds a listener for Wi-Fi usability statistics. See {@link WifiUsabilityStatsListener}.
+     * Multiple listeners can be added. Callers will be invoked periodically by framework to
+     * inform clients about the current Wi-Fi usability statistics. Callers can remove a previously
+     * added listener using {@link removeWifiUsabilityStatsListener}.
+     *
+     * @param executor The executor on which callback will be invoked.
+     * @param listener Listener for Wifi usability statistics.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public void addWifiUsabilityStatsListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull WifiUsabilityStatsListener listener) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        if (mVerboseLoggingEnabled) {
+            Log.v(TAG, "addWifiUsabilityStatsListener: listener=" + listener);
+        }
+        try {
+            mService.addWifiUsabilityStatsListener(new Binder(),
+                    new IWifiUsabilityStatsListener.Stub() {
+                        @Override
+                        public void onStatsUpdated(int seqNum, boolean isSameBssidAndFreq,
+                                WifiUsabilityStatsEntry stats) {
+                            if (mVerboseLoggingEnabled) {
+                                Log.v(TAG, "WifiUsabilityStatsListener: onStatsUpdated: seqNum="
+                                        + seqNum);
+                            }
+                            Binder.withCleanCallingIdentity(() ->
+                                    executor.execute(() -> listener.onStatsUpdated(seqNum,
+                                            isSameBssidAndFreq, stats)));
+                        }
+                    },
+                    listener.hashCode()
+            );
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allow callers to remove a previously registered listener. After calling this method,
+     * applications will no longer receive Wi-Fi usability statistics.
+     *
+     * @param listener Listener to remove the Wi-Fi usability statistics.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public void removeWifiUsabilityStatsListener(@NonNull WifiUsabilityStatsListener listener) {
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        if (mVerboseLoggingEnabled) {
+            Log.v(TAG, "removeWifiUsabilityStatsListener: listener=" + listener);
+        }
+        try {
+            mService.removeWifiUsabilityStatsListener(listener.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Provide a Wi-Fi usability score information to be recorded (but not acted upon) by the
+     * framework. The Wi-Fi usability score is derived from {@link WifiUsabilityStatsListener}
+     * where a score is matched to Wi-Fi usability statistics using the sequence number. The score
+     * is used to quantify whether Wi-Fi is usable in a future time.
+     *
+     * @param seqNum Sequence number of the Wi-Fi usability score.
+     * @param score The Wi-Fi usability score.
+     * @param predictionHorizonSec Prediction horizon of the Wi-Fi usability score.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec) {
+        try {
+            mService.updateWifiUsabilityScore(seqNum, score, predictionHorizonSec);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

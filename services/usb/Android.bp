@@ -10,6 +10,7 @@ java_library_static {
     static_libs: [
         "android.hardware.usb-V1.0-java",
         "android.hardware.usb-V1.1-java",
+        "android.hardware.usb-V1.2-java",
         "android.hardware.usb.gadget-V1.0-java",
     ],
 }

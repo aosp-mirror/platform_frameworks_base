@@ -28,7 +28,6 @@
 #include "../statscompanion_util.h"
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
-#include "ResourceThermalManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
 #include "StatsPullerManager.h"
 #include "SubsystemSleepStatePuller.h"
@@ -150,7 +149,8 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           .puller =
                   new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
         // temperature
-        {android::util::TEMPERATURE, {.puller = new ResourceThermalManagerPuller()}},
+        {android::util::TEMPERATURE,
+          {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
         // binder_calls
         {android::util::BINDER_CALLS,
          {.additiveFields = {4, 5, 6, 8, 12},
@@ -209,6 +209,14 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER,
          {.puller = new StatsCompanionServicePuller(
                   android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
+        // DebugElapsedClock.
+        {android::util::DEBUG_ELAPSED_CLOCK,
+         {.additiveFields = {1, 2, 3, 4},
+          .puller = new StatsCompanionServicePuller(android::util::DEBUG_ELAPSED_CLOCK)}},
+        // DebugFailingElapsedClock.
+        {android::util::DEBUG_FAILING_ELAPSED_CLOCK,
+         {.additiveFields = {1, 2, 3, 4},
+          .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
         // BuildInformation.
         {android::util::BUILD_INFORMATION,
          {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},

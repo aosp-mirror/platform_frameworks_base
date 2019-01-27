@@ -1137,9 +1137,6 @@ public class NotificationManager {
         }
     }
 
-    /**
-     * @hide
-     */
     public boolean isNotificationAssistantAccessGranted(ComponentName assistant) {
         INotificationManager service = getService();
         try {

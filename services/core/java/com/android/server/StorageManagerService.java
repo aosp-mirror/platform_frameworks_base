@@ -112,6 +112,7 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
@@ -463,6 +464,7 @@ class StorageManagerService extends IStorageManager.Stub
         = { "password", "default", "pattern", "pin" };
 
     private final Context mContext;
+    private final ContentResolver mResolver;
 
     private volatile IVold mVold;
     private volatile IStoraged mStoraged;
@@ -797,6 +799,14 @@ class StorageManagerService extends IStorageManager.Stub
                     refreshIsolatedStorageSettings();
                 }
             });
+        // For now, simply clone property when it changes
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.Storage.NAMESPACE,
+                mContext.getMainExecutor(), (namespace, name, value) -> {
+                    if (DeviceConfig.Storage.ISOLATED_STORAGE_ENABLED.equals(name)) {
+                        Settings.Global.putString(mResolver,
+                                Settings.Global.ISOLATED_STORAGE_REMOTE, value);
+                    }
+                });
         refreshIsolatedStorageSettings();
     }
 
@@ -1523,6 +1533,8 @@ class StorageManagerService extends IStorageManager.Stub
                 SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)));
 
         mContext = context;
+        mResolver = mContext.getContentResolver();
+
         mCallbacks = new Callbacks(FgThread.get().getLooper());
         mLockPatternUtils = new LockPatternUtils(mContext);
 

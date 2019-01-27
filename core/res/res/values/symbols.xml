@@ -437,6 +437,7 @@
   <java-symbol type="integer" name="config_bluetooth_operating_voltage_mv" />
   <java-symbol type="bool" name="config_bluetooth_pan_enable_autoconnect" />
   <java-symbol type="bool" name="config_bluetooth_reload_supported_profiles_when_enabled" />
+  <java-symbol type="bool" name="config_hearing_aid_profile_supported" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_drawLockTimeoutMillis" />
   <java-symbol type="integer" name="config_doublePressOnPowerBehavior" />
@@ -694,6 +695,7 @@
   <java-symbol type="string" name="capability_title_canControlMagnification" />
   <java-symbol type="string" name="capability_desc_canPerformGestures" />
   <java-symbol type="string" name="capability_title_canPerformGestures" />
+  <java-symbol type="string" name="captive_portal_logged_in_detailed" />
   <java-symbol type="string" name="cfTemplateForwarded" />
   <java-symbol type="string" name="cfTemplateForwardedTime" />
   <java-symbol type="string" name="cfTemplateNotForwarded" />
@@ -2104,6 +2106,10 @@
   <java-symbol type="string" name="usb_supplying_notification_title" />
   <java-symbol type="string" name="usb_unsupported_audio_accessory_title" />
   <java-symbol type="string" name="usb_unsupported_audio_accessory_message" />
+  <java-symbol type="string" name="usb_contaminant_detected_title" />
+  <java-symbol type="string" name="usb_contaminant_detected_message" />
+  <java-symbol type="string" name="usb_contaminant_not_detected_title" />
+  <java-symbol type="string" name="usb_contaminant_not_detected_message" />
   <java-symbol type="string" name="config_UsbDeviceConnectionHandling_component" />
   <java-symbol type="string" name="vpn_text" />
   <java-symbol type="string" name="vpn_text_long" />
@@ -3522,8 +3528,6 @@
 
   <java-symbol type="bool" name="config_useSmsAppService" />
 
-  <java-symbol type="string" name="config_defaultAssistantComponentName" />
-
   <java-symbol type="id" name="transition_overlay_view_tag" />
 
   <java-symbol type="dimen" name="rounded_corner_radius" />
@@ -3548,4 +3552,10 @@
 
   <!-- For CBRS -->
   <java-symbol type="bool" name="config_cbrs_supported" />
+
+  <java-symbol type="bool" name="config_awareSettingAvailable" />
+
+  <!-- For Attention Service -->
+  <java-symbol type="integer" name="config_attentionMaximumExtension" />
+  <java-symbol type="integer" name="config_attentionApiTimeout" />
 </resources>

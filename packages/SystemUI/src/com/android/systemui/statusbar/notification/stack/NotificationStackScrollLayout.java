@@ -174,6 +174,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final boolean mShouldDrawNotificationBackground;
     private boolean mLowPriorityBeforeSpeedBump;
     private final boolean mAllowLongPress;
+    private boolean mDismissRtl;
 
     private float mExpandedHeight;
     private int mOwnScrollY;
@@ -533,8 +534,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         tunerService.addTunable((key, newValue) -> {
             if (key.equals(LOW_PRIORITY)) {
                 mLowPriorityBeforeSpeedBump = "1".equals(newValue);
+            } else if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
+                updateDismissRtlSetting("1".equals(newValue));
             }
-        }, LOW_PRIORITY);
+        }, LOW_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
 
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
@@ -546,6 +549,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
             }
         });
+    }
+
+    private void updateDismissRtlSetting(boolean dismissRtl) {
+        mDismissRtl = dismissRtl;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) child).setDismissRtl(dismissRtl);
+            }
+        }
     }
 
     @Override
@@ -2600,8 +2613,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification())) {
+                if (!row.getEntry().isHighPriority()) {
                     break;
                 } else {
                     lastChildBeforeGap = row;
@@ -2619,8 +2631,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification())) {
+                if (!row.getEntry().isHighPriority()) {
                     return row;
                 }
             }
@@ -3255,6 +3266,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
         updateChronometerForChild(child);
+        if (child instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) child).setDismissRtl(mDismissRtl);
+        }
         if (ANCHOR_SCROLLING) {
             // TODO: once we're recycling this will need to check the adapter position of the child
             if (child == getFirstChildNotGone() && (isScrolledToTop() || !mIsExpanded)) {
@@ -5756,11 +5770,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             currentIndex++;
             boolean beforeSpeedBump;
             if (mLowPriorityBeforeSpeedBump) {
-                beforeSpeedBump = !mEntryManager.getNotificationData().isAmbient(
-                        row.getStatusBarNotification().getKey());
+                beforeSpeedBump = !row.getEntry().ambient;
             } else {
-                beforeSpeedBump = mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification());
+                beforeSpeedBump = row.getEntry().isHighPriority();
             }
             if (beforeSpeedBump) {
                 speedBumpIndex = currentIndex;
@@ -5784,8 +5796,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     continue;
                 }
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                if (!mEntryManager.getNotificationData().isHighPriority(
-                        row.getStatusBarNotification())) {
+                if (!row.getEntry().isHighPriority()) {
                     if (currentIndex > 0) {
                         gapIndex = currentIndex;
                     }
@@ -6315,7 +6326,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public boolean canChildBeDismissedInDirection(View v, boolean isRightOrDown) {
             boolean isValidDirection;
             if (NotificationUtils.useNewInterruptionModel(mContext)) {
-                isValidDirection = isLayoutRtl() ? !isRightOrDown : isRightOrDown;
+                isValidDirection = mDismissRtl ? !isRightOrDown : isRightOrDown;
             } else {
                 isValidDirection = true;
             }

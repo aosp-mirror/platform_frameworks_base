@@ -821,7 +821,7 @@ static bool NeedsNoRandomizeWorkaround() {
 
 // Utility to close down the Zygote socket file descriptors while
 // the child is still running as root with Zygote's privileges.  Each
-// descriptor (if any) is closed via dup2(), replacing it with a valid
+// descriptor (if any) is closed via dup3(), replacing it with a valid
 // (open) descriptor to /dev/null.
 
 static void DetachDescriptors(JNIEnv* env,
@@ -829,15 +829,15 @@ static void DetachDescriptors(JNIEnv* env,
                               fail_fn_t fail_fn) {
 
   if (fds_to_close.size() > 0) {
-    android::base::unique_fd devnull_fd(open("/dev/null", O_RDWR));
+    android::base::unique_fd devnull_fd(open("/dev/null", O_RDWR | O_CLOEXEC));
     if (devnull_fd == -1) {
       fail_fn(std::string("Failed to open /dev/null: ").append(strerror(errno)));
     }
 
     for (int fd : fds_to_close) {
       ALOGV("Switching descriptor %d to /dev/null", fd);
-      if (dup2(devnull_fd, fd) == -1) {
-        fail_fn(StringPrintf("Failed dup2() on descriptor %d: %s", fd, strerror(errno)));
+      if (dup3(devnull_fd, fd, O_CLOEXEC) == -1) {
+        fail_fn(StringPrintf("Failed dup3() on descriptor %d: %s", fd, strerror(errno)));
       }
     }
   }
@@ -1472,7 +1472,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     fds_to_close.insert(fds_to_close.end(), blastula_pipes.begin(), blastula_pipes.end());
     fds_to_ignore.insert(fds_to_ignore.end(), blastula_pipes.begin(), blastula_pipes.end());
 
-//    fds_to_close.push_back(gBlastulaPoolSocketFD);
+    fds_to_close.push_back(gBlastulaPoolSocketFD);
 
     if (gBlastulaPoolEventFD != -1) {
       fds_to_close.push_back(gBlastulaPoolEventFD);
@@ -1498,7 +1498,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   std::vector<int> fds_to_close(MakeBlastulaPipeReadFDVector()),
                    fds_to_ignore(fds_to_close);
 
-//  fds_to_close.push_back(gBlastulaPoolSocketFD);
+  fds_to_close.push_back(gBlastulaPoolSocketFD);
 
   if (gBlastulaPoolEventFD != -1) {
     fds_to_close.push_back(gBlastulaPoolEventFD);

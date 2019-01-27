@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A broadcast receiver that can be used to get
- * ACTION_PACKAGE_ROLLBACK_EXECUTED broadcasts.
+ * ACTION_ROLLBACK_COMMITTED broadcasts.
  */
 class RollbackBroadcastReceiver extends BroadcastReceiver {
 
@@ -43,7 +43,7 @@ class RollbackBroadcastReceiver extends BroadcastReceiver {
      */
     RollbackBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
+        filter.addAction(Intent.ACTION_ROLLBACK_COMMITTED);
         InstrumentationRegistry.getContext().registerReceiver(this, filter);
     }
 

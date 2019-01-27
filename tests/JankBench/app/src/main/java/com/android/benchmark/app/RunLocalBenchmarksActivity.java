@@ -70,6 +70,7 @@ public class RunLocalBenchmarksActivity extends AppCompatActivity {
             R.id.benchmark_text_low_hitrate,
             R.id.benchmark_edit_text_input,
             R.id.benchmark_overdraw,
+            R.id.benchmark_bitmap_upload,
     };
 
     public static class LocalBenchmarksList extends ListFragment {
@@ -204,6 +205,7 @@ public class RunLocalBenchmarksActivity extends AppCompatActivity {
             case R.id.benchmark_text_low_hitrate:
             case R.id.benchmark_edit_text_input:
             case R.id.benchmark_overdraw:
+            case R.id.benchmark_bitmap_upload:
             case R.id.benchmark_memory_bandwidth:
             case R.id.benchmark_memory_latency:
             case R.id.benchmark_power_management:
@@ -323,6 +325,9 @@ public class RunLocalBenchmarksActivity extends AppCompatActivity {
                 intent = new Intent(getApplicationContext(), EditTextInputActivity.class);
                 break;
             case R.id.benchmark_overdraw:
+                intent = new Intent(getApplicationContext(), FullScreenOverdrawActivity.class);
+                break;
+            case R.id.benchmark_bitmap_upload:
                 intent = new Intent(getApplicationContext(), BitmapUploadActivity.class);
                 break;
             case R.id.benchmark_memory_bandwidth:

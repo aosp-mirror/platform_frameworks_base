@@ -39,6 +39,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
@@ -258,6 +259,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHarmfulAppWarning();
                 case "get-harmful-app-warning":
                     return runGetHarmfulAppWarning();
+                case "get-stagedsessions":
+                    return getStagedSessions();
                 case "uninstall-system-updates":
                     return uninstallSystemUpdates();
                 default: {
@@ -280,6 +283,28 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    private int getStagedSessions() {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            List<SessionInfo> stagedSessionsList =
+                    mInterface.getPackageInstaller().getStagedSessions().getList();
+            for (SessionInfo session: stagedSessionsList) {
+                pw.println("appPackageName = " + session.getAppPackageName()
+                        + "; sessionId = " + session.getSessionId()
+                        + "; isStaged = " + session.isStaged()
+                        + "; isSessionReady = " + session.isSessionReady()
+                        + "; isSessionApplied = " + session.isSessionApplied()
+                        + "; isSessionFailed = " + session.isSessionFailed() + ";");
+            }
+        } catch (RemoteException e) {
+            pw.println("Failure ["
+                    + e.getClass().getName() + " - "
+                    + e.getMessage() + "]");
+            return 0;
+        }
+        return 1;
     }
 
     private int uninstallSystemUpdates() {
@@ -2307,7 +2332,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
                     break;
                 case "--apex":
-                    sessionParams.installFlags |= PackageManager.INSTALL_APEX;
+                    sessionParams.setInstallAsApex();
                     sessionParams.setStaged();
                     break;
                 case "--multi-package":

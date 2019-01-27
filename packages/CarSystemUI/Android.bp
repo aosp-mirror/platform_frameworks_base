@@ -81,5 +81,5 @@ android_app {
         "com.android.keyguard",
     ],
 
-    annotation_processors: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler-2.19"],
 }

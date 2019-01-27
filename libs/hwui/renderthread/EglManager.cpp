@@ -132,11 +132,13 @@ void EglManager::initialize() {
     createPBufferSurface();
     makeCurrent(mPBufferSurface, nullptr, /* force */ true);
 
-    SkColorSpace::Gamut wideColorGamut = DeviceInfo::get()->getWideColorGamut();
+    skcms_Matrix3x3 wideColorGamut;
+    LOG_ALWAYS_FATAL_IF(!DeviceInfo::get()->getWideColorSpace()->toXYZD50(&wideColorGamut),
+                        "Could not get gamut matrix from wideColorSpace");
     bool hasWideColorSpaceExtension = false;
-    if (wideColorGamut == SkColorSpace::Gamut::kDCIP3_D65_Gamut) {
+    if (memcmp(&wideColorGamut, &SkNamedGamut::kDCIP3, sizeof(wideColorGamut)) == 0) {
         hasWideColorSpaceExtension = EglExtensions.displayP3;
-    } else if (wideColorGamut == SkColorSpace::Gamut::kSRGB_Gamut) {
+    } else if (memcmp(&wideColorGamut, &SkNamedGamut::kSRGB, sizeof(wideColorGamut)) == 0) {
         hasWideColorSpaceExtension = EglExtensions.scRGB;
     } else {
         LOG_ALWAYS_FATAL("Unsupported wide color space.");
@@ -297,7 +299,7 @@ void EglManager::createPBufferSurface() {
 
 Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
                                                      ColorMode colorMode,
-                                                     SkColorSpace::Gamut colorGamut) {
+                                                     sk_sp<SkColorSpace> colorSpace) {
     LOG_ALWAYS_FATAL_IF(!hasEglContext(), "Not initialized");
 
     bool wideColorGamut = colorMode == ColorMode::WideColorGamut && mHasWideColorGamutSupport &&
@@ -330,15 +332,15 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
     if (EglExtensions.glColorSpace) {
         attribs[0] = EGL_GL_COLORSPACE_KHR;
         if (wideColorGamut) {
-            switch (colorGamut) {
-                case SkColorSpace::Gamut::kDCIP3_D65_Gamut:
-                    attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
-                    break;
-                case SkColorSpace::Gamut::kSRGB_Gamut:
-                    attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
-                    break;
-                default:
-                    LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
+            skcms_Matrix3x3 colorGamut;
+            LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&colorGamut),
+                                "Could not get gamut matrix from color space");
+            if (memcmp(&colorGamut, &SkNamedGamut::kDCIP3, sizeof(colorGamut)) == 0) {
+                attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
+            } else if (memcmp(&colorGamut, &SkNamedGamut::kSRGB, sizeof(colorGamut)) == 0) {
+                attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
+            } else {
+                LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
             }
         } else {
             attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;

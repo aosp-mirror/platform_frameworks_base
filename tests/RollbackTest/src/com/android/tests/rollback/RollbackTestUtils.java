@@ -90,12 +90,12 @@ class RollbackTestUtils {
     }
 
     /**
-     * Execute the given rollback.
+     * Commit the given rollback.
      * @throws AssertionError if the rollback fails.
      */
     static void rollback(RollbackInfo rollback) throws InterruptedException {
         RollbackManager rm = getRollbackManager();
-        rm.executeRollback(rollback, LocalIntentSender.getIntentSender());
+        rm.commitRollback(rollback, LocalIntentSender.getIntentSender());
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
     }
 
@@ -133,6 +133,17 @@ class RollbackTestUtils {
         // Commit the session (this will start the installation workflow).
         session.commit(LocalIntentSender.getIntentSender());
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
+    }
+
+    /** Launches {@code packageName} with {@link Intent#ACTION_MAIN}. */
+    static void launchPackage(String packageName)
+            throws InterruptedException, IOException {
+        Context context = InstrumentationRegistry.getContext();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setPackage(packageName);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        context.startActivity(intent);
     }
 
     /**

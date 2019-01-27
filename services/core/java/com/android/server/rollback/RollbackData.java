@@ -49,6 +49,14 @@ class RollbackData {
      */
     public Instant timestamp;
 
+    /**
+     * Whether this Rollback is currently in progress. This field is true from the point
+     * we commit a {@code PackageInstaller} session containing these packages to the point the
+     * {@code PackageInstaller} calls into the {@code onFinished} callback.
+     */
+    // NOTE: All accesses to this field are from the RollbackManager handler thread.
+    public boolean inProgress = false;
+
     RollbackData(int rollbackId, File backupDir) {
         this.rollbackId = rollbackId;
         this.backupDir = backupDir;

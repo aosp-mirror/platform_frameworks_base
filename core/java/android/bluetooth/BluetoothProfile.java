@@ -18,11 +18,14 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -59,6 +62,16 @@ public interface BluetoothProfile {
     int STATE_CONNECTED = 2;
     /** The profile is in disconnecting state */
     int STATE_DISCONNECTING = 3;
+
+    /** @hide */
+    @IntDef({
+            STATE_DISCONNECTED,
+            STATE_CONNECTING,
+            STATE_CONNECTED,
+            STATE_DISCONNECTING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BtProfileState {}
 
     /**
      * Headset and Handsfree profile
@@ -185,7 +198,6 @@ public interface BluetoothProfile {
     /**
      * Hearing Aid Device
      *
-     * @hide
      */
     int HEARING_AID = 21;
 

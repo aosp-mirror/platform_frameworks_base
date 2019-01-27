@@ -62,10 +62,8 @@ DisplayInfo QueryDisplayInfo() {
     return displayInfo;
 }
 
-static void queryWideColorGamutPreference(SkColorSpace::Gamut* colorGamut,
-                                          sk_sp<SkColorSpace>* colorSpace, SkColorType* colorType) {
+static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkColorType* colorType) {
     if (Properties::isolatedProcess) {
-        *colorGamut = SkColorSpace::Gamut::kSRGB_Gamut;
         *colorSpace = SkColorSpace::MakeSRGB();
         *colorType = SkColorType::kN32_SkColorType;
         return;
@@ -78,16 +76,13 @@ static void queryWideColorGamutPreference(SkColorSpace::Gamut* colorGamut,
     LOG_ALWAYS_FATAL_IF(status, "Failed to get composition preference, error %d", status);
     switch (wcgDataspace) {
         case ui::Dataspace::DISPLAY_P3:
-            *colorGamut = SkColorSpace::Gamut::kDCIP3_D65_Gamut;
             *colorSpace = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
             break;
         case ui::Dataspace::V0_SCRGB:
-            *colorGamut = SkColorSpace::Gamut::kSRGB_Gamut;
             *colorSpace = SkColorSpace::MakeSRGB();
             break;
         case ui::Dataspace::V0_SRGB:
             // when sRGB is returned, it means wide color gamut is not supported.
-            *colorGamut = SkColorSpace::Gamut::kSRGB_Gamut;
             *colorSpace = SkColorSpace::MakeSRGB();
             break;
         default:
@@ -112,7 +107,7 @@ DeviceInfo::DeviceInfo() {
         mMaxTextureSize = -1;
 #endif
     mDisplayInfo = QueryDisplayInfo();
-    queryWideColorGamutPreference(&mWideColorGamut, &mWideColorSpace, &mWideColorType);
+    queryWideColorGamutPreference(&mWideColorSpace, &mWideColorType);
 }
 
 int DeviceInfo::maxTextureSize() const {

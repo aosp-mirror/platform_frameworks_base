@@ -386,6 +386,15 @@
             android:excludeFromRecents="true">
         </activity>
 
+        <!-- started from UsbPortManager -->
+        <activity android:name=".usb.UsbContaminantActivity"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_USB"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+
         <!-- started from AdbDebuggingManager -->
         <activity android:name=".usb.UsbDebuggingActivity"
             android:permission="android.permission.MANAGE_DEBUGGING"

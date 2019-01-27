@@ -162,6 +162,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InsetsState.InternalInsetType;
 import android.view.MagnificationSpec;
+import android.view.RemoteAnimationDefinition;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -250,6 +251,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     final ArraySet<AppWindowToken> mOpeningApps = new ArraySet<>();
     final ArraySet<AppWindowToken> mClosingApps = new ArraySet<>();
+    final ArraySet<AppWindowToken> mChangingApps = new ArraySet<>();
     final UnknownAppVisibilityController mUnknownAppVisibilityController;
     BoundsAnimationController mBoundsAnimationController;
 
@@ -1055,11 +1057,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void setInsetProvider(@InternalInsetType int type, WindowState win,
             @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
-        if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL) {
-            if (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR) {
-                return;
-            }
-        }
         mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider);
     }
 
@@ -1088,6 +1085,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     int getLastWindowForcedOrientation() {
         return mLastWindowForcedOrientation;
+    }
+
+    void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        mAppTransitionController.registerRemoteAnimations(definition);
     }
 
     /**
@@ -2454,6 +2455,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // Clear all transitions & screen frozen states when removing display.
             mOpeningApps.clear();
             mClosingApps.clear();
+            mChangingApps.clear();
             mUnknownAppVisibilityController.clear();
             mAppTransition.removeAppTransitionTimeoutCallbacks();
             handleAnimatingStoppedAndTransition();
@@ -3284,13 +3286,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty()) {
+        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty() || !mChangingApps.isEmpty()) {
             pw.println();
             if (mOpeningApps.size() > 0) {
                 pw.print("  mOpeningApps="); pw.println(mOpeningApps);
             }
             if (mClosingApps.size() > 0) {
                 pw.print("  mClosingApps="); pw.println(mClosingApps);
+            }
+            if (mChangingApps.size() > 0) {
+                pw.print("  mChangingApps="); pw.println(mChangingApps);
             }
         }
 

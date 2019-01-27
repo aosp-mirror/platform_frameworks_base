@@ -508,7 +508,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /**
      * Bit in {@link #privateFlags} indicating if the activity should be shown when locked in case
      * an activity behind this can also be shown when locked.
-     * See android.R.attr#inheritShowWhenLocked
+     * See {@link android.R.attr#inheritShowWhenLocked}.
      * @hide
      */
     public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 0x1;

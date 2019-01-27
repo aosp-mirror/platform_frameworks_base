@@ -70,9 +70,11 @@ import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AF
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
+import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
+
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
@@ -81,10 +83,11 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
         .PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
         .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
-import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
-        .ADMIN_TYPE_DEVICE_OWNER;
-import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
-        .ADMIN_TYPE_PROFILE_OWNER;
+
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
+
+
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -237,11 +240,11 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
+import com.android.internal.util.StatLogger;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
@@ -949,8 +952,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "metered_data_disabled_packages";
         private static final String TAG_CROSS_PROFILE_CALENDAR_PACKAGES =
                 "cross-profile-calendar-packages";
-        private static final String TAG_PACKAGE = "package";
-
+        private static final String TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL =
+                "cross-profile-calendar-packages-null";
 
         DeviceAdminInfo info;
 
@@ -1072,7 +1075,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         String endUserSessionMessage = null;
 
         // The whitelist of packages that can access cross profile calendar APIs.
-        final Set<String> mCrossProfileCalendarPackages = new ArraySet<>();
+        // This whitelist should be in default an empty list, which indicates that no package
+        // is whitelisted.
+        List<String> mCrossProfileCalendarPackages = Collections.emptyList();
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -1343,11 +1348,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.text(endUserSessionMessage);
                 out.endTag(null, TAG_END_USER_SESSION_MESSAGE);
             }
-            if (!mCrossProfileCalendarPackages.isEmpty()) {
-                out.startTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES);
-                writeAttributeValuesToXml(
-                        out, TAG_PACKAGE, mCrossProfileCalendarPackages);
-                out.endTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES);
+            if (mCrossProfileCalendarPackages == null) {
+                out.startTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL);
+                out.endTag(null, TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL);
+            } else {
+                writePackageListToXml(out, TAG_CROSS_PROFILE_CALENDAR_PACKAGES,
+                        mCrossProfileCalendarPackages);
             }
         }
 
@@ -1542,8 +1548,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         Log.w(LOG_TAG, "Missing text when loading end session message");
                     }
                 } else if (TAG_CROSS_PROFILE_CALENDAR_PACKAGES.equals(tag)) {
-                    readAttributeValues(
-                            parser, TAG_PACKAGE, mCrossProfileCalendarPackages);
+                    mCrossProfileCalendarPackages = readPackageList(parser, tag);
+                } else if (TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL.equals(tag)) {
+                    mCrossProfileCalendarPackages = null;
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -1759,8 +1766,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.print(prefix);  pw.println("parentAdmin:");
                 parentAdmin.dump(prefix + "  ", pw);
             }
-            pw.print(prefix); pw.print("mCrossProfileCalendarPackages=");
-            pw.println(mCrossProfileCalendarPackages);
+            if (mCrossProfileCalendarPackages != null) {
+                pw.print(prefix); pw.print("mCrossProfileCalendarPackages=");
+                pw.println(mCrossProfileCalendarPackages);
+            }
         }
     }
 
@@ -6362,7 +6371,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void forceWipeUser(int userId, String wipeReasonForUser) {
+    private void forceWipeUser(int userId, String wipeReasonForUser, boolean wipeSilently) {
         boolean success = false;
         try {
             IActivityManager am = mInjector.getIActivityManager();
@@ -6373,7 +6382,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             success = mUserManagerInternal.removeUserEvenWhenDisallowed(userId);
             if (!success) {
                 Slog.w(LOG_TAG, "Couldn't remove user " + userId);
-            } else if (isManagedProfile(userId) && !TextUtils.isEmpty(wipeReasonForUser)) {
+            } else if (isManagedProfile(userId) && !wipeSilently) {
                 sendWipeProfileNotification(wipeReasonForUser);
             }
         } catch (RemoteException re) {
@@ -6388,6 +6397,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkStringNotEmpty(wipeReasonForUser, "wipeReasonForUser is null or empty");
         enforceFullCrossUsersPermission(mInjector.userHandleGetCallingUserId());
 
         final ActiveAdmin admin;
@@ -6447,7 +6457,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         internalReason,
                         /*wipeEuicc=*/ (flags & WIPE_EUICC) != 0);
             } else {
-                forceWipeUser(userId, wipeReasonForUser);
+                forceWipeUser(userId, wipeReasonForUser, (flags & WIPE_SILENTLY) != 0);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
@@ -13988,52 +13998,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void addCrossProfileCalendarPackage(ComponentName who, String packageName) {
+    public void setCrossProfileCalendarPackages(ComponentName who, List<String> packageNames) {
         if (!mHasFeature) {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        Preconditions.checkStringNotEmpty(packageName, "Package name is null or empty");
 
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (admin.mCrossProfileCalendarPackages.add(packageName)) {
-                saveSettingsLocked(mInjector.userHandleGetCallingUserId());
-            }
+            admin.mCrossProfileCalendarPackages = packageNames;
+            saveSettingsLocked(mInjector.userHandleGetCallingUserId());
         }
         DevicePolicyEventLogger
-                .createEvent(DevicePolicyEnums.ADD_CROSS_PROFILE_CALENDAR_PACKAGE)
+                .createEvent(DevicePolicyEnums.SET_CROSS_PROFILE_CALENDAR_PACKAGES)
                 .setAdmin(who)
-                .setStrings(packageName)
+                .setStrings(packageNames == null ? null
+                        : packageNames.toArray(new String[packageNames.size()]))
                 .write();
-    }
-
-    @Override
-    public boolean removeCrossProfileCalendarPackage(ComponentName who, String packageName) {
-        if (!mHasFeature) {
-            return false;
-        }
-        Preconditions.checkNotNull(who, "ComponentName is null");
-        Preconditions.checkStringNotEmpty(packageName, "Package name is null or empty");
-
-        boolean isRemoved = false;
-        synchronized (getLockObject()) {
-            final ActiveAdmin admin = getActiveAdminForCallerLocked(
-                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            isRemoved = admin.mCrossProfileCalendarPackages.remove(packageName);
-            if (isRemoved) {
-                saveSettingsLocked(mInjector.userHandleGetCallingUserId());
-            }
-        }
-        if (isRemoved) {
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.REMOVE_CROSS_PROFILE_CALENDAR_PACKAGE)
-                    .setAdmin(who)
-                    .setStrings(packageName)
-                    .write();
-        }
-        return isRemoved;
     }
 
     @Override
@@ -14046,7 +14028,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            return new ArrayList<String>(admin.mCrossProfileCalendarPackages);
+            return admin.mCrossProfileCalendarPackages;
         }
     }
 
@@ -14062,6 +14044,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
             if (admin != null) {
+                if (admin.mCrossProfileCalendarPackages == null) {
+                    return true;
+                }
                 return admin.mCrossProfileCalendarPackages.contains(packageName);
             }
         }
@@ -14077,7 +14062,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
             if (admin != null) {
-                return new ArrayList<String>(admin.mCrossProfileCalendarPackages);
+                return admin.mCrossProfileCalendarPackages;
             }
         }
         return Collections.emptyList();

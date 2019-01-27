@@ -22,7 +22,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.graphics.ColorUtils;
@@ -59,6 +60,8 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
     private NotificationEntry mEntry;
     private PendingIntent mAppOverlayIntent;
     private ActivityView mActivityView;
+    private boolean mActivityViewReady;
+    private boolean mActivityViewStarted;
 
     public BubbleView(Context context) {
         this(context, null);
@@ -191,10 +194,10 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
                         fraction = showDot ? fraction : 1 - fraction;
                         mBadgedImageView.setDotScale(fraction);
                     }).withEndAction(() -> {
-                        if (!showDot) {
-                            mBadgedImageView.setShowDot(false);
-                        }
-                    }).start();
+                if (!showDot) {
+                    mBadgedImageView.setShowDot(false);
+                }
+            }).start();
         }
     }
 
@@ -231,8 +234,21 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
      */
     public ActivityView getActivityView() {
         if (mActivityView == null) {
-            mActivityView = new ActivityView(mContext);
+            mActivityView = new ActivityView(mContext, null /* attrs */, 0 /* defStyle */,
+                    true /* singleTaskInstance */);
             Log.d(TAG, "[getActivityView] created: " + mActivityView);
+            mActivityView.setCallback(new ActivityView.StateCallback() {
+                @Override
+                public void onActivityViewReady(ActivityView view) {
+                    mActivityViewReady = true;
+                    mActivityView.startActivity(mAppOverlayIntent);
+                }
+
+                @Override
+                public void onActivityViewDestroyed(ActivityView view) {
+                    mActivityViewReady = false;
+                }
+            });
         }
         return mActivityView;
     }
@@ -244,46 +260,44 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
         if (mActivityView == null) {
             return;
         }
-        // HACK: Only release if initialized. There's no way to know if the ActivityView has
-        // been initialized. Calling release() if it hasn't been initialized will crash.
-
+        if (!mActivityViewReady) {
+            // release not needed, never initialized?
+            mActivityView = null;
+            return;
+        }
+        // HACK: release() will crash if the view is not attached.
         if (!mActivityView.isAttachedToWindow()) {
-            // HACK: release() will crash if the view is not attached.
-
             mActivityView.setVisibility(View.GONE);
-            tmpParent.addView(mActivityView, new ViewGroup.LayoutParams(
+            tmpParent.addView(mActivityView, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
         }
-        try {
-            mActivityView.release();
-        } catch (IllegalStateException ex) {
-            Log.e(TAG, "ActivityView either already released, or not yet initialized.", ex);
-        }
+
+        mActivityView.release();
 
         ((ViewGroup) mActivityView.getParent()).removeView(mActivityView);
         mActivityView = null;
     }
 
     @Override
-    public void setPosition(int x, int y) {
+    public void setPosition(float x, float y) {
         setPositionX(x);
         setPositionY(y);
     }
 
     @Override
-    public void setPositionX(int x) {
+    public void setPositionX(float x) {
         setTranslationX(x);
     }
 
     @Override
-    public void setPositionY(int y) {
+    public void setPositionY(float y) {
         setTranslationY(y);
     }
 
     @Override
-    public Point getPosition() {
-        return new Point((int) getTranslationX(), (int) getTranslationY());
+    public PointF getPosition() {
+        return new PointF(getTranslationX(), getTranslationY());
     }
 
     /**

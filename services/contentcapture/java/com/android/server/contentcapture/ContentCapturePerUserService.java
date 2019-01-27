@@ -28,6 +28,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUC
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -35,18 +36,22 @@ import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
+import com.android.server.LocalServices;
 import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
 import com.android.server.infra.AbstractPerUserSystemService;
 
@@ -246,6 +251,39 @@ final class ContentCapturePerUserService
         }
         if (mMaster.verbose) Slog.v(TAG, "finishSession(): id=" + sessionId);
         session.removeSelfLocked(/* notifyRemoteService= */ true);
+    }
+
+    @GuardedBy("mLock")
+    public void removeUserDataLocked(@NonNull UserDataRemovalRequest request) {
+        if (!isEnabledLocked()) {
+            return;
+        }
+        assertCallerLocked(request.getPackageName());
+        mRemoteService.onUserDataRemovalRequest(request);
+    }
+
+    /**
+     * Asserts the component is owned by the caller.
+     */
+    @GuardedBy("mLock")
+    private void assertCallerLocked(@NonNull String packageName) {
+        final PackageManager pm = getContext().getPackageManager();
+        final int callingUid = Binder.getCallingUid();
+        final int packageUid;
+        try {
+            packageUid = pm.getPackageUidAsUser(packageName, UserHandle.getCallingUserId());
+        } catch (NameNotFoundException e) {
+            throw new SecurityException("Could not verify UID for " + packageName);
+        }
+        if (callingUid != packageUid && !LocalServices.getService(ActivityManagerInternal.class)
+                .hasRunningActivity(callingUid, packageName)) {
+            final String[] packages = pm.getPackagesForUid(callingUid);
+            final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
+            Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
+                    + ") passed package (" + packageName + ") owned by UID " + packageUid);
+
+            throw new SecurityException("Invalid package: " + packageName);
+        }
     }
 
     @GuardedBy("mLock")

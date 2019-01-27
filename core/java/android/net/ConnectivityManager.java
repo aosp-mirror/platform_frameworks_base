@@ -15,6 +15,9 @@
  */
 package android.net;
 
+import static android.net.IpSecManager.INVALID_RESOURCE_ID;
+
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +31,8 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.IpSecManager.UdpEncapsulationSocket;
+import android.net.SocketKeepalive.Callback;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -58,6 +63,7 @@ import com.android.internal.util.Protocol;
 
 import libcore.net.event.NetworkEventDispatcher;
 
+import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
@@ -66,6 +72,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Class that answers queries about the state of network connectivity. It also
@@ -1699,6 +1706,8 @@ public class ConnectivityManager {
      * {@link PacketKeepaliveCallback#onStopped} if the operation was successful or
      * {@link PacketKeepaliveCallback#onError} if an error occurred.
      *
+     * @deprecated Use {@link SocketKeepalive} instead.
+     *
      * @hide
      */
     public class PacketKeepalive {
@@ -1802,6 +1811,8 @@ public class ConnectivityManager {
     /**
      * Starts an IPsec NAT-T keepalive packet with the specified parameters.
      *
+     * @deprecated Use {@link #createSocketKeepalive} instead.
+     *
      * @hide
      */
     @UnsupportedAppUsage
@@ -1818,6 +1829,62 @@ public class ConnectivityManager {
             return null;
         }
         return k;
+    }
+
+    /**
+     * Request that keepalives be started on a IPsec NAT-T socket.
+     *
+     * @param network The {@link Network} the socket is on.
+     * @param socket The socket that needs to be kept alive.
+     * @param source The source address of the {@link UdpEncapsulationSocket}.
+     * @param destination The destination address of the {@link UdpEncapsulationSocket}.
+     * @param executor The executor on which callback will be invoked. The provided {@link Executor}
+     *                 must run callback sequentially, otherwise the order of callbacks cannot be
+     *                 guaranteed.
+     * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
+     *        changes. Must be extended by applications that use this API.
+     *
+     * @return A {@link SocketKeepalive} object, which can be used to control this keepalive object.
+     **/
+    public SocketKeepalive createSocketKeepalive(@NonNull Network network,
+            @NonNull UdpEncapsulationSocket socket,
+            @NonNull InetAddress source,
+            @NonNull InetAddress destination,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Callback callback) {
+        return new NattSocketKeepalive(mService, network, socket.getFileDescriptor(),
+            socket.getResourceId(), source, destination, executor, callback);
+    }
+
+    /**
+     * Request that keepalives be started on a IPsec NAT-T socket file descriptor. Directly called
+     * by system apps which don't use IpSecService to create {@link UdpEncapsulationSocket}.
+     *
+     * @param network The {@link Network} the socket is on.
+     * @param fd The {@link FileDescriptor} that needs to be kept alive. The provided
+     *        {@link FileDescriptor} must be bound to a port and the keepalives will be sent from
+     *        that port.
+     * @param source The source address of the {@link UdpEncapsulationSocket}.
+     * @param destination The destination address of the {@link UdpEncapsulationSocket}. The
+     *        keepalive packets will always be sent to port 4500 of the given {@code destination}.
+     * @param executor The executor on which callback will be invoked. The provided {@link Executor}
+     *                 must run callback sequentially, otherwise the order of callbacks cannot be
+     *                 guaranteed.
+     * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
+     *        changes. Must be extended by applications that use this API.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD)
+    public SocketKeepalive createNattKeepalive(@NonNull Network network,
+            @NonNull FileDescriptor fd,
+            @NonNull InetAddress source,
+            @NonNull InetAddress destination,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Callback callback) {
+        return new NattSocketKeepalive(mService, network, fd, INVALID_RESOURCE_ID /* Unused */,
+                source, destination, executor, callback);
     }
 
     /**

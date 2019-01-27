@@ -16,6 +16,7 @@
 
 package com.android.settingslib.applications;
 
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -121,6 +122,14 @@ public class AppUtils {
             Log.w(TAG, "Unable to find info for package: " + packageName);
         }
         return null;
+    }
+
+    /**
+     * Returns a boolean indicating whether the given package is a hidden system module
+     */
+    public static boolean isHiddenSystemModule(Context context, String packageName) {
+        return ApplicationsState.getInstance((Application) context.getApplicationContext())
+            .isHiddenModule(packageName);
     }
 
 }

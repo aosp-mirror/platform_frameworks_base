@@ -787,6 +787,18 @@ public class WifiConfiguration implements Parcelable {
     public boolean trusted;
 
     /**
+     * This Wifi configuration is created from a {@link WifiNetworkSuggestion}
+     * @hide
+     */
+    public boolean fromWifiNetworkSuggestion;
+
+    /**
+     * This Wifi configuration is created from a {@link WifiNetworkSpecifier}
+     * @hide
+     */
+    public boolean fromWifiNetworkSpecifier;
+
+    /**
      * Indicates if the creator of this configuration has expressed that it
      * should be considered metered.
      *
@@ -1668,6 +1680,8 @@ public class WifiConfiguration implements Parcelable {
         ephemeral = false;
         osu = false;
         trusted = true; // Networks are considered trusted by default.
+        fromWifiNetworkSuggestion = false;
+        fromWifiNetworkSpecifier = false;
         meteredHint = false;
         meteredOverride = METERED_OVERRIDE_NONE;
         useExternalScores = false;
@@ -1779,10 +1793,13 @@ public class WifiConfiguration implements Parcelable {
         if (this.ephemeral) sbuf.append(" ephemeral");
         if (this.osu) sbuf.append(" osu");
         if (this.trusted) sbuf.append(" trusted");
+        if (this.fromWifiNetworkSuggestion) sbuf.append(" fromWifiNetworkSuggestion");
+        if (this.fromWifiNetworkSpecifier) sbuf.append(" fromWifiNetworkSpecifier");
         if (this.meteredHint) sbuf.append(" meteredHint");
         if (this.useExternalScores) sbuf.append(" useExternalScores");
         if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess
-                || this.ephemeral || this.trusted || this.meteredHint || this.useExternalScores) {
+                || this.ephemeral || this.trusted || this.fromWifiNetworkSuggestion
+                || this.fromWifiNetworkSpecifier || this.meteredHint || this.useExternalScores) {
             sbuf.append("\n");
         }
         if (this.meteredOverride != METERED_OVERRIDE_NONE) {
@@ -2270,6 +2287,8 @@ public class WifiConfiguration implements Parcelable {
             ephemeral = source.ephemeral;
             osu = source.osu;
             trusted = source.trusted;
+            fromWifiNetworkSuggestion = source.fromWifiNetworkSuggestion;
+            fromWifiNetworkSpecifier = source.fromWifiNetworkSpecifier;
             meteredHint = source.meteredHint;
             meteredOverride = source.meteredOverride;
             useExternalScores = source.useExternalScores;
@@ -2347,6 +2366,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(isLegacyPasspointConfig ? 1 : 0);
         dest.writeInt(ephemeral ? 1 : 0);
         dest.writeInt(trusted ? 1 : 0);
+        dest.writeInt(fromWifiNetworkSuggestion ? 1 : 0);
+        dest.writeInt(fromWifiNetworkSpecifier ? 1 : 0);
         dest.writeInt(meteredHint ? 1 : 0);
         dest.writeInt(meteredOverride);
         dest.writeInt(useExternalScores ? 1 : 0);
@@ -2418,6 +2439,8 @@ public class WifiConfiguration implements Parcelable {
                 config.isLegacyPasspointConfig = in.readInt() != 0;
                 config.ephemeral = in.readInt() != 0;
                 config.trusted = in.readInt() != 0;
+                config.fromWifiNetworkSuggestion =  in.readInt() != 0;
+                config.fromWifiNetworkSpecifier =  in.readInt() != 0;
                 config.meteredHint = in.readInt() != 0;
                 config.meteredOverride = in.readInt();
                 config.useExternalScores = in.readInt() != 0;

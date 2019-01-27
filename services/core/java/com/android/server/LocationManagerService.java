@@ -220,6 +220,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final ArraySet<String> mBackgroundThrottlePackageWhitelist = new ArraySet<>();
 
+    private final ArraySet<String> mIgnoreSettingsPackageWhitelist = new ArraySet<>();
+
     @GuardedBy("mLock")
     private final ArrayMap<IBinder, Identity> mGnssMeasurementsListeners = new ArrayMap<>();
 
@@ -350,6 +352,18 @@ public class LocationManagerService extends ILocationManager.Stub {
                     public void onChange(boolean selfChange) {
                         synchronized (mLock) {
                             onBackgroundThrottleWhitelistChangedLocked();
+                        }
+                    }
+                }, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(
+                        Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST),
+                true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        synchronized (mLock) {
+                            onIgnoreSettingsWhitelistChangedLocked();
                         }
                     }
                 }, UserHandle.USER_ALL);
@@ -544,6 +558,25 @@ public class LocationManagerService extends ILocationManager.Stub {
         mBackgroundThrottlePackageWhitelist.addAll(
                 SystemConfig.getInstance().getAllowUnthrottledLocation());
         mBackgroundThrottlePackageWhitelist.addAll(Arrays.asList(setting.split(",")));
+
+        for (LocationProvider p : mProviders) {
+            applyRequirementsLocked(p);
+        }
+    }
+
+    @GuardedBy("lock")
+    private void onIgnoreSettingsWhitelistChangedLocked() {
+        String setting = Settings.Global.getString(
+                mContext.getContentResolver(),
+                Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST);
+        if (setting == null) {
+            setting = "";
+        }
+
+        mIgnoreSettingsPackageWhitelist.clear();
+        mIgnoreSettingsPackageWhitelist.addAll(
+                SystemConfig.getInstance().getAllowIgnoreLocationSettings());
+        mIgnoreSettingsPackageWhitelist.addAll(Arrays.asList(setting.split(",")));
 
         for (LocationProvider p : mProviders) {
             applyRequirementsLocked(p);
@@ -1299,8 +1332,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     if (provider == null) {
                         continue;
                     }
-                    if (!provider.isUseableLocked()
-                            && !updateRecord.mRealRequest.isLocationSettingsIgnored()) {
+                    if (!provider.isUseableLocked() && !isSettingsExemptLocked(updateRecord)) {
                         continue;
                     }
 
@@ -1988,7 +2020,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
 
                 // requests that ignore location settings will never provider notifications
-                if (record.mRealRequest.isLocationSettingsIgnored()) {
+                if (isSettingsExemptLocked(record)) {
                     continue;
                 }
 
@@ -2052,8 +2084,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         record.mReceiver.mAllowedResolutionLevel)) {
                     continue;
                 }
-                if (!provider.isUseableLocked()
-                        && !record.mRealRequest.isLocationSettingsIgnored()) {
+                if (!provider.isUseableLocked() && !isSettingsExemptLocked(record)) {
                     continue;
                 }
 
@@ -2156,6 +2187,25 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         for (LocationProvider provider : mProviders) {
             if (identity.mPackageName.equals(provider.getPackageLocked())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    private boolean isSettingsExemptLocked(UpdateRecord record) {
+        if (!record.mRealRequest.isLocationSettingsIgnored()) {
+            return false;
+        }
+
+        if (mBackgroundThrottlePackageWhitelist.contains(record.mReceiver.mIdentity.mPackageName)) {
+            return true;
+        }
+
+        for (LocationProvider provider : mProviders) {
+            if (record.mReceiver.mIdentity.mPackageName.equals(provider.getPackageLocked())) {
                 return true;
             }
         }
@@ -2306,7 +2356,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         // make getFastestInterval() the minimum of interval and fastest interval
         if (sanitizedRequest.getFastestInterval() > sanitizedRequest.getInterval()) {
-            request.setFastestInterval(request.getInterval());
+            sanitizedRequest.setFastestInterval(request.getInterval());
         }
         return sanitizedRequest;
     }
@@ -2418,7 +2468,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             oldRecord.disposeLocked(false);
         }
 
-        if (!provider.isUseableLocked() && !request.isLocationSettingsIgnored()) {
+        if (!provider.isUseableLocked() && !isSettingsExemptLocked(record)) {
             // Notify the listener that updates are currently disabled - but only if the request
             // does not ignore location settings
             receiver.callProviderEnabledLocked(name, false);
@@ -3056,7 +3106,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             Receiver receiver = r.mReceiver;
             boolean receiverDead = false;
 
-            if (!provider.isUseableLocked() && !r.mRealRequest.isLocationSettingsIgnored()) {
+            if (!provider.isUseableLocked() && !isSettingsExemptLocked(r)) {
                 continue;
             }
 

@@ -1617,14 +1617,16 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * @hide
+         * Returns a list of smart {@link Notification.Action} that can be added by the
+         * {@link NotificationAssistantService}
          */
         public List<Notification.Action> getSmartActions() {
             return mSmartActions;
         }
 
         /**
-         * @hide
+         * Returns a list of smart replies that can be added by the
+         * {@link NotificationAssistantService}
          */
         public List<CharSequence> getSmartReplies() {
             return mSmartReplies;

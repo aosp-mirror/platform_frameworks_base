@@ -38,6 +38,7 @@
 #include "gtest/gtest.h"
 
 #include "androidfw/PosixUtils.h"
+#include "private/android_filesystem_config.h"
 
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
@@ -69,9 +70,23 @@ void AssertIdmap(const Idmap& idmap, const std::string& target_apk_path,
     ASSERT_NO_FATAL_FAILURE(AssertIdmap(idmap_ref, target_apk_path, overlay_apk_path)); \
   } while (0)
 
+#ifdef __ANDROID__
+#define SKIP_TEST_IF_CANT_EXEC_IDMAP2           \
+  do {                                          \
+    const uid_t uid = getuid();                 \
+    if (uid != AID_ROOT && uid != AID_SYSTEM) { \
+      GTEST_SKIP();                             \
+    }                                           \
+  } while (0)
+#else
+#define SKIP_TEST_IF_CANT_EXEC_IDMAP2
+#endif
+
 }  // namespace
 
 TEST_F(Idmap2BinaryTests, Create) {
+  SKIP_TEST_IF_CANT_EXEC_IDMAP2;
+
   // clang-format off
   auto result = ExecuteBinary({"idmap2",
                                "create",
@@ -97,6 +112,8 @@ TEST_F(Idmap2BinaryTests, Create) {
 }
 
 TEST_F(Idmap2BinaryTests, Dump) {
+  SKIP_TEST_IF_CANT_EXEC_IDMAP2;
+
   // clang-format off
   auto result = ExecuteBinary({"idmap2",
                                "create",
@@ -144,6 +161,8 @@ TEST_F(Idmap2BinaryTests, Dump) {
 }
 
 TEST_F(Idmap2BinaryTests, Scan) {
+  SKIP_TEST_IF_CANT_EXEC_IDMAP2;
+
   const std::string overlay_static_1_apk_path = GetTestDataPath() + "/overlay/overlay-static-1.apk";
   const std::string overlay_static_2_apk_path = GetTestDataPath() + "/overlay/overlay-static-2.apk";
   const std::string idmap_static_1_path =
@@ -236,6 +255,8 @@ TEST_F(Idmap2BinaryTests, Scan) {
 }
 
 TEST_F(Idmap2BinaryTests, Lookup) {
+  SKIP_TEST_IF_CANT_EXEC_IDMAP2;
+
   // clang-format off
   auto result = ExecuteBinary({"idmap2",
                                "create",
@@ -285,6 +306,8 @@ TEST_F(Idmap2BinaryTests, Lookup) {
 }
 
 TEST_F(Idmap2BinaryTests, InvalidCommandLineOptions) {
+  SKIP_TEST_IF_CANT_EXEC_IDMAP2;
+
   const std::string invalid_target_apk_path = GetTestDataPath() + "/DOES-NOT-EXIST";
 
   // missing mandatory options

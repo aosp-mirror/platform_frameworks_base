@@ -174,7 +174,8 @@ public final class LinkProperties implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public LinkProperties(LinkProperties source) {
         if (source != null) {
             mIfaceName = source.mIfaceName;
@@ -576,6 +577,8 @@ public final class LinkProperties implements Parcelable {
      * @param addresses The {@link Collection} of PCSCF servers to set in this object.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public void setPcscfServers(Collection<InetAddress> pcscfServers) {
         mPcscfs.clear();
         for (InetAddress pcscfServer: pcscfServers) {
@@ -590,6 +593,8 @@ public final class LinkProperties implements Parcelable {
      *         this link.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public List<InetAddress> getPcscfServers() {
         return Collections.unmodifiableList(mPcscfs);
     }
@@ -781,6 +786,8 @@ public final class LinkProperties implements Parcelable {
      * @return the NAT64 prefix.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public @Nullable IpPrefix getNat64Prefix() {
         return mNat64Prefix;
     }
@@ -794,6 +801,8 @@ public final class LinkProperties implements Parcelable {
      * @param prefix the NAT64 prefix.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public void setNat64Prefix(IpPrefix prefix) {
         if (prefix != null && prefix.getPrefixLength() != 96) {
             throw new IllegalArgumentException("Only 96-bit prefixes are supported: " + prefix);

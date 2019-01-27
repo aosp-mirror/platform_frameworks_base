@@ -549,8 +549,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         verify(mActivityMetricsLogger, times(1)).logActivityStart(any(), any(), any(),
                 eq(FAKE_CALLING_UID), eq(FAKE_CALLING_PACKAGE), anyInt(), anyBoolean(),
                 eq(FAKE_REAL_CALLING_UID), anyInt(), anyBoolean(), anyInt(),
-                eq(ActivityBuilder.getDefaultComponent().getPackageName()), anyInt(), anyBoolean(),
-                any(), eq(false));
+                any(), anyInt(), anyBoolean(), any(), eq(false));
     }
 
     /**
@@ -597,6 +596,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted", false,
                 Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false, false);
+        runAndVerifyBackgroundActivityStartsSubtest("disallowed_nfcUid_notAborted", false,
+                Process.NFC_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(

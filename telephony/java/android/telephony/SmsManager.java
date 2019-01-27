@@ -16,12 +16,18 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothMapClient;
+import android.bluetooth.BluetoothProfile;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,6 +38,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telecom.PhoneAccount;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -61,6 +68,8 @@ import java.util.Map;
  */
 public final class SmsManager {
     private static final String TAG = "SmsManager";
+    private static final boolean DBG = false;
+
     /**
      * A psuedo-subId that represents the default subId at any given time. The actual subId it
      * represents changes as the default subId is changed.
@@ -339,6 +348,44 @@ public final class SmsManager {
             throw new IllegalArgumentException("Invalid message body");
         }
 
+        // A Manager code accessing another manager is *not* acceptable, in Android.
+        // In this particular case, it is unavoidable because of the following:
+        // If the subscription for this SmsManager instance belongs to a remote SIM
+        // then a listener to get BluetoothMapClient proxy needs to be started up.
+        // Doing that is possible only in a foreground thread or as a system user.
+        // i.e., Can't be done in ISms service.
+        // For that reason, SubscriptionManager needs to be accessed here to determine
+        // if the subscription belongs to a remote SIM.
+        // Ideally, there should be another API in ISms to service messages going thru
+        // remote SIM subscriptions (and ISms should be tweaked to be able to access
+        // BluetoothMapClient proxy)
+        Context context = ActivityThread.currentApplication().getApplicationContext();
+        SubscriptionManager manager = (SubscriptionManager) context
+                .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        int subId = getSubscriptionId();
+        SubscriptionInfo info = manager.getActiveSubscriptionInfo(subId);
+        if (DBG) {
+            Log.d(TAG, "for subId: " + subId + ", subscription-info: " + info);
+        }
+        if (info == null) {
+            // There is no subscription for the given subId. That can only mean one thing:
+            // the caller is using a SmsManager instance with an obsolete subscription id.
+            // That is most probably because caller didn't invalidate SmsManager instance
+            // for an already deleted subscription id.
+            Log.e(TAG, "subId: " + subId + " for this SmsManager instance is obsolete.");
+            sendErrorInPendingIntent(sentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
+        }
+
+        /* If the Subscription associated with this SmsManager instance belongs to a remote-sim,
+         * then send the message thru the remote-sim subscription.
+         */
+        if (info.getSubscriptionType() == SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM) {
+            if (DBG) Log.d(TAG, "sending message thru bluetooth");
+            sendTextMessageBluetooth(destinationAddress, scAddress, text, sentIntent,
+                    deliveryIntent, info);
+            return;
+        }
+
         try {
             ISms iccISms = getISmsServiceOrThrow();
             iccISms.sendTextForSubscriber(getSubscriptionId(), ActivityThread.currentPackageName(),
@@ -347,6 +394,79 @@ public final class SmsManager {
                     persistMessage);
         } catch (RemoteException ex) {
             // ignore it
+        }
+    }
+
+    private void sendTextMessageBluetooth(String destAddr, String scAddress,
+            String text, PendingIntent sentIntent, PendingIntent deliveryIntent,
+            SubscriptionInfo info) {
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (btAdapter == null) {
+            // No bluetooth service on this platform?
+            sendErrorInPendingIntent(sentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
+            return;
+        }
+        BluetoothDevice device = btAdapter.getRemoteDevice(info.getIccId());
+        if (device == null) {
+            if (DBG) Log.d(TAG, "Bluetooth device addr invalid: " + info.getIccId());
+            sendErrorInPendingIntent(sentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
+            return;
+        }
+        btAdapter.getProfileProxy(ActivityThread.currentApplication().getApplicationContext(),
+                new MapMessageSender(destAddr, text, device, sentIntent, deliveryIntent),
+                BluetoothProfile.MAP_CLIENT);
+    }
+
+    private class MapMessageSender implements BluetoothProfile.ServiceListener {
+        final Uri[] mDestAddr;
+        private String mMessage;
+        final BluetoothDevice mDevice;
+        final PendingIntent mSentIntent;
+        final PendingIntent mDeliveryIntent;
+        MapMessageSender(final String destAddr, final String message, final BluetoothDevice device,
+                final PendingIntent sentIntent, final PendingIntent deliveryIntent) {
+            super();
+            mDestAddr = new Uri[] {new Uri.Builder()
+                    .appendPath(destAddr)
+                    .scheme(PhoneAccount.SCHEME_TEL)
+                    .build()};
+            mMessage = message;
+            mDevice = device;
+            mSentIntent = sentIntent;
+            mDeliveryIntent = deliveryIntent;
+        }
+
+        @Override
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if (DBG) Log.d(TAG, "Service connected");
+            if (profile != BluetoothProfile.MAP_CLIENT) return;
+            BluetoothMapClient mapProfile = (BluetoothMapClient) proxy;
+            if (mMessage != null) {
+                if (DBG) Log.d(TAG, "Sending message thru bluetooth");
+                mapProfile.sendMessage(mDevice, mDestAddr, mMessage, mSentIntent, mDeliveryIntent);
+                mMessage = null;
+            }
+            BluetoothAdapter.getDefaultAdapter()
+                    .closeProfileProxy(BluetoothProfile.MAP_CLIENT, mapProfile);
+        }
+
+        @Override
+        public void onServiceDisconnected(int profile) {
+            if (mMessage != null) {
+                if (DBG) Log.d(TAG, "Bluetooth disconnected before sending the message");
+                sendErrorInPendingIntent(mSentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
+                mMessage = null;
+            }
+        }
+    }
+
+    private void sendErrorInPendingIntent(PendingIntent intent, int errorCode) {
+        try {
+            intent.send(errorCode);
+        } catch (PendingIntent.CanceledException e) {
+            // PendingIntent is cancelled. ignore sending this error code back to
+            // caller.
+            if (DBG) Log.d(TAG, "PendingIntent.CanceledException: " + e.getMessage());
         }
     }
 
@@ -887,8 +1007,6 @@ public final class SmsManager {
             // ignore it
         }
     }
-
-
 
     /**
      * Get the SmsManager associated with the default subscription id. The instance will always be
@@ -2021,6 +2139,79 @@ public final class SmsManager {
             ISms iccSms = getISmsServiceOrThrow();
             return iccSms.createAppSpecificSmsToken(getSubscriptionId(),
                     ActivityThread.currentPackageName(), intent);
+
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The prefixes is a list of prefix {@code String} separated by this delimiter.
+     * @hide
+     */
+    public static final String REGEX_PREFIX_DELIMITER = ",";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The success status to be added into the intent to be sent to the calling package.
+     * @hide
+     */
+    public static final int RESULT_STATUS_SUCCESS = 0;
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * The timeout status to be added into the intent to be sent to the calling package.
+     * @hide
+     */
+    public static final int RESULT_STATUS_TIMEOUT = 1;
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * Intent extra key of the retrieved SMS message as a {@code String}.
+     * @hide
+     */
+    public static final String EXTRA_SMS_MESSAGE = "android.telephony.extra.SMS_MESSAGE";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * Intent extra key of SMS retriever status, which indicates whether the request for the
+     * coming SMS message is SUCCESS or TIMEOUT
+     * @hide
+     */
+    public static final String EXTRA_STATUS = "android.telephony.extra.STATUS";
+    /**
+     * @see #createAppSpecificSmsTokenWithPackageInfo().
+     * [Optional] Intent extra key of the retrieved Sim card subscription Id if any. {@code int}
+     * @hide
+     */
+    public static final String EXTRA_SIM_SUBSCRIPTION_ID =
+            "android.telephony.extra.SIM_SUBSCRIPTION_ID";
+
+    /**
+     * Create a single use app specific incoming SMS request for the calling package.
+     *
+     * This method returns a token that if included in a subsequent incoming SMS message, and the
+     * SMS message has a prefix from the given prefixes list, the provided {@code intent} will be
+     * sent with the SMS data to the calling package.
+     *
+     * The token is only good for one use within a reasonable amount of time. After an SMS has been
+     * received containing the token all subsequent SMS messages with the token will be routed as
+     * normal.
+     *
+     * An app can only have one request at a time, if the app already has a request pending it will
+     * be replaced with a new request.
+     *
+     * @param prefixes this is a list of prefixes string separated by REGEX_PREFIX_DELIMITER. The
+     *  matching SMS message should have at least one of the prefixes in the beginning of the
+     *  message.
+     * @param intent this intent is sent when the matching SMS message is received.
+     * @return Token to include in an SMS message.
+     */
+    @Nullable
+    public String createAppSpecificSmsTokenWithPackageInfo(
+            @Nullable String prefixes, @NonNull PendingIntent intent) {
+        try {
+            ISms iccSms = getISmsServiceOrThrow();
+            return iccSms.createAppSpecificSmsTokenWithPackageInfo(getSubscriptionId(),
+                ActivityThread.currentPackageName(), prefixes, intent);
 
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();

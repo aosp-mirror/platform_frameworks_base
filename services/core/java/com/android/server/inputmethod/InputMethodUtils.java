@@ -34,6 +34,7 @@ import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Printer;
@@ -66,9 +67,9 @@ import java.util.Locale;
  */
 final class InputMethodUtils {
     public static final boolean DEBUG = false;
-    public static final int NOT_A_SUBTYPE_ID = -1;
-    public static final String SUBTYPE_MODE_ANY = null;
-    public static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
+    static final int NOT_A_SUBTYPE_ID = -1;
+    private static final String SUBTYPE_MODE_ANY = null;
+    static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String TAG = "InputMethodUtils";
     private static final Locale ENGLISH_LOCALE = new Locale("en");
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
@@ -108,7 +109,7 @@ final class InputMethodUtils {
 
     // ----------------------------------------------------------------------
     // Utilities for debug
-    public static String getApiCallStack() {
+    static String getApiCallStack() {
         String apiCallStack = "";
         try {
             throw new RuntimeException();
@@ -131,10 +132,9 @@ final class InputMethodUtils {
     }
     // ----------------------------------------------------------------------
 
-    public static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
-            final Context context, final boolean checkDefaultAttribute,
-            @Nullable final Locale requiredLocale, final boolean checkCountry,
-            final String requiredSubtypeMode) {
+    private static boolean isSystemImeThatHasSubtypeOf(InputMethodInfo imi, Context context,
+            boolean checkDefaultAttribute, @Nullable Locale requiredLocale, boolean checkCountry,
+            String requiredSubtypeMode) {
         if (!imi.isSystem()) {
             return false;
         }
@@ -148,8 +148,8 @@ final class InputMethodUtils {
     }
 
     @Nullable
-    public static Locale getFallbackLocaleForDefaultIme(final ArrayList<InputMethodInfo> imis,
-            final Context context) {
+    private static Locale getFallbackLocaleForDefaultIme(ArrayList<InputMethodInfo> imis,
+            Context context) {
         // At first, find the fallback locale from the IMEs that are declared as "default" in the
         // current locale.  Note that IME developers can declare an IME as "default" only for
         // some particular locales but "not default" for other locales.
@@ -177,8 +177,8 @@ final class InputMethodUtils {
         return null;
     }
 
-    private static boolean isSystemAuxilialyImeThatHasAutomaticSubtype(final InputMethodInfo imi,
-            final Context context, final boolean checkDefaultAttribute) {
+    private static boolean isSystemAuxilialyImeThatHasAutomaticSubtype(InputMethodInfo imi,
+            Context context, boolean checkDefaultAttribute) {
         if (!imi.isSystem()) {
             return false;
         }
@@ -198,7 +198,7 @@ final class InputMethodUtils {
         return false;
     }
 
-    public static Locale getSystemLocaleFromContext(final Context context) {
+    private static Locale getSystemLocaleFromContext(Context context) {
         try {
             return context.getResources().getConfiguration().locale;
         } catch (Resources.NotFoundException ex) {
@@ -212,10 +212,9 @@ final class InputMethodUtils {
         @NonNull
         private final LinkedHashSet<InputMethodInfo> mInputMethodSet = new LinkedHashSet<>();
 
-        public InputMethodListBuilder fillImes(final ArrayList<InputMethodInfo> imis,
-                final Context context, final boolean checkDefaultAttribute,
-                @Nullable final Locale locale, final boolean checkCountry,
-                final String requiredSubtypeMode) {
+        InputMethodListBuilder fillImes(ArrayList<InputMethodInfo> imis, Context context,
+                boolean checkDefaultAttribute, @Nullable Locale locale, boolean checkCountry,
+                String requiredSubtypeMode) {
             for (int i = 0; i < imis.size(); ++i) {
                 final InputMethodInfo imi = imis.get(i);
                 if (isSystemImeThatHasSubtypeOf(imi, context, checkDefaultAttribute, locale,
@@ -228,8 +227,7 @@ final class InputMethodUtils {
 
         // TODO: The behavior of InputMethodSubtype#overridesImplicitlyEnabledSubtype() should be
         // documented more clearly.
-        public InputMethodListBuilder fillAuxiliaryImes(final ArrayList<InputMethodInfo> imis,
-                final Context context) {
+        InputMethodListBuilder fillAuxiliaryImes(ArrayList<InputMethodInfo> imis, Context context) {
             // If one or more auxiliary input methods are available, OK to stop populating the list.
             for (final InputMethodInfo imi : mInputMethodSet) {
                 if (imi.isAuxiliaryIme()) {
@@ -269,8 +267,8 @@ final class InputMethodUtils {
     }
 
     private static InputMethodListBuilder getMinimumKeyboardSetWithSystemLocale(
-            final ArrayList<InputMethodInfo> imis, final Context context,
-            @Nullable final Locale systemLocale, @Nullable final Locale fallbackLocale) {
+            ArrayList<InputMethodInfo> imis, Context context, @Nullable Locale systemLocale,
+            @Nullable Locale fallbackLocale) {
         // Once the system becomes ready, we pick up at least one keyboard in the following order.
         // Secondary users fall into this category in general.
         // 1. checkDefaultAttribute: true, locale: systemLocale, checkCountry: true
@@ -317,7 +315,7 @@ final class InputMethodUtils {
         return builder;
     }
 
-    public static ArrayList<InputMethodInfo> getDefaultEnabledImes(
+    static ArrayList<InputMethodInfo> getDefaultEnabledImes(
             Context context, ArrayList<InputMethodInfo> imis, boolean onlyMinimum) {
         final Locale fallbackLocale = getFallbackLocaleForDefaultIme(imis, context);
         // We will primarily rely on the system locale, but also keep relying on the fallback locale
@@ -336,13 +334,13 @@ final class InputMethodUtils {
         return builder.build();
     }
 
-    public static ArrayList<InputMethodInfo> getDefaultEnabledImes(
+    static ArrayList<InputMethodInfo> getDefaultEnabledImes(
             Context context, ArrayList<InputMethodInfo> imis) {
         return getDefaultEnabledImes(context, imis, false /* onlyMinimum */);
     }
 
-    public static boolean containsSubtypeOf(final InputMethodInfo imi,
-            @Nullable final Locale locale, final boolean checkCountry, final String mode) {
+    static boolean containsSubtypeOf(InputMethodInfo imi, @Nullable Locale locale,
+            boolean checkCountry, String mode) {
         if (locale == null) {
             return false;
         }
@@ -371,7 +369,7 @@ final class InputMethodUtils {
         return false;
     }
 
-    public static ArrayList<InputMethodSubtype> getSubtypes(InputMethodInfo imi) {
+    static ArrayList<InputMethodSubtype> getSubtypes(InputMethodInfo imi) {
         ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
         final int subtypeCount = imi.getSubtypeCount();
         for (int i = 0; i < subtypeCount; ++i) {
@@ -380,7 +378,7 @@ final class InputMethodUtils {
         return subtypes;
     }
 
-    public static InputMethodInfo getMostApplicableDefaultIME(List<InputMethodInfo> enabledImes) {
+    static InputMethodInfo getMostApplicableDefaultIME(List<InputMethodInfo> enabledImes) {
         if (enabledImes == null || enabledImes.isEmpty()) {
             return null;
         }
@@ -404,11 +402,11 @@ final class InputMethodUtils {
         return enabledImes.get(Math.max(firstFoundSystemIme, 0));
     }
 
-    public static boolean isValidSubtypeId(InputMethodInfo imi, int subtypeHashCode) {
+    static boolean isValidSubtypeId(InputMethodInfo imi, int subtypeHashCode) {
         return getSubtypeIdFromHashCode(imi, subtypeHashCode) != NOT_A_SUBTYPE_ID;
     }
 
-    public static int getSubtypeIdFromHashCode(InputMethodInfo imi, int subtypeHashCode) {
+    static int getSubtypeIdFromHashCode(InputMethodInfo imi, int subtypeHashCode) {
         if (imi != null) {
             final int subtypeCount = imi.getSubtypeCount();
             for (int i = 0; i < subtypeCount; ++i) {
@@ -430,7 +428,7 @@ final class InputMethodUtils {
             };
 
     @VisibleForTesting
-    public static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
+    static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
             Resources res, InputMethodInfo imi) {
         final LocaleList systemLocales = res.getConfiguration().getLocales();
 
@@ -564,7 +562,7 @@ final class InputMethodUtils {
      * it will return the first subtype matched with mode
      * @return the most applicable subtypeId
      */
-    public static InputMethodSubtype findLastResortApplicableSubtypeLocked(
+    static InputMethodSubtype findLastResortApplicableSubtypeLocked(
             Resources res, List<InputMethodSubtype> subtypes, String mode, String locale,
             boolean canIgnoreLocaleAsLastResort) {
         if (subtypes == null || subtypes.size() == 0) {
@@ -615,14 +613,13 @@ final class InputMethodUtils {
         return applicableSubtype;
     }
 
-    public static boolean canAddToLastInputMethod(InputMethodSubtype subtype) {
+    static boolean canAddToLastInputMethod(InputMethodSubtype subtype) {
         if (subtype == null) return true;
         return !subtype.isAuxiliary();
     }
 
-    public static void setNonSelectedSystemImesDisabledUntilUsed(
-            IPackageManager packageManager, List<InputMethodInfo> enabledImis,
-            int userId, String callingPackage) {
+    static void setNonSelectedSystemImesDisabledUntilUsed(IPackageManager packageManager,
+            List<InputMethodInfo> enabledImis, @UserIdInt int userId, String callingPackage) {
         if (DEBUG) {
             Slog.d(TAG, "setNonSelectedSystemImesDisabledUntilUsed");
         }
@@ -710,7 +707,7 @@ final class InputMethodUtils {
         }
     }
 
-    public static CharSequence getImeAndSubtypeDisplayName(Context context, InputMethodInfo imi,
+    static CharSequence getImeAndSubtypeDisplayName(Context context, InputMethodInfo imi,
             InputMethodSubtype subtype) {
         final CharSequence imiLabel = imi.loadLabel(context.getPackageManager());
         return subtype != null
@@ -730,8 +727,8 @@ final class InputMethodUtils {
      * @param packageName the package name.
      * @return {@code true} if the package name belongs to the UID.
      */
-    public static boolean checkIfPackageBelongsToUid(final AppOpsManager appOpsManager,
-            final int uid, final String packageName) {
+    static boolean checkIfPackageBelongsToUid(AppOpsManager appOpsManager,
+            @UserIdInt int uid, String packageName) {
         try {
             appOpsManager.checkPackage(uid, packageName);
             return true;
@@ -759,6 +756,14 @@ final class InputMethodUtils {
          * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
          */
         private final ArrayMap<String, String> mCopyOnWriteDataStore = new ArrayMap<>();
+
+        private static final ArraySet<String> CLONE_TO_MANAGED_PROFILE = new ArraySet<>();
+        static {
+            Settings.Secure.getCloneToManagedProfileSettings(CLONE_TO_MANAGED_PROFILE);
+        }
+
+        private static final UserManagerInternal sUserManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
 
         private boolean mCopyOnWrite = false;
         @NonNull
@@ -802,10 +807,9 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        public InputMethodSettings(
-                Resources res, ContentResolver resolver,
-                ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
-                @UserIdInt int userId, boolean copyOnWrite) {
+        InputMethodSettings(Resources res, ContentResolver resolver,
+                ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
+                boolean copyOnWrite) {
             mRes = res;
             mResolver = resolver;
             mMethodMap = methodMap;
@@ -820,7 +824,7 @@ final class InputMethodUtils {
          * (e.g. {@link Settings.Secure#ACTION_INPUT_METHOD_SUBTYPE_SETTINGS}) we use the actual
          * settings on the {@link Settings.Secure} until we do the first write operation.
          */
-        public void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
+        void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
             if (DEBUG) {
                 Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
             }
@@ -834,16 +838,18 @@ final class InputMethodUtils {
             // TODO: mCurrentProfileIds should be updated here.
         }
 
-        private void putString(@NonNull final String key, @Nullable final String str) {
+        private void putString(@NonNull String key, @Nullable String str) {
             if (mCopyOnWrite) {
                 mCopyOnWriteDataStore.put(key, str);
             } else {
-                Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
+                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
+                Settings.Secure.putStringForUser(mResolver, key, str, userId);
             }
         }
 
         @Nullable
-        private String getString(@NonNull final String key, @Nullable final String defaultValue) {
+        private String getString(@NonNull String key, @Nullable String defaultValue) {
             final String result;
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 result = mCopyOnWriteDataStore.get(key);
@@ -853,15 +859,17 @@ final class InputMethodUtils {
             return result != null ? result : defaultValue;
         }
 
-        private void putInt(final String key, final int value) {
+        private void putInt(String key, int value) {
             if (mCopyOnWrite) {
                 mCopyOnWriteDataStore.put(key, String.valueOf(value));
             } else {
-                Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
+                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
+                Settings.Secure.putIntForUser(mResolver, key, value, userId);
             }
         }
 
-        private int getInt(final String key, final int defaultValue) {
+        private int getInt(String key, int defaultValue) {
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 final String result = mCopyOnWriteDataStore.get(key);
                 return result != null ? Integer.parseInt(result) : 0;
@@ -869,11 +877,11 @@ final class InputMethodUtils {
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
 
-        private void putBoolean(final String key, final boolean value) {
+        private void putBoolean(String key, boolean value) {
             putInt(key, value ? 1 : 0);
         }
 
-        private boolean getBoolean(final String key, final boolean defaultValue) {
+        private boolean getBoolean(String key, boolean defaultValue) {
             return getInt(key, defaultValue ? 1 : 0) == 1;
         }
 
@@ -893,12 +901,12 @@ final class InputMethodUtils {
             }
         }
 
-        public ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
+        ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
             return createEnabledInputMethodListLocked(
                     getEnabledInputMethodsAndSubtypeListLocked());
         }
 
-        public List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
+        List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
                 Context context, InputMethodInfo imi, boolean allowsImplicitlySelectedSubtypes) {
             List<InputMethodSubtype> enabledSubtypes =
                     getEnabledInputMethodSubtypeListLocked(imi);
@@ -909,8 +917,7 @@ final class InputMethodUtils {
             return InputMethodSubtype.sort(context, 0, imi, enabledSubtypes);
         }
 
-        public List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
-                InputMethodInfo imi) {
+        List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(InputMethodInfo imi) {
             List<Pair<String, ArrayList<String>>> imsList =
                     getEnabledInputMethodsAndSubtypeListLocked();
             ArrayList<InputMethodSubtype> enabledSubtypes = new ArrayList<>();
@@ -934,13 +941,13 @@ final class InputMethodUtils {
             return enabledSubtypes;
         }
 
-        public List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
+        List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
             return buildInputMethodsAndSubtypeList(getEnabledInputMethodsStr(),
                     mInputMethodSplitter,
                     mSubtypeSplitter);
         }
 
-        public void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {
+        void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {
             if (reloadInputMethodStr) {
                 getEnabledInputMethodsStr();
             }
@@ -957,7 +964,7 @@ final class InputMethodUtils {
          * Build and put a string of EnabledInputMethods with removing specified Id.
          * @return the specified id was removed or not.
          */
-        public boolean buildAndPutEnabledInputMethodsStrRemovingIdLocked(
+        boolean buildAndPutEnabledInputMethodsStrRemovingIdLocked(
                 StringBuilder builder, List<Pair<String, ArrayList<String>>> imsList, String id) {
             boolean isRemoved = false;
             boolean needsAppendSeparator = false;
@@ -1012,7 +1019,7 @@ final class InputMethodUtils {
         }
 
         @NonNull
-        public String getEnabledInputMethodsStr() {
+        String getEnabledInputMethodsStr() {
             mEnabledInputMethodsStrCache = getString(Settings.Secure.ENABLED_INPUT_METHODS, "");
             if (DEBUG) {
                 Slog.d(TAG, "getEnabledInputMethodsStr: " + mEnabledInputMethodsStrCache
@@ -1080,12 +1087,12 @@ final class InputMethodUtils {
             }
         }
 
-        public Pair<String, String> getLastInputMethodAndSubtypeLocked() {
+        Pair<String, String> getLastInputMethodAndSubtypeLocked() {
             // Gets the first one from the history
             return getLastSubtypeForInputMethodLockedInternal(null);
         }
 
-        public String getLastSubtypeForInputMethodLocked(String imeId) {
+        String getLastSubtypeForInputMethodLocked(String imeId) {
             Pair<String, String> ime = getLastSubtypeForInputMethodLockedInternal(imeId);
             if (ime != null) {
                 return ime.second;
@@ -1203,7 +1210,7 @@ final class InputMethodUtils {
             return history;
         }
 
-        public void putSelectedInputMethod(String imeId) {
+        void putSelectedInputMethod(String imeId) {
             if (DEBUG) {
                 Slog.d(TAG, "putSelectedInputMethodStr: " + imeId + ", "
                         + mCurrentUserId);
@@ -1211,7 +1218,7 @@ final class InputMethodUtils {
             putString(Settings.Secure.DEFAULT_INPUT_METHOD, imeId);
         }
 
-        public void putSelectedSubtype(int subtypeId) {
+        void putSelectedSubtype(int subtypeId) {
             if (DEBUG) {
                 Slog.d(TAG, "putSelectedInputMethodSubtypeStr: " + subtypeId + ", "
                         + mCurrentUserId);
@@ -1220,7 +1227,7 @@ final class InputMethodUtils {
         }
 
         @Nullable
-        public String getSelectedInputMethod() {
+        String getSelectedInputMethod() {
             final String imi = getString(Settings.Secure.DEFAULT_INPUT_METHOD, null);
             if (DEBUG) {
                 Slog.d(TAG, "getSelectedInputMethodStr: " + imi);
@@ -1228,7 +1235,7 @@ final class InputMethodUtils {
             return imi;
         }
 
-        public boolean isSubtypeSelected() {
+        boolean isSubtypeSelected() {
             return getSelectedInputMethodSubtypeHashCode() != NOT_A_SUBTYPE_ID;
         }
 
@@ -1236,11 +1243,11 @@ final class InputMethodUtils {
             return getInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, NOT_A_SUBTYPE_ID);
         }
 
-        public boolean isShowImeWithHardKeyboardEnabled() {
+        boolean isShowImeWithHardKeyboardEnabled() {
             return getBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, false);
         }
 
-        public void setShowImeWithHardKeyboard(boolean show) {
+        void setShowImeWithHardKeyboard(boolean show) {
             putBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, show);
         }
 
@@ -1249,7 +1256,7 @@ final class InputMethodUtils {
             return mCurrentUserId;
         }
 
-        public int getSelectedInputMethodSubtypeId(String selectedImiId) {
+        int getSelectedInputMethodSubtypeId(String selectedImiId) {
             final InputMethodInfo imi = mMethodMap.get(selectedImiId);
             if (imi == null) {
                 return NOT_A_SUBTYPE_ID;
@@ -1258,8 +1265,8 @@ final class InputMethodUtils {
             return getSubtypeIdFromHashCode(imi, subtypeHashCode);
         }
 
-        public void saveCurrentInputMethodAndSubtypeToHistory(
-                String curMethodId, InputMethodSubtype currentSubtype) {
+        void saveCurrentInputMethodAndSubtypeToHistory(String curMethodId,
+                InputMethodSubtype currentSubtype) {
             String subtypeId = NOT_A_SUBTYPE_ID_STR;
             if (currentSubtype != null) {
                 subtypeId = String.valueOf(currentSubtype.hashCode());
@@ -1277,8 +1284,8 @@ final class InputMethodUtils {
         }
     }
 
-    public static boolean isSoftInputModeStateVisibleAllowed(
-            int targetSdkVersion, @StartInputFlags int startInputFlags) {
+    static boolean isSoftInputModeStateVisibleAllowed(int targetSdkVersion,
+            @StartInputFlags int startInputFlags) {
         if (targetSdkVersion < Build.VERSION_CODES.P) {
             // for compatibility.
             return true;

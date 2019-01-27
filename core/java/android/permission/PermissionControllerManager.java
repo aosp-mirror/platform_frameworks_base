@@ -21,6 +21,7 @@ import static android.permission.PermissionControllerService.SERVICE_INTERFACE;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -340,6 +341,28 @@ public final class PermissionControllerManager {
 
         sRemoteService.scheduleRequest(new PendingGetPermissionUsagesRequest(sRemoteService,
                 countSystem, numMillis, executor, callback));
+    }
+
+    /**
+     * Check whether an application is qualified for a role.
+     *
+     * @param roleName name of the role to check for
+     * @param packageName package name of the application to check for
+     * @param executor Executor on which to invoke the callback
+     * @param callback Callback to receive the result
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public void isApplicationQualifiedForRole(@NonNull String roleName, @NonNull String packageName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        checkStringNotEmpty(roleName);
+        checkStringNotEmpty(packageName);
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        sRemoteService.scheduleRequest(new PendingIsApplicationQualifiedForRoleRequest(
+                sRemoteService, roleName, packageName, executor, callback));
     }
 
     /**
@@ -807,6 +830,60 @@ public final class PermissionControllerManager {
                         mRemoteCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error counting permission users", e);
+            }
+        }
+    }
+
+    /**
+     * Request for {@link #isApplicationQualifiedForRole}.
+     */
+    private static final class PendingIsApplicationQualifiedForRoleRequest extends
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
+
+        private final @NonNull String mRoleName;
+        private final @NonNull String mPackageName;
+        private final @NonNull Consumer<Boolean> mCallback;
+
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingIsApplicationQualifiedForRoleRequest(@NonNull RemoteService service,
+                @NonNull String roleName, @NonNull String packageName,
+                @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+            super(service);
+
+            mRoleName = roleName;
+            mPackageName = packageName;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> executor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    boolean qualified;
+                    if (result != null) {
+                        qualified = result.getBoolean(KEY_RESULT);
+                    } else {
+                        qualified = false;
+                    }
+                    callback.accept(qualified);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
+                }
+            }), null);
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            mCallback.accept(false);
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().isApplicationQualifiedForRole(mRoleName,
+                        mPackageName, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error checking whether application qualifies for role", e);
             }
         }
     }

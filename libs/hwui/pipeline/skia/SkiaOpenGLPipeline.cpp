@@ -167,7 +167,7 @@ bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
 
     if (surface) {
         mRenderThread.requireGlContext();
-        auto newSurface = mEglManager.createSurface(surface, colorMode, mSurfaceColorGamut);
+        auto newSurface = mEglManager.createSurface(surface, colorMode, mSurfaceColorSpace);
         if (!newSurface) {
             return false;
         }

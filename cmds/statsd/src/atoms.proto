@@ -34,6 +34,7 @@ import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.
 import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
+import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
@@ -162,7 +163,7 @@ message Atom {
         // Consider removing this if it becomes a problem
         ServiceStateChanged service_state_changed = 99;
         ServiceLaunchReported service_launch_reported = 100;
-        PhenotypeFlagStateChanged phenotype_flag_state_changed = 101;
+        FlagFlipUpdateOccurred flag_flip_update_occurred = 101;
         BinaryPushStateChanged binary_push_state_changed = 102;
         DevicePolicyEvent device_policy_event = 103;
         DocsUIFileOperationCanceledReported docs_ui_file_op_canceled = 104;
@@ -207,10 +208,11 @@ message Atom {
         AttentionManagerServiceResultReported attention_manager_service_result_reported = 143;
         AdbConnectionChanged adb_connection_changed = 144;
         SpeechDspStatReported speech_dsp_stat_reported = 145;
+        UsbContaminantReported usb_contaminant_reported = 146;
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10043
+    // Next: 10048
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -258,6 +260,8 @@ message Atom {
         BatteryLevel battery_level = 10043;
         BuildInformation build_information = 10044;
         BatteryCycleCount battery_cycle_count = 10045;
+        DebugElapsedClock debug_elapsed_clock = 10046;
+        DebugFailingElapsedClock debug_failing_elapsed_clock = 10047;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2474,40 +2478,44 @@ message Notification {
 }
 
 /*
- * Logs when a flag flip state changes.
- * Logged in P/h.
+ * Logs when a flag flip update occurrs. Used for mainline modules that update via flag flips.
  */
-message PhenotypeFlagStateChanged {
-    // Mendel configuration name.
-    optional string mendel_config_name = 1;
-    // State
-    enum State {
-        STATE_UNKNOWN = 0;
-        COMMITTED = 1;
-    }
-    optional State state = 2;
+message FlagFlipUpdateOccurred {
+    // If the event is from a flag config package, specify the package name.
+    optional string flag_flip_package_name = 1;
+
+    // The order id of the package
+    optional int64 order_id = 2;
 }
 
 /*
  * Logs when a binary push state changes.
- * Logged in Play store
+ * Logged by the installer via public api.
  */
 message BinaryPushStateChanged {
-    // Binary package name.
-    optional string binary_name = 1;
-    // Version code.
-    optional int64 version = 2;
-    // State
+    // Name of the train.
+    optional string train_name = 1;
+    // Version code for a "train" of packages that need to be installed atomically
+    optional int64 train_version_code = 2;
+    // After installation of this package, device requires a restart.
+    optional bool requires_staging = 3;
+    // Rollback should be enabled for this install.
+    optional bool rollback_enabled = 4;
+    // Requires low latency monitoring if possible.
+    optional bool requires_low_latency_monitor = 5;
+
     enum State {
-        STATE_UNKNOWN = 0;
-        DOWNLOAD_START = 1;
-        DOWNLOAD_DONE = 2;
-        INSTALL_START = 3;
-        INSTALL_DONE = 4;
-        REBOOT_START = 5;
-        REBOOT_DONE = 6;
+        UNKNOWN = 0;
+        INSTALL_REQUESTED = 1;
+        INSTALL_STARTED = 2;
+        INSTALL_STAGED_NOT_READY = 3;
+        INSTALL_STAGED_READY = 4;
+        INSTALL_SUCCESS = 5;
+        INSTALL_FAILURE = 6;
+        INSTALL_CANCELLED = 7;
+        INSTALLER_ROLLBACK_REQUESTED = 8;
     }
-    optional State state = 3;
+    optional State state = 6;
 }
 
 /** Represents USB port overheat event. */
@@ -3019,8 +3027,8 @@ message DiskSpace {
 
 /**
  * Pulls battery coulomb counter, which is the remaining battery charge in uAh.
- * Pulled from:
- *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ *
+ * Pulled from StatsCompanionService.java
  */
 message RemainingBatteryCapacity {
     optional int32 charge_micro_ampere_hour = 1;
@@ -4536,4 +4544,50 @@ message SpeechDspStatReported {
     optional int32 total_downtime_millis = 2;
     optional int32 total_crash_count = 3;
     optional int32 total_recover_count = 4;
+}
+
+/**
+ * Logs USB connector contaminant status.
+ *
+ * Logged from: USB Service.
+ */
+message UsbContaminantReported {
+    optional string id = 1;
+    optional android.service.usb.ContaminantPresenceStatus status = 2;
+}
+
+/**
+ * This atom is for debugging purpose.
+ */
+message DebugElapsedClock {
+    // Monotically increasing value for each pull.
+    optional int64 pull_count = 1;
+    // Time from System.elapsedRealtime.
+    optional int64 elapsed_clock_millis = 2;
+    // Time from System.elapsedRealtime.
+    optional int64 same_elapsed_clock_millis = 3;
+    // Diff between current elapsed time and elapsed time from previous pull.
+    optional int64 elapsed_clock_diff_millis = 4;
+
+    enum Type {
+      TYPE_UNKNOWN = 0;
+      ALWAYS_PRESENT = 1;
+      PRESENT_ON_ODD_PULLS = 2;
+    }
+    // Type of behavior for the pulled data.
+    optional Type type = 5;
+}
+
+/**
+ * This atom is for debugging purpose.
+ */
+message DebugFailingElapsedClock {
+    // Monotically increasing value for each pull.
+    optional int64 pull_count = 1;
+    // Time from System.elapsedRealtime.
+    optional int64 elapsed_clock_millis = 2;
+    // Time from System.elapsedRealtime.
+    optional int64 same_elapsed_clock_millis = 3;
+    // Diff between current elapsed time and elapsed time from previous pull.
+    optional int64 elapsed_clock_diff_millis = 4;
 }

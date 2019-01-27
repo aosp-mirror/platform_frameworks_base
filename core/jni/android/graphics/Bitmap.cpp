@@ -19,6 +19,7 @@
 #include <hwui/Paint.h>
 #include <hwui/Bitmap.h>
 #include <renderthread/RenderProxy.h>
+#include <utils/Color.h>
 
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 
@@ -602,6 +603,14 @@ static jint Bitmap_getGenerationId(JNIEnv* env, jobject, jlong bitmapHandle) {
     return static_cast<jint>(bitmap->getGenerationID());
 }
 
+static jboolean Bitmap_isConfigF16(JNIEnv* env, jobject, jlong bitmapHandle) {
+    LocalScopedBitmap bitmap(bitmapHandle);
+    if (bitmap->info().colorType() == kRGBA_F16_SkColorType) {
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
 static jboolean Bitmap_isPremultiplied(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
     if (bitmap->info().alphaType() == kPremul_SkAlphaType) {
@@ -1120,7 +1129,8 @@ static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphic
     sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
     // To support any color space, we need to pass an additional ColorSpace argument to
     // java Bitmap.createHardwareBitmap.
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, SkColorSpace::MakeSRGB());
+    SkColorType ct = uirenderer::PixelFormatToColorType(buffer->getPixelFormat());
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, ct, SkColorSpace::MakeSRGB());
     if (!bitmap.get()) {
         ALOGW("failed to create hardware bitmap from graphic buffer");
         return NULL;
@@ -1133,7 +1143,8 @@ static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject har
     AHardwareBuffer* hwBuf = android_hardware_HardwareBuffer_getNativeHardwareBuffer(env,
         hardwareBuffer);
     sp<GraphicBuffer> buffer(AHardwareBuffer_to_GraphicBuffer(hwBuf));
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer,
+    SkColorType ct = uirenderer::PixelFormatToColorType(buffer->getPixelFormat());
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, ct,
             GraphicsJNI::getNativeColorSpace(colorSpacePtr));
     if (!bitmap.get()) {
         ALOGW("failed to create hardware bitmap from hardware buffer");
@@ -1193,6 +1204,7 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeErase",              "(JJJ)V", (void*)Bitmap_eraseLong },
     {   "nativeRowBytes",           "(J)I", (void*)Bitmap_rowBytes },
     {   "nativeConfig",             "(J)I", (void*)Bitmap_config },
+    {   "nativeIsConfigF16",        "(J)Z", (void*)Bitmap_isConfigF16 },
     {   "nativeHasAlpha",           "(J)Z", (void*)Bitmap_hasAlpha },
     {   "nativeIsPremultiplied",    "(J)Z", (void*)Bitmap_isPremultiplied},
     {   "nativeSetHasAlpha",        "(JZZ)V", (void*)Bitmap_setHasAlpha},

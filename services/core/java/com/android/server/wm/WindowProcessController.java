@@ -52,6 +52,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
@@ -328,6 +329,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     String getRequiredAbi() {
         return mRequiredAbi;
+    }
+
+    /** Returns ID of display overriding the configuration for this process, or
+     *  INVALID_DISPLAY if no display is overriding. */
+    @VisibleForTesting
+    int getDisplayId() {
+        return mDisplayId;
     }
 
     public void setDebugging(boolean debugging) {
@@ -761,15 +769,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         activityDisplay.registerConfigurationChangeListener(this);
     }
 
-    private void unregisterDisplayConfigurationListenerLocked() {
+    @VisibleForTesting
+    void unregisterDisplayConfigurationListenerLocked() {
         if (mDisplayId == INVALID_DISPLAY) {
             return;
         }
         final ActivityDisplay activityDisplay =
                 mAtm.mRootActivityContainer.getActivityDisplay(mDisplayId);
         if (activityDisplay != null) {
-            mAtm.mRootActivityContainer.getActivityDisplay(
-                    mDisplayId).unregisterConfigurationChangeListener(this);
+            activityDisplay.unregisterConfigurationChangeListener(this);
         }
         mDisplayId = INVALID_DISPLAY;
     }
@@ -867,6 +875,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     public boolean appNotResponding(String info, Runnable killAppCallback,
             Runnable serviceTimeoutCallback) {
+        Runnable targetRunnable = null;
         synchronized (mAtm.mGlobalLock) {
             if (mAtm.mController == null) {
                 return false;
@@ -877,18 +886,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 int res = mAtm.mController.appNotResponding(mName, mPid, info);
                 if (res != 0) {
                     if (res < 0 && mPid != MY_PID) {
-                        killAppCallback.run();
+                        targetRunnable = killAppCallback;
                     } else {
-                        serviceTimeoutCallback.run();
+                        targetRunnable = serviceTimeoutCallback;
                     }
-                    return true;
                 }
             } catch (RemoteException e) {
                 mAtm.mController = null;
                 Watchdog.getInstance().setActivityController(null);
+                return false;
             }
-            return false;
         }
+        if (targetRunnable != null) {
+            targetRunnable.run();
+            return true;
+        }
+        return false;
     }
 
     public void onTopProcChanged() {

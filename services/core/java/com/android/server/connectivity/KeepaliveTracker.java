@@ -16,39 +16,48 @@
 
 package com.android.server.connectivity;
 
-import com.android.internal.util.HexDump;
-import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.connectivity.NetworkAgentInfo;
-import android.net.ConnectivityManager;
+// TODO: Clean up imports and remove references of PacketKeepalive constants.
+
+import static android.net.ConnectivityManager.PacketKeepalive.ERROR_INVALID_INTERVAL;
+import static android.net.ConnectivityManager.PacketKeepalive.ERROR_INVALID_IP_ADDRESS;
+import static android.net.ConnectivityManager.PacketKeepalive.ERROR_INVALID_NETWORK;
+import static android.net.ConnectivityManager.PacketKeepalive.MIN_INTERVAL;
+import static android.net.ConnectivityManager.PacketKeepalive.NATT_PORT;
+import static android.net.ConnectivityManager.PacketKeepalive.NO_KEEPALIVE;
+import static android.net.ConnectivityManager.PacketKeepalive.SUCCESS;
+import static android.net.NetworkAgent.CMD_START_PACKET_KEEPALIVE;
+import static android.net.NetworkAgent.CMD_STOP_PACKET_KEEPALIVE;
+import static android.net.NetworkAgent.EVENT_PACKET_KEEPALIVE;
+import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.KeepalivePacketData;
-import android.net.LinkAddress;
 import android.net.NetworkAgent;
 import android.net.NetworkUtils;
 import android.net.util.IpUtils;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
-import android.system.OsConstants;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
+import com.android.internal.util.HexDump;
+import com.android.internal.util.IndentingPrintWriter;
+
+import java.io.FileDescriptor;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static android.net.ConnectivityManager.PacketKeepalive.*;
-import static android.net.NetworkAgent.CMD_START_PACKET_KEEPALIVE;
-import static android.net.NetworkAgent.CMD_STOP_PACKET_KEEPALIVE;
-import static android.net.NetworkAgent.EVENT_PACKET_KEEPALIVE;
 
 /**
  * Manages packet keepalive requests.
@@ -300,7 +309,9 @@ public class KeepaliveTracker {
         }
     }
 
-    public void handleEventPacketKeepalive(NetworkAgentInfo nai, Message message) {
+    /** Handle keepalive events from lower layer. */
+    public void handleEventPacketKeepalive(@NonNull NetworkAgentInfo nai,
+            @NonNull Message message) {
         int slot = message.arg1;
         int reason = message.arg2;
 
@@ -330,8 +341,18 @@ public class KeepaliveTracker {
         }
     }
 
-    public void startNattKeepalive(NetworkAgentInfo nai, int intervalSeconds, Messenger messenger,
-            IBinder binder, String srcAddrString, int srcPort, String dstAddrString, int dstPort) {
+    /**
+     * Called when requesting that keepalives be started on a IPsec NAT-T socket. See
+     * {@link android.net.SocketKeepalive}.
+     **/
+    public void startNattKeepalive(@Nullable NetworkAgentInfo nai,
+            int intervalSeconds,
+            @NonNull Messenger messenger,
+            @NonNull IBinder binder,
+            @NonNull String srcAddrString,
+            int srcPort,
+            @NonNull String dstAddrString,
+            int dstPort) {
         if (nai == null) {
             notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_NETWORK);
             return;
@@ -358,6 +379,56 @@ public class KeepaliveTracker {
         Log.d(TAG, "Created keepalive: " + ki.toString());
         mConnectivityServiceHandler.obtainMessage(
                 NetworkAgent.CMD_START_PACKET_KEEPALIVE, ki).sendToTarget();
+    }
+
+   /**
+    * Called when requesting that keepalives be started on a IPsec NAT-T socket. This function is
+    * identical to {@link #startNattKeepalive}, but also takes a {@code resourceId}, which is the
+    * resource index bound to the {@link UdpEncapsulationSocket} when creating by
+    * {@link com.android.server.IpSecService} to verify whether the given
+    * {@link UdpEncapsulationSocket} is legitimate.
+    **/
+    public void startNattKeepalive(@Nullable NetworkAgentInfo nai,
+            @Nullable FileDescriptor fd,
+            int resourceId,
+            int intervalSeconds,
+            @NonNull Messenger messenger,
+            @NonNull IBinder binder,
+            @NonNull String srcAddrString,
+            @NonNull String dstAddrString,
+            int dstPort) {
+        // Ensure that the socket is created by IpSecService.
+        if (!isNattKeepaliveSocketValid(fd, resourceId)) {
+            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_SOCKET);
+        }
+
+        // Get src port to adopt old API.
+        int srcPort = 0;
+        try {
+            final SocketAddress srcSockAddr = Os.getsockname(fd);
+            srcPort = ((InetSocketAddress) srcSockAddr).getPort();
+        } catch (ErrnoException e) {
+            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_SOCKET);
+        }
+
+        // Forward request to old API.
+        startNattKeepalive(nai, intervalSeconds, messenger, binder, srcAddrString, srcPort,
+                dstAddrString, dstPort);
+    }
+
+    /**
+     * Verify if the IPsec NAT-T file descriptor and resource Id hold for IPsec keepalive is valid.
+     **/
+    public static boolean isNattKeepaliveSocketValid(@Nullable FileDescriptor fd, int resourceId) {
+        // TODO: 1. confirm whether the fd is called from system api or created by IpSecService.
+        //       2. If the fd is created from the system api, check that it's bounded. And
+        //          call dup to keep the fd open.
+        //       3. If the fd is created from IpSecService, check if the resource ID is valid. And
+        //          hold the resource needed in IpSecService.
+        if (null == fd) {
+            return false;
+        }
+        return true;
     }
 
     public void dump(IndentingPrintWriter pw) {

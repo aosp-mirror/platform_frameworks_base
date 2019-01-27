@@ -246,6 +246,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     @Nullable
     private final KernelCpuThreadReader mKernelCpuThreadReader;
 
+    private long mDebugElapsedClockPreviousValue = 0;
+    private long mDebugElapsedClockPullCount = 0;
+    private long mDebugFailingElapsedClockPreviousValue = 0;
+    private long mDebugFailingElapsedClockPullCount = 0;
     private BatteryStatsHelper mBatteryStatsHelper = null;
     private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
     private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
@@ -1705,6 +1709,77 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullTemperature(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<Temperature> temperatures = sThermalService.getCurrentTemperatures();
+            for (Temperature temp : temperatures) {
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeInt(temp.getType());
+                e.writeString(temp.getName());
+                e.writeInt((int) (temp.getValue() * 10));
+                pulledData.add(e);
+            }
+        } catch (RemoteException e) {
+            // Should not happen.
+            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    private void pullDebugElapsedClock(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        final long elapsedMillis = SystemClock.elapsedRealtime();
+        final long clockDiffMillis = mDebugElapsedClockPreviousValue == 0
+                ? 0 : elapsedMillis - mDebugElapsedClockPreviousValue;
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeLong(mDebugElapsedClockPullCount);
+        e.writeLong(elapsedMillis);
+        // Log it twice to be able to test multi-value aggregation from ValueMetric.
+        e.writeLong(elapsedMillis);
+        e.writeLong(clockDiffMillis);
+        e.writeInt(1 /* always set */);
+        pulledData.add(e);
+
+        if (mDebugElapsedClockPullCount % 2 == 1) {
+            StatsLogEventWrapper e2 = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e2.writeLong(mDebugElapsedClockPullCount);
+            e2.writeLong(elapsedMillis);
+            // Log it twice to be able to test multi-value aggregation from ValueMetric.
+            e2.writeLong(elapsedMillis);
+            e2.writeLong(clockDiffMillis);
+            e2.writeInt(2 /* set on odd pulls */);
+            pulledData.add(e2);
+        }
+
+        mDebugElapsedClockPullCount++;
+        mDebugElapsedClockPreviousValue = elapsedMillis;
+    }
+
+    private void pullDebugFailingElapsedClock(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        final long elapsedMillis = SystemClock.elapsedRealtime();
+        // Fails every 10 buckets.
+        if (mDebugFailingElapsedClockPullCount++ % 10 == 0) {
+            mDebugFailingElapsedClockPreviousValue = elapsedMillis;
+            throw new RuntimeException("Failing debug elapsed clock");
+        }
+
+        e.writeLong(mDebugFailingElapsedClockPullCount);
+        e.writeLong(elapsedMillis);
+        // Log it twice to be able to test multi-value aggregation from ValueMetric.
+        e.writeLong(elapsedMillis);
+        e.writeLong(mDebugFailingElapsedClockPreviousValue == 0
+                ? 0 : elapsedMillis - mDebugFailingElapsedClockPreviousValue);
+        mDebugFailingElapsedClockPreviousValue = elapsedMillis;
+        pulledData.add(e);
+    }
+
     /**
      * Pulls various data.
      */
@@ -1865,6 +1940,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER: {
                 pullDeviceCalculatedPowerBlameOther(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.TEMPERATURE: {
+                pullTemperature(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEBUG_ELAPSED_CLOCK: {
+                pullDebugElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
+                pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:

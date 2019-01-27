@@ -84,7 +84,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -5257,7 +5256,11 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews makeAmbientNotification() {
-            return createHeadsUpContentView(false /* increasedHeight */);
+            RemoteViews headsUpContentView = createHeadsUpContentView(false /* increasedHeight */);
+            if (headsUpContentView != null) {
+                return headsUpContentView;
+            }
+            return createContentView();
         }
 
         private void hideLine1Text(RemoteViews result) {
@@ -8399,6 +8402,30 @@ public class Notification implements Parcelable
         private CharSequence mTitle;
         private Icon mIcon;
         private int mDesiredHeight;
+        private int mFlags;
+
+        /**
+         * If set and the app creating the bubble is in the foreground, the bubble will be posted
+         * in its expanded state, with the contents of {@link #getIntent()} in a floating window.
+         *
+         * <p>If the app creating the bubble is not in the foreground this flag has no effect.</p>
+         *
+         * <p>Generally this flag should only be set if the user has performed an action to request
+         * or create a bubble.</p>
+         */
+        private static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
+
+        /**
+         * If set and the app creating the bubble is in the foreground, the bubble will be posted
+         * <b>without</b> the associated notification in the notification shade. Subsequent update
+         * notifications to this bubble will post a notification in the shade.
+         *
+         * <p>If the app creating the bubble is not in the foreground this flag has no effect.</p>
+         *
+         * <p>Generally this flag should only be set if the user has performed an action to request
+         * or create a bubble.</p>
+         */
+        private static final int FLAG_SUPPRESS_INITIAL_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent intent, CharSequence title, Icon icon, int height) {
             mPendingIntent = intent;
@@ -8412,6 +8439,7 @@ public class Notification implements Parcelable
             mTitle = in.readCharSequence();
             mIcon = Icon.CREATOR.createFromParcel(in);
             mDesiredHeight = in.readInt();
+            mFlags = in.readInt();
         }
 
         /**
@@ -8444,6 +8472,24 @@ public class Notification implements Parcelable
             return mDesiredHeight;
         }
 
+        /**
+         * @return whether this bubble should auto expand when it is posted.
+         *
+         * @see BubbleMetadata.Builder#setAutoExpandBubble(boolean)
+         */
+        public boolean getAutoExpandBubble() {
+            return (mFlags & FLAG_AUTO_EXPAND_BUBBLE) != 0;
+        }
+
+        /**
+         * @return whether this bubble should suppress the initial notification when it is posted.
+         *
+         * @see BubbleMetadata.Builder#setSuppressInitialNotification(boolean)
+         */
+        public boolean getSuppressInitialNotification() {
+            return (mFlags & FLAG_SUPPRESS_INITIAL_NOTIFICATION) != 0;
+        }
+
         public static final Parcelable.Creator<BubbleMetadata> CREATOR =
                 new Parcelable.Creator<BubbleMetadata>() {
 
@@ -8469,6 +8515,11 @@ public class Notification implements Parcelable
             out.writeCharSequence(mTitle);
             mIcon.writeToParcel(out, 0);
             out.writeInt(mDesiredHeight);
+            out.writeInt(mFlags);
+        }
+
+        private void setFlags(int flags) {
+            mFlags = flags;
         }
 
         /**
@@ -8480,6 +8531,7 @@ public class Notification implements Parcelable
             private CharSequence mTitle;
             private Icon mIcon;
             private int mDesiredHeight;
+            private int mFlags;
 
             /**
              * Constructs a new builder object.
@@ -8539,6 +8591,39 @@ public class Notification implements Parcelable
             }
 
             /**
+             * If set and the app creating the bubble is in the foreground, the bubble will be
+             * posted in its expanded state, with the contents of {@link #getIntent()} in a
+             * floating window.
+             *
+             * <p>If the app creating the bubble is not in the foreground this flag has no effect.
+             * </p>
+             *
+             * <p>Generally this flag should only be set if the user has performed an action to
+             * request or create a bubble.</p>
+             */
+            public BubbleMetadata.Builder setAutoExpandBubble(boolean shouldExpand) {
+                setFlag(FLAG_AUTO_EXPAND_BUBBLE, shouldExpand);
+                return this;
+            }
+
+            /**
+             * If set and the app creating the bubble is in the foreground, the bubble will be
+             * posted <b>without</b> the associated notification in the notification shade.
+             * Subsequent update notifications to this bubble will post a notification in the shade.
+             *
+             * <p>If the app creating the bubble is not in the foreground this flag has no effect.
+             * </p>
+             *
+             * <p>Generally this flag should only be set if the user has performed an action to
+             * request or create a bubble.</p>
+             */
+            public BubbleMetadata.Builder setSuppressInitialNotification(
+                    boolean shouldSupressNotif) {
+                setFlag(FLAG_SUPPRESS_INITIAL_NOTIFICATION, shouldSupressNotif);
+                return this;
+            }
+
+            /**
              * Creates the {@link BubbleMetadata} defined by this builder.
              * <p>Will throw {@link IllegalStateException} if required fields have not been set
              * on this builder.</p>
@@ -8553,7 +8638,22 @@ public class Notification implements Parcelable
                 if (mIcon == null) {
                     throw new IllegalStateException("Must supply an icon for the bubble");
                 }
-                return new BubbleMetadata(mPendingIntent, mTitle, mIcon, mDesiredHeight);
+                BubbleMetadata data = new BubbleMetadata(mPendingIntent, mTitle, mIcon,
+                        mDesiredHeight);
+                data.setFlags(mFlags);
+                return data;
+            }
+
+            /**
+             * @hide
+             */
+            public BubbleMetadata.Builder setFlag(int mask, boolean value) {
+                if (value) {
+                    mFlags |= mask;
+                } else {
+                    mFlags &= ~mask;
+                }
+                return this;
             }
         }
     }

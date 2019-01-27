@@ -54,7 +54,7 @@ import java.util.concurrent.Executor;
  * registration and MmTel capability status callbacks, as well as query/modify user settings for the
  * associated subscription.
  *
- * @see #createForSubscriptionId(Context, int)
+ * @see #createForSubscriptionId(int)
  * @hide
  */
 @SystemApi
@@ -86,9 +86,7 @@ public class ImsMmTelManager {
 
     /**
      * Prefer registering for IMS over IWLAN if possible if WiFi signal quality is high enough.
-     * @hide
      */
-    @SystemApi
     public static final int WIFI_MODE_WIFI_PREFERRED = 2;
 
     /**
@@ -317,15 +315,12 @@ public class ImsMmTelManager {
     /**
      * Create an instance of ImsManager for the subscription id specified.
      *
-     * @param context The context to create this ImsMmTelManager instance within.
      * @param subId The ID of the subscription that this ImsMmTelManager will use.
      * @see android.telephony.SubscriptionManager#getActiveSubscriptionInfoList()
-     * @throws IllegalArgumentException if the subscription is invalid or
-     *         the subscription ID is not an active subscription.
+     * @throws IllegalArgumentException if the subscription is invalid.
      */
-    public static ImsMmTelManager createForSubscriptionId(Context context, int subId) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)
-                || !getSubscriptionManager(context).isActiveSubscriptionId(subId)) {
+    public static ImsMmTelManager createForSubscriptionId(int subId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
 
@@ -333,7 +328,7 @@ public class ImsMmTelManager {
     }
 
     /**
-     * Only visible for testing, use {@link #createForSubscriptionId(Context, int)} instead.
+     * Only visible for testing, use {@link #createForSubscriptionId(int)} instead.
      * @hide
      */
     @VisibleForTesting
@@ -343,7 +338,7 @@ public class ImsMmTelManager {
 
     /**
      * Registers a {@link RegistrationCallback} with the system, which will provide registration
-     * updates for the subscription specified in {@link #createForSubscriptionId(Context, int)}. Use
+     * updates for the subscription specified in {@link #createForSubscriptionId(int)}. Use
      * {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to Subscription changed
      * events and call {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up.
      *
@@ -356,13 +351,14 @@ public class ImsMmTelManager {
      * @throws IllegalArgumentException if the subscription associated with this callback is not
      * active (SIM is not inserted, ESIM inactive) or invalid, or a null {@link Executor} or
      * {@link CapabilityCallback} callback.
-     * @throws IllegalStateException if the subscription associated with this callback is valid, but
+     * @throws ImsException if the subscription associated with this callback is valid, but
      * the {@link ImsService} associated with the subscription is not available. This can happen if
-     * the service crashed, for example.
+     * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
+     * reason.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(@CallbackExecutor Executor executor,
-            @NonNull RegistrationCallback c) {
+            @NonNull RegistrationCallback c) throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
         }
@@ -374,6 +370,8 @@ public class ImsMmTelManager {
             getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        } catch (IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -405,7 +403,7 @@ public class ImsMmTelManager {
     /**
      * Registers a {@link CapabilityCallback} with the system, which will provide MmTel service
      * availability updates for the subscription specified in
-     * {@link #createForSubscriptionId(Context, int)}. The method {@link #isAvailable(int, int)}
+     * {@link #createForSubscriptionId(int)}. The method {@link #isAvailable(int, int)}
      * can also be used to query this information at any time.
      *
      * Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to
@@ -421,13 +419,14 @@ public class ImsMmTelManager {
      * @throws IllegalArgumentException if the subscription associated with this callback is not
      * active (SIM is not inserted, ESIM inactive) or invalid, or a null {@link Executor} or
      * {@link CapabilityCallback} callback.
-     * @throws IllegalStateException if the subscription associated with this callback is valid, but
+     * @throws ImsException if the subscription associated with this callback is valid, but
      * the {@link ImsService} associated with the subscription is not available. This can happen if
-     * the service crashed, for example.
+     * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
+     * reason.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerMmTelCapabilityCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull CapabilityCallback c) {
+            @NonNull CapabilityCallback c) throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
         }
@@ -439,6 +438,8 @@ public class ImsMmTelManager {
             getITelephony().registerMmTelCapabilityCallback(mSubId, c.getBinder());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }  catch (IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -796,14 +797,6 @@ public class ImsMmTelManager {
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
-    }
-
-    private static SubscriptionManager getSubscriptionManager(Context context) {
-        SubscriptionManager manager = context.getSystemService(SubscriptionManager.class);
-        if (manager == null) {
-            throw new RuntimeException("Could not find SubscriptionManager.");
-        }
-        return manager;
     }
 
     private static ITelephony getITelephony() {

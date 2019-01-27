@@ -424,8 +424,7 @@ interface IDevicePolicyManager {
 
     void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 
-    void addCrossProfileCalendarPackage(in ComponentName admin, String packageName);
-    boolean removeCrossProfileCalendarPackage(in ComponentName admin, String packageName);
+    void setCrossProfileCalendarPackages(in ComponentName admin, in List<String> packageNames);
     List<String> getCrossProfileCalendarPackages(in ComponentName admin);
     boolean isPackageAllowedToAccessCalendarForUser(String packageName, int userHandle);
     List<String> getCrossProfileCalendarPackagesForUser(int userHandle);

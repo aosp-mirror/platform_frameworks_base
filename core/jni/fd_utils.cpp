@@ -72,9 +72,17 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
       return true;
   }
 
+  // Framework jars are allowed.
   static const char* kFrameworksPrefix = "/system/framework/";
   static const char* kJarSuffix = ".jar";
   if (android::base::StartsWith(path, kFrameworksPrefix)
+      && android::base::EndsWith(path, kJarSuffix)) {
+    return true;
+  }
+
+  // Jars from the runtime apex are allowed.
+  static const char* kRuntimeApexPrefix = "/apex/com.android.runtime/javalib/";
+  if (android::base::StartsWith(path, kRuntimeApexPrefix)
       && android::base::EndsWith(path, kJarSuffix)) {
     return true;
   }
@@ -415,13 +423,13 @@ bool FileDescriptorInfo::GetSocketName(const int fd, std::string* result) {
 }
 
 void FileDescriptorInfo::DetachSocket(fail_fn_t fail_fn) const {
-  const int dev_null_fd = open("/dev/null", O_RDWR);
+  const int dev_null_fd = open("/dev/null", O_RDWR | O_CLOEXEC);
   if (dev_null_fd < 0) {
     fail_fn(std::string("Failed to open /dev/null: ").append(strerror(errno)));
   }
 
-  if (dup2(dev_null_fd, fd) == -1) {
-    fail_fn(android::base::StringPrintf("Failed dup2 on socket descriptor %d: %s",
+  if (dup3(dev_null_fd, fd, O_CLOEXEC) == -1) {
+    fail_fn(android::base::StringPrintf("Failed dup3 on socket descriptor %d: %s",
                                         fd,
                                         strerror(errno)));
   }

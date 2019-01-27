@@ -26,6 +26,7 @@ import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -949,6 +950,24 @@ public final class Display {
         synchronized (this) {
             updateDisplayInfoLocked();
             return mDisplayInfo.isWideColorGamut();
+        }
+    }
+
+    /**
+     * Returns the preferred wide color space of the Display.
+     * The returned wide gamut color space is based on hardware capability and
+     * is preferred by the composition pipeline.
+     * Returns null if the display doesn't support wide color gamut.
+     * {@link Display#isWideColorGamut()}.
+     */
+    @Nullable
+    public ColorSpace getPreferredWideGamutColorSpace() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            if (mDisplayInfo.isWideColorGamut()) {
+                return mGlobal.getPreferredWideGamutColorSpace();
+            }
+            return null;
         }
     }
 

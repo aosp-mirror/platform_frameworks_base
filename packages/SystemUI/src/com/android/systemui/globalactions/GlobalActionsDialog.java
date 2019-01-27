@@ -1090,9 +1090,16 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
+        protected int getActionLayoutId(Context context) {
+            if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.GLOBAL_ACTIONS_GRID_ENABLED)) {
+                return com.android.systemui.R.layout.global_actions_grid_item;
+            }
+            return com.android.systemui.R.layout.global_actions_item;
+        }
+
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
-            View v = inflater.inflate(com.android.systemui.R.layout.global_actions_item, parent,
+            View v = inflater.inflate(getActionLayoutId(context), parent,
                     false);
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
@@ -1498,7 +1505,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             window.setBackgroundDrawable(mGradientDrawable);
             window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
 
-            setContentView(com.android.systemui.R.layout.global_actions_wrapped);
+
+            setContentView(getGlobalActionsLayoutId(context));
             mGlobalActionsLayout = (MultiListLayout)
                     findViewById(com.android.systemui.R.id.global_actions_view);
             mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
@@ -1513,6 +1521,13 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 }
             });
             setTitle(R.string.global_actions);
+        }
+
+        private int getGlobalActionsLayoutId(Context context) {
+            if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.GLOBAL_ACTIONS_GRID_ENABLED)) {
+                return com.android.systemui.R.layout.global_actions_grid;
+            }
+            return com.android.systemui.R.layout.global_actions_wrapped;
         }
 
         private void updateList() {

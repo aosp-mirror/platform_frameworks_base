@@ -39,6 +39,8 @@ public final class UsbPortStatus implements Parcelable {
     private final @UsbPowerRole int mCurrentPowerRole;
     private final @UsbDataRole int mCurrentDataRole;
     private final int mSupportedRoleCombinations;
+    private final @ContaminantProtectionStatus int mContaminantProtectionStatus;
+    private final @ContaminantDetectionStatus int mContaminantDetectionStatus;
 
     /**
      * Power role: This USB port does not have a power role.
@@ -131,6 +133,93 @@ public final class UsbPortStatus implements Parcelable {
     public static final int MODE_DEBUG_ACCESSORY =
             android.hardware.usb.V1_1.Constants.PortMode_1_1.DEBUG_ACCESSORY;
 
+   /**
+     * Contaminant presence detection not supported by the device.
+     * @hide
+     */
+    public static final int CONTAMINANT_DETECTION_NOT_SUPPORTED =
+            android.hardware.usb.V1_2.Constants.ContaminantDetectionStatus.NOT_SUPPORTED;
+
+    /**
+     * Contaminant presence detection supported but disabled.
+     * @hide
+     */
+    public static final int CONTAMINANT_DETECTION_DISABLED =
+            android.hardware.usb.V1_2.Constants.ContaminantDetectionStatus.DISABLED;
+
+    /**
+     * Contaminant presence enabled but not detected.
+     * @hide
+     */
+    public static final int CONTAMINANT_DETECTION_NOT_DETECTED =
+            android.hardware.usb.V1_2.Constants.ContaminantDetectionStatus.NOT_DETECTED;
+
+    /**
+     * Contaminant presence enabled and detected.
+     * @hide
+     */
+    public static final int CONTAMINANT_DETECTION_DETECTED =
+            android.hardware.usb.V1_2.Constants.ContaminantDetectionStatus.DETECTED;
+
+    /**
+     * Contaminant protection - No action performed upon detection of
+     * contaminant presence.
+     * @hide
+     */
+    public static final int CONTAMINANT_PROTECTION_NONE =
+            android.hardware.usb.V1_2.Constants.ContaminantProtectionStatus.NONE;
+
+    /**
+     * Contaminant protection - Port is forced to sink upon detection of
+     * contaminant presence.
+     * @hide
+     */
+    public static final int CONTAMINANT_PROTECTION_SINK =
+            android.hardware.usb.V1_2.Constants.ContaminantProtectionStatus.FORCE_SINK;
+
+    /**
+     * Contaminant protection - Port is forced to source upon detection of
+     * contaminant presence.
+     * @hide
+     */
+    public static final int CONTAMINANT_PROTECTION_SOURCE =
+            android.hardware.usb.V1_2.Constants.ContaminantProtectionStatus.FORCE_SOURCE;
+
+    /**
+     * Contaminant protection - Port is disabled upon detection of
+     * contaminant presence.
+     * @hide
+     */
+    public static final int CONTAMINANT_PROTECTION_FORCE_DISABLE =
+            android.hardware.usb.V1_2.Constants.ContaminantProtectionStatus.FORCE_DISABLE;
+
+    /**
+     * Contaminant protection - Port is disabled upon detection of
+     * contaminant presence.
+     * @hide
+     */
+    public static final int CONTAMINANT_PROTECTION_DISABLED =
+            android.hardware.usb.V1_2.Constants.ContaminantProtectionStatus.DISABLED;
+
+    @IntDef(prefix = { "CONTAMINANT_DETECION_" }, flag = true, value = {
+            CONTAMINANT_DETECTION_NOT_SUPPORTED,
+            CONTAMINANT_DETECTION_DISABLED,
+            CONTAMINANT_DETECTION_NOT_DETECTED,
+            CONTAMINANT_DETECTION_DETECTED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ContaminantDetectionStatus{}
+
+    @IntDef(prefix = { "CONTAMINANT_PROTECTION_" }, flag = true, value = {
+            CONTAMINANT_PROTECTION_NONE,
+            CONTAMINANT_PROTECTION_SINK,
+            CONTAMINANT_PROTECTION_SOURCE,
+            CONTAMINANT_PROTECTION_FORCE_DISABLE,
+            CONTAMINANT_PROTECTION_DISABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ContaminantProtectionStatus{}
+
     @IntDef(prefix = { "MODE_" }, flag = true, value = {
             MODE_NONE,
             MODE_DFP,
@@ -142,12 +231,15 @@ public final class UsbPortStatus implements Parcelable {
     @interface UsbPortMode{}
 
     /** @hide */
-    public UsbPortStatus(int currentMode, @UsbPowerRole int currentPowerRole,
-            @UsbDataRole int currentDataRole, int supportedRoleCombinations) {
+    public UsbPortStatus(int currentMode, int currentPowerRole, int currentDataRole,
+            int supportedRoleCombinations, int contaminantProtectionStatus,
+            int contaminantDetectionStatus) {
         mCurrentMode = currentMode;
         mCurrentPowerRole = currentPowerRole;
         mCurrentDataRole = currentDataRole;
         mSupportedRoleCombinations = supportedRoleCombinations;
+        mContaminantProtectionStatus = contaminantProtectionStatus;
+        mContaminantDetectionStatus = contaminantDetectionStatus;
     }
 
     /**
@@ -212,6 +304,24 @@ public final class UsbPortStatus implements Parcelable {
         return mSupportedRoleCombinations;
     }
 
+    /**
+     * Returns contaminant detection status.
+     *
+     * @hide
+     */
+    public @ContaminantDetectionStatus int getContaminantDetectionStatus() {
+        return mContaminantDetectionStatus;
+    }
+
+    /**
+     * Returns contamiant protection status.
+     *
+     * @hide
+     */
+    public @ContaminantProtectionStatus int getContaminantProtectionStatus() {
+        return mContaminantProtectionStatus;
+    }
+
     @Override
     public String toString() {
         return "UsbPortStatus{connected=" + isConnected()
@@ -220,6 +330,10 @@ public final class UsbPortStatus implements Parcelable {
                 + ", currentDataRole=" + UsbPort.dataRoleToString(mCurrentDataRole)
                 + ", supportedRoleCombinations="
                         + UsbPort.roleCombinationsToString(mSupportedRoleCombinations)
+                + ", contaminantDetectionStatus="
+                        + getContaminantDetectionStatus()
+                + ", contaminantProtectionStatus="
+                        + getContaminantProtectionStatus()
                 + "}";
     }
 
@@ -234,6 +348,8 @@ public final class UsbPortStatus implements Parcelable {
         dest.writeInt(mCurrentPowerRole);
         dest.writeInt(mCurrentDataRole);
         dest.writeInt(mSupportedRoleCombinations);
+        dest.writeInt(mContaminantProtectionStatus);
+        dest.writeInt(mContaminantDetectionStatus);
     }
 
     public static final Parcelable.Creator<UsbPortStatus> CREATOR =
@@ -244,8 +360,11 @@ public final class UsbPortStatus implements Parcelable {
             int currentPowerRole = in.readInt();
             int currentDataRole = in.readInt();
             int supportedRoleCombinations = in.readInt();
+            int contaminantProtectionStatus = in.readInt();
+            int contaminantDetectionStatus = in.readInt();
             return new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
-                    supportedRoleCombinations);
+                    supportedRoleCombinations, contaminantProtectionStatus,
+                    contaminantDetectionStatus);
         }
 
         @Override

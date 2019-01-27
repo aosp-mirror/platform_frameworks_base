@@ -405,6 +405,11 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
                 nativeFormat, consumerUsage);
         return;
     }
+
+    if (consumerUsage & GRALLOC_USAGE_PROTECTED) {
+        gbConsumer->setConsumerIsProtected(true);
+    }
+
     ctx->setBufferConsumer(bufferConsumer);
     bufferConsumer->setName(consumerName);
 

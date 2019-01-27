@@ -506,8 +506,10 @@ public class PackageDexOptimizer {
             boolean isUsedByOtherApps) {
         int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
-        // When a priv app is configured to run out of box, only verify it.
-        if (info.isPrivilegedApp() && DexManager.isPackageSelectedToRunOob(info.packageName)) {
+        // When an app or priv app is configured to run out of box, only verify it.
+        if (info.isCodeIntegrityPreferred()
+                || (info.isPrivilegedApp()
+                    && DexManager.isPackageSelectedToRunOob(info.packageName))) {
             return "verify";
         }
         if (vmSafeMode) {

@@ -38,7 +38,6 @@ public:
     // context or if you are using the HWUI_NULL_GPU
     int maxTextureSize() const;
     const DisplayInfo& displayInfo() const { return mDisplayInfo; }
-    SkColorSpace::Gamut getWideColorGamut() const { return mWideColorGamut; }
     sk_sp<SkColorSpace> getWideColorSpace() const { return mWideColorSpace; }
     SkColorType getWideColorType() const { return mWideColorType; }
 
@@ -50,7 +49,6 @@ private:
 
     int mMaxTextureSize;
     DisplayInfo mDisplayInfo;
-    SkColorSpace::Gamut mWideColorGamut;
     sk_sp<SkColorSpace> mWideColorSpace;
     SkColorType mWideColorType;
 };

@@ -25,6 +25,7 @@ import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -135,6 +136,7 @@ public class LauncherAppsService extends SystemService {
         private final Context mContext;
         private final UserManager mUm;
         private final UserManagerInternal mUserManagerInternal;
+        private final UsageStatsManagerInternal mUsageStatsManagerInternal;
         private final ActivityManagerInternal mActivityManagerInternal;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final ShortcutServiceInternal mShortcutServiceInternal;
@@ -156,6 +158,8 @@ public class LauncherAppsService extends SystemService {
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             mUserManagerInternal = Preconditions.checkNotNull(
                     LocalServices.getService(UserManagerInternal.class));
+            mUsageStatsManagerInternal = Preconditions.checkNotNull(
+                    LocalServices.getService(UsageStatsManagerInternal.class));
             mActivityManagerInternal = Preconditions.checkNotNull(
                     LocalServices.getService(ActivityManagerInternal.class));
             mActivityTaskManagerInternal = Preconditions.checkNotNull(
@@ -669,6 +673,30 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override
+        public LauncherApps.AppUsageLimit getAppUsageLimit(String callingPackage,
+                String packageName, UserHandle user) {
+            verifyCallingPackage(callingPackage);
+            if (!canAccessProfile(user.getIdentifier(), "Cannot access usage limit")) {
+                return null;
+            }
+
+            final PackageManagerInternal pmi =
+                    LocalServices.getService(PackageManagerInternal.class);
+            final ComponentName cn = pmi.getDefaultHomeActivity(user.getIdentifier());
+            if (!cn.getPackageName().equals(callingPackage)) {
+                throw new SecurityException("Caller is not the active launcher");
+            }
+
+            final UsageStatsManagerInternal.AppUsageLimitData data =
+                    mUsageStatsManagerInternal.getAppUsageLimit(packageName, user);
+            if (data == null) {
+                return null;
+            }
+            return new LauncherApps.AppUsageLimit(
+                    data.isGroupLimit(), data.getTotalUsageLimit(), data.getUsageRemaining());
         }
 
         private void ensureShortcutPermission(@NonNull String callingPackage) {

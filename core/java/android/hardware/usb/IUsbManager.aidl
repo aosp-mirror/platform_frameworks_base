@@ -120,6 +120,9 @@ interface IUsbManager
     /* Sets the port's current role. */
     void setPortRoles(in String portId, int powerRole, int dataRole);
 
+    /* Enable/disable contaminant detection */
+    void enableContaminantDetection(in String portId, boolean enable);
+
    /* Sets USB device connection handler. */
    void setUsbDeviceConnectionHandler(in ComponentName usbDeviceConnectionHandler);
 }

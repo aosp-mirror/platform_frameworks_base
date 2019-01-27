@@ -103,10 +103,9 @@ public final class ActionsSuggestionsHelper {
         final String modelName = String.format(
                 Locale.US, "%s_v%d", localesJoiner.toString(), modelVersion);
         final int hash = Objects.hash(
-                messages.stream()
-                        .map(ConversationActions.Message::getText)
-                        .collect(Collectors.toList()),
-                context.getPackageName());
+                messages.stream().mapToInt(ActionsSuggestionsHelper::hashMessage),
+                context.getPackageName(),
+                System.currentTimeMillis());
         return SelectionSessionLogger.SignatureParser.createSignature(
                 SelectionSessionLogger.CLASSIFIER_ID, modelName, hash);
     }
@@ -116,7 +115,7 @@ public final class ActionsSuggestionsHelper {
         private int mNextUserId = FIRST_NON_LOCAL_USER;
 
         private int encode(Person person) {
-            if (ConversationActions.Message.PERSON_USER_LOCAL.equals(person)) {
+            if (ConversationActions.Message.PERSON_USER_SELF.equals(person)) {
                 return USER_LOCAL;
             }
             Integer result = mMapping.get(person);
@@ -127,5 +126,9 @@ public final class ActionsSuggestionsHelper {
             }
             return result;
         }
+    }
+
+    private static int hashMessage(ConversationActions.Message message) {
+        return Objects.hash(message.getAuthor(), message.getText(), message.getReferenceTime());
     }
 }

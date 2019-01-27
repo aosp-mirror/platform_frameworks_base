@@ -16,7 +16,7 @@
 
 #include "TestSceneBase.h"
 #include "tests/common/TestListViewSceneBase.h"
-
+#include "hwui/Paint.h"
 #include <SkGradientShader.h>
 
 class ListOfFadedTextAnimation;
@@ -33,8 +33,8 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         int length = dp(100);
         canvas.saveLayer(0, 0, length, itemHeight, nullptr, SaveFlags::HasAlphaLayer);
-        SkPaint textPaint;
-        textPaint.setTextSize(dp(20));
+        Paint textPaint;
+        textPaint.getSkFont().setSize(dp(20));
         textPaint.setAntiAlias(true);
         TestUtils::drawUtf8ToCanvas(&canvas, "not that long long text", textPaint, dp(10), dp(30));
 

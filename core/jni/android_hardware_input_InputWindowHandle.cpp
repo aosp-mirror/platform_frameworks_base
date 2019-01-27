@@ -159,7 +159,7 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.inputApplicationHandle);
     if (inputApplicationHandleObj) {
         sp<InputApplicationHandle> inputApplicationHandle =
-            android_server_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
+            android_view_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
         if (inputApplicationHandle != nullptr) {
             inputApplicationHandle->updateInfo();
             mInfo.applicationInfo = *(inputApplicationHandle->getInfo());
@@ -174,7 +174,7 @@ bool NativeInputWindowHandle::updateInfo() {
 
 // --- Global functions ---
 
-sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
+sp<NativeInputWindowHandle> android_view_InputWindowHandle_getHandle(
         JNIEnv* env, jobject inputWindowHandleObj) {
     if (!inputWindowHandleObj) {
         return NULL;
@@ -189,7 +189,7 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
     } else {
         jweak objWeak = env->NewWeakGlobalRef(inputWindowHandleObj);
         handle = new NativeInputWindowHandle(objWeak);
-        handle->incStrong((void*)android_server_InputWindowHandle_getHandle);
+        handle->incStrong((void*)android_view_InputWindowHandle_getHandle);
         env->SetLongField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr,
                 reinterpret_cast<jlong>(handle));
     }
@@ -199,7 +199,7 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
 
 // --- JNI ---
 
-static void android_server_InputWindowHandle_nativeDispose(JNIEnv* env, jobject obj) {
+static void android_view_InputWindowHandle_nativeDispose(JNIEnv* env, jobject obj) {
     AutoMutex _l(gHandleMutex);
 
     jlong ptr = env->GetLongField(obj, gInputWindowHandleClassInfo.ptr);
@@ -207,7 +207,7 @@ static void android_server_InputWindowHandle_nativeDispose(JNIEnv* env, jobject 
         env->SetLongField(obj, gInputWindowHandleClassInfo.ptr, 0);
 
         NativeInputWindowHandle* handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
-        handle->decStrong((void*)android_server_InputWindowHandle_getHandle);
+        handle->decStrong((void*)android_view_InputWindowHandle_getHandle);
     }
 }
 
@@ -215,7 +215,7 @@ static void android_server_InputWindowHandle_nativeDispose(JNIEnv* env, jobject 
 static const JNINativeMethod gInputWindowHandleMethods[] = {
     /* name, signature, funcPtr */
     { "nativeDispose", "()V",
-            (void*) android_server_InputWindowHandle_nativeDispose },
+            (void*) android_view_InputWindowHandle_nativeDispose },
 };
 
 #define FIND_CLASS(var, className) \
@@ -226,7 +226,7 @@ static const JNINativeMethod gInputWindowHandleMethods[] = {
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
         LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
 
-int register_android_server_InputWindowHandle(JNIEnv* env) {
+int register_android_view_InputWindowHandle(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/InputWindowHandle",
             gInputWindowHandleMethods, NELEM(gInputWindowHandleMethods));
     (void) res;  // Faked use when LOG_NDEBUG.

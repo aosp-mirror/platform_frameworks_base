@@ -16,13 +16,19 @@
 
 package com.android.server.am;
 
+import static android.provider.DeviceConfig.ActivityManager.KEY_MAX_CACHED_PROCESSES;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 
+import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.OnPropertyChangedListener;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -34,7 +40,6 @@ import java.io.PrintWriter;
 final class ActivityManagerConstants extends ContentObserver {
 
     // Key names stored in the settings value.
-    private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
     private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
@@ -69,13 +74,6 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_PROCESS_START_ASYNC = "process_start_async";
     static final String KEY_MEMORY_INFO_THROTTLE_TIME = "memory_info_throttle_time";
     static final String KEY_TOP_TO_FGS_GRACE_DURATION = "top_to_fgs_grace_duration";
-    static final String KEY_USE_COMPACTION = "use_compaction";
-    static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
-    static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
-    static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
-    static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
-    static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
-    static final String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -106,13 +104,6 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
     private static final long DEFAULT_MEMORY_INFO_THROTTLE_TIME = 5*60*1000;
     private static final long DEFAULT_TOP_TO_FGS_GRACE_DURATION = 15 * 1000;
-    private static final boolean DEFAULT_USE_COMPACTION = false;
-    public static final int DEFAULT_COMPACT_ACTION_1 = 1;
-    public static final int DEFAULT_COMPACT_ACTION_2 = 3;
-    public static final long DEFAULT_COMPACT_THROTTLE_1 = 5000;
-    public static final long DEFAULT_COMPACT_THROTTLE_2 = 10000;
-    public static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
-    public static final long DEFAULT_COMPACT_THROTTLE_4 = 10000;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -232,23 +223,6 @@ final class ActivityManagerConstants extends ContentObserver {
     // this long.
     public long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
 
-    // Use compaction for background apps.
-    public boolean USE_COMPACTION = DEFAULT_USE_COMPACTION;
-
-    // Action for compactAppSome.
-    public int COMPACT_ACTION_1 = DEFAULT_COMPACT_ACTION_1;
-    // Action for compactAppFull;
-    public int COMPACT_ACTION_2 = DEFAULT_COMPACT_ACTION_2;
-
-    // How long we'll skip second compactAppSome after first compactAppSome
-    public long COMPACT_THROTTLE_1 = DEFAULT_COMPACT_THROTTLE_1;
-    // How long we'll skip compactAppSome after compactAppFull
-    public long COMPACT_THROTTLE_2 = DEFAULT_COMPACT_THROTTLE_2;
-    // How long we'll skip compactAppFull after compactAppSome
-    public long COMPACT_THROTTLE_3 = DEFAULT_COMPACT_THROTTLE_3;
-    // How long we'll skip second compactAppFull after first compactAppFull
-    public long COMPACT_THROTTLE_4 = DEFAULT_COMPACT_THROTTLE_4;
-
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
     volatile boolean mFlagActivityStartsLoggingEnabled;
@@ -295,10 +269,19 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.getUriFor(
                         Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED);
 
+    private final OnPropertyChangedListener mOnDeviceConfigChangedListener =
+            new OnPropertyChangedListener() {
+                @Override
+                public void onPropertyChanged(String namespace, String name, String value) {
+                    if (KEY_MAX_CACHED_PROCESSES.equals(name)) {
+                        updateMaxCachedProcesses();
+                    }
+                }
+            };
+
     public ActivityManagerConstants(ActivityManagerService service, Handler handler) {
         super(handler);
         mService = service;
-        updateMaxCachedProcesses();
     }
 
     public void start(ContentResolver resolver) {
@@ -309,6 +292,11 @@ final class ActivityManagerConstants extends ContentObserver {
         updateConstants();
         updateActivityStartsLoggingEnabled();
         updateBackgroundActivityStartsEnabled();
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.ActivityManager.NAMESPACE,
+                ActivityThread.currentApplication().getMainExecutor(),
+                mOnDeviceConfigChangedListener);
+        updateMaxCachedProcesses();
+
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -347,8 +335,6 @@ final class ActivityManagerConstants extends ContentObserver {
                 // with defaults.
                 Slog.e("ActivityManagerConstants", "Bad activity manager config settings", e);
             }
-            MAX_CACHED_PROCESSES = mParser.getInt(KEY_MAX_CACHED_PROCESSES,
-                    DEFAULT_MAX_CACHED_PROCESSES);
             BACKGROUND_SETTLE_TIME = mParser.getLong(KEY_BACKGROUND_SETTLE_TIME,
                     DEFAULT_BACKGROUND_SETTLE_TIME);
             FGSERVICE_MIN_SHOWN_TIME = mParser.getLong(KEY_FGSERVICE_MIN_SHOWN_TIME,
@@ -406,13 +392,9 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_MEMORY_INFO_THROTTLE_TIME);
             TOP_TO_FGS_GRACE_DURATION = mParser.getDurationMillis(KEY_TOP_TO_FGS_GRACE_DURATION,
                     DEFAULT_TOP_TO_FGS_GRACE_DURATION);
-            USE_COMPACTION = mParser.getBoolean(KEY_USE_COMPACTION, DEFAULT_USE_COMPACTION);
-            COMPACT_ACTION_1 = mParser.getInt(KEY_COMPACT_ACTION_1, DEFAULT_COMPACT_ACTION_1);
-            COMPACT_ACTION_2 = mParser.getInt(KEY_COMPACT_ACTION_2, DEFAULT_COMPACT_ACTION_2);
-            COMPACT_THROTTLE_1 = mParser.getLong(KEY_COMPACT_THROTTLE_1, DEFAULT_COMPACT_THROTTLE_1);
-            COMPACT_THROTTLE_2 = mParser.getLong(KEY_COMPACT_THROTTLE_2, DEFAULT_COMPACT_THROTTLE_2);
-            COMPACT_THROTTLE_3 = mParser.getLong(KEY_COMPACT_THROTTLE_3, DEFAULT_COMPACT_THROTTLE_3);
-            COMPACT_THROTTLE_4 = mParser.getLong(KEY_COMPACT_THROTTLE_4, DEFAULT_COMPACT_THROTTLE_4);
+
+            // For new flags that are intended for server-side experiments, please use the new
+            // DeviceConfig package.
 
             updateMaxCachedProcesses();
         }
@@ -429,8 +411,19 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateMaxCachedProcesses() {
-        CUR_MAX_CACHED_PROCESSES = mOverrideMaxCachedProcesses < 0
-                ? MAX_CACHED_PROCESSES : mOverrideMaxCachedProcesses;
+        String maxCachedProcessesFlag = DeviceConfig.getProperty(
+                DeviceConfig.ActivityManager.NAMESPACE, KEY_MAX_CACHED_PROCESSES);
+        try {
+            CUR_MAX_CACHED_PROCESSES = mOverrideMaxCachedProcesses < 0
+                    ? (TextUtils.isEmpty(maxCachedProcessesFlag)
+                    ? DEFAULT_MAX_CACHED_PROCESSES : Integer.parseInt(maxCachedProcessesFlag))
+                    : mOverrideMaxCachedProcesses;
+        } catch (NumberFormatException e) {
+            // Bad flag value from Phenotype, revert to default.
+            Slog.e("ActivityManagerConstants",
+                    "Unable to parse flag for max_cached_processes: " + maxCachedProcessesFlag, e);
+            CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
+        }
         CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
         // Note the trim levels do NOT depend on the override process limit, we want
@@ -503,8 +496,6 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MEMORY_INFO_THROTTLE_TIME);
         pw.print("  "); pw.print(KEY_TOP_TO_FGS_GRACE_DURATION); pw.print("=");
         pw.println(TOP_TO_FGS_GRACE_DURATION);
-        pw.print("  "); pw.print(KEY_USE_COMPACTION); pw.print("=");
-        pw.println(USE_COMPACTION);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

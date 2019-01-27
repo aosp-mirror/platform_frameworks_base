@@ -20,6 +20,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
+import static com.android.systemui.statusbar.phone.NavigationPrototypeController.PROTOTYPE_ENABLED;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -84,7 +85,7 @@ public abstract class NavigationGestureAction {
 
         // Tell launcher that this action requires a stable task list or not
         boolean flag = requiresStableTaskList();
-        if (flag != sLastTaskStabilizationFlag) {
+        if (getGlobalBoolean(PROTOTYPE_ENABLED) && flag != sLastTaskStabilizationFlag) {
             Settings.Global.putInt(mNavigationBarView.getContext().getContentResolver(),
                     ENABLE_TASK_STABILIZER_FLAG, flag ? 1 : 0);
             sLastTaskStabilizationFlag = flag;

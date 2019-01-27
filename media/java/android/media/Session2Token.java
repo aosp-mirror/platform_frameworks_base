@@ -19,13 +19,17 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.media.session.MediaSessionManager;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -35,7 +39,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents an ongoing {@link MediaSession2} or a {@link MediaSession2Service}.
+ * Represents an ongoing MediaSession2 or a MediaSession2Service.
  * If it's representing a session service, it may not be ongoing.
  * <p>
  * This API is not generally intended for third party application developers.
@@ -44,7 +48,7 @@ import java.util.Objects;
  * for consistent behavior across all devices.
  * <p>
  * This may be passed to apps by the session owner to allow them to create a
- * {@link MediaController2} to communicate with the session.
+ * MediaController2 to communicate with the session.
  * <p>
  * It can be also obtained by {@link android.media.session.MediaSessionManager}.
  */
@@ -64,6 +68,13 @@ public final class Session2Token implements Parcelable {
     };
 
     /**
+     * The {@link Intent} that must be declared for the session service.
+     * @hide
+     */
+    @SystemApi
+    public static final String SESSION_SERVICE_INTERFACE = "android.media.MediaSession2Service";
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -72,22 +83,26 @@ public final class Session2Token implements Parcelable {
     }
 
     /**
-     * Type for {@link MediaSession2}.
+     * Type for MediaSession2.
      */
     public static final int TYPE_SESSION = 0;
 
     /**
-     * Type for {@link MediaSession2Service}.
+     * Type for MediaSession2Service.
      */
     public static final int TYPE_SESSION_SERVICE = 1;
 
+    private final String mSessionId;
+    private final int mPid;
     private final int mUid;
     @TokenType
     private final int mType;
     private final String mPackageName;
     private final String mServiceName;
-    private final Session2Link mSessionLink;
     private final ComponentName mComponentName;
+    private final Bundle mExtras;
+
+    private boolean mDestroyed = false;
 
     /**
      * Constructor for the token with type {@link #TYPE_SESSION_SERVICE}.
@@ -106,44 +121,67 @@ public final class Session2Token implements Parcelable {
         final PackageManager manager = context.getPackageManager();
         final int uid = getUid(manager, serviceComponent.getPackageName());
 
-        if (!isInterfaceDeclared(manager, MediaSession2Service.SERVICE_INTERFACE,
-                serviceComponent)) {
+        if (!isInterfaceDeclared(manager, SESSION_SERVICE_INTERFACE, serviceComponent)) {
             Log.w(TAG, serviceComponent + " doesn't implement MediaSession2Service.");
         }
+        mSessionId = null;
         mComponentName = serviceComponent;
         mPackageName = serviceComponent.getPackageName();
         mServiceName = serviceComponent.getClassName();
+        mPid = -1;
         mUid = uid;
         mType = TYPE_SESSION_SERVICE;
-        mSessionLink = null;
+        mExtras = null;
     }
 
-    Session2Token(int uid, int type, String packageName, Session2Link sessionLink) {
-        mUid = uid;
-        mType = type;
-        mPackageName = packageName;
+    /**
+     * Constructor for the token with type {@link #TYPE_SESSION}.
+     *
+     * @param context The context.
+     * @param sessionId The ID of the session. Should be unique.
+     * @param extras The extras.
+     * @hide
+     */
+    @SystemApi
+    public Session2Token(@NonNull Context context, @NonNull String sessionId,
+            @Nullable Bundle extras) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("sessionId shouldn't be null");
+        }
+        if (context == null) {
+            throw new IllegalArgumentException("context shouldn't be null");
+        }
+        mSessionId = sessionId;
+        mPid = Process.myPid();
+        mUid = Process.myUid();
+        mType = TYPE_SESSION;
+        mPackageName = context.getPackageName();
+        mExtras = extras;
         mServiceName = null;
         mComponentName = null;
-        mSessionLink = sessionLink;
     }
 
     Session2Token(Parcel in) {
+        mSessionId = in.readString();
+        mPid = in.readInt();
         mUid = in.readInt();
         mType = in.readInt();
         mPackageName = in.readString();
         mServiceName = in.readString();
-        mSessionLink = in.readParcelable(null);
         mComponentName = ComponentName.unflattenFromString(in.readString());
+        mExtras = in.readParcelable(null);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mSessionId);
+        dest.writeInt(mPid);
         dest.writeInt(mUid);
         dest.writeInt(mType);
         dest.writeString(mPackageName);
         dest.writeString(mServiceName);
-        dest.writeParcelable(mSessionLink, flags);
         dest.writeString(mComponentName == null ? "" : mComponentName.flattenToString());
+        dest.writeParcelable(mExtras, flags);
     }
 
     @Override
@@ -153,7 +191,7 @@ public final class Session2Token implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mUid, mPackageName, mServiceName, mSessionLink);
+        return Objects.hash(mSessionId, mPid, mUid, mType, mPackageName, mServiceName);
     }
 
     @Override
@@ -162,17 +200,27 @@ public final class Session2Token implements Parcelable {
             return false;
         }
         Session2Token other = (Session2Token) obj;
-        return mUid == other.mUid
-                && TextUtils.equals(mPackageName, other.mPackageName)
-                && TextUtils.equals(mServiceName, other.mServiceName)
+        return TextUtils.equals(mSessionId, other.mSessionId)
+                && mPid == other.mPid
+                && mUid == other.mUid
                 && mType == other.mType
-                && Objects.equals(mSessionLink, other.mSessionLink);
+                && TextUtils.equals(mPackageName, other.mPackageName)
+                && TextUtils.equals(mServiceName, other.mServiceName);
     }
 
     @Override
     public String toString() {
         return "Session2Token {pkg=" + mPackageName + " type=" + mType
-                + " service=" + mServiceName + " Session2Link=" + mSessionLink + "}";
+                + " service=" + mServiceName + "}";
+    }
+
+    /**
+     * @return pid of the session
+     * @hide
+     */
+    @SystemApi
+    public int getPid() {
+        return mPid;
     }
 
     /**
@@ -207,8 +255,36 @@ public final class Session2Token implements Parcelable {
         return mType;
     }
 
-    Session2Link getSessionLink() {
-        return mSessionLink;
+    /**
+     * @return extras
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras == null ? new Bundle() : new Bundle(mExtras);
+    }
+
+    /**
+     * Destroys this session token. After this method is called,
+     * {@link MediaSessionManager#notifySession2Created(Session2Token)} should not be called
+     * with this token.
+     *
+     * @see MediaSessionManager#notifySession2Created(Session2Token)
+     * @hide
+     */
+    @SystemApi
+    public void destroy() {
+        mDestroyed = true;
+    }
+
+    /**
+     * @return whether this token is destroyed
+     * @hide
+     */
+    @SystemApi
+    public boolean isDestroyed() {
+        return mDestroyed;
     }
 
     private static boolean isInterfaceDeclared(PackageManager manager, String serviceInterface,

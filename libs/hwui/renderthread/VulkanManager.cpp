@@ -516,10 +516,9 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface** surfaceOut) {
     if (windowWidth != surface->mWindowWidth || windowHeight != surface->mWindowHeight) {
         ColorMode colorMode = surface->mColorMode;
         sk_sp<SkColorSpace> colorSpace = surface->mColorSpace;
-        SkColorSpace::Gamut colorGamut = surface->mColorGamut;
         SkColorType colorType = surface->mColorType;
         destroySurface(surface);
-        *surfaceOut = createSurface(window, colorMode, colorSpace, colorGamut, colorType);
+        *surfaceOut = createSurface(window, colorMode, colorSpace, colorType);
         surface = *surfaceOut;
     }
 
@@ -841,9 +840,12 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     }
 
     if (surface->mColorMode == ColorMode::WideColorGamut) {
-        if (surface->mColorGamut == SkColorSpace::Gamut::kSRGB_Gamut) {
+        skcms_Matrix3x3 surfaceGamut;
+        LOG_ALWAYS_FATAL_IF(!surface->mColorSpace->toXYZD50(&surfaceGamut),
+                            "Could not get gamut matrix from color space");
+        if (memcmp(&surfaceGamut, &SkNamedGamut::kSRGB, sizeof(surfaceGamut)) == 0) {
             colorSpace = VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT;
-        } else if (surface->mColorGamut == SkColorSpace::Gamut::kDCIP3_D65_Gamut) {
+        } else if (memcmp(&surfaceGamut, &SkNamedGamut::kDCIP3, sizeof(surfaceGamut)) == 0) {
             colorSpace = VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT;
         } else {
             LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
@@ -922,7 +924,6 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
 
 VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode,
                                             sk_sp<SkColorSpace> surfaceColorSpace,
-                                            SkColorSpace::Gamut surfaceColorGamut,
                                             SkColorType surfaceColorType) {
     initialize();
 
@@ -931,7 +932,7 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode col
     }
 
     VulkanSurface* surface = new VulkanSurface(colorMode, window, surfaceColorSpace,
-                                               surfaceColorGamut, surfaceColorType);
+                                               surfaceColorType);
 
     VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
     memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));

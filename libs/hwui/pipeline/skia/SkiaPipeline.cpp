@@ -476,11 +476,9 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
     if (colorMode == ColorMode::SRGB) {
         mSurfaceColorType = SkColorType::kN32_SkColorType;
-        mSurfaceColorGamut = SkColorSpace::Gamut::kSRGB_Gamut;
         mSurfaceColorSpace = SkColorSpace::MakeSRGB();
     } else if (colorMode == ColorMode::WideColorGamut) {
         mSurfaceColorType = DeviceInfo::get()->getWideColorType();
-        mSurfaceColorGamut = DeviceInfo::get()->getWideColorGamut();
         mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
     } else {
         LOG_ALWAYS_FATAL("Unreachable: unsupported color mode.");

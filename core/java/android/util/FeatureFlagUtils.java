@@ -40,6 +40,7 @@ public class FeatureFlagUtils {
     public static final String SAFETY_HUB = "settings_safety_hub";
     public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     public static final String AOD_IMAGEWALLPAPER_ENABLED = "settings_aod_imagewallpaper_enabled";
+    public static final String GLOBAL_ACTIONS_GRID_ENABLED = "settings_global_actions_grid_enabled";
 
     private static final Map<String, String> DEFAULT_FLAGS;
     private static final Set<String> OBSERVABLE_FLAGS;
@@ -53,13 +54,14 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
         DEFAULT_FLAGS.put("settings_slice_injection", "false");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put("settings_wifi_dpp", "false");
-        DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "false");
-        DEFAULT_FLAGS.put("settings_wifi_sharing", "false");
+        DEFAULT_FLAGS.put("settings_wifi_dpp", "true");
+        DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "true");
+        DEFAULT_FLAGS.put("settings_wifi_sharing", "true");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put(SAFETY_HUB, "false");
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put(AOD_IMAGEWALLPAPER_ENABLED, "false");
+        DEFAULT_FLAGS.put(GLOBAL_ACTIONS_GRID_ENABLED, "false");
 
         OBSERVABLE_FLAGS = new HashSet<>();
         OBSERVABLE_FLAGS.add(AOD_IMAGEWALLPAPER_ENABLED);

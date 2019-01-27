@@ -262,6 +262,9 @@ public class TextClassifierTest {
         assertEquals(
                 context.getString(com.android.internal.R.string.translate),
                 classification.getActions().get(0).getTitle());
+        Intent intent = (Intent) classification.getExtras()
+                .getParcelableArrayList(TextClassifierImpl.ACTIONS_INTENTS).get(0);
+        assertEquals(Intent.ACTION_TRANSLATE, intent.getAction());
 
         LocaleList.setDefault(originalLocales);
     }
@@ -375,7 +378,7 @@ public class TextClassifierTest {
         if (isTextClassifierDisabled()) return;
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
-                        ConversationActions.Message.PERSON_USER_REMOTE)
+                        ConversationActions.Message.PERSON_USER_OTHERS)
                         .setText("Where are you?")
                         .build();
         TextClassifier.EntityConfig typeConfig =
@@ -404,7 +407,7 @@ public class TextClassifierTest {
         if (isTextClassifierDisabled()) return;
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
-                        ConversationActions.Message.PERSON_USER_REMOTE)
+                        ConversationActions.Message.PERSON_USER_OTHERS)
                         .setText("Where are you?")
                         .build();
         TextClassifier.EntityConfig typeConfig =

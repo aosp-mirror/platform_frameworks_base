@@ -113,6 +113,7 @@ public class KeyguardStatusBarView extends RelativeLayout
      * Ratio representing being in ambient mode or not.
      */
     private float mDarkAmount;
+    private boolean mDozing;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -210,7 +211,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                 mMultiUserSwitch.setVisibility(View.GONE);
             }
         }
-        mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable);
+        mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable || mDozing);
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -347,7 +348,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         onThemeChanged();
-        updateDozeState();
+        updateDarkState();
     }
 
     @Override
@@ -506,21 +507,29 @@ public class KeyguardStatusBarView extends RelativeLayout
         }
     }
 
+    public void setDozing(boolean dozing) {
+        if (mDozing == dozing) {
+            return;
+        }
+        mDozing = dozing;
+        updateVisibilities();
+    }
+
     public void setDarkAmount(float darkAmount) {
         mDarkAmount = darkAmount;
         if (darkAmount == 0) {
             dozeTimeTick();
         }
-        updateDozeState();
+        updateDarkState();
     }
 
     public void dozeTimeTick() {
         mCurrentBurnInOffsetX = getBurnInOffset(mBurnInOffset, true /* xAxis */);
         mCurrentBurnInOffsetY = getBurnInOffset(mBurnInOffset, false /* xAxis */);
-        updateDozeState();
+        updateDarkState();
     }
 
-    private void updateDozeState() {
+    private void updateDarkState() {
         float alpha = 1f - mDarkAmount;
         int visibility = alpha != 0f ? VISIBLE : INVISIBLE;
         mCarrierLabel.setAlpha(alpha * alpha);

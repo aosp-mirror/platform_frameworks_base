@@ -21,6 +21,7 @@
 
 #include <cutils/compiler.h>
 
+#include <SkFont.h>
 #include <SkPaint.h>
 #include <string>
 
@@ -46,13 +47,23 @@ public:
 
     Paint();
     Paint(const Paint& paint);
-    Paint(const SkPaint& paint);  // NOLINT(google-explicit-constructor)
     ~Paint();
 
     Paint& operator=(const Paint& other);
 
     friend bool operator==(const Paint& a, const Paint& b);
     friend bool operator!=(const Paint& a, const Paint& b) { return !(a == b); }
+
+    SkFont& getSkFont() { return mFont; }
+    const SkFont& getSkFont() const { return mFont; }
+
+    // These shadow the methods on SkPaint, but we need to so we can keep related
+    // attributes in-sync.
+
+    void reset();
+    void setAntiAlias(bool);
+
+    // End method shadowing
 
     void setLetterSpacing(float letterSpacing) { mLetterSpacing = letterSpacing; }
 
@@ -94,7 +105,31 @@ public:
     Align getTextAlign() const { return mAlign; }
     void setTextAlign(Align align) { mAlign = align; }
 
+    bool isStrikeThru() const { return mStrikeThru; }
+    void setStrikeThru(bool st) { mStrikeThru = st; }
+
+    bool isUnderline() const { return mUnderline; }
+    void setUnderline(bool u) { mUnderline = u; }
+
+    bool isDevKern() const { return mDevKern; }
+    void setDevKern(bool d) { mDevKern = d; }
+
+    // The Java flags (Paint.java) no longer fit into the native apis directly.
+    // These methods handle converting to and from them and the native representations
+    // in android::Paint.
+
+    uint32_t getJavaFlags() const;
+    void setJavaFlags(uint32_t);
+
+    // Helpers that return or apply legacy java flags to SkPaint, ignoring all flags
+    // that are meant for SkFont or Paint (e.g. underline, strikethru)
+    // The only respected flags are : [ antialias, dither, filterBitmap ]
+    static uint32_t GetSkPaintJavaFlags(const SkPaint&);
+    static void SetSkPaintJavaFlags(SkPaint*, uint32_t flags);
+ 
 private:
+    SkFont mFont;
+
     float mLetterSpacing = 0;
     float mWordSpacing = 0;
     std::string mFontFeatureSettings;
@@ -107,6 +142,9 @@ private:
     // nullptr is valid: it means the default typeface.
     const Typeface* mTypeface = nullptr;
     Align mAlign = kLeft_Align;
+    bool mStrikeThru = false;
+    bool mUnderline = false;
+    bool mDevKern = false;
 };
 
 }  // namespace android

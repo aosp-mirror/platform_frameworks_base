@@ -4367,6 +4367,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void startAnimation(Animation anim) {
+
+        // If we are an inset provider, all our animations are driven by the inset client.
+        if (mInsetProvider != null && mInsetProvider.isControllable()) {
+            return;
+        }
+
         final DisplayInfo displayInfo = getDisplayContent().getDisplayInfo();
         anim.initialize(mWindowFrames.mFrame.width(), mWindowFrames.mFrame.height(),
                 displayInfo.appWidth, displayInfo.appHeight);
@@ -4380,6 +4386,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void startMoveAnimation(int left, int top) {
+
+        // If we are an inset provider, all our animations are driven by the inset client.
+        if (mInsetProvider != null && mInsetProvider.isControllable()) {
+            return;
+        }
+
         if (DEBUG_ANIM) Slog.v(TAG, "Setting move animation on " + this);
         final Point oldPosition = new Point();
         final Point newPosition = new Point();

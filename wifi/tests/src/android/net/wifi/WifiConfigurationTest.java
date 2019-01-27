@@ -60,6 +60,8 @@ public class WifiConfigurationTest {
         config.setPasspointManagementObjectTree(cookie);
         config.trusted = false;
         config.updateIdentifier = "1234";
+        config.fromWifiNetworkSpecifier = true;
+        config.fromWifiNetworkSuggestion = true;
         MacAddress macBeforeParcel = config.getOrCreateRandomizedMacAddress();
         Parcel parcelW = Parcel.obtain();
         config.writeToParcel(parcelW, 0);
@@ -76,6 +78,8 @@ public class WifiConfigurationTest {
         assertEquals(macBeforeParcel, reconfig.getOrCreateRandomizedMacAddress());
         assertEquals(config.updateIdentifier, reconfig.updateIdentifier);
         assertFalse(reconfig.trusted);
+        assertTrue(config.fromWifiNetworkSpecifier);
+        assertTrue(config.fromWifiNetworkSuggestion);
 
         Parcel parcelWW = Parcel.obtain();
         reconfig.writeToParcel(parcelWW, 0);

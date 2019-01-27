@@ -73,9 +73,16 @@ public final class TextClassificationManager {
     /**
      * Returns the text classifier that was set via {@link #setTextClassifier(TextClassifier)}.
      * If this is null, this method returns a default text classifier (i.e. either the system text
-     * classifier if one exists, or a local text classifier running in this app.)
+     * classifier if one exists, or a local text classifier running in this process.)
+     * <p>
+     * Note that if system textclassifier is in use, requests will be sent to a textclassifier
+     * package provided from OEM. If you want to make sure the requests are handled in your own
+     * process, you should consider {@link #getLocalTextClassifier()} instead. However, the local
+     * textclassifier may return inferior results to those returned by the system
+     * textclassifier.
      *
      * @see #setTextClassifier(TextClassifier)
+     * @see #getLocalTextClassifier()
      */
     @NonNull
     public TextClassifier getTextClassifier() {
@@ -215,7 +222,13 @@ public final class TextClassificationManager {
         return TextClassifier.NO_OP;
     }
 
-    private TextClassifier getLocalTextClassifier() {
+    /**
+     * Returns a local textclassifier, which is running in this process.
+     *
+     * @see #getTextClassifier()
+     */
+    @NonNull
+    public TextClassifier getLocalTextClassifier() {
         synchronized (mLock) {
             if (mLocalTextClassifier == null) {
                 if (getSettings().isLocalTextClassifierEnabled()) {

@@ -758,6 +758,27 @@ public class LauncherApps {
     }
 
     /**
+     * Returns an object describing the app usage limit for the given package.
+     * If there are multiple limits that apply to the package, the one with the smallest
+     * time remaining will be returned.
+     *
+     * @param packageName name of the package whose app usage limit will be returned
+     * @param user the user of the package
+     *
+     * @return an {@link AppUsageLimit} object describing the app time limit containing
+     * the given package with the smallest time remaining, or {@code null} if none exist.
+     * @throws SecurityException when the caller is not the active launcher.
+     */
+    @Nullable
+    public LauncherApps.AppUsageLimit getAppUsageLimit(String packageName, UserHandle user) {
+        try {
+            return mService.getAppUsageLimit(mContext.getPackageName(), packageName, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks if the activity exists and it enabled for a profile.
      *
      * @param component The activity to check.
@@ -1630,6 +1651,88 @@ public class LauncherApps {
         @Override
         public int describeContents() {
             return 0;
+        }
+    }
+
+    /**
+     * A class that encapsulates information about the usage limit set for an app or
+     * a group of apps.
+     *
+     * <p>The launcher can query specifics about the usage limit such as if it is a group limit,
+     * how much usage time the limit has, and how much of the total usage time is remaining
+     * via the APIs available in this class.
+     *
+     * @see #getAppUsageLimit(String, UserHandle)
+     */
+    public static final class AppUsageLimit implements Parcelable {
+        private final boolean mGroupLimit;
+        private final long mTotalUsageLimit;
+        private final long mUsageRemaining;
+
+        /** @hide */
+        public AppUsageLimit(boolean groupLimit, long totalUsageLimit, long usageRemaining) {
+            this.mGroupLimit = groupLimit;
+            this.mTotalUsageLimit = totalUsageLimit;
+            this.mUsageRemaining = usageRemaining;
+        }
+
+        /**
+         * Returns whether this limit refers to a group of apps.
+         *
+         * @return {@code TRUE} if the limit refers to a group of apps, {@code FALSE} otherwise.
+         * @hide
+         */
+        public boolean isGroupLimit() {
+            return mGroupLimit;
+        }
+
+        /**
+         * Returns the total usage limit in milliseconds set for an app or a group of apps.
+         *
+         * @return the total usage limit in milliseconds
+         */
+        public long getTotalUsageLimit() {
+            return mTotalUsageLimit;
+        }
+
+        /**
+         * Returns the usage remaining in milliseconds for an app or the group of apps
+         * this limit refers to.
+         *
+         * @return the usage remaining in milliseconds
+         */
+        public long getUsageRemaining() {
+            return mUsageRemaining;
+        }
+
+        private AppUsageLimit(Parcel source) {
+            mGroupLimit = source.readBoolean();
+            mTotalUsageLimit = source.readLong();
+            mUsageRemaining = source.readLong();
+        }
+
+        public static final Creator<AppUsageLimit> CREATOR = new Creator<AppUsageLimit>() {
+            @Override
+            public AppUsageLimit createFromParcel(Parcel source) {
+                return new AppUsageLimit(source);
+            }
+
+            @Override
+            public AppUsageLimit[] newArray(int size) {
+                return new AppUsageLimit[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeBoolean(mGroupLimit);
+            dest.writeLong(mTotalUsageLimit);
+            dest.writeLong(mUsageRemaining);
         }
     }
 }

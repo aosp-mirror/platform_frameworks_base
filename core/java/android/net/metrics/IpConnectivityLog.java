@@ -18,7 +18,6 @@ package android.net.metrics;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
 import android.net.Network;
@@ -51,7 +50,8 @@ public class IpConnectivityLog {
     public interface Event extends Parcelable {}
 
     /** @hide */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public IpConnectivityLog() {
     }
 

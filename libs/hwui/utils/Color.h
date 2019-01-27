@@ -112,6 +112,7 @@ static constexpr float EOCF(float srgb) {
 }
 
 android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType);
+ANDROID_API SkColorType PixelFormatToColorType(android::PixelFormat format);
 
 ANDROID_API sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
 

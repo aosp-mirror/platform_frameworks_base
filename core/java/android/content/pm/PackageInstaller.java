@@ -1543,6 +1543,13 @@ public class PackageInstaller {
             this.isStaged = true;
         }
 
+        /**
+         * Set this session to be installing an APEX package.
+         */
+        public void setInstallAsApex() {
+            installFlags |= PackageManager.INSTALL_APEX;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1703,6 +1710,7 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean isSessionFailed;
         private int mStagedSessionErrorCode;
+        private String mStagedSessionErrorMessage;
 
         /** {@hide} */
         @UnsupportedAppUsage
@@ -1742,6 +1750,7 @@ public class PackageInstaller {
             isSessionReady = source.readBoolean();
             isSessionFailed = source.readBoolean();
             mStagedSessionErrorCode = source.readInt();
+            mStagedSessionErrorMessage = source.readString();
         }
 
         /**
@@ -2059,9 +2068,19 @@ public class PackageInstaller {
             return mStagedSessionErrorCode;
         }
 
+        /**
+         * Text description of the error code returned by {@code getStagedSessionErrorCode}, or
+         * empty string if no error was encountered.
+         */
+        public String getStagedSessionErrorMessage() {
+            return mStagedSessionErrorMessage;
+        }
+
         /** {@hide} */
-        public void setStagedSessionErrorCode(@StagedSessionErrorCode int errorCode) {
+        public void setStagedSessionErrorCode(@StagedSessionErrorCode int errorCode,
+                                              String errorMessage) {
             mStagedSessionErrorCode = errorCode;
+            mStagedSessionErrorMessage = errorMessage;
         }
 
         @Override
@@ -2099,6 +2118,7 @@ public class PackageInstaller {
             dest.writeBoolean(isSessionReady);
             dest.writeBoolean(isSessionFailed);
             dest.writeInt(mStagedSessionErrorCode);
+            dest.writeString(mStagedSessionErrorMessage);
         }
 
         public static final Parcelable.Creator<SessionInfo>

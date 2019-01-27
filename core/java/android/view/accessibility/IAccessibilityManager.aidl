@@ -63,7 +63,7 @@ interface IAccessibilityManager {
 
     IBinder getWindowToken(int windowId, int userId);
 
-    void notifyAccessibilityButtonClicked();
+    void notifyAccessibilityButtonClicked(int displayId);
 
     void notifyAccessibilityButtonVisibilityChanged(boolean available);
 

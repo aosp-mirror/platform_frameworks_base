@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.SurfaceControl.METADATA_OWNER_UID;
+import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
+
 import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
 import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
@@ -50,9 +53,23 @@ class AppWindowThumbnail implements Animatable {
     private final SurfaceAnimator mSurfaceAnimator;
     private final int mWidth;
     private final int mHeight;
+    private final boolean mRelative;
 
     AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader) {
+        this(t, appToken, thumbnailHeader, false /* relative */);
+    }
+
+    /**
+     * @param t Transaction to create the thumbnail in.
+     * @param appToken {@link AppWindowToken} to associate this thumbnail with.
+     * @param thumbnailHeader A thumbnail or placeholder for thumbnail to initialize with.
+     * @param relative Whether this thumbnail will be a child of appToken (and thus positioned
+     *                 relative to it) or not.
+     */
+    AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader,
+            boolean relative) {
         mAppToken = appToken;
+        mRelative = relative;
         mSurfaceAnimator =
                 new SurfaceAnimator(this, this::onAnimationFinished, appToken.mWmService);
         mWidth = thumbnailHeader.getWidth();
@@ -68,7 +85,8 @@ class AppWindowThumbnail implements Animatable {
                 .setName("thumbnail anim: " + appToken.toString())
                 .setBufferSize(mWidth, mHeight)
                 .setFormat(PixelFormat.TRANSLUCENT)
-                .setMetadata(appToken.windowType,
+                .setMetadata(METADATA_WINDOW_TYPE, appToken.windowType)
+                .setMetadata(METADATA_OWNER_UID,
                         window != null ? window.mOwnerUid : Binder.getCallingUid())
                 .build();
 
@@ -86,6 +104,9 @@ class AppWindowThumbnail implements Animatable {
         // We parent the thumbnail to the task, and just place it on top of anything else in the
         // task.
         t.setLayer(mSurfaceControl, Integer.MAX_VALUE);
+        if (relative) {
+            t.reparent(mSurfaceControl, appToken.getSurfaceControl());
+        }
     }
 
     void startAnimation(Transaction t, Animation anim) {
@@ -99,6 +120,13 @@ class AppWindowThumbnail implements Animatable {
                 new WindowAnimationSpec(anim, position,
                         mAppToken.getDisplayContent().mAppTransition.canSkipFirstFrame()),
                 mAppToken.mWmService.mSurfaceAnimationRunner), false /* hidden */);
+    }
+
+    /**
+     * Start animation with existing adapter.
+     */
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
+        mSurfaceAnimator.startAnimation(t, anim, hidden);
     }
 
     private void onAnimationFinished() {
@@ -147,6 +175,9 @@ class AppWindowThumbnail implements Animatable {
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         t.setLayer(leash, Integer.MAX_VALUE);
+        if (mRelative) {
+            t.reparent(leash, mAppToken.getSurfaceControl());
+        }
     }
 
     @Override

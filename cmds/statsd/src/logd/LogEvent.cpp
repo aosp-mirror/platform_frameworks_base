@@ -310,6 +310,36 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                                  Value(usbPortOverheatEvent.timeToInactive)));
 }
 
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const VendorAtom& vendorAtom) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = vendorAtom.atomId;
+
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(1)), Value(vendorAtom.reverseDomainName)));
+    for (int i = 0; i < (int)vendorAtom.values.size(); i++) {
+        switch (vendorAtom.values[i].getDiscriminator()) {
+            case VendorAtom::Value::hidl_discriminator::intValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].intValue())));
+                break;
+            case VendorAtom::Value::hidl_discriminator::longValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].longValue())));
+                break;
+            case VendorAtom::Value::hidl_discriminator::floatValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].floatValue())));
+                break;
+            case VendorAtom::Value::hidl_discriminator::stringValue:
+                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
+                                             Value(vendorAtom.values[i].stringValue())));
+                break;
+        }
+    }
+}
+
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {

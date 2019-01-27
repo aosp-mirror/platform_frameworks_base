@@ -54,6 +54,7 @@ public final class DeviceConfig {
 
     /**
      * Namespace for all Game Driver features.
+     *
      * @hide
      */
     @SystemApi
@@ -104,6 +105,24 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NOTIFICATION_ASSISTANT = "notification_assistant";
 
     /**
+     * Namespace for attention-based features provided by on-device machine intelligence.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface IntelligenceAttention {
+        String NAMESPACE = "intelligence_attention";
+        /**
+         * If {@code true}, enables the attention check.
+         */
+        String PROPERTY_ATTENTION_CHECK_ENABLED = "attention_check_enabled";
+        /**
+         * Settings for performing the attention check.
+         */
+        String PROPERTY_ATTENTION_CHECK_SETTINGS = "attention_check_settings";
+    }
+
+    /**
      * Telephony related properties definitions.
      *
      * @hide
@@ -134,6 +153,51 @@ public final class DeviceConfig {
         String OOB_WHITELIST = "oob_whitelist";
     }
 
+    /**
+     * Namespace for activity manager related features. These features will be applied
+     * immediately upon change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface ActivityManager {
+        String NAMESPACE = "activity_manager";
+
+        /**
+         * App compaction flags. See {@link com.android.server.am.AppCompactor}.
+         */
+        String KEY_USE_COMPACTION = "use_compaction";
+        String KEY_COMPACT_ACTION_1 = "compact_action_1";
+        String KEY_COMPACT_ACTION_2 = "compact_action_2";
+        String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
+        String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
+        String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
+        String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+
+        /**
+         * Maximum number of cached processes. See
+         * {@link com.android.server.am.ActivityManagerConstants}.
+         */
+        String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
+    }
+
+    /**
+     * Namespace for storage-related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Storage {
+        String NAMESPACE = "storage";
+
+        /**
+         * If {@code 1}, enables the isolated storage feature. If {@code -1},
+         * disables the isolated storage feature. If {@code 0}, uses the default
+         * value from the build system.
+         */
+        String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
+    }
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
@@ -149,9 +213,8 @@ public final class DeviceConfig {
      * Look up the value of a property for a particular namespace.
      *
      * @param namespace The namespace containing the property to look up.
-     * @param name The name of the property to look up.
+     * @param name      The name of the property to look up.
      * @return the corresponding value, or null if not present.
-     *
      * @hide
      */
     @SystemApi
@@ -173,14 +236,13 @@ public final class DeviceConfig {
      * All properties stored for a particular scope can be reverted to their default values
      * by passing the namespace to {@link #resetToDefaults(int, String)}.
      *
-     * @param namespace The namespace containing the property to create or update.
-     * @param name The name of the property to create or update.
-     * @param value The value to store for the property.
+     * @param namespace   The namespace containing the property to create or update.
+     * @param name        The name of the property to create or update.
+     * @param value       The value to store for the property.
      * @param makeDefault Whether to make the new value the default one.
      * @return True if the value was set, false if the storage implementation throws errors.
-     * @see #resetToDefaults(int, String).
-     *
      * @hide
+     * @see #resetToDefaults(int, String).
      */
     @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
@@ -199,9 +261,8 @@ public final class DeviceConfig {
      *
      * @param resetMode The reset mode to use.
      * @param namespace Optionally, the specific namespace which resets will be limited to.
-     * @see #setProperty(String, String, String, boolean)
-     *
      * @hide
+     * @see #setProperty(String, String, String, boolean)
      */
     @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
@@ -218,12 +279,11 @@ public final class DeviceConfig {
      * will replace the old namespace and executor. Remove the listener entirely by calling
      * {@link #removeOnPropertyChangedListener(OnPropertyChangedListener)}.
      *
-     * @param namespace The namespace containing properties to monitor.
-     * @param executor The executor which will be used to run callbacks.
+     * @param namespace                 The namespace containing properties to monitor.
+     * @param executor                  The executor which will be used to run callbacks.
      * @param onPropertyChangedListener The listener to add.
-     * @see #removeOnPropertyChangedListener(OnPropertyChangedListener)
-     *
      * @hide
+     * @see #removeOnPropertyChangedListener(OnPropertyChangedListener)
      */
     @SystemApi
     @RequiresPermission(READ_DEVICE_CONFIG)
@@ -255,9 +315,8 @@ public final class DeviceConfig {
      * property changes.
      *
      * @param onPropertyChangedListener The listener to remove.
-     * @see #addOnPropertyChangedListener(String, Executor, OnPropertyChangedListener)
-     *
      * @hide
+     * @see #addOnPropertyChangedListener(String, Executor, OnPropertyChangedListener)
      */
     @SystemApi
     public static void removeOnPropertyChangedListener(
@@ -358,8 +417,8 @@ public final class DeviceConfig {
          * Called when a property has changed.
          *
          * @param namespace The namespace containing the property which has changed.
-         * @param name The name of the property which has changed.
-         * @param value The new value of the property which has changed.
+         * @param name      The name of the property which has changed.
+         * @param value     The new value of the property which has changed.
          */
         void onPropertyChanged(String namespace, String name, String value);
     }

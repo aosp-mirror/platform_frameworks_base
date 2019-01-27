@@ -138,6 +138,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     info.width = fboSize.width();
     info.height = fboSize.height();
     mat4.asColMajorf(&info.transform[0]);
+    info.color_space_ptr = canvas->imageInfo().colorSpace();
 
     // ensure that the framebuffer that the webview will render into is bound before we clear
     // the stencil and/or draw the functor.

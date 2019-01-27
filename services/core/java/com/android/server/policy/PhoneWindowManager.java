@@ -1901,9 +1901,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mWindowManagerInternal.registerAppTransitionListener(new AppTransitionListener() {
             @Override
-            public int onAppTransitionStartingLocked(int transit, IBinder openToken,
-                    IBinder closeToken, long duration, long statusBarAnimationStartTime,
-                    long statusBarAnimationDuration) {
+            public int onAppTransitionStartingLocked(int transit, long duration,
+                    long statusBarAnimationStartTime, long statusBarAnimationDuration) {
                 return handleStartTransitionForKeyguardLw(transit, duration);
             }
 
@@ -2570,6 +2569,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private static final int[] WINDOW_TYPES_WHERE_HOME_DOESNT_WORK = {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
             WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
         };

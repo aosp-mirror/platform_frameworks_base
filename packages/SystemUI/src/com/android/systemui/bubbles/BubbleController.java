@@ -18,9 +18,8 @@ package com.android.systemui.bubbles;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-import static com.android.systemui.bubbles.BubbleMovementHelper.EDGE_OVERLAP;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.NotificationAlertingManager.alertAgain;
 
@@ -229,10 +228,6 @@ public class BubbleController {
         }
         mStackView.stackDismissed();
 
-        // Reset the position of the stack (TODO - or should we save / respect last user position?)
-        Point startPoint = getStartPoint(mStackView.getStackWidth(), mDisplaySize);
-        mStackView.setPosition(startPoint.x, startPoint.y);
-
         updateVisibility();
         mNotificationEntryManager.updateNotifications();
     }
@@ -249,16 +244,14 @@ public class BubbleController {
             BubbleView bubble = mBubbles.get(notif.key);
             mStackView.updateBubble(bubble, notif, updatePosition);
         } else {
-            boolean setPosition = mStackView != null && mStackView.getVisibility() != VISIBLE;
             if (mStackView == null) {
-                setPosition = true;
                 mStackView = new BubbleStackView(mContext);
                 ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
                 // XXX: Bug when you expand the shade on top of expanded bubble, there is no scrim
                 // between bubble and the shade
                 int bubblePosition = sbv.indexOfChild(sbv.findViewById(R.id.scrim_behind)) + 1;
                 sbv.addView(mStackView, bubblePosition,
-                        new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+                        new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
                 if (mExpandListener != null) {
                     mStackView.setExpandListener(mExpandListener);
                 }
@@ -273,11 +266,6 @@ public class BubbleController {
             }
             mBubbles.put(bubble.getKey(), bubble);
             mStackView.addBubble(bubble);
-            if (setPosition) {
-                // Need to add the bubble to the stack before we can know the width
-                Point startPoint = getStartPoint(mStackView.getStackWidth(), mDisplaySize);
-                mStackView.setPosition(startPoint.x, startPoint.y);
-            }
         }
         updateVisibility();
     }
@@ -421,24 +409,6 @@ public class BubbleController {
     @VisibleForTesting
     BubbleStackView getStackView() {
         return mStackView;
-    }
-
-    // TODO: factor in PIP location / maybe last place user had it
-    /**
-     * Gets an appropriate starting point to position the bubble stack.
-     */
-    private static Point getStartPoint(int size, Point displaySize) {
-        final int x = displaySize.x - size + EDGE_OVERLAP;
-        final int y = displaySize.y / 4;
-        return new Point(x, y);
-    }
-
-    /**
-     * Gets an appropriate position for the bubble when the stack is expanded.
-     */
-    static Point getExpandPoint(BubbleStackView view, int size, Point displaySize) {
-        // Same place for now..
-        return new Point(EDGE_OVERLAP, size);
     }
 
     /**

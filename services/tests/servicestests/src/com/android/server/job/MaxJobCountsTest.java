@@ -17,14 +17,14 @@ package com.android.server.job;
 
 import android.util.KeyValueListParser;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.server.job.JobSchedulerService.MaxJobCounts;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -43,13 +43,14 @@ public class MaxJobCountsTest {
 
         counts.parse(parser);
 
-        Assert.assertEquals(expectedTotal, counts.getTotalMax());
+        Assert.assertEquals(expectedTotal, counts.getMaxTotal());
         Assert.assertEquals(expectedMaxBg, counts.getMaxBg());
         Assert.assertEquals(expectedMinBg, counts.getMinBg());
     }
 
     @Test
     public void test() {
+        // Tests with various combinations.
         check("", /*default*/ 5, 1, 0, /*expected*/ 5, 1, 0);
         check("", /*default*/ 5, 0, 0, /*expected*/ 5, 1, 0);
         check("", /*default*/ 0, 0, 0, /*expected*/ 1, 1, 0);
@@ -58,7 +59,11 @@ public class MaxJobCountsTest {
         check("", /*default*/ 6, 5, 6, /*expected*/ 6, 5, 5);
         check("", /*default*/ 4, 5, 6, /*expected*/ 4, 4, 3);
         check("", /*default*/ 5, 1, 1, /*expected*/ 5, 1, 1);
+        check("", /*default*/ 15, 15, 15, /*expected*/ 15, 15, 14);
+        check("", /*default*/ 16, 16, 16, /*expected*/ 16, 16, 15);
+        check("", /*default*/ 20, 20, 20, /*expected*/ 16, 16, 15);
 
+        // Test for overriding with a setting string.
         check("total=5,maxbg=4,minbg=3", /*default*/ 9, 9, 9, /*expected*/ 5, 4, 3);
         check("total=5", /*default*/ 9, 9, 9, /*expected*/ 5, 5, 4);
         check("maxbg=4", /*default*/ 9, 9, 9, /*expected*/ 9, 4, 4);

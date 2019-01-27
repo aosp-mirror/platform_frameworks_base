@@ -19,11 +19,19 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "android-base/file.h"
+#include "android-base/macros.h"
+#include "android-base/stringprintf.h"
+#include "private/android_filesystem_config.h"
 
 #include "idmap2/FileUtils.h"
 
@@ -76,5 +84,27 @@ std::unique_ptr<std::string> ReadFile(int fd) {
   }
   return r == 0 ? std::move(str) : nullptr;
 }
+
+#ifdef __ANDROID__
+bool UidHasWriteAccessToPath(uid_t uid, const std::string& path) {
+  // resolve symlinks and relative paths; the directories must exist
+  std::string canonical_path;
+  if (!base::Realpath(base::Dirname(path), &canonical_path)) {
+    return false;
+  }
+
+  const std::string cache_subdir = base::StringPrintf("%s/", kIdmapCacheDir);
+  if (canonical_path == kIdmapCacheDir ||
+      canonical_path.compare(0, cache_subdir.size(), cache_subdir) == 0) {
+    // limit access to /data/resource-cache to root and system
+    return uid == AID_ROOT || uid == AID_SYSTEM;
+  }
+  return true;
+}
+#else
+bool UidHasWriteAccessToPath(uid_t uid ATTRIBUTE_UNUSED, const std::string& path ATTRIBUTE_UNUSED) {
+  return true;
+}
+#endif
 
 }  // namespace android::idmap2::utils

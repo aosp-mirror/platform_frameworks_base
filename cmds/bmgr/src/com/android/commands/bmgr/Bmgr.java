@@ -102,7 +102,17 @@ public class Bmgr {
         String op = nextArg();
         Slog.v(TAG, "Running " + op + " for user:" + userId);
 
-        if (!isBmgrActive(userId)) {
+        if (mBmgr == null) {
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+            return;
+        }
+
+        if ("activate".equals(op)) {
+            doActivateService(userId);
+            return;
+        }
+
+        if (!isBackupActive(userId)) {
             return;
         }
 
@@ -175,12 +185,7 @@ public class Bmgr {
         showUsage();
     }
 
-    boolean isBmgrActive(@UserIdInt int userId) {
-        if (mBmgr == null) {
-            System.err.println(BMGR_NOT_RUNNING_ERR);
-            return false;
-        }
-
+    boolean isBackupActive(@UserIdInt int userId) {
         try {
             if (!mBmgr.isBackupServiceActive(userId)) {
                 System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -845,6 +850,27 @@ public class Bmgr {
         }
     }
 
+    private void doActivateService(int userId) {
+        String arg = nextArg();
+        if (arg == null) {
+            showUsage();
+            return;
+        }
+
+        try {
+            boolean activate = Boolean.parseBoolean(arg);
+            mBmgr.setBackupServiceActive(userId, activate);
+            System.out.println(
+                    "Backup service now "
+                            + (activate ? "activated" : "deactivated")
+                            + " for user "
+                            + userId);
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
     private String nextArg() {
         if (mNextArg >= mArgs.length) {
             return null;
@@ -880,6 +906,7 @@ public class Bmgr {
         System.err.println("       bmgr backupnow [--monitor|--monitor-verbose] --all|PACKAGE...");
         System.err.println("       bmgr cancel backups");
         System.err.println("       bmgr init TRANSPORT...");
+        System.err.println("       bmgr activate BOOL");
         System.err.println("");
         System.err.println("The '--user' option specifies the user on which the operation is run.");
         System.err.println("It must be the first argument before the operation.");
@@ -946,6 +973,11 @@ public class Bmgr {
         System.err.println("");
         System.err.println("The 'init' command initializes the given transports, wiping all data");
         System.err.println("from their backing data stores.");
+        System.err.println("");
+        System.err.println("The 'activate' command activates or deactivates the backup service.");
+        System.err.println("If the argument is 'true' it will be activated, otherwise it will be");
+        System.err.println("deactivated. When deactivated, the service will not be running and no");
+        System.err.println("operations can be performed until activation.");
     }
 
     private static class BackupMonitor extends IBackupManagerMonitor.Stub {

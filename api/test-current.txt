@@ -11,7 +11,12 @@ package android {
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
+  }
+
+  public static final class R.array {
+    field public static final int config_defaultRoleHolders = 17235974; // 0x1070006
   }
 
 }
@@ -332,6 +337,7 @@ package android.app.role {
     method @NonNull @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public java.util.List<java.lang.String> getRoleHolders(@NonNull String);
     method @NonNull @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public java.util.List<java.lang.String> getRoleHoldersAsUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void removeRoleHolderAsUser(@NonNull String, @NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
+    field public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
   }
 
   public interface RoleManagerCallback {
@@ -802,11 +808,16 @@ package android.net {
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
   }
 
+  public final class IpPrefix implements android.os.Parcelable {
+    ctor public IpPrefix(java.net.InetAddress, int);
+  }
+
   public final class IpSecManager {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
   public class LinkAddress implements android.os.Parcelable {
+    ctor public LinkAddress(java.net.InetAddress, int, int, int);
     method public boolean isGlobalPreferred();
     method public boolean isIPv4();
     method public boolean isIPv6();
@@ -814,7 +825,10 @@ package android.net {
   }
 
   public final class LinkProperties implements android.os.Parcelable {
+    ctor public LinkProperties(android.net.LinkProperties);
     method public boolean addDnsServer(java.net.InetAddress);
+    method @Nullable public android.net.IpPrefix getNat64Prefix();
+    method public java.util.List<java.net.InetAddress> getPcscfServers();
     method public String getTcpBufferSizes();
     method public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
     method public boolean hasGlobalIPv6Address();
@@ -826,6 +840,8 @@ package android.net {
     method public boolean isReachable(java.net.InetAddress);
     method public boolean removeDnsServer(java.net.InetAddress);
     method public boolean removeRoute(android.net.RouteInfo);
+    method public void setNat64Prefix(android.net.IpPrefix);
+    method public void setPcscfServers(java.util.Collection<java.net.InetAddress>);
     method public void setPrivateDnsServerName(@Nullable String);
     method public void setTcpBufferSizes(String);
     method public void setUsePrivateDns(boolean);
@@ -843,6 +859,7 @@ package android.net {
   }
 
   public final class RouteInfo implements android.os.Parcelable {
+    ctor public RouteInfo(android.net.IpPrefix, java.net.InetAddress, String, int);
     method public int getType();
     field public static final int RTN_THROW = 9; // 0x9
     field public static final int RTN_UNICAST = 1; // 0x1
@@ -929,6 +946,7 @@ package android.net.metrics {
   }
 
   public class IpConnectivityLog {
+    ctor public IpConnectivityLog();
     method public boolean log(long, android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(String, android.net.metrics.IpConnectivityLog.Event);
     method public boolean log(android.net.Network, int[], android.net.metrics.IpConnectivityLog.Event);
@@ -975,6 +993,20 @@ package android.net.metrics {
     field public static final int NETWORK_UNLINGER = 6; // 0x6
     field public static final int NETWORK_VALIDATED = 2; // 0x2
     field public static final int NETWORK_VALIDATION_FAILED = 3; // 0x3
+  }
+
+  public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
+  }
+
+  public static class RaEvent.Builder {
+    ctor public RaEvent.Builder();
+    method public android.net.metrics.RaEvent build();
+    method public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
+    method public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
   }
 
   public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
@@ -1273,15 +1305,11 @@ package android.os {
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
     method public abstract long getDuration();
     method protected static int scale(int, float, int);
-    field public static final int EFFECT_CLICK = 0; // 0x0
-    field public static final int EFFECT_DOUBLE_CLICK = 1; // 0x1
-    field public static final int EFFECT_HEAVY_CLICK = 5; // 0x5
     field public static final int EFFECT_POP = 4; // 0x4
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
     field public static final int EFFECT_STRENGTH_STRONG = 2; // 0x2
     field public static final int EFFECT_THUD = 3; // 0x3
-    field public static final int EFFECT_TICK = 2; // 0x2
     field public static final int[] RINGTONES;
   }
 
@@ -1725,82 +1753,12 @@ package android.service.autofill.augmented {
 
 package android.service.notification {
 
-  public final class Adjustment implements android.os.Parcelable {
-    ctor public Adjustment(String, String, android.os.Bundle, CharSequence, int);
-    ctor protected Adjustment(android.os.Parcel);
-    method public int describeContents();
-    method public CharSequence getExplanation();
-    method public String getKey();
-    method public String getPackage();
-    method public android.os.Bundle getSignals();
-    method public int getUser();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.notification.Adjustment> CREATOR;
-    field public static final String KEY_IMPORTANCE = "key_importance";
-    field public static final String KEY_PEOPLE = "key_people";
-    field public static final String KEY_SMART_ACTIONS = "key_smart_actions";
-    field public static final String KEY_SMART_REPLIES = "key_smart_replies";
-    field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
-    field public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
-  }
-
   @Deprecated public abstract class ConditionProviderService extends android.app.Service {
     method @Deprecated public boolean isBound();
   }
 
-  public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {
-    ctor public NotificationAssistantService();
-    method public final void adjustNotification(android.service.notification.Adjustment);
-    method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
-    method public void onActionInvoked(@NonNull String, @NonNull android.app.Notification.Action, int);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method public void onNotificationDirectReplied(@NonNull String);
-    method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
-    method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, android.app.NotificationChannel);
-    method public void onNotificationExpansionChanged(@NonNull String, boolean, boolean);
-    method public abstract void onNotificationSnoozedUntilContext(android.service.notification.StatusBarNotification, String);
-    method public void onNotificationsSeen(java.util.List<java.lang.String>);
-    method public void onSuggestedReplySent(@NonNull String, @NonNull CharSequence, int);
-    method public final void unsnoozeNotification(String);
-    field public static final String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
-    field public static final int SOURCE_FROM_APP = 0; // 0x0
-    field public static final int SOURCE_FROM_ASSISTANT = 1; // 0x1
-  }
-
   public abstract class NotificationListenerService extends android.app.Service {
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap, android.service.notification.NotificationStats, int);
-  }
-
-  public final class NotificationStats implements android.os.Parcelable {
-    ctor public NotificationStats();
-    ctor protected NotificationStats(android.os.Parcel);
-    method public int describeContents();
-    method public int getDismissalSentiment();
-    method public int getDismissalSurface();
-    method public boolean hasDirectReplied();
-    method public boolean hasExpanded();
-    method public boolean hasInteracted();
-    method public boolean hasSeen();
-    method public boolean hasSnoozed();
-    method public boolean hasViewedSettings();
-    method public void setDirectReplied();
-    method public void setDismissalSentiment(int);
-    method public void setDismissalSurface(int);
-    method public void setExpanded();
-    method public void setSeen();
-    method public void setSnoozed();
-    method public void setViewedSettings();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.notification.NotificationStats> CREATOR;
-    field public static final int DISMISSAL_AOD = 2; // 0x2
-    field public static final int DISMISSAL_NOT_DISMISSED = -1; // 0xffffffff
-    field public static final int DISMISSAL_OTHER = 0; // 0x0
-    field public static final int DISMISSAL_PEEK = 1; // 0x1
-    field public static final int DISMISSAL_SHADE = 3; // 0x3
-    field public static final int DISMISS_SENTIMENT_NEGATIVE = 0; // 0x0
-    field public static final int DISMISS_SENTIMENT_NEUTRAL = 1; // 0x1
-    field public static final int DISMISS_SENTIMENT_POSITIVE = 2; // 0x2
-    field public static final int DISMISS_SENTIMENT_UNKNOWN = -1000; // 0xfffffc18
   }
 
   public final class SnoozeCriterion implements android.os.Parcelable {

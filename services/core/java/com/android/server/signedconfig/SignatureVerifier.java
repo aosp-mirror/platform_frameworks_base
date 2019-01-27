@@ -41,8 +41,8 @@ public class SignatureVerifier {
     private static final boolean DBG = false;
 
     private static final String DEBUG_KEY =
-            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaAn2XVifsLTHg616nTsOMVmlhBoECGbTEBTKKvdd2hO60"
-            + "pj1pnU8SMkhYfaNxZuKgw9LNvOwlFwStboIYeZ3lQ==";
+            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmJKs4lSn+XRhMQmMid+Zbhbu13YrU1haIhVC5296InRu1"
+            + "x7A8PV1ejQyisBODGgRY6pqkAHRncBCYcgg5wIIJg==";
     private static final String PROD_KEY =
             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+lky6wKyGL6lE1VrD0YTMHwb0Xwc+tzC8MvnrzVxodvTp"
             + "VY/jV7V+Zktcx+pry43XPABFRXtbhTo+qykhyBA1g==";

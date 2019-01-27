@@ -181,6 +181,10 @@ interface IConnectivityManager
     void startNattKeepalive(in Network network, int intervalSeconds, in Messenger messenger,
             in IBinder binder, String srcAddr, int srcPort, String dstAddr);
 
+    void startNattKeepaliveWithFd(in Network network, in FileDescriptor fd, int resourceId,
+            int intervalSeconds, in Messenger messenger, in IBinder binder, String srcAddr,
+            String dstAddr);
+
     void stopKeepalive(in Network network, int slot);
 
     String getCaptivePortalServerUrl();

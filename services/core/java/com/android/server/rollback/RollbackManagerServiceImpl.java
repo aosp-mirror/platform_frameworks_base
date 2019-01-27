@@ -19,8 +19,6 @@ package com.android.server.rollback;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IIntentReceiver;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -30,17 +28,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.StringParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.storage.StorageManager;
@@ -60,13 +55,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Implementation of service that manages APK level rollbacks.
@@ -116,6 +108,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final Context mContext;
     private final HandlerThread mHandlerThread;
     private final Installer mInstaller;
+    private final RollbackPackageHealthObserver mPackageHealthObserver;
 
     RollbackManagerServiceImpl(Context context) {
         mContext = context;
@@ -127,6 +120,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mHandlerThread.start();
 
         mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
+
+        mPackageHealthObserver = new RollbackPackageHealthObserver(mContext);
 
         // Kick off loading of the rollback data from strorage in a background
         // thread.
@@ -202,48 +197,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public RollbackInfo getAvailableRollback(String packageName) {
+    public ParceledListSlice getAvailableRollbacks() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getAvailableRollback");
+                "getAvailableRollbacks");
 
-        RollbackData data = getRollbackForPackage(packageName);
-        if (data == null) {
-            return null;
-        }
-
-        // Note: The rollback for the package ought to be for the currently
-        // installed version, otherwise the rollback data is out of date. In
-        // that rare case, we'll check when we execute the rollback whether
-        // it's out of date or not, so no need to check package versions here.
-
-        for (PackageRollbackInfo info : data.packages) {
-            if (info.getPackageName().equals(packageName)) {
-                // TODO: Once the RollbackInfo API supports info about
-                // dependant packages, add that info here.
-                return new RollbackInfo(data.rollbackId, info);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public StringParceledListSlice getPackagesWithAvailableRollbacks() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getPackagesWithAvailableRollbacks");
-
-        final Set<String> packageNames = new HashSet<>();
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
+            List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                for (PackageRollbackInfo info : data.packages) {
-                    packageNames.add(info.getPackageName());
-                }
+                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages));
             }
+            return new ParceledListSlice<>(rollbacks);
         }
-        return new StringParceledListSlice(new ArrayList<>(packageNames));
     }
 
     @Override
@@ -281,18 +248,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void executeRollbackInternal(RollbackInfo rollback,
             String callerPackageName, IntentSender statusReceiver) {
-        String targetPackageName = rollback.targetPackage.getPackageName();
-        Log.i(TAG, "Initiating rollback of " + targetPackageName);
+        Log.i(TAG, "Initiating rollback");
 
-        // Get the latest RollbackData for the target package.
-        RollbackData data = getRollbackForPackage(targetPackageName);
+        RollbackData data = getRollbackForId(rollback.getRollbackId());
         if (data == null) {
-            sendFailure(statusReceiver, "No rollback available for package.");
+            sendFailure(statusReceiver, "Rollback unavailable");
             return;
         }
 
-        if (data.rollbackId != rollback.getRollbackId()) {
-            sendFailure(statusReceiver, "Rollback for package is out of date");
+        if (data.inProgress) {
+            sendFailure(statusReceiver, "Rollback for package is already in progress.");
             return;
         }
 
@@ -332,14 +297,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = context.getPackageManager();
         try {
             PackageInstaller packageInstaller = pm.getPackageInstaller();
-            String installerPackageName = pm.getInstallerPackageName(targetPackageName);
-            if (installerPackageName == null) {
-                sendFailure(statusReceiver, "Cannot find installer package");
-                return;
-            }
             PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            parentParams.setInstallerPackageName(installerPackageName);
             parentParams.setAllowDowngrade(true);
             parentParams.setMultiPackage();
             int parentSessionId = packageInstaller.createSession(parentParams);
@@ -348,6 +307,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (PackageRollbackInfo info : data.packages) {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
+                if (installerPackageName == null) {
+                    sendFailure(statusReceiver, "Cannot find installer package");
+                    return;
+                }
                 params.setInstallerPackageName(installerPackageName);
                 params.setAllowDowngrade(true);
                 int sessionId = packageInstaller.createSession(params);
@@ -371,30 +335,39 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
             final LocalIntentReceiver receiver = new LocalIntentReceiver(
                     (Intent result) -> {
-                        int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                                PackageInstaller.STATUS_FAILURE);
-                        if (status != PackageInstaller.STATUS_SUCCESS) {
-                            sendFailure(statusReceiver, "Rollback downgrade install failed: "
-                                    + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
-                            return;
-                        }
+                        getHandler().post(() -> {
+                            // We've now completed the rollback, so we mark it as no longer in
+                            // progress.
+                            data.inProgress = false;
 
-                        addRecentlyExecutedRollback(rollback);
-                        sendSuccess(statusReceiver);
+                            int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                                    PackageInstaller.STATUS_FAILURE);
+                            if (status != PackageInstaller.STATUS_SUCCESS) {
+                                sendFailure(statusReceiver,
+                                        "Rollback downgrade install failed: "
+                                        + result.getStringExtra(
+                                                PackageInstaller.EXTRA_STATUS_MESSAGE));
+                                return;
+                            }
 
-                        Intent broadcast = new Intent(Intent.ACTION_PACKAGE_ROLLBACK_EXECUTED);
+                            addRecentlyExecutedRollback(rollback);
+                            sendSuccess(statusReceiver);
 
-                        // TODO: This call emits the warning "Calling a method in the
-                        // system process without a qualified user". Fix that.
-                        // TODO: Limit this to receivers holding the
-                        // MANAGE_ROLLBACKS permission?
-                        mContext.sendBroadcast(broadcast);
+                            Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
+
+                            // TODO: This call emits the warning "Calling a method in the
+                            // system process without a qualified user". Fix that.
+                            // TODO: Limit this to receivers holding the
+                            // MANAGE_ROLLBACKS permission?
+                            mContext.sendBroadcast(broadcast);
+                        });
                     }
             );
 
+            data.inProgress = true;
             parentSession.commit(receiver.getIntentSender());
         } catch (IOException e) {
-            Log.e(TAG, "Unable to roll back " + targetPackageName, e);
+            Log.e(TAG, "Rollback failed", e);
             sendFailure(statusReceiver, "IOException: " + e.toString());
             return;
         }
@@ -525,9 +498,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             boolean changed = false;
             while (iter.hasNext()) {
                 RollbackInfo rollback = iter.next();
-                if (packageName.equals(rollback.targetPackage.getPackageName())) {
-                    iter.remove();
-                    changed = true;
+                for (PackageRollbackInfo info : rollback.getPackages()) {
+                    if (packageName.equals(info.getPackageName())) {
+                        iter.remove();
+                        changed = true;
+                        break;
+                    }
                 }
             }
 
@@ -774,10 +750,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         getHandler().post(() -> {
             PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-            // TODO(narayan): Should we make sure we're in the middle of a session commit for a
-            // a package with this package name ? Otherwise it's possible we may roll back data
-            // for some other downgrade.
-            if (getRollbackForPackage(packageName) == null) {
+            final RollbackData rollbackData = getRollbackForPackage(packageName);
+            if (rollbackData == null) {
+                pmi.finishPackageInstall(token, false);
+                return;
+            }
+
+            if (!rollbackData.inProgress) {
+                Log.e(TAG, "Request to restore userData for: " + packageName
+                        + ", but no rollback in progress.");
                 pmi.finishPackageInstall(token, false);
                 return;
             }
@@ -803,26 +784,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
             pmi.finishPackageInstall(token, false);
         });
-    }
-
-    private class LocalIntentReceiver {
-        final Consumer<Intent> mConsumer;
-
-        LocalIntentReceiver(Consumer<Intent> consumer) {
-            mConsumer = consumer;
-        }
-
-        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
-            @Override
-            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
-                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
-                getHandler().post(() -> mConsumer.accept(intent));
-            }
-        };
-
-        public IntentSender getIntentSender() {
-            return new IntentSender((IIntentSender) mLocalSender);
-        }
     }
 
     /**
@@ -891,7 +852,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             ensureRollbackDataLoadedLocked();
                             mAvailableRollbacks.add(data);
                         }
-
+                        // TODO(zezeozue): Provide API to explicitly start observing instead
+                        // of doing this for all rollbacks. If we do this for all rollbacks,
+                        // should document in PackageInstaller.SessionParams#setEnableRollback
+                        // After enabling and commiting any rollback, observe packages and
+                        // prepare to rollback if packages crashes too frequently.
+                        List<String> packages = new ArrayList<>();
+                        for (int i = 0; i < data.packages.size(); i++) {
+                            packages.add(data.packages.get(i).getPackageName());
+                        }
+                        mPackageHealthObserver.startObservingHealth(packages,
+                                ROLLBACK_LIFETIME_DURATION_MILLIS);
                         scheduleExpiration(ROLLBACK_LIFETIME_DURATION_MILLIS);
                     } catch (IOException e) {
                         Log.e(TAG, "Unable to enable rollback", e);
@@ -922,6 +893,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     if (info.getPackageName().equals(packageName)) {
                         return data;
                     }
+                }
+            }
+        }
+        return null;
+    }
+
+    /*
+     * Returns the RollbackData, if any, for an available rollback with the
+     * given rollbackId.
+     */
+    private RollbackData getRollbackForId(int rollbackId) {
+        synchronized (mLock) {
+            // TODO: Have ensureRollbackDataLoadedLocked return the list of
+            // available rollbacks, to hopefully avoid forgetting to call it?
+            ensureRollbackDataLoadedLocked();
+            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                RollbackData data = mAvailableRollbacks.get(i);
+                if (data.rollbackId == rollbackId) {
+                    return data;
                 }
             }
         }

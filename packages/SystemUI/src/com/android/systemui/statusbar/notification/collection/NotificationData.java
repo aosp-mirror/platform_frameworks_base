@@ -333,6 +333,7 @@ public class NotificationData {
                         mGroupManager.onEntryUpdated(entry, oldSbn);
                     }
                     entry.populateFromRanking(mTmpRanking);
+                    entry.setIsHighPriority(isHighPriority(entry.notification));
                 }
             }
         }

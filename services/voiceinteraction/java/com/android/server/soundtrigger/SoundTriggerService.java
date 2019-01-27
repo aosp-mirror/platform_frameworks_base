@@ -939,11 +939,7 @@ public class SoundTriggerService extends SystemService {
             runOrAddOperation(new Operation(
                     // always execute:
                     () -> {
-                        // Don't remove the callback if multiple triggers are allowed or
-                        // if this event was triggered by a getModelState request
-                        if (!mRecognitionConfig.allowMultipleTriggers
-                                && event.status
-                                    != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
+                        if (!mRecognitionConfig.allowMultipleTriggers) {
                             // Unregister this remoteService once op is done
                             synchronized (mCallbacksLock) {
                                 mCallbacks.remove(mPuuid.getUuid());

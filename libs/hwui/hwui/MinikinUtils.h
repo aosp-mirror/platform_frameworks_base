@@ -63,27 +63,29 @@ public:
     // f is a functor of type void f(size_t start, size_t end);
     template <typename F>
     ANDROID_API static void forFontRun(const minikin::Layout& layout, Paint* paint, F& f) {
-        float saveSkewX = paint->getTextSkewX();
-        bool savefakeBold = paint->isFakeBoldText();
+        float saveSkewX = paint->getSkFont().getSkewX();
+        bool savefakeBold = paint->getSkFont().isEmbolden();
         const minikin::MinikinFont* curFont = nullptr;
         size_t start = 0;
         size_t nGlyphs = layout.nGlyphs();
         for (size_t i = 0; i < nGlyphs; i++) {
             const minikin::MinikinFont* nextFont = layout.getFont(i);
             if (i > 0 && nextFont != curFont) {
-                MinikinFontSkia::populateSkPaint(paint, curFont, layout.getFakery(start));
+                SkFont* skfont = &paint->getSkFont();
+                MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));
                 f(start, i);
-                paint->setTextSkewX(saveSkewX);
-                paint->setFakeBoldText(savefakeBold);
+                skfont->setSkewX(saveSkewX);
+                skfont->setEmbolden(savefakeBold);
                 start = i;
             }
             curFont = nextFont;
         }
         if (nGlyphs > start) {
-            MinikinFontSkia::populateSkPaint(paint, curFont, layout.getFakery(start));
+            SkFont* skfont = &paint->getSkFont();
+            MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));
             f(start, nGlyphs);
-            paint->setTextSkewX(saveSkewX);
-            paint->setFakeBoldText(savefakeBold);
+            skfont->setSkewX(saveSkewX);
+            skfont->setEmbolden(savefakeBold);
         }
     }
 };

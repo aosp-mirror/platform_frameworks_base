@@ -20,6 +20,7 @@ import android.annotation.UserIdInt;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.res.Configuration;
+import android.os.UserHandle;
 
 import java.util.List;
 import java.util.Set;
@@ -270,4 +271,40 @@ public abstract class UsageStatsManagerInternal {
      * @param userId which user the app is associated with
      */
     public abstract void reportExemptedSyncStart(String packageName, @UserIdInt int userId);
+
+    /**
+     * Returns an object describing the app usage limit for the given package which was set via
+     * {@link UsageStatsManager#registerAppUsageLimitObserver}.
+     * If there are multiple limits that apply to the package, the one with the smallest
+     * time remaining will be returned.
+     *
+     * @param packageName name of the package whose app usage limit will be returned
+     * @param user the user associated with the limit
+     * @return an {@link AppUsageLimitData} object describing the app time limit containing
+     * the given package, with the smallest time remaining.
+     */
+    public abstract AppUsageLimitData getAppUsageLimit(String packageName, UserHandle user);
+
+    /** A class which is used to share the usage limit data for an app or a group of apps. */
+    public static class AppUsageLimitData {
+        private final boolean mGroupLimit;
+        private final long mTotalUsageLimit;
+        private final long mUsageRemaining;
+
+        public AppUsageLimitData(boolean groupLimit, long totalUsageLimit, long usageRemaining) {
+            this.mGroupLimit = groupLimit;
+            this.mTotalUsageLimit = totalUsageLimit;
+            this.mUsageRemaining = usageRemaining;
+        }
+
+        public boolean isGroupLimit() {
+            return mGroupLimit;
+        }
+        public long getTotalUsageLimit() {
+            return mTotalUsageLimit;
+        }
+        public long getUsageRemaining() {
+            return mUsageRemaining;
+        }
+    }
 }

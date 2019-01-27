@@ -19,7 +19,7 @@ package com.android.server.audio;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 
-import com.android.server.audio.AudioService.WiredDeviceConnectionState;
+import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
 
 
 public class AudioServiceEvents {
@@ -89,9 +89,11 @@ public class AudioServiceEvents {
     }
 
     final static class VolumeEvent extends AudioEventLogger.Event {
-        final static int VOL_ADJUST_SUGG_VOL = 0;
-        final static int VOL_ADJUST_STREAM_VOL = 1;
-        final static int VOL_SET_STREAM_VOL = 2;
+        static final int VOL_ADJUST_SUGG_VOL = 0;
+        static final int VOL_ADJUST_STREAM_VOL = 1;
+        static final int VOL_SET_STREAM_VOL = 2;
+        static final int VOL_SET_HEARING_AID_VOL = 3;
+        static final int VOL_SET_AVRCP_VOL = 4;
 
         final int mOp;
         final int mStream;
@@ -105,6 +107,24 @@ public class AudioServiceEvents {
             mVal1 = val1;
             mVal2 = val2;
             mCaller = caller;
+        }
+
+        VolumeEvent(int op, int index, int gainDb) {
+            mOp = op;
+            mVal1 = index;
+            mVal2 = gainDb;
+            //unused
+            mStream = -1;
+            mCaller = null;
+        }
+
+        VolumeEvent(int op, int index) {
+            mOp = op;
+            mVal1 = index;
+            //unused
+            mVal2 = 0;
+            mStream = -1;
+            mCaller = null;
         }
 
         @Override
@@ -130,6 +150,15 @@ public class AudioServiceEvents {
                             .append(" index:").append(mVal1)
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
                             .append(") from ").append(mCaller)
+                            .toString();
+                case VOL_SET_HEARING_AID_VOL:
+                    return new StringBuilder("setHearingAidVolume:")
+                            .append(" index:").append(mVal1)
+                            .append(" gain dB:").append(mVal2)
+                            .toString();
+                case VOL_SET_AVRCP_VOL:
+                    return new StringBuilder("setAvrcpVolume:")
+                            .append(" index:").append(mVal1)
                             .toString();
                default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }

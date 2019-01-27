@@ -2375,8 +2375,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_ENABLE_ROLLBACK =
             "android.intent.action.PACKAGE_ENABLE_ROLLBACK";
     /**
-     * Broadcast Action: An existing version of an application package has been
-     * rolled back to a previous version.
+     * Broadcast Action: A rollback has been committed.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -2385,8 +2384,8 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_ROLLBACK_EXECUTED =
-            "android.intent.action.PACKAGE_ROLLBACK_EXECUTED";
+    public static final String ACTION_ROLLBACK_COMMITTED =
+            "android.intent.action.ROLLBACK_COMMITTED";
     /**
      * @hide
      * Broadcast Action: Ask system services if there is any reason to
@@ -3046,6 +3045,13 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MEDIA_SCANNER_SCAN_FILE = "android.intent.action.MEDIA_SCANNER_SCAN_FILE";
+
+    /**
+     * Broadcast Action:  Request the media scanner to scan a storage volume and add it to the media database.
+     * The path to the storage volume is contained in the Intent.mData field.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MEDIA_SCANNER_SCAN_VOLUME = "android.intent.action.MEDIA_SCANNER_SCAN_VOLUME";
 
    /**
      * Broadcast Action:  The "Media Button" was pressed.  Includes a single
@@ -9969,9 +9975,21 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
+    public void writeToProto(ProtoOutputStream proto) {
+        // Same input parameters that toString() gives to toShortString().
+        writeToProtoWithoutFieldId(proto, true, true, true, false);
+    }
+
+    /** @hide */
     public void writeToProto(ProtoOutputStream proto, long fieldId, boolean secure, boolean comp,
             boolean extras, boolean clip) {
         long token = proto.start(fieldId);
+        writeToProtoWithoutFieldId(proto, secure, comp, extras, clip);
+        proto.end(token);
+    }
+
+    private void writeToProtoWithoutFieldId(ProtoOutputStream proto, boolean secure, boolean comp,
+            boolean extras, boolean clip) {
         if (mAction != null) {
             proto.write(IntentProto.ACTION, mAction);
         }
@@ -10016,7 +10034,6 @@ public class Intent implements Parcelable, Cloneable {
         if (mSelector != null) {
             proto.write(IntentProto.SELECTOR, mSelector.toShortString(secure, comp, extras, clip));
         }
-        proto.end(token);
     }
 
     /**

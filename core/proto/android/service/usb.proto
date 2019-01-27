@@ -228,6 +228,15 @@ message UsbPortProto {
     repeated Mode supported_modes = 2;
 }
 
+/* Same as android.hardware.usb.V1_2.Constants.ContaminantPresenceStatus */
+enum ContaminantPresenceStatus {
+    CONTAMINANT_STATUS_UNKNOWN = 0;
+    CONTAMINANT_STATUS_NOT_SUPPORTED = 1;
+    CONTAMINANT_STATUS_DISABLED = 2;
+    CONTAMINANT_STATUS_NOT_DETECTED = 3;
+    CONTAMINANT_STATUS_DETECTED = 4;
+}
+
 message UsbPortStatusProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -250,6 +259,7 @@ message UsbPortStatusProto {
     optional PowerRole power_role = 3;
     optional DataRole data_role = 4;
     repeated UsbPortStatusRoleCombinationProto role_combinations = 5;
+    optional ContaminantPresenceStatus contaminant_presence_status = 6;
 }
 
 message UsbPortStatusRoleCombinationProto {

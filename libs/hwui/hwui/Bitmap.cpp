@@ -133,12 +133,11 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) 
 }
 
 
-sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer, sk_sp<SkColorSpace> colorSpace,
-                                 SkAlphaType alphaType, BitmapPalette palette) {
-    // As we will be effectively texture-sampling the buffer (using either EGL or Vulkan), we can
-    // view the format as RGBA8888.
+sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer, SkColorType colorType,
+                                 sk_sp<SkColorSpace> colorSpace, SkAlphaType alphaType,
+                                 BitmapPalette palette) {
     SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
-                                         kRGBA_8888_SkColorType, alphaType, colorSpace);
+                                         colorType, alphaType, colorSpace);
     return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info, palette));
 }
 

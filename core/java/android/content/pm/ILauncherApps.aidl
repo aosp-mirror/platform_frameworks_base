@@ -23,6 +23,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.LauncherApps;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
@@ -55,6 +56,9 @@ interface ILauncherApps {
             String callingPackage, in ComponentName component, in UserHandle user);
     ApplicationInfo getApplicationInfo(
             String callingPackage, String packageName, int flags, in UserHandle user);
+
+    LauncherApps.AppUsageLimit getAppUsageLimit(String callingPackage, String packageName,
+            in UserHandle user);
 
     ParceledListSlice getShortcuts(String callingPackage, long changedSince, String packageName,
             in List shortcutIds, in ComponentName componentName, int flags, in UserHandle user);

@@ -13395,11 +13395,22 @@ public class BatteryStatsImpl extends BatteryStats {
             mResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.BATTERY_STATS_CONSTANTS),
                     false /* notifyForDescendants */, this);
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY),
+                    false /* notifyForDescendants */, this);
             updateConstants();
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(
+                    Settings.Global.getUriFor(
+                            Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY))) {
+                synchronized (BatteryStatsImpl.this) {
+                    updateBatteryChargedDelayMsLocked();
+                }
+                return;
+            }
             updateConstants();
         }
 
@@ -13443,10 +13454,19 @@ public class BatteryStatsImpl extends BatteryStats {
                                 DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB
                                 : DEFAULT_MAX_HISTORY_BUFFER_KB)
                         * 1024;
-                BATTERY_CHARGED_DELAY_MS = mParser.getInt(
-                        KEY_BATTERY_CHARGED_DELAY_MS,
-                        DEFAULT_BATTERY_CHARGED_DELAY_MS);
+                updateBatteryChargedDelayMsLocked();
             }
+        }
+
+        private void updateBatteryChargedDelayMsLocked() {
+            // a negative value indicates that we should ignore this override
+            final int delay = Settings.Global.getInt(mResolver,
+                    Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
+                    -1);
+
+            BATTERY_CHARGED_DELAY_MS = delay >= 0 ? delay : mParser.getInt(
+                    KEY_BATTERY_CHARGED_DELAY_MS,
+                    DEFAULT_BATTERY_CHARGED_DELAY_MS);
         }
 
         private void updateTrackCpuTimesByProcStateLocked(boolean wasEnabled, boolean isEnabled) {

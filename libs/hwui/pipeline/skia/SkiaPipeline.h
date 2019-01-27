@@ -116,7 +116,6 @@ protected:
 
     renderthread::RenderThread& mRenderThread;
     SkColorType mSurfaceColorType;
-    SkColorSpace::Gamut mSurfaceColorGamut;
     sk_sp<SkColorSpace> mSurfaceColorSpace;
 
 private:

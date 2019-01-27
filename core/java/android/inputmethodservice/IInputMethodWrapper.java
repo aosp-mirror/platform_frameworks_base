@@ -179,19 +179,24 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 return;
             case DO_START_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final int missingMethods = msg.arg1;
-                final boolean restarting = msg.arg2 != 0;
                 final IBinder startInputToken = (IBinder) args.arg1;
                 final IInputContext inputContext = (IInputContext) args.arg2;
                 final EditorInfo info = (EditorInfo) args.arg3;
                 final AtomicBoolean isUnbindIssued = (AtomicBoolean) args.arg4;
+                SomeArgs moreArgs = (SomeArgs) args.arg5;
                 final InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(
-                                mTarget, inputContext, missingMethods, isUnbindIssued) : null;
+                                mTarget, inputContext, moreArgs.argi3, isUnbindIssued)
+                        : null;
                 info.makeCompatible(mTargetSdkVersion);
-                inputMethod.dispatchStartInputWithToken(ic, info, restarting /* restarting */,
-                        startInputToken);
+                inputMethod.dispatchStartInputWithToken(
+                        ic,
+                        info,
+                        moreArgs.argi1 == 1 /* restarting */,
+                        startInputToken,
+                        moreArgs.argi2 == 1 /* shouldPreRenderIme */);
                 args.recycle();
+                moreArgs.recycle();
                 return;
             }
             case DO_CREATE_SESSION: {
@@ -291,14 +296,17 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
-            EditorInfo attribute, boolean restarting) {
+            EditorInfo attribute, boolean restarting, boolean shouldPreRenderIme) {
         if (mIsUnbindIssued == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mIsUnbindIssued = new AtomicBoolean();
         }
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOOO(DO_START_INPUT,
-                missingMethods, restarting ? 1 : 0, startInputToken, inputContext, attribute,
-                mIsUnbindIssued));
+        SomeArgs args = SomeArgs.obtain();
+        args.argi1 = restarting ? 1 : 0;
+        args.argi2 = shouldPreRenderIme ? 1 : 0;
+        args.argi3 = missingMethods;
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOO(
+                DO_START_INPUT, startInputToken, inputContext, attribute, mIsUnbindIssued, args));
     }
 
     @BinderThread

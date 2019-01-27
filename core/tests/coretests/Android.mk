@@ -49,6 +49,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
     telephony-common \
+    testables \
     org.apache.http.legacy \
     android.test.base \
     android.test.mock \

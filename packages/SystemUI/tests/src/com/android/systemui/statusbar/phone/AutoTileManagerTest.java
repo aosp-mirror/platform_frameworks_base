@@ -85,7 +85,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
-                ColorDisplayController.AUTO_MODE_TWILIGHT);
+                ColorDisplayManager.AUTO_MODE_TWILIGHT);
         verify(mQsTileHost).addTile("night");
     }
 
@@ -95,7 +95,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
-                ColorDisplayController.AUTO_MODE_CUSTOM);
+                ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
         verify(mQsTileHost).addTile("night");
     }
 
@@ -105,7 +105,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             return;
         }
         mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
-                ColorDisplayController.AUTO_MODE_DISABLED);
+                ColorDisplayManager.AUTO_MODE_DISABLED);
         verify(mQsTileHost, never()).addTile("night");
     }
 }

@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowInsets.Type.ime;
+
 import android.annotation.NonNull;
 import android.view.WindowInsets.Type.InsetType;
 
@@ -32,11 +34,11 @@ public interface WindowInsetsController {
      * <p>
      * Note that if the window currently doesn't have control over a certain type, it will apply the
      * change as soon as the window gains control. The app can listen to the event by observing
-     * {@link View#onApplyWindowInsets} and checking visibility with "TODO at method" in
-     * {@link WindowInsets}.
+     * {@link View#onApplyWindowInsets} and checking visibility with {@link WindowInsets#isVisible}.
      *
      * @param types A bitmask of {@link WindowInsets.Type.InsetType} specifying what windows the app
      *              would like to make appear on screen.
+     * @hide
      */
     void show(@InsetType int types);
 
@@ -45,11 +47,11 @@ public interface WindowInsetsController {
      * <p>
      * Note that if the window currently doesn't have control over a certain type, it will apply the
      * change as soon as the window gains control. The app can listen to the event by observing
-     * {@link View#onApplyWindowInsets} and checking visibility with "TODO at method" in
-     * {@link WindowInsets}.
+     * {@link View#onApplyWindowInsets} and checking visibility with {@link WindowInsets#isVisible}.
      *
      * @param types A bitmask of {@link WindowInsets.Type.InsetType} specifying what windows the app
      *              would like to make disappear.
+     * @hide
      */
     void hide(@InsetType int types);
 
@@ -60,7 +62,50 @@ public interface WindowInsetsController {
      * @param types The {@link InsetType}s the application has requested to control.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
+     * @hide
      */
     void controlWindowInsetsAnimation(@InsetType int types,
             @NonNull WindowInsetsAnimationControlListener listener);
+
+    /**
+     * Lets the application control the animation for showing the IME in a frame-by-frame manner by
+     * modifying the position of the IME when it's causing insets.
+     *
+     * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
+     *                 IME are ready to be controlled, among other callbacks.
+     */
+    default void controlInputMethodAnimation(
+            @NonNull WindowInsetsAnimationControlListener listener) {
+        controlWindowInsetsAnimation(ime(), listener);
+    }
+
+    /**
+     * Makes the IME appear on screen.
+     * <p>
+     * Note that if the window currently doesn't have control over the IME, because it doesn't have
+     * focus, it will apply the change as soon as the window gains control. The app can listen to
+     * the event by observing {@link View#onApplyWindowInsets} and checking visibility with
+     * {@link WindowInsets#isVisible}.
+     *
+     * @see #controlInputMethodAnimation(WindowInsetsAnimationControlListener)
+     * @see #hideInputMethod()
+     */
+    default void showInputMethod() {
+        show(ime());
+    }
+
+    /**
+     * Makes the IME disappear on screen.
+     * <p>
+     * Note that if the window currently doesn't have control over IME, because it doesn't have
+     * focus, it will apply the change as soon as the window gains control. The app can listen to
+     * the event by observing {@link View#onApplyWindowInsets} and checking visibility with
+     * {@link WindowInsets#isVisible}.
+     *
+     * @see #controlInputMethodAnimation(WindowInsetsAnimationControlListener)
+     * @see #showInputMethod()
+     */
+    default void hideInputMethod() {
+        hide(ime());
+    }
 }

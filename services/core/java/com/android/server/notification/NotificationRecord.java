@@ -690,6 +690,8 @@ public final class NotificationRecord {
                                     importance));
                 }
             }
+            // We have now gotten all the information out of the adjustments and can forget them.
+            mAdjustments.clear();
         }
     }
 

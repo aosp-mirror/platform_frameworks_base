@@ -608,9 +608,39 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_PROMOTE_WFC_ON_CALL_FAIL_BOOL =
             "carrier_promote_wfc_on_call_fail_bool";
 
-    /** Flag specifying whether provisioning is required for VOLTE. */
+    /**
+     * Flag specifying whether provisioning is required for VoLTE, Video Telephony, and WiFi
+     * Calling.
+     */
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
             = "carrier_volte_provisioning_required_bool";
+
+    /**
+     * Flag indicating whether or not the IMS MmTel UT capability requires carrier provisioning
+     * before it can be set as enabled.
+     *
+     * If true, the UT capability will be set to false for the newly loaded subscription
+     * and will require the carrier provisioning app to set the persistent provisioning result.
+     * If false, the platform will not wait for provisioning status updates for the UT capability
+     * and enable the UT over IMS capability for the subscription when the subscription is loaded.
+     *
+     * The default value for this key is {@code false}.
+     */
+    public static final String KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL =
+            "carrier_ut_provisioning_required_bool";
+
+    /**
+     * Flag indicating whether or not the carrier supports Supplementary Services over the UT
+     * interface for this subscription.
+     *
+     * If true, the device will use Supplementary Services over UT when provisioned (see
+     * {@link #KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL}). If false, this device will fallback to
+     * circuit switch for supplementary services and will disable this capability for IMS entirely.
+     *
+     * The default value for this key is {@code true}.
+     */
+    public static final String KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL =
+            "carrier_supports_ss_over_ut_bool";
 
     /**
      * Flag specifying if WFC provisioning depends on VoLTE provisioning.
@@ -2575,6 +2605,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);

@@ -562,7 +562,7 @@ std::string AssetManager2::GetLastResourceResolution() const {
   if (package != nullptr) {
     ToResourceName(last_resolution.type_string_ref,
                    last_resolution.entry_string_ref,
-                   package,
+                   package->GetPackageName(),
                    &resource_name);
     resource_name_string = ToFormattedResourceString(&resource_name);
   }
@@ -607,15 +607,25 @@ bool AssetManager2::GetResourceName(uint32_t resid, ResourceName* out_name) cons
     return false;
   }
 
-  const LoadedPackage* package =
-      apk_assets_[cookie]->GetLoadedArsc()->GetPackageById(get_package_id(resid));
-  if (package == nullptr) {
+  const uint8_t package_idx = package_ids_[get_package_id(resid)];
+  if (package_idx == 0xff) {
+    LOG(ERROR) << base::StringPrintf("No package ID %02x found for ID 0x%08x.",
+                                     get_package_id(resid), resid);
     return false;
   }
 
+  const PackageGroup& package_group = package_groups_[package_idx];
+  auto cookie_iter = std::find(package_group.cookies_.begin(),
+                               package_group.cookies_.end(), cookie);
+  if (cookie_iter == package_group.cookies_.end()) {
+    return false;
+  }
+
+  long package_pos = std::distance(package_group.cookies_.begin(), cookie_iter);
+  const LoadedPackage* package = package_group.packages_[package_pos].loaded_package_;
   return ToResourceName(entry.type_string_ref,
                         entry.entry_string_ref,
-                        package,
+                        package->GetPackageName(),
                         out_name);
 }
 

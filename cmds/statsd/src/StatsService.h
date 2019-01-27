@@ -211,6 +211,11 @@ public:
     virtual Return<void> reportSpeechDspStat(
             const SpeechDspStat& speechDspStat) override;
 
+    /**
+     * Binder call to get vendor atom.
+     */
+    virtual Return<void> reportVendorAtom(const VendorAtom& vendorAtom) override;
+
     /** IBinder::DeathRecipient */
     virtual void binderDied(const wp<IBinder>& who) override;
 

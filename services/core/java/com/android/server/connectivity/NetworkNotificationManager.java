@@ -16,13 +16,16 @@
 
 package com.android.server.connectivity;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
@@ -31,14 +34,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.widget.Toast;
+
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-
-import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 public class NetworkNotificationManager {
 
@@ -47,7 +47,8 @@ public class NetworkNotificationManager {
         LOST_INTERNET(SystemMessage.NOTE_NETWORK_LOST_INTERNET),
         NETWORK_SWITCH(SystemMessage.NOTE_NETWORK_SWITCH),
         NO_INTERNET(SystemMessage.NOTE_NETWORK_NO_INTERNET),
-        SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN);
+        SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN),
+        LOGGED_IN(SystemMessage.NOTE_NETWORK_LOGGED_IN);
 
         public final int eventId;
 
@@ -192,6 +193,9 @@ public class NetworkNotificationManager {
                     details = r.getString(R.string.network_available_sign_in_detailed, name);
                     break;
             }
+        } else if (notifyType == NotificationType.LOGGED_IN) {
+            title = WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID());
+            details = r.getString(R.string.captive_portal_logged_in_detailed);
         } else if (notifyType == NotificationType.NETWORK_SWITCH) {
             String fromTransport = getTransportName(transportType);
             String toTransport = getTransportName(getFirstTransportType(switchToNai));
@@ -237,6 +241,18 @@ public class NetworkNotificationManager {
         } catch (NullPointerException npe) {
             Slog.d(TAG, "setNotificationVisible: visible notificationManager error", npe);
         }
+    }
+
+    /**
+     * Clear the notification with the given id, only if it matches the given type.
+     */
+    public void clearNotification(int id, NotificationType notifyType) {
+        final int previousEventId = mNotificationTypeMap.get(id);
+        final NotificationType previousNotifyType = NotificationType.getFromId(previousEventId);
+        if (notifyType != previousNotifyType) {
+            return;
+        }
+        clearNotification(id);
     }
 
     public void clearNotification(int id) {
@@ -290,6 +306,10 @@ public class NetworkNotificationManager {
         return (t != null) ? t.name() : "UNKNOWN";
     }
 
+    /**
+     * A notification with a higher number will take priority over a notification with a lower
+     * number.
+     */
     private static int priority(NotificationType t) {
         if (t == null) {
             return 0;
@@ -302,6 +322,7 @@ public class NetworkNotificationManager {
             case NETWORK_SWITCH:
                 return 2;
             case LOST_INTERNET:
+            case LOGGED_IN:
                 return 1;
             default:
                 return 0;

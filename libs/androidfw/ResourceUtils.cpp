@@ -48,12 +48,12 @@ bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, Strin
          !(has_type_separator && out_type->empty());
 }
 
-bool ToResourceName(StringPoolRef& type_string_ref,
-                    StringPoolRef& entry_string_ref,
-                    const LoadedPackage* package,
+bool ToResourceName(const StringPoolRef& type_string_ref,
+                    const StringPoolRef& entry_string_ref,
+                    const StringPiece& package_name,
                     AssetManager2::ResourceName* out_name) {
-  out_name->package = package->GetPackageName().data();
-  out_name->package_len = package->GetPackageName().size();
+  out_name->package = package_name.data();
+  out_name->package_len = package_name.size();
 
   out_name->type = type_string_ref.string8(&out_name->type_len);
   out_name->type16 = nullptr;

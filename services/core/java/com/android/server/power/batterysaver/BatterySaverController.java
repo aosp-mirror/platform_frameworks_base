@@ -104,6 +104,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     public static final int REASON_SETTING_CHANGED = 8;
     public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON = 9;
     public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF = 10;
+    public static final int REASON_STICKY_RESTORE_OFF = 13;
 
     /**
      * Plugin interface. All methods are guaranteed to be called on the same (handler) thread.

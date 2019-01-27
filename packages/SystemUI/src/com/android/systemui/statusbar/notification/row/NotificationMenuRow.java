@@ -23,7 +23,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -78,6 +77,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private ArrayList<MenuItem> mRightMenuItems;
     private final Map<View, MenuItem> mMenuItemsByView = new ArrayMap<>();
     private OnMenuEventListener mMenuListener;
+    private boolean mDismissRtl;
+    private boolean mIsForeground;
 
     private ValueAnimator mFadeAnimator;
     private boolean mAnimating;
@@ -238,6 +239,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     }
 
     private void createMenuViews(boolean resetState, final boolean isForeground) {
+        mIsForeground = isForeground;
+
         final Resources res = mContext.getResources();
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
@@ -250,12 +253,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         }
         mAppOpsItem = createAppOpsItem(mContext);
         if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            int channelImportance = mParent.getEntry().channel.getImportance();
-            int effectiveImportance =
-                    channelImportance == NotificationManager.IMPORTANCE_UNSPECIFIED
-                            ? mParent.getEntry().importance : channelImportance;
-            mInfoItem = createInfoItem(mContext,
-                    effectiveImportance < NotificationManager.IMPORTANCE_DEFAULT);
+            mInfoItem = createInfoItem(mContext, !mParent.getEntry().isHighPriority());
         } else {
             mInfoItem = createInfoItem(mContext);
         }
@@ -268,10 +266,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mRightMenuItems.add(mAppOpsItem);
             mLeftMenuItems.addAll(mRightMenuItems);
         } else {
-            mRightMenuItems.add(mInfoItem);
-            mRightMenuItems.add(mAppOpsItem);
+            ArrayList<MenuItem> menuItems = mDismissRtl ? mLeftMenuItems : mRightMenuItems;
+            menuItems.add(mInfoItem);
+            menuItems.add(mAppOpsItem);
             if (!isForeground) {
-                mRightMenuItems.add(mSnoozeItem);
+                menuItems.add(mSnoozeItem);
             }
         }
 
@@ -727,6 +726,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public boolean canBeDismissed() {
         return getParent().canViewBeDismissed();
+    }
+
+    @Override
+    public void setDismissRtl(boolean dismissRtl) {
+        mDismissRtl = dismissRtl;
+        if (mMenuContainer != null) {
+            createMenuViews(true, mIsForeground);
+        }
     }
 
     public static class NotificationMenuItem implements MenuItem {

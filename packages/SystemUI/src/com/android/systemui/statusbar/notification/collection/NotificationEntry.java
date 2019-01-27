@@ -153,6 +153,12 @@ public final class NotificationEntry {
      */
     private boolean mUserDismissedBubble;
 
+    /**
+     * Whether this notification is shown to the user as a high priority notification: visible on
+     * the lock screen/status bar and in the top section in the shade.
+     */
+    private boolean mHighPriority;
+
     public NotificationEntry(StatusBarNotification n) {
         this(n, null);
     }
@@ -189,6 +195,14 @@ public final class NotificationEntry {
 
     public boolean hasInterrupted() {
         return interruption;
+    }
+
+    public boolean isHighPriority() {
+        return mHighPriority;
+    }
+
+    public void setIsHighPriority(boolean highPriority) {
+        this.mHighPriority = highPriority;
     }
 
     public void setIsBubble(boolean bubbleable) {

@@ -163,18 +163,18 @@ class InsetsStateController {
     }
 
     private void onControlChanged(int type, @Nullable WindowState win) {
-        if (sNewInsetsMode == NEW_INSETS_MODE_NONE) {
-            return;
-        }
         final WindowState previous = mTypeWinControlMap.get(type);
         if (win == previous) {
             return;
         }
-        final InsetsSourceProvider controller = mControllers.get(type);
+        final InsetsSourceProvider controller = getSourceProvider(type);
         if (controller == null) {
             return;
         }
-        controller.updateControlForTarget(win);
+        if (!controller.isControllable()) {
+            return;
+        }
+        controller.updateControlForTarget(win, false /* force */);
         if (previous != null) {
             removeFromControlMaps(previous, type);
             mPendingControlChanged.add(previous);

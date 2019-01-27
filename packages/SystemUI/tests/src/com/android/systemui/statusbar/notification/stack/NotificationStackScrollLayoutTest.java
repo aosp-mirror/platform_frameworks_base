@@ -352,7 +352,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                     RETURNS_DEEP_STUBS);
             String key = Integer.toString(i);
             when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(mNotificationData.isHighPriority(row.getStatusBarNotification())).thenReturn(true);
+            when(row.getEntry().isHighPriority()).thenReturn(true);
             when(mStackScroller.getChildAt(i)).thenReturn(row);
         }
 
@@ -368,8 +368,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                     RETURNS_DEEP_STUBS);
             String key = Integer.toString(i);
             when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(mNotificationData.isHighPriority(row.getStatusBarNotification()))
-                    .thenReturn(false);
+            when(row.getEntry().isHighPriority()).thenReturn(false);
             when(mStackScroller.getChildAt(i)).thenReturn(row);
         }
 
@@ -385,8 +384,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                     RETURNS_DEEP_STUBS);
             String key = Integer.toString(i);
             when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(mNotificationData.isHighPriority(row.getStatusBarNotification()))
-                    .thenReturn(i < 3);
+            when(row.getEntry().isHighPriority()).thenReturn(i < 3);
             when(mStackScroller.getChildAt(i)).thenReturn(row);
         }
 

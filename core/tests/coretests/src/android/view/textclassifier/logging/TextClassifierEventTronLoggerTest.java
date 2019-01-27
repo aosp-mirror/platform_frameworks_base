@@ -18,9 +18,10 @@ package android.view.textclassifier.logging;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_TEXT_SELECTION_SMART_SHARE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.CONVERSATION_ACTIONS;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_SELECTION_ENTITY_TYPE;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_SELECTION_WIDGET_TYPE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_EVENT_TIME;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_FIRST_ENTITY_TYPE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_SCORE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_TEXT_CLASSIFIER_WIDGET_TYPE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -71,7 +72,8 @@ public class TextClassifierEventTronLoggerTest {
                 new TextClassifierEvent.Builder(
                         TextClassifierEvent.CATEGORY_CONVERSATION_ACTIONS,
                         TextClassifierEvent.TYPE_SMART_ACTION)
-                        .setEntityType(ConversationAction.TYPE_CALL_PHONE)
+                        .setEntityTypes(ConversationAction.TYPE_CALL_PHONE)
+                        .setScore(0.5f)
                         .setEventTime(EVENT_TIME)
                         .setEventContext(textClassificationContext)
                         .build();
@@ -83,15 +85,18 @@ public class TextClassifierEventTronLoggerTest {
         LogMaker logMaker = captor.getValue();
         assertThat(logMaker.getCategory()).isEqualTo(
                 CONVERSATION_ACTIONS);
-        assertThat(logMaker.getType()).isEqualTo(
+        assertThat(logMaker.getSubtype()).isEqualTo(
                 ACTION_TEXT_SELECTION_SMART_SHARE);
-        assertThat(logMaker.getTaggedData(FIELD_SELECTION_ENTITY_TYPE))
+        assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_FIRST_ENTITY_TYPE))
                 .isEqualTo(ConversationAction.TYPE_CALL_PHONE);
+        assertThat((float) logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_SCORE))
+                .isWithin(0.00001f).of(0.5f);
         assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_EVENT_TIME))
                 .isEqualTo(EVENT_TIME);
         assertThat(logMaker.getPackageName()).isEqualTo(PACKAGE_NAME);
-        assertThat(logMaker.getTaggedData(FIELD_SELECTION_WIDGET_TYPE))
+        assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_WIDGET_TYPE))
                 .isEqualTo(WIDGET_TYPE);
+
     }
 
     @Test

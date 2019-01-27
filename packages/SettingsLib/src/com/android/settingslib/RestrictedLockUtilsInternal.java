@@ -47,6 +47,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utility class to host methods usable in adding a restricted padlock icon and showing admin
@@ -325,7 +326,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         if (admin == null) {
             return null;
         }
-        if (dpm.getCrossProfileCalendarPackages().isEmpty()) {
+        final Set<String> packages = dpm.getCrossProfileCalendarPackages();
+        if (packages != null && packages.isEmpty()) {
             return admin;
         }
         return null;

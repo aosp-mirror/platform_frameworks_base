@@ -107,6 +107,8 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
+import android.net.IpSecManager;
+import android.net.IpSecManager.UdpEncapsulationSocket;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MatchAllNetworkSpecifier;
@@ -121,7 +123,9 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkUtils;
+import android.net.ProxyInfo;
 import android.net.RouteInfo;
+import android.net.SocketKeepalive;
 import android.net.UidRange;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
@@ -158,6 +162,7 @@ import com.android.server.connectivity.DefaultNetworkMetrics;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.Nat464Xlat;
+import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.NetworkPinner;
@@ -186,6 +191,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -402,8 +409,8 @@ public class ConnectivityServiceTest {
         private final ConditionVariable mPreventReconnectReceived = new ConditionVariable();
         private int mScore;
         private NetworkAgent mNetworkAgent;
-        private int mStartKeepaliveError = PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
-        private int mStopKeepaliveError = PacketKeepalive.NO_KEEPALIVE;
+        private int mStartKeepaliveError = SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
+        private int mStopKeepaliveError = SocketKeepalive.NO_KEEPALIVE;
         private Integer mExpectedKeepaliveSlot = null;
         // Contains the redirectUrl from networkStatus(). Before reading, wait for
         // mNetworkStatusReceived.
@@ -1002,6 +1009,11 @@ public class ConnectivityServiceTest {
         }
 
         @Override
+        protected ProxyTracker makeProxyTracker() {
+            return mock(ProxyTracker.class);
+        }
+
+        @Override
         protected int reserveNetId() {
             while (true) {
                 final int netId = super.reserveNetId();
@@ -1021,6 +1033,11 @@ public class ConnectivityServiceTest {
 
                 return netId;
             }
+        }
+
+        @Override
+        protected boolean queryUserAccess(int uid, int netId) {
+            return true;
         }
 
         public Nat464Xlat getNat464Xlat(MockNetworkAgent mna) {
@@ -3548,6 +3565,80 @@ public class ConnectivityServiceTest {
         }
     }
 
+    private static class TestSocketKeepaliveCallback extends SocketKeepalive.Callback {
+
+        public enum CallbackType { ON_STARTED, ON_STOPPED, ON_ERROR };
+
+        private class CallbackValue {
+            public CallbackType callbackType;
+            public int error;
+
+            CallbackValue(CallbackType type) {
+                this.callbackType = type;
+                this.error = SocketKeepalive.SUCCESS;
+                assertTrue("onError callback must have error", type != CallbackType.ON_ERROR);
+            }
+
+            CallbackValue(CallbackType type, int error) {
+                this.callbackType = type;
+                this.error = error;
+                assertEquals("error can only be set for onError", type, CallbackType.ON_ERROR);
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                return o instanceof CallbackValue
+                        && this.callbackType == ((CallbackValue) o).callbackType
+                        && this.error == ((CallbackValue) o).error;
+            }
+
+            @Override
+            public String toString() {
+                return String.format("%s(%s, %d)", getClass().getSimpleName(), callbackType,
+                        error);
+            }
+        }
+
+        private LinkedBlockingQueue<CallbackValue> mCallbacks = new LinkedBlockingQueue<>();
+
+        @Override
+        public void onStarted() {
+            mCallbacks.add(new CallbackValue(CallbackType.ON_STARTED));
+        }
+
+        @Override
+        public void onStopped() {
+            mCallbacks.add(new CallbackValue(CallbackType.ON_STOPPED));
+        }
+
+        @Override
+        public void onError(int error) {
+            mCallbacks.add(new CallbackValue(CallbackType.ON_ERROR, error));
+        }
+
+        private void expectCallback(CallbackValue callbackValue) {
+            try {
+                assertEquals(
+                        callbackValue,
+                        mCallbacks.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            } catch (InterruptedException e) {
+                fail(callbackValue.callbackType + " callback not seen after " + TIMEOUT_MS + " ms");
+            }
+        }
+
+        public void expectStarted() {
+            expectCallback(new CallbackValue(CallbackType.ON_STARTED));
+        }
+
+        public void expectStopped() {
+            expectCallback(new CallbackValue(CallbackType.ON_STOPPED));
+        }
+
+        public void expectError(int error) {
+            expectCallback(new CallbackValue(CallbackType.ON_ERROR, error));
+        }
+    }
+
     private Network connectKeepaliveNetwork(LinkProperties lp) {
         // Ensure the network is disconnected before we do anything.
         if (mWiFiNetworkAgent != null) {
@@ -3692,6 +3783,145 @@ public class ConnectivityServiceTest {
 
         ka3.stop();
         callback3.expectStopped();
+    }
+
+    @Test
+    public void testNattSocketKeepalives() throws Exception {
+        // TODO: 1. Move this outside of ConnectivityServiceTest.
+        //       2. Add helper function to test against newSingleThreadExecutor as well as inline
+        //          executor.
+        //       3. Make test to verify that Nat-T keepalive socket is created by IpSecService.
+        final int srcPort = 12345;
+        final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
+        final InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
+        final InetAddress myIPv6 = InetAddress.getByName("2001:db8::1");
+        final InetAddress dstIPv4 = InetAddress.getByName("8.8.8.8");
+        final InetAddress dstIPv6 = InetAddress.getByName("2001:4860:4860::8888");
+
+        final int validKaInterval = 15;
+        final int invalidKaInterval = 9;
+
+        final IpSecManager mIpSec = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
+        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket(srcPort);
+
+        final Executor executor = Executors.newSingleThreadExecutor();
+
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("wlan12");
+        lp.addLinkAddress(new LinkAddress(myIPv6, 64));
+        lp.addLinkAddress(new LinkAddress(myIPv4, 25));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("fe80::1234")));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("192.0.2.254")));
+
+        Network notMyNet = new Network(61234);
+        Network myNet = connectKeepaliveNetwork(lp);
+
+        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback();
+        SocketKeepalive ka;
+
+        // Attempt to start keepalives with invalid parameters and check for errors.
+        // Invalid network.
+        ka = mCm.createSocketKeepalive(notMyNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+
+        // Invalid interval.
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(invalidKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_INTERVAL);
+
+        // Invalid destination.
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv6, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+
+        // Invalid source;
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv6, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+
+        // NAT-T is only supported for IPv4.
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv6, dstIPv6, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+
+        // Sanity check before testing started keepalive.
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
+
+        // Check that a started keepalive can be stopped.
+        mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectStarted();
+        mWiFiNetworkAgent.setStopKeepaliveError(SocketKeepalive.SUCCESS);
+        ka.stop();
+        callback.expectStopped();
+
+        // Check that deleting the IP address stops the keepalive.
+        LinkProperties bogusLp = new LinkProperties(lp);
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectStarted();
+        bogusLp.removeLinkAddress(new LinkAddress(myIPv4, 25));
+        bogusLp.addLinkAddress(new LinkAddress(notMyIPv4, 25));
+        mWiFiNetworkAgent.sendLinkProperties(bogusLp);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        mWiFiNetworkAgent.sendLinkProperties(lp);
+
+        // Check that a started keepalive is stopped correctly when the network disconnects.
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectStarted();
+        mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+
+        // ... and that stopping it after that has no adverse effects.
+        waitForIdle();
+        final Network myNetAlias = myNet;
+        assertNull(mCm.getNetworkCapabilities(myNetAlias));
+        ka.stop();
+
+        // Reconnect.
+        myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
+
+        // Check things work as expected when the keepalive is stopped and the network disconnects.
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectStarted();
+        ka.stop();
+        mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+        waitForIdle();
+        callback.expectStopped();
+
+        // Reconnect.
+        myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
+
+        // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
+        mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
+        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectStarted();
+
+        // The second one gets slot 2.
+        mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
+        final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket(6789);
+        TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback();
+        SocketKeepalive ka2 =
+                mCm.createSocketKeepalive(myNet, testSocket2, myIPv4, dstIPv4, executor, callback2);
+        ka2.start(validKaInterval);
+        callback2.expectStarted();
+
+        ka.stop();
+        callback.expectStopped();
+
+        ka2.stop();
+        callback2.expectStopped();
     }
 
     @Test
@@ -4913,5 +5143,85 @@ public class ConnectivityServiceTest {
         lp.setTcpBufferSizes(TEST_TCP_BUFFER_SIZES);
         mCellNetworkAgent.sendLinkProperties(lp);
         verifyTcpBufferSizeChange(TEST_TCP_BUFFER_SIZES);
+    }
+
+    @Test
+    public void testGetGlobalProxyForNetwork() {
+        final ProxyInfo testProxyInfo = ProxyInfo.buildDirectProxy("test", 8888);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        final Network wifiNetwork = mWiFiNetworkAgent.getNetwork();
+        when(mService.mProxyTracker.getGlobalProxy()).thenReturn(testProxyInfo);
+        assertEquals(testProxyInfo, mService.getProxyForNetwork(wifiNetwork));
+    }
+
+    @Test
+    public void testGetProxyForActiveNetwork() {
+        final ProxyInfo testProxyInfo = ProxyInfo.buildDirectProxy("test", 8888);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        waitForIdle();
+        assertNull(mService.getProxyForNetwork(null));
+
+        final LinkProperties testLinkProperties = new LinkProperties();
+        testLinkProperties.setHttpProxy(testProxyInfo);
+
+        mWiFiNetworkAgent.sendLinkProperties(testLinkProperties);
+        waitForIdle();
+
+        assertEquals(testProxyInfo, mService.getProxyForNetwork(null));
+    }
+
+    @Test
+    public void testGetProxyForVPN() {
+        final ProxyInfo testProxyInfo = ProxyInfo.buildDirectProxy("test", 8888);
+
+        // Set up a WiFi network with no proxy
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        waitForIdle();
+        assertNull(mService.getProxyForNetwork(null));
+
+        // Set up a VPN network with a proxy
+        final int uid = Process.myUid();
+        final MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        final ArraySet<UidRange> ranges = new ArraySet<>();
+        ranges.add(new UidRange(uid, uid));
+        mMockVpn.setUids(ranges);
+        LinkProperties testLinkProperties = new LinkProperties();
+        testLinkProperties.setHttpProxy(testProxyInfo);
+        vpnNetworkAgent.sendLinkProperties(testLinkProperties);
+        waitForIdle();
+
+        // Connect to VPN with proxy
+        mMockVpn.setNetworkAgent(vpnNetworkAgent);
+        vpnNetworkAgent.connect(true);
+        mMockVpn.connect();
+        waitForIdle();
+
+        // Test that the VPN network returns a proxy, and the WiFi does not.
+        assertEquals(testProxyInfo, mService.getProxyForNetwork(vpnNetworkAgent.getNetwork()));
+        assertEquals(testProxyInfo, mService.getProxyForNetwork(null));
+        assertNull(mService.getProxyForNetwork(mWiFiNetworkAgent.getNetwork()));
+
+        // Test that the VPN network returns no proxy when it is set to null.
+        testLinkProperties.setHttpProxy(null);
+        vpnNetworkAgent.sendLinkProperties(testLinkProperties);
+        waitForIdle();
+        assertNull(mService.getProxyForNetwork(vpnNetworkAgent.getNetwork()));
+        assertNull(mService.getProxyForNetwork(null));
+
+        // Set WiFi proxy and check that the vpn proxy is still null.
+        testLinkProperties.setHttpProxy(testProxyInfo);
+        mWiFiNetworkAgent.sendLinkProperties(testLinkProperties);
+        waitForIdle();
+        assertNull(mService.getProxyForNetwork(null));
+
+        // Disconnect from VPN and check that the active network, which is now the WiFi, has the
+        // correct proxy setting.
+        vpnNetworkAgent.disconnect();
+        waitForIdle();
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        assertEquals(testProxyInfo, mService.getProxyForNetwork(mWiFiNetworkAgent.getNetwork()));
+        assertEquals(testProxyInfo, mService.getProxyForNetwork(null));
     }
 }

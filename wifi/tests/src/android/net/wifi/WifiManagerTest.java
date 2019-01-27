@@ -61,6 +61,7 @@ import android.net.wifi.WifiManager.NetworkRequestMatchCallback;
 import android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback;
 import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.TrafficStateCallback;
+import android.net.wifi.WifiManager.WifiUsabilityStatsListener;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -80,6 +81,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Unit tests for {@link android.net.wifi.WifiManager}.
@@ -103,7 +105,9 @@ public class WifiManagerTest {
     @Mock SoftApCallback mSoftApCallback;
     @Mock TrafficStateCallback mTrafficStateCallback;
     @Mock NetworkRequestMatchCallback mNetworkRequestMatchCallback;
+    @Mock WifiUsabilityStatsListener mWifiUsabilityStatsListener;
 
+    private Executor mExecutor;
     private Handler mHandler;
     private TestLooper mLooper;
     private WifiManager mWifiManager;
@@ -1341,5 +1345,41 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
         when(mWifiService.getFactoryMacAddresses()).thenReturn(TEST_MAC_ADDRESSES);
         assertArrayEquals(TEST_MAC_ADDRESSES, mWifiManager.getFactoryMacAddresses());
         verify(mWifiService).getFactoryMacAddresses();
+    }
+
+    /**
+     * Verify the call to addWifiUsabilityStatsListener goes to WifiServiceImpl.
+     */
+    @Test
+    public void addWifiUsabilityStatsListeneroesToWifiServiceImpl() throws Exception {
+        mExecutor = new SynchronousExecutor();
+        mWifiManager.addWifiUsabilityStatsListener(mExecutor, mWifiUsabilityStatsListener);
+        verify(mWifiService).addWifiUsabilityStatsListener(any(IBinder.class),
+                any(IWifiUsabilityStatsListener.Stub.class), anyInt());
+    }
+
+    /**
+     * Verify the call to removeWifiUsabilityStatsListener goes to WifiServiceImpl.
+     */
+    @Test
+    public void removeWifiUsabilityListenerGoesToWifiServiceImpl() throws Exception {
+        ArgumentCaptor<Integer> listenerIdentifier = ArgumentCaptor.forClass(Integer.class);
+        mExecutor = new SynchronousExecutor();
+        mWifiManager.addWifiUsabilityStatsListener(mExecutor, mWifiUsabilityStatsListener);
+        verify(mWifiService).addWifiUsabilityStatsListener(any(IBinder.class),
+                any(IWifiUsabilityStatsListener.Stub.class), listenerIdentifier.capture());
+
+        mWifiManager.removeWifiUsabilityStatsListener(mWifiUsabilityStatsListener);
+        verify(mWifiService).removeWifiUsabilityStatsListener(
+                eq((int) listenerIdentifier.getValue()));
+    }
+
+    /**
+     * Defined for testing purpose.
+     */
+    class SynchronousExecutor implements Executor {
+        public void execute(Runnable r) {
+            r.run();
+        }
     }
 }

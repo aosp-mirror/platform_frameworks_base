@@ -30,6 +30,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -3989,33 +3990,11 @@ public class AudioManager {
     }
 
      /**
-     * Indicate A2DP source or sink connection state change.
-     * @param device Bluetooth device connected/disconnected
-     * @param state  new connection state (BluetoothProfile.STATE_xxx)
-     * @param profile profile for the A2DP device
-     * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
-     * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
-     * @return a delay in ms that the caller should wait before broadcasting
-     * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
-     * {@hide}
-     */
-    public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state,
-            int profile) {
-        final IAudioService service = getService();
-        int delay = 0;
-        try {
-            delay = service.setBluetoothA2dpDeviceConnectionState(device, state, profile);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return delay;
-    }
-
-     /**
      * Indicate A2DP source or sink connection state change and eventually suppress
      * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
      * @param device Bluetooth device connected/disconnected
-     * @param state  new connection state (BluetoothProfile.STATE_xxx)
+     * @param state  new connection state, {@link BluetoothProfile#STATE_CONNECTED}
+     *     or {@link BluetoothProfile#STATE_DISCONNECTED}
      * @param profile profile for the A2DP device
      * @param a2dpVolume New volume for the connecting device. Does nothing if disconnecting.
      * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
@@ -4027,8 +4006,8 @@ public class AudioManager {
      * {@hide}
      */
     public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
-                BluetoothDevice device, int state, int profile,
-                boolean suppressNoisyIntent, int a2dpVolume) {
+            BluetoothDevice device, int state,
+            int profile, boolean suppressNoisyIntent, int a2dpVolume) {
         final IAudioService service = getService();
         int delay = 0;
         try {

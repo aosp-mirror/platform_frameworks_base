@@ -509,6 +509,15 @@ public class VpnService extends Service {
         }
 
         /**
+         * Sets an HTTP proxy for the VPN network. This proxy is only a recommendation
+         * and it is possible that some apps will ignore it.
+         */
+        public Builder setHttpProxy(ProxyInfo proxyInfo) {
+            mConfig.proxyInfo = proxyInfo;
+            return this;
+        }
+
+        /**
          * Add a network address to the VPN interface. Both IPv4 and IPv6
          * addresses are supported. At least one address must be set before
          * calling {@link #establish}.

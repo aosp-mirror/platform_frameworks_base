@@ -1607,19 +1607,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case UPDATE_HTTP_PROXY_MSG: {
-                ProxyInfo proxy = (ProxyInfo)msg.obj;
-                String host = "";
-                String port = "";
-                String exclList = "";
-                Uri pacFileUrl = Uri.EMPTY;
-                if (proxy != null) {
-                    host = proxy.getHost();
-                    port = Integer.toString(proxy.getPort());
-                    exclList = proxy.getExclusionListAsString();
-                    pacFileUrl = proxy.getPacFileUrl();
-                }
                 synchronized (ActivityManagerService.this) {
-                    mProcessList.setAllHttpProxyLocked(host, port, exclList, pacFileUrl);
+                    mProcessList.setAllHttpProxyLocked();
                 }
             } break;
             case PROC_START_TIMEOUT_MSG: {
@@ -7228,6 +7217,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.installSystemProviders();
         mDevelopmentSettingsObserver = new DevelopmentSettingsObserver();
         SettingsToPropertiesMapper.start(mContext.getContentResolver());
+        mOomAdjuster.initSettings();
 
         // Now that the settings provider is published we can consider sending
         // in a rescue party.
@@ -9340,6 +9330,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mConstants.dump(pw);
+            mOomAdjuster.dumpAppCompactorSettings(pw);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
@@ -9739,6 +9730,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("settings".equals(cmd)) {
                 synchronized (this) {
                     mConstants.dump(pw);
+                    mOomAdjuster.dumpAppCompactorSettings(pw);
                 }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 if (dumpClient) {
@@ -14656,8 +14648,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
                     break;
                 case Proxy.PROXY_CHANGE_ACTION:
-                    ProxyInfo proxy = intent.getParcelableExtra(Proxy.EXTRA_PROXY_INFO);
-                    mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
+                    mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG));
                     break;
                 case android.hardware.Camera.ACTION_NEW_PICTURE:
                 case android.hardware.Camera.ACTION_NEW_VIDEO:
