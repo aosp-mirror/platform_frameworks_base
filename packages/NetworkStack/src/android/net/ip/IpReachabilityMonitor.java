@@ -31,15 +31,15 @@ import android.net.metrics.IpReachabilityEvent;
 import android.net.netlink.StructNdMsg;
 import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
+import android.os.ConditionVariable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.DumpUtils.Dump;
 
 import java.io.PrintWriter;
 import java.net.Inet6Address;
@@ -215,15 +215,20 @@ public class IpReachabilityMonitor {
     }
 
     public void dump(PrintWriter pw) {
-        DumpUtils.dumpAsync(
-                mIpNeighborMonitor.getHandler(),
-                new Dump() {
-                    @Override
-                    public void dump(PrintWriter pw, String prefix) {
-                        pw.println(describeWatchList("\n"));
-                    }
-                },
-                pw, "", 1000);
+        if (Looper.myLooper() == mIpNeighborMonitor.getHandler().getLooper()) {
+            pw.println(describeWatchList("\n"));
+            return;
+        }
+
+        final ConditionVariable cv = new ConditionVariable(false);
+        mIpNeighborMonitor.getHandler().post(() -> {
+            pw.println(describeWatchList("\n"));
+            cv.open();
+        });
+
+        if (!cv.block(1000)) {
+            pw.println("Timed out waiting for IpReachabilityMonitor dump");
+        }
     }
 
     private String describeWatchList() { return describeWatchList(" "); }
