@@ -25,9 +25,10 @@ java_library {
 }
 
 java_library {
-    name: "updatable-mediasession2",
+    name: "updatable-media",
 
     srcs: [
+        ":mediaplayer2-srcs",
         ":mediasession2-srcs",
         ":framework-media-annotation-srcs",
     ],
@@ -37,25 +38,11 @@ java_library {
             "apex/java",
         ],
 
-        // TODO: find out a way to include only the necessary aidl files instead of dirs.
         include_dirs: [
+            // For the usage of android.os.Bundle and android.os.ResultReceiver in aidl files
             "frameworks/base/core/java",
         ],
     },
-
-    installable: true,
-
-    // Make sure that the implementaion only relies on SDK or system APIs.
-    sdk_version: "system_current",
-}
-
-java_library {
-    name: "updatable-media",
-
-    srcs: [
-        ":mediaplayer2-srcs",
-        ":framework-media-annotation-srcs",
-    ],
 
     static_libs: [
         "mediaplayer2-protos",

@@ -16,8 +16,6 @@
 
 package android.media;
 
-import static android.media.Session2Token.SESSION_SERVICE_INTERFACE;
-
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,6 +45,10 @@ import java.util.Map;
  * for consistent behavior across all devices.
  */
 public abstract class MediaSession2Service extends Service {
+    /**
+     * The {@link Intent} that must be declared as handled by the service.
+     */
+    public static final String SERVICE_INTERFACE = Session2Token.SESSION_SERVICE_INTERFACE;
 
     private static final String TAG = "MediaSession2Service";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -98,7 +100,7 @@ public abstract class MediaSession2Service extends Service {
     @Override
     @Nullable
     public IBinder onBind(@NonNull Intent intent) {
-        if (SESSION_SERVICE_INTERFACE.equals(intent.getAction())) {
+        if (SERVICE_INTERFACE.equals(intent.getAction())) {
             synchronized (mLock) {
                 return mStub;
             }
