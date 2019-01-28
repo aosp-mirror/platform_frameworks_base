@@ -34,21 +34,21 @@ import java.util.List;
   */
 oneway interface IContentCaptureManager {
     /**
-     * Starts a new session for the provided {@code userId} running as part of the
+     * Starts a new session for the calling user running as part of the
      * app's activity identified by {@code activityToken}/{@code componentName}.
      *
      * @param sessionId Unique session id as provided by the app.
      * @param flags Meta flags that enable or disable content capture (see
      *     {@link IContentCaptureContext#flags}).
      */
-    void startSession(int userId, IBinder activityToken, in ComponentName componentName,
+    void startSession(IBinder activityToken, in ComponentName componentName,
                       String sessionId, int flags, in IResultReceiver result);
 
     /**
-     * Marks the end of a session for the provided {@code userId} identified by
+     * Marks the end of a session for the calling user identified by
      * the corresponding {@code startSession}'s {@code sessionId}.
      */
-    void finishSession(int userId, String sessionId);
+    void finishSession(String sessionId);
 
     /**
      * Returns the content capture service's component name (if enabled and
@@ -56,10 +56,10 @@ oneway interface IContentCaptureManager {
      * @param Receiver of the content capture service's @{code ComponentName}
      *     provided {@code Bundle} with key "{@code EXTRA}".
      */
-    void getReceiverServiceComponentName(int userId, in IResultReceiver result);
+    void getServiceComponentName(in IResultReceiver result);
 
     /**
-     * Requests the removal of user data for the provided {@code userId}.
+     * Requests the removal of user data for the calling user.
      */
-    void removeUserData(int userId, in UserDataRemovalRequest request);
+    void removeUserData(in UserDataRemovalRequest request);
 }

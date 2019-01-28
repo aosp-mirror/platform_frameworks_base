@@ -211,8 +211,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         try {
             if (mSystemServerInterface == null) return;
 
-            mSystemServerInterface.startSession(mContext.getUserId(), mApplicationToken,
-                    componentName, mId, flags, new IResultReceiver.Stub() {
+            mSystemServerInterface.startSession(mApplicationToken, componentName, mId, flags,
+                    new IResultReceiver.Stub() {
                         @Override
                         public void send(int resultCode, Bundle resultData) {
                             IBinder binder = null;
@@ -473,7 +473,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         try {
             if (mSystemServerInterface == null) return;
 
-            mSystemServerInterface.finishSession(mContext.getUserId(), mId);
+            mSystemServerInterface.finishSession(mId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error destroying system-service session " + mId + " for "
                     + getDebugState() + ": " + e);
