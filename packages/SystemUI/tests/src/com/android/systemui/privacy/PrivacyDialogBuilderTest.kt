@@ -27,16 +27,20 @@ import org.junit.runner.RunWith
 @SmallTest
 class PrivacyDialogBuilderTest : SysuiTestCase() {
 
+    companion object {
+        val TEST_UID = 1
+    }
+
     @Test
     fun testGenerateAppsList() {
         val bar2 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Bar", context))
+                "Bar", TEST_UID, context))
         val bar3 = PrivacyItem(Privacy.TYPE_LOCATION, PrivacyApplication(
-                "Bar", context))
+                "Bar", TEST_UID, context))
         val foo0 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Foo", context))
+                "Foo", TEST_UID, context))
         val baz1 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
-                "Baz", context))
+                "Baz", TEST_UID, context))
 
         val items = listOf(bar2, foo0, baz1, bar3)
 
@@ -55,11 +59,14 @@ class PrivacyDialogBuilderTest : SysuiTestCase() {
     @Test
     fun testOrder() {
         // We want location to always go last, so it will go in the "+ other apps"
-        val appCamera = PrivacyItem(PrivacyType.TYPE_CAMERA, PrivacyApplication("Camera", context))
+        val appCamera = PrivacyItem(PrivacyType.TYPE_CAMERA,
+                PrivacyApplication("Camera", TEST_UID, context))
         val appMicrophone =
-                PrivacyItem(PrivacyType.TYPE_MICROPHONE, PrivacyApplication("Microphone", context))
+                PrivacyItem(PrivacyType.TYPE_MICROPHONE,
+                        PrivacyApplication("Microphone", TEST_UID, context))
         val appLocation =
-                PrivacyItem(PrivacyType.TYPE_LOCATION, PrivacyApplication("Location", context))
+                PrivacyItem(PrivacyType.TYPE_LOCATION,
+                        PrivacyApplication("Location", TEST_UID, context))
 
         val items = listOf(appLocation, appMicrophone, appCamera)
         val textBuilder = PrivacyDialogBuilder(context, items)

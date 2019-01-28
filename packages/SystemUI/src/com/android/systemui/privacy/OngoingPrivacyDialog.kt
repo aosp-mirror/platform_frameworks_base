@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.UserHandle
 import android.util.IconDrawableFactory
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -48,6 +49,7 @@ class OngoingPrivacyDialog constructor(
             R.dimen.ongoing_appops_dialog_icon_margin)
     private val MAX_ITEMS = context.resources.getInteger(R.integer.ongoing_appops_dialog_max_apps)
     private val iconFactory = IconDrawableFactory.newInstance(context, true)
+    private var dismissDialog: (() -> Unit)? = null
 
     init {
         val a = context.theme.obtainStyledAttributes(
@@ -58,8 +60,8 @@ class OngoingPrivacyDialog constructor(
 
     fun createDialog(): Dialog {
         val builder = AlertDialog.Builder(context).apply {
-            setNegativeButton(R.string.ongoing_privacy_dialog_cancel, null)
-            setPositiveButton(R.string.ongoing_privacy_dialog_open_settings,
+            setPositiveButton(R.string.ongoing_privacy_dialog_ok, null)
+            setNeutralButton(R.string.ongoing_privacy_dialog_open_settings,
                     object : DialogInterface.OnClickListener {
                         val intent = Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE).putExtra(
                                 Intent.EXTRA_DURATION_MILLIS, TimeUnit.MINUTES.toMillis(1))
@@ -72,7 +74,9 @@ class OngoingPrivacyDialog constructor(
                     })
         }
         builder.setView(getContentView())
-        return builder.create()
+        val dialog = builder.create()
+        dismissDialog = dialog::dismiss
+        return dialog
     }
 
     fun getContentView(): View {
@@ -116,6 +120,7 @@ class OngoingPrivacyDialog constructor(
         return contentView
     }
 
+    @Suppress("DEPRECATION")
     private fun addAppItem(
         itemList: LinearLayout,
         app: PrivacyApplication,
@@ -152,6 +157,16 @@ class OngoingPrivacyDialog constructor(
         } else {
             icons.visibility = View.GONE
         }
+        item.setOnClickListener(object : View.OnClickListener {
+            val intent = Intent(Intent.ACTION_REVIEW_APP_PERMISSION_USAGE)
+                    .putExtra(Intent.EXTRA_PACKAGE_NAME, app.packageName)
+                    .putExtra(Intent.EXTRA_USER, UserHandle.getUserHandleForUid(app.uid))
+            override fun onClick(v: View?) {
+                Dependency.get(ActivityStarter::class.java)
+                        .postStartActivityDismissingKeyguard(intent, 0)
+                dismissDialog?.invoke()
+            }
+        })
         itemList.addView(item)
     }
 }
