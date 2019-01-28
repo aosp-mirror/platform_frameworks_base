@@ -43,7 +43,7 @@ public class InsetsSourceConsumer {
         mState = state;
         mTransactionSupplier = transactionSupplier;
         mController = controller;
-        mVisible = InsetsState.getDefaultVisibly(type);
+        mVisible = InsetsState.getDefaultVisibility(type);
     }
 
     public void setControl(@Nullable InsetsSourceControl control) {

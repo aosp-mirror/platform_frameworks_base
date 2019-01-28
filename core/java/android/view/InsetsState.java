@@ -278,7 +278,7 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static boolean getDefaultVisibly(@InsetType int type) {
+    public static boolean getDefaultVisibility(@InsetType int type) {
         switch (type) {
             case TYPE_TOP_BAR:
             case TYPE_SIDE_BAR_1:
