@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
+
 import java.util.UUID;
 
 /**
@@ -109,6 +111,7 @@ public final class ParcelUuid implements Parcelable {
 
    public static final Parcelable.Creator<ParcelUuid> CREATOR =
                new Parcelable.Creator<ParcelUuid>() {
+        @UnsupportedAppUsage
         public ParcelUuid createFromParcel(Parcel source) {
             long mostSigBits = source.readLong();
             long leastSigBits = source.readLong();
