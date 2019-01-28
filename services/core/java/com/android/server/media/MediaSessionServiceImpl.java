@@ -707,6 +707,14 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         return mUserRecords.get(fullUserId);
     }
 
+    private MediaSessionRecord getMediaSessionRecordLocked(MediaSession.Token sessionToken) {
+        FullUserRecord user = getFullUserRecordLocked(UserHandle.getUserId(sessionToken.getUid()));
+        if (user != null) {
+            return user.mPriorityStack.getMediaSessionRecord(sessionToken);
+        }
+        return null;
+    }
+
     /**
      * Information about a full user and its corresponding managed profiles.
      *
@@ -1272,6 +1280,34 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
 
         @Override
+        public boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
+                MediaSession.Token sessionToken, KeyEvent keyEvent) {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    MediaSessionRecord record = getMediaSessionRecordLocked(sessionToken);
+                    if (record == null) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Failed to find session to dispatch key event.");
+                        }
+                        return false;
+                    }
+                    if (DEBUG) {
+                        Log.d(TAG, "dispatchMediaKeyEventToSessionAsSystemService, pkg="
+                                + packageName + ", pid=" + pid + ", uid=" + uid + ", sessionToken="
+                                + sessionToken + ", event=" + keyEvent + ", session=" + record);
+                    }
+                    return record.sendMediaButton(packageName, pid, uid, true /* asSystemService */,
+                            keyEvent, 0, null);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void setCallback(ICallback callback) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
@@ -1573,6 +1609,62 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                                 asSystemService, stream, AudioManager.ADJUST_TOGGLE_MUTE, flags);
                     }
                 }
+            }
+        }
+
+        @Override
+        public void dispatchVolumeKeyEventToSessionAsSystemService(String packageName,
+                String opPackageName, MediaSession.Token sessionToken, KeyEvent keyEvent) {
+            int pid = Binder.getCallingPid();
+            int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    MediaSessionRecord record = getMediaSessionRecordLocked(sessionToken);
+                    if (record == null) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Failed to find session to dispatch key event.");
+                        }
+                        return;
+                    }
+                    if (DEBUG) {
+                        Log.d(TAG, "dispatchVolumeKeyEventToSessionAsSystemService, pkg="
+                                + packageName + ", opPkg=" + opPackageName + ", pid=" + pid
+                                + ", uid=" + uid + ", sessionToken=" + sessionToken + ", event="
+                                + keyEvent + ", session=" + record);
+                    }
+                    switch (keyEvent.getAction()) {
+                        case KeyEvent.ACTION_DOWN: {
+                            int direction = 0;
+                            switch (keyEvent.getKeyCode()) {
+                                case KeyEvent.KEYCODE_VOLUME_UP:
+                                    direction = AudioManager.ADJUST_RAISE;
+                                    break;
+                                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                                    direction = AudioManager.ADJUST_LOWER;
+                                    break;
+                                case KeyEvent.KEYCODE_VOLUME_MUTE:
+                                    direction = AudioManager.ADJUST_TOGGLE_MUTE;
+                                    break;
+                            }
+                            record.adjustVolume(packageName, opPackageName, pid, uid,
+                                    null /* caller */, true /* asSystemService */, direction,
+                                    AudioManager.FLAG_SHOW_UI, false /* useSuggested */);
+                            break;
+                        }
+
+                        case KeyEvent.ACTION_UP: {
+                            final int flags =
+                                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
+                                            | AudioManager.FLAG_FROM_KEY;
+                            record.adjustVolume(packageName, opPackageName, pid, uid,
+                                    null /* caller */, true /* asSystemService */, 0,
+                                    flags, false /* useSuggested */);
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 

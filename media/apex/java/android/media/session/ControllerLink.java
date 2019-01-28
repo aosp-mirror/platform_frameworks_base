@@ -34,6 +34,7 @@ import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Handles incoming commands from {@link MediaController}.
@@ -601,6 +602,23 @@ public final class ControllerLink implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStrongBinder(mISessionController.asBinder());
+    }
+
+    @Override
+    public int hashCode() {
+        return mISessionController.asBinder().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ControllerLink)) {
+            return false;
+        }
+        ControllerLink other = (ControllerLink) obj;
+        return Objects.equals(getBinder(), other.getBinder());
     }
 
     /**
