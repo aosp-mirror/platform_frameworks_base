@@ -920,12 +920,14 @@ public class MediaMetadataRetriever implements AutoCloseable {
     public static final int METADATA_KEY_VIDEO_FRAME_COUNT = 32;
 
     /**
-     * @hide
+     * If the media contains EXIF data, this key retrieves the offset value
+     * of the data.
      */
     public static final int METADATA_KEY_EXIF_OFFSET = 33;
 
     /**
-     * @hide
+     * If the media contains EXIF data, this key retrieves the length of the
+     * data.
      */
     public static final int METADATA_KEY_EXIF_LENGTH = 34;
 
