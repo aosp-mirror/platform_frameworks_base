@@ -6904,6 +6904,12 @@ message MetricsEvent {
     // OS: Q
     FIELD_TEXT_CLASSIFIER_WIDGET_VERSION = 1640;
 
+    // Tagged data for NOTIFICATION_ITEM. One of the CATEGORY String constants from
+    // https://developer.android.com/reference/android/app/Notification .
+    // OS: Q
+    // CATEGORY: NOTIFICATION
+    FIELD_NOTIFICATION_CATEGORY = 1641;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
