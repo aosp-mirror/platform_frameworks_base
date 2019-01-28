@@ -89,9 +89,10 @@ public final class TextLanguage implements Parcelable {
     /**
      * Returns the language locale at the specified index. Locales are ordered from high
      * confidence to low confidence.
+     * <p>
+     * See {@link #getLocaleHypothesisCount()} for the number of locales available.
      *
      * @throws IndexOutOfBoundsException if the specified index is out of range.
-     * @see #getLocaleHypothesisCount() for the number of locales available.
      */
     @NonNull
     public ULocale getLocale(int index) {
@@ -109,7 +110,8 @@ public final class TextLanguage implements Parcelable {
     }
 
     /**
-     * Returns a bundle containing non-structured extra information about this result.
+     * Returns a bundle containing non-structured extra information about this result. What is
+     * returned in the extras is specific to the {@link TextClassifier} implementation.
      *
      * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should prefer
      * to hold a reference to the returned bundle rather than frequently calling this method.

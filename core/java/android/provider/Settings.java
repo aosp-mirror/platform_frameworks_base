@@ -11723,6 +11723,7 @@ public final class Settings {
          * entity_list_default                      (String[])
          * entity_list_not_editable                 (String[])
          * entity_list_editable                     (String[])
+         * lang_id_threshold_override               (float)
          * </pre>
          *
          * <p>
