@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_1;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_2;
+import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_STATSD_SAMPLE_RATE;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_1;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_2;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_3;
@@ -61,6 +62,9 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public final class AppCompactorTest {
 
+    private static final String CLEAR_DEVICE_CONFIG_KEY_CMD =
+            "device_config delete activity_manager";
+
     @Mock private AppOpsService mAppOpsService;
     private AppCompactor mCompactorUnderTest;
     private HandlerThread mHandlerThread;
@@ -70,19 +74,21 @@ public final class AppCompactorTest {
     private static void clearDeviceConfig() throws IOException  {
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         uiDevice.executeShellCommand(
-                "device_config delete activity_manager " + KEY_USE_COMPACTION);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_USE_COMPACTION);
         uiDevice.executeShellCommand(
-                "device_config delete activity_manager " + KEY_COMPACT_ACTION_1);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_COMPACT_ACTION_1);
         uiDevice.executeShellCommand(
-                "device_config delete activity_manager " + KEY_COMPACT_ACTION_2);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_COMPACT_ACTION_2);
         uiDevice.executeShellCommand(
-                "device_config delete activity_manager " + KEY_COMPACT_THROTTLE_1);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_COMPACT_THROTTLE_1);
         uiDevice.executeShellCommand(
-                "device_config delete activity_manager " + KEY_COMPACT_THROTTLE_2);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_COMPACT_THROTTLE_2);
         uiDevice.executeShellCommand(
-                "device_config delete activity_manager " + KEY_COMPACT_THROTTLE_3);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_COMPACT_THROTTLE_3);
         uiDevice.executeShellCommand(
-                "device_config delete activity_manager " + KEY_COMPACT_THROTTLE_4);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_COMPACT_THROTTLE_4);
+        uiDevice.executeShellCommand(
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + KEY_COMPACT_STATSD_SAMPLE_RATE);
     }
 
     @Before
@@ -128,6 +134,8 @@ public final class AppCompactorTest {
                 is(AppCompactor.DEFAULT_COMPACT_THROTTLE_3));
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull,
                 is(AppCompactor.DEFAULT_COMPACT_THROTTLE_4));
+        assertThat(mCompactorUnderTest.mStatsdSampleRate,
+                is(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE));
     }
 
     @Test
@@ -155,6 +163,9 @@ public final class AppCompactorTest {
         DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
                 KEY_COMPACT_THROTTLE_4,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                KEY_COMPACT_STATSD_SAMPLE_RATE,
+                Float.toString(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f), false);
 
         // Then calling init will read and set that flag.
         mCompactorUnderTest.init();
@@ -173,6 +184,8 @@ public final class AppCompactorTest {
                 is(AppCompactor.DEFAULT_COMPACT_THROTTLE_3 + 1));
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull,
                 is(AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1));
+        assertThat(mCompactorUnderTest.mStatsdSampleRate,
+                is(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f));
     }
 
     @Test
@@ -363,6 +376,63 @@ public final class AppCompactorTest {
                 is(AppCompactor.DEFAULT_COMPACT_THROTTLE_3));
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull,
                 is(AppCompactor.DEFAULT_COMPACT_THROTTLE_4));
+    }
+
+    @Test
+    public void statsdSampleRate_listensToDeviceConfigChanges() throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        // When we override mStatsdSampleRate with a reasonable values ...
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                KEY_COMPACT_STATSD_SAMPLE_RATE,
+                Float.toString(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f), false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS), is(true));
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mStatsdSampleRate,
+                is(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f));
+    }
+
+    @Test
+    public void statsdSanokeRate_listensToDeviceConfigChangesBadValues()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        // When we override mStatsdSampleRate with a reasonable values ...
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                KEY_COMPACT_STATSD_SAMPLE_RATE, "foo", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS), is(true));
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mStatsdSampleRate,
+                is(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE));
+    }
+
+    @Test
+    public void statsdSanokeRate_listensToDeviceConfigChangesOutOfRangeValues()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        // When we override mStatsdSampleRate with an value outside of [0..1]...
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                KEY_COMPACT_STATSD_SAMPLE_RATE,
+                Float.toString(-1.0f), false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS), is(true));
+
+        // Then the values is capped in the range.
+        assertThat(mCompactorUnderTest.mStatsdSampleRate, is(0.0f));
+
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                KEY_COMPACT_STATSD_SAMPLE_RATE,
+                Float.toString(1.01f), false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS), is(true));
+
+        // Then the values is capped in the range.
+        assertThat(mCompactorUnderTest.mStatsdSampleRate, is(1.0f));
     }
 
     private class TestInjector extends Injector {
