@@ -62,7 +62,7 @@ public class IpConfigurationParcelableUtilTest {
         mDhcpResults.leaseDuration = 3600;
         mDhcpResults.mtu = 1450;
         // Any added DhcpResults field must be included in equals() to be tested properly
-        assertFieldCountEquals(4, DhcpResults.class);
+        assertFieldCountEquals(8, DhcpResults.class);
     }
 
     @Test
