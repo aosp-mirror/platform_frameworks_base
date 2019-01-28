@@ -13881,6 +13881,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final String packageName = res.pkg.applicationInfo.packageName;
             final String seInfo = res.pkg.applicationInfo.seInfo;
+            final int[] allUsers = sUserManager.getUserIds();
+            final int[] installedUsers;
+
             final PackageSetting ps;
             int appId = -1;
             long ceDataInode = -1;
@@ -13890,11 +13893,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     appId = ps.appId;
                     ceDataInode = ps.getCeDataInode(userId);
                 }
+
+                // NOTE: We ignore the user specified in the InstallParam because we know this is
+                // an update, and hence need to restore data for all installed users.
+                installedUsers = ps.queryInstalledUsers(allUsers, true);
             }
 
             if (ps != null) {
                 try {
-                    rm.restoreUserData(packageName, userId, appId, ceDataInode, seInfo, token);
+                    rm.restoreUserData(packageName, installedUsers, appId, ceDataInode,
+                            seInfo, token);
                 } catch (RemoteException re) {
                     // Cannot happen, the RollbackManager is hosted in the same process.
                 }
@@ -14591,6 +14599,17 @@ public class PackageManagerService extends IPackageManager.Stub
                             TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
                     mPendingEnableRollback.append(enableRollbackToken, this);
 
+                    final int[] installedUsers;
+                    synchronized (mPackages) {
+                        PackageSetting ps = mSettings.getPackageLPr(pkgLite.packageName);
+                        if (ps != null) {
+                            installedUsers = ps.queryInstalledUsers(sUserManager.getUserIds(),
+                                    true);
+                        } else {
+                            installedUsers = new int[0];
+                        }
+                    }
+
                     // TODO(ruhler) b/112431924: What user? Test for multi-user.
                     Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
                     enableRollbackIntent.putExtra(
@@ -14601,7 +14620,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             installFlags);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS,
-                            resolveUserIds(args.user.getIdentifier()));
+                            installedUsers);
                     enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
                             PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

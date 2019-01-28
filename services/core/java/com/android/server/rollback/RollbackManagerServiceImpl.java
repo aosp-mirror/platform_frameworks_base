@@ -783,7 +783,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public void restoreUserData(String packageName, int userId, int appId, long ceDataInode,
+    public void restoreUserData(String packageName, int[] userIds, int appId, long ceDataInode,
             String seInfo, int token) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("restoureUserData may only be called by the system.");
@@ -791,23 +791,26 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         getHandler().post(() -> {
             final RollbackData rollbackData = getRollbackForPackage(packageName);
-            final boolean changedRollbackData = mUserdataHelper.restoreAppData(packageName,
-                    rollbackData, userId, appId, ceDataInode, seInfo);
+            for (int userId : userIds) {
+                final boolean changedRollbackData = mUserdataHelper.restoreAppData(packageName,
+                        rollbackData, userId, appId, ceDataInode, seInfo);
+
+                // We've updated metadata about this rollback, so save it to flash.
+                if (changedRollbackData) {
+                    try {
+                        mRollbackStore.saveAvailableRollback(rollbackData);
+                    } catch (IOException ioe) {
+                        // TODO(narayan): What is the right thing to do here ? This isn't a fatal
+                        // error, since it will only result in us trying to restore data again,
+                        // which will be a no-op if there's no data available.
+                        Log.e(TAG, "Unable to save available rollback: " + packageName, ioe);
+                    }
+                }
+            }
+
             final PackageManagerInternal pmi = LocalServices.getService(
                     PackageManagerInternal.class);
             pmi.finishPackageInstall(token, false);
-
-            // We've updated metadata about this rollback, so save it to flash.
-            if (changedRollbackData) {
-                try {
-                    mRollbackStore.saveAvailableRollback(rollbackData);
-                } catch (IOException ioe) {
-                    // TODO(narayan): What is the right thing to do here ? This isn't a fatal error,
-                    // since it will only result in us trying to restore data again, which will be
-                    // a no-op if there's no data available.
-                    Log.e(TAG, "Unable to save available rollback: " + packageName, ioe);
-                }
-            }
         });
     }
 
