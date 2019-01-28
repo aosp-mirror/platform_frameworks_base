@@ -20,6 +20,7 @@ import static android.system.OsConstants.O_CLOEXEC;
 
 import static com.android.internal.os.ZygoteConnectionConstants.MAX_ZYGOTE_ARGC;
 
+import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
@@ -370,6 +371,27 @@ public final class Zygote {
      * Lets children of the zygote inherit open file descriptors to this path.
      */
     protected static native void nativeAllowFileAcrossFork(String path);
+
+    /**
+     * Lets children of the zygote inherit open file descriptors that belong to the
+     * ApplicationInfo that is passed in.
+     *
+     * @param appInfo ApplicationInfo of the application
+     */
+    protected static void allowAppFilesAcrossFork(ApplicationInfo appInfo) {
+        Zygote.nativeAllowFileAcrossFork(appInfo.sourceDir);
+        if (appInfo.splitSourceDirs != null) {
+            for (String path : appInfo.splitSourceDirs) {
+                Zygote.nativeAllowFileAcrossFork(path);
+            }
+        }
+        // As well as its shared libs
+        if (appInfo.sharedLibraryFiles != null) {
+            for (String path : appInfo.sharedLibraryFiles) {
+                Zygote.nativeAllowFileAcrossFork(path);
+            }
+        }
+    }
 
     /**
      * Installs a seccomp filter that limits setresuid()/setresgid() to the passed-in range

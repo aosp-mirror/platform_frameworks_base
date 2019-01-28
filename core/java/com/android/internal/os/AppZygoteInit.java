@@ -73,6 +73,9 @@ class AppZygoteInit {
             Log.i(TAG, "Beginning application preload for " + appInfo.packageName);
             LoadedApk loadedApk = new LoadedApk(null, appInfo, null, null, false, true, false);
             ClassLoader loader = loadedApk.getClassLoader();
+
+            Zygote.allowAppFilesAcrossFork(appInfo);
+
             Class<?> cl;
             Method m;
             try {
