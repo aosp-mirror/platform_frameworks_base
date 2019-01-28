@@ -52,7 +52,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
         DEFAULT_FLAGS.put("settings_network_and_internet_v2", "false");
         DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
-        DEFAULT_FLAGS.put("settings_slice_injection", "false");
+        DEFAULT_FLAGS.put("settings_slice_injection", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
         DEFAULT_FLAGS.put("settings_wifi_dpp", "true");
         DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "true");
