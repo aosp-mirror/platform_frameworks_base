@@ -1906,13 +1906,7 @@ public class UserBackupManagerService {
                 final long interval = mConstants.getFullBackupIntervalMilliseconds();
                 final long appLatency = (timeSinceLast < interval) ? (interval - timeSinceLast) : 0;
                 final long latency = Math.max(transportMinLatency, appLatency);
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        FullBackupJob.schedule(mUserId, mContext, latency, mConstants);
-                    }
-                };
-                mBackupHandler.postDelayed(r, 2500);
+                FullBackupJob.schedule(mUserId, mContext, latency, mConstants);
             } else {
                 if (DEBUG_SCHEDULING) {
                     Slog.i(TAG, "Full backup queue empty; not scheduling");
@@ -2144,12 +2138,7 @@ public class UserBackupManagerService {
                     Slog.i(TAG, "Nothing pending full backup; rescheduling +" + latency);
                 }
                 final long deferTime = latency;     // pin for the closure
-                mBackupHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        FullBackupJob.schedule(mUserId, mContext, deferTime, mConstants);
-                    }
-                });
+                FullBackupJob.schedule(mUserId, mContext, deferTime, mConstants);
                 return false;
             }
 
