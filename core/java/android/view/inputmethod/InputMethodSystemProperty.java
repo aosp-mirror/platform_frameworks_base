@@ -93,8 +93,14 @@ public class InputMethodSystemProperty {
      * {@code true} when per-profile IME is enabled.
      * @hide
      */
-    public static final boolean PER_PROFILE_IME_ENABLED = MULTI_CLIENT_IME_ENABLED
-            || Build.IS_DEBUGGABLE && SystemProperties.getBoolean(
-                    PROP_DEBUG_PER_PROFILE_IME, false);
-
+    public static final boolean PER_PROFILE_IME_ENABLED;
+    static {
+        if (MULTI_CLIENT_IME_ENABLED) {
+            PER_PROFILE_IME_ENABLED = true;
+        } else if (Build.IS_DEBUGGABLE) {
+            PER_PROFILE_IME_ENABLED = SystemProperties.getBoolean(PROP_DEBUG_PER_PROFILE_IME, true);
+        } else {
+            PER_PROFILE_IME_ENABLED = true;
+        }
+    }
 }
