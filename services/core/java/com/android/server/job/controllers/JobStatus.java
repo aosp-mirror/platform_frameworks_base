@@ -78,9 +78,9 @@ public final class JobStatus {
     static final int CONSTRAINT_DEADLINE = 1<<30;
     static final int CONSTRAINT_CONNECTIVITY = 1<<28;
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
-    static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
-    static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;
-    static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1<<22;
+    static final int CONSTRAINT_DEVICE_NOT_DOZING = 1 << 25; // Implicit constraint
+    static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
+    static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
 
     /**
      * The constraints that we want to log to statsd.
@@ -1044,8 +1044,48 @@ public final class JobStatus {
      * @return Whether or not this job would be ready to run if it had the specified constraint
      * granted, based on its requirements.
      */
-    public boolean wouldBeReadyWithConstraint(int constraint) {
-        return isReady(mSatisfiedConstraintsOfInterest | constraint);
+    boolean wouldBeReadyWithConstraint(int constraint) {
+        boolean oldValue = false;
+        int satisfied = mSatisfiedConstraintsOfInterest;
+        switch (constraint) {
+            case CONSTRAINT_BACKGROUND_NOT_RESTRICTED:
+                oldValue = mReadyNotRestrictedInBg;
+                mReadyNotRestrictedInBg = true;
+                break;
+            case CONSTRAINT_DEADLINE:
+                oldValue = mReadyDeadlineSatisfied;
+                mReadyDeadlineSatisfied = true;
+                break;
+            case CONSTRAINT_DEVICE_NOT_DOZING:
+                oldValue = mReadyNotDozing;
+                mReadyNotDozing = true;
+                break;
+            case CONSTRAINT_WITHIN_QUOTA:
+                oldValue = mReadyWithinQuota;
+                mReadyWithinQuota = true;
+                break;
+            default:
+                satisfied |= constraint;
+                break;
+        }
+
+        boolean toReturn = isReady(satisfied);
+
+        switch (constraint) {
+            case CONSTRAINT_BACKGROUND_NOT_RESTRICTED:
+                mReadyNotRestrictedInBg = oldValue;
+                break;
+            case CONSTRAINT_DEADLINE:
+                mReadyDeadlineSatisfied = oldValue;
+                break;
+            case CONSTRAINT_DEVICE_NOT_DOZING:
+                mReadyNotDozing = oldValue;
+                break;
+            case CONSTRAINT_WITHIN_QUOTA:
+                mReadyWithinQuota = oldValue;
+                break;
+        }
+        return toReturn;
     }
 
     private boolean isReady(int satisfiedConstraints) {
