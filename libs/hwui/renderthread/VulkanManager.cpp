@@ -83,7 +83,6 @@ void VulkanManager::destroy() {
     mDevice = VK_NULL_HANDLE;
     mPhysicalDevice = VK_NULL_HANDLE;
     mInstance = VK_NULL_HANDLE;
-    mInstanceVersion = 0u;
     mInstanceExtensions.clear();
     mDeviceExtensions.clear();
     free_features_extensions_structs(mPhysicalDeviceFeatures2);
@@ -100,7 +99,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         0,                                  // applicationVersion
         "android framework",                // pEngineName
         0,                                  // engineVerison
-        VK_MAKE_VERSION(1, 1, 0),           // apiVersion
+        mAPIVersion,                        // apiVersion
     };
 
     {
@@ -377,8 +376,9 @@ void VulkanManager::initialize() {
     }
 
     GET_PROC(EnumerateInstanceVersion);
-    LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&mInstanceVersion));
-    LOG_ALWAYS_FATAL_IF(mInstanceVersion < VK_MAKE_VERSION(1, 1, 0));
+    uint32_t instanceVersion;
+    LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&instanceVersion));
+    LOG_ALWAYS_FATAL_IF(instanceVersion < VK_MAKE_VERSION(1, 1, 0));
 
     GrVkExtensions extensions;
     LOG_ALWAYS_FATAL_IF(!this->setupDevice(extensions, mPhysicalDeviceFeatures2));
@@ -398,7 +398,7 @@ void VulkanManager::initialize() {
     backendContext.fDevice = mDevice;
     backendContext.fQueue = mGraphicsQueue;
     backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
-    backendContext.fInstanceVersion = mInstanceVersion;
+    backendContext.fMaxAPIVersion = mAPIVersion;
     backendContext.fVkExtensions = &extensions;
     backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
     backendContext.fGetProc = std::move(getProc);
@@ -446,7 +446,7 @@ VkFunctorInitParams VulkanManager::getVkFunctorInitParams() const {
             .device = mDevice,
             .queue = mGraphicsQueue,
             .graphics_queue_index = mGraphicsQueueIndex,
-            .instance_version = mInstanceVersion,
+            .api_version = mAPIVersion,
             .enabled_instance_extension_names = mInstanceExtensions.data(),
             .enabled_instance_extension_names_length =
                     static_cast<uint32_t>(mInstanceExtensions.size()),

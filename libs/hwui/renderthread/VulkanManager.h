@@ -246,7 +246,7 @@ private:
     VkCommandBuffer mDummyCB = VK_NULL_HANDLE;
 
     // Variables saved to populate VkFunctorInitParams.
-    uint32_t mInstanceVersion = 0u;
+    static const uint32_t mAPIVersion = VK_MAKE_VERSION(1, 1, 0);
     std::vector<const char*> mInstanceExtensions;
     std::vector<const char*> mDeviceExtensions;
     VkPhysicalDeviceFeatures2 mPhysicalDeviceFeatures2{};
