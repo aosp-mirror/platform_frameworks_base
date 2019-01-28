@@ -21,21 +21,26 @@ import static android.net.captiveportal.CaptivePortalProbeResult.SUCCESS_CODE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /** @hide */
+@SystemApi
+@TestApi
 public abstract class CaptivePortalProbeSpec {
-    public static final String HTTP_LOCATION_HEADER_NAME = "Location";
-
     private static final String TAG = CaptivePortalProbeSpec.class.getSimpleName();
     private static final String REGEX_SEPARATOR = "@@/@@";
     private static final String SPEC_SEPARATOR = "@@,@@";
@@ -55,7 +60,9 @@ public abstract class CaptivePortalProbeSpec {
      * @throws MalformedURLException The URL has invalid format for {@link URL#URL(String)}.
      * @throws ParseException The string is empty, does not match the above format, or a regular
      * expression is invalid for {@link Pattern#compile(String)}.
+     * @hide
      */
+    @VisibleForTesting
     @NonNull
     public static CaptivePortalProbeSpec parseSpec(String spec) throws ParseException,
             MalformedURLException {
@@ -113,7 +120,8 @@ public abstract class CaptivePortalProbeSpec {
      * <p>Each spec is separated by @@,@@ and follows the format for {@link #parseSpec(String)}.
      * <p>This method does not throw but ignores any entry that could not be parsed.
      */
-    public static CaptivePortalProbeSpec[] parseCaptivePortalProbeSpecs(String settingsVal) {
+    public static Collection<CaptivePortalProbeSpec> parseCaptivePortalProbeSpecs(
+            String settingsVal) {
         List<CaptivePortalProbeSpec> specs = new ArrayList<>();
         if (settingsVal != null) {
             for (String spec : TextUtils.split(settingsVal, SPEC_SEPARATOR)) {
@@ -128,7 +136,7 @@ public abstract class CaptivePortalProbeSpec {
         if (specs.isEmpty()) {
             Log.e(TAG, String.format("could not create any validation spec from %s", settingsVal));
         }
-        return specs.toArray(new CaptivePortalProbeSpec[specs.size()]);
+        return specs;
     }
 
     /**
