@@ -1221,7 +1221,6 @@ public class WifiManager {
      * @param scanResults a list of scanResult that represents the BSSID
      * @return List that consists of {@link WifiConfiguration} and corresponding scanResults per
      * network type({@link #PASSPOINT_HOME_NETWORK} and {@link #PASSPOINT_ROAMING_NETWORK}).
-     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
     @SystemApi
@@ -1264,7 +1263,6 @@ public class WifiManager {
      *
      * @param scanResults a list of ScanResult
      * @return Map that consists {@link OsuProvider} and a list of matching {@link ScanResult}
-     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
     @SystemApi
@@ -1291,7 +1289,6 @@ public class WifiManager {
      *
      * @param osuProviders a set of {@link OsuProvider}
      * @return Map that consists of {@link OsuProvider} and matching {@link PasspointConfiguration}.
-     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
     @SystemApi
@@ -1720,8 +1717,8 @@ public class WifiManager {
      * FQDN, the new configuration will replace the existing configuration.
      *
      * @param config The Passpoint configuration to be added
-     * @throws IllegalArgumentException if configuration is invalid
-     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @throws IllegalArgumentException if configuration is invalid or Passpoint is not enabled on
+     *                                  the device.
      */
     public void addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
         try {
@@ -1737,8 +1734,8 @@ public class WifiManager {
      * Remove the Passpoint configuration identified by its FQDN (Fully Qualified Domain Name).
      *
      * @param fqdn The FQDN of the Passpoint configuration to be removed
-     * @throws IllegalArgumentException if no configuration is associated with the given FQDN.
-     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @throws IllegalArgumentException if no configuration is associated with the given FQDN or
+     *                                  Passpoint is not enabled on the device.
      * @deprecated This is no longer supported.
      */
     @Deprecated
@@ -1762,7 +1759,6 @@ public class WifiManager {
      * An empty list will be returned when no configurations are installed.
      *
      * @return A list of {@link PasspointConfiguration}
-     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @deprecated This is no longer supported.
      */
     @Deprecated
