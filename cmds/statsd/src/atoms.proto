@@ -212,6 +212,7 @@ message Atom {
         UsbContaminantReported usb_contaminant_reported = 146;
         WatchdogRollbackOccurred watchdog_rollback_occurred = 147;
         BiometricHalDeathReported biometric_hal_death_reported = 148;
+        BubbleUIChanged bubble_ui_changed = 149;
     }
 
     // Pulled events will start at field 10000.
@@ -4650,4 +4651,51 @@ message DebugFailingElapsedClock {
     optional int64 same_elapsed_clock_millis = 3;
     // Diff between current elapsed time and elapsed time from previous pull.
     optional int64 elapsed_clock_diff_millis = 4;
+}
+
+/** Logs System UI bubbles event changed.
+ *
+ * Logged from:
+ *     frameworks/base/packages/SystemUI/src/com/android/systemui/bubbles
+ */
+message BubbleUIChanged {
+
+    // The app package that is posting the bubble.
+    optional string package_name = 1;
+
+    // The notification channel that is posting the bubble.
+    optional string notification_channel = 2;
+
+    // The notification id associated with the posted bubble.
+    optional int32 notification_id = 3;
+
+    // The position of the bubble within the bubble stack.
+    optional int32 position = 4;
+
+    // The total number of bubbles within the bubble stack.
+    optional int32 total_number = 5;
+
+    // User interactions with the bubble.
+    enum Action {
+        UNKNOWN = 0;
+        POSTED = 1;
+        UPDATED = 2;
+        EXPANDED = 3;
+        COLLAPSED = 4;
+        DISMISSED = 5;
+        STACK_DISMISSED = 6;
+        STACK_MOVED = 7;
+        HEADER_GO_TO_APP = 8;
+        HEADER_GO_TO_SETTINGS = 9;
+        PERMISSION_OPT_IN = 10;
+        PERMISSION_OPT_OUT = 11;
+        PERMISSION_IGNORED = 12;
+        SWIPE_LEFT = 13;
+        SWIPE_RIGHT = 14;
+    }
+    optional Action action = 6;
+
+    // Normalized screen position of the bubble stack. The range is between 0 and 1.
+    optional float normalized_x_position = 7;
+    optional float normalized_y_position = 8;
 }
