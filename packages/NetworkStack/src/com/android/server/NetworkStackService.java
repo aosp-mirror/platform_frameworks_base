@@ -29,6 +29,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkStackConnector;
@@ -65,6 +66,7 @@ import java.util.Iterator;
  */
 public class NetworkStackService extends Service {
     private static final String TAG = NetworkStackService.class.getSimpleName();
+    private static NetworkStackConnector sConnector;
 
     /**
      * Create a binder connector for the system server to communicate with the network stack.
@@ -72,8 +74,11 @@ public class NetworkStackService extends Service {
      * <p>On platforms where the network stack runs in the system server process, this method may
      * be called directly instead of obtaining the connector by binding to the service.
      */
-    public static IBinder makeConnector(Context context) {
-        return new NetworkStackConnector(context);
+    public static synchronized IBinder makeConnector(Context context) {
+        if (sConnector == null) {
+            sConnector = new NetworkStackConnector(context);
+        }
+        return sConnector;
     }
 
     @NonNull
@@ -85,6 +90,8 @@ public class NetworkStackService extends Service {
     private static class NetworkStackConnector extends INetworkStackConnector.Stub {
         private static final int NUM_VALIDATION_LOG_LINES = 20;
         private final Context mContext;
+        private final INetd mNetd;
+        private final NetworkObserverRegistry mObserverRegistry;
         private final ConnectivityManager mCm;
         @GuardedBy("mIpClients")
         private final ArrayList<WeakReference<IpClient>> mIpClients = new ArrayList<>();
@@ -106,7 +113,11 @@ public class NetworkStackService extends Service {
 
         NetworkStackConnector(Context context) {
             mContext = context;
+            mNetd = (INetd) context.getSystemService(Context.NETD_SERVICE);
+            mObserverRegistry = new NetworkObserverRegistry();
             mCm = context.getSystemService(ConnectivityManager.class);
+
+            // TODO: call mObserverRegistry here after adding sepolicy changes
         }
 
         @NonNull
