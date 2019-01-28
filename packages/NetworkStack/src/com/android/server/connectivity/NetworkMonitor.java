@@ -93,6 +93,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1146,7 +1147,10 @@ public class NetworkMonitor extends StateMachine {
                 return null;
             }
 
-            return CaptivePortalProbeSpec.parseCaptivePortalProbeSpecs(settingsValue);
+            final Collection<CaptivePortalProbeSpec> specs =
+                    CaptivePortalProbeSpec.parseCaptivePortalProbeSpecs(settingsValue);
+            final CaptivePortalProbeSpec[] specsArray = new CaptivePortalProbeSpec[specs.size()];
+            return specs.toArray(specsArray);
         } catch (Exception e) {
             // Don't let a misconfiguration bootloop the system.
             Log.e(TAG, "Error parsing configured fallback probe specs", e);
