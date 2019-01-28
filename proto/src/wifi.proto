@@ -1861,11 +1861,31 @@ message WifiUsabilityStats {
     LABEL_BAD = 2;
   }
 
+  enum UsabilityStatsTriggerType {
+    // Default/Invalid event
+    TYPE_UNKNOWN = 0;
+
+    // There is a data stall from tx failures
+    TYPE_DATA_STALL_BAD_TX = 1;
+
+    // There is a data stall from rx failures
+    TYPE_DATA_STALL_TX_WITHOUT_RX = 2;
+
+    // There is a data stall from both tx and rx failures
+    TYPE_DATA_STALL_BOTH = 3;
+
+    // Firmware generated an alert
+    TYPE_FIRMWARE_ALERT = 4;
+  }
+
   // The current wifi usability state
   optional Label label = 1;
 
   // The list of timestamped wifi usability stats
   repeated WifiUsabilityStatsEntry stats = 2;
+
+  // What event triggered WifiUsabilityStats.
+  optional UsabilityStatsTriggerType trigger_type = 3;
 }
 
 message DeviceMobilityStatePnoScanStats {
