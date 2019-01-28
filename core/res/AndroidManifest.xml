@@ -4730,7 +4730,7 @@
         <receiver android:name="com.android.server.updates.ConversationActionsInstallReceiver"
                   android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
-                <action android:name="android.intent.action.ACTION_UPDATE_CONVERSATION_ACTIONS" />
+                <action android:name="android.intent.action.UPDATE_CONVERSATION_ACTIONS" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
