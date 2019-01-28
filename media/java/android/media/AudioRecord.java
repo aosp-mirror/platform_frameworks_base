@@ -401,7 +401,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
                 mAudioAttributes, sampleRate, mChannelMask, mChannelIndexMask,
                 mAudioFormat, mNativeBufferSizeInBytes,
-                session, ActivityThread.currentOpPackageName(), 0 /*nativeRecordInJavaObj*/);
+                session, getCurrentOpPackageName(), 0 /*nativeRecordInJavaObj*/);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
@@ -411,6 +411,15 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         mSessionId = session[0];
 
         mState = STATE_INITIALIZED;
+    }
+
+    private String getCurrentOpPackageName() {
+        String opPackageName = ActivityThread.currentOpPackageName();
+        if (opPackageName != null) {
+            return opPackageName;
+        }
+        // Command line utility
+        return "uid:" + Binder.getCallingUid();
     }
 
     /**
