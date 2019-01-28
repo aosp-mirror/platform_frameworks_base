@@ -2755,27 +2755,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
         }
-        final InputBindResult result = startInputOrWindowGainedFocusInternal(startInputReason,
-                client, windowToken, startInputFlags, softInputMode, windowFlags, attribute,
-                inputContext, missingMethods, unverifiedTargetSdkVersion);
-        if (result == null) {
-            // This must never happen, but just in case.
-            Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
-                    + InputMethodDebug.startInputReasonToString(startInputReason)
-                    + " windowFlags=#" + Integer.toHexString(windowFlags)
-                    + " editorInfo=" + attribute);
-            return InputBindResult.NULL;
-        }
-        return result;
-    }
-
-    @NonNull
-    private InputBindResult startInputOrWindowGainedFocusInternal(
-            @StartInputReason int startInputReason, IInputMethodClient client,
-            @NonNull IBinder windowToken, @StartInputFlags int startInputFlags,
-            @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
-            IInputContext inputContext, @MissingMethodFlags int missingMethods,
-            int unverifiedTargetSdkVersion) {
         final int callingUserId = UserHandle.getCallingUserId();
         final int userId;
         if (attribute != null && attribute.targetInputMethodUser != null
@@ -2793,8 +2772,29 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } else {
             userId = callingUserId;
         }
-        InputBindResult res = null;
+        final InputBindResult result = startInputOrWindowGainedFocusInternal(startInputReason,
+                client, windowToken, startInputFlags, softInputMode, windowFlags, attribute,
+                inputContext, missingMethods, unverifiedTargetSdkVersion, userId);
+        if (result == null) {
+            // This must never happen, but just in case.
+            Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
+                    + InputMethodDebug.startInputReasonToString(startInputReason)
+                    + " windowFlags=#" + Integer.toHexString(windowFlags)
+                    + " editorInfo=" + attribute);
+            return InputBindResult.NULL;
+        }
+        return result;
+    }
+
+    @NonNull
+    private InputBindResult startInputOrWindowGainedFocusInternal(
+            @StartInputReason int startInputReason, IInputMethodClient client,
+            @NonNull IBinder windowToken, @StartInputFlags int startInputFlags,
+            @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
+            IInputContext inputContext, @MissingMethodFlags int missingMethods,
+            int unverifiedTargetSdkVersion, @UserIdInt int userId) {
         synchronized (mMethodMap) {
+            InputBindResult res = null;
             final int windowDisplayId =
                     mWindowManagerInternal.getDisplayIdForWindow(windowToken);
             final long ident = Binder.clearCallingIdentity();
@@ -3004,9 +3004,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+            return res;
         }
-
-        return res;
     }
 
     private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
