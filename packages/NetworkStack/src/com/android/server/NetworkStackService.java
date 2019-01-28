@@ -117,7 +117,11 @@ public class NetworkStackService extends Service {
             mObserverRegistry = new NetworkObserverRegistry();
             mCm = context.getSystemService(ConnectivityManager.class);
 
-            // TODO: call mObserverRegistry here after adding sepolicy changes
+            try {
+                mObserverRegistry.register(mNetd);
+            } catch (RemoteException e) {
+                mLog.e("Error registering observer on Netd", e);
+            }
         }
 
         @NonNull
@@ -158,7 +162,7 @@ public class NetworkStackService extends Service {
 
         @Override
         public void makeIpClient(String ifName, IIpClientCallbacks cb) throws RemoteException {
-            final IpClient ipClient = new IpClient(mContext, ifName, cb);
+            final IpClient ipClient = new IpClient(mContext, ifName, cb, mObserverRegistry);
 
             synchronized (mIpClients) {
                 final Iterator<WeakReference<IpClient>> it = mIpClients.iterator();
