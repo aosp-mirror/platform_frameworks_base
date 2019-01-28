@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -1354,6 +1355,7 @@ public class StateMachine {
      * Add a new state to the state machine, parent will be null
      * @param state to add
      */
+    @UnsupportedAppUsage
     public final void addState(State state) {
         mSmHandler.addState(state, null);
     }
@@ -1372,6 +1374,7 @@ public class StateMachine {
      *
      * @param initialState is the state which will receive the first message.
      */
+    @UnsupportedAppUsage
     public final void setInitialState(State initialState) {
         mSmHandler.setInitialState(initialState);
     }
@@ -1410,6 +1413,7 @@ public class StateMachine {
      *
      * @param destState will be the state that receives the next message.
      */
+    @UnsupportedAppUsage
     public final void transitionTo(IState destState) {
         mSmHandler.transitionTo(destState);
     }
@@ -2053,6 +2057,7 @@ public class StateMachine {
     /**
      * Start the state machine.
      */
+    @UnsupportedAppUsage
     public void start() {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
