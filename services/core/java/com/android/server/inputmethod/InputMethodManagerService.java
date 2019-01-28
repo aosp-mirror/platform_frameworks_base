@@ -2781,7 +2781,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (attribute != null && attribute.targetInputMethodUser != null
                 && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
             mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "Using EditorInfo.user requires INTERACT_ACROSS_USERS_FULL.");
+                    "Using EditorInfo.targetInputMethodUser requires INTERACT_ACROSS_USERS_FULL.");
             userId = attribute.targetInputMethodUser.getIdentifier();
             if (!mUserManagerInternal.isUserRunning(userId)) {
                 // There is a chance that we hit here because of race condition.  Let's just return
