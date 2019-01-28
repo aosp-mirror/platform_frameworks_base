@@ -646,9 +646,14 @@
          + 8dp. -->
     <dimen name="assist_orb_navbar_scrim_height">56dp</dimen>
 
-    <!-- The width/height of the phone/camera/unlock icon view on keyguard. -->
+    <!-- The width/height of the phone/camera icon view on keyguard. -->
     <dimen name="keyguard_affordance_height">56dp</dimen>
     <dimen name="keyguard_affordance_width">56dp</dimen>
+
+    <!-- The width/height of the unlock icon view on keyguard. -->
+    <dimen name="keyguard_lock_height">32dp</dimen>
+    <dimen name="keyguard_lock_width">32dp</dimen>
+    <dimen name="keyguard_lock_padding">24dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
 

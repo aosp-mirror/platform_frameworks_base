@@ -37,22 +37,16 @@
             android:id="@+id/keyguard_indication_enterprise_disclosure"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textStyle="italic"
-            android:textColor="?attr/wallpaperTextColorSecondary"
-            android:textSize="16sp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
             android:visibility="gone" />
 
         <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
             android:id="@+id/keyguard_indication_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textStyle="italic"
-            android:textColor="?attr/wallpaperTextColorSecondary"
-            android:textSize="16sp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
             android:accessibilityLiveRegion="polite" />
 
     </LinearLayout>
@@ -85,12 +79,13 @@
 
     <com.android.systemui.statusbar.phone.LockIcon
         android:id="@+id/lock_icon"
-        android:layout_width="@dimen/keyguard_affordance_width"
-        android:layout_height="@dimen/keyguard_affordance_height"
+        android:layout_width="@dimen/keyguard_lock_width"
+        android:layout_height="@dimen/keyguard_lock_height"
         android:layout_gravity="bottom|center_horizontal"
-        android:src="@drawable/ic_lock"
+        android:layout_marginBottom="@dimen/keyguard_lock_padding"
+        android:src="@*android:drawable/ic_lock_24dp"
         android:contentDescription="@string/accessibility_unlock_button"
-        android:scaleType="center" />
+        android:scaleType="fitCenter" />
 
     <FrameLayout
         android:id="@+id/overlay_container"

@@ -103,4 +103,10 @@
         <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
 
+    <style name="TextAppearance.Keyguard.BottomArea">
+        <item name="android:textSize">16sp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
+    </style>
+
 </resources>

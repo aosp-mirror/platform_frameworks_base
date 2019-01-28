@@ -251,7 +251,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mUnlockMethodCache.addListener(this);
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         mLockIcon.setScreenOn(updateMonitor.isScreenOn());
-        mLockIcon.setDeviceInteractive(updateMonitor.isDeviceInteractive());
         mLockIcon.update();
         setClipChildren(false);
         setClipToPadding(false);
@@ -337,8 +336,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateRightAffordanceIcon();
 
         lp = mLockIcon.getLayoutParams();
-        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
-        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
+        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_lock_width);
+        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_lock_height);
         mLockIcon.setLayoutParams(lp);
         mLockIcon.setContentDescription(getContext().getText(R.string.accessibility_unlock_button));
         mLockIcon.update(true /* force */);
@@ -745,16 +744,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 @Override
                 public void onUserSwitchComplete(int userId) {
                     updateCameraVisibility();
-                }
-
-                @Override
-                public void onStartedWakingUp() {
-                    mLockIcon.setDeviceInteractive(true);
-                }
-
-                @Override
-                public void onFinishedGoingToSleep(int why) {
-                    mLockIcon.setDeviceInteractive(false);
                 }
 
                 @Override
