@@ -5907,8 +5907,9 @@ package android.provider {
 
   public static interface DeviceConfig.Telephony {
     field public static final String NAMESPACE = "telephony";
-    field public static final String PROPERTY_ENABLE_RAMPING_RINGER = "enable_ramping_ringer";
-    field public static final String PROPERTY_RAMPING_RINGER_DURATION = "ramping_duration";
+    field public static final String RAMPING_RINGER_DURATION = "ramping_ringer_duration";
+    field public static final String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
+    field public static final String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
   }
 
   public final class DocumentsContract {
