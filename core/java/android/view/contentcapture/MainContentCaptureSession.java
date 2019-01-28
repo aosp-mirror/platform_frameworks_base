@@ -402,7 +402,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     private void handleFlushIfNeeded(@FlushReason int reason) {
-        if (mEvents.isEmpty()) {
+        if (mEvents == null || mEvents.isEmpty()) {
             if (VERBOSE) Log.v(TAG, "Nothing to flush");
             return;
         }
