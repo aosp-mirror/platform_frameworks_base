@@ -920,6 +920,27 @@ aidl_interface {
     api_dir: "aidl/networkstack",
 }
 
+filegroup {
+    name: "framework-networkstack-shared-srcs",
+    srcs: [
+        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/annotations/VisibleForTesting.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/MessageUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
+        "core/java/android/net/shared/*.java",
+    ]
+}
+
 // Build ext.jar
 // ============================================================
 java_library {

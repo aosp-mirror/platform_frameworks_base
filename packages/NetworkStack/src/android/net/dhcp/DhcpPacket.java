@@ -3,8 +3,8 @@ package android.net.dhcp;
 import android.annotation.Nullable;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
-import android.net.NetworkUtils;
 import android.net.metrics.DhcpErrorEvent;
+import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.system.OsConstants;
@@ -1222,13 +1222,13 @@ public abstract class DhcpPacket {
         int prefixLength;
         if (mSubnetMask != null) {
             try {
-                prefixLength = NetworkUtils.netmaskToPrefixLength(mSubnetMask);
+                prefixLength = Inet4AddressUtils.netmaskToPrefixLength(mSubnetMask);
             } catch (IllegalArgumentException e) {
                 // Non-contiguous netmask.
                 return null;
             }
         } else {
-            prefixLength = NetworkUtils.getImplicitNetmask(ipAddress);
+            prefixLength = Inet4AddressUtils.getImplicitNetmask(ipAddress);
         }
 
         DhcpResults results = new DhcpResults();
