@@ -359,7 +359,7 @@ public final class Magnifier {
     /**
      * @return the initial width of the content magnified and copied to the magnifier, in pixels
      * @see Magnifier.Builder#setSize(int, int)
-     * @see Magnifier.Builder#setZoom(float)
+     * @see Magnifier.Builder#setInitialZoom(float)
      */
     @Px
     public int getSourceWidth() {
@@ -369,7 +369,7 @@ public final class Magnifier {
     /**
      * @return the initial height of the content magnified and copied to the magnifier, in pixels
      * @see Magnifier.Builder#setSize(int, int)
-     * @see Magnifier.Builder#setZoom(float)
+     * @see Magnifier.Builder#setInitialZoom(float)
      */
     @Px
     public int getSourceHeight() {
@@ -394,7 +394,7 @@ public final class Magnifier {
      * If the zoom is x and the magnifier window size is (width, height), the original size
      * of the content being magnified will be (width / x, height / x).
      * @return the zoom applied to the content
-     * @see Magnifier.Builder#setZoom(float)
+     * @see Magnifier.Builder#setInitialZoom(float)
      */
     public float getZoom() {
         return mZoom;
@@ -1196,10 +1196,12 @@ public final class Magnifier {
          * (content_width * zoom, content_height * zoom), which will coincide with the size
          * of the magnifier. A zoom of 1 will translate to no magnification (the content will
          * be just copied to the magnifier with no scaling). The zoom defaults to 1.25.
+         * Note that the zoom can also be changed after the instance is built, using the
+         * {@link Magnifier#setZoom(float)} method.
          * @param zoom the zoom to be set
          */
         @NonNull
-        public Builder setZoom(@FloatRange(from = 0f) float zoom) {
+        public Builder setInitialZoom(@FloatRange(from = 0f) float zoom) {
             Preconditions.checkArgumentPositive(zoom, "Zoom should be positive");
             mZoom = zoom;
             return this;
