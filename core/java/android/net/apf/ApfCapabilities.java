@@ -18,6 +18,9 @@ package android.net.apf;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.content.Context;
+
+import com.android.internal.R;
 
 /**
  * APF program support capabilities.
@@ -73,5 +76,19 @@ public class ApfCapabilities {
      */
     public boolean hasDataAccess() {
         return apfVersionSupported >= 4;
+    }
+
+    /**
+     * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
+     */
+    public boolean getApfDrop8023Frames(Context context) {
+        return context.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
+    }
+
+    /**
+     * @return An array of blacklisted EtherType, packets with EtherTypes within it will be dropped.
+     */
+    public int[] getApfEthTypeBlackList(Context context) {
+        return context.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
     }
 }
