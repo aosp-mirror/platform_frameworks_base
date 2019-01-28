@@ -37,7 +37,7 @@ data class PrivacyItem(
     val application: PrivacyApplication
 )
 
-data class PrivacyApplication(val packageName: String, val context: Context)
+data class PrivacyApplication(val packageName: String, val uid: Int, val context: Context)
     : Comparable<PrivacyApplication> {
 
     override fun compareTo(other: PrivacyApplication): Int {

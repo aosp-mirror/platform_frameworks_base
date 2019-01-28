@@ -59,7 +59,8 @@ class PrivacyItemController @Inject constructor(val context: Context) {
     @Suppress("DEPRECATION")
     private val uiHandler = Dependency.get(Dependency.MAIN_HANDLER)
     private var listening = false
-    val systemApp = PrivacyApplication(context.getString(R.string.device_services), context)
+    val systemApp =
+            PrivacyApplication(context.getString(R.string.device_services), SYSTEM_UID, context)
     private val callbacks = mutableListOf<WeakReference<Callback>>()
 
     private val notifyChanges = Runnable {
@@ -162,7 +163,7 @@ class PrivacyItemController @Inject constructor(val context: Context) {
             else -> return null
         }
         if (appOpItem.uid == SYSTEM_UID) return PrivacyItem(type, systemApp)
-        val app = PrivacyApplication(appOpItem.packageName, context)
+        val app = PrivacyApplication(appOpItem.packageName, appOpItem.uid, context)
         return PrivacyItem(type, app)
     }
 
