@@ -28,8 +28,10 @@ import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ApplicationInfo;
@@ -138,6 +140,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     private final Callbacks mCallbacks;
 
+    private volatile boolean mBootCompleted = false;
+
     /**
      * File storing persisted {@link #mSessions} metadata.
      */
@@ -203,9 +207,20 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mStagingManager = new StagingManager(pm);
     }
 
+    private void setBootCompleted()  {
+        mBootCompleted = true;
+    }
+
     public void systemReady() {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
 
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                setBootCompleted();
+                mContext.unregisterReceiver(this);
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         synchronized (mSessions) {
             readSessionsLocked();
 
@@ -1126,8 +1141,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         public void onStagedSessionChanged(PackageInstallerSession session) {
             writeSessionsAsync();
-            // TODO(b/118865310): don't send broadcast if system is not ready.
-            mPm.sendSessionUpdatedBroadcast(session.generateInfo(false), session.userId);
+            if (mBootCompleted) {
+                mPm.sendSessionUpdatedBroadcast(session.generateInfo(false),
+                        session.userId);
+            }
         }
 
         public void onSessionFinished(final PackageInstallerSession session, boolean success) {
