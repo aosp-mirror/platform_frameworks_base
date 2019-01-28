@@ -257,7 +257,6 @@ public final class IpSecTransform implements AutoCloseable {
      *
      * @hide
      */
-    @SystemApi
     public static class NattKeepaliveCallback {
         /** The specified {@code Network} is not connected. */
         public static final int ERROR_INVALID_NETWORK = 1;
@@ -288,7 +287,6 @@ public final class IpSecTransform implements AutoCloseable {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
             android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
@@ -331,7 +329,6 @@ public final class IpSecTransform implements AutoCloseable {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
             android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
