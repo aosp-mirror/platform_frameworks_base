@@ -872,7 +872,7 @@ final class InputMethodUtils {
         private int getInt(String key, int defaultValue) {
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? Integer.parseInt(result) : 0;
+                return result != null ? Integer.parseInt(result) : defaultValue;
             }
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
