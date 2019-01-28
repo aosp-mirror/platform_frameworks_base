@@ -1303,12 +1303,14 @@ public class PackageManagerService extends IPackageManager.Stub
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
     static class PostInstallData {
-        public InstallArgs args;
-        public PackageInstalledInfo res;
+        public final InstallArgs args;
+        public final PackageInstalledInfo res;
+        public final Runnable mPostInstallRunnable;
 
-        PostInstallData(InstallArgs _a, PackageInstalledInfo _r) {
+        PostInstallData(InstallArgs _a, PackageInstalledInfo _r, Runnable postInstallRunnable) {
             args = _a;
             res = _r;
+            mPostInstallRunnable = postInstallRunnable;
         }
     }
 
@@ -1440,7 +1442,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     final boolean didRestore = (msg.arg2 != 0);
                     mRunningInstalls.delete(msg.arg1);
 
-                    if (data != null) {
+                    if (data != null && data.mPostInstallRunnable != null) {
+                        data.mPostInstallRunnable.run();
+                    } else if (data != null) {
                         InstallArgs args = data.args;
                         PackageInstalledInfo parentRes = data.res;
 
@@ -12683,6 +12687,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
+        return installExistingPackageAsUser(packageName, userId, installFlags, installReason, null);
+    }
+
+    int installExistingPackageAsUser(String packageName, int userId, int installFlags,
+            int installReason, IntentSender intentSender) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "installExistingPackageAsUser package=" + packageName + " userId=" + userId
                     + " installFlags=" + installFlags + " installReason=" + installReason);
@@ -12762,13 +12771,27 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageInstalledInfo res =
                         createPackageInstalledInfo(PackageManager.INSTALL_SUCCEEDED);
                 res.pkg = pkgSetting.pkg;
-                restoreAndPostInstall(userId, res, null);
+                res.newUsers = new int[]{ userId };
+                PostInstallData postInstallData = intentSender == null ? null :
+                        new PostInstallData(null, res, () -> onRestoreComplete(res.returnCode,
+                              mContext, intentSender));
+                restoreAndPostInstall(userId, res, postInstallData);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
 
         return PackageManager.INSTALL_SUCCEEDED;
+    }
+
+    static void onRestoreComplete(int returnCode, Context context, IntentSender target) {
+        Intent fillIn = new Intent();
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
+                PackageManager.installStatusToPublicStatus(returnCode));
+        try {
+            target.sendIntent(context, 0, fillIn, null, null);
+        } catch (SendIntentException ignored) {
+        }
     }
 
     static void setInstantAppForUser(PackageSetting pkgSetting, int userId,
@@ -13727,7 +13750,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             for (InstallRequest request : installRequests) {
                 restoreAndPostInstall(request.args.user.getIdentifier(), request.installResult,
-                        new PostInstallData(request.args, request.installResult));
+                        new PostInstallData(request.args, request.installResult, null));
             }
         });
     }

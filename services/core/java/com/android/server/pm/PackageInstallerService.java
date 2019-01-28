@@ -821,6 +821,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     @Override
+    public void installExistingPackage(String packageName, int installFlags, int installReason,
+            IntentSender statusReceiver, int userId) {
+        mPm.installExistingPackageAsUser(packageName, userId, installFlags, installReason,
+                statusReceiver);
+    }
+
+    @Override
     public void setPermissionsResult(int sessionId, boolean accepted) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, TAG);
 
