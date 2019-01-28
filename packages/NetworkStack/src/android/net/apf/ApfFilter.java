@@ -26,11 +26,6 @@ import static android.system.OsConstants.IPPROTO_ICMPV6;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_RAW;
 
-import static com.android.internal.util.BitUtils.bytesToBEInt;
-import static com.android.internal.util.BitUtils.getUint16;
-import static com.android.internal.util.BitUtils.getUint32;
-import static com.android.internal.util.BitUtils.getUint8;
-import static com.android.internal.util.BitUtils.uint32;
 import static com.android.server.util.NetworkStackConstants.ICMPV6_ECHO_REQUEST_TYPE;
 import static com.android.server.util.NetworkStackConstants.ICMPV6_NEIGHBOR_ADVERTISEMENT;
 import static com.android.server.util.NetworkStackConstants.ICMPV6_ROUTER_ADVERTISEMENT;
@@ -1586,6 +1581,29 @@ public class ApfFilter {
     // TODO: move to android.net.NetworkUtils
     @VisibleForTesting
     public static int ipv4BroadcastAddress(byte[] addrBytes, int prefixLength) {
-        return bytesToBEInt(addrBytes) | (int) (uint32(-1) >>> prefixLength);
+        return bytesToBEInt(addrBytes) | (int) (Integer.toUnsignedLong(-1) >>> prefixLength);
+    }
+
+    private static int uint8(byte b) {
+        return b & 0xff;
+    }
+
+    private static int getUint16(ByteBuffer buffer, int position) {
+        return buffer.getShort(position) & 0xffff;
+    }
+
+    private static long getUint32(ByteBuffer buffer, int position) {
+        return Integer.toUnsignedLong(buffer.getInt(position));
+    }
+
+    private static int getUint8(ByteBuffer buffer, int position) {
+        return uint8(buffer.get(position));
+    }
+
+    private static int bytesToBEInt(byte[] bytes) {
+        return (uint8(bytes[0]) << 24)
+                + (uint8(bytes[1]) << 16)
+                + (uint8(bytes[2]) << 8)
+                + (uint8(bytes[3]));
     }
 }

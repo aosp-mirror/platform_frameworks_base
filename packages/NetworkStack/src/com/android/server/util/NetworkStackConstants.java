@@ -16,6 +16,10 @@
 
 package com.android.server.util;
 
+import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
+
+import java.net.Inet4Address;
+
 /**
  * Network constants used by the network stack.
  */
@@ -79,6 +83,8 @@ public final class NetworkStackConstants {
     public static final int IPV4_SRC_ADDR_OFFSET = 12;
     public static final int IPV4_DST_ADDR_OFFSET = 16;
     public static final int IPV4_ADDR_LEN = 4;
+    public static final Inet4Address IPV4_ADDR_ALL = intToInet4AddressHTH(0xffffffff);
+    public static final Inet4Address IPV4_ADDR_ANY = intToInet4AddressHTH(0x0);
 
     /**
      * IPv6 constants.

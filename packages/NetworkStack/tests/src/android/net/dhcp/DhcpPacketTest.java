@@ -78,9 +78,9 @@ public class DhcpPacketTest {
             SERVER_ADDR, PREFIX_LENGTH);
     private static final String HOSTNAME = "testhostname";
     private static final short MTU = 1500;
-    // Use our own empty address instead of Inet4Address.ANY or INADDR_ANY to ensure that the code
+    // Use our own empty address instead of IPV4_ADDR_ANY or INADDR_ANY to ensure that the code
     // doesn't use == instead of equals when comparing addresses.
-    private static final Inet4Address ANY = (Inet4Address) v4Address("0.0.0.0");
+    private static final Inet4Address ANY = v4Address("0.0.0.0");
 
     private static final byte[] CLIENT_MAC = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 
