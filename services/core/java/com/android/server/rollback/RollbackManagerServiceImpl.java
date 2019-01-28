@@ -43,6 +43,7 @@ import android.os.Process;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
@@ -110,7 +111,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final HandlerThread mHandlerThread;
     private final Installer mInstaller;
     private final RollbackPackageHealthObserver mPackageHealthObserver;
-    private final AppDataRollbackHelper mUserdataHelper;
+    private final AppDataRollbackHelper mAppDataRollbackHelper;
 
     RollbackManagerServiceImpl(Context context) {
         mContext = context;
@@ -124,7 +125,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
 
         mPackageHealthObserver = new RollbackPackageHealthObserver(mContext);
-        mUserdataHelper = new AppDataRollbackHelper(mInstaller);
+        mAppDataRollbackHelper = new AppDataRollbackHelper(mInstaller);
 
         // Kick off loading of the rollback data from strorage in a background
         // thread.
@@ -449,7 +450,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 for (PackageRollbackInfo info : data.packages) {
                     if (info.getPackageName().equals(packageName)) {
                         iter.remove();
-                        mRollbackStore.deleteAvailableRollback(data);
+                        deleteRollback(data);
                         break;
                     }
                 }
@@ -464,13 +465,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             final List<RollbackData> changed;
             synchronized (mLock) {
                 ensureRollbackDataLoadedLocked();
-                changed = mUserdataHelper.computePendingBackupsAndRestores(userId,
+                changed = mAppDataRollbackHelper.computePendingBackupsAndRestores(userId,
                         pendingBackupPackages, pendingRestorePackages, mAvailableRollbacks,
                         mRecentlyExecutedRollbacks);
             }
 
-            mUserdataHelper.commitPendingBackupAndRestoreForUser(userId,
-                    pendingBackupPackages, pendingRestorePackages);
+            mAppDataRollbackHelper.commitPendingBackupAndRestoreForUser(userId,
+                    pendingBackupPackages, pendingRestorePackages, changed);
 
             for (RollbackData rd : changed) {
                 try {
@@ -520,7 +521,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         // mAvailableRollbacks, or is it okay to leave as
                         // unavailable until the next reboot when it will go
                         // away on its own?
-                        mRollbackStore.deleteAvailableRollback(data);
+                        deleteRollback(data);
                     }
                 }
             }
@@ -592,7 +593,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                         info.getVersionRolledBackFrom(),
                                         installedVersion)) {
                         iter.remove();
-                        mRollbackStore.deleteAvailableRollback(data);
+                        deleteRollback(data);
                         break;
                     }
                 }
@@ -705,7 +706,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
                 if (!now.isBefore(data.timestamp.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS))) {
                     iter.remove();
-                    mRollbackStore.deleteAvailableRollback(data);
+                    deleteRollback(data);
                 } else if (oldest == null || oldest.isAfter(data.timestamp)) {
                     oldest = data.timestamp;
                 }
@@ -821,9 +822,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             String packageName = newPackage.packageName;
             for (PackageRollbackInfo info : rd.packages) {
                 if (info.getPackageName().equals(packageName)) {
-                    IntArray pendingBackups = mUserdataHelper.snapshotAppData(
-                            packageName, installedUsers);
-                    info.getPendingBackups().addAll(pendingBackups);
+                    AppDataRollbackHelper.SnapshotAppDataResult rs =
+                            mAppDataRollbackHelper.snapshotAppData(packageName, installedUsers);
+                    info.getPendingBackups().addAll(rs.pendingBackups);
+                    for (int i = 0; i < rs.ceSnapshotInodes.size(); i++) {
+                        info.putCeSnapshotInode(rs.ceSnapshotInodes.keyAt(i),
+                                rs.ceSnapshotInodes.valueAt(i));
+                    }
                     try {
                         mRollbackStore.saveAvailableRollback(rd);
                     } catch (IOException ioe) {
@@ -892,13 +897,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         VersionedPackage installedVersion = new VersionedPackage(packageName,
                 pkgInfo.getLongVersionCode());
 
-        IntArray pendingBackups = IntArray.wrap(new int[0]);
+        final AppDataRollbackHelper.SnapshotAppDataResult result;
         if (snapshotUserData && !isApex) {
-            pendingBackups = mUserdataHelper.snapshotAppData(packageName, installedUsers);
+            result = mAppDataRollbackHelper.snapshotAppData(packageName, installedUsers);
+        } else {
+            result = new AppDataRollbackHelper.SnapshotAppDataResult(IntArray.wrap(new int[0]),
+                new SparseLongArray());
         }
 
         PackageRollbackInfo info = new PackageRollbackInfo(newVersion, installedVersion,
-                pendingBackups, new ArrayList<>(), isApex);
+                result.pendingBackups, new ArrayList<>(), isApex, IntArray.wrap(installedUsers),
+                result.ceSnapshotInodes);
+
         RollbackData data;
         try {
             int childSessionId = session.getSessionId();
@@ -948,9 +958,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() -> {
             final RollbackData rollbackData = getRollbackForPackage(packageName);
             for (int userId : userIds) {
-                final boolean changedRollbackData = mUserdataHelper.restoreAppData(packageName,
-                        rollbackData, userId, appId, ceDataInode, seInfo);
-
+                final boolean changedRollbackData = mAppDataRollbackHelper.restoreAppData(
+                        packageName, rollbackData, userId, appId, ceDataInode, seInfo);
                 // We've updated metadata about this rollback, so save it to flash.
                 if (changedRollbackData) {
                     try {
@@ -1142,12 +1151,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     scheduleExpiration(ROLLBACK_LIFETIME_DURATION_MILLIS);
                 } catch (IOException e) {
                     Log.e(TAG, "Unable to enable rollback", e);
-                    mRollbackStore.deleteAvailableRollback(data);
+                    deleteRollback(data);
                 }
             } else {
                 // The install session was aborted, clean up the pending
                 // install.
-                mRollbackStore.deleteAvailableRollback(data);
+                deleteRollback(data);
             }
         }
     }
@@ -1245,5 +1254,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         } while (n++ < 32);
 
         throw new IOException("Failed to allocate rollback ID");
+    }
+
+    private void deleteRollback(RollbackData rollbackData) {
+        for (PackageRollbackInfo info : rollbackData.packages) {
+            IntArray installedUsers = info.getInstalledUsers();
+            SparseLongArray ceSnapshotInodes = info.getCeSnapshotInodes();
+            for (int i = 0; i < installedUsers.size(); i++) {
+                int userId = installedUsers.get(i);
+                mAppDataRollbackHelper.destroyAppDataSnapshot(info.getPackageName(), userId,
+                        ceSnapshotInodes.get(userId, 0));
+            }
+        }
+        mRollbackStore.deleteAvailableRollback(rollbackData);
     }
 }

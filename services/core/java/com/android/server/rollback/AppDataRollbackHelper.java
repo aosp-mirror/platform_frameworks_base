@@ -22,6 +22,7 @@ import android.content.rollback.RollbackInfo;
 import android.os.storage.StorageManager;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Installer;
@@ -51,11 +52,13 @@ public class AppDataRollbackHelper {
      * Creates an app data snapshot for a specified {@code packageName} for {@code installedUsers},
      * a specified set of users for whom the package is installed.
      *
-     * @return a list of users for which the snapshot is pending, usually because data for one or
-     *         more users is still credential locked.
+     * @return a {@link SnapshotAppDataResult}/
+     * @see SnapshotAppDataResult
      */
-    public IntArray snapshotAppData(String packageName, int[] installedUsers) {
+    public SnapshotAppDataResult snapshotAppData(String packageName, int[] installedUsers) {
         final IntArray pendingBackups = new IntArray();
+        final SparseLongArray ceSnapshotInodes = new SparseLongArray();
+
         for (int user : installedUsers) {
             final int storageFlags;
             if (isUserCredentialLocked(user)) {
@@ -69,14 +72,17 @@ public class AppDataRollbackHelper {
             }
 
             try {
-                mInstaller.snapshotAppData(packageName, user, storageFlags);
+                long ceSnapshotInode = mInstaller.snapshotAppData(packageName, user, storageFlags);
+                if ((storageFlags & Installer.FLAG_STORAGE_CE) != 0) {
+                    ceSnapshotInodes.put(user, ceSnapshotInode);
+                }
             } catch (InstallerException ie) {
                 Log.e(TAG, "Unable to create app data snapshot for: " + packageName
                         + ", userId: " + user, ie);
             }
         }
 
-        return pendingBackups;
+        return new SnapshotAppDataResult(pendingBackups, ceSnapshotInodes);
     }
 
     /**
@@ -138,6 +144,22 @@ public class AppDataRollbackHelper {
     }
 
     /**
+     * Deletes an app data data snapshot for a specified package {@code packageName} for a
+     * given {@code user}.
+     */
+    public void destroyAppDataSnapshot(String packageName, int user, long ceSnapshotInode) {
+        int storageFlags = Installer.FLAG_STORAGE_DE;
+        if (ceSnapshotInode > 0) {
+            storageFlags |= Installer.FLAG_STORAGE_CE;
+        }
+        try {
+            mInstaller.destroyAppDataSnapshot(packageName, user, ceSnapshotInode, storageFlags);
+        } catch (InstallerException ie) {
+            Log.e(TAG, "Unable to delete app data snapshot for " + packageName, ie);
+        }
+    }
+
+    /**
      * Computes the list of pending backups and restores for {@code userId} given lists of
      * available and recent rollbacks. Packages pending backup for the given user are added
      * to {@code pendingBackups} and packages pending restore are added to {@code pendingRestores}
@@ -191,16 +213,28 @@ public class AppDataRollbackHelper {
     }
 
     /**
-     * Commits the list of pending backups and restores for a given {@code userId}.
+     * Commits the list of pending backups and restores for a given {@code userId}. For the pending
+     * backups updates corresponding {@code changedRollbackData} with a mapping from {@code userId}
+     * to a inode of theirs CE user data snapshot.
      */
     public void commitPendingBackupAndRestoreForUser(int userId,
-            ArrayList<String> pendingBackups, Map<String, RestoreInfo> pendingRestores) {
+            ArrayList<String> pendingBackups, Map<String, RestoreInfo> pendingRestores,
+            List<RollbackData> changedRollbackData) {
         if (!pendingBackups.isEmpty()) {
             for (String packageName : pendingBackups) {
                 try {
-                    mInstaller.snapshotAppData(packageName, userId, Installer.FLAG_STORAGE_CE);
+                    long ceSnapshotInode = mInstaller.snapshotAppData(packageName, userId,
+                            Installer.FLAG_STORAGE_CE);
+                    for (RollbackData data : changedRollbackData) {
+                        for (PackageRollbackInfo info : data.packages) {
+                            if (info.getPackageName().equals(packageName)) {
+                                info.putCeSnapshotInode(userId, ceSnapshotInode);
+                            }
+                        }
+                    }
                 } catch (InstallerException ie) {
-                    Log.e(TAG, "Unable to create app data snapshot for: " + packageName, ie);
+                    Log.e(TAG, "Unable to create app data snapshot for: " + packageName
+                            + ", userId: " + userId, ie);
                 }
             }
         }
@@ -232,5 +266,27 @@ public class AppDataRollbackHelper {
     public boolean isUserCredentialLocked(int userId) {
         return StorageManager.isFileEncryptedNativeOrEmulated()
                 && !StorageManager.isUserKeyUnlocked(userId);
+    }
+
+    /**
+     * Encapsulates a result of {@link #snapshotAppData} method.
+     */
+    public static final class SnapshotAppDataResult {
+
+        /**
+         * A list of users for which the snapshot is pending, usually because data for one or more
+         * users is still credential locked.
+         */
+        public final IntArray pendingBackups;
+
+        /**
+         * A mapping between user and an inode of theirs CE data snapshot.
+         */
+        public final SparseLongArray ceSnapshotInodes;
+
+        public SnapshotAppDataResult(IntArray pendingBackups, SparseLongArray ceSnapshotInodes) {
+            this.pendingBackups = pendingBackups;
+            this.ceSnapshotInodes = ceSnapshotInodes;
+        }
     }
 }
