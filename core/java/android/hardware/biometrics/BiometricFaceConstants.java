@@ -295,12 +295,22 @@ public interface BiometricFaceConstants {
     public static final int FACE_ACQUIRED_FACE_OBSCURED = 19;
 
     /**
+     * This message represents the earliest message sent at the beginning of the authentication
+     * pipeline. It is expected to be used to measure latency. For example, in a camera-based
+     * authentication system it's expected to be sent prior to camera initialization. Note this
+     * should be sent whenever authentication is restarted (see IBiometricsFace#userActivity).
+     * The framework will measure latency based on the time between the last START message and the
+     * onAuthenticated callback.
+     */
+    public static final int FACE_ACQUIRED_START = 20;
+
+    /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
      *
      * @hide
      */
-    public static final int FACE_ACQUIRED_VENDOR = 20;
+    public static final int FACE_ACQUIRED_VENDOR = 21;
 
     /**
      * @hide
