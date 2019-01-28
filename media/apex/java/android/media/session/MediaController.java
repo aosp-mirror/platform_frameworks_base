@@ -82,42 +82,26 @@ public final class MediaController {
     private final TransportControls mTransportControls;
 
     /**
-     * Call for creating a MediaController directly from a controller link. Should only
-     * be used by framework code.
-     * @hide
-     */
-    public MediaController(Context context, ControllerLink sessionBinder) {
-        if (sessionBinder == null) {
-            throw new IllegalArgumentException("Session token cannot be null");
-        }
-        if (context == null) {
-            throw new IllegalArgumentException("Context cannot be null");
-        }
-        mSessionBinder = sessionBinder;
-        mTransportControls = new TransportControls();
-        mToken = new MediaSession.Token(sessionBinder);
-        mContext = context;
-        mCbStub = new ControllerCallbackLink(context, new CallbackStub(this));
-    }
-
-    /**
-     * Call for creating a MediaController directly from a binder. Should only
-     * be used by framework code.
-     * @hide
-     * TODO: remove this constructor
-     */
-    public MediaController(Context context, ISessionController sessionBinder) {
-        this(context, new ControllerLink(sessionBinder.asBinder()));
-    }
-
-    /**
      * Create a new MediaController from a session's token.
      *
      * @param context The caller's context.
      * @param token The token for the session.
      */
     public MediaController(@NonNull Context context, @NonNull MediaSession.Token token) {
-        this(context, token.getControllerLink());
+        if (context == null) {
+            throw new IllegalArgumentException("context shouldn't be null");
+        }
+        if (token == null) {
+            throw new IllegalArgumentException("token shouldn't be null");
+        }
+        if (token.getControllerLink() == null) {
+            throw new IllegalArgumentException("token.getControllerLink() shouldn't be null");
+        }
+        mSessionBinder = token.getControllerLink();
+        mTransportControls = new TransportControls();
+        mToken = token;
+        mContext = context;
+        mCbStub = new ControllerCallbackLink(context, new CallbackStub(this));
     }
 
     /**
