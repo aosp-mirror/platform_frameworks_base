@@ -749,9 +749,15 @@ class ActivityStarter {
 
         boolean abortBackgroundStart = false;
         if (!abort) {
-            abortBackgroundStart = shouldAbortBackgroundActivityStart(callingUid, callingPid,
-                    callingPackage, realCallingUid, callerApp, originatingPendingIntent,
-                    allowBackgroundActivityStart, intent);
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "shouldAbortBackgroundActivityStart");
+                abortBackgroundStart = shouldAbortBackgroundActivityStart(callingUid, callingPid,
+                        callingPackage, realCallingUid, callerApp, originatingPendingIntent,
+                        allowBackgroundActivityStart, intent);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            }
             abort |= (abortBackgroundStart && !mService.isBackgroundActivityStartsEnabled());
             // TODO: remove this toast after feature development is done
             if (abortBackgroundStart) {
@@ -903,12 +909,6 @@ class ActivityStarter {
         mService.onStartActivitySetDidAppSwitch();
         mController.doPendingActivityLaunches(false);
 
-        // maybe log to TRON, but only if we haven't already in shouldAbortBackgroundActivityStart()
-        if (!abortBackgroundStart) {
-            maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp, r,
-                    originatingPendingIntent, false /*abortedStart*/);
-        }
-
         return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
                 true /* doResume */, checkedOptions, inTask, outActivity);
     }
@@ -927,17 +927,31 @@ class ActivityStarter {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
-        final boolean isCallingUidForeground = mService.isUidForeground(callingUid);
-        final boolean isCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
-                callingUid);
+        final int callingUidProcState = mService.getUidStateLocked(callingUid);
+        final boolean callingUidHasAnyVisibleWindow =
+                mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
+        final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
+                || callingUidProcState == ActivityManager.PROCESS_STATE_TOP;
+        final boolean isCallingUidPersistentSystemProcess = (callingUid == Process.SYSTEM_UID)
+                || callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
             return false;
         }
         // take realCallingUid into consideration
-        final boolean isRealCallingUidForeground = mService.isUidForeground(
-                realCallingUid);
-        final boolean isRealCallingUidPersistentSystemProcess = isUidPersistentSystemProcess(
-                realCallingUid);
+        final int realCallingUidProcState = (callingUid == realCallingUid)
+                ? callingUidProcState
+                : mService.getUidStateLocked(realCallingUid);
+        final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
+                ? callingUidHasAnyVisibleWindow
+                : mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(realCallingUid);
+        final boolean isRealCallingUidForeground = (callingUid == realCallingUid)
+                ? isCallingUidForeground
+                : realCallingUidHasAnyVisibleWindow
+                        || realCallingUidProcState == ActivityManager.PROCESS_STATE_TOP;
+        final boolean isRealCallingUidPersistentSystemProcess = (callingUid == realCallingUid)
+                ? isCallingUidPersistentSystemProcess
+                : (realCallingUid == Process.SYSTEM_UID)
+                        || realCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (realCallingUid != callingUid) {
             // don't abort if the realCallingUid is in the foreground and callingUid isn't
             if (isRealCallingUidForeground) {
@@ -975,61 +989,14 @@ class ActivityStarter {
                 + "; isBgStartWhitelisted: " + allowBackgroundActivityStart
                 + "; intent: " + intent
                 + "]");
-        maybeLogActivityStart(callingUid, callingPackage, realCallingUid, intent, callerApp,
-                null /*r*/, originatingPendingIntent, true /*abortedStart*/);
-        return true;
-    }
-
-    /** Returns true if uid is in a persistent state. */
-    private boolean isUidPersistentSystemProcess(int uid) {
-        return (uid == Process.SYSTEM_UID)
-                || (mService.getUidStateLocked(uid) <= ActivityManager.PROCESS_STATE_PERSISTENT_UI);
-    }
-
-    private void maybeLogActivityStart(int callingUid, String callingPackage, int realCallingUid,
-            Intent intent, WindowProcessController callerApp, ActivityRecord r,
-            PendingIntentRecord originatingPendingIntent, boolean abortedStart) {
-        boolean callerAppHasForegroundActivity =
-                callerApp != null && callerApp.hasForegroundActivities();
-        if (!mService.isActivityStartsLoggingEnabled() || callerAppHasForegroundActivity
-                || (!abortedStart && r == null)) {
-            // skip logging in this case
-            return;
-        }
-
-        try {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "logActivityStart");
-            final int callingUidProcState = mService.getUidStateLocked(callingUid);
-            final boolean callingUidHasAnyVisibleWindow =
-                    mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
-            final int realCallingUidProcState = (callingUid == realCallingUid)
-                    ? callingUidProcState
-                    : mService.getUidStateLocked(realCallingUid);
-            final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
-                    ? callingUidHasAnyVisibleWindow
-                    : mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(
-                            realCallingUid);
-            final String targetPackage = (r != null) ? r.packageName : null;
-            final int targetUid = (r!= null) ? ((r.appInfo != null) ? r.appInfo.uid : -1) : -1;
-            final int targetUidProcState = mService.getUidStateLocked(targetUid);
-            final boolean targetUidHasAnyVisibleWindow = (targetUid != -1)
-                    ? mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(targetUid)
-                    : false;
-            final String targetWhitelistTag = (targetUid != -1)
-                    ? mService.getPendingTempWhitelistTagForUidLocked(targetUid)
-                    : null;
-
-            mSupervisor.getActivityMetricsLogger().logActivityStart(intent, callerApp, r,
-                    callingUid, callingPackage, callingUidProcState,
-                    callingUidHasAnyVisibleWindow,
-                    realCallingUid, realCallingUidProcState,
-                    realCallingUidHasAnyVisibleWindow,
-                    targetUid, targetPackage, targetUidProcState,
-                    targetUidHasAnyVisibleWindow, targetWhitelistTag,
+        // log aborted activity start to TRON
+        if (mService.isActivityStartsLoggingEnabled()) {
+            mSupervisor.getActivityMetricsLogger().logAbortedBgActivityStart(intent, callerApp,
+                    callingUid, callingPackage, callingUidProcState, callingUidHasAnyVisibleWindow,
+                    realCallingUid, realCallingUidProcState, realCallingUidHasAnyVisibleWindow,
                     (originatingPendingIntent != null));
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
+        return true;
     }
 
     /**

@@ -523,9 +523,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         starter.setReason("testActivityStartsLogging_noLoggingWhenDisabled").execute();
 
         // verify logging wasn't done
-        verify(mActivityMetricsLogger, never()).logActivityStart(any(), any(), any(), anyInt(),
-                any(), anyInt(), anyBoolean(), anyInt(), anyInt(), anyBoolean(), anyInt(), any(),
-                anyInt(), anyBoolean(), any(), anyBoolean());
+        verify(mActivityMetricsLogger, never()).logAbortedBgActivityStart(any(), any(), anyInt(),
+                any(), anyInt(), anyBoolean(), anyInt(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     /**
@@ -546,10 +545,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
         starter.setReason("testActivityStartsLogging_logsWhenEnabled").execute();
 
         // verify the above activity start was logged
-        verify(mActivityMetricsLogger, times(1)).logActivityStart(any(), any(), any(),
+        verify(mActivityMetricsLogger, times(1)).logAbortedBgActivityStart(any(), any(),
                 eq(FAKE_CALLING_UID), eq(FAKE_CALLING_PACKAGE), anyInt(), anyBoolean(),
-                eq(FAKE_REAL_CALLING_UID), anyInt(), anyBoolean(), anyInt(),
-                any(), anyInt(), anyBoolean(), any(), eq(false));
+                eq(FAKE_REAL_CALLING_UID), anyInt(), anyBoolean(), eq(false));
     }
 
     /**
