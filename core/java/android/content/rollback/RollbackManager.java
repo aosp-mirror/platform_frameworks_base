@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.ParceledListSlice;
+import android.content.pm.VersionedPackage;
 import android.os.RemoteException;
 
 import java.util.List;
@@ -103,14 +105,18 @@ public final class RollbackManager {
      * TODO: Specify the returns status codes.
      *
      * @param rollbackId ID of the rollback to commit
+     * @param causePackages package versions to record as the motivation for this
+     *                      rollback.
      * @param statusReceiver where to deliver the results
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public void commitRollback(int rollbackId, @NonNull IntentSender statusReceiver) {
+    public void commitRollback(int rollbackId, @NonNull List<VersionedPackage> causePackages,
+            @NonNull IntentSender statusReceiver) {
         try {
-            mBinder.commitRollback(rollbackId, mCallerPackageName, statusReceiver);
+            mBinder.commitRollback(rollbackId, new ParceledListSlice(causePackages),
+                    mCallerPackageName, statusReceiver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

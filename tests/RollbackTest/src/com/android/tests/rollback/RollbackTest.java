@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -40,6 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -303,14 +305,15 @@ public class RollbackTest {
                     rm.getAvailableRollbacks(), TEST_APP_A);
 
             // Roll back the app.
-            RollbackTestUtils.rollback(rollback.getRollbackId());
+            VersionedPackage cause = new VersionedPackage(
+                    "com.android.tests.rollback.testapp.Foo", 42);
+            RollbackTestUtils.rollback(rollback.getRollbackId(), cause);
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // Verify the recent rollback has been recorded.
             rollback = getUniqueRollbackInfoForPackage(
                     rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
-            assertNotNull(rollback);
-            assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
+            assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback, cause);
 
             // Reload the persisted data.
             rm.reloadPersistedData();
@@ -318,8 +321,7 @@ public class RollbackTest {
             // Verify the recent rollback is still recorded.
             rollback = getUniqueRollbackInfoForPackage(
                     rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
-            assertNotNull(rollback);
-            assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
+            assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback, cause);
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
         }
@@ -544,7 +546,7 @@ public class RollbackTest {
         try {
             // TODO: What if the implementation checks arguments for non-null
             // first? Then this test isn't valid.
-            rm.commitRollback(0, null);
+            rm.commitRollback(0, Collections.emptyList(), null);
             fail("expected SecurityException");
         } catch (SecurityException e) {
             // Expected.
@@ -690,11 +692,18 @@ public class RollbackTest {
     // Helper function to test the value of a RollbackInfo with single package
     private void assertRollbackInfoEquals(String packageName,
             long versionRolledBackFrom, long versionRolledBackTo,
-            RollbackInfo info) {
+            RollbackInfo info, VersionedPackage... causePackages) {
         assertNotNull(info);
         assertEquals(1, info.getPackages().size());
         assertPackageRollbackInfoEquals(packageName, versionRolledBackFrom, versionRolledBackTo,
                 info.getPackages().get(0));
+        assertEquals(causePackages.length, info.getCausePackages().size());
+        for (int i = 0; i < causePackages.length; ++i) {
+            assertEquals(causePackages[i].getPackageName(),
+                    info.getCausePackages().get(i).getPackageName());
+            assertEquals(causePackages[i].getLongVersionCode(),
+                    info.getCausePackages().get(i).getLongVersionCode());
+        }
     }
 
     // Helper function to test that the given rollback info is a rollback for

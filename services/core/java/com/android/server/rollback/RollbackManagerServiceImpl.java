@@ -54,6 +54,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -207,7 +208,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages));
+                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages,
+                            Collections.emptyList()));
             }
             return new ParceledListSlice<>(rollbacks);
         }
@@ -227,8 +229,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public void commitRollback(int rollbackId, String callerPackageName,
-            IntentSender statusReceiver) {
+    public void commitRollback(int rollbackId, ParceledListSlice causePackages,
+            String callerPackageName, IntentSender statusReceiver) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLLBACKS,
                 "executeRollback");
@@ -238,7 +240,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         appOps.checkPackage(callingUid, callerPackageName);
 
         getHandler().post(() ->
-                commitRollbackInternal(rollbackId, callerPackageName, statusReceiver));
+                commitRollbackInternal(rollbackId, causePackages.getList(),
+                    callerPackageName, statusReceiver));
     }
 
     /**
@@ -246,7 +249,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * The work is done on the current thread. This may be a long running
      * operation.
      */
-    private void commitRollbackInternal(int rollbackId,
+    private void commitRollbackInternal(int rollbackId, List<VersionedPackage> causePackages,
             String callerPackageName, IntentSender statusReceiver) {
         Log.i(TAG, "Initiating rollback");
 
@@ -350,8 +353,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                 return;
                             }
 
-                            addRecentlyExecutedRollback(
-                                    new RollbackInfo(data.rollbackId, data.packages));
+                            addRecentlyExecutedRollback(new RollbackInfo(
+                                        data.rollbackId, data.packages, causePackages));
                             sendSuccess(statusReceiver);
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);

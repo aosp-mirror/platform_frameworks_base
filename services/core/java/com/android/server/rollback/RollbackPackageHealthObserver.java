@@ -29,6 +29,7 @@ import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -85,8 +86,12 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         });
 
         // TODO(zezeozue): Log initiated metrics
+        // TODO: Pass the package as a cause package instead of using
+        // Collections.emptyList once the version of the failing package is
+        // easily available.
         mHandler.post(() ->
                 mRollbackManager.commitRollback(rollback.getRollbackId(),
+                    Collections.emptyList(),
                     rollbackReceiver.getIntentSender()));
         // Assume rollback executed successfully
         return true;
