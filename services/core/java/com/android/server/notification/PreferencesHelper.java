@@ -76,6 +76,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String TAG_CHANNEL = "channel";
     private static final String TAG_GROUP = "channelGroup";
     private static final String TAG_DELEGATE = "delegate";
+    private static final String TAG_STATUS_ICONS = "status_icons";
 
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
@@ -89,10 +90,13 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_APP_USER_LOCKED_FIELDS = "app_user_locked_fields";
     private static final String ATT_ENABLED = "enabled";
     private static final String ATT_USER_ALLOWED = "allowed";
+    private static final String ATT_HIDE_SILENT = "hide_silent";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
+    @VisibleForTesting
+    static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
     private static final boolean DEFAULT_ALLOW_BUBBLE = true;
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
@@ -124,6 +128,7 @@ public class PreferencesHelper implements RankingConfig {
 
     private SparseBooleanArray mBadgingEnabled;
     private boolean mAreChannelsBypassingDnd;
+    private boolean mHideSilentStatusBarIcons;
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper) {
@@ -143,9 +148,8 @@ public class PreferencesHelper implements RankingConfig {
         String tag = parser.getName();
         if (!TAG_RANKING.equals(tag)) return;
         synchronized (mPackagePreferences) {
-            // Clobber groups and channels with the xml, but don't delete other data that wasn't present
-
-            // at the time of serialization.
+            // Clobber groups and channels with the xml, but don't delete other data that wasn't
+            // present at the time of serialization.
             mRestoredWithoutUids.clear();
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 tag = parser.getName();
@@ -153,7 +157,10 @@ public class PreferencesHelper implements RankingConfig {
                     return;
                 }
                 if (type == XmlPullParser.START_TAG) {
-                    if (TAG_PACKAGE.equals(tag)) {
+                    if (TAG_STATUS_ICONS.equals(tag)) {
+                        mHideSilentStatusBarIcons = XmlUtils.readBooleanAttribute(
+                                parser, ATT_HIDE_SILENT, DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS);
+                    } else if (TAG_PACKAGE.equals(tag)) {
                         int uid = XmlUtils.readIntAttribute(parser, ATT_UID, UNKNOWN_UID);
                         String name = parser.getAttributeValue(null, ATT_NAME);
                         if (!TextUtils.isEmpty(name)) {
@@ -375,6 +382,11 @@ public class PreferencesHelper implements RankingConfig {
     public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
         out.startTag(null, TAG_RANKING);
         out.attribute(null, ATT_VERSION, Integer.toString(XML_VERSION));
+        if (mHideSilentStatusBarIcons != DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS) {
+            out.startTag(null, TAG_STATUS_ICONS);
+            out.attribute(null, ATT_HIDE_SILENT, String.valueOf(mHideSilentStatusBarIcons));
+            out.endTag(null, TAG_STATUS_ICONS);
+        }
 
         synchronized (mPackagePreferences) {
             final int N = mPackagePreferences.size();
@@ -779,6 +791,14 @@ public class PreferencesHelper implements RankingConfig {
                 r.channels.remove(key);
             }
         }
+    }
+
+    public boolean shouldHideSilentStatusIcons() {
+        return mHideSilentStatusBarIcons;
+    }
+
+    public void setHideSilentStatusIcons(boolean hide) {
+        mHideSilentStatusBarIcons = hide;
     }
 
     public void lockChannelsForOEM(String[] appOrChannelList) {

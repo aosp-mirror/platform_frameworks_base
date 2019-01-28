@@ -11,9 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import androidx.annotation.NonNull;
-import androidx.collection.ArrayMap;
-
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.ViewClippingUtil;
@@ -21,6 +19,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarStateController;
@@ -28,10 +27,12 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.tuner.TunerService;
 
 import java.util.ArrayList;
 import java.util.function.Function;
+
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
 
 /**
  * A controller for the space in the status bar to the left of the system icons. This area is
@@ -46,18 +47,19 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final NotificationEntryManager mEntryManager;
     private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
     private final StatusBarStateController mStatusBarStateController;
-    private final TunerService.Tunable mTunable = new TunerService.Tunable() {
-        @Override
-        public void onTuningChanged(String key, String newValue) {
-            if (key.equals(LOW_PRIORITY)) {
-                mShowLowPriority = "1".equals(newValue)
-                        || !NotificationUtils.useNewInterruptionModel(mContext);
-                if (mNotificationScrollLayout != null) {
-                    updateStatusBarIcons();
+    @VisibleForTesting
+    final NotificationListener.NotificationSettingsListener mSettingsListener =
+            new NotificationListener.NotificationSettingsListener() {
+                @Override
+                public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
+                    if (NotificationUtils.useNewInterruptionModel(mContext)) {
+                        mShowLowPriority = !hideSilentStatusIcons;
+                        if (mNotificationScrollLayout != null) {
+                            updateStatusBarIcons();
+                        }
+                    }
                 }
-            }
-        }
-    };
+            };
 
     private int mIconSize;
     private int mIconHPadding;
@@ -71,7 +73,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private ViewGroup mNotificationScrollLayout;
     private Context mContext;
     private boolean mFullyDark;
-    private boolean mShowLowPriority;
+    private boolean mShowLowPriority = true;
 
     /**
      * Ratio representing being awake or in ambient mode, where 1 is dark and 0 awake.
@@ -90,15 +92,15 @@ public class NotificationIconAreaController implements DarkReceiver,
             view -> view instanceof StatusBarWindowView;
 
     public NotificationIconAreaController(Context context, StatusBar statusBar,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            NotificationListener notificationListener) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mEntryManager = Dependency.get(NotificationEntryManager.class);
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(this);
-
-        Dependency.get(TunerService.class).addTunable(mTunable, LOW_PRIORITY);
+        notificationListener.addNotificationSettingsListener(mSettingsListener);
 
         initializeNotificationAreaViews(context);
     }
@@ -241,6 +243,11 @@ public class NotificationIconAreaController implements DarkReceiver,
                 false /* showAmbient */, mShowLowPriority /* showLowPriority */,
                 true /* hideDismissed */,
                 true /* hideRepliedMessages */);
+    }
+
+    @VisibleForTesting
+    boolean shouldShouldLowPriorityIcons() {
+        return mShowLowPriority;
     }
 
     /**

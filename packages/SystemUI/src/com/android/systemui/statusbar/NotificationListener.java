@@ -20,6 +20,8 @@ import static com.android.systemui.statusbar.RemoteInputController.processForRem
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_CHILD_NOTIFICATIONS;
 
+import android.annotation.SuppressLint;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
@@ -32,10 +34,13 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
+import java.util.ArrayList;
+
 /**
  * This class handles listening to notification updates and passing them along to
  * NotificationPresenter to be displayed to the user.
  */
+@SuppressLint("OverrideAbstract")
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
@@ -47,12 +52,17 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
 
+    private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
     private final Context mContext;
 
     protected NotificationPresenter mPresenter;
 
     public NotificationListener(Context context) {
         mContext = context;
+    }
+
+    public void addNotificationSettingsListener(NotificationSettingsListener listener) {
+        mSettingsListeners.add(listener);
     }
 
     @Override
@@ -70,6 +80,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                 mEntryManager.addNotification(sbn, currentRanking);
             }
         });
+        NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
+        onStatusBarIconsBehaviorChanged(noMan.shouldHideSilentStatusBarIcons());
     }
 
     @Override
@@ -133,6 +145,13 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         }
     }
 
+    @Override
+    public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
+        for (NotificationSettingsListener listener : mSettingsListeners) {
+            listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
+        }
+    }
+
     public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
 
@@ -143,5 +162,11 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to register notification listener", e);
         }
+    }
+
+    public interface NotificationSettingsListener {
+
+        default void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) { }
+
     }
 }

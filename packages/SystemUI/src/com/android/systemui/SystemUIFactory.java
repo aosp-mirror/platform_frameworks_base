@@ -137,8 +137,10 @@ public class SystemUIFactory {
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
-            StatusBar statusBar, StatusBarStateController statusBarStateController) {
-        return new NotificationIconAreaController(context, statusBar, statusBarStateController);
+            StatusBar statusBar, StatusBarStateController statusBarStateController,
+            NotificationListener listener) {
+        return new NotificationIconAreaController(context, statusBar, statusBarStateController,
+                listener);
     }
 
     public KeyguardIndicationController createKeyguardIndicationController(Context context,

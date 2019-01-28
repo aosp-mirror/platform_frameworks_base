@@ -2006,6 +2006,28 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testXml_statusBarIcons_default() throws Exception {
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        loadStreamXml(baos, false);
+
+        assertEquals(PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
+                mHelper.shouldHideSilentStatusIcons());
+    }
+
+    @Test
+    public void testXml_statusBarIcons() throws Exception {
+        mHelper.setHideSilentStatusIcons(!PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        loadStreamXml(baos, false);
+
+        assertEquals(!PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
+                mHelper.shouldHideSilentStatusIcons());
+    }
+
+    @Test
     public void testSetNotificationDelegate() {
         mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
         assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
