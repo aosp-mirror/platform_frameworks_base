@@ -486,6 +486,37 @@ public final class Settings {
             "android.settings.WIFI_IP_SETTINGS";
 
     /**
+     * Activity Action: Show setting page to process an Easy Connect (Wi-Fi DPP) QR code and start
+     * configuration. This intent should be used when you want to use this device to take on the
+     * configurator role for an IoT/other device. When provided with a valid DPP URI string Settings
+     * will open a wifi selection screen for the user to indicate which network they would like
+     * to configure the device specified in the DPP URI string for and carry them through the rest
+     * of the flow for provisioning the device.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this by checking WifiManager.isEasyConnectSupported();
+     * <p>
+     * Input:
+     * The following keys in the bundle with their associated value.
+     * <ul>
+     *     <li>"qrCode": Standard Easy Connect (Wi-Fi DPP) URI bootstrapping information as a
+     *     string.</li>
+     * </ul>
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROCESS_WIFI_EASY_CONNECT_QR_CODE =
+            "android.settings.PROCESS_WIFI_EASY_CONNECT_QR_CODE";
+
+    /**
+     * An extra to put in the bundle for {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_QR_CODE} intents.
+     * It must contain properly formatted Easy Connect (Wi-Fi DPP) URI bootstrapping information for
+     * the process to proceed.
+     */
+    public static final String EXTRA_QR_CODE = "android.provider.extra.QR_CODE";
+
+    /**
      * Activity Action: Show settings to allow configuration of data and view data usage.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
