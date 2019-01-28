@@ -104,6 +104,21 @@ static jlong android_hardware_HardwareBuffer_getNativeFinalizer(JNIEnv* env, job
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyWrapper));
 }
 
+static jboolean android_hardware_HardwareBuffer_isSupported(JNIEnv* env, jobject clazz,
+        jint width, jint height, jint format, jint layers, jlong usage) {
+
+    AHardwareBuffer_Desc desc;
+    desc.width = width;
+    desc.height = height;
+    desc.format = format;
+    desc.layers = layers;
+    desc.usage = usage;
+    desc.stride = 0;
+    desc.rfu0 = 0;
+    desc.rfu1 = 0;
+    return AHardwareBuffer_isSupported(&desc);
+}
+
 //----------------------------------------------------------------------------
 // Accessors
 // ----------------------------------------------------------------------------
@@ -234,6 +249,8 @@ static const JNINativeMethod gMethods[] = {
             (void*) android_hardware_HardwareBuffer_write },
     { "nReadHardwareBufferFromParcel", "(Landroid/os/Parcel;)J",
             (void*) android_hardware_HardwareBuffer_read },
+    { "nIsSupported",  "(IIIIJ)Z",
+            (void*) android_hardware_HardwareBuffer_isSupported },
 
     // --------------- @FastNative ----------------------
     { "nGetWidth", "(J)I",      (void*) android_hardware_HardwareBuffer_getWidth },
