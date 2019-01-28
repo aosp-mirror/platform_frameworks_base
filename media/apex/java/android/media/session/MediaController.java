@@ -485,7 +485,6 @@ public final class MediaController {
      * Get the session's tag for debugging purposes.
      *
      * @return The session's tag.
-     * @hide
      */
     public String getTag() {
         if (mTag == null) {
