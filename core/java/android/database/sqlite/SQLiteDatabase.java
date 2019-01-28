@@ -2644,10 +2644,29 @@ public final class SQLiteDatabase extends SQLiteClosable {
              * Sets the maximum number of milliseconds that SQLite connection is allowed to be idle
              * before it is closed and removed from the pool.
              *
+             * <p>DO NOT USE this method unless you fully understand the implication
+             * of what it does.
+             * A connection timeout allows the system to internally close a connection to a SQLite
+             * database after a given timeout.
+             * This is good for reducing app's memory consumption, but it has
+             * side effects that are hard to predict. For example, SQLite internally maintains
+             * a lot of "per-connection" states that apps can typically modify with a {@code PRAGMA}
+             * statement, and such states will be reset once the connection is closed.
+             * The system does not provide a callback that would allow apps to
+             * reconfigure a newly created connection and thus there's no way to re-configure
+             * connections when they're re-made internally. Do not use it unless you're sure
+             * your app uses no per-connection states.
+             *
              * @param idleConnectionTimeoutMs timeout in milliseconds. Use {@link Long#MAX_VALUE}
              * to allow unlimited idle connections.
+             *
+             * @see SQLiteOpenHelper#setIdleConnectionTimeout(long)
+             *
+             * @deprecated DO NOT USE this method unless you fully understand the implication
+             * of what it does.
              */
             @NonNull
+            @Deprecated
             public Builder setIdleConnectionTimeout(
                     @IntRange(from = 0) long idleConnectionTimeoutMs) {
                 Preconditions.checkArgument(idleConnectionTimeoutMs >= 0,
