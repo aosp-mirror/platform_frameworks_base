@@ -277,6 +277,7 @@ interface IActivityManager {
     void unstableProviderDied(in IBinder connection);
     boolean isIntentSenderAnActivity(in IIntentSender sender);
     boolean isIntentSenderAForegroundService(in IIntentSender sender);
+    boolean isIntentSenderABroadcast(in IIntentSender sender);
     int startActivityAsUser(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo,

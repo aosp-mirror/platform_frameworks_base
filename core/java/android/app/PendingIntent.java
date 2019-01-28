@@ -1113,6 +1113,19 @@ public final class PendingIntent implements Parcelable {
 
     /**
      * @hide
+     * Check whether this PendingIntent will launch an Activity.
+     */
+    public boolean isBroadcast() {
+        try {
+            return ActivityManager.getService()
+                .isIntentSenderABroadcast(mTarget);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
      * Return the Intent of this PendingIntent.
      */
     @UnsupportedAppUsage
