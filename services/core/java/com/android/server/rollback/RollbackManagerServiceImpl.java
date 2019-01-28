@@ -32,6 +32,7 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
+import android.content.rollback.RollbackManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -255,12 +256,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         RollbackData data = getRollbackForId(rollbackId);
         if (data == null) {
-            sendFailure(statusReceiver, "Rollback unavailable");
+            sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+                    "Rollback unavailable");
             return;
         }
 
         if (data.inProgress) {
-            sendFailure(statusReceiver, "Rollback for package is already in progress.");
+            sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+                    "Rollback for package is already in progress.");
             return;
         }
 
@@ -276,13 +279,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             VersionedPackage installedVersion = getInstalledPackageVersion(info.getPackageName());
             if (installedVersion == null) {
                 // TODO: Test this case
-                sendFailure(statusReceiver, "Package to roll back is not installed");
+                sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+                        "Package to roll back is not installed");
                 return;
             }
 
             if (!packageVersionsEqual(info.getVersionRolledBackFrom(), installedVersion)) {
                 // TODO: Test this case
-                sendFailure(statusReceiver, "Package version to roll back not installed.");
+                sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+                        "Package version to roll back not installed.");
                 return;
             }
         }
@@ -293,7 +298,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         try {
             context = mContext.createPackageContext(callerPackageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
-            sendFailure(statusReceiver, "Invalid callerPackageName");
+            sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
+                    "Invalid callerPackageName");
             return;
         }
 
@@ -312,7 +318,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
                 String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
                 if (installerPackageName == null) {
-                    sendFailure(statusReceiver, "Cannot find installer package");
+                    sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
+                            "Cannot find installer package");
                     return;
                 }
                 params.setInstallerPackageName(installerPackageName);
@@ -346,7 +353,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                                     PackageInstaller.STATUS_FAILURE);
                             if (status != PackageInstaller.STATUS_SUCCESS) {
-                                sendFailure(statusReceiver,
+                                sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_INSTALL,
                                         "Rollback downgrade install failed: "
                                         + result.getStringExtra(
                                                 PackageInstaller.EXTRA_STATUS_MESSAGE));
@@ -372,7 +379,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             parentSession.commit(receiver.getIntentSender());
         } catch (IOException e) {
             Log.e(TAG, "Rollback failed", e);
-            sendFailure(statusReceiver, "IOException: " + e.toString());
+            sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
+                    "IOException: " + e.toString());
             return;
         }
     }
@@ -534,16 +542,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * Notifies an IntentSender of failure.
      *
      * @param statusReceiver where to send the failure
+     * @param status the RollbackManager.STATUS_* code with the failure.
      * @param message the failure message.
      */
-    private void sendFailure(IntentSender statusReceiver, String message) {
+    private void sendFailure(IntentSender statusReceiver, int status, String message) {
         Log.e(TAG, message);
         try {
-            // TODO: More context on which rollback failed?
-            // TODO: More refined failure code?
             final Intent fillIn = new Intent();
-            fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
-            fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, message);
+            fillIn.putExtra(RollbackManager.EXTRA_STATUS, status);
+            fillIn.putExtra(RollbackManager.EXTRA_STATUS_MESSAGE, message);
             statusReceiver.sendIntent(mContext, 0, fillIn, null, null);
         } catch (IntentSender.SendIntentException e) {
             // Nowhere to send the result back to, so don't bother.
@@ -556,7 +563,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private void sendSuccess(IntentSender statusReceiver) {
         try {
             final Intent fillIn = new Intent();
-            fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_SUCCESS);
+            fillIn.putExtra(RollbackManager.EXTRA_STATUS, RollbackManager.STATUS_SUCCESS);
             statusReceiver.sendIntent(mContext, 0, fillIn, null, null);
         } catch (IntentSender.SendIntentException e) {
             // Nowhere to send the result back to, so don't bother.
