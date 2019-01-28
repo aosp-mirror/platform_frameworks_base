@@ -175,8 +175,8 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {android::util::CATEGORY_SIZE,
          {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
         // Number of fingerprints registered to each user.
-        {android::util::NUM_FINGERPRINTS,
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS)}},
+        {android::util::NUM_FINGERPRINTS_ENROLLED,
+         {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},
         // ProcStats.
         {android::util::PROC_STATS,
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},

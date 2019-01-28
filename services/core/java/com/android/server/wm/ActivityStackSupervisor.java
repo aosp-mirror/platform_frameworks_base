@@ -327,9 +327,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      */
     PowerManager.WakeLock mGoingToSleep;
 
-    /** Used to keep resumeTopActivityUncheckedLocked() from being entered recursively */
-    boolean inResumeTopActivity;
-
     /**
      * Temporary rect used during docked stack resize calculation so we don't need to create a new
      * object each time.

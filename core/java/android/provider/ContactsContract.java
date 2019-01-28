@@ -126,6 +126,7 @@ public final class ContactsContract {
      * Prefix for column names that are not visible to client apps.
      * @hide
      */
+    @TestApi
     public static final String HIDDEN_COLUMN_PREFIX = "x_";
 
     /**
@@ -8444,6 +8445,7 @@ public final class ContactsContract {
          * nothing will be done.
          * @hide
          */
+        @TestApi
         public static final String UNDEMOTE_METHOD = "undemote";
 
         /**

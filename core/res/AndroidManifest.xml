@@ -3329,7 +3329,7 @@
     <permission android:name="com.android.permission.INSTALL_EXISTING_PACKAGES"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows an application to clear user data.
+    <!-- @SystemApi @TestApi Allows an application to clear user data.
          <p>Not for use by third-party applications
          @hide
     -->

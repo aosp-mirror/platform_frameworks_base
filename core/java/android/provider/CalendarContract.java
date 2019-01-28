@@ -19,6 +19,7 @@ package android.provider;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -805,6 +806,7 @@ public final class CalendarContract {
          *
          * @hide
          */
+        @TestApi
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             ACCOUNT_NAME,
             ACCOUNT_TYPE,
@@ -1832,6 +1834,7 @@ public final class CalendarContract {
          *
          * @hide
          */
+        @TestApi
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             _SYNC_ID,
             DIRTY,

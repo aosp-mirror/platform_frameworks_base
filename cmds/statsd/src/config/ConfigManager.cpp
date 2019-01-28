@@ -128,6 +128,17 @@ void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
     mConfigReceivers.erase(key);
 }
 
+void ConfigManager::SetActiveConfigsChangedReceiver(const int uid,
+                                                    const sp<IBinder>& intentSender) {
+    lock_guard<mutex> lock(mMutex);
+    mActiveConfigsChangedReceivers[uid] = intentSender;
+}
+
+void ConfigManager::RemoveActiveConfigsChangedReceiver(const int uid) {
+    lock_guard<mutex> lock(mMutex);
+    mActiveConfigsChangedReceivers.erase(uid);
+}
+
 void ConfigManager::RemoveConfig(const ConfigKey& key) {
     vector<sp<ConfigListener>> broadcastList;
     {
@@ -181,6 +192,11 @@ void ConfigManager::RemoveConfigs(int uid) {
                 mConfigReceivers.erase(*it);
         }
 
+        auto itActiveConfigsChangedReceiver = mActiveConfigsChangedReceivers.find(uid);
+        if (itActiveConfigsChangedReceiver != mActiveConfigsChangedReceivers.end()) {
+            mActiveConfigsChangedReceivers.erase(itActiveConfigsChangedReceiver);
+        }
+
         mConfigs.erase(uidIt);
 
         for (const sp<ConfigListener>& listener : mListeners) {
@@ -213,6 +229,7 @@ void ConfigManager::RemoveAllConfigs() {
         }
 
         mConfigReceivers.clear();
+        mActiveConfigsChangedReceivers.clear();
         for (const sp<ConfigListener>& listener : mListeners) {
             broadcastList.push_back(listener);
         }
@@ -244,6 +261,17 @@ const sp<android::IBinder> ConfigManager::GetConfigReceiver(const ConfigKey& key
 
     auto it = mConfigReceivers.find(key);
     if (it == mConfigReceivers.end()) {
+        return nullptr;
+    } else {
+        return it->second;
+    }
+}
+
+const sp<android::IBinder> ConfigManager::GetActiveConfigsChangedReceiver(const int uid) const {
+    lock_guard<mutex> lock(mMutex);
+
+    auto it = mActiveConfigsChangedReceivers.find(uid);
+    if (it == mActiveConfigsChangedReceivers.end()) {
         return nullptr;
     } else {
         return it->second;
