@@ -374,7 +374,9 @@ easier.
     <style name="TextAppearance.DeviceDefault.Caption" parent="TextAppearance.Material.Caption">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
-    <style name="TextAppearance.DeviceDefault.ListItem" parent="TextAppearance.DeviceDefault.Subhead"/>
+    <style name="TextAppearance.DeviceDefault.ListItem" parent="TextAppearance.DeviceDefault.Subhead">
+        <item name="fontFamily">@string/config_headlineFontFamily</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.ListItemSecondary" parent="TextAppearance.DeviceDefault.Body1"/>
 
     <!-- Preference Styles -->
