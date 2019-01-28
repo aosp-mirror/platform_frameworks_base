@@ -2799,26 +2799,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
             int unverifiedTargetSdkVersion, @UserIdInt int userId) {
-        InputBindResult res = null;
-        final int windowDisplayId =
-                mWindowManagerInternal.getDisplayIdForWindow(windowToken);
-        if (DEBUG) Slog.v(TAG, "startInputOrWindowGainedFocusInternalLocked: reason="
-                + InputMethodDebug.startInputReasonToString(startInputReason)
-                + " client=" + client.asBinder()
-                + " inputContext=" + inputContext
-                + " missingMethods="
-                + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
-                + " attribute=" + attribute
-                + " startInputFlags="
-                + InputMethodDebug.startInputFlagsToString(startInputFlags)
-                + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
-                + " windowFlags=#" + Integer.toHexString(windowFlags)
-                + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
+        if (DEBUG) {
+            Slog.v(TAG, "startInputOrWindowGainedFocusInternalLocked: reason="
+                    + InputMethodDebug.startInputReasonToString(startInputReason)
+                    + " client=" + client.asBinder()
+                    + " inputContext=" + inputContext
+                    + " missingMethods="
+                    + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
+                    + " attribute=" + attribute
+                    + " startInputFlags="
+                    + InputMethodDebug.startInputFlagsToString(startInputFlags)
+                    + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
+                    + " windowFlags=#" + Integer.toHexString(windowFlags)
+                    + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
+        }
 
-        ClientState cs = mClients.get(client.asBinder());
+        final int windowDisplayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
+
+        final ClientState cs = mClients.get(client.asBinder());
         if (cs == null) {
-            throw new IllegalArgumentException("unknown client "
-                    + client.asBinder());
+            throw new IllegalArgumentException("unknown client " + client.asBinder());
         }
         if (cs.selfReportedDisplayId != windowDisplayId) {
             Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch."
@@ -2857,8 +2857,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Master feature flag that overrides other conditions and forces IME preRendering.
         if (DEBUG) {
             Slog.v(TAG, "IME PreRendering MASTER flag: "
-                    + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value()
-                    + ", LowRam: " + mIsLowRam);
+                    + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() + ", LowRam: " + mIsLowRam);
         }
         // pre-rendering not supported on low-ram devices.
         cs.shouldPreRenderIme = DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() && !mIsLowRam;
@@ -2892,8 +2891,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         == LayoutParams.SOFT_INPUT_ADJUST_RESIZE
                 || mRes.getConfiguration().isLayoutSizeAtLeast(
                         Configuration.SCREENLAYOUT_SIZE_LARGE);
-        final boolean isTextEditor =
-                (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
+        final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
 
         // We want to start input before showing the IME, but after closing
         // it.  We want to do this after closing it to help the IME disappear
@@ -2901,6 +2899,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // new focused input, even if its window wants to hide the IME).
         boolean didStart = false;
 
+        InputBindResult res = null;
         switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
             case LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
                 if (!isTextEditor || !doAutoShow) {
@@ -2957,9 +2956,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                             unverifiedTargetSdkVersion, startInputFlags)) {
                         if (attribute != null) {
-                            res = startInputUncheckedLocked(cs, inputContext,
-                                    missingMethods, attribute, startInputFlags,
-                                    startInputReason);
+                            res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                    attribute, startInputFlags, startInputReason);
                             didStart = true;
                         }
                         showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2992,8 +2990,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (attribute != null) {
                 if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
                         || (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
-                    res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                            attribute,
+                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
                             startInputFlags, startInputReason);
                 } else {
                     res = InputBindResult.NO_EDITOR;
