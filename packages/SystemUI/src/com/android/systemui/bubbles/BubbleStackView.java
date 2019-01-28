@@ -23,6 +23,7 @@ import android.app.ActivityView;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Outline;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -32,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -674,6 +676,17 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
             bv.updateDotVisibility();
             bv.setZ(bubbsCount - i);
+
+            // Draw the shadow around the circle inscribed within the bubble's bounds. This
+            // (intentionally) does not draw a shadow behind the update dot, which should be drawing
+            // its own shadow since it's on a different (higher) plane.
+            bv.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setOval(0, 0, mBubbleSize, mBubbleSize);
+                }
+            });
+            bv.setClipToOutline(false);
         }
     }
 
