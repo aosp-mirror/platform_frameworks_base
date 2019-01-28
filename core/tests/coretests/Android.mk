@@ -53,7 +53,6 @@ LOCAL_JAVA_LIBRARIES := \
     org.apache.http.legacy \
     android.test.base \
     android.test.mock \
-    framework-oahl-backward-compatibility \
     framework-atb-backward-compatibility \
 
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
