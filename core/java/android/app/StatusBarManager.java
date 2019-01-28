@@ -42,12 +42,10 @@ import java.lang.annotation.RetentionPolicy;
 public class StatusBarManager {
 
     /** @hide */
-    @SystemApi
     public static final int DISABLE_EXPAND = View.STATUS_BAR_DISABLE_EXPAND;
     /** @hide */
     public static final int DISABLE_NOTIFICATION_ICONS = View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS;
     /** @hide */
-    @SystemApi
     public static final int DISABLE_NOTIFICATION_ALERTS
             = View.STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
 
@@ -59,17 +57,14 @@ public class StatusBarManager {
     /** @hide */
     public static final int DISABLE_SYSTEM_INFO = View.STATUS_BAR_DISABLE_SYSTEM_INFO;
     /** @hide */
-    @SystemApi
     public static final int DISABLE_HOME = View.STATUS_BAR_DISABLE_HOME;
     /** @hide */
-    @SystemApi
     public static final int DISABLE_RECENT = View.STATUS_BAR_DISABLE_RECENT;
     /** @hide */
     public static final int DISABLE_BACK = View.STATUS_BAR_DISABLE_BACK;
     /** @hide */
     public static final int DISABLE_CLOCK = View.STATUS_BAR_DISABLE_CLOCK;
     /** @hide */
-    @SystemApi
     public static final int DISABLE_SEARCH = View.STATUS_BAR_DISABLE_SEARCH;
 
     /** @hide */
@@ -78,7 +73,6 @@ public class StatusBarManager {
             View.STATUS_BAR_DISABLE_HOME | View.STATUS_BAR_DISABLE_RECENT;
 
     /** @hide */
-    @SystemApi
     public static final int DISABLE_NONE = 0x00000000;
 
     /** @hide */
@@ -122,7 +116,6 @@ public class StatusBarManager {
     public static final int DISABLE2_ROTATE_SUGGESTIONS = 1 << 4;
 
     /** @hide */
-    @SystemApi
     public static final int DISABLE2_NONE = 0x00000000;
 
     /** @hide */
@@ -387,14 +380,14 @@ public class StatusBarManager {
     }
 
     /**
-     * Get the currently applied StatusBar disable flags
+     * Get this app's currently requested disabled components
      *
-     * @return a pair of Integers in the form of (disable, disable2)
+     * @return a new DisableInfo
      *
      * @hide
      */
     @SystemApi
-    public Pair<Integer, Integer> getDisableFlags() {
+    public DisableInfo getDisableInfo() {
         try {
             final int userId = Binder.getCallingUserHandle().getIdentifier();
             final IStatusBarService svc = getService();
@@ -403,7 +396,7 @@ public class StatusBarManager {
                 flags = svc.getDisableFlags(mToken, userId);
             }
 
-            return new Pair<Integer, Integer>(flags[0], flags[1]);
+            return new DisableInfo(flags[0], flags[1]);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -415,5 +408,181 @@ public class StatusBarManager {
         if (state == WINDOW_STATE_HIDDEN) return "WINDOW_STATE_HIDDEN";
         if (state == WINDOW_STATE_SHOWING) return "WINDOW_STATE_SHOWING";
         return "WINDOW_STATE_UNKNOWN";
+    }
+
+    /**
+     * DisableInfo describes this app's requested state of the StatusBar with regards to which
+     * components are enabled/disabled
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class DisableInfo {
+
+        private boolean mStatusBarExpansion;
+        private boolean mNavigateHome;
+        private boolean mNotificationPeeking;
+        private boolean mRecents;
+        private boolean mSearch;
+
+        /** @hide */
+        public DisableInfo(int flags1, int flags2) {
+            mStatusBarExpansion = (flags1 & DISABLE_EXPAND) != 0;
+            mNavigateHome = (flags1 & DISABLE_HOME) != 0;
+            mNotificationPeeking = (flags1 & DISABLE_NOTIFICATION_ALERTS) != 0;
+            mRecents = (flags1 & DISABLE_RECENT) != 0;
+            mSearch = (flags1 & DISABLE_SEARCH) != 0;
+        }
+
+        /** @hide */
+        public DisableInfo() {}
+
+        /**
+         * @return {@code true} if expanding the notification shade is disabled
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean isStatusBarExpansionDisabled() {
+            return mStatusBarExpansion;
+        }
+
+        /** * @hide */
+        public void setStatusBarExpansionDisabled(boolean disabled) {
+            mStatusBarExpansion = disabled;
+        }
+
+        /**
+         * @return {@code true} if navigation home is disabled
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean isNavigateToHomeDisabled() {
+            return mNavigateHome;
+        }
+
+        /** * @hide */
+        public void setNagivationHomeDisabled(boolean disabled) {
+            mNavigateHome = disabled;
+        }
+
+        /**
+         * @return {@code true} if notification peeking (heads-up notification) is disabled
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean isNotificationPeekingDisabled() {
+            return mNotificationPeeking;
+        }
+
+        /** @hide */
+        public void setNotificationPeekingDisabled(boolean disabled) {
+            mNotificationPeeking = disabled;
+        }
+
+        /**
+         * @return {@code true} if mRecents/overview is disabled
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean isRecentsDisabled() {
+            return mRecents;
+        }
+
+        /**  @hide */
+        public void setRecentsDisabled(boolean disabled) {
+            mRecents = disabled;
+        }
+
+        /**
+         * @return {@code true} if mSearch is disabled
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean isSearchDisabled() {
+            return mSearch;
+        }
+
+        /** @hide */
+        public void setSearchDisabled(boolean disabled) {
+            mSearch = disabled;
+        }
+
+        /**
+         * @return {@code true} if no components are disabled (default state)
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean areNoComponentsDisabled() {
+            return !mStatusBarExpansion && !mNavigateHome && !mNotificationPeeking && !mRecents
+                    && !mSearch;
+        }
+
+        /** @hide */
+        public void setEnableAll() {
+            mStatusBarExpansion = false;
+            mNavigateHome = false;
+            mNotificationPeeking = false;
+            mRecents = false;
+            mSearch = false;
+        }
+
+        /**
+         * @return {@code true} if all status bar components are disabled
+         *
+         * @hide
+         */
+        public boolean areAllComponentsDisabled() {
+            return mStatusBarExpansion && mNavigateHome && mNotificationPeeking
+                    && mRecents && mSearch;
+        }
+
+        /** @hide */
+        public void setDisableAll() {
+            mStatusBarExpansion = true;
+            mNavigateHome = true;
+            mNotificationPeeking = true;
+            mRecents = true;
+            mSearch = true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("DisableInfo: ");
+            sb.append(" mStatusBarExpansion=").append(mStatusBarExpansion ? "disabled" : "enabled");
+            sb.append(" mNavigateHome=").append(mNavigateHome ? "disabled" : "enabled");
+            sb.append(" mNotificationPeeking=")
+                    .append(mNotificationPeeking ? "disabled" : "enabled");
+            sb.append(" mRecents=").append(mRecents ? "disabled" : "enabled");
+            sb.append(" mSearch=").append(mSearch ? "disabled" : "enabled");
+
+            return sb.toString();
+
+        }
+
+        /**
+         * Convert a DisableInfo to equivalent flags
+         * @return a pair of equivalent disable flags
+         *
+         * @hide
+         */
+        public Pair<Integer, Integer> toFlags() {
+            int disable1 = DISABLE_NONE;
+            int disable2 = DISABLE2_NONE;
+
+            if (mStatusBarExpansion) disable1 |= DISABLE_EXPAND;
+            if (mNavigateHome) disable1 |= DISABLE_HOME;
+            if (mNotificationPeeking) disable1 |= DISABLE_NOTIFICATION_ALERTS;
+            if (mRecents) disable1 |= DISABLE_RECENT;
+            if (mSearch) disable1 |= DISABLE_SEARCH;
+
+            return new Pair<Integer, Integer>(disable1, disable2);
+        }
     }
 }
