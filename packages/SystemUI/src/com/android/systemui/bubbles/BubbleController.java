@@ -428,7 +428,7 @@ public class BubbleController {
                 entry.key).canBubble();
         boolean hasOverlayIntent = n.getNotification().getBubbleMetadata() != null
                 && n.getNotification().getBubbleMetadata().getIntent() != null;
-        return hasOverlayIntent && canChannelOverlay && canAppOverlay;
+        return DEBUG_ENABLE_AUTO_BUBBLE && hasOverlayIntent && canChannelOverlay && canAppOverlay;
     }
 
     /**
@@ -438,7 +438,8 @@ public class BubbleController {
      * message-like notification.
      * </p>
      */
-    private boolean shouldAutoBubble(Context context, NotificationEntry entry) {
+    @VisibleForTesting
+    protected boolean shouldAutoBubble(Context context, NotificationEntry entry) {
         if (entry.isBubbleDismissed()) {
             return false;
         }
@@ -465,9 +466,11 @@ public class BubbleController {
         Class<? extends Notification.Style> style = n.getNotification().getNotificationStyle();
         boolean isMessageType = Notification.CATEGORY_MESSAGE.equals(n.getNotification().category);
         boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
-        return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
+        boolean shouldAutoBubble =
+                (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
                 || (isImportantOngoing && autoBubbleOngoing)
                 || autoBubbleAll;
+        return DEBUG_ENABLE_AUTO_BUBBLE && shouldAutoBubble;
     }
 
     private static boolean shouldAutoBubbleMessages(Context context) {
