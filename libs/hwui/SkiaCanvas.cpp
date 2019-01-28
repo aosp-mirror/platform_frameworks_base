@@ -694,11 +694,8 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
         paintCopy.setStyle(SkPaint::kFill_Style);
     }
 
-    SkRect bounds =
-            SkRect::MakeLTRB(boundsLeft + x, boundsTop + y, boundsRight + x, boundsBottom + y);
-
     SkTextBlobBuilder builder;
-    const SkTextBlobBuilder::RunBuffer& buffer = builder.allocRunPos(font, count, &bounds);
+    const SkTextBlobBuilder::RunBuffer& buffer = builder.allocRunPos(font, count);
     glyphFunc(buffer.glyphs, buffer.pos);
 
     sk_sp<SkTextBlob> textBlob(builder.make());
