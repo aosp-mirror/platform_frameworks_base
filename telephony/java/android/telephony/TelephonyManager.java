@@ -8919,6 +8919,9 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
+        if (carriers == null || !SubscriptionManager.isValidPhoneId(slotIndex)) {
+            return -1;
+        }
         // Execute the method setCarrierRestrictionRules with an empty excluded list and
         // indicating priority for the allowed list.
         CarrierRestrictionRules carrierRestrictionRules = CarrierRestrictionRules.newBuilder()
@@ -8929,7 +8932,7 @@ public class TelephonyManager {
 
         int result = setCarrierRestrictionRules(carrierRestrictionRules);
 
-        // Convert boolean result into int, as required by this method.
+        // Convert result into int, as required by this method.
         if (result == SET_CARRIER_RESTRICTION_SUCCESS) {
             return carriers.size();
         } else {
@@ -9022,9 +9025,11 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<CarrierIdentifier> getAllowedCarriers(int slotIndex) {
-        CarrierRestrictionRules carrierRestrictionRule = getCarrierRestrictionRules();
-        if (carrierRestrictionRule != null) {
-            return carrierRestrictionRule.getAllowedCarriers();
+        if (SubscriptionManager.isValidPhoneId(slotIndex)) {
+            CarrierRestrictionRules carrierRestrictionRule = getCarrierRestrictionRules();
+            if (carrierRestrictionRule != null) {
+                return carrierRestrictionRule.getAllowedCarriers();
+            }
         }
         return new ArrayList<CarrierIdentifier>(0);
     }
