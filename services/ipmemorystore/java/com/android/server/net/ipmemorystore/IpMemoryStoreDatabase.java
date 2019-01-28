@@ -16,6 +16,9 @@
 
 package com.android.server.net.ipmemorystore;
 
+import static android.net.shared.Inet4AddressUtils.inet4AddressToIntHTH;
+import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentValues;
@@ -27,7 +30,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQuery;
-import android.net.NetworkUtils;
 import android.net.ipmemorystore.NetworkAttributes;
 import android.net.ipmemorystore.Status;
 import android.util.Log;
@@ -200,7 +202,7 @@ public class IpMemoryStoreDatabase {
         if (null == attributes) return values;
         if (null != attributes.assignedV4Address) {
             values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS,
-                    NetworkUtils.inet4AddressToIntHTH(attributes.assignedV4Address));
+                    inet4AddressToIntHTH(attributes.assignedV4Address));
         }
         if (null != attributes.groupHint) {
             values.put(NetworkAttributesContract.COLNAME_GROUPHINT, attributes.groupHint);
@@ -254,7 +256,7 @@ public class IpMemoryStoreDatabase {
                 getBlob(cursor, NetworkAttributesContract.COLNAME_DNSADDRESSES);
         final int mtu = getInt(cursor, NetworkAttributesContract.COLNAME_MTU, -1);
         if (0 != assignedV4AddressInt) {
-            builder.setAssignedV4Address(NetworkUtils.intToInet4AddressHTH(assignedV4AddressInt));
+            builder.setAssignedV4Address(intToInet4AddressHTH(assignedV4AddressInt));
         }
         builder.setGroupHint(groupHint);
         if (null != dnsAddressesBlob) {
