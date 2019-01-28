@@ -34,6 +34,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Message;
@@ -60,6 +61,7 @@ import com.android.server.wm.WindowProcessController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Controls error conditions in applications.
@@ -411,7 +413,7 @@ class AppErrors {
             } else {
                 // If a non-persistent app is stuck in crash loop, we want to inform
                 // the package watchdog, maybe an update or experiment can be rolled back.
-                mPackageWatchdog.onPackageFailure(r.getPackageList());
+                mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode());
             }
         }
 
@@ -830,7 +832,7 @@ class AppErrors {
 
     void handleShowAnrUi(Message msg) {
         Dialog dialogToShow = null;
-        String[] packageList = null;
+        List<VersionedPackage> packageList = null;
         synchronized (mService) {
             AppNotRespondingDialog.Data data = (AppNotRespondingDialog.Data) msg.obj;
             final ProcessRecord proc = data.proc;
@@ -839,7 +841,7 @@ class AppErrors {
                 return;
             }
             if (!proc.isPersistent()) {
-                packageList = proc.getPackageList();
+                packageList = proc.getPackageListWithVersionCode();
             }
             if (proc.anrDialog != null) {
                 Slog.e(TAG, "App already has anr dialog: " + proc);

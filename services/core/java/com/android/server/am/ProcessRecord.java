@@ -32,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
 import android.os.Binder;
 import android.os.Debug;
@@ -66,6 +67,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Full information about a particular process that
@@ -968,6 +970,18 @@ final class ProcessRecord implements WindowProcessListener {
         String list[] = new String[size];
         for (int i=0; i<pkgList.size(); i++) {
             list[i] = pkgList.keyAt(i);
+        }
+        return list;
+    }
+
+    public List<VersionedPackage> getPackageListWithVersionCode() {
+        int size = pkgList.size();
+        if (size == 0) {
+            return null;
+        }
+        List<VersionedPackage> list = new ArrayList<>();
+        for (int i = 0; i < pkgList.size(); i++) {
+            list.add(new VersionedPackage(pkgList.keyAt(i), pkgList.valueAt(i).appVersion));
         }
         return list;
     }
