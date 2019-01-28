@@ -726,12 +726,12 @@ public class SmsMessage extends SmsMessageBase {
             // being reported refers to.  The MsgStatus subparameter
             // is primarily useful to indicate error conditions -- a
             // message without this subparameter is assumed to
-            // indicate successful delivery (status == 0).
-            if (! mBearerData.messageStatusSet) {
+            // indicate successful delivery.
+            if (!mBearerData.messageStatusSet) {
                 Rlog.d(LOG_TAG, "DELIVERY_ACK message without msgStatus (" +
                         (mUserData == null ? "also missing" : "does have") +
                         " userData).");
-                status = 0;
+                status = (BearerData.ERROR_NONE << 8) | BearerData.STATUS_DELIVERED;
             } else {
                 status = mBearerData.errorClass << 8;
                 status |= mBearerData.messageStatus;
