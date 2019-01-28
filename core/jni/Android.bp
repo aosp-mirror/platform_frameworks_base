@@ -290,6 +290,7 @@ cc_library_shared {
         "libhwui",
         "libdl",
         "libstatslog",
+        "server_configurable_flags",
     ],
 
     generated_sources: ["android_util_StatsLog.cpp"],
