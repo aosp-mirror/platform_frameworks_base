@@ -40,6 +40,8 @@ import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_RCVBUF;
 import static android.system.OsConstants.SO_REUSEADDR;
 
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
+
 import android.content.Context;
 import android.net.DhcpResults;
 import android.net.NetworkUtils;
@@ -328,7 +330,7 @@ public class DhcpClient extends StateMachine {
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_REUSEADDR, 1);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_BROADCAST, 1);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_RCVBUF, 0);
-            Os.bind(mUdpSock, Inet4Address.ANY, DhcpPacket.DHCP_CLIENT);
+            Os.bind(mUdpSock, IPV4_ADDR_ANY, DhcpPacket.DHCP_CLIENT);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating UDP socket", e);
             return false;

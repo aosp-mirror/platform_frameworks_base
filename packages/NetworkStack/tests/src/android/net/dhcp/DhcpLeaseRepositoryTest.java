@@ -21,6 +21,8 @@ import static android.net.dhcp.DhcpLease.HOSTNAME_NONE;
 import static android.net.dhcp.DhcpLeaseRepository.CLIENTID_UNSPEC;
 import static android.net.dhcp.DhcpLeaseRepository.INETADDR_UNSPEC;
 
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -55,7 +57,6 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class DhcpLeaseRepositoryTest {
-    private static final Inet4Address INET4_ANY = (Inet4Address) Inet4Address.ANY;
     private static final Inet4Address TEST_DEF_ROUTER = parseAddr4("192.168.42.247");
     private static final Inet4Address TEST_SERVER_ADDR = parseAddr4("192.168.42.241");
     private static final Inet4Address TEST_RESERVED_ADDR = parseAddr4("192.168.42.243");
@@ -108,7 +109,7 @@ public class DhcpLeaseRepositoryTest {
             MacAddress newMac = MacAddress.fromBytes(hwAddrBytes);
             final String hostname = "host_" + i;
             final DhcpLease lease = mRepo.getOffer(CLIENTID_UNSPEC, newMac,
-                    INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, hostname);
+                    IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, hostname);
 
             assertNotNull(lease);
             assertEquals(newMac, lease.getHwAddr());
@@ -130,7 +131,7 @@ public class DhcpLeaseRepositoryTest {
 
         try {
             mRepo.getOffer(null, TEST_MAC_2,
-                    INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                    IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
             fail("Should be out of addresses");
         } catch (DhcpLeaseRepository.OutOfAddressesException e) {
             // Expected
@@ -181,11 +182,11 @@ public class DhcpLeaseRepositoryTest {
     public void testGetOffer_StableAddress() throws Exception {
         for (final MacAddress macAddr : new MacAddress[] { TEST_MAC_1, TEST_MAC_2, TEST_MAC_3 }) {
             final DhcpLease lease = mRepo.getOffer(CLIENTID_UNSPEC, macAddr,
-                    INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                    IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
 
             // Same lease is offered twice
             final DhcpLease newLease = mRepo.getOffer(CLIENTID_UNSPEC, macAddr,
-                    INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                    IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
             assertEquals(lease, newLease);
         }
     }
@@ -196,7 +197,7 @@ public class DhcpLeaseRepositoryTest {
         mRepo.updateParams(newPrefix, TEST_EXCL_SET, TEST_LEASE_TIME_MS);
 
         DhcpLease lease = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
         assertTrue(newPrefix.contains(lease.getNetAddr()));
     }
 
@@ -205,7 +206,7 @@ public class DhcpLeaseRepositoryTest {
         requestLeaseSelecting(TEST_MAC_1, TEST_INETADDR_1, TEST_HOSTNAME_1);
 
         DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
         assertEquals(TEST_INETADDR_1, offer.getNetAddr());
         assertEquals(TEST_HOSTNAME_1, offer.getHostname());
     }
@@ -213,12 +214,13 @@ public class DhcpLeaseRepositoryTest {
     @Test
     public void testGetOffer_ClientIdHasExistingLease() throws Exception {
         final byte[] clientId = new byte[] { 1, 2 };
-        mRepo.requestLease(clientId, TEST_MAC_1, INET4_ANY /* clientAddr */,
-                INET4_ANY /* relayAddr */, TEST_INETADDR_1 /* reqAddr */, false, TEST_HOSTNAME_1);
+        mRepo.requestLease(clientId, TEST_MAC_1, IPV4_ADDR_ANY /* clientAddr */,
+                IPV4_ADDR_ANY /* relayAddr */, TEST_INETADDR_1 /* reqAddr */, false,
+                TEST_HOSTNAME_1);
 
         // Different MAC, but same clientId
         DhcpLease offer = mRepo.getOffer(clientId, TEST_MAC_2,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
         assertEquals(TEST_INETADDR_1, offer.getNetAddr());
         assertEquals(TEST_HOSTNAME_1, offer.getHostname());
     }
@@ -227,12 +229,13 @@ public class DhcpLeaseRepositoryTest {
     public void testGetOffer_DifferentClientId() throws Exception {
         final byte[] clientId1 = new byte[] { 1, 2 };
         final byte[] clientId2 = new byte[] { 3, 4 };
-        mRepo.requestLease(clientId1, TEST_MAC_1, INET4_ANY /* clientAddr */,
-                INET4_ANY /* relayAddr */, TEST_INETADDR_1 /* reqAddr */, false, TEST_HOSTNAME_1);
+        mRepo.requestLease(clientId1, TEST_MAC_1, IPV4_ADDR_ANY /* clientAddr */,
+                IPV4_ADDR_ANY /* relayAddr */, TEST_INETADDR_1 /* reqAddr */, false,
+                TEST_HOSTNAME_1);
 
         // Same MAC, different client ID
         DhcpLease offer = mRepo.getOffer(clientId2, TEST_MAC_1,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
         // Obtains a different address
         assertNotEquals(TEST_INETADDR_1, offer.getNetAddr());
         assertEquals(HOSTNAME_NONE, offer.getHostname());
@@ -241,7 +244,7 @@ public class DhcpLeaseRepositoryTest {
 
     @Test
     public void testGetOffer_RequestedAddress() throws Exception {
-        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, INET4_ANY /* relayAddr */,
+        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, IPV4_ADDR_ANY /* relayAddr */,
                 TEST_INETADDR_1 /* reqAddr */, TEST_HOSTNAME_1);
         assertEquals(TEST_INETADDR_1, offer.getNetAddr());
         assertEquals(TEST_HOSTNAME_1, offer.getHostname());
@@ -250,14 +253,14 @@ public class DhcpLeaseRepositoryTest {
     @Test
     public void testGetOffer_RequestedAddressInUse() throws Exception {
         requestLeaseSelecting(TEST_MAC_1, TEST_INETADDR_1);
-        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_2, INET4_ANY /* relayAddr */,
+        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_2, IPV4_ADDR_ANY /* relayAddr */,
                 TEST_INETADDR_1 /* reqAddr */, HOSTNAME_NONE);
         assertNotEquals(TEST_INETADDR_1, offer.getNetAddr());
     }
 
     @Test
     public void testGetOffer_RequestedAddressReserved() throws Exception {
-        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, INET4_ANY /* relayAddr */,
+        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, IPV4_ADDR_ANY /* relayAddr */,
                 TEST_RESERVED_ADDR /* reqAddr */, HOSTNAME_NONE);
         assertNotEquals(TEST_RESERVED_ADDR, offer.getNetAddr());
     }
@@ -265,7 +268,7 @@ public class DhcpLeaseRepositoryTest {
     @Test
     public void testGetOffer_RequestedAddressInvalid() throws Exception {
         final Inet4Address invalidAddr = parseAddr4("192.168.42.0");
-        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, INET4_ANY /* relayAddr */,
+        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, IPV4_ADDR_ANY /* relayAddr */,
                 invalidAddr /* reqAddr */, HOSTNAME_NONE);
         assertNotEquals(invalidAddr, offer.getNetAddr());
     }
@@ -273,7 +276,7 @@ public class DhcpLeaseRepositoryTest {
     @Test
     public void testGetOffer_RequestedAddressOutsideSubnet() throws Exception {
         final Inet4Address invalidAddr = parseAddr4("192.168.254.2");
-        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, INET4_ANY /* relayAddr */,
+        DhcpLease offer = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1, IPV4_ADDR_ANY /* relayAddr */,
                 invalidAddr /* reqAddr */, HOSTNAME_NONE);
         assertNotEquals(invalidAddr, offer.getNetAddr());
     }
@@ -322,7 +325,7 @@ public class DhcpLeaseRepositoryTest {
 
     @Test(expected = DhcpLeaseRepository.InvalidSubnetException.class)
     public void testRequestLease_SelectingRelayInInvalidSubnet() throws  Exception {
-        mRepo.requestLease(CLIENTID_UNSPEC, TEST_MAC_1, INET4_ANY /* clientAddr */,
+        mRepo.requestLease(CLIENTID_UNSPEC, TEST_MAC_1, IPV4_ADDR_ANY /* clientAddr */,
                 parseAddr4("192.168.128.1") /* relayAddr */, TEST_INETADDR_1 /* reqAddr */,
                 true /* sidSet */, HOSTNAME_NONE);
     }
@@ -419,14 +422,14 @@ public class DhcpLeaseRepositoryTest {
     public void testReleaseLease_StableOffer() throws Exception {
         for (MacAddress mac : new MacAddress[] { TEST_MAC_1, TEST_MAC_2, TEST_MAC_3 }) {
             final DhcpLease lease = mRepo.getOffer(CLIENTID_UNSPEC, mac,
-                    INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                    IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
 
             requestLeaseSelecting(mac, lease.getNetAddr());
             mRepo.releaseLease(CLIENTID_UNSPEC, mac, lease.getNetAddr());
 
             // Same lease is offered after it was released
             final DhcpLease newLease = mRepo.getOffer(CLIENTID_UNSPEC, mac,
-                    INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                    IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
             assertEquals(lease.getNetAddr(), newLease.getNetAddr());
         }
     }
@@ -434,13 +437,13 @@ public class DhcpLeaseRepositoryTest {
     @Test
     public void testMarkLeaseDeclined() throws Exception {
         final DhcpLease lease = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
 
         mRepo.markLeaseDeclined(lease.getNetAddr());
 
         // Same lease is not offered again
         final DhcpLease newLease = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
         assertNotEquals(lease.getNetAddr(), newLease.getNetAddr());
     }
 
@@ -457,16 +460,16 @@ public class DhcpLeaseRepositoryTest {
 
         // Last 2 addresses: addresses marked declined should be used
         final DhcpLease firstLease = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_1,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, TEST_HOSTNAME_1);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, TEST_HOSTNAME_1);
         requestLeaseSelecting(TEST_MAC_1, firstLease.getNetAddr());
 
         final DhcpLease secondLease = mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_2,
-                INET4_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, TEST_HOSTNAME_2);
+                IPV4_ADDR_ANY /* relayAddr */, INETADDR_UNSPEC /* reqAddr */, TEST_HOSTNAME_2);
         requestLeaseSelecting(TEST_MAC_2, secondLease.getNetAddr());
 
         // Now out of addresses
         try {
-            mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_3, INET4_ANY /* relayAddr */,
+            mRepo.getOffer(CLIENTID_UNSPEC, TEST_MAC_3, IPV4_ADDR_ANY /* relayAddr */,
                     INETADDR_UNSPEC /* reqAddr */, HOSTNAME_NONE);
             fail("Repository should be out of addresses and throw");
         } catch (DhcpLeaseRepository.OutOfAddressesException e) { /* expected */ }
@@ -480,7 +483,8 @@ public class DhcpLeaseRepositoryTest {
     private DhcpLease requestLease(@NonNull MacAddress macAddr, @NonNull Inet4Address clientAddr,
             @Nullable Inet4Address reqAddr, @Nullable String hostname, boolean sidSet)
             throws DhcpLeaseRepository.DhcpLeaseException {
-        return mRepo.requestLease(CLIENTID_UNSPEC, macAddr, clientAddr, INET4_ANY /* relayAddr */,
+        return mRepo.requestLease(CLIENTID_UNSPEC, macAddr, clientAddr,
+                IPV4_ADDR_ANY /* relayAddr */,
                 reqAddr, sidSet, hostname);
     }
 
@@ -490,7 +494,7 @@ public class DhcpLeaseRepositoryTest {
     private DhcpLease requestLeaseSelecting(@NonNull MacAddress macAddr,
             @NonNull Inet4Address reqAddr, @Nullable String hostname)
             throws DhcpLeaseRepository.DhcpLeaseException {
-        return requestLease(macAddr, INET4_ANY /* clientAddr */, reqAddr, hostname,
+        return requestLease(macAddr, IPV4_ADDR_ANY /* clientAddr */, reqAddr, hostname,
                 true /* sidSet */);
     }
 
@@ -507,7 +511,7 @@ public class DhcpLeaseRepositoryTest {
      */
     private DhcpLease requestLeaseInitReboot(@NonNull MacAddress macAddr,
             @NonNull Inet4Address reqAddr) throws DhcpLeaseRepository.DhcpLeaseException {
-        return requestLease(macAddr, INET4_ANY /* clientAddr */, reqAddr, HOSTNAME_NONE,
+        return requestLease(macAddr, IPV4_ADDR_ANY /* clientAddr */, reqAddr, HOSTNAME_NONE,
                 false /* sidSet */);
     }
 
