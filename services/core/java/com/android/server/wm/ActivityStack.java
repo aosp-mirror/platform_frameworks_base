@@ -297,7 +297,8 @@ class ActivityStack extends ConfigurationContainer {
         STOPPED,
         FINISHING,
         DESTROYING,
-        DESTROYED
+        DESTROYED,
+        RESTARTING_PROCESS
     }
 
     @VisibleForTesting
@@ -4767,7 +4768,8 @@ class ActivityStack extends ConfigurationContainer {
                         // it has failed more than twice. Skip activities that's already finishing
                         // cleanly by itself.
                         remove = false;
-                    } else if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
+                    } else if ((!r.haveState && !r.stateNotNeeded
+                            && !r.isState(ActivityState.RESTARTING_PROCESS)) || r.finishing) {
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
                         remove = true;

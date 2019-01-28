@@ -126,6 +126,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     private boolean mSingleTaskInstance;
 
     /**
+     * Non-null if the last size compatibility mode activity is using non-native screen
+     * configuration. The activity is not able to put in multi-window mode, so it exists only one
+     * per display.
+     */
+    private ActivityRecord mLastCompatModeActivity;
+
+    /**
      * A focusable stack that is purposely to be positioned at the top. Although the stack may not
      * have the topmost index, it is used as a preferred candidate to prevent being unable to resume
      * target stack properly when there are other focusable always-on-top stacks.
@@ -1030,6 +1037,28 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         // display. For example, we want to be able to create fullscreen stack for standard activity
         // types when exiting split-screen mode.
         mSplitScreenPrimaryStack = null;
+    }
+
+    /** Checks whether the given activity is in size compatibility mode and notifies the change. */
+    void handleActivitySizeCompatModeIfNeeded(ActivityRecord r) {
+        if (!r.isState(RESUMED) || r.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+            // The callback is only interested in the foreground changes of fullscreen activity.
+            return;
+        }
+        if (!r.inSizeCompatMode()) {
+            if (mLastCompatModeActivity != null) {
+                mService.getTaskChangeNotificationController()
+                        .notifySizeCompatModeActivityChanged(mDisplayId, null /* activityToken */);
+            }
+            mLastCompatModeActivity = null;
+            return;
+        }
+        if (mLastCompatModeActivity == r) {
+            return;
+        }
+        mLastCompatModeActivity = r;
+        mService.getTaskChangeNotificationController()
+                .notifySizeCompatModeActivityChanged(mDisplayId, r.appToken);
     }
 
     ActivityStack getSplitScreenPrimaryStack() {

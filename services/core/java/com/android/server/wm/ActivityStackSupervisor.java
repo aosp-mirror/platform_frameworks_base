@@ -179,6 +179,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     static final int SLEEP_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 3;
     static final int LAUNCH_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 4;
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
+    static final int RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
     static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
     static final int REPORT_PIP_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 15;
     static final int REPORT_HOME_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 16;
@@ -2400,6 +2401,16 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mHandler.sendEmptyMessageDelayed(SLEEP_TIMEOUT_MSG, SLEEP_TIMEOUT);
     }
 
+    void removeRestartTimeouts(ActivityRecord r) {
+        mHandler.removeMessages(RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG, r);
+    }
+
+    final void scheduleRestartTimeout(ActivityRecord r) {
+        removeRestartTimeouts(r);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG, r),
+                WindowManagerService.WINDOW_FREEZE_TIMEOUT_DURATION);
+    }
+
     void handleNonResizableTaskIfNeeded(TaskRecord task, int preferredWindowingMode,
             int preferredDisplayId, ActivityStack actualStack) {
         handleNonResizableTaskIfNeeded(task, preferredWindowingMode, preferredDisplayId,
@@ -2664,6 +2675,22 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         if (r != null) {
                             handleLaunchTaskBehindCompleteLocked(r);
                         }
+                    }
+                } break;
+                case RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG: {
+                    final ActivityRecord r = (ActivityRecord) msg.obj;
+                    String processName = null;
+                    int uid = 0;
+                    synchronized (mService.mGlobalLock) {
+                        if (r.attachedToProcess()
+                                && r.isState(ActivityStack.ActivityState.RESTARTING_PROCESS)) {
+                            processName = r.app.mName;
+                            uid = r.app.mUid;
+                        }
+                    }
+                    if (processName != null) {
+                        mService.mAmInternal.killProcess(processName, uid,
+                                "restartActivityProcessTimeout");
                     }
                 } break;
                 case REPORT_HOME_CHANGED_MSG: {
