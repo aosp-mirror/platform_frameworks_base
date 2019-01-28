@@ -597,6 +597,7 @@ public class InputMethodService extends AbstractInputMethodService {
                     Log.v(TAG, "Making IME window invisible");
                 }
                 setImeWindowStatus(IME_ACTIVE | IME_INVISIBLE, mBackDisposition);
+                applyVisibilityInInsetsConsumer(false /* setVisible */);
                 onPreRenderedWindowVisibilityChanged(false /* setVisible */);
             } else {
                 mShowInputFlags = 0;
@@ -625,10 +626,10 @@ public class InputMethodService extends AbstractInputMethodService {
                     ? mDecorViewVisible && mWindowVisible : isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
                 if (mIsPreRendered) {
-                    // TODO: notify visibility to insets consumer.
                     if (DEBUG) {
                         Log.v(TAG, "Making IME window visible");
                     }
+                    applyVisibilityInInsetsConsumer(true /* setVisible */);
                     onPreRenderedWindowVisibilityChanged(true /* setVisible */);
                 } else {
                     showWindow(true);
@@ -1887,9 +1888,22 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
             mWindow.show();
         }
+        maybeNotifyPreRendered();
         mDecorViewWasVisible = true;
         mInShowWindow = false;
     }
+
+    /**
+     * Notify {@link android.view.ImeInsetsSourceConsumer} if IME has been pre-rendered
+     * for current EditorInfo, when pre-rendering is enabled.
+     */
+    private void maybeNotifyPreRendered() {
+        if (!mCanPreRender || !mIsPreRendered) {
+            return;
+        }
+        mPrivOps.reportPreRendered(getCurrentInputEditorInfo());
+    }
+
 
     private boolean prepareWindow(boolean showInput) {
         boolean doShowInput = false;
@@ -1940,6 +1954,18 @@ public class InputMethodService extends AbstractInputMethodService {
         if (setVisible) {
             onWindowShown();
         }
+    }
+
+    /**
+     * Apply the IME visibility in {@link android.view.ImeInsetsSourceConsumer} when
+     * pre-rendering is enabled.
+     * @param setVisible {@code true} to make it visible, false to hide it.
+     */
+    private void applyVisibilityInInsetsConsumer(boolean setVisible) {
+        if (!mIsPreRendered) {
+            return;
+        }
+        mPrivOps.applyImeVisibility(setVisible);
     }
 
     private void finishViews(boolean finishingInput) {
@@ -2081,6 +2107,7 @@ public class InputMethodService extends AbstractInputMethodService {
             // When IME is not pre-rendered, this will actually show the IME.
             if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
             mWindow.show();
+            maybeNotifyPreRendered();
             mDecorViewWasVisible = true;
             mInShowWindow = false;
         } else {

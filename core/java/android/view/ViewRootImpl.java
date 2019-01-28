@@ -2802,6 +2802,11 @@ public final class ViewRootImpl implements ViewParent,
             hasWindowFocus = mUpcomingWindowFocus;
             inTouchMode = mUpcomingInTouchMode;
         }
+        if (hasWindowFocus) {
+            mInsetsController.onWindowFocusGained();
+        } else {
+            mInsetsController.onWindowFocusLost();
+        }
 
         if (mAdded) {
             profileRendering(hasWindowFocus);

@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.InsetsState.TYPE_IME;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -262,7 +264,7 @@ public class InsetsController implements WindowInsetsController {
         if (controller != null) {
             return controller;
         }
-        controller = new InsetsSourceConsumer(type, mState, Transaction::new, this);
+        controller = createConsumerOfType(type);
         mSourceConsumers.put(type, controller);
         return controller;
     }
@@ -271,6 +273,32 @@ public class InsetsController implements WindowInsetsController {
     public void notifyVisibilityChanged() {
         mViewRoot.notifyInsetsChanged();
         sendStateToWindowManager();
+    }
+
+    /**
+     * Called when current window gains focus.
+     */
+    public void onWindowFocusGained() {
+        getSourceConsumer(TYPE_IME).onWindowFocusGained();
+    }
+
+    /**
+     * Called when current window loses focus.
+     */
+    public void onWindowFocusLost() {
+        getSourceConsumer(TYPE_IME).onWindowFocusLost();
+    }
+
+    ViewRootImpl getViewRoot() {
+        return mViewRoot;
+    }
+
+    private InsetsSourceConsumer createConsumerOfType(int type) {
+        if (type == TYPE_IME) {
+            return new ImeInsetsSourceConsumer(mState, Transaction::new, this);
+        } else {
+            return new InsetsSourceConsumer(type, mState, Transaction::new, this);
+        }
     }
 
     /**
