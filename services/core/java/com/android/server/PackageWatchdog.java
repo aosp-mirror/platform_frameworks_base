@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Environment;
@@ -46,6 +49,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +59,8 @@ import java.util.Set;
 
 /**
  * Monitors the health of packages on the system and notifies interested observers when packages
- * fail. All registered observers will be notified until an observer takes a mitigation action.
+ * fail. On failure, the registered observer with the least user impacting mitigation will
+ * be notified.
  */
 public class PackageWatchdog {
     private static final String TAG = "PackageWatchdog";
@@ -78,7 +83,8 @@ public class PackageWatchdog {
     private final Context mContext;
     // Handler to run package cleanup runnables
     private final Handler mTimerHandler;
-    private final Handler mIoHandler;
+    // Handler for processing IO and observer actions
+    private final Handler mWorkerHandler;
     // Contains (observer-name -> observer-handle) that have ever been registered from
     // previous boots. Observers with all packages expired are periodically pruned.
     // It is saved to disk on system shutdown and repouplated on startup so it survives reboots.
@@ -101,7 +107,7 @@ public class PackageWatchdog {
         mPolicyFile = new AtomicFile(new File(new File(Environment.getDataDirectory(), "system"),
                         "package-watchdog.xml"));
         mTimerHandler = new Handler(Looper.myLooper());
-        mIoHandler = BackgroundThread.getHandler();
+        mWorkerHandler = BackgroundThread.getHandler();
         mPackageCleanup = this::rescheduleCleanup;
         loadFromFile();
     }
@@ -115,7 +121,7 @@ public class PackageWatchdog {
         mContext = context;
         mPolicyFile = new AtomicFile(new File(context.getFilesDir(), "package-watchdog.xml"));
         mTimerHandler = new Handler(looper);
-        mIoHandler = mTimerHandler;
+        mWorkerHandler = mTimerHandler;
         mPackageCleanup = this::rescheduleCleanup;
         loadFromFile();
     }
@@ -228,49 +234,46 @@ public class PackageWatchdog {
     /**
      * Called when a process fails either due to a crash or ANR.
      *
-     * <p>All registered observers for the packages contained in the process will be notified in
-     * order of priority until an observer signifies that it has taken action and other observers
-     * should not notified.
+     * <p>For each package contained in the process, one registered observer with the least user
+     * impact will be notified for mitigation.
      *
      * <p>This method could be called frequently if there is a severe problem on the device.
      */
     public void onPackageFailure(String[] packages) {
-        ArrayMap<String, List<PackageHealthObserver>> packagesToReport = new ArrayMap<>();
-        synchronized (mLock) {
-            if (mAllObservers.isEmpty()) {
-                return;
-            }
+        mWorkerHandler.post(() -> {
+            synchronized (mLock) {
+                if (mAllObservers.isEmpty()) {
+                    return;
+                }
 
-            for (int pIndex = 0; pIndex < packages.length; pIndex++) {
-                // Observers interested in receiving packageName failures
-                List<PackageHealthObserver> observersToNotify = new ArrayList<>();
-                for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
-                    PackageHealthObserver registeredObserver =
-                            mAllObservers.valueAt(oIndex).mRegisteredObserver;
-                    if (registeredObserver != null) {
-                        observersToNotify.add(registeredObserver);
+                for (int pIndex = 0; pIndex < packages.length; pIndex++) {
+                    String packageToReport = packages[pIndex];
+                    // Observer that will receive failure for packageToReport
+                    PackageHealthObserver currentObserverToNotify = null;
+                    int currentObserverImpact = Integer.MAX_VALUE;
+
+                    // Find observer with least user impact
+                    for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
+                        ObserverInternal observer = mAllObservers.valueAt(oIndex);
+                        PackageHealthObserver registeredObserver = observer.mRegisteredObserver;
+                        if (registeredObserver != null
+                                && observer.onPackageFailure(packageToReport)) {
+                            int impact = registeredObserver.onHealthCheckFailed(packageToReport);
+                            if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
+                                    && impact < currentObserverImpact) {
+                                currentObserverToNotify = registeredObserver;
+                                currentObserverImpact = impact;
+                            }
+                        }
+                    }
+
+                    // Execute action with least user impact
+                    if (currentObserverToNotify != null) {
+                        currentObserverToNotify.execute(packageToReport);
                     }
                 }
-                // Save interested observers and notify them outside the lock
-                if (!observersToNotify.isEmpty()) {
-                    packagesToReport.put(packages[pIndex], observersToNotify);
-                }
             }
-        }
-
-        // Notify observers
-        for (int pIndex = 0; pIndex < packagesToReport.size(); pIndex++) {
-            List<PackageHealthObserver> observers = packagesToReport.valueAt(pIndex);
-            String packageName = packages[pIndex];
-            for (int oIndex = 0; oIndex < observers.size(); oIndex++) {
-                PackageHealthObserver observer = observers.get(oIndex);
-                if (mAllObservers.get(observer.getName()).onPackageFailure(packageName)
-                        && observer.onHealthCheckFailed(packageName)) {
-                    // Observer has handled, do not notify others
-                    break;
-                }
-            }
-        }
+        });
     }
 
     // TODO(zezeozue): Optimize write? Maybe only write a separate smaller file?
@@ -278,21 +281,46 @@ public class PackageWatchdog {
     /** Writes the package information to file during shutdown. */
     public void writeNow() {
         if (!mAllObservers.isEmpty()) {
-            mIoHandler.removeCallbacks(this::saveToFile);
+            mWorkerHandler.removeCallbacks(this::saveToFile);
             pruneObservers(SystemClock.uptimeMillis() - mUptimeAtLastRescheduleMs);
             saveToFile();
             Slog.i(TAG, "Last write to update package durations");
         }
     }
 
+    /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */
+    @Retention(SOURCE)
+    @IntDef(value = {PackageHealthObserverImpact.USER_IMPACT_NONE,
+                     PackageHealthObserverImpact.USER_IMPACT_LOW,
+                     PackageHealthObserverImpact.USER_IMPACT_MEDIUM,
+                     PackageHealthObserverImpact.USER_IMPACT_HIGH})
+    public @interface PackageHealthObserverImpact {
+        /** No action to take. */
+        int USER_IMPACT_NONE = 0;
+        /* Action has low user impact, user of a device will barely notice. */
+        int USER_IMPACT_LOW = 1;
+        /* Action has medium user impact, user of a device will likely notice. */
+        int USER_IMPACT_MEDIUM = 3;
+        /* Action has high user impact, a last resort, user of a device will be very frustrated. */
+        int USER_IMPACT_HIGH = 5;
+    }
+
     /** Register instances of this interface to receive notifications on package failure. */
     public interface PackageHealthObserver {
         /**
          * Called when health check fails for the {@code packageName}.
-         * @return {@code true} if action was taken and other observers should not be notified of
-         * this failure, {@code false} otherwise.
+         *
+         * @return any one of {@link PackageHealthObserverImpact} to express the impact
+         * to the user on {@link #execute}
          */
-        boolean onHealthCheckFailed(String packageName);
+        @PackageHealthObserverImpact int onHealthCheckFailed(String packageName);
+
+        /**
+         * Executes mitigation for {@link #onHealthCheckFailed}.
+         *
+         * @return {@code true} if action was executed successfully, {@code false} otherwise
+         */
+        boolean execute(String packageName);
 
         // TODO(zezeozue): Ensure uniqueness?
         /**
@@ -442,8 +470,8 @@ public class PackageWatchdog {
     }
 
     private void saveToFileAsync() {
-        mIoHandler.removeCallbacks(this::saveToFile);
-        mIoHandler.post(this::saveToFile);
+        mWorkerHandler.removeCallbacks(this::saveToFile);
+        mWorkerHandler.post(this::saveToFile);
     }
 
     /**
@@ -606,7 +634,11 @@ public class PackageWatchdog {
             } else {
                 mFailures++;
             }
-            return mFailures >= TRIGGER_FAILURE_COUNT;
+            boolean failed = mFailures >= TRIGGER_FAILURE_COUNT;
+            if (failed) {
+                mFailures = 0;
+            }
+            return failed;
         }
     }
 }
