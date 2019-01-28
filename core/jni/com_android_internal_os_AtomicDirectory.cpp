@@ -29,7 +29,7 @@ static jint com_android_internal_os_AtomicDirectory_getDirectoryFd(JNIEnv* env,
         return -1;
     }
     int fd;
-    if ((fd = TEMP_FAILURE_RETRY(open(path8.c_str(), O_DIRECTORY | O_RDONLY))) == -1) {
+    if ((fd = TEMP_FAILURE_RETRY(open(path8.c_str(), O_DIRECTORY | O_RDONLY | O_CLOEXEC))) == -1) {
         ALOGE("Cannot open directory %s, error: %s\n", path8.c_str(), strerror(errno));
         return -1;
     }
