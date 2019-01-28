@@ -652,10 +652,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         ApplicationInfo appInfo;
         CompatibilityInfo compatInfo;
         int backupMode;
+        int userId;
         public String toString() {
             return "CreateBackupAgentData{appInfo=" + appInfo
                     + " backupAgent=" + appInfo.backupAgentName
-                    + " mode=" + backupMode + "}";
+                    + " mode=" + backupMode + " userId=" + userId + "}";
         }
     }
 
@@ -870,11 +871,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
-                CompatibilityInfo compatInfo, int backupMode) {
+                CompatibilityInfo compatInfo, int backupMode, int userId) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
             d.compatInfo = compatInfo;
             d.backupMode = backupMode;
+            d.userId = userId;
 
             sendMessage(H.CREATE_BACKUP_AGENT, d);
         }
@@ -3630,7 +3632,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     context.setOuterContext(agent);
                     agent.attach(context);
 
-                    agent.onCreate();
+                    agent.onCreate(UserHandle.of(data.userId));
                     binder = agent.onBind();
                     mBackupAgents.put(packageName, agent);
                 } catch (Exception e) {

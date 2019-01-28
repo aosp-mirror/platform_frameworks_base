@@ -4818,7 +4818,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 thread.scheduleCreateBackupAgent(backupTarget.appInfo,
                         compatibilityInfoForPackage(backupTarget.appInfo),
-                        backupTarget.backupMode);
+                        backupTarget.backupMode, backupTarget.userId);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
                 badApp = true;
@@ -13673,7 +13673,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode);
+            BackupRecord r = new BackupRecord(app, backupMode, userId);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
@@ -13709,7 +13709,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     proc.thread.scheduleCreateBackupAgent(app,
-                            compatibilityInfoForPackage(app), backupMode);
+                            compatibilityInfoForPackage(app), backupMode, userId);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }
