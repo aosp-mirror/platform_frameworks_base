@@ -982,7 +982,8 @@ class ActivityStarter {
 
     /** Returns true if uid is in a persistent state. */
     private boolean isUidPersistentSystemProcess(int uid) {
-        return (mService.getUidStateLocked(uid) <= ActivityManager.PROCESS_STATE_PERSISTENT_UI);
+        return (uid == Process.SYSTEM_UID)
+                || (mService.getUidStateLocked(uid) <= ActivityManager.PROCESS_STATE_PERSISTENT_UI);
     }
 
     private void maybeLogActivityStart(int callingUid, String callingPackage, int realCallingUid,
