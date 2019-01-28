@@ -2095,8 +2095,6 @@ class ActivityStack extends ConfigurationContainer {
             final boolean stackShouldBeVisible = shouldBeVisible(starting);
             boolean behindFullscreenActivity = !stackShouldBeVisible;
             boolean resumeNextActivity = isFocusable() && isInStackLocked(starting) == null;
-            final boolean isTopNotPinnedStack =
-                    isAttached() && getDisplay().isTopNotPinnedStack(this);
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -2114,11 +2112,7 @@ class ActivityStack extends ConfigurationContainer {
                     // Check whether activity should be visible without Keyguard influence
                     final boolean visibleIgnoringKeyguard = r.shouldBeVisibleIgnoringKeyguard(
                             behindFullscreenActivity);
-                    r.visibleIgnoringKeyguard = visibleIgnoringKeyguard;
-
-                    // Now check whether it's really visible depending on Keyguard state.
-                    final boolean reallyVisible = checkKeyguardVisibility(r,
-                            visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
+                    final boolean reallyVisible = r.shouldBeVisible(behindFullscreenActivity);
                     if (visibleIgnoringKeyguard) {
                         behindFullscreenActivity = updateBehindFullscreen(!stackShouldBeVisible,
                                 behindFullscreenActivity, r);
