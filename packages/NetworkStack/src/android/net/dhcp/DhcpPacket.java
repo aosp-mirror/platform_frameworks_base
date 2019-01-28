@@ -1,5 +1,8 @@
 package android.net.dhcp;
 
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ALL;
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
+
 import android.annotation.Nullable;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
@@ -43,8 +46,8 @@ public abstract class DhcpPacket {
     public static final int MINIMUM_LEASE = 60;
     public static final int INFINITE_LEASE = (int) 0xffffffff;
 
-    public static final Inet4Address INADDR_ANY = (Inet4Address) Inet4Address.ANY;
-    public static final Inet4Address INADDR_BROADCAST = (Inet4Address) Inet4Address.ALL;
+    public static final Inet4Address INADDR_ANY = IPV4_ADDR_ANY;
+    public static final Inet4Address INADDR_BROADCAST = IPV4_ADDR_ALL;
     public static final byte[] ETHER_BROADCAST = new byte[] {
             (byte) 0xff, (byte) 0xff, (byte) 0xff,
             (byte) 0xff, (byte) 0xff, (byte) 0xff,
@@ -1212,9 +1215,9 @@ public abstract class DhcpPacket {
      */
     public DhcpResults toDhcpResults() {
         Inet4Address ipAddress = mYourIp;
-        if (ipAddress.equals(Inet4Address.ANY)) {
+        if (ipAddress.equals(IPV4_ADDR_ANY)) {
             ipAddress = mClientIp;
-            if (ipAddress.equals(Inet4Address.ANY)) {
+            if (ipAddress.equals(IPV4_ADDR_ANY)) {
                 return null;
             }
         }

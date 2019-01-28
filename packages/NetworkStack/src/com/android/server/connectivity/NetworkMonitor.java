@@ -31,6 +31,7 @@ import static android.net.metrics.ValidationProbeEvent.DNS_FAILURE;
 import static android.net.metrics.ValidationProbeEvent.DNS_SUCCESS;
 import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
 import static android.net.metrics.ValidationProbeEvent.PROBE_PRIVDNS;
+import static android.net.util.NetworkStackUtils.isEmpty;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -80,7 +81,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.RingBufferIndices;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -1173,7 +1173,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private CaptivePortalProbeSpec nextFallbackSpec() {
-        if (ArrayUtils.isEmpty(mCaptivePortalFallbackSpecs)) {
+        if (isEmpty(mCaptivePortalFallbackSpecs)) {
             return null;
         }
         // Randomly change spec without memory. Also randomize the first attempt.
