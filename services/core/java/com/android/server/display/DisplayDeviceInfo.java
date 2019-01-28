@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.hardware.display.DisplayViewport;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.Surface;
 
@@ -274,7 +275,7 @@ final class DisplayDeviceInfo {
      * Display address, or null if none.
      * Interpretation varies by display type.
      */
-    public String address;
+    public DisplayAddress address;
 
     /**
      * Display state.
