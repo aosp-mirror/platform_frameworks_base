@@ -16,13 +16,22 @@
 
 package android.telephony.data;
 
+import static android.telephony.data.ApnSetting.ProtocolType;
+
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.TelephonyManager.NetworkTypeBitMask;
+import android.telephony.data.ApnSetting.ApnType;
+import android.telephony.data.ApnSetting.AuthType;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.RILConstants;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Description of a mobile data profile used for establishing
@@ -32,24 +41,39 @@ import com.android.internal.telephony.RILConstants;
  */
 @SystemApi
 public final class DataProfile implements Parcelable {
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"TYPE_"},
+            value = {
+                    TYPE_COMMON,
+                    TYPE_3GPP,
+                    TYPE_3GPP2})
+    public @interface DataProfileType {}
 
-    // The types indicating the data profile is used on GSM (3GPP) or CDMA (3GPP2) network.
+    /** Common data profile */
     public static final int TYPE_COMMON = 0;
+
+    /** 3GPP type data profile */
     public static final int TYPE_3GPP = 1;
+
+    /** 3GPP2 type data profile */
     public static final int TYPE_3GPP2 = 2;
 
     private final int mProfileId;
 
     private final String mApn;
 
-    private final String mProtocol;
+    @ProtocolType
+    private final int mProtocolType;
 
+    @AuthType
     private final int mAuthType;
 
     private final String mUserName;
 
     private final String mPassword;
 
+    @DataProfileType
     private final int mType;
 
     private final int mMaxConnsTime;
@@ -60,10 +84,13 @@ public final class DataProfile implements Parcelable {
 
     private final boolean mEnabled;
 
+    @ApnType
     private final int mSupportedApnTypesBitmap;
 
-    private final String mRoamingProtocol;
+    @ProtocolType
+    private final int mRoamingProtocolType;
 
+    @NetworkTypeBitMask
     private final int mBearerBitmap;
 
     private final int mMtu;
@@ -73,14 +100,14 @@ public final class DataProfile implements Parcelable {
     private final boolean mPreferred;
 
     /** @hide */
-    public DataProfile(int profileId, String apn, String protocol, int authType, String userName,
-                       String password, int type, int maxConnsTime, int maxConns, int waitTime,
-                       boolean enabled, int supportedApnTypesBitmap, String roamingProtocol,
-                       int bearerBitmap, int mtu, boolean persistent, boolean preferred) {
-
+    public DataProfile(int profileId, String apn, @ProtocolType int protocolType, int authType,
+                       String userName, String password, int type, int maxConnsTime, int maxConns,
+                       int waitTime, boolean enabled, @ApnType int supportedApnTypesBitmap,
+                       @ProtocolType int roamingProtocolType, @NetworkTypeBitMask int bearerBitmap,
+                       int mtu, boolean persistent, boolean preferred) {
         this.mProfileId = profileId;
         this.mApn = apn;
-        this.mProtocol = protocol;
+        this.mProtocolType = protocolType;
         if (authType == -1) {
             authType = TextUtils.isEmpty(userName) ? RILConstants.SETUP_DATA_AUTH_NONE
                     : RILConstants.SETUP_DATA_AUTH_PAP_CHAP;
@@ -95,7 +122,7 @@ public final class DataProfile implements Parcelable {
         this.mEnabled = enabled;
 
         this.mSupportedApnTypesBitmap = supportedApnTypesBitmap;
-        this.mRoamingProtocol = roamingProtocol;
+        this.mRoamingProtocolType = roamingProtocolType;
         this.mBearerBitmap = bearerBitmap;
         this.mMtu = mtu;
         this.mPersistent = persistent;
@@ -106,7 +133,7 @@ public final class DataProfile implements Parcelable {
     public DataProfile(Parcel source) {
         mProfileId = source.readInt();
         mApn = source.readString();
-        mProtocol = source.readString();
+        mProtocolType = source.readInt();
         mAuthType = source.readInt();
         mUserName = source.readString();
         mPassword = source.readString();
@@ -116,7 +143,7 @@ public final class DataProfile implements Parcelable {
         mWaitTime = source.readInt();
         mEnabled = source.readBoolean();
         mSupportedApnTypesBitmap = source.readInt();
-        mRoamingProtocol = source.readString();
+        mRoamingProtocolType = source.readInt();
         mBearerBitmap = source.readInt();
         mMtu = source.readInt();
         mPersistent = source.readBoolean();
@@ -134,16 +161,14 @@ public final class DataProfile implements Parcelable {
     public String getApn() { return mApn; }
 
     /**
-     * @return The connection protocol, should be one of the PDP_type values in TS 27.007 section
-     * 10.1.1. For example, "IP", "IPV6", "IPV4V6", or "PPP".
+     * @return The connection protocol defined in 3GPP TS 27.007 section 10.1.1.
      */
-    public String getProtocol() { return mProtocol; }
+    public @ProtocolType int getProtocol() { return mProtocolType; }
 
     /**
-     * @return The authentication protocol used for this PDP context
-     * (None: 0, PAP: 1, CHAP: 2, PAP&CHAP: 3)
+     * @return The authentication protocol used for this PDP context.
      */
-    public int getAuthType() { return mAuthType; }
+    public @AuthType int getAuthType() { return mAuthType; }
 
     /**
      * @return The username for APN. Can be null.
@@ -156,9 +181,9 @@ public final class DataProfile implements Parcelable {
     public String getPassword() { return mPassword; }
 
     /**
-     * @return The profile type. Could be one of TYPE_COMMON, TYPE_3GPP, or TYPE_3GPP2.
+     * @return The profile type.
      */
-    public int getType() { return mType; }
+    public @DataProfileType int getType() { return mType; }
 
     /**
      * @return The period in seconds to limit the maximum connections.
@@ -183,20 +208,19 @@ public final class DataProfile implements Parcelable {
     public boolean isEnabled() { return mEnabled; }
 
     /**
-     * @return The supported APN types bitmap. See RIL_ApnTypes for the value of each bit.
+     * @return The supported APN types bitmap.
      */
-    public int getSupportedApnTypesBitmap() { return mSupportedApnTypesBitmap; }
+    public @ApnType int getSupportedApnTypesBitmap() { return mSupportedApnTypesBitmap; }
 
     /**
-     * @return  The connection protocol on roaming network, should be one of the PDP_type values in
-     * TS 27.007 section 10.1.1. For example, "IP", "IPV6", "IPV4V6", or "PPP".
+     * @return The connection protocol on roaming network defined in 3GPP TS 27.007 section 10.1.1.
      */
-    public String getRoamingProtocol() { return mRoamingProtocol; }
+    public @ProtocolType int getRoamingProtocol() { return mRoamingProtocolType; }
 
     /**
-     * @return The bearer bitmap. See RIL_RadioAccessFamily for the value of each bit.
+     * @return The bearer bitmap indicating the applicable networks for this data profile.
      */
-    public int getBearerBitmap() { return mBearerBitmap; }
+    public @NetworkTypeBitMask int getBearerBitmap() { return mBearerBitmap; }
 
     /**
      * @return The maximum transmission unit (MTU) size in bytes.
@@ -222,12 +246,12 @@ public final class DataProfile implements Parcelable {
 
     @Override
     public String toString() {
-        return "DataProfile=" + mProfileId + "/" + mProtocol + "/" + mAuthType
+        return "DataProfile=" + mProfileId + "/" + mProtocolType + "/" + mAuthType
                 + "/" + (Build.IS_USER ? "***/***/***" :
                          (mApn + "/" + mUserName + "/" + mPassword)) + "/" + mType + "/"
                 + mMaxConnsTime + "/" + mMaxConns + "/"
                 + mWaitTime + "/" + mEnabled + "/" + mSupportedApnTypesBitmap + "/"
-                + mRoamingProtocol + "/" + mBearerBitmap + "/" + mMtu + "/" + mPersistent + "/"
+                + mRoamingProtocolType + "/" + mBearerBitmap + "/" + mMtu + "/" + mPersistent + "/"
                 + mPreferred;
     }
 
@@ -242,7 +266,7 @@ public final class DataProfile implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mProfileId);
         dest.writeString(mApn);
-        dest.writeString(mProtocol);
+        dest.writeInt(mProtocolType);
         dest.writeInt(mAuthType);
         dest.writeString(mUserName);
         dest.writeString(mPassword);
@@ -252,7 +276,7 @@ public final class DataProfile implements Parcelable {
         dest.writeInt(mWaitTime);
         dest.writeBoolean(mEnabled);
         dest.writeInt(mSupportedApnTypesBitmap);
-        dest.writeString(mRoamingProtocol);
+        dest.writeInt(mRoamingProtocolType);
         dest.writeInt(mBearerBitmap);
         dest.writeInt(mMtu);
         dest.writeBoolean(mPersistent);
