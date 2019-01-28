@@ -102,16 +102,15 @@ public final class RollbackManager {
      * <p>
      * TODO: Specify the returns status codes.
      *
-     * @param rollback to commit
+     * @param rollbackId ID of the rollback to commit
      * @param statusReceiver where to deliver the results
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public void commitRollback(@NonNull RollbackInfo rollback,
-            @NonNull IntentSender statusReceiver) {
+    public void commitRollback(int rollbackId, @NonNull IntentSender statusReceiver) {
         try {
-            mBinder.executeRollback(rollback, mCallerPackageName, statusReceiver);
+            mBinder.commitRollback(rollbackId, mCallerPackageName, statusReceiver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

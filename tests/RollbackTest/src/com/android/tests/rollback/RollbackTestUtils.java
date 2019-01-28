@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.support.test.InstrumentationRegistry;
 
@@ -93,9 +92,9 @@ class RollbackTestUtils {
      * Commit the given rollback.
      * @throws AssertionError if the rollback fails.
      */
-    static void rollback(RollbackInfo rollback) throws InterruptedException {
+    static void rollback(int rollbackId) throws InterruptedException {
         RollbackManager rm = getRollbackManager();
-        rm.commitRollback(rollback, LocalIntentSender.getIntentSender());
+        rm.commitRollback(rollbackId, LocalIntentSender.getIntentSender());
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
     }
 
