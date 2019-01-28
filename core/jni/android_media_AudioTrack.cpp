@@ -23,6 +23,7 @@
 #include "core_jni_helpers.h"
 
 #include <utils/Log.h>
+#include <media/AudioParameter.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
 
@@ -1311,6 +1312,33 @@ static jint android_media_AudioTrack_get_port_id(JNIEnv *env,  jobject thiz) {
 }
 
 // ----------------------------------------------------------------------------
+static void android_media_AudioTrack_set_delay_padding(JNIEnv *env,  jobject thiz,
+        jint delayInFrames, jint paddingInFrames) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "AudioTrack not initialized");
+        return;
+    }
+    AudioParameter param = AudioParameter();
+    param.addInt(String8(AUDIO_OFFLOAD_CODEC_DELAY_SAMPLES), (int) delayInFrames);
+    param.addInt(String8(AUDIO_OFFLOAD_CODEC_PADDING_SAMPLES), (int) paddingInFrames);
+    lpTrack->setParameters(param.toString());
+}
+
+static void android_media_AudioTrack_set_eos(JNIEnv *env,  jobject thiz) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "AudioTrack not initialized");
+        return;
+    }
+    AudioParameter param = AudioParameter();
+    param.addInt(String8("EOS"), 1);
+    lpTrack->setParameters(param.toString());
+}
+
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
     // name,              signature,     funcPtr
@@ -1385,6 +1413,8 @@ static const JNINativeMethod gMethods[] = {
                                         (void *)android_media_AudioTrack_get_volume_shaper_state},
     {"native_setPresentation", "(II)I", (void *)android_media_AudioTrack_setPresentation},
     {"native_getPortId", "()I", (void *)android_media_AudioTrack_get_port_id},
+    {"native_set_delay_padding", "(II)V", (void *)android_media_AudioTrack_set_delay_padding},
+    {"native_set_eos",        "()V",    (void *)android_media_AudioTrack_set_eos},
 };
 
 

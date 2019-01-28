@@ -996,6 +996,50 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
+     * Configures the delay and padding values for the current compressed stream playing
+     * in offload mode.
+     * This can only be used on a track successfully initialized with
+     * {@link AudioTrack.Builder#setOffloadedPlayback(boolean)}. The unit is frames, where a
+     * frame indicates the number of samples per channel, e.g. 100 frames for a stereo compressed
+     * stream corresponds to 200 decoded interleaved PCM samples.
+     * @param delayInFrames number of frames to be ignored at the beginning of the stream. A value
+     *     of 0 indicates no padding is to be applied.
+     * @param paddingInFrames number of frames to be ignored at the end of the stream. A value of 0
+     *     of 0 indicates no delay is to be applied.
+     */
+    public void setOffloadDelayPadding(int delayInFrames, int paddingInFrames) {
+        if (paddingInFrames < 0) {
+            throw new IllegalArgumentException("Illegal negative padding");
+        }
+        if (delayInFrames < 0) {
+            throw new IllegalArgumentException("Illegal negative delay");
+        }
+        if (!mOffloaded) {
+            throw new IllegalStateException("Illegal use of delay/padding on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Uninitialized track");
+        }
+        native_set_delay_padding(delayInFrames, paddingInFrames);
+    }
+
+    /**
+     * Declares that the last write() operation on this track provided the last buffer of this
+     * stream.
+     * After the end of stream, previously set padding and delay values are ignored.
+     * Use this method in the same thread as any write() operation.
+     */
+    public void setOffloadEndOfStream() {
+        if (!mOffloaded) {
+            throw new IllegalStateException("EOS not supported on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Uninitialized track");
+        }
+        native_set_eos();
+    }
+
+    /**
      * Returns whether direct playback of an audio format with the provided attributes is
      * currently supported on the system.
      * <p>Direct playback means that the audio stream is not resampled or downmixed
@@ -3456,6 +3500,9 @@ public class AudioTrack extends PlayerBase
     private native final int native_setPresentation(int presentationId, int programId);
 
     private native int native_getPortId();
+
+    private native void native_set_delay_padding(int delayInFrames, int paddingInFrames);
+    private native void native_set_eos();
 
     //---------------------------------------------------------
     // Utility methods
