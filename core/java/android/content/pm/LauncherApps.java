@@ -1658,32 +1658,20 @@ public class LauncherApps {
      * A class that encapsulates information about the usage limit set for an app or
      * a group of apps.
      *
-     * <p>The launcher can query specifics about the usage limit such as if it is a group limit,
-     * how much usage time the limit has, and how much of the total usage time is remaining
-     * via the APIs available in this class.
+     * <p>The launcher can query specifics about the usage limit such as how much usage time
+     * the limit has and how much of the total usage time is remaining via the APIs available
+     * in this class.
      *
      * @see #getAppUsageLimit(String, UserHandle)
      */
     public static final class AppUsageLimit implements Parcelable {
-        private final boolean mGroupLimit;
         private final long mTotalUsageLimit;
         private final long mUsageRemaining;
 
         /** @hide */
-        public AppUsageLimit(boolean groupLimit, long totalUsageLimit, long usageRemaining) {
-            this.mGroupLimit = groupLimit;
+        public AppUsageLimit(long totalUsageLimit, long usageRemaining) {
             this.mTotalUsageLimit = totalUsageLimit;
             this.mUsageRemaining = usageRemaining;
-        }
-
-        /**
-         * Returns whether this limit refers to a group of apps.
-         *
-         * @return {@code TRUE} if the limit refers to a group of apps, {@code FALSE} otherwise.
-         * @hide
-         */
-        public boolean isGroupLimit() {
-            return mGroupLimit;
         }
 
         /**
@@ -1706,7 +1694,6 @@ public class LauncherApps {
         }
 
         private AppUsageLimit(Parcel source) {
-            mGroupLimit = source.readBoolean();
             mTotalUsageLimit = source.readLong();
             mUsageRemaining = source.readLong();
         }
@@ -1730,7 +1717,6 @@ public class LauncherApps {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeBoolean(mGroupLimit);
             dest.writeLong(mTotalUsageLimit);
             dest.writeLong(mUsageRemaining);
         }

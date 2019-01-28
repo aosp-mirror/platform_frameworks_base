@@ -510,12 +510,9 @@ public class AppTimeLimitController {
     }
 
     class AppUsageLimitGroup extends UsageGroup {
-        private boolean mGroupLimit;
-
         public AppUsageLimitGroup(UserData user, ObserverAppData observerApp, int observerId,
                 String[] observed, long timeLimitMs, PendingIntent limitReachedCallback) {
             super(user, observerApp, observerId, observed, timeLimitMs, limitReachedCallback);
-            mGroupLimit = observed.length > 1;
         }
 
         @Override
@@ -526,11 +523,6 @@ public class AppTimeLimitController {
             if (observerApp != null) {
                 observerApp.removeAppUsageLimitGroup(mObserverId);
             }
-        }
-
-        @GuardedBy("mLock")
-        boolean isGroupLimit() {
-            return mGroupLimit;
         }
 
         @GuardedBy("mLock")
@@ -546,14 +538,6 @@ public class AppTimeLimitController {
             } else {
                 return mTimeLimitMs - mUsageTimeMs;
             }
-        }
-
-        @Override
-        @GuardedBy("mLock")
-        void dump(PrintWriter pw) {
-            super.dump(pw);
-            pw.print(" groupLimit=");
-            pw.print(mGroupLimit);
         }
     }
 
@@ -692,7 +676,7 @@ public class AppTimeLimitController {
                     smallestGroup = otherGroup;
                 }
             }
-            return new UsageStatsManagerInternal.AppUsageLimitData(smallestGroup.isGroupLimit(),
+            return new UsageStatsManagerInternal.AppUsageLimitData(
                     smallestGroup.getTotaUsageLimit(), smallestGroup.getUsageRemaining());
         }
     }

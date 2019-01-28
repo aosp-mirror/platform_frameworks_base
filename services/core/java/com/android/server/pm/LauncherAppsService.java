@@ -696,7 +696,7 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
             return new LauncherApps.AppUsageLimit(
-                    data.isGroupLimit(), data.getTotalUsageLimit(), data.getUsageRemaining());
+                    data.getTotalUsageLimit(), data.getUsageRemaining());
         }
 
         private void ensureShortcutPermission(@NonNull String callingPackage) {

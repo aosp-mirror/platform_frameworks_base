@@ -287,19 +287,14 @@ public abstract class UsageStatsManagerInternal {
 
     /** A class which is used to share the usage limit data for an app or a group of apps. */
     public static class AppUsageLimitData {
-        private final boolean mGroupLimit;
         private final long mTotalUsageLimit;
         private final long mUsageRemaining;
 
-        public AppUsageLimitData(boolean groupLimit, long totalUsageLimit, long usageRemaining) {
-            this.mGroupLimit = groupLimit;
+        public AppUsageLimitData(long totalUsageLimit, long usageRemaining) {
             this.mTotalUsageLimit = totalUsageLimit;
             this.mUsageRemaining = usageRemaining;
         }
 
-        public boolean isGroupLimit() {
-            return mGroupLimit;
-        }
         public long getTotalUsageLimit() {
             return mTotalUsageLimit;
         }
