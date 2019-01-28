@@ -51,6 +51,7 @@ public class NavigationBarButtonTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         final Display display = createVirtualDisplay();
         final SysuiTestableContext context =
                 (SysuiTestableContext) mContext.createDisplayContext(display);

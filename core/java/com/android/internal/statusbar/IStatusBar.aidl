@@ -160,4 +160,9 @@ oneway interface IStatusBar
     void onBiometricError(String error);
     // Used to hide the biometric dialog when the AuthenticationClient is stopped
     void hideBiometricDialog();
+
+    /**
+     * Notifies System UI that the display is ready to show system decorations.
+     */
+    void onDisplayReady(int displayId);
 }

@@ -111,6 +111,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_SHOW_CHARGING_ANIMATION       = 44 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT = 45 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ESCAPE     = 46 << MSG_SHIFT;
+    private static final int MSG_DISPLAY_READY                 = 47 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -274,6 +275,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         default void onBiometricHelp(String message) { }
         default void onBiometricError(String error) { }
         default void hideBiometricDialog() { }
+
+        /**
+        * @see IStatusBar#onDisplayReady(int)
+        */
+        default void onDisplayReady(int displayId) { }
     }
 
     @VisibleForTesting
@@ -761,6 +767,13 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         }
     }
 
+    @Override
+    public void onDisplayReady(int displayId) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_DISPLAY_READY, displayId, 0).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1013,6 +1026,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                 case MSG_SHOW_PINNING_TOAST_ESCAPE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showPinningEscapeToast();
+                    }
+                    break;
+                case MSG_DISPLAY_READY:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onDisplayReady(msg.arg1);
                     }
                     break;
             }
