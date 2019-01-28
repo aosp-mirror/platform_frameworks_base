@@ -35,6 +35,7 @@
 #include "android_media_DeviceCallback.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_MicrophoneInfo.h"
+#include "android_media_AudioAttributes.h"
 
 // ----------------------------------------------------------------------------
 
@@ -42,7 +43,6 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/AudioRecord";
-static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
 
 static jclass gArrayListClass;
 static struct {
@@ -56,12 +56,6 @@ struct audio_record_fields_t {
     jfieldID  nativeCallbackCookie;    // provides access to the AudioRecord callback data
     jfieldID  nativeDeviceCallback;    // provides access to the JNIDeviceCallback instance
 };
-struct audio_attributes_fields_t {
-    jfieldID  fieldRecSource;    // AudioAttributes.mSource
-    jfieldID  fieldFlags;        // AudioAttributes.mFlags
-    jfieldID  fieldFormattedTags;// AudioAttributes.mFormattedTags
-};
-static audio_attributes_fields_t javaAudioAttrFields;
 static audio_record_fields_t     javaAudioRecordFields;
 static struct {
     jfieldID  fieldFramePosition;     // AudioTimestamp.framePosition
@@ -213,7 +207,6 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     nSession = NULL;
 
-    audio_attributes_t *paa = NULL;
     sp<AudioRecord> lpRecorder = 0;
     audiorecord_callback_cookie *lpCallbackData = NULL;
 
@@ -275,15 +268,11 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         lpRecorder = new AudioRecord(String16(opPackageNameStr.c_str()));
 
         // read the AudioAttributes values
-        paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
-        const jstring jtags =
-                (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldFormattedTags);
-        const char* tags = env->GetStringUTFChars(jtags, NULL);
-        // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
-        strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
-        env->ReleaseStringUTFChars(jtags, tags);
-        paa->source = (audio_source_t) env->GetIntField(jaa, javaAudioAttrFields.fieldRecSource);
-        paa->flags = (audio_flags_mask_t)env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
+        auto paa = JNIAudioAttributeHelper::makeUnique();
+        jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+        if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
         ALOGV("AudioRecord_setup for source=%d tags=%s flags=%08x", paa->source, paa->tags, paa->flags);
 
         audio_input_flags_t flags = AUDIO_INPUT_FLAG_NONE;
@@ -311,7 +300,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
             AudioRecord::TRANSFER_DEFAULT,
             flags,
             -1, -1,        // default uid, pid
-            paa);
+            paa.get());
 
         if (status != NO_ERROR) {
             ALOGE("Error creating AudioRecord instance: initialization check failed with status %d.",
@@ -368,19 +357,10 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // of the Java object (in mNativeCallbackCookie) so we can free the memory in finalize()
     env->SetLongField(thiz, javaAudioRecordFields.nativeCallbackCookie, (jlong)lpCallbackData);
 
-    if (paa != NULL) {
-        // audio attributes were copied in AudioRecord creation
-        free(paa);
-        paa = NULL;
-    }
-
     return (jint) AUDIO_JAVA_SUCCESS;
 
     // failure:
 native_init_failure:
-    if (paa != NULL) {
-        free(paa);
-    }
     env->DeleteGlobalRef(lpCallbackData->audioRecord_class);
     env->DeleteGlobalRef(lpCallbackData->audioRecord_ref);
     delete lpCallbackData;
@@ -971,13 +951,6 @@ int register_android_media_AudioRecord(JNIEnv *env)
 
     javaAudioRecordFields.nativeDeviceCallback = GetFieldIDOrDie(env,
             audioRecordClass, JAVA_NATIVEDEVICECALLBACK_FIELD_NAME, "J");
-
-    // Get the AudioAttributes class and fields
-    jclass audioAttrClass = FindClassOrDie(env, kAudioAttributesClassPathName);
-    javaAudioAttrFields.fieldRecSource = GetFieldIDOrDie(env, audioAttrClass, "mSource", "I");
-    javaAudioAttrFields.fieldFlags = GetFieldIDOrDie(env, audioAttrClass, "mFlags", "I");
-    javaAudioAttrFields.fieldFormattedTags = GetFieldIDOrDie(env,
-            audioAttrClass, "mFormattedTags", "Ljava/lang/String;");
 
     // Get the RecordTimestamp class and fields
     jclass audioTimestampClass = FindClassOrDie(env, "android/media/AudioTimestamp");
