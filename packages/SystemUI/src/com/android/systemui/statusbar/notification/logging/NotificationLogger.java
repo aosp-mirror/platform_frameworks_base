@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -218,6 +217,11 @@ public class NotificationLogger implements StateListener {
                     logNotificationClear(entry.key, entry.notification, visibility);
                 }
                 mExpansionStateLogger.onEntryRemoved(entry.key);
+            }
+
+            @Override
+            public void onEntryReinflated(NotificationEntry entry) {
+                mExpansionStateLogger.onEntryReinflated(entry.key);
             }
 
             @Override
@@ -465,6 +469,13 @@ public class NotificationLogger implements StateListener {
         @VisibleForTesting
         void onEntryRemoved(String key) {
             mExpansionStates.remove(key);
+            mLoggedExpansionState.remove(key);
+        }
+
+        @VisibleForTesting
+        void onEntryReinflated(String key) {
+            // When the notification is updated, we should consider the notification as not
+            // yet logged.
             mLoggedExpansionState.remove(key);
         }
 
