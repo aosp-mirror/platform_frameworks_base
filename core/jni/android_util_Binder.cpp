@@ -1158,7 +1158,7 @@ static int getprocname(pid_t pid, char *buf, size_t len) {
     FILE *f;
 
     snprintf(filename, sizeof(filename), "/proc/%d/cmdline", pid);
-    f = fopen(filename, "r");
+    f = fopen(filename, "re");
     if (!f) {
         *buf = '\0';
         return 1;
