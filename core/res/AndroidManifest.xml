@@ -4404,7 +4404,7 @@
         {@link android.provider.Telephony.Intents#ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL}
         broadcast -->
     <permission android:name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- A subclass of {@link android.app.SmsAppService} must be protected with this permission. -->
     <permission android:name="android.permission.BIND_SMS_APP_SERVICE"
