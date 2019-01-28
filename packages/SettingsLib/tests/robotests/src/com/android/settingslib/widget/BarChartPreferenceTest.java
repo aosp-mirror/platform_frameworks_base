@@ -58,7 +58,7 @@ public class BarChartPreferenceTest {
         mHolder = PreferenceViewHolder.createInstanceForTests(mBarChartView);
         mPreference = new BarChartPreference(mContext, null /* attrs */);
 
-        mIcon = mContext.getDrawable(R.drawable.ic_menu);
+        mIcon = mContext.getDrawable(com.android.internal.R.drawable.ic_menu);
         mBarView1 = mBarChartView.findViewById(R.id.bar_view1);
         mBarView2 = mBarChartView.findViewById(R.id.bar_view2);
         mBarView3 = mBarChartView.findViewById(R.id.bar_view3);

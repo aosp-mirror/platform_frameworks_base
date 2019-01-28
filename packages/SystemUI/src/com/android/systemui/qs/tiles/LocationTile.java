@@ -24,7 +24,6 @@ import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.R.drawable;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
@@ -38,7 +37,7 @@ import javax.inject.Inject;
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(drawable.ic_signal_location);
+    private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_signal_location);
 
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;

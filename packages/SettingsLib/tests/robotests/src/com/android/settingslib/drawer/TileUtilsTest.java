@@ -53,8 +53,6 @@ import android.provider.Settings.Global;
 import android.util.ArrayMap;
 import android.util.Pair;
 
-import com.android.settingslib.R;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -255,7 +253,7 @@ public class TileUtilsTest {
 
         resolveInfo.activityInfo.metaData = new Bundle(oldMetadata);
         resolveInfo.activityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON,
-                R.drawable.ic_bt_cellphone);
+                com.android.internal.R.drawable.ic_bt_cellphone);
         outTiles.clear();
         TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);

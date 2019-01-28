@@ -19,7 +19,6 @@ import android.bluetooth.BluetoothClass;
 import android.content.Context;
 import android.util.Log;
 
-import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 
 /**
@@ -45,7 +44,7 @@ public class BluetoothMediaDevice extends MediaDevice {
     @Override
     public int getIcon() {
         //TODO(b/117129183): This is not final icon for bluetooth device, just for demo.
-        return R.drawable.ic_bt_headphones_a2dp;
+        return com.android.internal.R.drawable.ic_bt_headphones_a2dp;
     }
 
     @Override
