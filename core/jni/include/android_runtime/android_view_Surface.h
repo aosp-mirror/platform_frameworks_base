@@ -57,7 +57,8 @@ enum class PublicFormat {
     YV12              = 0x32315659,
     Y8                = 0x20203859, // @hide
     Y16               = 0x20363159, // @hide
-    DEPTH16           = 0x44363159
+    DEPTH16           = 0x44363159,
+    DEPTH_JPEG        = 0x69656963,
 };
 
 /* Gets the underlying ANativeWindow for a Surface. */
