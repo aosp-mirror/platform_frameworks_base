@@ -781,6 +781,9 @@ public class LauncherApps {
     /**
      * Checks if the activity exists and it enabled for a profile.
      *
+     * <p>The activity may still not be exported, in which case {@link #startMainActivity} will
+     * throw a {@link SecurityException} unless the caller has the same UID as the target app's.
+     *
      * @param component The activity to check.
      * @param user The UserHandle of the profile.
      *
