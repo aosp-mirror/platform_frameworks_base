@@ -29,7 +29,6 @@ import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.Network;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
 import android.net.ProxyInfoParcelable;
@@ -1000,7 +999,9 @@ public class IpClient extends StateMachine {
         // mDhcpResults is never shared with any other owner so we don't have
         // to worry about concurrent modification.
         if (mDhcpResults != null) {
-            for (RouteInfo route : mDhcpResults.getRoutes(mInterfaceName)) {
+            final List<RouteInfo> routes =
+                    mDhcpResults.toStaticIpConfiguration().getRoutes(mInterfaceName);
+            for (RouteInfo route : routes) {
                 newLp.addRoute(route);
             }
             addAllReachableDnsServers(newLp, mDhcpResults.dnsServers);
