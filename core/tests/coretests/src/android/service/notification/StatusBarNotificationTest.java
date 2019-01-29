@@ -77,7 +77,6 @@ public class StatusBarNotificationTest {
     @Test
     public void testLogMaker() {
         final LogMaker logMaker = getNotification(PKG, GROUP_ID_1, CHANNEL_ID).getLogMaker();
-
         assertEquals(CHANNEL_ID,
                 (String) logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID));
         assertEquals(PKG, logMaker.getPackageName());
@@ -85,6 +84,18 @@ public class StatusBarNotificationTest {
         assertEquals(TAG, logMaker.getTaggedData(MetricsEvent.NOTIFICATION_TAG));
         assertEquals(GROUP_ID_1,
                 logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
+        assertEquals(0,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CATEGORY));
+    }
+
+    @Test
+    public void testLogMakerWithCategory() {
+        Notification.Builder builder = getNotificationBuilder(GROUP_ID_1, CHANNEL_ID)
+                        .setCategory(Notification.CATEGORY_MESSAGE);
+        final LogMaker logMaker = getNotification(PKG, builder).getLogMaker();
+        assertEquals(Notification.CATEGORY_MESSAGE,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CATEGORY));
     }
 
     @Test
@@ -138,6 +149,10 @@ public class StatusBarNotificationTest {
     }
 
     private StatusBarNotification getNotification(String pkg, String group, String channelId) {
+        return getNotification(pkg, getNotificationBuilder(group, channelId));
+    }
+
+    private Notification.Builder getNotificationBuilder(String group, String channelId) {
         final Notification.Builder builder = new Notification.Builder(mMockContext, channelId)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
@@ -145,10 +160,13 @@ public class StatusBarNotificationTest {
         if (group != null) {
             builder.setGroup(group);
         }
+        return builder;
+    }
 
-        Notification n = builder.build();
+    private StatusBarNotification getNotification(String pkg, Notification.Builder builder) {
+
         return new StatusBarNotification(
-                pkg, pkg, ID, TAG, UID, UID, n, USER, null, UID);
+                pkg, pkg, ID, TAG, UID, UID, builder.build(), USER, null, UID);
     }
 
 }

@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -410,7 +411,9 @@ public class StatusBarNotification implements Parcelable {
             .clearSubtype()
             .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID, getGroupLogTag())
             .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY,
-                getNotification().isGroupSummary() ? 1 : 0);
+                getNotification().isGroupSummary() ? 1 : 0)
+            .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CATEGORY,
+                    getNotification().category);
     }
 
     private String getGroupLogTag() {
