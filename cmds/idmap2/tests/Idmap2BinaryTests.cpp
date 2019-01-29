@@ -163,8 +163,12 @@ TEST_F(Idmap2BinaryTests, Dump) {
 TEST_F(Idmap2BinaryTests, Scan) {
   SKIP_TEST_IF_CANT_EXEC_IDMAP2;
 
+  const std::string overlay_static_no_name_apk_path =
+      GetTestDataPath() + "/overlay/overlay-no-name-static.apk";
   const std::string overlay_static_1_apk_path = GetTestDataPath() + "/overlay/overlay-static-1.apk";
   const std::string overlay_static_2_apk_path = GetTestDataPath() + "/overlay/overlay-static-2.apk";
+  const std::string idmap_static_no_name_path =
+      Idmap::CanonicalIdmapPathFor(GetTempDirPath(), overlay_static_no_name_apk_path);
   const std::string idmap_static_1_path =
       Idmap::CanonicalIdmapPathFor(GetTempDirPath(), overlay_static_1_apk_path);
   const std::string idmap_static_2_path =
@@ -184,11 +188,18 @@ TEST_F(Idmap2BinaryTests, Scan) {
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
   std::stringstream expected;
+  expected << idmap_static_no_name_path << std::endl;
   expected << idmap_static_1_path << std::endl;
   expected << idmap_static_2_path << std::endl;
   ASSERT_EQ(result->stdout, expected.str());
 
   std::stringstream error;
+  auto idmap_static_no_name_raw_string = utils::ReadFile(idmap_static_no_name_path);
+  auto idmap_static_no_name_raw_stream = std::istringstream(*idmap_static_no_name_raw_string);
+  auto idmap_static_no_name = Idmap::FromBinaryStream(idmap_static_no_name_raw_stream, error);
+  ASSERT_THAT(idmap_static_no_name, NotNull());
+  ASSERT_IDMAP(*idmap_static_no_name, GetTargetApkPath(), overlay_static_no_name_apk_path);
+
   auto idmap_static_1_raw_string = utils::ReadFile(idmap_static_1_path);
   auto idmap_static_1_raw_stream = std::istringstream(*idmap_static_1_raw_string);
   auto idmap_static_1 = Idmap::FromBinaryStream(idmap_static_1_raw_stream, error);
@@ -201,6 +212,7 @@ TEST_F(Idmap2BinaryTests, Scan) {
   ASSERT_THAT(idmap_static_2, NotNull());
   ASSERT_IDMAP(*idmap_static_2, GetTargetApkPath(), overlay_static_2_apk_path);
 
+  unlink(idmap_static_no_name_path.c_str());
   unlink(idmap_static_2_path.c_str());
   unlink(idmap_static_1_path.c_str());
 
@@ -218,6 +230,7 @@ TEST_F(Idmap2BinaryTests, Scan) {
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
   ASSERT_EQ(result->stdout, expected.str());
+  unlink(idmap_static_no_name_path.c_str());
   unlink(idmap_static_2_path.c_str());
   unlink(idmap_static_1_path.c_str());
 
@@ -236,6 +249,7 @@ TEST_F(Idmap2BinaryTests, Scan) {
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
   ASSERT_EQ(result->stdout, expected.str());
+  unlink(idmap_static_no_name_path.c_str());
   unlink(idmap_static_2_path.c_str());
   unlink(idmap_static_1_path.c_str());
 

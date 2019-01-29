@@ -633,6 +633,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
               overlayable_info.actor = actor;
               overlayable_info.policy_flags = policy_header->policy_flags;
               loaded_package->overlayable_infos_.push_back(std::make_pair(overlayable_info, ids));
+              loaded_package->defines_overlayable_ = true;
               break;
             }
 

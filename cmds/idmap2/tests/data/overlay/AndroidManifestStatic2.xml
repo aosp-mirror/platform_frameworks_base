@@ -18,6 +18,7 @@
     package="test.overlay.static2">
     <overlay
         android:targetPackage="test.target"
+        android:targetName="TestResources"
         android:isStatic="true"
         android:priority="2" />
 </manifest>
