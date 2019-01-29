@@ -2371,32 +2371,53 @@ public class CarrierConfigManager {
             "support_emergency_dialer_shortcut_bool";
 
     /**
-     * Controls RSRP threshold at which AlternativeNetworkService will decide whether
+     * Controls RSRP threshold at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
             "opportunistic_network_entry_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold at which AlternativeNetworkService will decide whether
+     * Controls RSSNR threshold at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
             "opportunistic_network_entry_threshold_rssnr_int";
 
     /**
-     * Controls RSRP threshold below which AlternativeNetworkService will decide whether
+     * Controls RSRP threshold below which OpportunisticNetworkService will decide whether
      * the opportunistic network available is not good enough for internet data.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
             "opportunistic_network_exit_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold below which AlternativeNetworkService will decide whether
+     * Controls RSSNR threshold below which OpportunisticNetworkService will decide whether
      * the opportunistic network available is not good enough for internet data.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
             "opportunistic_network_exit_threshold_rssnr_int";
+
+    /**
+     * Controls bandwidth threshold in Kbps at which OpportunisticNetworkService will decide whether
+     * the opportunistic network is good enough for internet data.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_BANDWIDTH_INT =
+            "opportunistic_network_entry_threshold_bandwidth_int";
+
+    /**
+     * Controls hysteresis time in milli seconds for which OpportunisticNetworkService
+     * will wait before attaching to a network.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_OR_EXIT_HYSTERESIS_TIME_LONG =
+            "opportunistic_network_entry_or_exit_hysteresis_time_long";
+
+    /**
+     * Controls hysteresis time in milli seconds for which OpportunisticNetworkService
+     * will wait before switching data to a network.
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG =
+            "opportunistic_network_data_switch_hysteresis_time_long";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -2767,6 +2788,12 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
+        /* Default value is 1024 kbps */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_BANDWIDTH_INT, 1024);
+        /* Default value is 10 seconds */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_OR_EXIT_HYSTERESIS_TIME_LONG, 10000);
+        /* Default value is 10 seconds. */
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
     }
 
     /**
