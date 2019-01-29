@@ -524,6 +524,14 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
         multiIntervals.resize(mFieldMatchers.size());
     }
 
+    // We only use anomaly detection under certain cases.
+    // N.B.: The anomaly detection cases were modified in order to fix an issue with value metrics
+    // containing multiple values. We tried to retain all previous behaviour, but we are unsure the
+    // previous behaviour was correct. At the time of the fix, anomaly detection had no owner.
+    // Whoever next works on it should look into the cases where it is triggered in this function.
+    // Discussion here: http://ag/6124370.
+    bool useAnomalyDetection = true;
+
     for (int i = 0; i < (int)mFieldMatchers.size(); i++) {
         const Matcher& matcher = mFieldMatchers[i];
         Interval& interval = multiIntervals[i];
@@ -546,7 +554,11 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
                     // no base. just update base and return.
                     interval.base = value;
                     interval.hasBase = true;
-                    return;
+                    // If we're missing a base, do not use anomaly detection on incomplete data
+                    useAnomalyDetection = false;
+                    // Continue (instead of return) here in order to set interval.base and
+                    // interval.hasBase for other intervals
+                    continue;
                 }
             }
             Value diff;
@@ -560,7 +572,9 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
                         VLOG("Unexpected decreasing value");
                         StatsdStats::getInstance().notePullDataError(mPullTagId);
                         interval.base = value;
-                        return;
+                        // If we've got bad data, do not use anomaly detection
+                        useAnomalyDetection = false;
+                        continue;
                     }
                     break;
                 case ValueMetric::DECREASING:
@@ -572,7 +586,9 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
                         VLOG("Unexpected increasing value");
                         StatsdStats::getInstance().notePullDataError(mPullTagId);
                         interval.base = value;
-                        return;
+                        // If we've got bad data, do not use anomaly detection
+                        useAnomalyDetection = false;
+                        continue;
                     }
                     break;
                 case ValueMetric::ANY:
@@ -608,14 +624,18 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
         interval.sampleSize += 1;
     }
 
-    // TODO: propgate proper values down stream when anomaly support doubles
-    long wholeBucketVal = multiIntervals[0].value.long_value;
-    auto prev = mCurrentFullBucket.find(eventKey);
-    if (prev != mCurrentFullBucket.end()) {
-        wholeBucketVal += prev->second;
-    }
-    for (auto& tracker : mAnomalyTrackers) {
-        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, wholeBucketVal);
+    // Only trigger the tracker if all intervals are correct
+    if (useAnomalyDetection) {
+        // TODO: propgate proper values down stream when anomaly support doubles
+        long wholeBucketVal = multiIntervals[0].value.long_value;
+        auto prev = mCurrentFullBucket.find(eventKey);
+        if (prev != mCurrentFullBucket.end()) {
+            wholeBucketVal += prev->second;
+        }
+        for (auto& tracker : mAnomalyTrackers) {
+            tracker->detectAndDeclareAnomaly(
+                eventTimeNs, mCurrentBucketNum, eventKey, wholeBucketVal);
+        }
     }
 }
 
