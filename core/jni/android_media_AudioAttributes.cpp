@@ -154,7 +154,7 @@ jint JNIAudioAttributeHelper::getJavaArray(
         JNIEnv* env, jobjectArray *jAudioAttributeArray, jint numAudioAttributes)
 {
     *jAudioAttributeArray = env->NewObjectArray(numAudioAttributes, gAudioAttributesClass, NULL);
-    return jAudioAttributeArray == NULL? (jint)AUDIO_JAVA_ERROR : (jint)AUDIO_JAVA_SUCCESS;
+    return *jAudioAttributeArray == NULL? (jint)AUDIO_JAVA_ERROR : (jint)AUDIO_JAVA_SUCCESS;
 }
 
 /*
