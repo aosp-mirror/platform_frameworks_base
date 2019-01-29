@@ -18,7 +18,10 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
+import android.net.InetAddresses;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
+import android.net.RouteInfo;
 import android.os.Handler;
 import android.os.RemoteException;
 
@@ -138,10 +141,13 @@ public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub 
 
     @Override
     public void onRouteChanged(boolean updated, String route, String gateway, String ifName) {
+        final RouteInfo processRoute = new RouteInfo(new IpPrefix(route),
+                ("".equals(gateway)) ? null : InetAddresses.parseNumericAddress(gateway),
+                ifName);
         if (updated) {
-            invokeForAllObservers(o -> o.onRouteUpdated(route, gateway, ifName));
+            invokeForAllObservers(o -> o.onRouteUpdated(processRoute));
         } else {
-            invokeForAllObservers(o -> o.onRouteRemoved(route, gateway, ifName));
+            invokeForAllObservers(o -> o.onRouteRemoved(processRoute));
         }
     }
 
