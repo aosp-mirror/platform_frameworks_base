@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.annotation.SystemApi;
+import android.app.slice.Slice;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -73,6 +74,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     private static final int MATCH_RAW_CODE = 2;
     private static final int MATCH_NON_INDEXABLE_KEYS_CODE = 3;
     private static final int MATCH_SITE_MAP_PAIRS_CODE = 4;
+    private static final int MATCH_SLICE_URI_PAIRS_CODE = 5;
 
     /**
      * Implementation is provided by the parent class.
@@ -90,6 +92,8 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
                 MATCH_NON_INDEXABLE_KEYS_CODE);
         mMatcher.addURI(mAuthority, SearchIndexablesContract.SITE_MAP_PAIRS_PATH,
                 MATCH_SITE_MAP_PAIRS_CODE);
+        mMatcher.addURI(mAuthority, SearchIndexablesContract.SLICE_URI_PAIRS_PATH,
+                MATCH_SLICE_URI_PAIRS_CODE);
 
         // Sanity check our setup
         if (!info.exported) {
@@ -117,6 +121,8 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
                 return queryNonIndexableKeys(null);
             case MATCH_SITE_MAP_PAIRS_CODE:
                 return querySiteMapPairs();
+            case MATCH_SLICE_URI_PAIRS_CODE:
+                return querySliceUriPairs();
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -163,6 +169,15 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
      */
     public Cursor querySiteMapPairs() {
         // By default no-op.
+        return null;
+    }
+
+    /**
+     * Returns a {@link Cursor} linking {@link Slice} {@link Uri Uris} to the
+     * corresponding Settings key.
+     */
+    public Cursor querySliceUriPairs() {
+        // By default no-op;
         return null;
     }
 
