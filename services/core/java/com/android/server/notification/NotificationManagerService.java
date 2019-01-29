@@ -2340,15 +2340,21 @@ public class NotificationManagerService extends SystemService {
         public boolean areBubblesAllowedForPackage(String pkg, int uid) {
             enforceSystemOrSystemUIOrSamePackage(pkg,
                     "Caller not system or systemui or same package");
-            return mPreferencesHelper.areBubblessAllowed(pkg, uid);
+            return mPreferencesHelper.areBubblesAllowed(pkg, uid);
         }
 
         @Override
         public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
-            checkCallerIsSystem();
-
+            enforceSystemOrSystemUI("Caller not system or systemui");
             mPreferencesHelper.setBubblesAllowed(pkg, uid, allowed);
             handleSavePolicyFile();
+        }
+
+        @Override
+        public boolean hasUserApprovedBubblesForPackage(String pkg, int uid) {
+            enforceSystemOrSystemUI("Caller not system or systemui");
+            int lockedFields = mPreferencesHelper.getAppLockedFields(pkg, uid);
+            return (lockedFields & PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE) != 0;
         }
 
         @Override

@@ -473,7 +473,7 @@ public class PreferencesHelper implements RankingConfig {
      * @param uid the uid to check if bubbles are allowed for.
      * @return whether bubbles are allowed.
      */
-    public boolean areBubblessAllowed(String pkg, int uid) {
+    public boolean areBubblesAllowed(String pkg, int uid) {
         return getOrCreatePackagePreferences(pkg, uid).allowBubble;
     }
 
@@ -488,7 +488,6 @@ public class PreferencesHelper implements RankingConfig {
     public int getImportance(String packageName, int uid) {
         return getOrCreatePackagePreferences(packageName, uid).importance;
     }
-
 
     /**
      * Returns whether the importance of the corresponding notification is user-locked and shouldn't

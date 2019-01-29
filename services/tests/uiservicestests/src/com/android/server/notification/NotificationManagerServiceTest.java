@@ -3595,6 +3595,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testUserApprovedBubblesForPackage() throws Exception {
+        assertFalse(mBinderService.hasUserApprovedBubblesForPackage(PKG, mUid));
+        mBinderService.setBubblesAllowed(PKG, mUid, true);
+        assertTrue(mBinderService.hasUserApprovedBubblesForPackage(PKG, mUid));
+        assertTrue(mBinderService.areBubblesAllowedForPackage(PKG, mUid));
+    }
+
+    @Test
+    public void testUserRejectsBubblesForPackage() throws Exception {
+        assertFalse(mBinderService.hasUserApprovedBubblesForPackage(PKG, mUid));
+        mBinderService.setBubblesAllowed(PKG, mUid, false);
+        assertTrue(mBinderService.hasUserApprovedBubblesForPackage(PKG, mUid));
+        assertFalse(mBinderService.areBubblesAllowedForPackage(PKG, mUid));
+    }
+
+    @Test
     public void testIsCallerInstantApp_primaryUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
