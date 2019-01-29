@@ -77,6 +77,7 @@ public class ActivityTestMain extends Activity {
     static final int MSG_SPAM_ALARM = 2;
     static final int MSG_SLOW_RECEIVER = 3;
     static final int MSG_SLOW_ALARM_RECEIVER = 4;
+    static final int MSG_REPLACE_BROADCAST = 5;
 
     final Handler mHandler = new Handler() {
         @Override
@@ -137,6 +138,20 @@ public class ActivityTestMain extends Activity {
                     long now = SystemClock.elapsedRealtime();
                     Log.i(TAG, "Setting alarm for now + 5 seconds");
                     am.setExact(AlarmManager.ELAPSED_REALTIME, now + 5_000, pi);
+                } break;
+                case MSG_REPLACE_BROADCAST: {
+                    Intent intent = new Intent(ActivityTestMain.this, SlowReceiver.class);
+                    intent.setAction(SLOW_RECEIVER_ACTION);
+                    intent.putExtra(SLOW_RECEIVER_EXTRA, 1);
+                    sendOrderedBroadcast(intent, null, mSlowReceiverCompletion, mHandler,
+                            Activity.RESULT_OK, null, null);
+                    intent.putExtra(SLOW_RECEIVER_EXTRA, 2);
+                    sendOrderedBroadcast(intent, null, mSlowReceiverCompletion, mHandler,
+                            Activity.RESULT_OK, null, null);
+                    intent.putExtra(SLOW_RECEIVER_EXTRA, 5038);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                    sendOrderedBroadcast(intent, null, mSlowReceiverCompletion, mHandler,
+                            Activity.RESULT_OK, null, null);
                 } break;
             }
             super.handleMessage(msg);
@@ -418,6 +433,12 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Replace broadcast").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                scheduleReplaceBroadcast();
+                return true;
+            }
+        });
         menu.add("Stack Doc").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 ActivityManager.AppTask task = findDocTask();
@@ -614,6 +635,11 @@ public class ActivityTestMain extends Activity {
     void scheduleSlowAlarmReceiver() {
         mHandler.removeMessages(MSG_SLOW_ALARM_RECEIVER);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SLOW_ALARM_RECEIVER), 500);
+    }
+
+    void scheduleReplaceBroadcast() {
+        mHandler.removeMessages(MSG_REPLACE_BROADCAST);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_REPLACE_BROADCAST), 500);
     }
 
     private View scrollWrap(View view) {
