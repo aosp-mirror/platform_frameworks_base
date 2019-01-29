@@ -3858,7 +3858,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationSmartReplySent(
-                r.getKey(), replyIndex, reply, generatedByAssistant);
+                r.getKey(), replyIndex, reply, generatedByAssistant, NOTIFICATION_LOCATION_UNKNOWN);
         verify(mAssistants).notifyAssistantSuggestedReplySent(
                 eq(r.sbn), eq(reply), eq(generatedByAssistant));
     }

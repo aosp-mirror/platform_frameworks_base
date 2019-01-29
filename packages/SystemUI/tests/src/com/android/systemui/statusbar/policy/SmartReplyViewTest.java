@@ -45,6 +45,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
@@ -190,7 +191,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         setSmartReplies(TEST_CHOICES);
         mView.getChildAt(2).performClick();
         verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2],
-                false /* generatedByAsssitant */);
+                false /* generatedByAsssitant */, MetricsEvent.LOCATION_UNKNOWN);
     }
 
     @Test
@@ -198,7 +199,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         setSmartReplies(TEST_CHOICES, true);
         mView.getChildAt(2).performClick();
         verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2],
-                true /* generatedByAsssitant */);
+                true /* generatedByAsssitant */, MetricsEvent.LOCATION_UNKNOWN);
     }
 
     @Test

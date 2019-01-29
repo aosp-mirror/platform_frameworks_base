@@ -929,14 +929,19 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationSmartReplySent(String key, int replyIndex, CharSequence reply,
-                boolean generatedByAssistant) {
+                boolean generatedByAssistant, int notificationLocation) {
 
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     LogMaker logMaker = r.getLogMaker()
                             .setCategory(MetricsEvent.SMART_REPLY_ACTION)
-                            .setSubtype(replyIndex);
+                            .setSubtype(replyIndex)
+                            .addTaggedData(
+                                    MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
+                                    generatedByAssistant ? 1 : 0)
+                            .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
+                                    notificationLocation);
                     mMetricsLogger.write(logMaker);
                     // Treat clicking on a smart reply as a user interaction.
                     reportUserInteraction(r);

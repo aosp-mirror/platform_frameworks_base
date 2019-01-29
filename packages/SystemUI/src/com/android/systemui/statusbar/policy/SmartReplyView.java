@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.text.BreakIterator;
@@ -258,8 +259,9 @@ public class SmartReplyView extends ViewGroup {
                 return false;
             }
 
-            smartReplyController.smartReplySent(
-                    entry, replyIndex, b.getText(), smartReplies.fromAssistant);
+            smartReplyController.smartReplySent(entry, replyIndex, b.getText(),
+                    smartReplies.fromAssistant,
+                    NotificationLogger.getNotificationLocation(entry).toMetricsEventEnum());
             Bundle results = new Bundle();
             results.putString(smartReplies.remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
