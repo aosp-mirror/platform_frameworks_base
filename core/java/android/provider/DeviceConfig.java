@@ -191,7 +191,7 @@ public final class DeviceConfig {
          * @hide
          */
         @SystemApi
-        String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
+        String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
 
         /**
          * Whether to show location access check notifications.
