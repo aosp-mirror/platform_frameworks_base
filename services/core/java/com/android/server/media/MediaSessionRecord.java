@@ -1247,9 +1247,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public boolean sendMediaButton(String packageName, ControllerCallbackLink cb,
-                boolean asSystemService, KeyEvent keyEvent) {
+                KeyEvent keyEvent) {
             return mSessionCb.sendMediaButton(packageName, Binder.getCallingPid(),
-                    Binder.getCallingUid(), cb, asSystemService, keyEvent);
+                    Binder.getCallingUid(), cb, false, keyEvent);
         }
 
         @Override
@@ -1316,14 +1316,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void adjustVolume(String packageName, String opPackageName,
-                ControllerCallbackLink caller, boolean asSystemService, int direction,
-                int flags) {
+                ControllerCallbackLink caller, int direction, int flags) {
             int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaSessionRecord.this.adjustVolume(packageName, opPackageName, pid, uid, caller,
-                        asSystemService, direction, flags, false /* useSuggested */);
+                        false, direction, flags, false /* useSuggested */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

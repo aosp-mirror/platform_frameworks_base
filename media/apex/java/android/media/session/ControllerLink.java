@@ -97,15 +97,12 @@ public final class ControllerLink implements Parcelable {
      *
      * @param packageName the package name of the controller
      * @param caller the {@link ControllerCallbackLink} of the controller
-     * @param asSystemService whether this event should be considered as from system service
      * @param mediaButton the media button key event
      */
     boolean sendMediaButton(@NonNull String packageName,
-            @NonNull ControllerCallbackLink caller, boolean asSystemService,
-            @NonNull KeyEvent mediaButton) {
+            @NonNull ControllerCallbackLink caller, @NonNull KeyEvent mediaButton) {
         try {
-            return mISessionController.sendMediaButton(packageName, caller, asSystemService,
-                    mediaButton);
+            return mISessionController.sendMediaButton(packageName, caller, mediaButton);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -203,16 +200,14 @@ public final class ControllerLink implements Parcelable {
      * @param packageName the package name of the controller
      * @param opPackageName the op package name of this request
      * @param caller the {@link ControllerCallbackLink} of the controller
-     * @param asSystemService whether this event should be considered as from system service
      * @param direction the direction to adjust the volume in
      * @param flags the flags with this volume change request
      */
     void adjustVolume(@NonNull String packageName, @NonNull String opPackageName,
-            @NonNull ControllerCallbackLink caller, boolean asSystemService, int direction,
+            @NonNull ControllerCallbackLink caller, int direction,
             int flags) {
         try {
-            mISessionController.adjustVolume(packageName, opPackageName, caller, asSystemService,
-                    direction, flags);
+            mISessionController.adjustVolume(packageName, opPackageName, caller, direction, flags);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -632,8 +627,7 @@ public final class ControllerLink implements Parcelable {
 
         /** Stub method for ISessionController.sendMediaButton */
         public boolean sendMediaButton(@NonNull String packageName,
-                @NonNull ControllerCallbackLink caller, boolean asSystemService,
-                @NonNull KeyEvent mediaButton) {
+                @NonNull ControllerCallbackLink caller, @NonNull KeyEvent mediaButton) {
             return false;
         }
 
@@ -677,8 +671,7 @@ public final class ControllerLink implements Parcelable {
 
         /** Stub method for ISessionController.adjustVolume */
         public void adjustVolume(@NonNull String packageName, @NonNull String opPackageName,
-                @NonNull ControllerCallbackLink caller, boolean asSystemService, int direction,
-                int flags) {
+                @NonNull ControllerCallbackLink caller, int direction, int flags) {
         }
 
         /** Stub method for ISessionController.setVolumeTo */
@@ -819,9 +812,8 @@ public final class ControllerLink implements Parcelable {
 
         @Override
         public boolean sendMediaButton(String packageName, ControllerCallbackLink caller,
-                boolean asSystemService, KeyEvent mediaButton) {
-            return mControllerStub.sendMediaButton(packageName, caller, asSystemService,
-                    mediaButton);
+                KeyEvent mediaButton) {
+            return mControllerStub.sendMediaButton(packageName, caller, mediaButton);
         }
 
         @Override
@@ -861,10 +853,8 @@ public final class ControllerLink implements Parcelable {
 
         @Override
         public void adjustVolume(String packageName, String opPackageName,
-                ControllerCallbackLink caller, boolean asSystemService, int direction,
-                int flags) {
-            mControllerStub.adjustVolume(packageName, opPackageName, caller, asSystemService,
-                    direction, flags);
+                ControllerCallbackLink caller, int direction, int flags) {
+            mControllerStub.adjustVolume(packageName, opPackageName, caller, direction, flags);
         }
 
         @Override

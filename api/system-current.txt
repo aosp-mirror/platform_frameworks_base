@@ -3584,7 +3584,7 @@ package android.media.session {
 
   public abstract static class ControllerLink.ControllerStub {
     ctor public ControllerLink.ControllerStub();
-    method public void adjustVolume(@NonNull String, @NonNull String, @NonNull android.media.session.ControllerCallbackLink, boolean, int, int);
+    method public void adjustVolume(@NonNull String, @NonNull String, @NonNull android.media.session.ControllerCallbackLink, int, int);
     method public void fastForward(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
     method @Nullable public android.os.Bundle getExtras();
     method public long getFlags();
@@ -3614,7 +3614,7 @@ package android.media.session {
     method public void seekTo(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, long);
     method public void sendCommand(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle, @Nullable android.os.ResultReceiver);
     method public void sendCustomAction(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method public boolean sendMediaButton(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, boolean, @NonNull android.view.KeyEvent);
+    method public boolean sendMediaButton(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.view.KeyEvent);
     method public void setVolumeTo(@NonNull String, @NonNull String, @NonNull android.media.session.ControllerCallbackLink, int, int);
     method public void skipToQueueItem(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, long);
     method public void stop(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);

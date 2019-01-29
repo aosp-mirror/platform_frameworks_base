@@ -130,8 +130,7 @@ public final class MediaController {
             return false;
         }
         try {
-            return mSessionBinder.sendMediaButton(mContext.getPackageName(), mCbStub,
-                    false /* asSystemService */, keyEvent);
+            return mSessionBinder.sendMediaButton(mContext.getPackageName(), mCbStub, keyEvent);
         } catch (RuntimeException e) {
             // System is dead. =(
         }
@@ -322,7 +321,7 @@ public final class MediaController {
             //       RemoteUserInfo, and OP package name is used for AudioService's internal
             //       AppOpsManager usages.
             mSessionBinder.adjustVolume(mContext.getPackageName(), mContext.getOpPackageName(),
-                    mCbStub, false /* asSystemService */, direction, flags);
+                    mCbStub, direction, flags);
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
         }
