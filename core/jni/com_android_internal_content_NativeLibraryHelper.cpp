@@ -125,7 +125,7 @@ isFileDifferent(const char* filePath, uint32_t fileSize, time_t modifiedTime,
         return true;
     }
 
-    int fd = TEMP_FAILURE_RETRY(open(filePath, O_RDONLY));
+    int fd = TEMP_FAILURE_RETRY(open(filePath, O_RDONLY | O_CLOEXEC));
     if (fd < 0) {
         ALOGV("Couldn't open file %s: %s", filePath, strerror(errno));
         return true;
@@ -565,7 +565,7 @@ com_android_internal_content_NativeLibraryHelper_openApkFd(JNIEnv *env, jclass,
         return 0;
     }
 
-    int dupedFd = dup(fd);
+    int dupedFd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
     if (dupedFd == -1) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                              "Failed to dup FileDescriptor: %s", strerror(errno));
