@@ -828,6 +828,7 @@ public class NotificationManager {
     /**
      * @hide
      */
+    @TestApi
     public boolean matchesCallFilter(Bundle extras) {
         INotificationManager service = getService();
         try {

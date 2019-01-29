@@ -242,6 +242,7 @@ package android.app {
 
   public class NotificationManager {
     method public android.content.ComponentName getEffectsSuppressor();
+    method public boolean matchesCallFilter(android.os.Bundle);
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
