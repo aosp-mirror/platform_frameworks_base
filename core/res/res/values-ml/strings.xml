@@ -1245,8 +1245,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"എല്ലാ നെറ്റ്‌വർക്കുകളും കാണാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"കണക്റ്റുചെയ്യുക"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"എല്ലാ നെറ്റ്‌വർക്കുകളും"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> നിർദേശിച്ച വൈഫൈ നെറ്റ്‌വർക്കിൽ കണക്‌റ്റ് ചെയ്‌തു"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"നിങ്ങൾക്കായി <xliff:g id="NAME">%s</xliff:g>-നെ നെറ്റ്‌വർക്കുകൾ നിർദ്ദേശിക്കാൻ അനുവദിക്കണോ?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ഉവ്വ്"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ഇല്ല"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"വൈഫൈ സ്വമേധയാ ഓണാകും"</string>
@@ -1260,6 +1262,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"വൈഫൈയ്ക്ക് ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ക്രമീകരണത്തിൽ വരുത്തിയ മാറ്റങ്ങൾ"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ബാൻഡ് മാറി."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"നിങ്ങളുടെ മുൻഗണനയനുസരിച്ചുള്ള, 5GHz മാത്രം എന്നത് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല. പകരം, 5GHz ബാൻഡ് ലഭ്യമാകുമ്പോൾ അത് ഉപയോഗിക്കും."</string>
@@ -1345,6 +1349,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്റ്റ് ചെയ്തു"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ഡീബഗ്ഗിംഗ് ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നു…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ബഗ് റിപ്പോർട്ട് പങ്കിടണോ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ബഗ് റിപ്പോർട്ട് പങ്കിടുന്നു…"</string>

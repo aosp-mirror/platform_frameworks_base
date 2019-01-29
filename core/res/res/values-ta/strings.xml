@@ -1245,8 +1245,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"எல்லா நெட்வொர்க்குகளையும் பார்க்க, தட்டவும்"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"இணை"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"எல்லா நெட்வொர்க்குகளும்"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> இன் வைஃபை நெட்வொர்க்குடன் இணைக்கப்பட்டது"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"உங்களுக்கு நெட்வொர்க்குகளைக் காட்ட <xliff:g id="NAME">%s</xliff:g>ஐ அனுமதிக்கவா?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"சரி"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"வேண்டாம்"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"வைஃபை தானாக ஆன் ஆகும்"</string>
@@ -1260,6 +1262,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"வைஃபையில் இண்டர்நெட் அணுகல் இல்லை"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"விருப்பங்களுக்கு, தட்டவும்"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"உங்கள் ஹாட்ஸ்பாட் அமைப்புகளில் செய்யப்பட்டுள்ள மாற்றங்கள்"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"உங்கள் ஹாட்ஸ்பாட்டின் அலைவரிசை மாறிவிட்டது."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"இந்தச் சாதனத்தில், ’5GHz மட்டும்’ எனும் முன்னுரிமைத் தேர்வு ஆதரிக்கப்படவில்லை. எனினும் 5GHz அலைவரிசை கிடைக்கும்போது, சாதனம் அதைப் பயன்படுத்திக்கொள்ளும்."</string>
@@ -1345,6 +1349,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைத் திருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB பிழைத் திருத்தத்தை ஆஃப் செய்ய, தட்டவும்"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB பிழைத்திருத்தத்தை முடக்க, தேர்ந்தெடுக்கவும்."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"பிழை அறிக்கையை எடுக்கிறது…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"பிழை அறிக்கையைப் பகிரவா?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"பிழை அறிக்கையைப் பகிர்கிறது…"</string>

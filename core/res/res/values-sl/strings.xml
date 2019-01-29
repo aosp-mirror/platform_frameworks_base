@@ -1289,8 +1289,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dotaknite se, če si želite ogledati vsa omrežja"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Vzpostavi povezavo"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Vsa omrežja"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Vzpostavljena povezava z omrežjem Wi‑Fi na predlog aplikacije <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Ali želite aplikaciji <xliff:g id="NAME">%s</xliff:g> dovoliti predlaganje omrežij?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Povezava Wi‑Fi se bo samodejno vklopila"</string>
@@ -1304,6 +1306,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Omrežje Wi-Fi nima dostopa do interneta"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dotaknite se za možnosti"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Spremembe nastavitev dostopne točke"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pas dostopne točke je spremenjen."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ta naprava ne podpira prednostne nastavitve samo za 5-GHz pas. Namesto tega bo ta naprava uporabljala 5-GHz pas, ko bo na voljo."</string>
@@ -1388,6 +1392,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje napak prek USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Dotaknite se, če želite izklopiti odpravljanje napak prek USB-ja"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Izberite, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Zajemanje poročila o napakah …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite poslati poročilo o napakah?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Pošiljanje poročila o napakah …"</string>

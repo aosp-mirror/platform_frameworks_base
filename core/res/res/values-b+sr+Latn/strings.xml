@@ -1267,8 +1267,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dodirnite da biste videli sve mreže"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Poveži"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Sve mreže"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Povezani ste sa Wi‑Fi mrežom koju predlaže <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Želite li da dozvolite da vam <xliff:g id="NAME">%s</xliff:g> predlaže mreže?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi će se automatski uključiti"</string>
@@ -1282,6 +1284,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nema pristup internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dodirnite za opcije"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Promene podešavanja za hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Opseg hotspota je promenjen."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ovaj uređaj ne podržava podešavanje samo za 5 GHz. Uređaj će koristiti opseg od 5 GHz kada bude dostupan."</string>
@@ -1366,6 +1370,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Otklanjanje grešaka sa USB-a je omogućeno"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Dodirnite da biste isključili otklanjanje grešaka sa USB-a"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Izaberite da biste onemogućili otklanjanja grešaka sa USB-a."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izveštaj o grešci se generiše…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite li da podelite izveštaj o grešci?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Deli se izveštaj o grešci…"</string>

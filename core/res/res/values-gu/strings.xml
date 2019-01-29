@@ -1245,8 +1245,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"બધા નેટવર્ક જોવા ટૅપ કરો"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"કનેક્ટ કરો"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"બધા નેટવર્કો"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> દ્વારા પ્રસ્તાવિત વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કર્યું"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"શું તમે <xliff:g id="NAME">%s</xliff:g>ને તમારા માટે નેટવર્કનો પ્રસ્તાવ આપવા દેવા માગો છો?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"હા"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ના"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"વાઇ-ફાઇ આપમેળે ચાલુ થઈ જશે"</string>
@@ -1260,6 +1262,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"વાઇ-ફાઇને કોઈ ઇન્ટરનેટ ઍક્સેસ નથી"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"વિકલ્પો માટે ટૅપ કરો"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"તમારી હૉટસ્પૉટ સેટિંગને બદલે છે"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"તમારું હૉટસ્પૉટ બેન્ડ બદલાયેલ છે."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"આ ઉપકરણ તમારી ફક્ત 5GHz માટેની પસંદગીને સમર્થન આપતું નથી. તેના બદલે, જ્યારે આ ઉપકરણ જ્યારે 5GHz બેન્ડ ઉપલબ્ધ હશે ત્યારે તેનો ઉપયોગ કરશે."</string>
@@ -1345,6 +1349,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ડિબગીંગ બંધ કરવા માટે ટૅપ કરો"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ડિબગીંગને અક્ષમ કરવા માટે પસંદ કરો."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"બગ રિપોર્ટ લઈ રહ્યાં છે…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"બગ રિપોર્ટ શેર કરીએ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"બગ રિપોર્ટ શેર કરી રહ્યાં છે…"</string>

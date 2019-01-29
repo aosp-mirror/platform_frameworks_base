@@ -661,7 +661,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Change the screen lock."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lock the screen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Control how and when the screen locks."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Erase all data"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Delete all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Erase the TV\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Erase the phone\'s data without warning by performing a factory data reset."</string>
@@ -1245,8 +1245,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap to see all networks"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connect"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"All networks"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Connected to Wi‑Fi network proposed by <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Do you want to let <xliff:g id="NAME">%s</xliff:g> propose networks for you?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yes"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi will turn on automatically"</string>
@@ -1260,6 +1262,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi has no Internet access"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tap for options"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Changes to your hotspot settings"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Your hotspot band has changed."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"This device doesn’t support your preference for 5 GHz only. Instead, this device will use the 5 GHz band when available."</string>
@@ -1344,6 +1348,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB debugging connected"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Tap to turn off USB debugging"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Select to disable USB debugging."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Taking bug report…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Share bug report?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Sharing bug report…"</string>

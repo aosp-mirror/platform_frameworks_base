@@ -1245,8 +1245,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Appuyer pour afficher tous les réseaux"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Se connecter"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tous les réseaux"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Connecté au réseau Wi‑Fi proposé par <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Voulez-vous autoriser <xliff:g id="NAME">%s</xliff:g> à vous proposer des réseaux ?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Oui"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Non"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Le Wi-Fi sera activé automatiquement"</string>
@@ -1260,6 +1262,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Impossible de se connecter à Internet via le réseau Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Appuyez ici pour afficher des options."</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifications apportées à vos paramètres de point d\'accès"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Votre bande de point d\'accès a été modifiée."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Cet appareil n\'est pas compatible avec votre préférence d\'utilisation de la bande 5 GHz uniquement. Il utilisera la bande 5 GHz lorsqu\'elle sera disponible."</string>
@@ -1344,6 +1348,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB activé"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Appuyez pour désactiver le débogage USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Sélectionnez cette option pour désactiver le débogage USB."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Création du rapport de bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bug ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Partage du rapport de bug…"</string>
