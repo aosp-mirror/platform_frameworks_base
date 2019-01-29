@@ -135,7 +135,17 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
-    public static final String NAMESPACE_NOTIFICATION_ASSISTANT = "notification_assistant";
+    public interface NotificationAssistant {
+        String NAMESPACE = "notification_assistant";
+        /**
+         * Whether the Notification Assistant should generate replies for notifications.
+         */
+        String GENERATE_REPLIES = "generate_replies";
+        /**
+         * Whether the Notification Assistant should generate contextual actions for notifications.
+         */
+        String GENERATE_ACTIONS = "generate_actions";
+    }
 
     /**
      * Namespace for attention-based features provided by on-device machine intelligence.

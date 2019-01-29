@@ -71,9 +71,14 @@ public class AssistantSettingsTest {
 
     @Test
     public void testGenerateRepliesDisabled() {
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
+                "false",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_REPLIES,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateReplies);
@@ -81,9 +86,14 @@ public class AssistantSettingsTest {
 
     @Test
     public void testGenerateRepliesEnabled() {
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
+                "true",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_REPLIES,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
                 "true");
 
         assertTrue(mAssistantSettings.mGenerateReplies);
@@ -91,16 +101,26 @@ public class AssistantSettingsTest {
 
     @Test
     public void testGenerateRepliesEmptyFlag() {
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
+                "false",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_REPLIES,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateReplies);
 
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
+                "",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_REPLIES,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES,
                 "");
 
         // Go back to the default value.
@@ -109,9 +129,14 @@ public class AssistantSettingsTest {
 
     @Test
     public void testGenerateActionsDisabled() {
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
+                "false",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_ACTIONS,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateActions);
@@ -119,9 +144,14 @@ public class AssistantSettingsTest {
 
     @Test
     public void testGenerateActionsEnabled() {
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
+                "true",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_ACTIONS,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
                 "true");
 
         assertTrue(mAssistantSettings.mGenerateActions);
@@ -129,16 +159,26 @@ public class AssistantSettingsTest {
 
     @Test
     public void testGenerateActionsEmptyFlag() {
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
+                "false",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_ACTIONS,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateActions);
 
+        DeviceConfig.setProperty(
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
+                "",
+                false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                AssistantSettings.KEY_GENERATE_ACTIONS,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS,
                 "");
 
         // Go back to the default value.
