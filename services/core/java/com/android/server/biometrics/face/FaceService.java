@@ -121,7 +121,12 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), mCurrentUserId,
-                    0 /* groupId */, cryptoToken, restricted, opPackageName, disabledFeatures);
+                    0 /* groupId */, cryptoToken, restricted, opPackageName, disabledFeatures) {
+                @Override
+                public boolean shouldVibrate() {
+                    return false;
+                }
+            };
 
             enrollInternal(client, UserHandle.getCallingUserId());
         }

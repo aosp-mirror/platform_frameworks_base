@@ -142,7 +142,12 @@ public class FingerprintService extends BiometricServiceBase {
             final int groupId = userId; // default group for fingerprint enrollment
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), mCurrentUserId, groupId,
-                    cryptoToken, restricted, opPackageName, new int[0] /* disabledFeatures */);
+                    cryptoToken, restricted, opPackageName, new int[0] /* disabledFeatures */) {
+                @Override
+                public boolean shouldVibrate() {
+                    return true;
+                }
+            };
 
             enrollInternal(client, userId);
         }
