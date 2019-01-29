@@ -21,6 +21,7 @@ import static android.system.OsConstants.SO_BINDTODEVICE;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.net.MacAddress;
 import android.net.NetworkUtils;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
@@ -31,7 +32,9 @@ import libcore.io.IoBridge;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.SocketAddress;
+import java.net.SocketException;
 
 /**
  * Collection of utilities to interact with raw sockets.
@@ -80,6 +83,43 @@ public class SocketUtils {
      */
     public static void closeSocket(FileDescriptor fd) throws IOException {
         IoBridge.closeAndSignalBlockedThreads(fd);
+    }
+
+    /**
+     * Attaches a socket filter that accepts DHCP packets to the given socket.
+     */
+    public static void attachDhcpFilter(FileDescriptor fd) throws SocketException {
+        NetworkUtils.attachDhcpFilter(fd);
+    }
+
+    /**
+     * Attaches a socket filter that accepts ICMPv6 router advertisements to the given socket.
+     * @param fd the socket's {@link FileDescriptor}.
+     * @param packetType the hardware address type, one of ARPHRD_*.
+     */
+    public static void attachRaFilter(FileDescriptor fd, int packetType) throws SocketException {
+        NetworkUtils.attachRaFilter(fd, packetType);
+    }
+
+    /**
+     * Attaches a socket filter that accepts L2-L4 signaling traffic required for IP connectivity.
+     *
+     * This includes: all ARP, ICMPv6 RS/RA/NS/NA messages, and DHCPv4 exchanges.
+     *
+     * @param fd the socket's {@link FileDescriptor}.
+     * @param packetType the hardware address type, one of ARPHRD_*.
+     */
+    public static void attachControlPacketFilter(FileDescriptor fd, int packetType)
+            throws SocketException {
+        NetworkUtils.attachControlPacketFilter(fd, packetType);
+    }
+
+    /**
+     * Add an entry into the ARP cache.
+     */
+    public static void addArpEntry(Inet4Address ipv4Addr, MacAddress ethAddr, String ifname,
+            FileDescriptor fd) throws IOException {
+        NetworkUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
     }
 
     private SocketUtils() {}

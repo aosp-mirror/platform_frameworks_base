@@ -287,7 +287,8 @@ public final class LinkProperties implements Parcelable {
      * @return true if {@code address} was added or updated, false otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public boolean addLinkAddress(LinkAddress address) {
         if (address == null) {
             return false;
@@ -315,6 +316,8 @@ public final class LinkProperties implements Parcelable {
      * @return true if the address was removed, false if it did not exist.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public boolean removeLinkAddress(LinkAddress toRemove) {
         int i = findLinkAddressIndex(toRemove);
         if (i >= 0) {

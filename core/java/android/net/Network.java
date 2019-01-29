@@ -123,6 +123,8 @@ public class Network implements Parcelable {
     /**
      * @hide
      */
+    @SystemApi
+    @TestApi
     public Network(Network that) {
         this(that.netId, that.mPrivateDnsBypass);
     }
