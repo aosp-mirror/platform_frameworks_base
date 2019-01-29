@@ -35,12 +35,12 @@ import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -362,27 +362,33 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_completionHint
      */
+    @InspectableProperty
     public CharSequence getCompletionHint() {
         return mHintText;
     }
 
     /**
-     * <p>Returns the current width for the auto-complete drop down list. This can
-     * be a fixed width, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill the screen, or
-     * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
+     * Returns the current width for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @return the width for the drop down list
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
      */
+    @InspectableProperty
     public int getDropDownWidth() {
         return mPopup.getWidth();
     }
 
     /**
-     * <p>Sets the current width for the auto-complete drop down list. This can
-     * be a fixed width, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill the screen, or
-     * {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the width of its anchor view.</p>
+     * Sets the current width for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @param width the width to use
      *
@@ -393,24 +399,27 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     /**
-     * <p>Returns the current height for the auto-complete drop down list. This can
-     * be a fixed height, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill
-     * the screen, or {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the height
-     * of the drop down's content.</p>
+     * <p>Returns the current height for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @return the height for the drop down list
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
      */
+    @InspectableProperty
     public int getDropDownHeight() {
         return mPopup.getHeight();
     }
 
     /**
-     * <p>Sets the current height for the auto-complete drop down list. This can
-     * be a fixed height, or {@link ViewGroup.LayoutParams#MATCH_PARENT} to fill
-     * the screen, or {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the height
-     * of the drop down's content.</p>
+     * Sets the current height for the auto-complete drop down list.
+     *
+     * This can be a fixed width, or {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to fill the screen, or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+     * to fit the width of its anchor view.
      *
      * @param height the height to use
      *
@@ -452,6 +461,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#PopupWindow_popupBackground
      */
+    @InspectableProperty(name = "popupBackground")
     public Drawable getDropDownBackground() {
         return mPopup.getBackground();
     }
@@ -496,6 +506,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
+    @InspectableProperty
     public int getDropDownVerticalOffset() {
         return mPopup.getVerticalOffset();
     }
@@ -518,6 +529,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
+    @InspectableProperty
     public int getDropDownHorizontalOffset() {
         return mPopup.getHorizontalOffset();
     }
@@ -610,6 +622,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @attr ref android.R.styleable#AutoCompleteTextView_completionThreshold
      */
+    @InspectableProperty(name = "completionThreshold")
     public int getThreshold() {
         return mThreshold;
     }

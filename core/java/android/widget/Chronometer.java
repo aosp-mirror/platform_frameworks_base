@@ -29,6 +29,7 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -145,6 +146,7 @@ public class Chronometer extends TextView {
      *
      * @see #setCountDown(boolean)
      */
+    @InspectableProperty
     public boolean isCountDown() {
         return mCountDown;
     }
@@ -206,6 +208,7 @@ public class Chronometer extends TextView {
     /**
      * Returns the current format string as set through {@link #setFormat}.
      */
+    @InspectableProperty
     public String getFormat() {
         return mFormat;
     }

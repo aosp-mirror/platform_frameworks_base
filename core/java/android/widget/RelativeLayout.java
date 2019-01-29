@@ -34,6 +34,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -289,6 +290,16 @@ public class RelativeLayout extends ViewGroup {
     }
 
     /**
+     * Get the id of the View to be ignored by gravity
+     *
+     * @attr ref android.R.styleable#RelativeLayout_ignoreGravity
+     */
+    @InspectableProperty
+    public int getIgnoreGravity() {
+        return mIgnoreGravity;
+    }
+
+    /**
      * Describes how the child views are positioned.
      *
      * @return the gravity.
@@ -298,6 +309,7 @@ public class RelativeLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#RelativeLayout_gravity
      */
+    @InspectableProperty(valueType = InspectableProperty.ValueType.GRAVITY)
     public int getGravity() {
         return mGravity;
     }

@@ -62,6 +62,7 @@ import android.view.ViewConfiguration;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inspector.InspectableProperty;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TextView.OnEditorActionListener;
@@ -563,6 +564,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      *
      * @return the query string
      */
+    @InspectableProperty(hasAttributeId = false)
     public CharSequence getQuery() {
         return mSearchSrcTextView.getText();
     }
@@ -620,6 +622,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      * @return the displayed query hint text, or {@code null} if none set
      * @attr ref android.R.styleable#SearchView_queryHint
      */
+    @InspectableProperty
     @Nullable
     public CharSequence getQueryHint() {
         final CharSequence hint;
@@ -656,9 +659,21 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      * Returns the default iconified state of the search field.
      * @return
      *
+     * @deprecated use {@link #isIconifiedByDefault()}
      * @attr ref android.R.styleable#SearchView_iconifiedByDefault
      */
+    @Deprecated
     public boolean isIconfiedByDefault() {
+        return mIconifiedByDefault;
+    }
+
+    /**
+     * Returns the default iconified state of the search field.
+     *
+     * @attr ref android.R.styleable#SearchView_iconifiedByDefault
+     */
+    @InspectableProperty
+    public boolean isIconifiedByDefault() {
         return mIconifiedByDefault;
     }
 
@@ -686,6 +701,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      * @return true if the SearchView is currently iconified, false if the search field is
      * fully visible.
      */
+    @InspectableProperty(hasAttributeId = false)
     public boolean isIconified() {
         return mIconified;
     }
@@ -780,6 +796,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      *
      * @attr ref android.R.styleable#SearchView_maxWidth
      */
+    @InspectableProperty
     public int getMaxWidth() {
         return mMaxWidth;
     }

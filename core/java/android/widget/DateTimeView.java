@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -140,6 +141,16 @@ public class DateTimeView extends TextView {
         mShowRelativeTime = showRelativeTime;
         updateNowText();
         update();
+    }
+
+    /**
+     * Returns whether this view shows relative time
+     *
+     * @return True if it shows relative time, false otherwise
+     */
+    @InspectableProperty(name = "showReleative", hasAttributeId = false)
+    public boolean isShowRelativeTime() {
+        return mShowRelativeTime;
     }
 
     @Override
