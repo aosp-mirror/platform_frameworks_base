@@ -2346,14 +2346,7 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device has biometric hardware to detect a fingerprint.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_FINGERPRINT_PRE_29 = "android.hardware.fingerprint";
-
-    /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device has biometric hardware to detect a fingerprint.
-     */
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_FINGERPRINT = "android.hardware.biometrics.fingerprint";
+    public static final String FEATURE_FINGERPRINT = "android.hardware.fingerprint";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
