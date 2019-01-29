@@ -2617,9 +2617,8 @@ public class DisplayPolicy {
             DisplayCutout displayCutout) {
         int width = fullWidth;
         if (hasNavigationBar()) {
-            // For a basic navigation bar, when we are in landscape mode we place
-            // the navigation bar to the side.
-            if (navigationBarCanMove() && fullWidth > fullHeight) {
+            final int navBarPosition = navigationBarPosition(fullWidth, fullHeight, rotation);
+            if (navBarPosition == NAV_BAR_LEFT || navBarPosition == NAV_BAR_RIGHT) {
                 width -= getNavigationBarWidth(rotation, uiMode);
             }
         }
@@ -2646,9 +2645,8 @@ public class DisplayPolicy {
             DisplayCutout displayCutout) {
         int height = fullHeight;
         if (hasNavigationBar()) {
-            // For a basic navigation bar, when we are in portrait mode we place
-            // the navigation bar to the bottom.
-            if (!navigationBarCanMove() || fullWidth < fullHeight) {
+            final int navBarPosition = navigationBarPosition(fullWidth, fullHeight, rotation);
+            if (navBarPosition == NAV_BAR_BOTTOM) {
                 height -= getNavigationBarHeight(rotation, uiMode);
             }
         }

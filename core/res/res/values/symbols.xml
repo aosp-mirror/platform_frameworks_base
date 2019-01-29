@@ -403,6 +403,7 @@
   <java-symbol type="integer" name="config_defaultPictureInPictureGravity" />
   <java-symbol type="dimen" name="config_pictureInPictureMinAspectRatio" />
   <java-symbol type="dimen" name="config_pictureInPictureMaxAspectRatio" />
+  <java-symbol type="dimen" name="config_closeToSquareDisplayMaxAspectRatio" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_factor" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_threshold" />

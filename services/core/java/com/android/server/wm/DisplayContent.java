@@ -1500,8 +1500,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
         final int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
 
-        mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
         mDisplayPolicy.configure(width, height, shortSizeDp);
+        mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
