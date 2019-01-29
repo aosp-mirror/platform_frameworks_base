@@ -34,6 +34,7 @@
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.Dependency$DependencyCreator</item>
         <item>com.android.systemui.util.NotificationChannels</item>
+        <item>com.android.systemui.notifications.NotificationsUI</item>
         <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
         <item>com.android.systemui.recents.Recents</item>
@@ -52,6 +53,5 @@
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
         <item>com.android.systemui.ScreenDecorations</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
-        <item>com.android.systemui.notifications.NotificationsUI</item>
     </string-array>
 </resources>

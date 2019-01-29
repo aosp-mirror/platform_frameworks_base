@@ -211,6 +211,7 @@ public class CarStatusBar extends StatusBar implements
     @Override
     public void showKeyguard() {
         super.showKeyguard();
+        getComponent(NotificationsUI.class).closeCarNotifications(0);
         if (mNavigationBarView != null) {
             mNavigationBarView.showKeyguardButtons();
         }
@@ -264,6 +265,12 @@ public class CarStatusBar extends StatusBar implements
             mBatteryMeterView.setVisibility(View.GONE);
         });
         addTemperatureViewToController(mStatusBarWindow);
+        // The following are the ui elements that the user would call the status bar.
+        // This will set the status bar so it they can make call backs.
+        CarNavigationBarView topBar = mStatusBarWindow.findViewById(R.id.car_top_bar);
+        topBar.setStatusBar(this);
+        CarNavigationBarView qsTopBar = mStatusBarWindow.findViewById(R.id.qs_car_top_bar);
+        qsTopBar.setStatusBar(this);
     }
 
     @Override
@@ -339,6 +346,7 @@ public class CarStatusBar extends StatusBar implements
             lp.setTitle("CarNavigationBar");
             lp.windowAnimations = 0;
             mWindowManager.addView(mNavigationBarWindow, lp);
+            mNavigationBarWindow.setOnTouchListener(getStatusBarWindowTouchListener());
         }
         if (mShowLeft) {
             int width = mContext.getResources().getDimensionPixelSize(
@@ -458,10 +466,8 @@ public class CarStatusBar extends StatusBar implements
 
     @Override
     protected View.OnTouchListener getStatusBarWindowTouchListener() {
-        // Usually, a touch on the background window will dismiss the notification shade. However,
-        // for the car use-case, the shade should remain unless the user switches to a different
-        // facet (e.g. phone).
-        return null;
+        // Gets the car specific notification touch listener
+        return getComponent(NotificationsUI.class).getDragDownListener();
     }
 
     @Override
