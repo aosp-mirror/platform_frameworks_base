@@ -158,6 +158,8 @@ public final class MediaStore {
     public static final String PARAM_PROGRESS = "progress";
     /** {@hide} */
     public static final String PARAM_REQUIRE_ORIGINAL = "requireOriginal";
+    /** {@hide} */
+    public static final String PARAM_LIMIT = "limit";
 
     /**
      * Activity Action: Launch a music player.
@@ -513,7 +515,12 @@ public final class MediaStore {
      * @see MediaStore#createPending(Context, PendingParams)
      */
     public static @NonNull Uri setIncludePending(@NonNull Uri uri) {
-        return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_PENDING, "1").build();
+        return setIncludePending(uri.buildUpon()).build();
+    }
+
+    /** @hide */
+    public static @NonNull Uri.Builder setIncludePending(@NonNull Uri.Builder uriBuilder) {
+        return uriBuilder.appendQueryParameter(PARAM_INCLUDE_PENDING, "1");
     }
 
     /**
@@ -982,6 +989,11 @@ public final class MediaStore {
      * work with multiple media file types in a single query.
      */
     public static final class Files {
+        /** @hide */
+        public static final String TABLE = "files";
+
+        /** @hide */
+        public static final Uri EXTERNAL_CONTENT_URI = getContentUri(VOLUME_EXTERNAL);
 
         /**
          * Get the content:// style URI for the files table on the

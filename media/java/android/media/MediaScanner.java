@@ -1277,7 +1277,8 @@ public class MediaScanner implements AutoCloseable {
                 // we need to query the database in small batches, to avoid problems
                 // with CursorWindow positioning.
                 long lastId = Long.MIN_VALUE;
-                Uri limitUri = mFilesUri.buildUpon().appendQueryParameter("limit", "1000").build();
+                Uri limitUri = mFilesUri.buildUpon()
+                        .appendQueryParameter(MediaStore.PARAM_LIMIT, "1000").build();
 
                 while (true) {
                     selectionArgs[0] = "" + lastId;

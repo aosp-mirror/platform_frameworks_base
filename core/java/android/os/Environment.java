@@ -50,6 +50,7 @@ public class Environment {
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
+    private static final String DIR_SANDBOX = "sandbox";
     private static final String DIR_DATA = "data";
     private static final String DIR_MEDIA = "media";
     private static final String DIR_OBB = "obb";
@@ -115,6 +116,10 @@ public class Environment {
 
         public File[] buildExternalStoragePublicDirs(String type) {
             return buildPaths(getExternalDirs(), type);
+        }
+
+        public File[] buildExternalStorageAndroidSandboxDirs() {
+            return buildPaths(getExternalDirs(), DIR_ANDROID, DIR_SANDBOX);
         }
 
         public File[] buildExternalStorageAndroidDataDirs() {
@@ -818,6 +823,15 @@ public class Environment {
     public static File getExternalStoragePublicDirectory(String type) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStoragePublicDirs(type)[0];
+    }
+
+    /**
+     * Returns the path for android-specific data on the SD card.
+     * @hide
+     */
+    public static File[] buildExternalStorageAndroidSandboxDirs() {
+        throwIfUserRequired();
+        return sCurrentUser.buildExternalStorageAndroidSandboxDirs();
     }
 
     /**
