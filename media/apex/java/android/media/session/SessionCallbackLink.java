@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.Rating;
+import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -35,6 +36,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Handles incoming commands to {@link MediaSession.Callback}.
  * @hide
@@ -42,16 +45,15 @@ import android.os.ResultReceiver;
 @SystemApi
 public final class SessionCallbackLink implements Parcelable {
     final Context mContext;
-    final CallbackStub mCallbackStub;
     final ISessionCallback mISessionCallback;
 
     /**
      * Constructor for stub (Callee)
+     * @hide
      */
-    SessionCallbackLink(@NonNull Context context, @NonNull CallbackStub callbackStub) {
+    public SessionCallbackLink(@NonNull Context context) {
         mContext = context;
-        mCallbackStub = callbackStub;
-        mISessionCallback = new CallbackStubProxy();
+        mISessionCallback = new CallbackStub();
     }
 
     /**
@@ -59,8 +61,16 @@ public final class SessionCallbackLink implements Parcelable {
      */
     public SessionCallbackLink(IBinder binder) {
         mContext = null;
-        mCallbackStub = null;
         mISessionCallback = ISessionCallback.Stub.asInterface(binder);
+    }
+
+    /**
+     * Set {@link MediaSessionEngine} which will be used by {@link CallbackStub}.
+     */
+    void setSessionEngine(@Nullable MediaSessionEngine sessionImpl) {
+        if (mISessionCallback instanceof CallbackStub) {
+            ((CallbackStub) mISessionCallback).mSessionImpl = new WeakReference<>(sessionImpl);
+        }
     }
 
     /**
@@ -540,139 +550,24 @@ public final class SessionCallbackLink implements Parcelable {
                 }
             };
 
-    /**
-     * Class for Stub implementation
-     */
-    abstract static class CallbackStub {
-        /** Stub method for ISessionCallback.notifyCommand */
-        public void onCommand(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull String command,
-                @Nullable Bundle args, @Nullable ResultReceiver cb) {
+    private class CallbackStub extends ISessionCallback.Stub {
+        private WeakReference<MediaSessionEngine> mSessionImpl;
+
+        private RemoteUserInfo createRemoteUserInfo(String packageName, int pid, int uid) {
+            return new RemoteUserInfo(packageName, pid, uid);
         }
 
-        /** Stub method for ISessionCallback.notifyMediaButton */
-        public void onMediaButton(@NonNull String packageName, int pid, int uid,
-                @NonNull Intent mediaButtonIntent, int sequenceNumber,
-                @Nullable ResultReceiver cb) {
-        }
-
-        /** Stub method for ISessionCallback.notifyMediaButtonFromController */
-        public void onMediaButtonFromController(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull Intent mediaButtonIntent) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPrepare */
-        public void onPrepare(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPrepareFromMediaId */
-        public void onPrepareFromMediaId(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull String mediaId,
-                @Nullable Bundle extras) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPrepareFromSearch */
-        public void onPrepareFromSearch(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, String query, @Nullable Bundle extras) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPrepareFromUri */
-        public void onPrepareFromUri(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull Uri uri, @Nullable Bundle extras) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPlay */
-        public void onPlay(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPlayFromMediaId */
-        public void onPlayFromMediaId(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull String mediaId,
-                @Nullable Bundle extras) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPlayFromSearch */
-        public void onPlayFromSearch(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, String query, @Nullable Bundle extras) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPlayFromUri */
-        public void onPlayFromUri(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull Uri uri, @Nullable Bundle extras) {
-        }
-
-        /** Stub method for ISessionCallback.notifySkipToTrack */
-        public void onSkipToTrack(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, long id) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPause */
-        public void onPause(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifyStop */
-        public void onStop(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifyNext */
-        public void onNext(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifyPrevious */
-        public void onPrevious(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifyFastForward */
-        public void onFastForward(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifyRewind */
-        public void onRewind(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller) {
-        }
-
-        /** Stub method for ISessionCallback.notifySeekTo */
-        public void onSeekTo(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, long pos) {
-        }
-
-        /** Stub method for ISessionCallback.notifyRate */
-        public void onRate(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull Rating rating) {
-        }
-
-        /** Stub method for ISessionCallback.notifyCustomAction */
-        public void onCustomAction(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, @NonNull String action,
-                @Nullable Bundle args) {
-        }
-
-        /** Stub method for ISessionCallback.notifyAdjustVolume */
-        public void onAdjustVolume(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, int direction) {
-        }
-
-        /** Stub method for ISessionCallback.notifySetVolumeTo */
-        public void onSetVolumeTo(@NonNull String packageName, int pid, int uid,
-                @NonNull ControllerCallbackLink caller, int value) {
-        }
-    }
-
-    private class CallbackStubProxy extends ISessionCallback.Stub {
         @Override
         public void notifyCommand(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String command, Bundle args, ResultReceiver cb) {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onCommand(packageName, pid, uid, caller, command, args, cb);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchCommand(createRemoteUserInfo(packageName, pid, uid),
+                            command, args, cb);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -684,9 +579,15 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onMediaButton(packageName, pid, uid, mediaButtonIntent,
-                        sequenceNumber, cb);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchMediaButton(
+                            createRemoteUserInfo(packageName, pid, uid), mediaButtonIntent);
+                }
             } finally {
+                if (cb != null) {
+                    cb.send(sequenceNumber, null);
+                }
                 Binder.restoreCallingIdentity(token);
             }
         }
@@ -697,8 +598,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onMediaButtonFromController(packageName, pid, uid, caller,
-                        mediaButtonIntent);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchMediaButton(createRemoteUserInfo(packageName, pid, uid),
+                            mediaButtonIntent);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -710,7 +614,10 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPrepare(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPrepare(createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -722,7 +629,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPrepareFromMediaId(packageName, pid, uid, caller, mediaId, extras);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPrepareFromMediaId(
+                            createRemoteUserInfo(packageName, pid, uid), mediaId, extras);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -734,7 +645,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPrepareFromSearch(packageName, pid, uid, caller, query, extras);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPrepareFromSearch(
+                            createRemoteUserInfo(packageName, pid, uid), query, extras);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -746,7 +661,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPrepareFromUri(packageName, pid, uid, caller, uri, extras);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPrepareFromUri(
+                            createRemoteUserInfo(packageName, pid, uid), uri, extras);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -758,7 +677,10 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPlay(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPlay(createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -770,7 +692,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPlayFromMediaId(packageName, pid, uid, caller, mediaId, extras);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPlayFromMediaId(
+                            createRemoteUserInfo(packageName, pid, uid), mediaId, extras);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -782,7 +708,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPlayFromSearch(packageName, pid, uid, caller, query, extras);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPlayFromSearch(
+                            createRemoteUserInfo(packageName, pid, uid), query, extras);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -794,7 +724,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPlayFromUri(packageName, pid, uid, caller, uri, extras);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPlayFromUri(
+                            createRemoteUserInfo(packageName, pid, uid), uri, extras);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -806,7 +740,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onSkipToTrack(packageName, pid, uid, caller, id);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchSkipToItem(
+                            createRemoteUserInfo(packageName, pid, uid), id);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -818,7 +756,10 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPause(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPause(createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -830,7 +771,10 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onStop(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchStop(createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -842,7 +786,10 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onNext(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchNext(createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -854,7 +801,10 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onPrevious(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchPrevious(createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -866,7 +816,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onFastForward(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchFastForward(
+                            createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -878,7 +832,10 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onRewind(packageName, pid, uid, caller);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchRewind(createRemoteUserInfo(packageName, pid, uid));
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -890,7 +847,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onSeekTo(packageName, pid, uid, caller, pos);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchSeekTo(
+                            createRemoteUserInfo(packageName, pid, uid), pos);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -902,7 +863,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onRate(packageName, pid, uid, caller, rating);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchRate(
+                            createRemoteUserInfo(packageName, pid, uid), rating);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -913,7 +878,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onCustomAction(packageName, pid, uid, caller, action, args);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchCustomAction(
+                            createRemoteUserInfo(packageName, pid, uid), action, args);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -925,7 +894,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onAdjustVolume(packageName, pid, uid, caller, direction);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchAdjustVolume(
+                            createRemoteUserInfo(packageName, pid, uid), direction);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -937,7 +910,11 @@ public final class SessionCallbackLink implements Parcelable {
             ensureMediaControlPermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                mCallbackStub.onSetVolumeTo(packageName, pid, uid, caller, value);
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchSetVolumeTo(
+                            createRemoteUserInfo(packageName, pid, uid), value);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

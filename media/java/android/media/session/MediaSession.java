@@ -142,10 +142,9 @@ public final class MediaSession {
         MediaSessionManager manager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         try {
-            MediaSessionEngine.CallbackStub cbStub = new MediaSessionEngine.CallbackStub();
-            SessionCallbackLink cbLink = new SessionCallbackLink(context, cbStub);
+            SessionCallbackLink cbLink = new SessionCallbackLink(context);
             SessionLink sessionLink = manager.createSession(cbLink, tag);
-            mImpl = new MediaSessionEngine(context, sessionLink, cbLink, cbStub);
+            mImpl = new MediaSessionEngine(context, sessionLink, cbLink);
             mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                     android.R.dimen.config_mediaMetadataBitmapMaxSize);
         } catch (RuntimeException e) {
