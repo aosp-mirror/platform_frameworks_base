@@ -3581,4 +3581,6 @@
   <!-- For Attention Service -->
   <java-symbol type="integer" name="config_attentionMaximumExtension" />
   <java-symbol type="integer" name="config_attentionApiTimeout" />
+
+  <java-symbol type="string" name="config_incidentReportApproverPackage" />
 </resources>

@@ -4,6 +4,7 @@ package android {
   public static final class Manifest.permission {
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
+    field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
@@ -413,6 +414,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract boolean arePermissionsIndividuallyControlled();
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
+    method public String getIncidentReportApproverPackageName();
     method public abstract int getInstallReason(String, @NonNull android.os.UserHandle);
     method public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
@@ -434,6 +436,7 @@ package android.content.pm {
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     field public static final int PROTECTION_FLAG_CONFIGURATOR = 524288; // 0x80000
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
+    field public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 1048576; // 0x100000
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
@@ -1279,7 +1282,27 @@ package android.os {
   }
 
   public class IncidentManager {
+    method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void approveReport(android.net.Uri);
+    method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void cancelAuthorization(android.os.IncidentManager.AuthListener);
+    method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void denyReport(android.net.Uri);
+    method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public java.util.List<android.os.IncidentManager.PendingReport> getPendingReports();
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void reportIncident(android.os.IncidentReportArgs);
+    method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void requestAuthorization(int, String, int, android.os.IncidentManager.AuthListener);
+    field public static final int FLAG_CONFIRMATION_DIALOG = 1; // 0x1
+  }
+
+  public static class IncidentManager.AuthListener {
+    ctor public IncidentManager.AuthListener();
+    method public void onReportApproved();
+    method public void onReportDenied();
+  }
+
+  public static class IncidentManager.PendingReport {
+    ctor public IncidentManager.PendingReport(@NonNull android.net.Uri);
+    method public int getFlags();
+    method @NonNull public String getRequestingPackage();
+    method public long getTimestamp();
+    method @NonNull public android.net.Uri getUri();
   }
 
   public final class IncidentReportArgs implements android.os.Parcelable {

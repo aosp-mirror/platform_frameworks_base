@@ -115,6 +115,7 @@
     <protected-broadcast android:name="android.app.action.BUGREPORT_FAILED" />
     <protected-broadcast android:name="android.app.action.BUGREPORT_SHARE" />
     <protected-broadcast android:name="android.app.action.SHOW_DEVICE_MONITORING_DIALOG" />
+    <protected-broadcast android:name="android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED" />
 
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_UPDATE_OPTIONS" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />
@@ -2797,6 +2798,20 @@
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.SIGNAL_PERSISTENT_PROCESSES"
         android:protectionLevel="signature|privileged|development" />
+
+    <!-- @hide @SystemApi @TestApi
+         Allow an application to approve incident and bug reports to be
+         shared off-device.  There can be only one application installed on the
+         device with this permission, and since this is a privileged permission, it
+         must be in priv-app.
+        <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.APPROVE_INCIDENT_REPORTS"
+        android:protectionLevel="signature|incidentReportApprover" />
+
+    <!-- @hide Allow an application to approve an incident or bug report approval from
+        the system. -->
+    <permission android:name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"
+        android:protectionLevel="signature|privileged" />
 
     <!-- ==================================== -->
     <!-- Private permissions                  -->

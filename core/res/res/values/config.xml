@@ -3493,6 +3493,13 @@
     -->
     <string name="config_defaultAttentionService" translatable="false"></string>
 
+    <!-- The package name for the incident report approver app.
+        This app is usually PermissionController or an app that replaces it.  When
+        a bugreport or incident report with EXPLICT-level sharing flags is going to be
+        shared, this app will be sent the PENDING_INCIDENT_REPORTS_CHANGED broadcast.
+    -->
+    <string name="config_incidentReportApproverPackage" translatable="false">com.android.permissioncontroller</string>
+
     <!-- The package name for the system's content capture service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          If no service with the specified name exists on the device, content capture will be
