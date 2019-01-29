@@ -7527,7 +7527,7 @@ package android.telephony {
   }
 
   public class PhoneStateListener {
-    method public void onCallAttributesChanged(android.telephony.CallAttributes);
+    method public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
     method public void onCallDisconnectCauseChanged(int, int);
     method public void onPreciseCallStateChanged(android.telephony.PreciseCallState);
     method public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
