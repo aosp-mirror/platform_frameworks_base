@@ -3621,6 +3621,10 @@ package android.media.session {
     method public void unregisterCallback(@NonNull android.media.session.ControllerCallbackLink);
   }
 
+  public static final class MediaController.PlaybackInfo implements android.os.Parcelable {
+    ctor public MediaController.PlaybackInfo(int, int, int, int, android.media.AudioAttributes);
+  }
+
   public abstract static class MediaSession.Callback {
     method public void onSetMediaButtonEventDelegate(@NonNull android.media.session.MediaSessionEngine.MediaButtonEventDelegate);
   }
