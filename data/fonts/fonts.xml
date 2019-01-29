@@ -65,6 +65,7 @@
         <font weight="400" style="italic">NotoSerif-Italic.ttf</font>
         <font weight="700" style="italic">NotoSerif-BoldItalic.ttf</font>
     </family>
+    <alias name="serif-bold" to="serif" weight="700" />
     <alias name="times" to="serif" />
     <alias name="times new roman" to="serif" />
     <alias name="palatino" to="serif" />
