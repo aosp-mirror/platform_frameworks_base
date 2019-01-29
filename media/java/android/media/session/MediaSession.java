@@ -392,16 +392,6 @@ public final class MediaSession {
     }
 
     /**
-     * Notify the system that the remote volume changed.
-     *
-     * @param provider The provider that is handling volume changes.
-     * @hide
-     */
-    public void notifyRemoteVolumeChanged(VolumeProvider provider) {
-        mImpl.notifyRemoteVolumeChanged(provider);
-    }
-
-    /**
      * Returns the name of the package that sent the last media button, transport control, or
      * command from controllers and the system. This is only valid while in a request callback, such
      * as {@link Callback#onPlay}.
