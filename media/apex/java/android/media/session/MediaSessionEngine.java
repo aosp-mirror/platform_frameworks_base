@@ -56,7 +56,6 @@ public final class MediaSessionEngine implements AutoCloseable {
     private static final String TAG = "MediaSession";
 
     private final Object mLock = new Object();
-    private final int mMaxBitmapSize;
 
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
@@ -82,10 +81,9 @@ public final class MediaSessionEngine implements AutoCloseable {
      * @param cbStub A callback link that handles incoming command to {@link MediaSession.Callback}.
      */
     public MediaSessionEngine(@NonNull Context context, @NonNull SessionLink sessionLink,
-            @NonNull SessionCallbackLink cbLink, @NonNull CallbackStub cbStub, int maxBitmapSize) {
+            @NonNull SessionCallbackLink cbLink, @NonNull CallbackStub cbStub) {
         mSessionLink = sessionLink;
         mCbLink = cbLink;
-        mMaxBitmapSize = maxBitmapSize;
 
         cbStub.setSessionImpl(this);
         mSessionToken = new MediaSession.Token(mSessionLink.getController());
@@ -346,7 +344,6 @@ public final class MediaSessionEngine implements AutoCloseable {
         int fields = 0;
         MediaDescription description = null;
         if (metadata != null) {
-            metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
             if (metadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
                 duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
             }
