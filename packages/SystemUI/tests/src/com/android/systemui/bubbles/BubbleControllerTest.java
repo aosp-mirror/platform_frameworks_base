@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
@@ -188,6 +189,11 @@ public class BubbleControllerTest extends SysuiTestCase {
         TestableBubbleController(Context context,
                 StatusBarWindowController statusBarWindowController) {
             super(context, statusBarWindowController);
+        }
+
+        @Override
+        public boolean shouldAutoBubble(Context c, NotificationEntry entry) {
+            return entry.notification.getNotification().getBubbleMetadata() != null;
         }
     }
 }
