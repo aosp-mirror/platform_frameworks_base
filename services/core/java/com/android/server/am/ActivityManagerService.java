@@ -4559,7 +4559,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
         app.setCurrentSchedulingGroup(app.setSchedGroup = ProcessList.SCHED_GROUP_DEFAULT);
         app.forcingToImportant = null;
-        updateProcessForegroundLocked(app, false, false);
+        updateProcessForegroundLocked(app, false, 0, false);
         app.hasShownUi = false;
         app.setDebugging(false);
         app.cached = false;
@@ -5335,7 +5335,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 pr.forcingToImportant = null;
-                updateProcessForegroundLocked(pr, false, false);
+                updateProcessForegroundLocked(pr, false, 0, false);
             }
             updateOomAdjLocked();
         }
@@ -13249,7 +13249,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.makeInactive(mProcessStats);
         app.waitingToKill = null;
         app.forcingToImportant = null;
-        updateProcessForegroundLocked(app, false, false);
+        updateProcessForegroundLocked(app, false, 0, false);
         app.setHasForegroundActivities(false);
         app.hasShownUi = false;
         app.treatLikeActivity = false;
@@ -16118,9 +16118,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
-            boolean oomAdj) {
-        if (isForeground != proc.hasForegroundServices()) {
-            proc.setHasForegroundServices(isForeground);
+            int fgServiceTypes, boolean oomAdj) {
+        final boolean hasFgServiceLocationType =
+                (fgServiceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) != 0;
+        if (isForeground != proc.hasForegroundServices()
+                || proc.hasLocationForegroundServices() != hasFgServiceLocationType) {
+            proc.setHasForegroundServices(isForeground, fgServiceTypes);
             ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
                     proc.info.uid);
             if (isForeground) {

@@ -347,10 +347,11 @@ package android.app {
     field public static final String OPSTR_WRITE_ICC_SMS = "android:write_icc_sms";
     field public static final String OPSTR_WRITE_SMS = "android:write_sms";
     field public static final String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
-    field public static final int UID_STATE_BACKGROUND = 4; // 0x4
-    field public static final int UID_STATE_CACHED = 5; // 0x5
-    field public static final int UID_STATE_FOREGROUND = 3; // 0x3
-    field public static final int UID_STATE_FOREGROUND_SERVICE = 2; // 0x2
+    field public static final int UID_STATE_BACKGROUND = 5; // 0x5
+    field public static final int UID_STATE_CACHED = 6; // 0x6
+    field public static final int UID_STATE_FOREGROUND = 4; // 0x4
+    field public static final int UID_STATE_FOREGROUND_SERVICE = 3; // 0x3
+    field public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 2; // 0x2
     field public static final int UID_STATE_PERSISTENT = 0; // 0x0
     field public static final int UID_STATE_TOP = 1; // 0x1
   }

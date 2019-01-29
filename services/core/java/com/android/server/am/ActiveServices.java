@@ -1438,14 +1438,16 @@ public final class ActiveServices {
 
     private void updateServiceForegroundLocked(ProcessRecord proc, boolean oomAdj) {
         boolean anyForeground = false;
-        for (int i=proc.services.size()-1; i>=0; i--) {
+        int fgServiceTypes = 0;
+        for (int i = proc.services.size() - 1; i >= 0; i--) {
             ServiceRecord sr = proc.services.valueAt(i);
             if (sr.isForeground || sr.fgRequired) {
                 anyForeground = true;
+                fgServiceTypes |= sr.serviceInfo.mForegroundServiceType;
                 break;
             }
         }
-        mAm.updateProcessForegroundLocked(proc, anyForeground, oomAdj);
+        mAm.updateProcessForegroundLocked(proc, anyForeground, fgServiceTypes, oomAdj);
     }
 
     private void updateWhitelistManagerLocked(ProcessRecord proc) {

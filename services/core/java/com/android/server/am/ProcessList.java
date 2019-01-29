@@ -738,6 +738,9 @@ public final class ProcessList {
             case ActivityManager.PROCESS_STATE_TOP:
                 procState = "TOP ";
                 break;
+            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
+                procState = "FGSL";
+                break;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
                 procState = "FGS ";
                 break;
@@ -804,10 +807,11 @@ public final class ProcessList {
                 return AppProtoEnums.PROCESS_STATE_PERSISTENT_UI;
             case ActivityManager.PROCESS_STATE_TOP:
                 return AppProtoEnums.PROCESS_STATE_TOP;
-            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                return AppProtoEnums.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
                 return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
+            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                return AppProtoEnums.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
             case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
                 return AppProtoEnums.PROCESS_STATE_TOP_SLEEPING;
             case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
@@ -932,6 +936,7 @@ public final class ProcessList {
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP
+        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND

@@ -897,11 +897,13 @@ public final class OomAdjuster {
         }
 
         if (adj > ProcessList.PERCEPTIBLE_APP_ADJ
-                || procState > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                || procState > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION) {
             if (app.hasForegroundServices()) {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
-                procState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+                procState = app.hasLocationForegroundServices()
+                        ? ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
+                        : ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
                 app.cached = false;
                 app.adjType = "fg-service";
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
@@ -1507,6 +1509,7 @@ public final class OomAdjuster {
             switch (procState) {
                 case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
                 case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
+                case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
                     // Something else is keeping it at this level, just leave it.
                     break;
                 case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
