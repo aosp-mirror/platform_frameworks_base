@@ -22,6 +22,7 @@ import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.telephony.CallQuality;
 import android.telephony.CellInfo;
+import android.telephony.ims.ImsReasonInfo;
 import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.ServiceState;
@@ -84,4 +85,5 @@ interface ITelephonyRegistry {
     void notifyRadioPowerStateChanged(in int state);
     void notifyEmergencyNumberList();
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId);
+    void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
 }
