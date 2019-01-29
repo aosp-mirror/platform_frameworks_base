@@ -92,6 +92,23 @@ public class SmartActionsHelper {
         mSettings = settings;
     }
 
+    @NonNull
+    SmartSuggestions suggest(@NonNull NotificationEntry entry) {
+        // Whenever suggest() is called on a notification, its previous session is ended.
+        mNotificationKeyToResultIdCache.remove(entry.getSbn().getKey());
+
+        ArrayList<Notification.Action> actions = suggestActions(entry);
+        ArrayList<CharSequence> replies = suggestReplies(entry);
+
+        // Not logging subsequent events of this notification if we didn't generate any suggestion
+        // for it.
+        if (replies.isEmpty() && actions.isEmpty()) {
+            mNotificationKeyToResultIdCache.remove(entry.getSbn().getKey());
+        }
+
+        return new SmartSuggestions(replies, actions);
+    }
+
     /**
      * Adds action adjustments based on the notification contents.
      */
@@ -115,6 +132,7 @@ public class SmartActionsHelper {
                 messages.get(messages.size() - 1).getText(), MAX_SMART_ACTIONS);
     }
 
+    @NonNull
     ArrayList<CharSequence> suggestReplies(@NonNull NotificationEntry entry) {
         if (!mSettings.mGenerateReplies) {
             return EMPTY_REPLY_LIST;
@@ -146,7 +164,7 @@ public class SmartActionsHelper {
                 .collect(Collectors.toCollection(ArrayList::new));
 
         String resultId = conversationActionsResult.getId();
-        if (resultId != null && !replies.isEmpty()) {
+        if (resultId != null) {
             mNotificationKeyToResultIdCache.put(entry.getSbn().getKey(), resultId);
         }
         return replies;
@@ -384,5 +402,16 @@ public class SmartActionsHelper {
             }
         }
         return actions;
+    }
+
+    static class SmartSuggestions {
+        public final ArrayList<CharSequence> replies;
+        public final ArrayList<Notification.Action> actions;
+
+        SmartSuggestions(
+                ArrayList<CharSequence> replies, ArrayList<Notification.Action> actions) {
+            this.replies = replies;
+            this.actions = actions;
+        }
     }
 }
