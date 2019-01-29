@@ -5812,9 +5812,9 @@ package android.provider {
   }
 
   public static interface DeviceConfig.AttentionManagerService {
+    field public static final String COMPONENT_NAME = "component_name";
     field public static final String NAMESPACE = "attention_manager_service";
-    field public static final String PROPERTY_COMPONENT_NAME = "component_name";
-    field public static final String PROPERTY_SERVICE_ENABLED = "service_enabled";
+    field public static final String SERVICE_ENABLED = "service_enabled";
   }
 
   public static interface DeviceConfig.ContentCapture {
@@ -5828,9 +5828,9 @@ package android.provider {
   }
 
   public static interface DeviceConfig.IntelligenceAttention {
+    field public static final String ATTENTION_ENABLED = "attention_enabled";
+    field public static final String ATTENTION_SETTINGS = "attention_settings";
     field public static final String NAMESPACE = "intelligence_attention";
-    field public static final String PROPERTY_ATTENTION_ENABLED = "attention_enabled";
-    field public static final String PROPERTY_ATTENTION_SETTINGS = "attention_settings";
   }
 
   public static interface DeviceConfig.NotificationAssistant {

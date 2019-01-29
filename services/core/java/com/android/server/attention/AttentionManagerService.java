@@ -16,9 +16,9 @@
 
 package com.android.server.attention;
 
+import static android.provider.DeviceConfig.AttentionManagerService.COMPONENT_NAME;
 import static android.provider.DeviceConfig.AttentionManagerService.NAMESPACE;
-import static android.provider.DeviceConfig.AttentionManagerService.PROPERTY_COMPONENT_NAME;
-import static android.provider.DeviceConfig.AttentionManagerService.PROPERTY_SERVICE_ENABLED;
+import static android.provider.DeviceConfig.AttentionManagerService.SERVICE_ENABLED;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -129,7 +129,7 @@ public class AttentionManagerService extends SystemService {
     }
 
     private boolean isServiceEnabled() {
-        final String enabled = DeviceConfig.getProperty(NAMESPACE, PROPERTY_SERVICE_ENABLED);
+        final String enabled = DeviceConfig.getProperty(NAMESPACE, SERVICE_ENABLED);
         return enabled == null ? DEFAULT_SERVICE_ENABLED : "true".equals(enabled);
     }
 
@@ -279,7 +279,7 @@ public class AttentionManagerService extends SystemService {
      * system.
      */
     private static ComponentName resolveAttentionService(Context context) {
-        final String flag = DeviceConfig.getProperty(NAMESPACE, PROPERTY_COMPONENT_NAME);
+        final String flag = DeviceConfig.getProperty(NAMESPACE, COMPONENT_NAME);
 
         final String componentNameString = flag != null ? flag : context.getString(
                 R.string.config_defaultAttentionService);

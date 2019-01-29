@@ -159,10 +159,10 @@ public final class DeviceConfig {
         String NAMESPACE = "intelligence_attention";
 
         /** If {@code true}, enables the attention features. */
-        String PROPERTY_ATTENTION_ENABLED = "attention_enabled";
+        String ATTENTION_ENABLED = "attention_enabled";
 
         /** Settings for the attention features. */
-        String PROPERTY_ATTENTION_SETTINGS = "attention_settings";
+        String ATTENTION_SETTINGS = "attention_settings";
     }
 
     /**
@@ -258,10 +258,10 @@ public final class DeviceConfig {
         String NAMESPACE = "attention_manager_service";
 
         /** If {@code true}, enables {@link AttentionManagerService} features. */
-        String PROPERTY_SERVICE_ENABLED = "service_enabled";
+        String SERVICE_ENABLED = "service_enabled";
 
         /** Allows a CTS to inject a fake implementation. */
-        String PROPERTY_COMPONENT_NAME = "component_name";
+        String COMPONENT_NAME = "component_name";
     }
 
     /**
