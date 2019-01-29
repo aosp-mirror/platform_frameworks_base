@@ -32,12 +32,14 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.rolecontrollerservice.IRoleControllerService;
 import android.rolecontrollerservice.RoleControllerService;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Queue;
 
 /**
@@ -226,10 +228,21 @@ public class RemoteRoleControllerService {
 
             private boolean mCallbackNotified;
 
+            @Nullable
+            private final String mDebugName;
+
             private Call(@NonNull CallExecutor callExecutor,
                     @NonNull IRoleManagerCallback callback) {
                 mCallExecutor = callExecutor;
                 mCallback = callback;
+                mDebugName = DEBUG
+                        ? Arrays.stream(Thread.currentThread().getStackTrace())
+                                .filter(s -> s.getClassName().equals(
+                                        RemoteRoleControllerService.class.getName()))
+                                .findFirst()
+                                .get()
+                                .getMethodName()
+                        : null;
             }
 
             @WorkerThread
@@ -254,6 +267,10 @@ public class RemoteRoleControllerService {
 
             @WorkerThread
             private void notifyCallback(boolean success) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "notifyCallback(" + this
+                            + ", success = " + success + ")");
+                }
                 if (mCallbackNotified) {
                     return;
                 }
@@ -273,7 +290,7 @@ public class RemoteRoleControllerService {
 
             @Override
             public String toString() {
-                return "Call with callback: " + mCallback;
+                return DEBUG ? mDebugName : "Call with callback: " + mCallback;
             }
 
             @FunctionalInterface

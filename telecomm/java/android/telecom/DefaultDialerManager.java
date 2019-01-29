@@ -15,16 +15,21 @@
 package android.telecom;
 
 import android.app.ActivityManager;
+import android.app.role.RoleManager;
+import android.app.role.RoleManagerCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
+
+import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,25 +69,24 @@ public class DefaultDialerManager {
      * */
     public static boolean setDefaultDialerApplication(Context context, String packageName,
             int user) {
-        // Get old package name
-        String oldPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
-                Settings.Secure.DIALER_DEFAULT_APPLICATION, user);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            context.getSystemService(RoleManager.class).addRoleHolderAsUser(
+                    RoleManager.ROLE_DIALER, packageName, UserHandle.of(user),
+                    AsyncTask.THREAD_POOL_EXECUTOR, new RoleManagerCallback() {
+                        @Override
+                        public void onSuccess() {}
 
-        if (packageName != null && oldPackageName != null && packageName.equals(oldPackageName)) {
-            // No change
-            return false;
-        }
-
-        // Only make the change if the new package belongs to a valid phone application
-        List<String> packageNames = getInstalledDialerApplications(context, user);
-
-        if (packageNames.contains(packageName)) {
-            // Update the secure setting.
-            Settings.Secure.putStringForUser(context.getContentResolver(),
-                    Settings.Secure.DIALER_DEFAULT_APPLICATION, packageName, user);
+                        @Override
+                        public void onFailure() {
+                            Log.w(TAG, "Failed to set default dialer to %s for user %s",
+                                    packageName, user);
+                        }
+                    });
             return true;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        return false;
     }
 
     /**
@@ -116,28 +120,12 @@ public class DefaultDialerManager {
      * @hide
      * */
     public static String getDefaultDialerApplication(Context context, int user) {
-        String defaultPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
-                Settings.Secure.DIALER_DEFAULT_APPLICATION, user);
-
-        final List<String> packageNames = getInstalledDialerApplications(context, user);
-
-        // Verify that the default dialer has not been disabled or uninstalled.
-        if (packageNames.contains(defaultPackageName)) {
-            return defaultPackageName;
-        }
-
-        // No user-set dialer found, fallback to system dialer
-        String systemDialerPackageName = getTelecomManager(context).getSystemDialerPackage();
-
-        if (TextUtils.isEmpty(systemDialerPackageName)) {
-            // No system dialer configured at build time
-            return null;
-        }
-
-        if (packageNames.contains(systemDialerPackageName)) {
-            return systemDialerPackageName;
-        } else {
-            return null;
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return CollectionUtils.firstOrNull(context.getSystemService(RoleManager.class)
+                    .getRoleHoldersAsUser(RoleManager.ROLE_DIALER, UserHandle.of(user)));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
