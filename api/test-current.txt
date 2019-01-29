@@ -613,6 +613,7 @@ package android.net {
 
   public final class IpPrefix implements android.os.Parcelable {
     ctor public IpPrefix(java.net.InetAddress, int);
+    ctor public IpPrefix(String);
   }
 
   public final class IpSecManager {
@@ -621,6 +622,9 @@ package android.net {
 
   public class LinkAddress implements android.os.Parcelable {
     ctor public LinkAddress(java.net.InetAddress, int, int, int);
+    ctor public LinkAddress(java.net.InetAddress, int);
+    ctor public LinkAddress(String);
+    ctor public LinkAddress(String, int, int);
     method public boolean isGlobalPreferred();
     method public boolean isIPv4();
     method public boolean isIPv6();
@@ -630,6 +634,7 @@ package android.net {
   public final class LinkProperties implements android.os.Parcelable {
     ctor public LinkProperties(android.net.LinkProperties);
     method public boolean addDnsServer(java.net.InetAddress);
+    method public boolean addLinkAddress(android.net.LinkAddress);
     method @Nullable public android.net.IpPrefix getNat64Prefix();
     method public java.util.List<java.net.InetAddress> getPcscfServers();
     method public String getTcpBufferSizes();
@@ -642,6 +647,7 @@ package android.net {
     method public boolean isProvisioned();
     method public boolean isReachable(java.net.InetAddress);
     method public boolean removeDnsServer(java.net.InetAddress);
+    method public boolean removeLinkAddress(android.net.LinkAddress);
     method public boolean removeRoute(android.net.RouteInfo);
     method public void setNat64Prefix(android.net.IpPrefix);
     method public void setPcscfServers(java.util.Collection<java.net.InetAddress>);
@@ -652,6 +658,7 @@ package android.net {
   }
 
   public class Network implements android.os.Parcelable {
+    ctor public Network(android.net.Network);
     method public android.net.Network getPrivateDnsBypassingCopy();
   }
 
@@ -703,8 +710,8 @@ package android.net.apf {
 
   public class ApfCapabilities {
     ctor public ApfCapabilities(int, int, int);
-    method public boolean getApfDrop8023Frames(android.content.Context);
-    method public int[] getApfEthTypeBlackList(android.content.Context);
+    method public static boolean getApfDrop8023Frames(android.content.Context);
+    method public static int[] getApfEthTypeBlackList(android.content.Context);
     method public boolean hasDataAccess();
     field public final int apfPacketFormat;
     field public final int apfVersionSupported;
@@ -901,6 +908,10 @@ package android.net.metrics {
 package android.net.util {
 
   public class SocketUtils {
+    method public static void addArpEntry(java.net.Inet4Address, android.net.MacAddress, String, java.io.FileDescriptor) throws java.io.IOException;
+    method public static void attachControlPacketFilter(java.io.FileDescriptor, int) throws java.net.SocketException;
+    method public static void attachDhcpFilter(java.io.FileDescriptor) throws java.net.SocketException;
+    method public static void attachRaFilter(java.io.FileDescriptor, int) throws java.net.SocketException;
     method public static void bindSocketToInterface(java.io.FileDescriptor, String) throws android.system.ErrnoException;
     method public static void closeSocket(java.io.FileDescriptor) throws java.io.IOException;
     method public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);

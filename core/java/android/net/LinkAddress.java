@@ -176,6 +176,7 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public LinkAddress(InetAddress address, int prefixLength) {
         this(address, prefixLength, 0, 0);
         this.scope = scopeForUnicastAddress(address);
@@ -199,6 +200,7 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public LinkAddress(String address) {
         this(address, 0, 0);
         this.scope = scopeForUnicastAddress(this.address);
@@ -212,6 +214,8 @@ public class LinkAddress implements Parcelable {
      * @param scope The address scope.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public LinkAddress(String address, int flags, int scope) {
         // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
         // TODO: consider rejecting mapped IPv4 addresses such as "::ffff:192.0.2.5/24".
