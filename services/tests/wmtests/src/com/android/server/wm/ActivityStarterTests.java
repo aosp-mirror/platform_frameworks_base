@@ -561,7 +561,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
     }
 
     /**
@@ -576,7 +576,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 "disallowed_unsupportedUsecase_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
     }
 
     /**
@@ -591,57 +591,64 @@ public class ActivityStarterTests extends ActivityTestsBase {
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted", false,
                 Process.ROOT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted", false,
                 Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_nfcUid_notAborted", false,
                 Process.NFC_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingUidHasVisibleWindow_notAborted", false,
                 UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingUidProcessStateTop_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_realCallingUidHasVisibleWindow_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, true, PROCESS_STATE_TOP + 1,
-                false, false, false);
+                false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_realCallingUidProcessStateTop_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
-                false, false, false);
+                false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_hasForegroundActivities_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                true, false, false);
+                true, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsRecents_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, true, false);
+                false, true, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsWhitelisted_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, true);
+                false, false, true, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callerIsInstrumentingWithBackgroundActivityStartPrivileges_notAborted",
+                false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false, false, true);
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
             int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
             int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
             boolean hasForegroundActivities, boolean callerIsRecents,
-            boolean callerIsTempWhitelisted) {
+            boolean callerIsTempWhitelisted,
+            boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges) {
         // window visibility
         doReturn(callingUidHasVisibleWindow).when(mService.mWindowManager.mRoot)
                 .isAnyNonToastWindowVisibleForUid(callingUid);
@@ -664,6 +671,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
         // caller is temp whitelisted
         callerApp.setAllowBackgroundActivityStarts(callerIsTempWhitelisted);
+        // caller is instrumenting with background activity starts privileges
+        callerApp.setInstrumentingWithBackgroundActivityStartPrivileges(
+                callerIsInstrumentingWithBackgroundActivityStartPrivileges);
 
         final ActivityOptions options = spy(ActivityOptions.makeBasic());
         ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK)

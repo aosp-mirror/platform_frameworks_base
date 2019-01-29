@@ -22,6 +22,7 @@ import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.REMOVE_TASKS;
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
@@ -15194,7 +15195,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             IInstrumentationWatcher watcher, IUiAutomationConnection uiAutomationConnection,
             int userId, String abiOverride) {
         enforceNotIsolatedCaller("startInstrumentation");
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        userId = mUserController.handleIncomingUser(callingPid, callingUid,
                 userId, false, ALLOW_FULL_ONLY, "startInstrumentation", null);
         // Refuse possible leaked file descriptors
         if (arguments != null && arguments.hasFileDescriptors()) {
@@ -15259,6 +15262,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mWatcher = watcher;
             activeInstr.mUiAutomationConnection = uiAutomationConnection;
             activeInstr.mResultClass = className;
+            activeInstr.mHasBackgroundActivityStartsPermission = checkPermission(
+                    START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
+                            == PackageManager.PERMISSION_GRANTED;
 
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
