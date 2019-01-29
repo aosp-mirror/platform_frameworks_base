@@ -14107,6 +14107,7 @@ public final class Settings {
          * edit_choices_before_sending       (boolean)
          * show_in_heads_up                  (boolean)
          * min_num_system_generated_replies  (int)
+         * max_num_actions                   (int)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
          * @hide

@@ -47,6 +47,7 @@ public final class SmartReplyConstants extends ContentObserver {
             "edit_choices_before_sending";
     private static final String KEY_SHOW_IN_HEADS_UP = "show_in_heads_up";
     private static final String KEY_MIN_NUM_REPLIES = "min_num_system_generated_replies";
+    private static final String KEY_MAX_NUM_ACTIONS = "max_num_actions";
 
     private final boolean mDefaultEnabled;
     private final boolean mDefaultRequiresP;
@@ -54,6 +55,7 @@ public final class SmartReplyConstants extends ContentObserver {
     private final boolean mDefaultEditChoicesBeforeSending;
     private final boolean mDefaultShowInHeadsUp;
     private final int mDefaultMinNumSystemGeneratedReplies;
+    private final int mDefaultMaxNumActions;
 
     private boolean mEnabled;
     private boolean mRequiresTargetingP;
@@ -61,6 +63,7 @@ public final class SmartReplyConstants extends ContentObserver {
     private boolean mEditChoicesBeforeSending;
     private boolean mShowInHeadsUp;
     private int mMinNumSystemGeneratedReplies;
+    private int mMaxNumActions;
 
     private final Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -83,6 +86,8 @@ public final class SmartReplyConstants extends ContentObserver {
                 R.bool.config_smart_replies_in_notifications_show_in_heads_up);
         mDefaultMinNumSystemGeneratedReplies = resources.getInteger(
                 R.integer.config_smart_replies_in_notifications_min_num_system_generated_replies);
+        mDefaultMaxNumActions = resources.getInteger(
+                R.integer.config_smart_replies_in_notifications_max_num_actions);
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS),
@@ -112,6 +117,7 @@ public final class SmartReplyConstants extends ContentObserver {
             mShowInHeadsUp = mParser.getBoolean(KEY_SHOW_IN_HEADS_UP, mDefaultShowInHeadsUp);
             mMinNumSystemGeneratedReplies =
                     mParser.getInt(KEY_MIN_NUM_REPLIES, mDefaultMinNumSystemGeneratedReplies);
+            mMaxNumActions = mParser.getInt(KEY_MAX_NUM_ACTIONS, mDefaultMaxNumActions);
         }
     }
 
@@ -169,5 +175,13 @@ public final class SmartReplyConstants extends ContentObserver {
      */
     public int getMinNumSystemGeneratedReplies() {
         return mMinNumSystemGeneratedReplies;
+    }
+
+    /**
+     * Returns the maximum number smart actions to show in a notification, or -1 if there shouldn't
+     * be a limit.
+     */
+    public int getMaxNumActions() {
+        return mMaxNumActions;
     }
 }
