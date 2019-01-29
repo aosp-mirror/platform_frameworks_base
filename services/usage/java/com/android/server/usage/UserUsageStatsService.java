@@ -595,8 +595,8 @@ class UserUsageStatsService {
     private void loadActiveStats(final long currentTimeMillis) {
         for (int intervalType = 0; intervalType < mCurrentStats.length; intervalType++) {
             final IntervalStats stats = mDatabase.getLatestUsageStats(intervalType);
-            if (stats != null && currentTimeMillis - 500 >= stats.endTime &&
-                    currentTimeMillis < stats.beginTime + INTERVAL_LENGTH[intervalType]) {
+            if (stats != null
+                    && currentTimeMillis < stats.beginTime + INTERVAL_LENGTH[intervalType]) {
                 if (DEBUG) {
                     Slog.d(TAG, mLogPrefix + "Loading existing stats @ " +
                             sDateFormat.format(stats.beginTime) + "(" + stats.beginTime +
