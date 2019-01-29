@@ -1290,6 +1290,28 @@ public class PackageInstaller {
             isStaged = source.readBoolean();
         }
 
+        /** {@hide} */
+        public SessionParams copy() {
+            SessionParams ret = new SessionParams(mode);
+            ret.installFlags = installFlags;
+            ret.installLocation = installLocation;
+            ret.installReason = installReason;
+            ret.sizeBytes = sizeBytes;
+            ret.appPackageName = appPackageName;
+            ret.appIcon = appIcon;  // not a copy.
+            ret.appLabel = appLabel;
+            ret.originatingUri = originatingUri;  // not a copy, but immutable.
+            ret.originatingUid = originatingUid;
+            ret.referrerUri = referrerUri;  // not a copy, but immutable.
+            ret.abiOverride = abiOverride;
+            ret.volumeUuid = volumeUuid;
+            ret.grantedRuntimePermissions = grantedRuntimePermissions;
+            ret.installerPackageName = installerPackageName;
+            ret.isMultiPackage = isMultiPackage;
+            ret.isStaged = isStaged;
+            return ret;
+        }
+
         /**
          * Check if there are hidden options set.
          *

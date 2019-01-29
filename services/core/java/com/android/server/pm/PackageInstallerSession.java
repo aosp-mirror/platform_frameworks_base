@@ -1664,6 +1664,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    String getInstallerPackageName() {
+        synchronized (mLock) {
+            return mInstallerPackageName;
+        }
+    }
+
     private static String getRelativePath(File file, File base) throws IOException {
         final String pathStr = file.getAbsolutePath();
         final String baseStr = base.getAbsolutePath();
@@ -1964,7 +1970,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Send broadcast to default launcher only if it's a new install
         final boolean isNewInstall = extras == null || !extras.getBoolean(Intent.EXTRA_REPLACING);
-        if (success && isNewInstall) {
+        if (success && isNewInstall && mPm.mInstallerService.isBootCompleted()) {
             mPm.sendSessionCommitBroadcast(generateInfo(), userId);
         }
 
