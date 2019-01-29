@@ -18,17 +18,19 @@ package com.android.server.backup.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.job.JobScheduler;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
+import com.android.server.backup.FullBackupJob;
+import com.android.server.backup.JobIdManager;
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
-import com.android.server.backup.testing.TestUtils;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 
 import org.junit.Before;
@@ -38,7 +40,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowJobScheduler;
 
 import java.io.File;
 
@@ -47,7 +51,7 @@ import java.io.File;
  * UserBackupManagerService}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowApplicationPackageManager.class})
+@Config(shadows = {ShadowApplicationPackageManager.class, ShadowJobScheduler.class})
 @Presubmit
 public class SetupObserverTest {
     private static final String TAG = "SetupObserverTest";
@@ -58,6 +62,7 @@ public class SetupObserverTest {
     private Context mContext;
     private UserBackupManagerService mUserBackupManagerService;
     private HandlerThread mHandlerThread;
+    private ShadowJobScheduler mShadowJobScheduler;
 
     /** Setup state. */
     @Before
@@ -73,6 +78,7 @@ public class SetupObserverTest {
                         new File(mContext.getDataDir(), "test1"),
                         new File(mContext.getDataDir(), "test2"),
                         mTransportManager);
+        mShadowJobScheduler = Shadows.shadowOf(mContext.getSystemService(JobScheduler.class));
     }
 
     /** Test observer handles changes from not setup -> setup correctly. */
@@ -121,17 +127,27 @@ public class SetupObserverTest {
         // Setup conditions for a full backup job to be scheduled.
         mUserBackupManagerService.setEnabled(true);
         mUserBackupManagerService.enqueueFullBackup("testPackage", /* lastBackedUp */ 0);
-        // Clear the handler of all pending tasks. This is to prevent the below assertion on the
-        // handler from encountering false positives due to other tasks being scheduled as part of
-        // setup work.
-        TestUtils.runToEndOfTasks(mHandlerThread.getLooper());
 
         setupObserver.onChange(true);
 
-        assertThat(KeyValueBackupJob.isScheduled(mUserBackupManagerService.getUserId())).isTrue();
-        // Verifies that the full backup job is scheduled. The job is scheduled via a posted message
-        // on the backup handler so we verify that a message exists.
-        assertThat(mUserBackupManagerService.getBackupHandler().hasMessagesOrCallbacks()).isTrue();
+        assertThat(
+                        mShadowJobScheduler.getPendingJob(
+                                getJobIdForUser(
+                                        KeyValueBackupJob.MIN_JOB_ID,
+                                        KeyValueBackupJob.MAX_JOB_ID,
+                                        USER_ID)))
+                .isNotNull();
+        assertThat(
+                        mShadowJobScheduler.getPendingJob(
+                                getJobIdForUser(
+                                        FullBackupJob.MIN_JOB_ID,
+                                        FullBackupJob.MAX_JOB_ID,
+                                        USER_ID)))
+                .isNotNull();
+    }
+
+    private int getJobIdForUser(int min, int max, int userId) {
+        return JobIdManager.getJobIdForUserId(min, max, userId);
     }
 
     private void changeSetupCompleteSettingForUser(boolean value, int userId) {

@@ -32,9 +32,9 @@ public class FullBackupJob extends JobService {
     private static final String USER_ID_EXTRA_KEY = "userId";
 
     @VisibleForTesting
-    static final int MIN_JOB_ID = 52418896;
+    public static final int MIN_JOB_ID = 52418896;
     @VisibleForTesting
-    static final int MAX_JOB_ID = 52419896;
+    public static final int MAX_JOB_ID = 52419896;
 
     private static ComponentName sIdleService =
             new ComponentName("android", FullBackupJob.class.getName());
