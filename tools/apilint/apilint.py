@@ -223,6 +223,7 @@ class Package():
 class V2Tokenizer(object):
     __slots__ = ["raw"]
 
+    SIGNATURE_PREFIX = "// Signature format: "
     DELIMITER = re.compile(r'\s+|[()@<>;,={}/"!?]|\[\]|\.\.\.')
     STRING_SPECIAL = re.compile(r'["\\]')
 
@@ -610,8 +611,12 @@ def _parse_stream_to_generator(f):
         else:
             blame = None
 
-        if line == 1 and raw == "// Signature format: 2.0":
-            sig_format = 2
+        if line == 1 and raw.startswith("// Signature format: "):
+            sig_format_string = raw[len(V2Tokenizer.SIGNATURE_PREFIX):]
+            if sig_format_string in ["2.0", "3.0"]:
+                sig_format = 2
+            else:
+                raise ValueError("Unknown format: %s" % (sig_format_string,))
         elif raw.startswith("package"):
             pkg = Package(line, raw, blame)
         elif raw.startswith("  ") and raw.endswith("{"):
