@@ -35,19 +35,19 @@ public class DozeLog {
     private static final int SIZE = Build.IS_DEBUGGABLE ? 400 : 50;
     static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
-    private static final int REASONS = 10;
+    public static final int REASONS = 10;
 
     public static final int PULSE_REASON_NONE = -1;
     public static final int PULSE_REASON_INTENT = 0;
     public static final int PULSE_REASON_NOTIFICATION = 1;
     public static final int PULSE_REASON_SENSOR_SIGMOTION = 2;
-    public static final int PULSE_REASON_SENSOR_PICKUP = 3;
-    public static final int PULSE_REASON_SENSOR_DOUBLE_TAP = 4;
+    public static final int REASON_SENSOR_PICKUP = 3;
+    public static final int REASON_SENSOR_DOUBLE_TAP = 4;
     public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
     public static final int PULSE_REASON_DOCKING = 6;
     public static final int REASON_SENSOR_WAKE_UP = 7;
     public static final int PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN = 8;
-    public static final int PULSE_REASON_SENSOR_TAP = 9;
+    public static final int REASON_SENSOR_TAP = 9;
 
     private static boolean sRegisterKeyguardCallback = true;
 
@@ -202,13 +202,13 @@ public class DozeLog {
             case PULSE_REASON_INTENT: return "intent";
             case PULSE_REASON_NOTIFICATION: return "notification";
             case PULSE_REASON_SENSOR_SIGMOTION: return "sigmotion";
-            case PULSE_REASON_SENSOR_PICKUP: return "pickup";
-            case PULSE_REASON_SENSOR_DOUBLE_TAP: return "doubletap";
+            case REASON_SENSOR_PICKUP: return "pickup";
+            case REASON_SENSOR_DOUBLE_TAP: return "doubletap";
             case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
             case PULSE_REASON_DOCKING: return "docking";
             case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "wakelockscreen";
             case REASON_SENSOR_WAKE_UP: return "wakeup";
-            case PULSE_REASON_SENSOR_TAP: return "tap";
+            case REASON_SENSOR_TAP: return "tap";
             default: throw new IllegalArgumentException("bad reason: " + pulseReason);
         }
     }

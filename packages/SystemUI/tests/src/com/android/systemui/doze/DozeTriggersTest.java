@@ -125,7 +125,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void testOnSensor_whenUndockedWithNearAndDoubleTapScreen_shouldNotWakeUp() {
         mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
 
-        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_DOUBLE_TAP,
                 false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
                 null /* rawValues */);
 
@@ -137,7 +137,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         doReturn(true).when(mDockManagerFake).isDocked();
         mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
 
-        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_DOUBLE_TAP,
                 false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
                 null /* rawValues */);
 

@@ -230,9 +230,9 @@ public class DozeMachineTest extends SysuiTestCase {
     public void testPulseReason_getMatchesRequest() {
         mMachine.requestState(INITIALIZED);
         mMachine.requestState(DOZE);
-        mMachine.requestPulse(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP);
+        mMachine.requestPulse(DozeLog.REASON_SENSOR_DOUBLE_TAP);
 
-        assertEquals(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP, mMachine.getPulseReason());
+        assertEquals(DozeLog.REASON_SENSOR_DOUBLE_TAP, mMachine.getPulseReason());
     }
 
     @Test

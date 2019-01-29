@@ -97,20 +97,20 @@ public class DozeSensors {
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PICK_UP_GESTURE,
                         config.dozePickupSensorAvailable(),
-                        DozeLog.PULSE_REASON_SENSOR_PICKUP, false /* touchCoords */,
+                        DozeLog.REASON_SENSOR_PICKUP, false /* touchCoords */,
                         false /* touchscreen */),
                 new TriggerSensor(
                         findSensorWithType(config.doubleTapSensorType()),
                         Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                         true /* configured */,
-                        DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
+                        DozeLog.REASON_SENSOR_DOUBLE_TAP,
                         dozeParameters.doubleTapReportsTouchCoordinates(),
                         true /* touchscreen */),
                 new TriggerSensor(
                         findSensorWithType(config.tapSensorType()),
                         Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
                         true /* configured */,
-                        DozeLog.PULSE_REASON_SENSOR_TAP,
+                        DozeLog.REASON_SENSOR_TAP,
                         false /* reports touch coordinates */,
                         true /* touchscreen */),
                 new TriggerSensor(
@@ -530,7 +530,7 @@ public class DozeSensors {
 
         /**
          * Called when a sensor requests a pulse
-         * @param pulseReason Requesting sensor, e.g. {@link DozeLog#PULSE_REASON_SENSOR_PICKUP}
+         * @param pulseReason Requesting sensor, e.g. {@link DozeLog#REASON_SENSOR_PICKUP}
          * @param sensorPerformedProxCheck true if the sensor already checked for FAR proximity.
          * @param screenX the location on the screen where the sensor fired or -1
  *                if the sensor doesn't support reporting screen locations.
