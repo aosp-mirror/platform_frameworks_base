@@ -664,15 +664,11 @@ android_media_MediaRecorder_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // build and return the Bundle
-    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
     item->readFromParcel(reply);
-    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 
-    // housekeeping
-    delete item;
-    item = NULL;
     return mybundle;
-
 }
 
 static jboolean
