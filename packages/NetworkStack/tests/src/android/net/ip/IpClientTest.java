@@ -129,7 +129,7 @@ public class IpClientTest {
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(ifname, false);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(ifname);
         ArgumentCaptor<NetworkObserver> arg = ArgumentCaptor.forClass(NetworkObserver.class);
-        verify(mObserverRegistry, times(1)).registerObserver(arg.capture(), any());
+        verify(mObserverRegistry, times(1)).registerObserverForNonblockingCallback(arg.capture());
         mObserver = arg.getValue();
         reset(mObserverRegistry);
         reset(mNetd);
