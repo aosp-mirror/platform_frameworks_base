@@ -154,6 +154,21 @@ public final class DeviceConfig {
     }
 
     /**
+     * Privacy related properties definitions.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Privacy {
+        String NAMESPACE = "privacy";
+
+        /**
+         * Whether to show the Permissions Hub.
+         */
+        String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
+    }
+
+    /**
      * Telephony related properties definitions.
      *
      * @hide

@@ -5800,6 +5800,11 @@ package android.provider {
     method public void onPropertyChanged(String, String, String);
   }
 
+  public static interface DeviceConfig.Privacy {
+    field public static final String NAMESPACE = "privacy";
+    field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
+  }
+
   public static interface DeviceConfig.Storage {
     field public static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
     field public static final String NAMESPACE = "storage";
