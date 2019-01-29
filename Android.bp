@@ -780,6 +780,7 @@ java_defaults {
         "--multi-dex",
     ],
 
+    plugins: ["view-inspector-annotation-processor"],
 }
 
 filegroup {
