@@ -1284,17 +1284,34 @@ package android.os {
   public class IncidentManager {
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void approveReport(android.net.Uri);
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void cancelAuthorization(android.os.IncidentManager.AuthListener);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void deleteIncidentReports(android.net.Uri);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void denyReport(android.net.Uri);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @Nullable public android.os.IncidentManager.IncidentReport getIncidentReport(android.net.Uri);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @NonNull public java.util.List<android.net.Uri> getIncidentReportList(String);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public java.util.List<android.os.IncidentManager.PendingReport> getPendingReports();
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void reportIncident(android.os.IncidentReportArgs);
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void requestAuthorization(int, String, int, android.os.IncidentManager.AuthListener);
     field public static final int FLAG_CONFIRMATION_DIALOG = 1; // 0x1
+    field public static final int PRIVACY_POLICY_AUTO = 200; // 0xc8
+    field public static final int PRIVACY_POLICY_EXPLICIT = 100; // 0x64
+    field public static final int PRIVACY_POLICY_LOCAL = 0; // 0x0
   }
 
   public static class IncidentManager.AuthListener {
     ctor public IncidentManager.AuthListener();
     method public void onReportApproved();
     method public void onReportDenied();
+  }
+
+  public static class IncidentManager.IncidentReport implements java.io.Closeable android.os.Parcelable {
+    ctor public IncidentManager.IncidentReport(android.os.Parcel);
+    method public void close();
+    method public int describeContents();
+    method public java.io.InputStream getInputStream() throws java.io.IOException;
+    method public long getPrivacyPolicy();
+    method public long getTimestamp();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.IncidentManager.IncidentReport> CREATOR;
   }
 
   public static class IncidentManager.PendingReport {
