@@ -20,13 +20,17 @@ import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_BINDTODEVICE;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.NetworkUtils;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.Os;
 import android.system.PacketSocketAddress;
 
+import libcore.io.IoBridge;
+
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.net.SocketAddress;
 
 /**
@@ -34,6 +38,7 @@ import java.net.SocketAddress;
  * @hide
  */
 @SystemApi
+@TestApi
 public class SocketUtils {
     /**
      * Create a raw datagram socket that is bound to an interface.
@@ -57,17 +62,24 @@ public class SocketUtils {
     }
 
     /**
-     * Make a socket address to bind to packet sockets.
+     * Make socket address that packet sockets can bind to.
      */
     public static SocketAddress makePacketSocketAddress(short protocol, int ifIndex) {
         return new PacketSocketAddress(protocol, ifIndex);
     }
 
     /**
-     * Make a socket address to send raw packets.
+     * Make a socket address that packet socket can send packets to.
      */
     public static SocketAddress makePacketSocketAddress(int ifIndex, byte[] hwAddr) {
         return new PacketSocketAddress(ifIndex, hwAddr);
+    }
+
+    /**
+     * @see IoBridge#closeAndSignalBlockedThreads(FileDescriptor)
+     */
+    public static void closeSocket(FileDescriptor fd) throws IOException {
+        IoBridge.closeAndSignalBlockedThreads(fd);
     }
 
     private SocketUtils() {}

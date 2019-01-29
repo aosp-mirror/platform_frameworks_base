@@ -128,10 +128,14 @@ public class TrafficStats {
     public static final int TAG_SYSTEM_APP = 0xFFFFFF05;
 
     /** @hide */
+    @SystemApi
+    @TestApi
     public static final int TAG_SYSTEM_DHCP = 0xFFFFFF40;
     /** @hide */
     public static final int TAG_SYSTEM_NTP = 0xFFFFFF41;
     /** @hide */
+    @SystemApi
+    @TestApi
     public static final int TAG_SYSTEM_PROBE = 0xFFFFFF42;
     /** @hide */
     public static final int TAG_SYSTEM_NEIGHBOR = 0xFFFFFF43;
@@ -140,6 +144,8 @@ public class TrafficStats {
     /** @hide */
     public static final int TAG_SYSTEM_PAC = 0xFFFFFF45;
     /** @hide */
+    @SystemApi
+    @TestApi
     public static final int TAG_SYSTEM_DHCP_SERVER = 0xFFFFFF46;
 
     private static INetworkStatsService sStatsService;
