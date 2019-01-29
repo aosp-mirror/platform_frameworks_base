@@ -1,0 +1,58 @@
+/*
+ * Copyright 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.bluetooth.smp;
+
+option java_outer_classname = "BluetoothSmpProtoEnums";
+option java_multiple_files = true;
+
+// SMP Pairing command codes
+enum CommandEnum {
+    CMD_UNKNOWN = 0x00;
+    CMD_PAIRING_REQUEST = 0x01;
+    CMD_PAIRING_RESPONSE = 0x02;
+    CMD_PAIRING_CONFIRM = 0x03;
+    CMD_PAIRING_RANDOM = 0x04;
+    CMD_PAIRING_FAILED = 0x05;
+    CMD_ENCRYPTION_INFON = 0x06;
+    CMD_MASTER_IDENTIFICATION = 0x07;
+    CMD_IDENTITY_INFO = 0x08;
+    CMD_IDENTITY_ADDR_INFO = 0x09;
+    CMD_SIGNING_INFO = 0x0A;
+    CMD_SECURITY_REQUEST = 0x0B;
+    CMD_PAIRING_PUBLIC_KEY = 0x0C;
+    CMD_PAIRING_DHKEY_CHECK = 0x0D;
+    CMD_PAIRING_KEYPRESS_INFO = 0x0E;
+}
+
+enum PairingFailReasonEnum {
+    PAIRING_FAIL_REASON_RESERVED = 0x00;
+    PAIRING_FAIL_REASON_PASSKEY_ENTRY = 0x01;
+    PAIRING_FAIL_REASON_OOB = 0x02;
+    PAIRING_FAIL_REASON_AUTH_REQ = 0x03;
+    PAIRING_FAIL_REASON_CONFIRM_VALUE = 0x04;
+    PAIRING_FAIL_REASON_PAIR_NOT_SUPPORT = 0x05;
+    PAIRING_FAIL_REASON_ENC_KEY_SIZE = 0x06;
+    PAIRING_FAIL_REASON_INVALID_CMD = 0x07;
+    PAIRING_FAIL_REASON_UNSPECIFIED = 0x08;
+    PAIRING_FAIL_REASON_REPEATED_ATTEMPTS = 0x09;
+    PAIRING_FAIL_REASON_INVALID_PARAMETERS = 0x0A;
+    PAIRING_FAIL_REASON_DHKEY_CHK = 0x0B;
+    PAIRING_FAIL_REASON_NUMERIC_COMPARISON = 0x0C;
+    PAIRING_FAIL_REASON_CLASSIC_PAIRING_IN_PROGR = 0x0D;
+    PAIRING_FAIL_REASON_XTRANS_DERIVE_NOT_ALLOW = 0x0E;
+}
