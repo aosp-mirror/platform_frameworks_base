@@ -74,6 +74,19 @@ public class ZygoteProcess {
     public static final String ZYGOTE_SECONDARY_SOCKET_NAME = "zygote_secondary";
 
     /**
+     * @hide for internal use only.
+     */
+    public static final int ZYGOTE_CONNECT_TIMEOUT_MS = 20000;
+
+    /**
+     * @hide for internal use only.
+     *
+     * Use a relatively short delay, because for app zygote, this is in the critical path of
+     * service launch.
+     */
+    public static final int ZYGOTE_CONNECT_RETRY_DELAY_MS = 50;
+
+    /**
      * @hide for internal use only
      */
     public static final String BLASTULA_POOL_SOCKET_NAME = "blastula_pool";
@@ -933,7 +946,8 @@ public class ZygoteProcess {
      * @param address The name of the socket to connect to.
      */
     public static void waitForConnectionToZygote(LocalSocketAddress zygoteSocketAddress) {
-        for (int n = 20; n >= 0; n--) {
+        int numRetries = ZYGOTE_CONNECT_TIMEOUT_MS / ZYGOTE_CONNECT_RETRY_DELAY_MS;
+        for (int n = numRetries; n >= 0; n--) {
             try {
                 final ZygoteState zs =
                         ZygoteState.connect(zygoteSocketAddress, null);
@@ -945,7 +959,7 @@ public class ZygoteProcess {
             }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(ZYGOTE_CONNECT_RETRY_DELAY_MS);
             } catch (InterruptedException ie) {
             }
         }
