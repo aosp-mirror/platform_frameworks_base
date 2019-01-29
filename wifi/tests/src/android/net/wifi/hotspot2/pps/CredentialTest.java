@@ -541,4 +541,20 @@ public class CredentialTest {
         Credential copyCred = new Credential(sourceCred);
         assertTrue(copyCred.equals(sourceCred));
     }
+
+    /**
+     * Verify that two certificates are identical.
+     */
+    @Test
+    public void validateTwoCertificateIdentical() {
+        assertTrue(Credential.isX509CertificateEquals(FakeKeys.CA_CERT1, FakeKeys.CA_CERT1));
+    }
+
+    /**
+     * Verify that two certificates are different.
+     */
+    @Test
+    public void validateTwoCertificateDifferent() {
+        assertFalse(Credential.isX509CertificateEquals(FakeKeys.CA_CERT0, FakeKeys.CA_CERT1));
+    }
 }
