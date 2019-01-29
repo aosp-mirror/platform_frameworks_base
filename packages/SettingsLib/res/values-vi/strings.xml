@@ -38,87 +38,50 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Tự động được kết nối qua %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Tự động được kết nối qua nhà cung cấp dịch vụ xếp hạng mạng"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Được kết nối qua %1$s"</string>
-    <!-- no translation found for ssid_by_passpoint_provider (7898171424140673315) -->
-    <skip />
+    <string name="ssid_by_passpoint_provider" msgid="7898171424140673315">"<xliff:g id="SSID">%1$s</xliff:g> của <xliff:g id="PASSPOINTPROVIDER">%2$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Có sẵn qua %1$s"</string>
-    <!-- no translation found for tap_to_set_up (2468970825530423314) -->
-    <skip />
+    <string name="tap_to_set_up" msgid="2468970825530423314">"Nhấn để thiết lập"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Đã kết nối, không có Internet"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Không có Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Yêu cầu đăng nhập"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Điểm truy cập tạm thời đã đạt đến giới hạn số lượng thiết bị truy cập."</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Được kết nối qua %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Có sẵn qua %1$s"</string>
-    <!-- no translation found for osu_failure_ap_connection (598977488344424542) -->
-    <skip />
-    <!-- no translation found for osu_failure_server_url_invalid (2237477219243136714) -->
-    <skip />
-    <!-- no translation found for osu_failure_server_connection (8192988165059982174) -->
-    <skip />
-    <!-- no translation found for osu_failure_server_validation (4631649978129606823) -->
-    <skip />
-    <!-- no translation found for osu_failure_service_provider_verification (4854091521439785597) -->
-    <skip />
-    <!-- no translation found for osu_failure_provisioning_aborted (424627208135320329) -->
-    <skip />
-    <!-- no translation found for osu_failure_provisioning_not_available (3021783729256985432) -->
-    <skip />
-    <!-- no translation found for osu_failure_invalid_server_url (8548886196179435758) -->
-    <skip />
-    <!-- no translation found for osu_failure_unexpected_command_type (8245921319866603904) -->
-    <skip />
-    <!-- no translation found for osu_failure_unexpected_soap_message_type (2255897608510053065) -->
-    <skip />
-    <!-- no translation found for osu_failure_soap_message_exchange (4357358438685987192) -->
-    <skip />
-    <!-- no translation found for osu_failure_start_redirect_listener (4292769407279548482) -->
-    <skip />
-    <!-- no translation found for osu_failure_timed_out_redirect_listener (3168657820278807508) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_osu_activity_found (4593038891437878675) -->
-    <skip />
-    <!-- no translation found for osu_failure_unexpected_soap_message_status (6568467710235256675) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_pps_mo (850567403039076835) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_aaa_server_trust_root_node (8961455873459838456) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_remediation_server_trust_root_node (5041179688081545244) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_policy_server_trust_root_node (6617290380940513539) -->
-    <skip />
-    <!-- no translation found for osu_failure_retrieve_trust_root_certificates (1499136256195528265) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_aaa_trust_root_certificate (1904322497042226984) -->
-    <skip />
-    <!-- no translation found for osu_failure_add_passpoint_configuration (2173557755811446047) -->
-    <skip />
-    <!-- no translation found for osu_failure_osu_provider_not_found (6616172862116673082) -->
-    <skip />
-    <!-- no translation found for osu_status_ap_connecting (5296821043003441437) -->
-    <skip />
-    <!-- no translation found for osu_status_ap_connected (3777289375683170728) -->
-    <skip />
-    <!-- no translation found for osu_status_server_connecting (8499785407540355867) -->
-    <skip />
-    <!-- no translation found for osu_status_server_validated (3158727184762596355) -->
-    <skip />
-    <!-- no translation found for osu_status_server_connected (8382024481520158168) -->
-    <skip />
-    <!-- no translation found for osu_status_init_soap_exchange (8628063888912101981) -->
-    <skip />
-    <!-- no translation found for osu_status_waiting_for_redirect_response (2343016207837053197) -->
-    <skip />
-    <!-- no translation found for osu_status_redirect_response_received (5323368411922609405) -->
-    <skip />
-    <!-- no translation found for osu_status_second_soap_exchange (7115332266758483909) -->
-    <skip />
-    <!-- no translation found for osu_status_third_soap_exchange (8460901783597440766) -->
-    <skip />
-    <!-- no translation found for osu_status_retrieving_trust_root_certs (1563445892926269689) -->
-    <skip />
-    <!-- no translation found for osu_provisioning_complete (5120178802493970149) -->
-    <skip />
+    <string name="osu_failure_ap_connection" msgid="598977488344424542">"Không kết nối được"</string>
+    <string name="osu_failure_server_url_invalid" msgid="2237477219243136714">"URL máy chủ OSU không hợp lệ"</string>
+    <string name="osu_failure_server_connection" msgid="8192988165059982174">"Không kết nối được với máy chủ OSU"</string>
+    <string name="osu_failure_server_validation" msgid="4631649978129606823">"Không xác thực được máy chủ OSU"</string>
+    <string name="osu_failure_service_provider_verification" msgid="4854091521439785597">"Chứng chỉ máy chủ OSU không hợp lệ"</string>
+    <string name="osu_failure_provisioning_aborted" msgid="424627208135320329">"Đã hủy cấp phép"</string>
+    <string name="osu_failure_provisioning_not_available" msgid="3021783729256985432">"Hiện không cấp phép được"</string>
+    <string name="osu_failure_invalid_server_url" msgid="8548886196179435758">"URL máy chủ OSU không hợp lệ"</string>
+    <string name="osu_failure_unexpected_command_type" msgid="8245921319866603904">"Loại lệnh không mong muốn"</string>
+    <string name="osu_failure_unexpected_soap_message_type" msgid="2255897608510053065">"Loại thông báo SOAP không mong muốn"</string>
+    <string name="osu_failure_soap_message_exchange" msgid="4357358438685987192">"Không trao đổi được thông báo SOAP"</string>
+    <string name="osu_failure_start_redirect_listener" msgid="4292769407279548482">"Không thể bắt đầu chuyển hướng người nghe"</string>
+    <string name="osu_failure_timed_out_redirect_listener" msgid="3168657820278807508">"Đã hết thời gian chờ chuyển hướng"</string>
+    <string name="osu_failure_no_osu_activity_found" msgid="4593038891437878675">"Không tìm thấy hoạt động OSU nào"</string>
+    <string name="osu_failure_unexpected_soap_message_status" msgid="6568467710235256675">"Trạng thái thông báo SOAP không mong muốn"</string>
+    <string name="osu_failure_no_pps_mo" msgid="850567403039076835">"Không tìm thấy PPS-MO"</string>
+    <string name="osu_failure_no_aaa_server_trust_root_node" msgid="8961455873459838456">"Không tìm thấy nút gốc tin cậy cho máy chủ AAA"</string>
+    <string name="osu_failure_no_remediation_server_trust_root_node" msgid="5041179688081545244">"Không tìm thấy nút gốc tin cậy cho máy chủ khắc phục"</string>
+    <string name="osu_failure_no_policy_server_trust_root_node" msgid="6617290380940513539">"Không tìm thấy nút gốc tin cậy cho máy chủ chính sách"</string>
+    <string name="osu_failure_retrieve_trust_root_certificates" msgid="1499136256195528265">"Không truy xuất được chứng chỉ gốc tin cậy"</string>
+    <string name="osu_failure_no_aaa_trust_root_certificate" msgid="1904322497042226984">"Không tìm thấy chứng chỉ gốc tin cậy cho máy chủ AAA"</string>
+    <string name="osu_failure_add_passpoint_configuration" msgid="2173557755811446047">"Không thêm được cấu hình PassPoint"</string>
+    <string name="osu_failure_osu_provider_not_found" msgid="6616172862116673082">"Không tìm thấy nhà cung cấp OSU"</string>
+    <string name="osu_status_ap_connecting" msgid="5296821043003441437">"Đang kết nối"</string>
+    <string name="osu_status_ap_connected" msgid="3777289375683170728">"Đã kết nối"</string>
+    <string name="osu_status_server_connecting" msgid="8499785407540355867">"Đang kết nối với máy chủ OSU"</string>
+    <string name="osu_status_server_validated" msgid="3158727184762596355">"Đã xác thực máy chủ OSU"</string>
+    <string name="osu_status_server_connected" msgid="8382024481520158168">"Đã kết nối với máy chủ OSU"</string>
+    <string name="osu_status_init_soap_exchange" msgid="8628063888912101981">"Lần trao đổi SOAP ban đầu"</string>
+    <string name="osu_status_waiting_for_redirect_response" msgid="2343016207837053197">"Đang đợi thông tin phản hồi chuyển hướng"</string>
+    <string name="osu_status_redirect_response_received" msgid="5323368411922609405">"Đã nhận được thông tin phản hồi chuyển hướng"</string>
+    <string name="osu_status_second_soap_exchange" msgid="7115332266758483909">"Lần trao đổi SOAP thứ hai"</string>
+    <string name="osu_status_third_soap_exchange" msgid="8460901783597440766">"Lần trao đổi SOAP thứ ba"</string>
+    <string name="osu_status_retrieving_trust_root_certs" msgid="1563445892926269689">"Đang truy xuất chứng chỉ gốc tin cậy"</string>
+    <string name="osu_provisioning_complete" msgid="5120178802493970149">"Quá trình cấp phép đã hoàn tất"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Rất chậm"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Chậm"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Khá tốt"</string>
@@ -271,7 +234,8 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Không khóa màn hình"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Màn hình sẽ không bao giờ chuyển sang chế độ nghỉ khi sạc"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bật nhật ký theo dõi HCI Bluetooth"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Thu thập tất cả các gói HCI Bluetooth vào một tệp (Bật/tắt Bluetooth sau khi thay đổi cài đặt này)"</string>
+    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
+    <skip />
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Mở khóa OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Cho phép mở khóa trình khởi động"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Cho phép mở khóa OEM?"</string>

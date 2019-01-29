@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="search_menu" msgid="1604061903696928905">"הגדרות חיפוש"</string>
+    <string name="search_menu" msgid="1604061903696928905">"חיפוש בהגדרות"</string>
 </resources>

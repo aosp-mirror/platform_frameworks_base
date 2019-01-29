@@ -58,6 +58,9 @@
     <item msgid="3878793616631049349">"DRM 콘텐츠에 대해서만 HDCP 확인 사용"</item>
     <item msgid="45075631231212732">"항상 HDCP 확인 사용"</item>
   </string-array>
+    <!-- no translation found for bt_hci_snoop_log_entries:0 (3966341281672645384) -->
+    <!-- no translation found for bt_hci_snoop_log_entries:1 (1969681323976948639) -->
+    <!-- no translation found for bt_hci_snoop_log_entries:2 (8719029132154020716) -->
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4(기본)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
