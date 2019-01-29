@@ -18,6 +18,7 @@ package android.content.rollback;
 
 import android.annotation.SystemApi;
 import android.content.pm.PackageInstaller;
+import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,15 +40,20 @@ public final class RollbackInfo implements Parcelable {
 
     private final List<PackageRollbackInfo> mPackages;
 
+    private final List<VersionedPackage> mCausePackages;
+
     /** @hide */
-    public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages) {
+    public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages,
+            List<VersionedPackage> causePackages) {
         this.mRollbackId = rollbackId;
         this.mPackages = packages;
+        this.mCausePackages = causePackages;
     }
 
     private RollbackInfo(Parcel in) {
         mRollbackId = in.readInt();
         mPackages = in.createTypedArrayList(PackageRollbackInfo.CREATOR);
+        mCausePackages = in.createTypedArrayList(VersionedPackage.CREATOR);
     }
 
     /**
@@ -82,6 +88,15 @@ public final class RollbackInfo implements Parcelable {
         return PackageInstaller.SessionInfo.INVALID_ID;
     }
 
+    /**
+     * Gets the list of package versions that motivated this rollback.
+     * As provided to {@link #commitRollback} when the rollback was committed.
+     * This is only applicable for rollbacks that have been committed.
+     */
+    public List<VersionedPackage> getCausePackages() {
+        return mCausePackages;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -91,6 +106,7 @@ public final class RollbackInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mRollbackId);
         out.writeTypedList(mPackages);
+        out.writeTypedList(mCausePackages);
     }
 
     public static final Parcelable.Creator<RollbackInfo> CREATOR =

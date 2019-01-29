@@ -116,7 +116,9 @@ class RollbackStore {
                     int rollbackId = element.getInt("rollbackId");
                     List<PackageRollbackInfo> packages = packageRollbackInfosFromJson(
                             element.getJSONArray("packages"));
-                    RollbackInfo rollback = new RollbackInfo(rollbackId, packages);
+                    List<VersionedPackage> causePackages = versionedPackagesFromJson(
+                            element.getJSONArray("causePackages"));
+                    RollbackInfo rollback = new RollbackInfo(rollbackId, packages, causePackages);
                     recentlyExecutedRollbacks.add(rollback);
                 }
             } catch (IOException | JSONException e) {
@@ -187,6 +189,7 @@ class RollbackStore {
                 JSONObject element = new JSONObject();
                 element.put("rollbackId", rollback.getRollbackId());
                 element.put("packages", toJson(rollback.getPackages()));
+                element.put("causePackages", versionedPackagesToJson(rollback.getCausePackages()));
                 array.put(element);
             }
 
@@ -219,21 +222,49 @@ class RollbackStore {
         }
     }
 
+    private JSONObject toJson(VersionedPackage pkg) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("packageName", pkg.getPackageName());
+        json.put("longVersionCode", pkg.getLongVersionCode());
+        return json;
+    }
+
+    private VersionedPackage versionedPackageFromJson(JSONObject json) throws JSONException {
+        String packageName = json.getString("packageName");
+        long longVersionCode = json.getLong("longVersionCode");
+        return new VersionedPackage(packageName, longVersionCode);
+    }
+
     private JSONObject toJson(PackageRollbackInfo info) throws JSONException {
         JSONObject json = new JSONObject();
-        json.put("packageName", info.getPackageName());
-        json.put("higherVersionCode", info.getVersionRolledBackFrom().getLongVersionCode());
-        json.put("lowerVersionCode", info.getVersionRolledBackTo().getLongVersionCode());
+        json.put("versionRolledBackFrom", toJson(info.getVersionRolledBackFrom()));
+        json.put("versionRolledBackTo", toJson(info.getVersionRolledBackTo()));
         return json;
     }
 
     private PackageRollbackInfo packageRollbackInfoFromJson(JSONObject json) throws JSONException {
-        String packageName = json.getString("packageName");
-        long higherVersionCode = json.getLong("higherVersionCode");
-        long lowerVersionCode = json.getLong("lowerVersionCode");
-        return new PackageRollbackInfo(
-                new VersionedPackage(packageName, higherVersionCode),
-                new VersionedPackage(packageName, lowerVersionCode));
+        VersionedPackage versionRolledBackFrom = versionedPackageFromJson(
+                json.getJSONObject("versionRolledBackFrom"));
+        VersionedPackage versionRolledBackTo = versionedPackageFromJson(
+                json.getJSONObject("versionRolledBackTo"));
+        return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo);
+    }
+
+    private JSONArray versionedPackagesToJson(List<VersionedPackage> packages)
+            throws JSONException {
+        JSONArray json = new JSONArray();
+        for (VersionedPackage pkg : packages) {
+            json.put(toJson(pkg));
+        }
+        return json;
+    }
+
+    private List<VersionedPackage> versionedPackagesFromJson(JSONArray json) throws JSONException {
+        List<VersionedPackage> packages = new ArrayList<>();
+        for (int i = 0; i < json.length(); ++i) {
+            packages.add(versionedPackageFromJson(json.getJSONObject(i)));
+        }
+        return packages;
     }
 
     private JSONArray toJson(List<PackageRollbackInfo> infos) throws JSONException {
