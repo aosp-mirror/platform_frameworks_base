@@ -27,6 +27,7 @@ import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.Os;
 import android.system.PacketSocketAddress;
+import android.system.StructTimeval;
 
 import libcore.io.IoBridge;
 
@@ -76,6 +77,38 @@ public class SocketUtils {
      */
     public static SocketAddress makePacketSocketAddress(int ifIndex, byte[] hwAddr) {
         return new PacketSocketAddress(ifIndex, hwAddr);
+    }
+
+    /**
+     * Set an option on a socket that takes a time value argument.
+     */
+    public static void setSocketTimeValueOption(
+            FileDescriptor fd, int level, int option, long millis) throws ErrnoException {
+        Os.setsockoptTimeval(fd, level, option, StructTimeval.fromMillis(millis));
+    }
+
+    /**
+     * Bind a socket to the specified address.
+     */
+    public static void bindSocket(FileDescriptor fd, SocketAddress addr)
+            throws ErrnoException, SocketException {
+        Os.bind(fd, addr);
+    }
+
+    /**
+     * Connect a socket to the specified address.
+     */
+    public static void connectSocket(FileDescriptor fd, SocketAddress addr)
+            throws ErrnoException, SocketException {
+        Os.connect(fd, addr);
+    }
+
+    /**
+     * Send a message on a socket, using the specified SocketAddress.
+     */
+    public static void sendTo(FileDescriptor fd, byte[] bytes, int byteOffset, int byteCount,
+            int flags, SocketAddress addr) throws ErrnoException, SocketException {
+        Os.sendto(fd, bytes, byteOffset, byteCount, flags, addr);
     }
 
     /**
