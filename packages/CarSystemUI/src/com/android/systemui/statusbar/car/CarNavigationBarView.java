@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.car;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -37,6 +38,8 @@ class CarNavigationBarView extends LinearLayout {
     private CarStatusBar mCarStatusBar;
     private Context mContext;
     private View mLockScreenButtons;
+    private OnTouchListener mStatusBarWindowTouchListener;
+
 
     public CarNavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,11 +65,22 @@ class CarNavigationBarView extends LinearLayout {
             mDarkIconManager.setShouldLog(true);
             Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         }
+    }
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mStatusBarWindowTouchListener == null) {
+            return false;
+        }
+        // forward touch events to the status bar window so it can add a drag down
+        // windows if required (Notification shade)
+        mStatusBarWindowTouchListener.onTouch(this, ev);
+        return false;
     }
 
     void setStatusBar(CarStatusBar carStatusBar) {
         mCarStatusBar = carStatusBar;
+        mStatusBarWindowTouchListener = carStatusBar.getStatusBarWindowTouchListener();
     }
 
     protected void onNotificationsClick(View v) {

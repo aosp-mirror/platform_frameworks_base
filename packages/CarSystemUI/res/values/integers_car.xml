@@ -24,4 +24,12 @@
     <!-- If the number is negative, the feature is disabled.
          If it's zero, we switch to guest immediately as we start driving. -->
     <integer name="driving_on_keyguard_timeout_ms">30000</integer>
+
+    <!--Percentage of the screen height, from the bottom, that a notification panel being
+    partially closed at will result in it remaining open if released-->
+    <integer name="notification_settle_open_percentage">20</integer>
+    <!--Percentage of the screen height, from the bottom, that a notification panel being peeked
+    at will result in remaining closed the panel if released-->
+    <integer name="notification_settle_close_percentage">80</integer>
+
 </resources>
