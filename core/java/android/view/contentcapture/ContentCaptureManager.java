@@ -17,8 +17,6 @@ package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
 
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
@@ -33,7 +31,6 @@ import android.util.Log;
 import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
 
@@ -155,13 +152,12 @@ public final class ContentCaptureManager {
         }
         // Wait for system server to return the component name.
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-        mHandler.sendMessage(obtainMessage(
-                ContentCaptureManager::handleGetComponentName, this, resultReceiver));
+
 
         try {
+            mService.getServiceComponentName(resultReceiver);
             return resultReceiver.getParcelableResult();
         } catch (RemoteException e) {
-            // Unable to retrieve component name in a reasonable amount of time.
             throw e.rethrowFromSystemServer();
         }
     }
@@ -221,16 +217,6 @@ public final class ContentCaptureManager {
             } else {
                 pw.print(prefix); pw.println("No sessions");
             }
-        }
-    }
-
-
-    /** Retrieves the component name of the target content capture service through system_server. */
-    private void handleGetComponentName(@NonNull IResultReceiver resultReceiver) {
-        try {
-            mService.getServiceComponentName(resultReceiver);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Unable to retrieve service component name: " + e);
         }
     }
 }
