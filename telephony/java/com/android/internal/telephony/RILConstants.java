@@ -192,30 +192,10 @@ public interface RILConstants {
     int LTE_ON_CDMA_FALSE = 0;
     int LTE_ON_CDMA_TRUE = 1;
 
-    int CDM_TTY_MODE_DISABLED = 0;
-    int CDM_TTY_MODE_ENABLED = 1;
-
-    int CDM_TTY_FULL_MODE = 1;
-    int CDM_TTY_HCO_MODE = 2;
-    int CDM_TTY_VCO_MODE = 3;
-
-    /* Setup a packet data connection. See ril.h RIL_REQUEST_SETUP_DATA_CALL */
-    int SETUP_DATA_TECH_CDMA      = 0;
-    int SETUP_DATA_TECH_GSM       = 1;
-
     int SETUP_DATA_AUTH_NONE      = 0;
     int SETUP_DATA_AUTH_PAP       = 1;
     int SETUP_DATA_AUTH_CHAP      = 2;
     int SETUP_DATA_AUTH_PAP_CHAP  = 3;
-
-    String SETUP_DATA_PROTOCOL_IP     = "IP";
-    String SETUP_DATA_PROTOCOL_IPV6   = "IPV6";
-    String SETUP_DATA_PROTOCOL_IPV4V6 = "IPV4V6";
-
-    /* NV config radio reset types. */
-    int NV_CONFIG_RELOAD_RESET = 1;
-    int NV_CONFIG_ERASE_RESET = 2;
-    int NV_CONFIG_FACTORY_RESET = 3;
 
     /* LCE service related constants. */
     int LCE_NOT_AVAILABLE = -1;
