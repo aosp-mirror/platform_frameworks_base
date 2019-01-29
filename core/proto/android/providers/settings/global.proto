@@ -230,12 +230,7 @@ message GlobalSettingsProto {
     }
     optional Connectivity connectivity = 32;
 
-    message ContentCapture {
-      option (android.msg_privacy).dest = DEST_EXPLICIT;
-
-      optional SettingProto service_explicitly_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    }
-    optional ContentCapture content_capture = 145;
+    reserved 145; // Used to be ContentCapture, which moved to DeviceConfig
 
     optional SettingProto contact_metadata_sync_enabled = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto contacts_database_wal_enabled = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];

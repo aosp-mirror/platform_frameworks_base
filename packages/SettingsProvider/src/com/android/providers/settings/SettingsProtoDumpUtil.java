@@ -422,12 +422,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
                 GlobalSettingsProto.CONTACTS_DATABASE_WAL_ENABLED);
 
-        final long contentCaptureToken = p.start(GlobalSettingsProto.CONTENT_CAPTURE);
-        dumpSetting(s, p,
-                Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED,
-                GlobalSettingsProto.ContentCapture.SERVICE_EXPLICITLY_ENABLED);
-        p.end(contentCaptureToken);
-
         final long dataToken = p.start(GlobalSettingsProto.DATA);
         // Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA intentionally excluded.
         dumpSetting(s, p,
