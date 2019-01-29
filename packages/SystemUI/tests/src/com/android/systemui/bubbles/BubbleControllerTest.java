@@ -73,6 +73,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
+    private ExpandableNotificationRow mNoChannelRow;
 
     @Mock
     private NotificationData mNotificationData;
@@ -92,10 +93,12 @@ public class BubbleControllerTest extends SysuiTestCase {
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mRow = mNotificationTestHelper.createBubble();
         mRow2 = mNotificationTestHelper.createBubble();
+        mNoChannelRow = mNotificationTestHelper.createBubble();
 
         // Return non-null notification data from the NEM
         when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
         when(mNotificationData.getChannel(mRow.getEntry().key)).thenReturn(mRow.getEntry().channel);
+        when(mNotificationData.getChannel(mNoChannelRow.getEntry().key)).thenReturn(null);
 
         mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController);
 
@@ -182,6 +185,11 @@ public class BubbleControllerTest extends SysuiTestCase {
     public void testMarkNewNotificationAsShowInShade() {
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         assertTrue(mRow.getEntry().showInShadeWhenBubble());
+    }
+
+    @Test
+    public void testNotificationWithoutChannel() {
+        assertFalse(mBubbleController.shouldBubble(mNoChannelRow.getEntry()));
     }
 
     static class TestableBubbleController extends BubbleController {

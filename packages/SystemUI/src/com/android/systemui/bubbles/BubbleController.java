@@ -26,6 +26,7 @@ import static com.android.systemui.statusbar.notification.NotificationAlertingMa
 import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -414,7 +415,8 @@ public class BubbleController {
     /**
      * Whether the notification has been developer configured to bubble and is allowed by the user.
      */
-    private boolean shouldBubble(NotificationEntry entry) {
+    @VisibleForTesting
+    protected boolean shouldBubble(NotificationEntry entry) {
         StatusBarNotification n = entry.notification;
         boolean canAppOverlay = false;
         try {
@@ -424,8 +426,9 @@ public class BubbleController {
             Log.w(TAG, "Error calling NoMan to determine if app can overlay", e);
         }
 
-        boolean canChannelOverlay = mNotificationEntryManager.getNotificationData().getChannel(
-                entry.key).canBubble();
+        NotificationChannel channel = mNotificationEntryManager.getNotificationData().getChannel(
+                entry.key);
+        boolean canChannelOverlay = channel != null && channel.canBubble();
         boolean hasOverlayIntent = n.getNotification().getBubbleMetadata() != null
                 && n.getNotification().getBubbleMetadata().getIntent() != null;
         return DEBUG_ENABLE_AUTO_BUBBLE && hasOverlayIntent && canChannelOverlay && canAppOverlay;
