@@ -1113,6 +1113,15 @@
          -->
     <attr name="classLoader" format="string" />
 
+    <!-- Name of the class that gets invoked for preloading application code, when starting an
+         {@link android.R.attr#isolatedProcess} service that has
+         {@link android.R.attr#useAppZygote} set to <code>true</code>. This is a fully
+         qualified class name (for example, com.mycompany.myapp.MyZygotePreload); as a
+         short-hand if the first character of the class is a period then it is appended
+         to your package name. The class must implement the {@link android.app.ZygotePreload}
+         interface. -->
+    <attr name="zygotePreloadName" format="string"/>
+
     <!-- If set to <code>true</code>, indicates to the platform that this APK is
          a 'feature' split and that it implicitly depends on the base APK. This distinguishes
          this split APK from a 'configuration' split, which provides resource overrides
@@ -1641,6 +1650,7 @@
         <!-- If {@code true} the user is prompted to keep the app's data on uninstall -->
         <attr name="hasFragileUserData" />
 
+	<attr name="zygotePreloadName" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
@@ -2297,17 +2307,18 @@
         <!-- If true, and this is an {@link android.R.attr#isolatedProcess} service, the service
              will be spawned from an Application Zygote, instead of the regular Zygote.
              <p>
-             The Application Zygote will pre-initialize the application's class loader,
-             and call a static callback into the application to allow it to perform
+             The Application Zygote will first pre-initialize the application's class loader. Then,
+             if the application has defined the {@link android.R.attr#zygotePreloadName} attribute,
+             the Application Zygote will call into that class to allow it to perform
              application-specific preloads (such as loading a shared library). Therefore,
              spawning from the Application Zygote will typically reduce the service
              launch time and reduce its memory usage. The downside of using this flag
              is that you will have an additional process (the app zygote itself) that
              is taking up memory. Whether actual memory usage is improved therefore strongly
              depends on the number of isolated services that an application starts,
-             and how much memory those services save by preloading. Therefore, it is
-             recommended to measure memory usage under typical workloads to determine
-             whether it makes sense to use this flag. -->
+             and how much memory those services save by preloading and sharing memory with
+             the app zygote. Therefore, it is recommended to measure memory usage under
+             typical workloads to determine whether it makes sense to use this flag. -->
         <attr name="useAppZygote" format="boolean" />
         <!-- If this is a foreground service, specify its category. -->
         <attr name="foregroundServiceType" />
