@@ -33,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  * through one of the factory methods.
  */
 public final class Rating implements Parcelable {
-    private final static String TAG = "Rating";
+    private static final String TAG = "Rating";
 
     /**
      * @hide
@@ -55,40 +55,40 @@ public final class Rating implements Parcelable {
      * type, but can be used by other classes to indicate they do not support
      * Rating.
      */
-    public final static int RATING_NONE = 0;
+    public static final int RATING_NONE = 0;
 
     /**
      * A rating style with a single degree of rating, "heart" vs "no heart". Can be used to
      * indicate the content referred to is a favorite (or not).
      */
-    public final static int RATING_HEART = 1;
+    public static final int RATING_HEART = 1;
 
     /**
      * A rating style for "thumb up" vs "thumb down".
      */
-    public final static int RATING_THUMB_UP_DOWN = 2;
+    public static final int RATING_THUMB_UP_DOWN = 2;
 
     /**
      * A rating style with 0 to 3 stars.
      */
-    public final static int RATING_3_STARS = 3;
+    public static final int RATING_3_STARS = 3;
 
     /**
      * A rating style with 0 to 4 stars.
      */
-    public final static int RATING_4_STARS = 4;
+    public static final int RATING_4_STARS = 4;
 
     /**
      * A rating style with 0 to 5 stars.
      */
-    public final static int RATING_5_STARS = 5;
+    public static final int RATING_5_STARS = 5;
 
     /**
      * A rating style expressed as a percentage.
      */
-    public final static int RATING_PERCENTAGE = 6;
+    public static final int RATING_PERCENTAGE = 6;
 
-    private final static float RATING_NOT_RATED = -1.0f;
+    private static final float RATING_NOT_RATED = -1.0f;
 
     private final int mRatingStyle;
 
@@ -116,8 +116,7 @@ public final class Rating implements Parcelable {
         dest.writeFloat(mRatingValue);
     }
 
-    public static final Parcelable.Creator<Rating> CREATOR
-            = new Parcelable.Creator<Rating>() {
+    public static final Parcelable.Creator<Rating> CREATOR = new Parcelable.Creator<Rating>() {
         /**
          * Rebuilds a Rating previously stored with writeToParcel().
          * @param p    Parcel object to read the Rating from
@@ -205,7 +204,7 @@ public final class Rating implements Parcelable {
                 break;
             default:
                 Log.e(TAG, "Invalid rating style (" + starRatingStyle + ") for a star rating");
-                        return null;
+                return null;
         }
         if ((starRating < 0.0f) || (starRating > maxRating)) {
             Log.e(TAG, "Trying to set out of range star-based rating");
@@ -281,16 +280,16 @@ public final class Rating implements Parcelable {
      *    not star-based, or if it is unrated.
      */
     public float getStarRating() {
+        float ratingValue = -1.0f;
         switch (mRatingStyle) {
             case RATING_3_STARS:
             case RATING_4_STARS:
             case RATING_5_STARS:
                 if (isRated()) {
-                    return mRatingValue;
+                    ratingValue = mRatingValue;
                 }
-            default:
-                return -1.0f;
         }
+        return ratingValue;
     }
 
     /**
