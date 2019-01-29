@@ -1049,6 +1049,8 @@ public class PermissionManagerService {
                     updatedUserIds);
             updatedUserIds = setInitialGrantForNewImplicitPermissionsLocked(origPermissions,
                     permissionsState, pkg, updatedUserIds);
+
+            setAppOpsLocked(permissionsState, pkg);
         }
 
         // Persist the runtime permissions state for users with changes. If permissions
@@ -1385,6 +1387,60 @@ public class PermissionManagerService {
         }
 
         return updatedUserIds;
+    }
+
+    /**
+     * Fix app-op modes for runtime permissions.
+     *
+     * @param permsState The state of the permissions of the package
+     * @param pkg The package information
+     */
+    private void setAppOpsLocked(@NonNull PermissionsState permsState,
+            @NonNull PackageParser.Package pkg) {
+        for (int userId : UserManagerService.getInstance().getUserIds()) {
+            int numPerms = pkg.requestedPermissions.size();
+            for (int i = 0; i < numPerms; i++) {
+                String permission = pkg.requestedPermissions.get(i);
+
+                int op = permissionToOpCode(permission);
+                if (op == OP_NONE) {
+                    continue;
+                }
+
+                // Runtime permissions are per uid, not per package, hence per package app-op
+                // modes should never have been set. It is possible to set them via the shell
+                // though. Revert such settings during boot to get the device back into a good
+                // state.
+                LocalServices.getService(AppOpsManagerInternal.class).setAllPkgModesToDefault(
+                        op, getUid(userId, getAppId(pkg.applicationInfo.uid)));
+
+                // For pre-M apps the runtime permission do not store the state
+                if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                    continue;
+                }
+
+                PermissionState state = permsState.getRuntimePermissionState(permission, userId);
+                if (state == null) {
+                    continue;
+                }
+
+                // Adjust app-op mods for foreground/background permissions. If an package used to
+                // have both fg and bg permission granted and it lost the bg permission during an
+                // upgrade the app-op mode should get downgraded to foreground.
+                if (state.isGranted()) {
+                    BasePermission bp = mSettings.getPermission(permission);
+
+                    if (bp != null && bp.perm != null && bp.perm.info != null
+                            && bp.perm.info.backgroundPermission != null) {
+                        PermissionState bgState = permsState.getRuntimePermissionState(
+                                bp.perm.info.backgroundPermission, userId);
+
+                        setAppOpMode(permission, pkg, userId, bgState != null && bgState.isGranted()
+                                        ? MODE_ALLOWED : MODE_FOREGROUND);
+                    }
+                }
+            }
+        }
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {

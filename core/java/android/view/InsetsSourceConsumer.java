@@ -30,12 +30,12 @@ import java.util.function.Supplier;
  */
 public class InsetsSourceConsumer {
 
+    protected final InsetsController mController;
+    protected boolean mVisible;
     private final Supplier<Transaction> mTransactionSupplier;
     private final @InternalInsetType int mType;
     private final InsetsState mState;
-    private final InsetsController mController;
     private @Nullable InsetsSourceControl mSourceControl;
-    private boolean mVisible;
 
     public InsetsSourceConsumer(@InternalInsetType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
@@ -43,7 +43,7 @@ public class InsetsSourceConsumer {
         mState = state;
         mTransactionSupplier = transactionSupplier;
         mController = controller;
-        mVisible = InsetsState.getDefaultVisibly(type);
+        mVisible = InsetsState.getDefaultVisibility(type);
     }
 
     public void setControl(@Nullable InsetsSourceControl control) {
@@ -75,6 +75,16 @@ public class InsetsSourceConsumer {
     public void hide() {
         setVisible(false);
     }
+
+    /**
+     * Called when current window gains focus
+     */
+    public void onWindowFocusGained() {}
+
+    /**
+     * Called when current window loses focus.
+     */
+    public void onWindowFocusLost() {}
 
     boolean applyLocalVisibilityOverride() {
 

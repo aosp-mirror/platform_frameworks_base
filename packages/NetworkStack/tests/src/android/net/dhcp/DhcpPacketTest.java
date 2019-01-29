@@ -16,9 +16,27 @@
 
 package android.net.dhcp;
 
-import static android.net.NetworkUtils.getBroadcastAddress;
-import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
-import static android.net.dhcp.DhcpPacket.*;
+import static android.net.dhcp.DhcpPacket.DHCP_BROADCAST_ADDRESS;
+import static android.net.dhcp.DhcpPacket.DHCP_DNS_SERVER;
+import static android.net.dhcp.DhcpPacket.DHCP_DOMAIN_NAME;
+import static android.net.dhcp.DhcpPacket.DHCP_LEASE_TIME;
+import static android.net.dhcp.DhcpPacket.DHCP_MESSAGE_TYPE_ACK;
+import static android.net.dhcp.DhcpPacket.DHCP_MESSAGE_TYPE_OFFER;
+import static android.net.dhcp.DhcpPacket.DHCP_MTU;
+import static android.net.dhcp.DhcpPacket.DHCP_REBINDING_TIME;
+import static android.net.dhcp.DhcpPacket.DHCP_RENEWAL_TIME;
+import static android.net.dhcp.DhcpPacket.DHCP_ROUTER;
+import static android.net.dhcp.DhcpPacket.DHCP_SUBNET_MASK;
+import static android.net.dhcp.DhcpPacket.DHCP_VENDOR_INFO;
+import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
+import static android.net.dhcp.DhcpPacket.ENCAP_L2;
+import static android.net.dhcp.DhcpPacket.ENCAP_L3;
+import static android.net.dhcp.DhcpPacket.INADDR_ANY;
+import static android.net.dhcp.DhcpPacket.INFINITE_LEASE;
+import static android.net.dhcp.DhcpPacket.ParseException;
+import static android.net.shared.Inet4AddressUtils.getBroadcastAddress;
+import static android.net.shared.Inet4AddressUtils.getPrefixMaskAsInet4Address;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -30,10 +48,14 @@ import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
 import android.net.metrics.DhcpErrorEvent;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.HexDump;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.net.Inet4Address;
@@ -43,10 +65,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -60,9 +78,9 @@ public class DhcpPacketTest {
             SERVER_ADDR, PREFIX_LENGTH);
     private static final String HOSTNAME = "testhostname";
     private static final short MTU = 1500;
-    // Use our own empty address instead of Inet4Address.ANY or INADDR_ANY to ensure that the code
+    // Use our own empty address instead of IPV4_ADDR_ANY or INADDR_ANY to ensure that the code
     // doesn't use == instead of equals when comparing addresses.
-    private static final Inet4Address ANY = (Inet4Address) v4Address("0.0.0.0");
+    private static final Inet4Address ANY = v4Address("0.0.0.0");
 
     private static final byte[] CLIENT_MAC = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 

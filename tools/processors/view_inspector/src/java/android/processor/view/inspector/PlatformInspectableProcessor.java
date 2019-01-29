@@ -32,6 +32,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 
@@ -116,6 +117,12 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
             if (!classElement.isPresent()) {
                 fail("Element not contained in a class", element);
                 break;
+            }
+
+            final Set<Modifier> classModifiers = classElement.get().getModifiers();
+
+            if (classModifiers.contains(Modifier.PRIVATE)) {
+                fail("Enclosing class cannot be private", element);
             }
 
             final InspectableClassModel model = modelMap.computeIfAbsent(

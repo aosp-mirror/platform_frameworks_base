@@ -161,6 +161,7 @@ import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PipModeChangeItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.app.servertransaction.TopResumedActivityChangeItem;
 import android.app.servertransaction.WindowVisibilityItem;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
@@ -687,6 +688,26 @@ final class ActivityRecord extends ConfigurationContainer {
 
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     ActivityConfigurationChangeItem.obtain(config));
+        } catch (RemoteException e) {
+            // If process died, whatever.
+        }
+    }
+
+    void scheduleTopResumedActivityChanged(boolean onTop) {
+        if (!attachedToProcess()) {
+            if (DEBUG_CONFIGURATION) {
+                Slog.w(TAG, "Can't report activity position update - client not running"
+                                + ", activityRecord=" + this);
+            }
+            return;
+        }
+        try {
+            if (DEBUG_CONFIGURATION) {
+                Slog.v(TAG, "Sending position change to " + this + ", onTop: " + onTop);
+            }
+
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                    TopResumedActivityChangeItem.obtain(onTop));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -3099,6 +3120,7 @@ final class ActivityRecord extends ConfigurationContainer {
             transaction.addCallback(callbackItem);
             transaction.setLifecycleStateRequest(lifecycleItem);
             mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+            mRootActivityContainer.updateTopResumedActivityIfNeeded();
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.

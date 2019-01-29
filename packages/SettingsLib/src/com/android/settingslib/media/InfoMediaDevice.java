@@ -20,8 +20,6 @@ import android.widget.Toast;
 
 import androidx.mediarouter.media.MediaRouter;
 
-import com.android.settingslib.R;
-
 /**
  * InfoMediaDevice extends MediaDevice to represents wifi device.
  */
@@ -45,7 +43,7 @@ public class InfoMediaDevice extends MediaDevice {
     @Override
     public int getIcon() {
         //TODO(b/121083246): This is not final icon for cast device, just for demo.
-        return R.drawable.ic_settings_print;
+        return com.android.internal.R.drawable.ic_settings_print;
     }
 
     @Override

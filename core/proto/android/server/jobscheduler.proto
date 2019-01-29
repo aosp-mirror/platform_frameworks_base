@@ -29,6 +29,7 @@ import "frameworks/base/core/proto/android/net/networkrequest.proto";
 import "frameworks/base/core/proto/android/os/bundle.proto";
 import "frameworks/base/core/proto/android/os/persistablebundle.proto";
 import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
+import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 // Next tag: 21
@@ -757,21 +758,9 @@ message JobStatusDumpProto {
     }
     optional JobInfo job_info = 6;
 
-    enum Constraint {
-        CONSTRAINT_CHARGING = 1;
-        CONSTRAINT_BATTERY_NOT_LOW = 2;
-        CONSTRAINT_STORAGE_NOT_LOW = 3;
-        CONSTRAINT_TIMING_DELAY = 4;
-        CONSTRAINT_DEADLINE = 5;
-        CONSTRAINT_IDLE = 6;
-        CONSTRAINT_CONNECTIVITY = 7;
-        CONSTRAINT_CONTENT_TRIGGER = 8;
-        CONSTRAINT_DEVICE_NOT_DOZING = 9;
-        CONSTRAINT_WITHIN_QUOTA = 10;
-    }
-    repeated Constraint required_constraints = 7;
-    repeated Constraint satisfied_constraints = 8;
-    repeated Constraint unsatisfied_constraints = 9;
+    repeated ConstraintEnum required_constraints = 7;
+    repeated ConstraintEnum satisfied_constraints = 8;
+    repeated ConstraintEnum unsatisfied_constraints = 9;
     optional bool is_doze_whitelisted = 10;
     optional bool is_uid_active = 26;
 

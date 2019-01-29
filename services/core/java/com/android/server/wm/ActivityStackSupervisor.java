@@ -840,6 +840,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
+                mRootActivityContainer.updateTopResumedActivityIfNeeded();
 
                 if ((proc.mInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
                         && mService.mHasHeavyWeightFeature) {

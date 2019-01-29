@@ -16,6 +16,8 @@
 
 package android.processor.view.inspector;
 
+import android.processor.view.inspector.InspectableClassModel.IntEnumEntry;
+import android.processor.view.inspector.InspectableClassModel.IntFlagEntry;
 import android.processor.view.inspector.InspectableClassModel.Property;
 
 import com.squareup.javapoet.ClassName;
@@ -67,6 +69,18 @@ public final class InspectionCompanionGenerator {
      */
     private static final ClassName PROPERTY_READER = ClassName.get(
             "android.view.inspector", "PropertyReader");
+
+    /**
+     * The class name of {@link android.view.inspector.IntEnumMapping}.
+     */
+    private static final ClassName INT_ENUM_MAPPING = ClassName.get(
+            "android.view.inspector", "IntEnumMapping");
+
+    /**
+     * The class name of {@link android.view.inspector.IntFlagMapping}.
+     */
+    private static final ClassName INT_FLAG_MAPPING = ClassName.get(
+            "android.view.inspector", "IntFlagMapping");
 
     /**
      * The {@code mPropertiesMapped} field.
@@ -248,13 +262,13 @@ public final class InspectionCompanionGenerator {
         final MethodSpec.Builder builder =  MethodSpec.methodBuilder("readProperties")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(model.getClassName(), "inspectable")
+                .addParameter(model.getClassName(), "node")
                 .addParameter(PROPERTY_READER, "propertyReader")
                 .addCode(generatePropertyMapInitializationCheck());
 
         for (PropertyIdField propertyIdField : propertyIdFields) {
             builder.addStatement(
-                    "propertyReader.read$L($N, inspectable.$L())",
+                    "propertyReader.read$L($N, node.$L())",
                     methodSuffixForPropertyType(propertyIdField.mProperty.getType()),
                     propertyIdField.mFieldSpec,
                     propertyIdField.mProperty.getGetter());
@@ -286,21 +300,22 @@ public final class InspectionCompanionGenerator {
             if (property.getAttributeId() == ID_NULL) {
                 builder.add("$L", ID_NULL);
             } else {
-                builder.add("$L", String.format("0x%08x", property.getAttributeId()));
+                builder.add("$L", hexLiteral(property.getAttributeId()));
             }
         }
 
         switch (property.getType()) {
             case INT_ENUM:
-                throw new RuntimeException("IntEnumMapping generation not implemented");
+                builder.add(",$W");
+                builder.add(generateIntEnumMappingBuilder(property.getIntEnumEntries()));
+                break;
             case INT_FLAG:
-                throw new RuntimeException("IntFlagMapping generation not implemented");
-            default:
-                builder.add(")");
+                builder.add(",$W");
+                builder.add(generateIntFlagMappingBuilder(property.getIntFlagEntries()));
                 break;
         }
 
-        return builder.build();
+        return builder.add(")").build();
     }
 
     /**
@@ -324,6 +339,56 @@ public final class InspectionCompanionGenerator {
                         INSPECTION_COMPANION.nestedClass("UninitializedPropertyMapException"))
                 .endControlFlow()
                 .build();
+    }
+
+    /**
+     * Generate an invocation of {@link android.view.inspector.IntEnumMapping.Builder}.
+     *
+     * <pre>
+     *      new IntEnumMapping.Builder()
+     *          .addValue("ONE", 1)
+     *          .build()
+     * </pre>
+     *
+     * @return A codeblock containing the an int enum mapping builder
+     */
+    private CodeBlock generateIntEnumMappingBuilder(List<IntEnumEntry> intEnumEntries) {
+        final ArrayList<IntEnumEntry> sortedEntries = new ArrayList<>(intEnumEntries);
+        sortedEntries.sort(Comparator.comparing(IntEnumEntry::getValue));
+
+        final CodeBlock.Builder builder = CodeBlock.builder()
+                .add("new $T()$>", INT_ENUM_MAPPING.nestedClass("Builder"));
+
+        for (IntEnumEntry entry : sortedEntries) {
+            builder.add("\n.addValue($S, $L)", entry.getName(), entry.getValue());
+        }
+
+        return builder.add("\n.build()$<").build();
+    }
+
+    private CodeBlock generateIntFlagMappingBuilder(List<IntFlagEntry> intFlagEntries) {
+        final ArrayList<IntFlagEntry> sortedEntries = new ArrayList<>(intFlagEntries);
+        sortedEntries.sort(Comparator.comparing(IntFlagEntry::getName));
+
+        final CodeBlock.Builder builder = CodeBlock.builder()
+                .add("new $T()$>", INT_FLAG_MAPPING.nestedClass("Builder"));
+
+        for (IntFlagEntry entry : sortedEntries) {
+            if (entry.hasMask()) {
+                builder.add(
+                        "\n.addFlag($S, $L, $L)",
+                        entry.getName(),
+                        hexLiteral(entry.getTarget()),
+                        hexLiteral(entry.getMask()));
+            } else {
+                builder.add(
+                        "\n.addFlag($S, $L)",
+                        entry.getName(),
+                        hexLiteral(entry.getTarget()));
+            }
+        }
+
+        return builder.add("\n.build()$<").build();
     }
 
     /**
@@ -383,6 +448,10 @@ public final class InspectionCompanionGenerator {
             default:
                 throw new NoSuchElementException(String.format("No such property type, %s", type));
         }
+    }
+
+    private static String hexLiteral(int value) {
+        return String.format("0x%08x", value);
     }
 
     /**

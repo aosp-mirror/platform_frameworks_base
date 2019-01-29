@@ -544,6 +544,16 @@ class ActivityMetricsLogger {
         mHandler.obtainMessage(MSG_CHECK_VISIBILITY, args).sendToTarget();
     }
 
+    private boolean hasVisibleNonFinishingActivity(TaskRecord t) {
+        for (int i = t.mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = t.mActivities.get(i);
+            if (r.visible && !r.finishing) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void checkVisibility(TaskRecord t, ActivityRecord r) {
         synchronized (mSupervisor.mService.mGlobalLock) {
 
@@ -552,7 +562,7 @@ class ActivityMetricsLogger {
 
             // If we have an active transition that's waiting on a certain activity that will be
             // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
-            if (info != null && !t.isVisible()) {
+            if (info != null && !hasVisibleNonFinishingActivity(t)) {
                 if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible"
                         + " activity=" + r);
                 logAppTransitionCancel(info);
@@ -841,13 +851,11 @@ class ActivityMetricsLogger {
         Log.i(TAG, sb.toString());
     }
 
-    void logActivityStart(Intent intent, WindowProcessController callerApp, ActivityRecord r,
+    void logAbortedBgActivityStart(Intent intent, WindowProcessController callerApp,
             int callingUid, String callingPackage, int callingUidProcState,
             boolean callingUidHasAnyVisibleWindow,
             int realCallingUid, int realCallingUidProcState,
             boolean realCallingUidHasAnyVisibleWindow,
-            int targetUid, String targetPackage, int targetUidProcState,
-            boolean targetUidHasAnyVisibleWindow, String targetWhitelistTag,
             boolean comingFromPendingIntent) {
 
         final long nowElapsed = SystemClock.elapsedRealtime();
@@ -865,13 +873,6 @@ class ActivityMetricsLogger {
                 processStateAmToProto(realCallingUidProcState));
         builder.addTaggedData(FIELD_REAL_CALLING_UID_HAS_ANY_VISIBLE_WINDOW,
                 realCallingUidHasAnyVisibleWindow ? 1 : 0);
-        builder.addTaggedData(FIELD_TARGET_UID, targetUid);
-        builder.addTaggedData(FIELD_TARGET_PACKAGE_NAME, targetPackage);
-        builder.addTaggedData(FIELD_TARGET_UID_PROC_STATE,
-                processStateAmToProto(targetUidProcState));
-        builder.addTaggedData(FIELD_TARGET_UID_HAS_ANY_VISIBLE_WINDOW,
-                targetUidHasAnyVisibleWindow ? 1 : 0);
-        builder.addTaggedData(FIELD_TARGET_WHITELIST_TAG, targetWhitelistTag);
         builder.addTaggedData(FIELD_COMING_FROM_PENDING_INTENT, comingFromPendingIntent ? 1 : 0);
         if (intent != null) {
             builder.addTaggedData(FIELD_INTENT_ACTION, intent.getAction());
@@ -902,35 +903,6 @@ class ActivityMetricsLogger {
             if (callerApp.getWhenUnimportant() != 0) {
                 builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_UNIMPORTANT,
                         (nowUptime - callerApp.getWhenUnimportant()));
-            }
-        }
-        if (r != null) {
-            builder.addTaggedData(FIELD_TARGET_SHORT_COMPONENT_NAME, r.shortComponentName);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_LAUNCH_MODE, r.info.launchMode);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_TARGET_ACTIVITY, r.info.targetActivity);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_FLAGS, r.info.flags);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_REAL_ACTIVITY,
-                    r.mActivityComponent.toShortString());
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_SHORT_COMPONENT_NAME, r.shortComponentName);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_PROCESS_NAME, r.processName);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_FULLSCREEN, r.fullscreen ? 1 : 0);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_NO_DISPLAY, r.noDisplay ? 1 : 0);
-            if (r.lastVisibleTime != 0) {
-                builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_VISIBLE,
-                        (nowUptime - r.lastVisibleTime));
-            }
-            if (r.resultTo != null) {
-                builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_PKG_NAME,
-                        r.resultTo.packageName);
-                builder.addTaggedData(FIELD_ACTIVITY_RECORD_RESULT_TO_SHORT_COMPONENT_NAME,
-                        r.resultTo.shortComponentName);
-            }
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE, r.visible ? 1 : 0);
-            builder.addTaggedData(FIELD_ACTIVITY_RECORD_IS_VISIBLE_IGNORING_KEYGUARD,
-                    r.visibleIgnoringKeyguard ? 1 : 0);
-            if (r.lastLaunchTime != 0) {
-                builder.addTaggedData(FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH,
-                        (nowUptime - r.lastLaunchTime));
             }
         }
         mMetricsLogger.write(builder);

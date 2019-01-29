@@ -19,7 +19,9 @@ package android.processor.view.inspector;
 import com.squareup.javapoet.ClassName;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -92,6 +94,8 @@ public final class InspectableClassModel {
         private final Type mType;
         private boolean mAttributeIdInferrableFromR = true;
         private int mAttributeId = 0;
+        private List<IntEnumEntry> mIntEnumEntries;
+        private List<IntFlagEntry> mIntFlagEntries;
 
         public Property(String name, String getter, Type type) {
             mName = Objects.requireNonNull(name, "Name must not be null");
@@ -131,6 +135,40 @@ public final class InspectableClassModel {
 
         public Type getType() {
             return mType;
+        }
+
+        /**
+         * Get the mapping for an {@code int} enumeration, if present.
+         *
+         * @return A list of mapping entries, empty if absent
+         */
+        public List<IntEnumEntry> getIntEnumEntries() {
+            if (mIntEnumEntries != null) {
+                return mIntEnumEntries;
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
+        public void setIntEnumEntries(List<IntEnumEntry> intEnumEntries) {
+            mIntEnumEntries = intEnumEntries;
+        }
+
+        /**
+         * Get the mapping of {@code int} flags, if present.
+         *
+         * @return A list of mapping entries, empty if absent
+         */
+        public List<IntFlagEntry> getIntFlagEntries() {
+            if (mIntFlagEntries != null) {
+                return mIntFlagEntries;
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
+        public void setIntFlagEntries(List<IntFlagEntry> intFlagEntries) {
+            mIntFlagEntries = intFlagEntries;
         }
 
         public enum Type {
@@ -181,6 +219,7 @@ public final class InspectableClassModel {
              * An enumeration packed into an {@code int}.
              *
              * @see android.view.inspector.IntEnumMapping
+             * @see IntEnumEntry
              */
             INT_ENUM,
 
@@ -188,8 +227,74 @@ public final class InspectableClassModel {
              * Non-exclusive or partially-exclusive flags packed into an {@code int}.
              *
              * @see android.view.inspector.IntFlagMapping
+             * @see IntFlagEntry
              */
             INT_FLAG
+        }
+    }
+
+    /**
+     * Model one entry in a int enum mapping.
+     *
+     * @see android.view.inspector.IntEnumMapping
+     */
+    public static final class IntEnumEntry {
+        private final String mName;
+        private final int mValue;
+
+        public IntEnumEntry(String name, int value) {
+            mName = Objects.requireNonNull(name, "Name must not be null");
+            mValue = value;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public int getValue() {
+            return mValue;
+        }
+    }
+
+    /**
+     * Model one entry in an int flag mapping.
+     *
+     * @see android.view.inspector.IntFlagMapping
+     */
+    public static final class IntFlagEntry {
+        private final String mName;
+        private final int mTarget;
+        private final int mMask;
+
+        public IntFlagEntry(String name, int target, int mask) {
+            mName = Objects.requireNonNull(name, "Name must not be null");
+            mTarget = target;
+            mMask = mask;
+        }
+
+        public IntFlagEntry(String name, int target) {
+            this(name, target, target);
+        }
+
+        /**
+         * Determine if this entry has a bitmask.
+         *
+         * @return True if the bitmask and target are different, false otherwise
+         */
+        public boolean hasMask() {
+            return mTarget != mMask;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public int getTarget() {
+            return mTarget;
+        }
+
+        public int getMask() {
+            return mMask;
         }
     }
 }

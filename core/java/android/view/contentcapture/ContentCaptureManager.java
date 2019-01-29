@@ -156,8 +156,7 @@ public final class ContentCaptureManager {
         // Wait for system server to return the component name.
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
         mHandler.sendMessage(obtainMessage(
-                ContentCaptureManager::handleReceiverServiceComponentName,
-                this, mContext.getUserId(), resultReceiver));
+                ContentCaptureManager::handleGetComponentName, this, resultReceiver));
 
         try {
             return resultReceiver.getParcelableResult();
@@ -198,7 +197,7 @@ public final class ContentCaptureManager {
         Preconditions.checkNotNull(request);
 
         try {
-            mService.removeUserData(mContext.getUserId(), request);
+            mService.removeUserData(request);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -227,9 +226,9 @@ public final class ContentCaptureManager {
 
 
     /** Retrieves the component name of the target content capture service through system_server. */
-    private void handleReceiverServiceComponentName(int userId, IResultReceiver resultReceiver) {
+    private void handleGetComponentName(@NonNull IResultReceiver resultReceiver) {
         try {
-            mService.getReceiverServiceComponentName(userId, resultReceiver);
+            mService.getServiceComponentName(resultReceiver);
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to retrieve service component name: " + e);
         }

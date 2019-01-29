@@ -2305,8 +2305,8 @@
         <item quantity="other"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
     </plurals>
 
-    <!-- Action on Ongoing Privacy Dialog to dismiss [CHAR LIMIT=10]-->
-    <string name="ongoing_privacy_dialog_cancel">Cancel</string>
+    <!-- Action for accepting the Ongoing privacy dialog [CHAR LIMIT=10]-->
+    <string name="ongoing_privacy_dialog_ok">Got it</string>
 
     <!-- Action on Ongoing Privacy Dialog to open privacy hub [CHAR LIMIT=20]-->
     <string name="ongoing_privacy_dialog_open_settings">View details</string>
@@ -2337,6 +2337,7 @@
         <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> other app</item>
         <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> other apps</item>
     </plurals>
+
     <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
     <string name="sensor_privacy_mode">Sensors off</string>
 

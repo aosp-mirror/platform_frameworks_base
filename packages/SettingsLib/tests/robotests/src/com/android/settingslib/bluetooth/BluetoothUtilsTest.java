@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import android.bluetooth.BluetoothDevice;
 import android.graphics.drawable.Drawable;
 
-import com.android.settingslib.R;
 import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
 
 import org.junit.Test;
@@ -34,7 +33,7 @@ public class BluetoothUtilsTest {
     @Test
     public void testGetBluetoothDrawable_noBatteryLevel_returnSimpleDrawable() {
         final Drawable drawable = BluetoothUtils.getBluetoothDrawable(
-                RuntimeEnvironment.application, R.drawable.ic_bt_laptop,
+                RuntimeEnvironment.application, com.android.internal.R.drawable.ic_bt_laptop,
                 BluetoothDevice.BATTERY_LEVEL_UNKNOWN, 1 /* iconScale */);
 
         assertThat(drawable).isNotInstanceOf(BluetoothDeviceLayerDrawable.class);
@@ -43,7 +42,7 @@ public class BluetoothUtilsTest {
     @Test
     public void testGetBluetoothDrawable_hasBatteryLevel_returnLayerDrawable() {
         final Drawable drawable = BluetoothUtils.getBluetoothDrawable(
-                RuntimeEnvironment.application, R.drawable.ic_bt_laptop,
+                RuntimeEnvironment.application, com.android.internal.R.drawable.ic_bt_laptop,
                 10 /* batteryLevel */, 1 /* iconScale */);
 
         assertThat(drawable).isInstanceOf(BluetoothDeviceLayerDrawable.class);

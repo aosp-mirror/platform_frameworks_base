@@ -486,6 +486,37 @@ public final class Settings {
             "android.settings.WIFI_IP_SETTINGS";
 
     /**
+     * Activity Action: Show setting page to process an Easy Connect (Wi-Fi DPP) QR code and start
+     * configuration. This intent should be used when you want to use this device to take on the
+     * configurator role for an IoT/other device. When provided with a valid DPP URI string Settings
+     * will open a wifi selection screen for the user to indicate which network they would like
+     * to configure the device specified in the DPP URI string for and carry them through the rest
+     * of the flow for provisioning the device.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this by checking WifiManager.isEasyConnectSupported();
+     * <p>
+     * Input:
+     * The following keys in the bundle with their associated value.
+     * <ul>
+     *     <li>"qrCode": Standard Easy Connect (Wi-Fi DPP) URI bootstrapping information as a
+     *     string.</li>
+     * </ul>
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROCESS_WIFI_EASY_CONNECT_QR_CODE =
+            "android.settings.PROCESS_WIFI_EASY_CONNECT_QR_CODE";
+
+    /**
+     * An extra to put in the bundle for {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_QR_CODE} intents.
+     * It must contain properly formatted Easy Connect (Wi-Fi DPP) URI bootstrapping information for
+     * the process to proceed.
+     */
+    public static final String EXTRA_QR_CODE = "android.provider.extra.QR_CODE";
+
+    /**
      * Activity Action: Show settings to allow configuration of data and view data usage.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -11723,6 +11754,7 @@ public final class Settings {
          * entity_list_default                      (String[])
          * entity_list_not_editable                 (String[])
          * entity_list_editable                     (String[])
+         * lang_id_threshold_override               (float)
          * </pre>
          *
          * <p>
@@ -11765,6 +11797,44 @@ public final class Settings {
          * @see com.android.server.content.SyncManagerConstants
          */
         public static final String SYNC_MANAGER_CONSTANTS = "sync_manager_constants";
+
+        /**
+         * Broadcast dispatch tuning parameters specific to foreground broadcasts.
+         *
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true"
+         *
+         * The following keys are supported:
+         * <pre>
+         * bcast_timeout                (long)
+         * bcast_slow_time              (long)
+         * bcast_deferral               (long)
+         * bcast_deferral_decay_factor  (float)
+         * bcast_deferral_floor         (long)
+         * </pre>
+         *
+         * @hide
+         */
+        public static final String BROADCAST_FG_CONSTANTS = "bcast_fg_constants";
+
+        /**
+         * Broadcast dispatch tuning parameters specific to background broadcasts.
+         *
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true".
+         * See {@link #BROADCAST_FG_CONSTANTS} for the list of supported keys.
+         *
+         * @hide
+         */
+        public static final String BROADCAST_BG_CONSTANTS = "bcast_bg_constants";
+
+        /**
+         * Broadcast dispatch tuning parameters specific to specific "offline" broadcasts.
+         *
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true".
+         * See {@link #BROADCAST_FG_CONSTANTS} for the list of supported keys.
+         *
+         * @hide
+         */
+        public static final String BROADCAST_OFFLOAD_CONSTANTS = "bcast_offload_constants";
 
         /**
          * Whether or not App Standby feature is enabled by system. This controls throttling of apps

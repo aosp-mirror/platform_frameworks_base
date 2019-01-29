@@ -17,8 +17,8 @@
 package android.net.dhcp;
 
 import static android.net.InetAddresses.parseNumericAddress;
-import static android.net.NetworkUtils.inet4AddressToIntHTH;
 import static android.net.dhcp.DhcpServingParams.MTU_UNSET;
+import static android.net.shared.Inet4AddressUtils.inet4AddressToIntHTH;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -27,8 +27,8 @@ import static junit.framework.Assert.assertTrue;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.LinkAddress;
-import android.net.NetworkUtils;
 import android.net.dhcp.DhcpServingParams.InvalidParameterException;
+import android.net.shared.Inet4AddressUtils;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -200,7 +200,7 @@ public class DhcpServingParamsTest {
     }
 
     private static int[] toIntArray(Collection<Inet4Address> addrs) {
-        return addrs.stream().mapToInt(NetworkUtils::inet4AddressToIntHTH).toArray();
+        return addrs.stream().mapToInt(Inet4AddressUtils::inet4AddressToIntHTH).toArray();
     }
 
     private static <T> void assertContains(@NonNull Set<T> set, @NonNull Set<T> subset) {

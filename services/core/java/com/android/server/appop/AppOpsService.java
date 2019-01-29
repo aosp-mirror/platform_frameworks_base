@@ -16,8 +16,8 @@
 
 package com.android.server.appop;
 
-import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -94,9 +94,9 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
-
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
+
 import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1277,6 +1277,46 @@ public class AppOpsService extends IAppOpsService.Stub {
                     mHandler.sendMessage(PooledLambda.obtainMessage(
                             AppOpsService::notifyOpChanged,
                             this, callback, code, uid, reportedPackageName));
+                }
+            }
+        }
+    }
+
+    /**
+     * Set all {@link #setMode (package) modes} for this uid to the default value.
+     *
+     * @param code The app-op
+     * @param uid The uid
+     */
+    private void setAllPkgModesToDefault(int code, int uid) {
+        synchronized (this) {
+            UidState uidState = getUidStateLocked(uid, false);
+            if (uidState == null) {
+                return;
+            }
+
+            ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
+            if (pkgOps == null) {
+                return;
+            }
+
+            int numPkgs = pkgOps.size();
+            for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                Ops ops = pkgOps.valueAt(pkgNum);
+
+                Op op = ops.get(code);
+                if (op == null) {
+                    continue;
+                }
+
+                int defaultMode = AppOpsManager.opToDefaultMode(code);
+                if (op.mode != defaultMode) {
+                    Slog.w(TAG, "resetting app-op mode for " + AppOpsManager.opToName(code) + " of "
+                            + pkgOps.keyAt(pkgNum));
+
+                    op.mode = defaultMode;
+
+                    scheduleWriteLocked();
                 }
             }
         }
@@ -4386,6 +4426,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void setUidMode(int code, int uid, int mode) {
             AppOpsService.this.setUidMode(code, uid, mode);
+        }
+
+        @Override
+        public void setAllPkgModesToDefault(int code, int uid) {
+            AppOpsService.this.setAllPkgModesToDefault(code, uid);
         }
     }
 }

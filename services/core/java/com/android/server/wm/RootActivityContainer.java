@@ -175,6 +175,12 @@ class RootActivityContainer extends ConfigurationContainer
     private ActivityDisplay mDefaultDisplay;
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
+    /**
+     * Cached value of the topmost resumed activity in the system. Updated when new activity is
+     * resumed.
+     */
+    private ActivityRecord mTopResumedActivity;
+
     /** The current user */
     int mCurrentUser;
     /** Stack id of the front stack when user switched, indexed by userId. */
@@ -1145,6 +1151,23 @@ class RootActivityContainer extends ConfigurationContainer
         return result;
     }
 
+    void updateTopResumedActivityIfNeeded() {
+        final ActivityRecord prevTopActivity = mTopResumedActivity;
+        final ActivityStack topStack = getTopDisplayFocusedStack();
+        if (topStack == null || topStack.mResumedActivity == prevTopActivity) {
+            return;
+        }
+        // Clear previous top state
+        if (prevTopActivity != null) {
+            prevTopActivity.scheduleTopResumedActivityChanged(false /* onTop */);
+        }
+        // Update the current top activity
+        mTopResumedActivity = topStack.mResumedActivity;
+        if (mTopResumedActivity != null) {
+            mTopResumedActivity.scheduleTopResumedActivityChanged(true /* onTop */);
+        }
+    }
+
     void applySleepTokens(boolean applyToStacks) {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             // Set the sleeping state of the display.
@@ -1296,14 +1319,19 @@ class RootActivityContainer extends ConfigurationContainer
     public void onDisplayAdded(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
-            getActivityDisplayOrCreate(displayId);
+            final ActivityDisplay display = getActivityDisplayOrCreate(displayId);
             // Do not start home before booting, or it may accidentally finish booting before it
             // starts. Instead, we expect home activities to be launched when the system is ready
             // (ActivityManagerService#systemReady).
             if (mService.isBooted() || mService.isBooting()) {
-                startHomeOnDisplay(mCurrentUser, "displayAdded", displayId);
+                startSystemDecorations(display.mDisplayContent);
             }
         }
+    }
+
+    private void startSystemDecorations(final DisplayContent displayContent) {
+        startHomeOnDisplay(mCurrentUser, "displayAdded", displayContent.getDisplayId());
+        displayContent.getDisplayPolicy().notifyDisplayReady();
     }
 
     @Override
@@ -1399,6 +1427,7 @@ class RootActivityContainer extends ConfigurationContainer
             mActivityDisplays.remove(display);
             mActivityDisplays.add(position, display);
         }
+        updateTopResumedActivityIfNeeded();
     }
 
     @VisibleForTesting

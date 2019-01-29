@@ -36,6 +36,7 @@
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
 #include "android_media_MicrophoneInfo.h"
+#include "android_media_AudioAttributes.h"
 
 // ----------------------------------------------------------------------------
 
@@ -152,15 +153,6 @@ static struct {
     jfieldID    mIntProp;
     jfieldID    mRule;
 } gAudioMixMatchCriterionFields;
-
-static jclass gAudioAttributesClass;
-static struct {
-    jfieldID    mUsage;
-    jfieldID    mSource;
-    jfieldID    mContentType;
-    jfieldID    mFlags;
-    jfieldID    mFormattedTags;
-} gAudioAttributesFields;
 
 static const char* const kEventHandlerClassPathName =
         "android/media/AudioPortEventHandler";
@@ -704,27 +696,6 @@ static void convertAudioGainConfigToNative(JNIEnv *env,
     memcpy(nAudioGainConfig->values, nValues, size * sizeof(int));
     env->DeleteLocalRef(jValues);
 }
-
-static jint convertAudioAttributesToNative(JNIEnv *env,
-                                           audio_attributes_t *nAudioAttributes,
-                                           const jobject jAudioAttributes)
-{
-    nAudioAttributes->usage = (audio_usage_t)env->GetIntField(jAudioAttributes,
-            gAudioAttributesFields.mUsage);
-    nAudioAttributes->source = (audio_source_t)env->GetIntField(jAudioAttributes,
-            gAudioAttributesFields.mSource);
-    nAudioAttributes->content_type = (audio_content_type_t)env->GetIntField(jAudioAttributes,
-            gAudioAttributesFields.mContentType);
-    nAudioAttributes->flags = env->GetIntField(jAudioAttributes,
-            gAudioAttributesFields.mFlags);
-    const jstring jtags = (jstring)env->GetObjectField(jAudioAttributes,
-            gAudioAttributesFields.mFormattedTags);
-    const char *tags = env->GetStringUTFChars(jtags, NULL);
-    strncpy(nAudioAttributes->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
-    env->ReleaseStringUTFChars(jtags, tags);
-    return (jint)AUDIO_JAVA_SUCCESS;
-}
-
 
 static jint convertAudioPortConfigToNative(JNIEnv *env,
                                                struct audio_port_config *nAudioPortConfig,
@@ -1705,22 +1676,19 @@ android_media_AudioSystem_startAudioSource(JNIEnv *env, jobject clazz,
     if (!env->IsInstanceOf(jAudioPortConfig, gAudioPortConfigClass)) {
         return AUDIO_JAVA_BAD_VALUE;
     }
-    if (!env->IsInstanceOf(jAudioAttributes, gAudioAttributesClass)) {
-        return AUDIO_JAVA_BAD_VALUE;
-    }
     struct audio_port_config nAudioPortConfig = {};
     jint jStatus = convertAudioPortConfigToNativeWithDevicePort(env,
             &nAudioPortConfig, jAudioPortConfig, false);
     if (jStatus != AUDIO_JAVA_SUCCESS) {
         return jStatus;
     }
-    audio_attributes_t nAudioAttributes = {};
-    jStatus = convertAudioAttributesToNative(env, &nAudioAttributes, jAudioAttributes);
-    if (jStatus != AUDIO_JAVA_SUCCESS) {
+    auto paa = JNIAudioAttributeHelper::makeUnique();
+    jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jAudioAttributes, paa.get());
+    if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
         return jStatus;
     }
     audio_port_handle_t handle;
-    status_t status = AudioSystem::startAudioSource(&nAudioPortConfig, &nAudioAttributes, &handle);
+    status_t status = AudioSystem::startAudioSource(&nAudioPortConfig, paa.get(), &handle);
     ALOGV("AudioSystem::startAudioSource() returned %d handle %d", status, handle);
     return handle > 0 ? handle : nativeToJavaStatus(status);
 }
@@ -1833,12 +1801,16 @@ static jint convertAudioMixToNative(JNIEnv *env,
         case RULE_MATCH_ATTRIBUTE_USAGE:
         case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET: {
             jobject jAttributes = env->GetObjectField(jCriterion, gAudioMixMatchCriterionFields.mAttr);
+
+            auto paa = JNIAudioAttributeHelper::makeUnique();
+            jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jAttributes, paa.get());
+            if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+                return jStatus;
+            }
             if (match_rule == RULE_MATCH_ATTRIBUTE_USAGE) {
-                nCriterion.mValue.mUsage = (audio_usage_t)env->GetIntField(jAttributes,
-                        gAudioAttributesFields.mUsage);
+                nCriterion.mValue.mUsage = paa->usage;
             } else {
-                nCriterion.mValue.mSource = (audio_source_t)env->GetIntField(jAttributes,
-                        gAudioAttributesFields.mSource);
+                nCriterion.mValue.mSource = paa->source;
             }
             env->DeleteLocalRef(jAttributes);
             }
@@ -2395,17 +2367,6 @@ int register_android_media_AudioSystem(JNIEnv *env)
                                                        "I");
     gAudioMixMatchCriterionFields.mRule = GetFieldIDOrDie(env, audioMixMatchCriterionClass, "mRule",
                                                        "I");
-
-    jclass audioAttributesClass = FindClassOrDie(env, "android/media/AudioAttributes");
-    gAudioAttributesClass = MakeGlobalRefOrDie(env, audioAttributesClass);
-    gAudioAttributesFields.mUsage = GetFieldIDOrDie(env, audioAttributesClass, "mUsage", "I");
-    gAudioAttributesFields.mSource = GetFieldIDOrDie(env, audioAttributesClass, "mSource", "I");
-    gAudioAttributesFields.mContentType = GetFieldIDOrDie(env,
-            audioAttributesClass, "mContentType", "I");
-    gAudioAttributesFields.mFlags = GetFieldIDOrDie(env, audioAttributesClass, "mFlags", "I");
-    gAudioAttributesFields.mFormattedTags = GetFieldIDOrDie(env,
-            audioAttributesClass, "mFormattedTags", "Ljava/lang/String;");
-
     // AudioTrackRoutingProxy methods
     gClsAudioTrackRoutingProxy =
             android::FindClassOrDie(env, "android/media/AudioTrackRoutingProxy");

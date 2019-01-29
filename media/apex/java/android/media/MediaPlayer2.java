@@ -4482,6 +4482,7 @@ public class MediaPlayer2 implements AutoCloseable
     };
 
     // Modular DRM
+    private final Map<UUID, MediaDrm> mDrmObjs = new HashMap<>();
     private class DrmHandle {
 
         static final int PROVISION_TIMEOUT_MS = 60000;
@@ -4594,7 +4595,13 @@ public class MediaPlayer2 implements AutoCloseable
             Log.v(TAG, "prepareDrm_createDrmStep: UUID: " + uuid);
 
             try {
-                mDrmObj = new MediaDrm(uuid);
+                mDrmObj = mDrmObjs.computeIfAbsent(uuid, scheme -> {
+                    try {
+                        return new MediaDrm(scheme);
+                    } catch (UnsupportedSchemeException e) {
+                        throw new IllegalArgumentException(e);
+                    }
+                });
                 Log.v(TAG, "prepareDrm_createDrmStep: Created mDrmObj=" + mDrmObj);
             } catch (Exception e) { // UnsupportedSchemeException
                 Log.e(TAG, "prepareDrm_createDrmStep: MediaDrm failed with " + e);

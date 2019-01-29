@@ -15,10 +15,10 @@
  */
 package com.android.systemui.statusbar.notification.logging;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.os.RemoteException;
@@ -31,6 +31,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -153,6 +154,27 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
         verify(mBarService).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, false, true,
                 NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN.toMetricsEventEnum());
+    }
+
+    @Test
+    public void testOnEntryReinflated() throws RemoteException {
+        mLogger.onExpansionChanged(NOTIFICATION_KEY, true, true,
+                NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN);
+        mLogger.onVisibilityChanged(
+                Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
+                Collections.emptyList());
+        waitForUiOffloadThread();
+        verify(mBarService).onNotificationExpansionChanged(
+                NOTIFICATION_KEY, true, true, ExpandableViewState.LOCATION_UNKNOWN);
+
+        mLogger.onEntryReinflated(NOTIFICATION_KEY);
+        mLogger.onVisibilityChanged(
+                Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
+                Collections.emptyList());
+        waitForUiOffloadThread();
+        // onNotificationExpansionChanged is called the second time.
+        verify(mBarService, times(2)).onNotificationExpansionChanged(
+                NOTIFICATION_KEY, true, true, ExpandableViewState.LOCATION_UNKNOWN);
     }
 
     private NotificationVisibility createNotificationVisibility(String key, boolean visibility) {

@@ -443,6 +443,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 } catch (RemoteException ex) {}
             }
         }
+
+        @Override
+        public void onDisplayReady(int displayId) {
+            if (mBar != null) {
+                try {
+                    mBar.onDisplayReady(displayId);
+                } catch (RemoteException ex) { }
+            }
+        }
     };
 
     private final GlobalActionsProvider mGlobalActionsProvider = new GlobalActionsProvider() {

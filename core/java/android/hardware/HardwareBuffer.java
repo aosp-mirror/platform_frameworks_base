@@ -182,6 +182,38 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     }
 
     /**
+     * Queries whether the given buffer description is supported by the system. If this returns
+     * true, then the allocation may succeed until resource exhaustion occurs. If this returns
+     * false then this combination will never succeed.
+     *
+     * @param width The width in pixels of the buffer
+     * @param height The height in pixels of the buffer
+     * @param format The @Format of each pixel
+     * @param layers The number of layers in the buffer
+     * @param usage The @Usage flags describing how the buffer will be used
+     * @return True if the combination is supported, false otherwise.
+     */
+    public static boolean isSupported(int width, int height, @Format int format, int layers,
+            @Usage long usage) {
+        if (!HardwareBuffer.isSupportedFormat(format)) {
+            throw new IllegalArgumentException("Invalid pixel format " + format);
+        }
+        if (width <= 0) {
+            throw new IllegalArgumentException("Invalid width " + width);
+        }
+        if (height <= 0) {
+            throw new IllegalArgumentException("Invalid height " + height);
+        }
+        if (layers <= 0) {
+            throw new IllegalArgumentException("Invalid layer count " + layers);
+        }
+        if (format == BLOB && height != 1) {
+            throw new IllegalArgumentException("Height must be 1 when using the BLOB format");
+        }
+        return nIsSupported(width, height, format, layers, usage);
+    }
+
+    /**
      * Private use only. See {@link #create(int, int, int, int, long)}. May also be
      * called from JNI using an already allocated native <code>HardwareBuffer</code>.
      */
@@ -386,4 +418,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     private static native int nGetLayers(long nativeObject);
     @FastNative
     private static native long nGetUsage(long nativeObject);
+    private static native boolean nIsSupported(int width, int height, int format, int layers,
+            long usage);
 }

@@ -36,8 +36,6 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
 
-import com.android.internal.util.BitUtils;
-
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
@@ -186,7 +184,7 @@ public class IpNeighborMonitor extends PacketReader {
 
             final int srcPortId = nlMsg.getHeader().nlmsg_pid;
             if (srcPortId !=  0) {
-                mLog.e("non-kernel source portId: " + BitUtils.uint32(srcPortId));
+                mLog.e("non-kernel source portId: " + Integer.toUnsignedLong(srcPortId));
                 break;
             }
 

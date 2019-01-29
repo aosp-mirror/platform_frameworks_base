@@ -207,6 +207,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SET_ACTIVE = 3020;
     static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
+    static final int MSG_REPORT_PRE_RENDERED = 3060;
+    static final int MSG_APPLY_IME_VISIBILITY = 3070;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
@@ -3327,6 +3329,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @BinderThread
+    private void reportPreRendered(IBinder token, EditorInfo info) {
+        synchronized (mMethodMap) {
+            if (!calledWithValidTokenLocked(token)) {
+                return;
+            }
+            if (mCurClient != null && mCurClient.client != null) {
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
+                        MSG_REPORT_PRE_RENDERED, info, mCurClient));
+            }
+        }
+    }
+
+    @BinderThread
+    private void applyImeVisibility(IBinder token, boolean setVisible) {
+        synchronized (mMethodMap) {
+            if (!calledWithValidTokenLocked(token)) {
+                return;
+            }
+            if (mCurClient != null && mCurClient.client != null) {
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                        MSG_APPLY_IME_VISIBILITY, setVisible ? 1 : 0, mCurClient));
+            }
+        }
+    }
+
     private void setInputMethodWithSubtypeIdLocked(IBinder token, String id, int subtypeId) {
         if (token == null) {
             if (mContext.checkCallingOrSelfPermission(
@@ -3576,6 +3604,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Got RemoteException sending "
                             + "reportFullscreen(" + fullscreen + ") notification to pid="
+                            + clientState.pid + " uid=" + clientState.uid);
+                }
+                return true;
+            }
+            case MSG_REPORT_PRE_RENDERED: {
+                args = (SomeArgs) msg.obj;
+                final EditorInfo info = (EditorInfo) args.arg1;
+                final ClientState clientState = (ClientState) args.arg2;
+                try {
+                    clientState.client.reportPreRendered(info);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Got RemoteException sending "
+                            + "reportPreRendered(" + info + ") notification to pid="
+                            + clientState.pid + " uid=" + clientState.uid);
+                }
+                args.recycle();
+                return true;
+            }
+            case MSG_APPLY_IME_VISIBILITY: {
+                final boolean setVisible = msg.arg1 != 0;
+                final ClientState clientState = (ClientState) msg.obj;
+                try {
+                    clientState.client.applyImeVisibility(setVisible);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Got RemoteException sending "
+                            + "applyImeVisibility(" + setVisible + ") notification to pid="
                             + clientState.pid + " uid=" + clientState.uid);
                 }
                 return true;
@@ -4755,6 +4809,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void notifyUserAction() {
             mImms.notifyUserAction(mToken);
+        }
+
+        @BinderThread
+        @Override
+        public void reportPreRendered(EditorInfo info) {
+            mImms.reportPreRendered(mToken, info);
+        }
+
+        @BinderThread
+        @Override
+        public void applyImeVisibility(boolean setVisible) {
+            mImms.applyImeVisibility(mToken, setVisible);
         }
     }
 }

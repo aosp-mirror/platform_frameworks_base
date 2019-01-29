@@ -177,12 +177,13 @@ public final class ContentCaptureManagerService extends
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {
 
         @Override
-        public void startSession(@UserIdInt int userId, @NonNull IBinder activityToken,
+        public void startSession(@NonNull IBinder activityToken,
                 @NonNull ComponentName componentName, @NonNull String sessionId, int flags,
                 @NonNull IResultReceiver result) {
             Preconditions.checkNotNull(activityToken);
             Preconditions.checkNotNull(componentName);
             Preconditions.checkNotNull(sessionId);
+            final int userId = UserHandle.getCallingUserId();
 
             // TODO(b/111276913): refactor getTaskIdForActivity() to also return ComponentName,
             // so we don't pass it on startSession (same for Autofill)
@@ -199,8 +200,9 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void finishSession(@UserIdInt int userId, @NonNull String sessionId) {
+        public void finishSession(@NonNull String sessionId) {
             Preconditions.checkNotNull(sessionId);
+            final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
@@ -209,15 +211,16 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void getReceiverServiceComponentName(@UserIdInt int userId,
-                IResultReceiver receiver) {
+        public void getServiceComponentName(@NonNull IResultReceiver result) {
+            final int userId = UserHandle.getCallingUserId();
             ComponentName connectedServiceComponentName;
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 connectedServiceComponentName = service.getServiceComponentName();
             }
             try {
-                receiver.send(0, SyncResultReceiver.bundleFor(connectedServiceComponentName));
+                result.send(/* resultCode= */ 0,
+                        SyncResultReceiver.bundleFor(connectedServiceComponentName));
             } catch (RemoteException e) {
                 // Ignore exception as we need to be resilient against app behavior.
                 Slog.w(TAG, "Unable to send service component name: " + e);
@@ -225,8 +228,9 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void removeUserData(@UserIdInt int userId, @NonNull UserDataRemovalRequest request) {
+        public void removeUserData(@NonNull UserDataRemovalRequest request) {
             Preconditions.checkNotNull(request);
+            final int userId = UserHandle.getCallingUserId();
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
                 service.removeUserDataLocked(request);

@@ -16,6 +16,10 @@
 
 package com.android.server.attention;
 
+import static android.provider.DeviceConfig.AttentionManagerService.NAMESPACE;
+import static android.provider.DeviceConfig.AttentionManagerService.PROPERTY_COMPONENT_NAME;
+import static android.provider.DeviceConfig.AttentionManagerService.PROPERTY_SERVICE_ENABLED;
+
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -40,6 +44,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.service.attention.AttentionService;
 import android.service.attention.AttentionService.AttentionFailureCodes;
 import android.service.attention.IAttentionCallback;
@@ -65,6 +70,9 @@ import java.io.PrintWriter;
  */
 public class AttentionManagerService extends SystemService {
     private static final String LOG_TAG = "AttentionManagerService";
+
+    /** Default value in absence of {@link DeviceConfig} override. */
+    private static final boolean DEFAULT_SERVICE_ENABLED = true;
 
     /** Service will unbind if connection is not used for that amount of time. */
     private static final long CONNECTION_TTL_MILLIS = 60_000;
@@ -105,7 +113,7 @@ public class AttentionManagerService extends SystemService {
         super.onBootPhase(phase);
         if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             mComponentName = resolveAttentionService(mContext);
-            if (mComponentName != null) {
+            if (isAttentionServiceSupported()) {
                 // If the service is supported we want to keep receiving the screen off events.
                 mContext.registerReceiver(new ScreenStateReceiver(),
                         new IntentFilter(Intent.ACTION_SCREEN_OFF));
@@ -117,7 +125,12 @@ public class AttentionManagerService extends SystemService {
      * Returns {@code true} if attention service is supported on this device.
      */
     public boolean isAttentionServiceSupported() {
-        return mComponentName != null;
+        return mComponentName != null && isServiceEnabled();
+    }
+
+    private boolean isServiceEnabled() {
+        final String enabled = DeviceConfig.getProperty(NAMESPACE, PROPERTY_SERVICE_ENABLED);
+        return enabled == null ? DEFAULT_SERVICE_ENABLED : "true".equals(enabled);
     }
 
     /**
@@ -266,8 +279,9 @@ public class AttentionManagerService extends SystemService {
      * system.
      */
     private static ComponentName resolveAttentionService(Context context) {
-        // TODO(b/111939367): add a flag to turn on/off.
-        final String componentNameString = context.getString(
+        final String flag = DeviceConfig.getProperty(NAMESPACE, PROPERTY_COMPONENT_NAME);
+
+        final String componentNameString = flag != null ? flag : context.getString(
                 R.string.config_defaultAttentionService);
 
         if (TextUtils.isEmpty(componentNameString)) {

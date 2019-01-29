@@ -16,8 +16,12 @@
 
 package android.processor.view.inspector;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -99,6 +103,83 @@ final class AnnotationUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Get a typed list of values for an annotation array property by name.
+     *
+     * The returned list will be empty if the value was left at the default.
+     *
+     * @param propertyName The name of the property to search for
+     * @param valueClass The expected class of the property value
+     * @param element The element the annotation is on, used for exceptions
+     * @param annotationMirror An annotation mirror to search for the property
+     * @param <T> The type of the value
+     * @return A list containing the requested types
+     */
+    <T> List<T> typedArrayValuesByName(
+            String propertyName,
+            Class<T> valueClass,
+            Element element,
+            AnnotationMirror annotationMirror) {
+        return untypedArrayValuesByName(propertyName, element, annotationMirror)
+                .stream()
+                .map(annotationValue -> {
+                    final Object value = annotationValue.getValue();
+
+                    if (value == null) {
+                        throw new ProcessingException(
+                                "Unexpected null in array.",
+                                element,
+                                annotationMirror,
+                                annotationValue);
+                    }
+
+                    if (valueClass.isAssignableFrom(value.getClass())) {
+                        return valueClass.cast(value);
+                    } else {
+                        throw new ProcessingException(
+                                String.format(
+                                        "Expected array entry to have type %s, but got %s.",
+                                        valueClass.getCanonicalName(),
+                                        value.getClass().getCanonicalName()),
+                                element,
+                                annotationMirror,
+                                annotationValue);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of values for an annotation array property by name.
+     *
+     * @param propertyName The name of the property to search for
+     * @param element The element the annotation is on, used for exceptions
+     * @param annotationMirror An annotation mirror to search for the property
+     * @return A list of annotation values, empty list if none found
+     */
+    List<AnnotationValue> untypedArrayValuesByName(
+            String propertyName,
+            Element element,
+            AnnotationMirror annotationMirror) {
+        return typedValueByName(propertyName, List.class, element, annotationMirror)
+                .map(untypedValues -> {
+                    List<AnnotationValue> typedValues = new ArrayList<>(untypedValues.size());
+
+                    for (Object untypedValue : untypedValues) {
+                        if (untypedValue instanceof AnnotationValue) {
+                            typedValues.add((AnnotationValue) untypedValue);
+                        } else {
+                            throw new ProcessingException(
+                                    "Unable to convert array entry to AnnotationValue",
+                                    element,
+                                    annotationMirror);
+                        }
+                    }
+
+                    return typedValues;
+                }).orElseGet(Collections::emptyList);
     }
 
     /**

@@ -33,6 +33,7 @@ import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
@@ -213,6 +214,7 @@ message Atom {
         WatchdogRollbackOccurred watchdog_rollback_occurred = 147;
         BiometricHalDeathReported biometric_hal_death_reported = 148;
         BubbleUIChanged bubble_ui_changed = 149;
+        ScheduledJobConstraintChanged scheduled_job_constraint_changed = 150;
     }
 
     // Pulled events will start at field 10000.
@@ -2430,7 +2432,7 @@ message BiometricAuthenticated {
     // specified and supported by the biometric modality, this is from the first ACQUIRED_GOOD to
     // AUTHENTICATED. for setRequireConfirmation(true), this is from PENDING_CONFIRMATION to
     // CONFIRMED.
-    optional int32 latency = 6;
+    optional int64 latency_millis = 6;
 }
 
 /**
@@ -4698,4 +4700,25 @@ message BubbleUIChanged {
     // Normalized screen position of the bubble stack. The range is between 0 and 1.
     optional float normalized_x_position = 7;
     optional float normalized_y_position = 8;
+}
+
+/**
+ * Logs that a constraint for a scheduled job has changed.
+ *
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/job/controllers/JobStatus.java
+ */
+message ScheduledJobConstraintChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // Name of the job.
+    optional string job_name = 2;
+
+    optional com.android.server.job.ConstraintEnum constraint = 3;
+
+    enum State {
+        UNSATISFIED = 0;
+        SATISFIED = 1;
+    }
+    optional State state = 4;
 }

@@ -139,7 +139,7 @@ public class RollbackTest {
             assertNull(broadcastReceiver.poll(0, TimeUnit.SECONDS));
 
             // Roll back the app.
-            RollbackTestUtils.rollback(rollback);
+            RollbackTestUtils.rollback(rollback.getRollbackId());
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // Verify we received a broadcast for the rollback.
@@ -211,7 +211,7 @@ public class RollbackTest {
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
             // Rollback of B should not rollback A
-            RollbackTestUtils.rollback(rollbackB);
+            RollbackTestUtils.rollback(rollbackB.getRollbackId());
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
         } finally {
@@ -268,7 +268,7 @@ public class RollbackTest {
             assertRollbackInfoForAandB(rollbackB);
 
             // Rollback of B should rollback A as well
-            RollbackTestUtils.rollback(rollbackB);
+            RollbackTestUtils.rollback(rollbackB.getRollbackId());
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
         } finally {
@@ -303,7 +303,7 @@ public class RollbackTest {
                     rm.getAvailableRollbacks(), TEST_APP_A);
 
             // Roll back the app.
-            RollbackTestUtils.rollback(rollback);
+            RollbackTestUtils.rollback(rollback.getRollbackId());
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
             // Verify the recent rollback has been recorded.
@@ -430,7 +430,7 @@ public class RollbackTest {
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
             RollbackInfo rollback = getUniqueRollbackInfoForPackage(
                     rm.getAvailableRollbacks(), TEST_APP_A);
-            RollbackTestUtils.rollback(rollback);
+            RollbackTestUtils.rollback(rollback.getRollbackId());
             processUserData(TEST_APP_A);
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
@@ -500,7 +500,7 @@ public class RollbackTest {
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
             // Executing rollback should roll back the correct package.
-            RollbackTestUtils.rollback(rollbackA);
+            RollbackTestUtils.rollback(rollbackA.getRollbackId());
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
 
@@ -509,7 +509,7 @@ public class RollbackTest {
             RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
-            RollbackTestUtils.rollback(rollbackB);
+            RollbackTestUtils.rollback(rollbackB.getRollbackId());
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
         } finally {
@@ -544,7 +544,7 @@ public class RollbackTest {
         try {
             // TODO: What if the implementation checks arguments for non-null
             // first? Then this test isn't valid.
-            rm.commitRollback(null, null);
+            rm.commitRollback(0, null);
             fail("expected SecurityException");
         } catch (SecurityException e) {
             // Expected.
@@ -598,7 +598,7 @@ public class RollbackTest {
 
             // Rollback the app. It should cause both test apps to be rolled
             // back.
-            RollbackTestUtils.rollback(rollback);
+            RollbackTestUtils.rollback(rollback.getRollbackId());
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
 

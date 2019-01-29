@@ -87,6 +87,7 @@ applications that come with the platform
         <permission name="android.permission.MASTER_CLEAR"/>
         <permission name="android.permission.NETWORK_MANAGED_PROVISIONING"/>
         <permission name="android.permission.PERFORM_CDMA_PROVISIONING"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.SET_TIME"/>
         <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SHUTDOWN"/>

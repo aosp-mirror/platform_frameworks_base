@@ -2574,6 +2574,10 @@ public class DisplayPolicy {
         }
     }
 
+    void notifyDisplayReady() {
+        mHandler.post(() -> getStatusBarManagerInternal().onDisplayReady(getDisplayId()));
+    }
+
     /**
      * Return the display width available after excluding any screen
      * decorations that could never be removed in Honeycomb. That is, system bar or

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+import static com.android.systemui.SysUiServiceProvider.getComponent;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
@@ -34,6 +35,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -48,7 +50,7 @@ import javax.inject.Singleton;
 
 /** A controller to handle navigation bars. */
 @Singleton
-public class NavigationBarController implements DisplayListener {
+public class NavigationBarController implements DisplayListener, Callbacks {
 
     private static final String TAG = NavigationBarController.class.getName();
 
@@ -65,13 +67,11 @@ public class NavigationBarController implements DisplayListener {
         mHandler = handler;
         mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
         mDisplayManager.registerDisplayListener(this, mHandler);
+        getComponent(mContext, CommandQueue.class).addCallback(this);
     }
 
     @Override
-    public void onDisplayAdded(int displayId) {
-        Display display = mDisplayManager.getDisplay(displayId);
-        createNavigationBar(display);
-    }
+    public void onDisplayAdded(int displayId) { }
 
     @Override
     public void onDisplayRemoved(int displayId) {
@@ -79,7 +79,12 @@ public class NavigationBarController implements DisplayListener {
     }
 
     @Override
-    public void onDisplayChanged(int displayId) {
+    public void onDisplayChanged(int displayId) { }
+
+    @Override
+    public void onDisplayReady(int displayId) {
+        Display display = mDisplayManager.getDisplay(displayId);
+        createNavigationBar(display);
     }
 
     // TODO(b/117478341): I use {@code includeDefaultDisplay} to make this method compatible to

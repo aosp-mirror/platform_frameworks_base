@@ -3637,6 +3637,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.INetd} for communicating with the network stack
+     * @hide
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String NETD_SERVICE = "netd";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link NetworkStack} for communicating with the network stack
      * @hide
      * @see #getSystemService(String)

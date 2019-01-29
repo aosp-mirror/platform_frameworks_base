@@ -567,8 +567,9 @@ public final class TextClassifierImpl implements TextClassifier {
             }
         }
 
-        // TODO: Make this configurable.
-        final float foreignTextThreshold = typeCount == 0 ? 0.5f : 0.7f;
+        final float foreignTextThreshold = mSettings.getLangIdThresholdOverride() >= 0
+                ? mSettings.getLangIdThresholdOverride()
+                : 0.5f /* TODO: Load this from the langId model. */;
         boolean isPrimaryAction = true;
         final ArrayList<Intent> sourceIntents = new ArrayList<>();
         for (LabeledIntent labeledIntent : IntentFactory.create(
@@ -602,6 +603,10 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     private boolean isForeignText(String text, float threshold) {
+        if (threshold > 1) {
+            return false;
+        }
+
         // TODO: Revisit this algorithm.
         try {
             final LangIdModel.LanguageResult[] langResults = getLangIdImpl().detectLanguages(text);

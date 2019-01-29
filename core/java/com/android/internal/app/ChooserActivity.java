@@ -22,6 +22,8 @@ import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionManager;
 import android.app.prediction.AppPredictor;
 import android.app.prediction.AppTarget;
+import android.app.prediction.AppTargetEvent;
+import android.app.prediction.AppTargetId;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -111,6 +113,7 @@ public class ChooserActivity extends ResolverActivity {
     private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = false;
     // TODO(b/123088566) Share these in a better way.
     private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
+    public static final String LAUNCH_LOCATON_DIRECT_SHARE = "direct_share";
     private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
     private AppPredictor mAppPredictor;
@@ -787,9 +790,11 @@ public class ChooserActivity extends ResolverActivity {
         // Do nothing. We'll send the voice stuff ourselves.
     }
 
-    // TODO(b/123377860) Send clicked ShortcutInfo to mAppPredictor
     void updateModelAndChooserCounts(TargetInfo info) {
         if (info != null) {
+            if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+                sendClickToAppPredictor(info);
+            }
             final ResolveInfo ri = info.getResolveInfo();
             Intent targetIntent = getTargetIntent();
             if (ri != null && ri.activityInfo != null && targetIntent != null) {
@@ -802,11 +807,37 @@ public class ChooserActivity extends ResolverActivity {
                     Log.d(TAG, "ResolveInfo Package is " + ri.activityInfo.packageName);
                     Log.d(TAG, "Action to be updated is " + targetIntent.getAction());
                 }
-            } else if(DEBUG) {
+            } else if (DEBUG) {
                 Log.d(TAG, "Can not log Chooser Counts of null ResovleInfo");
             }
         }
         mIsSuccessfullySelected = true;
+    }
+
+    private void sendClickToAppPredictor(TargetInfo targetInfo) {
+        if (!(targetInfo instanceof ChooserTargetInfo)) {
+            return;
+        }
+        ChooserTarget chooserTarget = ((ChooserTargetInfo) targetInfo).getChooserTarget();
+        ComponentName componentName = chooserTarget.getComponentName();
+        Bundle extras = chooserTarget.getIntentExtras();
+        if (extras == null) {
+            return;
+        }
+        String shortcutId = extras.getString(Intent.EXTRA_SHORTCUT_ID);
+        if (shortcutId == null) {
+            return;
+        }
+        mAppPredictor.notifyAppTargetEvent(
+                new AppTargetEvent.Builder(
+                    new AppTarget(
+                        new AppTargetId(shortcutId),
+                        componentName.getPackageName(),
+                        componentName.getClassName(),
+                        getUser()),
+                    AppTargetEvent.ACTION_LAUNCH
+                ).setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
+                .build());
     }
 
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
@@ -1126,6 +1157,10 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public CharSequence getBadgeContentDescription() {
             return mBadgeContentDescription;
+        }
+
+        public ChooserTarget getChooserTarget() {
+            return mChooserTarget;
         }
 
         @Override

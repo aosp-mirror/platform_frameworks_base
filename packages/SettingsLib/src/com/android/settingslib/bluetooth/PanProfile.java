@@ -153,7 +153,7 @@ public class PanProfile implements LocalBluetoothProfile {
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_network_pan;
+        return com.android.internal.R.drawable.ic_bt_network_pan;
     }
 
     // Tethering direction determines UI strings.

@@ -1,4 +1,4 @@
-package com.android.inspectable;
+package com.android.node;
 
 import android.view.inspector.InspectionCompanion;
 import android.view.inspector.PropertyMapper;
@@ -23,7 +23,7 @@ public final class Outer$Inner$$InspectionCompanion implements InspectionCompani
     }
 
     @Override
-    public void readProperties(Outer.Inner inspectable, PropertyReader propertyReader) {
+    public void readProperties(Outer.Inner node, PropertyReader propertyReader) {
         if (!mPropertiesMapped) {
             throw new InspectionCompanion.UninitializedPropertyMapException();
         }

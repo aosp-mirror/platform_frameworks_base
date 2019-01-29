@@ -227,7 +227,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public void executeRollback(RollbackInfo rollback, String callerPackageName,
+    public void commitRollback(int rollbackId, String callerPackageName,
             IntentSender statusReceiver) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLLBACKS,
@@ -238,19 +238,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         appOps.checkPackage(callingUid, callerPackageName);
 
         getHandler().post(() ->
-                executeRollbackInternal(rollback, callerPackageName, statusReceiver));
+                commitRollbackInternal(rollbackId, callerPackageName, statusReceiver));
     }
 
     /**
-     * Performs the actual work to execute a rollback.
+     * Performs the actual work to commit a rollback.
      * The work is done on the current thread. This may be a long running
      * operation.
      */
-    private void executeRollbackInternal(RollbackInfo rollback,
+    private void commitRollbackInternal(int rollbackId,
             String callerPackageName, IntentSender statusReceiver) {
         Log.i(TAG, "Initiating rollback");
 
-        RollbackData data = getRollbackForId(rollback.getRollbackId());
+        RollbackData data = getRollbackForId(rollbackId);
         if (data == null) {
             sendFailure(statusReceiver, "Rollback unavailable");
             return;
@@ -350,7 +350,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                 return;
                             }
 
-                            addRecentlyExecutedRollback(rollback);
+                            addRecentlyExecutedRollback(
+                                    new RollbackInfo(data.rollbackId, data.packages));
                             sendSuccess(statusReceiver);
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);

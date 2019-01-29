@@ -562,6 +562,7 @@ java_defaults {
         "telephony/java/android/telephony/mbms/vendor/IMbmsStreamingService.aidl",
         "telephony/java/android/telephony/mbms/vendor/IMbmsGroupCallService.aidl",
         "telephony/java/android/telephony/ICellInfoCallback.aidl",
+        "telephony/java/android/telephony/IFinancialSmsCallback.aidl",
         "telephony/java/android/telephony/INetworkService.aidl",
         "telephony/java/android/telephony/INetworkServiceCallback.aidl",
         "telephony/java/com/android/ims/internal/IImsCallSession.aidl",
@@ -827,19 +828,6 @@ java_library_host {
 }
 
 // A temporary build target that is conditionally included on the bootclasspath if
-// org.apache.http.legacy library has been removed and which provides support for
-// maintaining backwards compatibility for APKs that target pre-P and depend on
-// org.apache.http.legacy classes. This is used iff REMOVE_OAHL_FROM_BCP=true is
-// specified on the build command line.
-java_library {
-    name: "framework-oahl-backward-compatibility",
-    installable: true,
-    srcs: [
-        "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
-    ],
-}
-
-// A temporary build target that is conditionally included on the bootclasspath if
 // android.test.base library has been removed and which provides support for
 // maintaining backwards compatibility for APKs that target pre-P and depend on
 // android.test.base classes. This is used iff REMOVE_ATB_FROM_BCP=true is
@@ -918,6 +906,31 @@ aidl_interface {
         "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
+}
+
+filegroup {
+    name: "framework-networkstack-shared-srcs",
+    srcs: [
+        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/android/net/DhcpResults.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/annotations/VisibleForTesting.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/MessageUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/RingBufferIndices.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
+        "core/java/android/net/shared/*.java",
+    ]
 }
 
 // Build ext.jar

@@ -46,6 +46,7 @@ import java.util.StringJoiner;
  * entity_list_default                      (String[])
  * entity_list_not_editable                 (String[])
  * entity_list_editable                     (String[])
+ * lang_id_threshold_override               (float)
  * </pre>
  *
  * <p>
@@ -94,6 +95,8 @@ public final class TextClassificationConstants {
             "in_app_conversation_action_types_default";
     private static final String NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT =
             "notification_conversation_action_types_default";
+    private static final String LANG_ID_THRESHOLD_OVERRIDE =
+            "lang_id_threshold_override";
 
     private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
@@ -106,8 +109,8 @@ public final class TextClassificationConstants {
     private static final int CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT = 10 * 1000;
     private static final int GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT = 100 * 1000;
     private static final int GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT = 100;
-    private static final String ENTITY_LIST_DELIMITER = ":";
-    private static final String ENTITY_LIST_DEFAULT_VALUE = new StringJoiner(ENTITY_LIST_DELIMITER)
+    private static final String STRING_LIST_DELIMITER = ":";
+    private static final String ENTITY_LIST_DEFAULT_VALUE = new StringJoiner(STRING_LIST_DELIMITER)
             .add(TextClassifier.TYPE_ADDRESS)
             .add(TextClassifier.TYPE_EMAIL)
             .add(TextClassifier.TYPE_PHONE)
@@ -116,7 +119,7 @@ public final class TextClassificationConstants {
             .add(TextClassifier.TYPE_DATE_TIME)
             .add(TextClassifier.TYPE_FLIGHT_NUMBER).toString();
     private static final String CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES =
-            new StringJoiner(ENTITY_LIST_DELIMITER)
+            new StringJoiner(STRING_LIST_DELIMITER)
                     .add(ConversationAction.TYPE_TEXT_REPLY)
                     .add(ConversationAction.TYPE_CREATE_REMINDER)
                     .add(ConversationAction.TYPE_CALL_PHONE)
@@ -127,6 +130,13 @@ public final class TextClassificationConstants {
                     .add(ConversationAction.TYPE_VIEW_CALENDAR)
                     .add(ConversationAction.TYPE_VIEW_MAP)
                     .toString();
+    /**
+     * < 0  : Not set. Use value from LangId model.
+     * 0 - 1: Override value in LangId model.
+     * > 1  : Effectively turns off the foreign language detection. Scores should never be > 1.
+     * @see EntityConfidence
+     */
+    private static final float LANG_ID_THRESHOLD_OVERRIDE_DEFAULT = -1f;
 
     private final boolean mSystemTextClassifierEnabled;
     private final boolean mLocalTextClassifierEnabled;
@@ -144,6 +154,7 @@ public final class TextClassificationConstants {
     private final List<String> mEntityListEditable;
     private final List<String> mInAppConversationActionTypesDefault;
     private final List<String> mNotificationConversationActionTypesDefault;
+    private final float mLangIdThresholdOverride;
 
     private TextClassificationConstants(@Nullable String settings) {
         final KeyValueListParser parser = new KeyValueListParser(',');
@@ -186,21 +197,24 @@ public final class TextClassificationConstants {
         mGenerateLinksLogSampleRate = parser.getInt(
                 GENERATE_LINKS_LOG_SAMPLE_RATE,
                 GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT);
-        mEntityListDefault = parseEntityList(parser.getString(
+        mEntityListDefault = parseStringList(parser.getString(
                 ENTITY_LIST_DEFAULT,
                 ENTITY_LIST_DEFAULT_VALUE));
-        mEntityListNotEditable = parseEntityList(parser.getString(
+        mEntityListNotEditable = parseStringList(parser.getString(
                 ENTITY_LIST_NOT_EDITABLE,
                 ENTITY_LIST_DEFAULT_VALUE));
-        mEntityListEditable = parseEntityList(parser.getString(
+        mEntityListEditable = parseStringList(parser.getString(
                 ENTITY_LIST_EDITABLE,
                 ENTITY_LIST_DEFAULT_VALUE));
-        mInAppConversationActionTypesDefault = parseEntityList(parser.getString(
+        mInAppConversationActionTypesDefault = parseStringList(parser.getString(
                 IN_APP_CONVERSATION_ACTION_TYPES_DEFAULT,
                 CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES));
-        mNotificationConversationActionTypesDefault = parseEntityList(parser.getString(
+        mNotificationConversationActionTypesDefault = parseStringList(parser.getString(
                 NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT,
                 CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES));
+        mLangIdThresholdOverride = parser.getFloat(
+                LANG_ID_THRESHOLD_OVERRIDE,
+                LANG_ID_THRESHOLD_OVERRIDE_DEFAULT);
     }
 
     /** Load from a settings string. */
@@ -272,8 +286,12 @@ public final class TextClassificationConstants {
         return mNotificationConversationActionTypesDefault;
     }
 
-    private static List<String> parseEntityList(String listStr) {
-        return Collections.unmodifiableList(Arrays.asList(listStr.split(ENTITY_LIST_DELIMITER)));
+    public float getLangIdThresholdOverride() {
+        return mLangIdThresholdOverride;
+    }
+
+    private static List<String> parseStringList(String listStr) {
+        return Collections.unmodifiableList(Arrays.asList(listStr.split(STRING_LIST_DELIMITER)));
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -296,6 +314,7 @@ public final class TextClassificationConstants {
         pw.printPair("getInAppConversationActionTypes", mInAppConversationActionTypesDefault);
         pw.printPair("getNotificationConversationActionTypes",
                 mNotificationConversationActionTypesDefault);
+        pw.printPair("getLangIdThresholdOverride", mLangIdThresholdOverride);
         pw.decreaseIndent();
         pw.println();
     }

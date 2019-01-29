@@ -183,6 +183,14 @@ public class ImageFormat {
     public static final int JPEG = 0x100;
 
     /**
+     * Depth augmented compressed JPEG format.
+     *
+     * <p>JPEG compressed main image along with XMP embedded depth metadata
+     * following ISO 16684-1:2011(E).</p>
+     */
+    public static final int DEPTH_JPEG = 0x69656963;
+
+    /**
      * <p>Multi-plane Android YUV 420 format</p>
      *
      * <p>This format is a generic YCbCr format, capable of describing any 4:2:0
@@ -787,6 +795,7 @@ public class ImageFormat {
             case PRIVATE:
             case RAW_DEPTH:
             case Y8:
+            case DEPTH_JPEG:
                 return true;
         }
 

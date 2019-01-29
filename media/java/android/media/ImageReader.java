@@ -17,12 +17,10 @@
 package android.media;
 
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
 import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.Surface;
 
 import dalvik.system.VMRuntime;
@@ -74,12 +72,6 @@ public class ImageReader implements AutoCloseable {
     private static final int ACQUIRE_MAX_IMAGES = 2;
 
     /**
-     * Invalid consumer buffer usage flag. This usage flag will be ignored
-     * by the {@code ImageReader} instance is constructed with this value.
-     */
-    private static final long BUFFER_USAGE_UNKNOWN = 0;
-
-    /**
      * <p>
      * Create a new reader for images of the desired size and format.
      * </p>
@@ -129,7 +121,10 @@ public class ImageReader implements AutoCloseable {
      * @see Image
      */
     public static ImageReader newInstance(int width, int height, int format, int maxImages) {
-        return new ImageReader(width, height, format, maxImages, BUFFER_USAGE_UNKNOWN);
+        // If the format is private don't default to USAGE_CPU_READ_OFTEN since it may not
+        // work, and is inscrutable anyway
+        return new ImageReader(width, height, format, maxImages,
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN);
     }
 
     /**
@@ -207,18 +202,23 @@ public class ImageReader implements AutoCloseable {
      *            obtained by the user, one of them has to be released before a new Image will
      *            become available for access through {@link #acquireLatestImage()} or
      *            {@link #acquireNextImage()}. Must be greater than 0.
-     * @param usage The intended usage of the images produced by this ImageReader. It needs
-     *            to be one of the Usage defined by {@link HardwareBuffer}, or an
-     *            {@link IllegalArgumentException} will be thrown.
+     * @param usage The intended usage of the images produced by this ImageReader. See the usages
+     *              on {@link HardwareBuffer} for a list of valid usage bits. See also
+     *              {@link HardwareBuffer#isSupported(int, int, int, int, long)} for checking
+     *              if a combination is supported. If it's not supported this will throw
+     *              an {@link IllegalArgumentException}.
      * @see Image
      * @see HardwareBuffer
      */
     public static ImageReader newInstance(int width, int height, int format, int maxImages,
             long usage) {
-        if (!isFormatUsageCombinationAllowed(format, usage)) {
-            throw new IllegalArgumentException("Format usage combination is not supported:"
-                    + " format = " + format + ", usage = " + usage);
-        }
+        // TODO: Check this - can't do it just yet because format support is different
+        // Unify formats! The only reliable way to validate usage is to just try it and see.
+
+//        if (!HardwareBuffer.isSupported(width, height, format, 1, usage)) {
+//            throw new IllegalArgumentException("The given format=" + Integer.toHexString(format)
+//                + " & usage=" + Long.toHexString(usage) + " is not supported");
+//        }
         return new ImageReader(width, height, format, maxImages, usage);
     }
 
@@ -716,19 +716,6 @@ public class ImageReader implements AutoCloseable {
         return si.getReader() == this;
     }
 
-    private static boolean isFormatUsageCombinationAllowed(int format, long usage) {
-        if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
-            return false;
-        }
-
-        // Valid usage needs to be provided.
-        if (usage == BUFFER_USAGE_UNKNOWN) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * Called from Native code when an Event happens.
      *
@@ -833,6 +820,7 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.JPEG:
                 case ImageFormat.DEPTH_POINT_CLOUD:
                 case ImageFormat.RAW_PRIVATE:
+                case ImageFormat.DEPTH_JPEG:
                     width = ImageReader.this.getWidth();
                     break;
                 default:
@@ -849,6 +837,7 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.JPEG:
                 case ImageFormat.DEPTH_POINT_CLOUD:
                 case ImageFormat.RAW_PRIVATE:
+                case ImageFormat.DEPTH_JPEG:
                     height = ImageReader.this.getHeight();
                     break;
                 default:

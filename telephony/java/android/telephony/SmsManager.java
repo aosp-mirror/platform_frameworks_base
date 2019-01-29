@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -32,8 +33,10 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.BaseBundle;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -51,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /*
  * TODO(code review): Curious question... Why are a lot of these
@@ -2143,6 +2147,43 @@ public final class SmsManager {
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
             return null;
+        }
+    }
+
+    /** callback for providing asynchronous sms messages for financial app. */
+    public abstract static class FinancialSmsCallback {
+        /**
+         * Callback to send sms messages back to financial app asynchronously.
+         *
+         * @param msgs SMS messages.
+         */
+        public abstract void onFinancialSmsMessages(CursorWindow msgs);
+    };
+
+    /**
+     * Get SMS messages for the calling financial app.
+     * The result will be delivered asynchronously in the passing in callback interface.
+     *
+     * @param params the parameters to filter SMS messages returned.
+     * @param executor the executor on which callback will be invoked.
+     * @param callback a callback to receive CursorWindow with SMS messages.
+     */
+    @RequiresPermission(android.Manifest.permission.SMS_FINANCIAL_TRANSACTIONS)
+    public void getSmsMessagesForFinancialApp(
+            Bundle params,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull FinancialSmsCallback callback) {
+        try {
+            ISms iccSms = getISmsServiceOrThrow();
+            iccSms.getSmsMessagesForFinancialApp(
+                    getSubscriptionId(), ActivityThread.currentPackageName(), params,
+                    new IFinancialSmsCallback.Stub() {
+                        public void onGetSmsMessagesForFinancialApp(CursorWindow msgs) {
+                            Binder.withCleanCallingIdentity(() -> executor.execute(
+                                    () -> callback.onFinancialSmsMessages(msgs)));
+                        }});
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
         }
     }
 
