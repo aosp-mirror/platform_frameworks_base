@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.net.LinkAddress;
+import android.net.RouteInfo;
 
 /**
  * Observer for network events, to use with {@link NetworkObserverRegistry}.
@@ -77,11 +78,11 @@ public interface NetworkObserver {
      * @see android.net.INetdUnsolicitedEventListener
      *          #onRouteChanged(boolean, String, String, String)
      */
-    default void onRouteUpdated(String route, String gateway, String ifName) {}
+    default void onRouteUpdated(RouteInfo route) {}
 
     /**
      * @see android.net.INetdUnsolicitedEventListener
      *          #onRouteChanged(boolean, String, String, String)
      */
-    default void onRouteRemoved(String route, String gateway, String ifName) {}
+    default void onRouteRemoved(RouteInfo route) {}
 }
