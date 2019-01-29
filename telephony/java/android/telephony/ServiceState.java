@@ -1631,8 +1631,9 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public static boolean bearerBitmapHasCdma(int radioTechnologyBitmap) {
-        return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK & radioTechnologyBitmap) != 0;
+    public static boolean bearerBitmapHasCdma(int networkTypeBitmask) {
+        return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK
+                & convertNetworkTypeBitmaskToBearerBitmask(networkTypeBitmask)) != 0;
     }
 
     /** @hide */
