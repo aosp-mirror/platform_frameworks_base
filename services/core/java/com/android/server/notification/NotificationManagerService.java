@@ -197,6 +197,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -3618,6 +3619,22 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public ComponentName getAllowedNotificationAssistantForUser(int userId) {
+            checkCallerIsSystem();
+            List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
+            if (allowedComponents.size() > 1) {
+                throw new IllegalStateException(
+                        "At most one NotificationAssistant: " + allowedComponents.size());
+            }
+            return CollectionUtils.firstOrNull(allowedComponents);
+        }
+
+        @Override
+        public ComponentName getAllowedNotificationAssistant() {
+            return getAllowedNotificationAssistantForUser(getCallingUserHandle().getIdentifier());
+        }
+
+        @Override
         public boolean isNotificationListenerAccessGranted(ComponentName listener) {
             Preconditions.checkNotNull(listener);
             checkCallerIsSystemOrSameApp(listener.getPackageName());
@@ -3685,8 +3702,15 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
                 int userId, boolean granted) throws RemoteException {
-            Preconditions.checkNotNull(assistant);
             checkCallerIsSystemOrShell();
+            if (assistant == null) {
+                ComponentName allowedAssistant = CollectionUtils.firstOrNull(
+                        mAssistants.getAllowedComponents(userId));
+                if (allowedAssistant != null) {
+                    setNotificationAssistantAccessGrantedForUser(allowedAssistant, userId, false);
+                }
+                return;
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (mAllowedManagedServicePackages.test(assistant.getPackageName())) {
@@ -7208,6 +7232,26 @@ public class NotificationManagerService extends SystemService {
                     readDefaultAssistant(userId);
                 }
             }
+        }
+
+        @Override
+        protected void setPackageOrComponentEnabled(String pkgOrComponent, int userId,
+                boolean isPrimary, boolean enabled) {
+            // Ensures that only one component is enabled at a time
+            if (enabled) {
+                List<ComponentName> allowedComponents = getAllowedComponents(userId);
+                if (!allowedComponents.isEmpty()) {
+                    ComponentName currentComponent = CollectionUtils.firstOrNull(allowedComponents);
+                    if (currentComponent.flattenToString().equals(pkgOrComponent)) return;
+                    try {
+                        getBinderService().setNotificationAssistantAccessGrantedForUser(
+                                currentComponent, userId, false);
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
+                    }
+                }
+            }
+            super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled);
         }
     }
 

@@ -499,6 +499,13 @@ package android.app {
     method public org.json.JSONObject toJson() throws org.json.JSONException;
   }
 
+  public class NotificationManager {
+    method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
+    method @Nullable public android.content.ComponentName getAllowedNotificationAssistantForUser(android.os.UserHandle);
+    method public void setNotificationAssistantAccessGranted(android.content.ComponentName, boolean);
+    method public void setNotificationAssistantAccessGrantedForUser(android.content.ComponentName, android.os.UserHandle, boolean);
+  }
+
   public final class StatsManager {
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void addConfig(long, byte[]) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean addConfiguration(long, byte[]);
