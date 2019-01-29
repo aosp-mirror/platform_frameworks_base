@@ -23,15 +23,17 @@ import static junit.framework.Assert.assertTrue;
 import android.app.RemoteInput;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +49,7 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        overrideSetting(null); // No config.
+        resetAllDeviceConfigFlags();
         TestableResources resources = mContext.getOrCreateTestableResources();
         resources.addOverride(R.bool.config_smart_replies_in_notifications_enabled, true);
         resources.addOverride(
@@ -58,7 +60,14 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
         resources.addOverride(
                 R.integer.config_smart_replies_in_notifications_min_num_system_generated_replies,
                 2);
+        resources.addOverride(
+                R.integer.config_smart_replies_in_notifications_max_num_actions, -1);
         mConstants = new SmartReplyConstants(Handler.createAsync(Looper.myLooper()), mContext);
+    }
+
+    @After
+    public void tearDown() {
+        resetAllDeviceConfigFlags();
     }
 
     @Test
@@ -68,25 +77,25 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
 
     @Test
     public void testIsEnabledWithInvalidConfig() {
-        overrideSetting("invalid config");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_ENABLED, "invalid config");
         triggerConstantsOnChange();
         assertTrue(mConstants.isEnabled());
     }
 
     @Test
     public void testIsEnabledWithValidConfig() {
-        overrideSetting("enabled=false,max_squeeze_remeasure_attempts=5");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_ENABLED, "false");
         triggerConstantsOnChange();
         assertFalse(mConstants.isEnabled());
     }
 
     @Test
     public void testRequiresTargetingPConfig() {
-        overrideSetting("enabled=true,requires_targeting_p=false");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P, "false");
         triggerConstantsOnChange();
         assertEquals(false, mConstants.requiresTargetingP());
 
-        overrideSetting("enabled=true");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P, "");
         triggerConstantsOnChange();
         assertEquals(true, mConstants.requiresTargetingP());
     }
@@ -99,21 +108,21 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
 
     @Test
     public void testGetMaxSqueezeRemeasureAttemptsWithInvalidConfig() {
-        overrideSetting("invalid config");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS,
+                "invalid config");
         triggerConstantsOnChange();
         assertEquals(7, mConstants.getMaxSqueezeRemeasureAttempts());
     }
 
     @Test
     public void testGetMaxSqueezeRemeasureAttemptsWithValidConfig() {
-        overrideSetting("enabled=false,max_squeeze_remeasure_attempts=5");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS, "5");
         triggerConstantsOnChange();
         assertEquals(5, mConstants.getMaxSqueezeRemeasureAttempts());
     }
 
     @Test
     public void testGetEffectiveEditChoicesBeforeSendingWithNoConfig() {
-        overrideSetting("enabled=true");
         triggerConstantsOnChange();
         assertFalse(
                 mConstants.getEffectiveEditChoicesBeforeSending(
@@ -128,7 +137,7 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
 
     @Test
     public void testGetEffectiveEditChoicesBeforeSendingWithEnabledConfig() {
-        overrideSetting("enabled=true,edit_choices_before_sending=true");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING, "true");
         triggerConstantsOnChange();
         assertTrue(
                 mConstants.getEffectiveEditChoicesBeforeSending(
@@ -143,7 +152,7 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
 
     @Test
     public void testGetEffectiveEditChoicesBeforeSendingWithDisabledConfig() {
-        overrideSetting("enabled=true,edit_choices_before_sending=false");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING, "false");
         triggerConstantsOnChange();
         assertFalse(
                 mConstants.getEffectiveEditChoicesBeforeSending(
@@ -164,34 +173,16 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
 
     @Test
     public void testShowInHeadsUpEnabled() {
-        overrideSetting("enabled=true,show_in_heads_up=true");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP, "true");
         triggerConstantsOnChange();
         assertTrue(mConstants.getShowInHeadsUp());
     }
 
     @Test
     public void testShowInHeadsUpDisabled() {
-        overrideSetting("enabled=true,show_in_heads_up=false");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP, "false");
         triggerConstantsOnChange();
         assertFalse(mConstants.getShowInHeadsUp());
-    }
-
-    @Test
-    public void testMaxNumActionsWithNoConfig() {
-        assertTrue(mConstants.isEnabled());
-        assertEquals(-1, mConstants.getMaxNumActions());
-    }
-
-    @Test
-    public void testMaxNumActionsSet() {
-        overrideSetting("enabled=true,max_num_actions=10");
-        triggerConstantsOnChange();
-        assertEquals(10, mConstants.getMaxNumActions());
-    }
-
-    private void overrideSetting(String flags) {
-        Settings.Global.putString(mContext.getContentResolver(),
-                Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS, flags);
     }
 
     @Test
@@ -202,15 +193,51 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
 
     @Test
     public void testGetMinNumSystemGeneratedRepliesWithValidConfig() {
-        overrideSetting("enabled=true,min_num_system_generated_replies=5");
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES, "5");
         triggerConstantsOnChange();
         assertEquals(5, mConstants.getMinNumSystemGeneratedReplies());
     }
 
+    @Test
+    public void testMaxNumActionsWithNoConfig() {
+        assertTrue(mConstants.isEnabled());
+        assertEquals(-1, mConstants.getMaxNumActions());
+    }
+
+    @Test
+    public void testMaxNumActionsSet() {
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS, "10");
+        triggerConstantsOnChange();
+        assertEquals(10, mConstants.getMaxNumActions());
+    }
+
+    private void overrideSetting(String propertyName, String value) {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                propertyName, value, false /* makeDefault */);
+    }
+
     private void triggerConstantsOnChange() {
-        // Since Settings.Global is mocked in TestableContext, we need to manually trigger the
-        // content observer.
-        mConstants.onChange(false,
-                Settings.Global.getUriFor(Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS));
+        mConstants.onDeviceConfigPropertyChanged(DeviceConfig.NAMESPACE_SYSTEMUI,
+                "" /* name */, "" /* value */);
+    }
+
+    private void resetAllDeviceConfigFlags() {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_ENABLED, "", false /* makeDefault */);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P, "", false /* makeDefault */);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS, "",
+                false /* makeDefault */);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING, "",
+                false /* makeDefault */);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP, "", false /* makeDefault */);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES, "",
+                false /* makeDefault */);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS, "", false /* makeDefault */);
     }
 }

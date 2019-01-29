@@ -21,13 +21,14 @@ import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.res.Resources;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 
 import javax.inject.Inject;
@@ -35,19 +36,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
-public final class SmartReplyConstants extends ContentObserver {
+public final class SmartReplyConstants {
 
     private static final String TAG = "SmartReplyConstants";
-
-    private static final String KEY_ENABLED = "enabled";
-    private static final String KEY_REQUIRES_TARGETING_P = "requires_targeting_p";
-    private static final String KEY_MAX_SQUEEZE_REMEASURE_ATTEMPTS =
-            "max_squeeze_remeasure_attempts";
-    private static final String KEY_EDIT_CHOICES_BEFORE_SENDING =
-            "edit_choices_before_sending";
-    private static final String KEY_SHOW_IN_HEADS_UP = "show_in_heads_up";
-    private static final String KEY_MIN_NUM_REPLIES = "min_num_system_generated_replies";
-    private static final String KEY_MAX_NUM_ACTIONS = "max_num_actions";
 
     private final boolean mDefaultEnabled;
     private final boolean mDefaultRequiresP;
@@ -65,13 +56,13 @@ public final class SmartReplyConstants extends ContentObserver {
     private int mMinNumSystemGeneratedReplies;
     private int mMaxNumActions;
 
+    private final Handler mHandler;
     private final Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     @Inject
     public SmartReplyConstants(@Named(MAIN_HANDLER_NAME) Handler handler, Context context) {
-        super(handler);
-
+        mHandler = handler;
         mContext = context;
         final Resources resources = mContext.getResources();
         mDefaultEnabled = resources.getBoolean(
@@ -89,35 +80,86 @@ public final class SmartReplyConstants extends ContentObserver {
         mDefaultMaxNumActions = resources.getInteger(
                 R.integer.config_smart_replies_in_notifications_max_num_actions);
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS),
-                false, this);
+        registerDeviceConfigListener();
         updateConstants();
     }
 
-    @Override
-    public void onChange(boolean selfChange, Uri uri) {
+    private void registerDeviceConfigListener() {
+        DeviceConfig.addOnPropertyChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                this::postToHandler,
+                this::onDeviceConfigPropertyChanged);
+    }
+
+    private void postToHandler(Runnable r) {
+        this.mHandler.post(r);
+    }
+
+    @VisibleForTesting
+    void onDeviceConfigPropertyChanged(String namespace, String name, String value) {
+        if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
+            Log.e(TAG, "Received update from DeviceConfig for unrelated namespace: "
+                    + namespace + " " + name + "=" + value);
+            return;
+        }
+
         updateConstants();
     }
 
     private void updateConstants() {
         synchronized (SmartReplyConstants.this) {
-            try {
-                mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
-                        Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS));
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "Bad smart reply constants", e);
-            }
-            mEnabled = mParser.getBoolean(KEY_ENABLED, mDefaultEnabled);
-            mRequiresTargetingP = mParser.getBoolean(KEY_REQUIRES_TARGETING_P, mDefaultRequiresP);
-            mMaxSqueezeRemeasureAttempts = mParser.getInt(
-                    KEY_MAX_SQUEEZE_REMEASURE_ATTEMPTS, mDefaultMaxSqueezeRemeasureAttempts);
-            mEditChoicesBeforeSending = mParser.getBoolean(
-                    KEY_EDIT_CHOICES_BEFORE_SENDING, mDefaultEditChoicesBeforeSending);
-            mShowInHeadsUp = mParser.getBoolean(KEY_SHOW_IN_HEADS_UP, mDefaultShowInHeadsUp);
-            mMinNumSystemGeneratedReplies =
-                    mParser.getInt(KEY_MIN_NUM_REPLIES, mDefaultMinNumSystemGeneratedReplies);
-            mMaxNumActions = mParser.getInt(KEY_MAX_NUM_ACTIONS, mDefaultMaxNumActions);
+            mEnabled = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_ENABLED,
+                    mDefaultEnabled);
+            mRequiresTargetingP = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P,
+                    mDefaultRequiresP);
+            mMaxSqueezeRemeasureAttempts = readDeviceConfigIntegerOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS,
+                    mDefaultMaxSqueezeRemeasureAttempts);
+            mEditChoicesBeforeSending = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING,
+                    mDefaultEditChoicesBeforeSending);
+            mShowInHeadsUp = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP,
+                    mDefaultShowInHeadsUp);
+            mMinNumSystemGeneratedReplies = readDeviceConfigIntegerOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES,
+                    mDefaultMinNumSystemGeneratedReplies);
+            mMaxNumActions = readDeviceConfigIntegerOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS,
+                    mDefaultMaxNumActions);
+        }
+    }
+
+    private static boolean readDeviceConfigBooleanOrDefaultIfEmpty(String propertyName,
+            boolean defaultValue) {
+        String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI, propertyName);
+        if (TextUtils.isEmpty(value)) {
+            return defaultValue;
+        }
+        if ("true".equals(value)) {
+            return true;
+        }
+        if ("false".equals(value)) {
+            return false;
+        }
+        // For invalid configs we return the default value.
+        return defaultValue;
+    }
+
+    private static int readDeviceConfigIntegerOrDefaultIfEmpty(String propertyName,
+            int defaultValue) {
+        String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI, propertyName);
+        if (TextUtils.isEmpty(value)) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Tried to read an integer flag, property name="
+                    + propertyName + ", value=" + value);
+            return defaultValue;
         }
     }
 
