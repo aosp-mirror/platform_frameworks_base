@@ -1484,25 +1484,34 @@ interface ITelephony {
      * Get the card ID of the default eUICC card. If there is no eUICC, returns
      * {@link #INVALID_CARD_ID}.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     *
      * @param subId subscription ID used for authentication
      * @param callingPackage package making the call
      * @return card ID of the default eUICC card.
-     * @hide
      */
-    int getCardIdForDefaultEuicc(int subId, String callingPackage); 
+    int getCardIdForDefaultEuicc(int subId, String callingPackage);
 
     /**
-     * Gets information about currently inserted UICCs and eUICCs. See {@link UiccCardInfo} for more
-     * details on the kind of information available.
+     * Gets information about currently inserted UICCs and enabled eUICCs.
+     * <p>
+     * Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * If the caller has carrier priviliges on any active subscription, then they have permission to
+     * get simple information like the card ID ({@link UiccCardInfo#getCardId()}), whether the card
+     * is an eUICC ({@link UiccCardInfo#isEuicc()}), and the slot index where the card is inserted
+     * ({@link UiccCardInfo#getSlotIndex()}).
+     * <p>
+     * To get private information such as the EID ({@link UiccCardInfo#getEid()}) or ICCID
+     * ({@link UiccCardInfo#getIccId()}), the caller must have carrier priviliges on that specific
+     * UICC or eUICC card.
+     * <p>
+     * See {@link UiccCardInfo} for more details on the kind of information available.
      *
-     * @return UiccCardInfo an array of UiccCardInfo objects, representing information on the
-     * currently inserted UICCs and eUICCs.
-     *
-     * @hide
+     * @param callingPackage package making the call, used to evaluate carrier privileges 
+     * @return a list of UiccCardInfo objects, representing information on the currently inserted
+     * UICCs and eUICCs. Each UiccCardInfo in the list will have private information filtered out if
+     * the caller does not have adequate permissions for that card.
      */
-    UiccCardInfo[] getUiccCardsInfo();
+    List<UiccCardInfo> getUiccCardsInfo(String callingPackage);
 
     /**
      * Get slot info for all the UICC slots.

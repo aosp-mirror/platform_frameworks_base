@@ -577,10 +577,10 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the cardId of the SIM card which contains the subscription.
-     * @hide
+     * Returns the card ID of the SIM card which contains the subscription (see
+     * {@link UiccCardInfo#getCardId()}.
+     * @return the cardId
      */
-    @SystemApi
     public int getCardId() {
         return this.mCardId;
     }
