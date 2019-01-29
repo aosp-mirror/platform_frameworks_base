@@ -1861,6 +1861,7 @@ public final class Settings {
      * This is the only type of reset available to non-system clients.
      * @hide
      */
+    @TestApi
     public static final int RESET_MODE_PACKAGE_DEFAULTS = 1;
 
     /**

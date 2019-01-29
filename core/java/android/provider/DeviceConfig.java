@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -44,6 +45,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class DeviceConfig {
     /**
      * The content:// style URL for the config table.
@@ -169,13 +171,22 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     public interface Privacy {
         String NAMESPACE = "privacy";
 
         /**
          * Whether to show the Permissions Hub.
+         *
+         * @hide
          */
+        @SystemApi
         String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
+
+        /**
+         * Whether to show location access check notifications.
+         */
+        String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "enable_location_access_check";
     }
 
     /**
@@ -317,6 +328,7 @@ public final class DeviceConfig {
      * @see #resetToDefaults(int, String).
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperty(
             String namespace, String name, String value, boolean makeDefault) {
@@ -337,6 +349,7 @@ public final class DeviceConfig {
      * @see #setProperty(String, String, String, boolean)
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
@@ -483,7 +496,10 @@ public final class DeviceConfig {
      * Interface for monitoring to properties.
      * <p>
      * Override {@link #onPropertyChanged(String, String, String)} to handle callbacks for changes.
+     *
+     * @hide
      */
+    @SystemApi
     public interface OnPropertyChangedListener {
         /**
          * Called when a property has changed.
