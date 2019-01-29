@@ -17,7 +17,13 @@
 package android.net.util;
 
 import static android.net.util.PacketReader.DEFAULT_RECV_BUF_SIZE;
-import static android.system.OsConstants.*;
+import static android.system.OsConstants.AF_INET6;
+import static android.system.OsConstants.IPPROTO_UDP;
+import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOCK_NONBLOCK;
+import static android.system.OsConstants.SOL_SOCKET;
+import static android.system.OsConstants.SO_SNDTIMEO;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,10 +37,12 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructTimeval;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet6Address;
@@ -44,13 +52,6 @@ import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import org.junit.runner.RunWith;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import libcore.io.IoBridge;
 
 /**
  * Tests for PacketReader.
@@ -80,7 +81,7 @@ public class PacketReaderTest {
         protected FileDescriptor createFd() {
             FileDescriptor s = null;
             try {
-                s = Os.socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+                s = Os.socket(AF_INET6, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
                 Os.bind(s, LOOPBACK6, 0);
                 mLocalSockName = (InetSocketAddress) Os.getsockname(s);
                 Os.setsockoptTimeval(s, SOL_SOCKET, SO_SNDTIMEO, TIMEO);

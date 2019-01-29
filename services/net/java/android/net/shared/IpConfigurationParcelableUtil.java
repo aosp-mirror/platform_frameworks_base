@@ -44,11 +44,11 @@ public final class IpConfigurationParcelableUtil {
             @Nullable StaticIpConfiguration config) {
         if (config == null) return null;
         final StaticIpConfigurationParcelable p = new StaticIpConfigurationParcelable();
-        p.ipAddress = LinkPropertiesParcelableUtil.toStableParcelable(config.ipAddress);
-        p.gateway = parcelAddress(config.gateway);
+        p.ipAddress = LinkPropertiesParcelableUtil.toStableParcelable(config.getIpAddress());
+        p.gateway = parcelAddress(config.getGateway());
         p.dnsServers = toParcelableArray(
-                config.dnsServers, IpConfigurationParcelableUtil::parcelAddress, String.class);
-        p.domains = config.domains;
+                config.getDnsServers(), IpConfigurationParcelableUtil::parcelAddress, String.class);
+        p.domains = config.getDomains();
         return p;
     }
 
@@ -59,11 +59,13 @@ public final class IpConfigurationParcelableUtil {
             @Nullable StaticIpConfigurationParcelable p) {
         if (p == null) return null;
         final StaticIpConfiguration config = new StaticIpConfiguration();
-        config.ipAddress = LinkPropertiesParcelableUtil.fromStableParcelable(p.ipAddress);
-        config.gateway = unparcelAddress(p.gateway);
-        config.dnsServers.addAll(fromParcelableArray(
-                p.dnsServers, IpConfigurationParcelableUtil::unparcelAddress));
-        config.domains = p.domains;
+        config.setIpAddress(LinkPropertiesParcelableUtil.fromStableParcelable(p.ipAddress));
+        config.setGateway(unparcelAddress(p.gateway));
+        for (InetAddress addr : fromParcelableArray(
+                p.dnsServers, IpConfigurationParcelableUtil::unparcelAddress)) {
+            config.addDnsServer(addr);
+        }
+        config.setDomains(p.domains);
         return config;
     }
 
