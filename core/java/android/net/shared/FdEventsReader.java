@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.net.util;
+package android.net.shared;
 
-import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
+import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,6 +63,7 @@ import java.io.FileDescriptor;
  * All public methods MUST only be called from the same thread with which
  * the Handler constructor argument is associated.
  *
+ * @param <BufferType> the type of the buffer used to read data.
  * @hide
  */
 public abstract class FdEventsReader<BufferType> {
@@ -89,6 +90,7 @@ public abstract class FdEventsReader<BufferType> {
         mBuffer = buffer;
     }
 
+    /** Start this FdEventsReader. */
     public void start() {
         if (onCorrectThread()) {
             createAndRegisterFd();
@@ -100,6 +102,7 @@ public abstract class FdEventsReader<BufferType> {
         }
     }
 
+    /** Stop this FdEventsReader and destroy the file descriptor. */
     public void stop() {
         if (onCorrectThread()) {
             unregisterAndDestroyFd();
@@ -112,18 +115,25 @@ public abstract class FdEventsReader<BufferType> {
     }
 
     @NonNull
-    public Handler getHandler() { return mHandler; }
+    public Handler getHandler() {
+        return mHandler;
+    }
 
     protected abstract int recvBufSize(@NonNull BufferType buffer);
 
-    public int recvBufSize() { return recvBufSize(mBuffer); }
+    /** Returns the size of the receive buffer. */
+    public int recvBufSize() {
+        return recvBufSize(mBuffer);
+    }
 
     /**
      * Get the number of successful calls to {@link #readPacket(FileDescriptor, Object)}.
      *
      * <p>A call was successful if {@link #readPacket(FileDescriptor, Object)} returned a value > 0.
      */
-    public final long numPacketsReceived() { return mPacketsReceived; }
+    public final long numPacketsReceived() {
+        return mPacketsReceived;
+    }
 
     /**
      * Subclasses MUST create the listening socket here, including setting
@@ -199,7 +209,9 @@ public abstract class FdEventsReader<BufferType> {
         onStart();
     }
 
-    private boolean isRunning() { return (mFd != null) && mFd.valid(); }
+    private boolean isRunning() {
+        return (mFd != null) && mFd.valid();
+    }
 
     // Keep trying to read until we get EAGAIN/EWOULDBLOCK or some fatal error.
     private boolean handleInput() {
