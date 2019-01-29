@@ -148,7 +148,6 @@ import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
@@ -372,8 +371,6 @@ class ActivityStack extends ConfigurationContainer {
     /** Stores the override windowing-mode from before a transient mode change (eg. split) */
     private int mRestoreOverrideWindowingMode = WINDOWING_MODE_UNDEFINED;
 
-    private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
-    private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
     private final Rect mTmpRect3 = new Rect();
@@ -4974,21 +4971,10 @@ class ActivityStack extends ConfigurationContainer {
         // Update override configurations of all tasks in the stack.
         final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
 
-        mTmpBounds.clear();
-        mTmpInsetBounds.clear();
-
         for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
             final TaskRecord task = mTaskHistory.get(i);
             if (task.isResizeable()) {
                 task.updateOverrideConfiguration(taskBounds, tempTaskInsetBounds);
-            }
-
-            if (task.hasDisplayedBounds()) {
-                mTmpBounds.put(task.taskId, task.getDisplayedBounds());
-                mTmpInsetBounds.put(task.taskId, task.getRequestedOverrideBounds());
-            } else {
-                mTmpBounds.put(task.taskId, task.getRequestedOverrideBounds());
-                mTmpInsetBounds.put(task.taskId, null);
             }
         }
 
