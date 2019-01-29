@@ -701,7 +701,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
-    public void onCallAttributesChanged(CallAttributes callAttributes) {
+    public void onCallAttributesChanged(@NonNull CallAttributes callAttributes) {
         // default implementation empty
     }
 
