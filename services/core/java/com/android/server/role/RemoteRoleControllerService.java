@@ -101,6 +101,20 @@ public class RemoteRoleControllerService {
                 callback));
     }
 
+    /**
+     * @see RoleControllerService#onSmsKillSwitchToggled(boolean)
+     */
+    public void onSmsKillSwitchToggled(boolean smsRestrictionEnabled) {
+        mConnection.enqueueCall(new Connection.Call(
+                (s, cb) -> s.onSmsKillSwitchToggled(smsRestrictionEnabled),
+                new IRoleManagerCallback.Default() {
+                    @Override
+                    public void onFailure() {
+                        Slog.e(LOG_TAG, "Failed onSmsKillSwitchToggled");
+                    }
+                }));
+    }
+
     private static final class Connection implements ServiceConnection {
 
         private static final long UNBIND_DELAY_MILLIS = 15 * 1000;
