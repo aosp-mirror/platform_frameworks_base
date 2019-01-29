@@ -164,6 +164,23 @@ package android {
         self.assertEquals(api['android.SomeEnum'].ctors[0].split[0], 'ctor')
         self.assertEquals(api['android.SomeEnum'].methods[0].split[0], 'method')
 
+class ParseV3Stream(unittest.TestCase):
+    def test_field_kinds(self):
+        api = apilint._parse_stream("""
+// Signature format: 3.0
+package a {
+
+  public final class ContextKt {
+    method public static inline <reified T> T! getSystemService(android.content.Context);
+    method public static inline void withStyledAttributes(android.content.Context, android.util.AttributeSet? set = null, int[] attrs, @AttrRes int defStyleAttr = 0, @StyleRes int defStyleRes = 0, kotlin.jvm.functions.Function1<? super android.content.res.TypedArray,kotlin.Unit> block);
+  }
+}
+        """.strip().split('\n'))
+        self.assertEquals(api['a.ContextKt'].methods[0].name, 'getSystemService')
+        self.assertEquals(api['a.ContextKt'].methods[0].split[:4], ['method', 'public', 'static', 'inline'])
+        self.assertEquals(api['a.ContextKt'].methods[1].name, 'withStyledAttributes')
+        self.assertEquals(api['a.ContextKt'].methods[1].split[:4], ['method', 'public', 'static', 'inline'])
+
 class V2TokenizerTests(unittest.TestCase):
     def _test(self, raw, expected):
         self.assertEquals(apilint.V2Tokenizer(raw).tokenize(), expected)
