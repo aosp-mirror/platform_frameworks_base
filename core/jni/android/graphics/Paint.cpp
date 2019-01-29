@@ -73,6 +73,7 @@ static JMetricsID gFontMetricsInt_fieldID;
 
 static void getPosTextPath(const SkFont& font, const uint16_t glyphs[], int count,
                            const SkPoint pos[], SkPath* dst) {
+    dst->reset();
     struct Rec {
         SkPath* fDst;
         const SkPoint* fPos;
