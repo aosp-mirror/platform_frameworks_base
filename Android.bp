@@ -49,9 +49,8 @@ java_defaults {
         "rs/java/**/*.java",
 
         ":framework-javastream-protos",
-        // TODO: Resolve circular library dependency and remove media1-srcs and mediasession2-srcs
+        // TODO: Resolve circular library dependency and remove media1-srcs
         ":media1-srcs",
-        ":mediasession2-srcs",
 
         "core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl",
         "core/java/android/accessibilityservice/IAccessibilityServiceClient.aidl",
