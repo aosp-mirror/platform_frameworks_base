@@ -43,7 +43,6 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
 import android.media.Session2Token;
-import android.media.session.ControllerLink;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
@@ -1054,21 +1053,21 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
 
         @Override
-        public List<ControllerLink> getSessions(ComponentName componentName, int userId) {
+        public List<MediaSession.Token> getSessions(ComponentName componentName, int userId) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
 
             try {
                 int resolvedUserId = verifySessionsRequest(componentName, userId, pid, uid);
-                ArrayList<ControllerLink> binders = new ArrayList<>();
+                ArrayList<MediaSession.Token> tokens = new ArrayList<>();
                 synchronized (mLock) {
                     List<MediaSessionRecord> records = getActiveSessionsLocked(resolvedUserId);
                     for (MediaSessionRecord record : records) {
-                        binders.add(record.getControllerLink());
+                        tokens.add(record.getSessionToken());
                     }
                 }
-                return binders;
+                return tokens;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
