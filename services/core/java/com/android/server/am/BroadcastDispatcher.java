@@ -312,7 +312,7 @@ public class BroadcastDispatcher {
         final Intent intent = r.intent;
         // Any in-flight broadcast has already been popped, and cannot be replaced.
         // (This preserves existing behavior of the replacement API)
-        for (int i = list.size() - 1; i >= 0; i++) {
+        for (int i = list.size() - 1; i >= 0; i--) {
             old = list.get(i);
             if (old.userId == r.userId && intent.filterEquals(old.intent)) {
                 if (DEBUG_BROADCAST) {
