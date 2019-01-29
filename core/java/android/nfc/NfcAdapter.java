@@ -1702,6 +1702,63 @@ public final class NfcAdapter {
     }
 
     /**
+     * Sets Secure NFC feature.
+     * <p>This API is for the Settings application.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean setNfcSecure(boolean enable) {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.setNfcSecure(enable);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the device supports Secure NFC functionality.
+     *
+     * @return True if device supports Secure NFC, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     */
+    public boolean deviceSupportsNfcSecure() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.deviceSupportsNfcSecure();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+     * Checks Secure NFC feature is enabled.
+     *
+     * @return True if device supports Secure NFC is enabled, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if device doesn't support
+     *         Secure NFC functionality. {@link #deviceSupportsNfcSecure}
+     */
+    public boolean isNfcSecureEnabled() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.isNfcSecureEnabled();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
      * Enable NDEF Push feature.
      * <p>This API is for the Settings application.
      * @hide
