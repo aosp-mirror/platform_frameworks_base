@@ -85,6 +85,16 @@ public class NotificationCategorizerTest {
     }
 
     @Test
+    public void testHigh() {
+        NotificationCategorizer nc = new NotificationCategorizer();
+
+        when(mEntry.getChannel()).thenReturn(new NotificationChannel("", "", IMPORTANCE_HIGH));
+
+        assertEquals(NotificationCategorizer.CATEGORY_HIGH, nc.getCategory(mEntry));
+        assertFalse(nc.shouldSilence(NotificationCategorizer.CATEGORY_HIGH));
+    }
+
+    @Test
     public void testOngoingCategory() {
         NotificationCategorizer nc = new NotificationCategorizer();
 
