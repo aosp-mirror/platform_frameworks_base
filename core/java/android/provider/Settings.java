@@ -5831,6 +5831,16 @@ public final class Settings {
         public static final String ALWAYS_ON_VPN_LOCKDOWN = "always_on_vpn_lockdown";
 
         /**
+         * Comma separated list of packages that are allowed to access the network when VPN is in
+         * lockdown mode but not running.
+         * @see #ALWAYS_ON_VPN_LOCKDOWN
+         *
+         * @hide
+         */
+        public static final String ALWAYS_ON_VPN_LOCKDOWN_WHITELIST =
+                "always_on_vpn_lockdown_whitelist";
+
+        /**
          * Whether applications can be installed for this user via the system's
          * {@link Intent#ACTION_INSTALL_PACKAGE} mechanism.
          *
