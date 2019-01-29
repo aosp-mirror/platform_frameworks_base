@@ -13,6 +13,7 @@ android_library {
 
         "SettingsLibHelpUtils",
         "SettingsLibRestrictedLockUtils",
+        "SettingsLibActionBarShadow",
         "SettingsLibAppPreference",
         "SettingsLibSearchWidget",
         "SettingsLibSettingsSpinner",
