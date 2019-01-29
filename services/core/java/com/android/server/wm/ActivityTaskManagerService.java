@@ -762,6 +762,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mGlobalLock;
     }
 
+    /** For test purpose only. */
+    @VisibleForTesting
+    public ActivityTaskManagerInternal getAtmInternal() {
+        return mInternal;
+    }
+
     public void initialize(IntentFirewall intentFirewall, PendingIntentController intentController,
             Looper looper) {
         mH = new H(looper);
