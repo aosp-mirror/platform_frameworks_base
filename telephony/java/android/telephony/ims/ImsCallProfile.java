@@ -347,6 +347,9 @@ public final class ImsCallProfile implements Parcelable {
     private @EmergencyCallRouting int mEmergencyCallRouting =
             EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN;
 
+    /** Indicates if the call is for testing purpose */
+    private boolean mEmergencyCallTesting = false;
+
     /**
      * Extras associated with this {@link ImsCallProfile}.
      * <p>
@@ -534,9 +537,10 @@ public final class ImsCallProfile implements Parcelable {
                 + ", callType=" + mCallType
                 + ", restrictCause=" + mRestrictCause
                 + ", mediaProfile=" + mMediaProfile.toString()
-                + ", emergencyServiceCategories=" + mEmergencyCallRouting
+                + ", emergencyServiceCategories=" + mEmergencyServiceCategories
                 + ", emergencyUrns=" + mEmergencyUrns
-                + ", emergencyCallRouting=" + mEmergencyCallRouting + " }";
+                + ", emergencyCallRouting=" + mEmergencyCallRouting
+                + ", emergencyCallTesting=" + mEmergencyCallTesting + " }";
     }
 
     @Override
@@ -554,6 +558,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeInt(mEmergencyServiceCategories);
         out.writeStringList(mEmergencyUrns);
         out.writeInt(mEmergencyCallRouting);
+        out.writeBoolean(mEmergencyCallTesting);
     }
 
     private void readFromParcel(Parcel in) {
@@ -564,6 +569,7 @@ public final class ImsCallProfile implements Parcelable {
         mEmergencyServiceCategories = in.readInt();
         mEmergencyUrns = in.createStringArrayList();
         mEmergencyCallRouting = in.readInt();
+        mEmergencyCallTesting = in.readBoolean();
     }
 
     public static final Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
@@ -784,9 +790,11 @@ public final class ImsCallProfile implements Parcelable {
      * @hide
      */
     public void setEmergencyCallInfo(EmergencyNumber num) {
-        setEmergencyServiceCategories(num.getEmergencyServiceCategoryBitmask());
+        setEmergencyServiceCategories(num.getEmergencyServiceCategoryBitmaskInternalDial());
         setEmergencyUrns(num.getEmergencyUrns());
         setEmergencyCallRouting(num.getEmergencyCallRouting());
+        setEmergencyCallTesting(num.getEmergencyNumberSourceBitmask()
+                == EmergencyNumber.EMERGENCY_NUMBER_SOURCE_TEST);
     }
 
     /**
@@ -843,6 +851,15 @@ public final class ImsCallProfile implements Parcelable {
     }
 
     /**
+     * Set if this is for testing emergency call, only valid if {@link #getServiceType} returns
+     * {@link #SERVICE_TYPE_EMERGENCY}.
+     */
+    @VisibleForTesting
+    public void setEmergencyCallTesting(boolean isTesting) {
+        mEmergencyCallTesting = isTesting;
+    }
+
+    /**
      * Get the emergency service categories, only valid if {@link #getServiceType} returns
      * {@link #SERVICE_TYPE_EMERGENCY}
      *
@@ -891,5 +908,12 @@ public final class ImsCallProfile implements Parcelable {
      */
     public @EmergencyCallRouting int getEmergencyCallRouting() {
         return mEmergencyCallRouting;
+    }
+
+    /**
+     * Get if the emergency call is for testing purpose.
+     */
+    public boolean isEmergencyCallTesting() {
+        return mEmergencyCallTesting;
     }
 }
