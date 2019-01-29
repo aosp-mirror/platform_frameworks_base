@@ -943,7 +943,7 @@ static bool openFile(JNIEnv* env, jobject fileDescriptor, UniqueFile& fp)
     }
 
     /* dup() the descriptor so we don't close the original with fclose() */
-    int fd = dup(origFd);
+    int fd = fcntl(origFd, F_DUPFD_CLOEXEC, 0);
     if (fd < 0) {
         ALOGW("dup(%d) failed: %s\n", origFd, strerror(errno));
         jniThrowRuntimeException(env, "dup() failed");

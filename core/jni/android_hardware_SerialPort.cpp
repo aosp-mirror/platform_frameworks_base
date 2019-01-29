@@ -134,7 +134,7 @@ android_hardware_SerialPort_open(JNIEnv *env, jobject thiz, jobject fileDescript
 
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     // duplicate the file descriptor, since ParcelFileDescriptor will eventually close its copy
-    fd = dup(fd);
+    fd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
     if (fd < 0) {
         jniThrowException(env, "java/io/IOException", "Could not open serial port");
         return;
