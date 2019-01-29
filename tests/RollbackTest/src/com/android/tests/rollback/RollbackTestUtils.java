@@ -99,7 +99,13 @@ class RollbackTestUtils {
         RollbackManager rm = getRollbackManager();
         rm.commitRollback(rollbackId, Arrays.asList(causePackages),
                 LocalIntentSender.getIntentSender());
-        assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
+        Intent result = LocalIntentSender.getIntentSenderResult();
+        int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
+                RollbackManager.STATUS_FAILURE);
+        if (status != RollbackManager.STATUS_SUCCESS) {
+            String message = result.getStringExtra(RollbackManager.EXTRA_STATUS_MESSAGE);
+            throw new AssertionError(message);
+        }
     }
 
     /**
