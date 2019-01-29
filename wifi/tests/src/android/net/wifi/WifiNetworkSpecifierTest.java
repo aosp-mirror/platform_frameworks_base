@@ -17,6 +17,8 @@
 package android.net.wifi;
 
 import static android.os.PatternMatcher.PATTERN_LITERAL;
+import static android.os.PatternMatcher.PATTERN_PREFIX;
+import static android.os.PatternMatcher.PATTERN_SIMPLE_GLOB;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,8 +26,10 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
 import android.net.MatchAllNetworkSpecifier;
+import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.PatternMatcher;
+import android.os.Process;
 import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
@@ -42,7 +46,341 @@ public class WifiNetworkSpecifierTest {
     private static final String TEST_SSID = "Test123";
     private static final String TEST_BSSID_OUI_BASE_ADDRESS = "12:12:12:00:00:00";
     private static final String TEST_BSSID_OUI_MASK = "ff:ff:ff:00:00:00";
+    private static final String TEST_BSSID = "12:12:12:12:12:12";
     private static final String TEST_PRESHARED_KEY = "\"Test123\"";
+
+    /**
+     * Validate correctness of WifiNetworkSpecifier object created by
+     * {@link WifiNetworkSpecifier.Builder#build()} for open network with SSID pattern.
+     */
+    @Test
+    public void testWifiNetworkSpecifierBuilderForOpenNetworkWithSsidPattern() {
+        NetworkSpecifier specifier = new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_PREFIX))
+                .build();
+
+        assertTrue(specifier instanceof WifiNetworkSpecifier);
+        WifiNetworkSpecifier wifiNetworkSpecifier = (WifiNetworkSpecifier) specifier;
+
+        assertEquals(Process.myUid(), wifiNetworkSpecifier.requestorUid);
+        assertEquals(TEST_SSID, wifiNetworkSpecifier.ssidPatternMatcher.getPath());
+        assertEquals(PATTERN_PREFIX, wifiNetworkSpecifier.ssidPatternMatcher.getType());
+        assertEquals(MacAddress.ALL_ZEROS_ADDRESS, wifiNetworkSpecifier.bssidPatternMatcher.first);
+        assertEquals(MacAddress.ALL_ZEROS_ADDRESS, wifiNetworkSpecifier.bssidPatternMatcher.second);
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.NONE));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedProtocols
+                .get(WifiConfiguration.Protocol.RSN));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedAuthAlgorithms
+                .get(WifiConfiguration.AuthAlgorithm.OPEN));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedPairwiseCiphers
+                .get(WifiConfiguration.PairwiseCipher.CCMP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.TKIP));
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSpecifier object created by
+     * {@link WifiNetworkSpecifier.Builder#build()} for WPA_PSK network with BSSID
+     * pattern.
+     */
+    @Test
+    public void testWifiNetworkSpecifierBuilderForWpa2PskNetworkWithBssidPattern() {
+        NetworkSpecifier specifier = new WifiNetworkSpecifier.Builder()
+                .setBssidPattern(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
+                        MacAddress.fromString(TEST_BSSID_OUI_MASK))
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .build();
+
+        assertTrue(specifier instanceof WifiNetworkSpecifier);
+        WifiNetworkSpecifier wifiNetworkSpecifier = (WifiNetworkSpecifier) specifier;
+
+        assertEquals(".*", wifiNetworkSpecifier.ssidPatternMatcher.getPath());
+        assertEquals(PATTERN_SIMPLE_GLOB, wifiNetworkSpecifier.ssidPatternMatcher.getType());
+        assertEquals(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
+                wifiNetworkSpecifier.bssidPatternMatcher.first);
+        assertEquals(MacAddress.fromString(TEST_BSSID_OUI_MASK),
+                wifiNetworkSpecifier.bssidPatternMatcher.second);
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WPA_PSK));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedProtocols
+                .get(WifiConfiguration.Protocol.RSN));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedAuthAlgorithms
+                .get(WifiConfiguration.AuthAlgorithm.OPEN));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedPairwiseCiphers
+                .get(WifiConfiguration.PairwiseCipher.CCMP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.TKIP));
+        assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
+                wifiNetworkSpecifier.wifiConfiguration.preSharedKey);
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSpecifier object created by
+     * {@link WifiNetworkSpecifier.Builder#build()} for WPA_EAP network with
+     * SSID and BSSID pattern.
+     */
+    @Test
+    public void testWifiNetworkSpecifierBuilderForWpa2EapHiddenNetworkWithSsidAndBssid() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.GTC);
+
+        NetworkSpecifier specifier = new WifiNetworkSpecifier.Builder()
+                .setSsid(TEST_SSID)
+                .setBssid(MacAddress.fromString(TEST_BSSID))
+                .setWpa2EnterpriseConfig(enterpriseConfig)
+                .setIsHiddenSsid()
+                .build();
+
+        assertTrue(specifier instanceof WifiNetworkSpecifier);
+        WifiNetworkSpecifier wifiNetworkSpecifier = (WifiNetworkSpecifier) specifier;
+
+        assertEquals(TEST_SSID, wifiNetworkSpecifier.ssidPatternMatcher.getPath());
+        assertEquals(PATTERN_LITERAL, wifiNetworkSpecifier.ssidPatternMatcher.getType());
+        assertEquals(MacAddress.fromString(TEST_BSSID),
+                wifiNetworkSpecifier.bssidPatternMatcher.first);
+        assertEquals(MacAddress.BROADCAST_ADDRESS,
+                wifiNetworkSpecifier.bssidPatternMatcher.second);
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WPA_EAP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.IEEE8021X));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedProtocols
+                .get(WifiConfiguration.Protocol.RSN));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedAuthAlgorithms
+                .get(WifiConfiguration.AuthAlgorithm.OPEN));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedPairwiseCiphers
+                .get(WifiConfiguration.PairwiseCipher.CCMP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.CCMP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.TKIP));
+        assertTrue(wifiNetworkSpecifier.wifiConfiguration.hiddenSSID);
+        assertEquals(enterpriseConfig.getEapMethod(),
+                wifiNetworkSpecifier.wifiConfiguration.enterpriseConfig.getEapMethod());
+        assertEquals(enterpriseConfig.getPhase2Method(),
+                wifiNetworkSpecifier.wifiConfiguration.enterpriseConfig.getPhase2Method());
+    }
+
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#setSsid(String)} throws an exception
+     * when the string is not Unicode.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testWifiNetworkSpecifierBuilderSetSsidWithNonUnicodeString() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsid("\ud800")
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#setWpa2Passphrase(String)} throws an exception
+     * when the string is not ASCII encodable.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testWifiNetworkSpecifierSetWpa2PasphraseWithNonAsciiString() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2Passphrase("salvē")
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when neither SSID nor BSSID patterns were set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithNoSsidAndBssidPattern() {
+        new WifiNetworkSpecifier.Builder().build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-all SSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchAllSsidPattern1() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(".*", PATTERN_SIMPLE_GLOB))
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-all SSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchAllSsidPattern2() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(".*", PatternMatcher.PATTERN_ADVANCED_GLOB))
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-all SSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchAllSsidPattern3() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher("", PATTERN_PREFIX))
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-all BSSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchAllBssidPattern() {
+        new WifiNetworkSpecifier.Builder()
+                .setBssidPattern(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.ALL_ZEROS_ADDRESS)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-none SSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneSsidPattern1() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher("", PatternMatcher.PATTERN_LITERAL))
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-none SSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneSsidPattern2() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsid("")
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-none BSSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern1() {
+        new WifiNetworkSpecifier.Builder()
+                .setBssidPattern(MacAddress.BROADCAST_ADDRESS, MacAddress.BROADCAST_ADDRESS)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-none BSSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern2() {
+        new WifiNetworkSpecifier.Builder()
+                .setBssid(MacAddress.BROADCAST_ADDRESS)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when match-none BSSID pattern is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern3() {
+        new WifiNetworkSpecifier.Builder()
+                .setBssid(MacAddress.ALL_ZEROS_ADDRESS)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when SSID pattern is set for hidden network.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBssidMatchPatternForHiddenNetwork() {
+        new WifiNetworkSpecifier.Builder()
+                .setBssidPattern(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
+                        MacAddress.fromString(TEST_BSSID_OUI_MASK))
+                .setIsHiddenSsid()
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSpecifier.Builder#setWpa2Passphrase(String)} and
+     * {@link WifiNetworkSpecifier.Builder#setWpa2EnterpriseConfig(WifiEnterpriseConfig)} are
+     * invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBothWpa2PasphraseAndEnterpriseConfig() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setWpa2EnterpriseConfig(new WifiEnterpriseConfig())
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when SSID pattern is set for hidden network.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithSsidMatchPatternForHiddenNetwork() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_PREFIX))
+                .setIsHiddenSsid()
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSpecifier.Builder#setWpa2Passphrase(String)} and
+     * {@link WifiNetworkSpecifier.Builder#setWpa3Passphrase(String)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBothWpa2PasphraseAndWpa3Passphrase() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSpecifier.Builder#setWpa3Passphrase(String)} and
+     * {@link WifiNetworkSpecifier.Builder#setWpa3EnterpriseConfig(WifiEnterpriseConfig)} are
+     * invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBothWpa3PasphraseAndEnterprise() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .setWpa3EnterpriseConfig(new WifiEnterpriseConfig())
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSpecifier.Builder#setWpa3Passphrase(String)} and
+     * {@link WifiNetworkSpecifier.Builder#setIsEnhancedOpen()} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBothWpa3PasphraseAndEnhancedOpen() {
+        new WifiNetworkSpecifier.Builder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .setIsEnhancedOpen()
+                .build();
+    }
 
     /**
      * Validate that parcel marshalling/unmarshalling works
