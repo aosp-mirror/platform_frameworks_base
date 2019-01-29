@@ -1916,6 +1916,8 @@ final class ActivityRecord extends ConfigurationContainer {
      * @return true if the input activity should be made visible, ignoring any effect Keyguard
      * might have on the visibility
      *
+     * TODO(b/123540470): Combine this method and {@link #shouldBeVisible(boolean)}.
+     *
      * @see {@link ActivityStack#checkKeyguardVisibility}
      */
     boolean shouldBeVisibleIgnoringKeyguard(boolean behindFullscreenActivity) {
@@ -1924,6 +1926,36 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         return !behindFullscreenActivity || mLaunchTaskBehind;
+    }
+
+    boolean shouldBeVisible(boolean behindFullscreenActivity) {
+        // Check whether activity should be visible without Keyguard influence
+        visibleIgnoringKeyguard = shouldBeVisibleIgnoringKeyguard(behindFullscreenActivity);
+
+        final ActivityStack stack = getActivityStack();
+        if (stack == null) {
+            return false;
+        }
+
+        // Whether this activity is the top activity of this stack.
+        final boolean isTop = this == stack.getTopActivity();
+        // Exclude the case where this is the top activity in a pinned stack.
+        final boolean isTopNotPinnedStack = stack.isAttached()
+                && stack.getDisplay().isTopNotPinnedStack(stack);
+        // Now check whether it's really visible depending on Keyguard state.
+        return stack.checkKeyguardVisibility(this,
+                visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
+    }
+
+    boolean shouldBeVisible() {
+        final ActivityStack stack = getActivityStack();
+        if (stack == null) {
+            return false;
+        }
+
+        // TODO: Use real value of behindFullscreenActivity calculated using the same logic in
+        // ActivityStack#ensureActivitiesVisibleLocked().
+        return shouldBeVisible(!stack.shouldBeVisible(null /* starting */));
     }
 
     void makeVisibleIfNeeded(ActivityRecord starting, boolean reportToClient) {
@@ -2848,11 +2880,7 @@ final class ActivityRecord extends ConfigurationContainer {
             return true;
         }
 
-        // TODO: We should add ActivityRecord.shouldBeVisible() that checks if the activity should
-        // be visible based on the stack, task, and lockscreen state and use that here instead. The
-        // method should be based on the logic in ActivityStack.ensureActivitiesVisibleLocked().
-        // Skip updating configuration for activity is a stack that shouldn't be visible.
-        if (!stack.shouldBeVisible(null /* starting */)) {
+        if (!shouldBeVisible()) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check invisible stack: " + this);
             return true;
