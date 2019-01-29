@@ -81,14 +81,14 @@ public class ApfCapabilities {
     /**
      * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
      */
-    public boolean getApfDrop8023Frames(Context context) {
+    public static boolean getApfDrop8023Frames(Context context) {
         return context.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
     }
 
     /**
      * @return An array of blacklisted EtherType, packets with EtherTypes within it will be dropped.
      */
-    public int[] getApfEthTypeBlackList(Context context) {
+    public static int[] getApfEthTypeBlackList(Context context) {
         return context.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
     }
 }
