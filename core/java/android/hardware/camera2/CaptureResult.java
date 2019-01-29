@@ -94,11 +94,12 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
         }
 
        /**
-         * Visible for testing and vendor extensions only.
+         * Construct a new Key with a given name and type.
          *
-         * @hide
+         * <p>Normally, applications should use the existing Key definitions in
+         * {@link CaptureResult}, and not need to construct their own Key objects. However, they may
+         * be useful for testing purposes and for defining custom capture result fields.</p>
          */
-        @UnsupportedAppUsage
         public Key(String name, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name, type);
         }
