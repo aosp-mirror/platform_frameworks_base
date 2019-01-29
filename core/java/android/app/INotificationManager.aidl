@@ -94,6 +94,7 @@ interface INotificationManager
     boolean areChannelsBypassingDnd();
     int getAppsBypassingDndCount(int uid);
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
+    boolean isPackagePaused(String pkg);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
