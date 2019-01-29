@@ -724,6 +724,9 @@ public class PackageParser {
                 for (int i = 0; i < N; i++) {
                     final Activity a = p.activities.get(i);
                     if (state.isMatch(a.info, flags)) {
+                        if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(a.className)) {
+                            continue;
+                        }
                         res[num++] = generateActivityInfo(a, flags, state, userId);
                     }
                 }
