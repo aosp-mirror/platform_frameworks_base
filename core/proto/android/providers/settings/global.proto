@@ -230,8 +230,6 @@ message GlobalSettingsProto {
     }
     optional Connectivity connectivity = 32;
 
-    reserved 145; // Used to be ContentCapture, which moved to DeviceConfig
-
     optional SettingProto contact_metadata_sync_enabled = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto contacts_database_wal_enabled = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -1039,5 +1037,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 149;
+    // Next tag = 145 then 149; // (145 was removed)
 }
