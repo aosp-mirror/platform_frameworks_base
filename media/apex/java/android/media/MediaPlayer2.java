@@ -3667,53 +3667,66 @@ public class MediaPlayer2 implements AutoCloseable
     }
 
     /**
-     * The status codes for {@link DrmEventCallback#onDrmPrepared} listener.
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
      * <p>
      *
      * DRM preparation has succeeded.
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_SUCCESS = 0;
 
     /**
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
+     * <p>
+     *
      * The device required DRM provisioning but couldn't reach the provisioning server.
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR = 1;
 
     /**
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
+     * <p>
+     *
      * The device required DRM provisioning but the provisioning server denied the request.
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_PROVISIONING_SERVER_ERROR = 2;
 
     /**
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
+     * <p>
+     *
      * The DRM preparation has failed .
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_PREPARATION_ERROR = 3;
 
     /**
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
+     * <p>
+     *
      * The crypto scheme UUID is not supported by the device.
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_UNSUPPORTED_SCHEME = 4;
 
     /**
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
+     * <p>
+     *
      * The hardware resources are not available, due to being in use.
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_RESOURCE_BUSY = 5;
 
     /**
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
+     * <p>
+     *
      * Restoring persisted offline keys failed.
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_RESTORE_ERROR = 6;
 
     /**
+     * A status code for {@link DrmEventCallback#onDrmPrepared} listener.
+     * <p>
+     *
      * Error during key request/response exchange with license server.
-     * @hide
      */
     public static final int PREPARE_DRM_STATUS_KEY_EXCHANGE_ERROR = 7;
 
