@@ -234,7 +234,8 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‎‎‏‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‏‎‏‎‎‏‎‏‏‏‎‏‏‎‏‏‎‎‏‏‎‎‎‏‏‏‎‏‎‎‏‎‎‎‎‎‏‏‎‎‎‎Stay awake‎‏‎‎‏‎"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‎‎‎‎‏‏‏‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‎‏‎‎‎‎‎‎‏‏‎‏‏‎‎‏‎‏‎‎‎‏‎‎‎‏‎Screen will never sleep while charging‎‏‎‎‏‎"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‏‏‏‎‎‏‎‏‏‏‎‎‏‎‎‎‏‏‎‎‎‏‎‏‎‎‏‎‏‏‎‏‏‏‏‏‎‎‎‎‎‏‎‎‎‎‏‎‏‏‏‏‎‎‎‎‎‏‏‎‎Enable Bluetooth HCI snoop log‎‏‎‎‏‎"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‎‏‏‏‎‏‎‎‎‏‎‏‎‎‏‎‎‏‎‏‏‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‎‎‏‎‎‏‏‏‎‎‎‎‎‏‎‎‏‏‎Capture all Bluetooth HCI packets in a file (Toggle Bluetooth after changing this setting)‎‏‎‎‏‎"</string>
+    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
+    <skip />
     <string name="oem_unlock_enable" msgid="6040763321967327691">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‎‏‎‏‎‎‎‏‏‎‏‎‎‎‏‏‏‏‎‎‎‏‏‎‏‎‏‎‎‎‎‏‎‎‏‎‎‎‏‏‏‎‎‏‏‏‎‎‏‎‏‏‎OEM unlocking‎‏‎‎‏‎"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‎‎‎‎‎‏‏‏‎‎‏‏‏‏‎‏‎‏‎‎‎‎‎‏‏‏‎‎‏‎‏‏‎‏‎‎‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‎‎‎‎Allow the bootloader to be unlocked‎‏‎‎‏‎"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‎‏‎‎‏‎‏‏‎‎‎‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‏‎‎‏‏‎‏‎‎‎‏‎‏‏‎‎‎‏‎‏‎‎Allow OEM unlocking?‎‏‎‎‏‎"</string>

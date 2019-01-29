@@ -58,6 +58,9 @@
     <item msgid="3878793616631049349">"Utilitza la comprovació HDCP només per a contingut DRM"</item>
     <item msgid="45075631231212732">"Utilitza sempre la comprovació HDCP"</item>
   </string-array>
+    <!-- no translation found for bt_hci_snoop_log_entries:0 (3966341281672645384) -->
+    <!-- no translation found for bt_hci_snoop_log_entries:1 (1969681323976948639) -->
+    <!-- no translation found for bt_hci_snoop_log_entries:2 (8719029132154020716) -->
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (predeterminada)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>

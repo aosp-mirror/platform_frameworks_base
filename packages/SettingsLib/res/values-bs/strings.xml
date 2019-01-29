@@ -38,87 +38,50 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automatski povezano koristeći %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatski povezano putem ocjenjivača mreže"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Povezani preko %1$s"</string>
-    <!-- no translation found for ssid_by_passpoint_provider (7898171424140673315) -->
-    <skip />
+    <string name="ssid_by_passpoint_provider" msgid="7898171424140673315">"<xliff:g id="SSID">%1$s</xliff:g> autora <xliff:g id="PASSPOINTPROVIDER">%2$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Dostupan preko %1$s"</string>
-    <!-- no translation found for tap_to_set_up (2468970825530423314) -->
-    <skip />
+    <string name="tap_to_set_up" msgid="2468970825530423314">"Dodirnite za postavljanje"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Povezano, nema interneta"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Nema internetske veze"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Potrebna je prijava"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Pristupna tačka je privremeno puna"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Povezano koristeći %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Dostupna koristeći %1$s"</string>
-    <!-- no translation found for osu_failure_ap_connection (598977488344424542) -->
-    <skip />
-    <!-- no translation found for osu_failure_server_url_invalid (2237477219243136714) -->
-    <skip />
-    <!-- no translation found for osu_failure_server_connection (8192988165059982174) -->
-    <skip />
-    <!-- no translation found for osu_failure_server_validation (4631649978129606823) -->
-    <skip />
-    <!-- no translation found for osu_failure_service_provider_verification (4854091521439785597) -->
-    <skip />
-    <!-- no translation found for osu_failure_provisioning_aborted (424627208135320329) -->
-    <skip />
-    <!-- no translation found for osu_failure_provisioning_not_available (3021783729256985432) -->
-    <skip />
-    <!-- no translation found for osu_failure_invalid_server_url (8548886196179435758) -->
-    <skip />
-    <!-- no translation found for osu_failure_unexpected_command_type (8245921319866603904) -->
-    <skip />
-    <!-- no translation found for osu_failure_unexpected_soap_message_type (2255897608510053065) -->
-    <skip />
-    <!-- no translation found for osu_failure_soap_message_exchange (4357358438685987192) -->
-    <skip />
-    <!-- no translation found for osu_failure_start_redirect_listener (4292769407279548482) -->
-    <skip />
-    <!-- no translation found for osu_failure_timed_out_redirect_listener (3168657820278807508) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_osu_activity_found (4593038891437878675) -->
-    <skip />
-    <!-- no translation found for osu_failure_unexpected_soap_message_status (6568467710235256675) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_pps_mo (850567403039076835) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_aaa_server_trust_root_node (8961455873459838456) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_remediation_server_trust_root_node (5041179688081545244) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_policy_server_trust_root_node (6617290380940513539) -->
-    <skip />
-    <!-- no translation found for osu_failure_retrieve_trust_root_certificates (1499136256195528265) -->
-    <skip />
-    <!-- no translation found for osu_failure_no_aaa_trust_root_certificate (1904322497042226984) -->
-    <skip />
-    <!-- no translation found for osu_failure_add_passpoint_configuration (2173557755811446047) -->
-    <skip />
-    <!-- no translation found for osu_failure_osu_provider_not_found (6616172862116673082) -->
-    <skip />
-    <!-- no translation found for osu_status_ap_connecting (5296821043003441437) -->
-    <skip />
-    <!-- no translation found for osu_status_ap_connected (3777289375683170728) -->
-    <skip />
-    <!-- no translation found for osu_status_server_connecting (8499785407540355867) -->
-    <skip />
-    <!-- no translation found for osu_status_server_validated (3158727184762596355) -->
-    <skip />
-    <!-- no translation found for osu_status_server_connected (8382024481520158168) -->
-    <skip />
-    <!-- no translation found for osu_status_init_soap_exchange (8628063888912101981) -->
-    <skip />
-    <!-- no translation found for osu_status_waiting_for_redirect_response (2343016207837053197) -->
-    <skip />
-    <!-- no translation found for osu_status_redirect_response_received (5323368411922609405) -->
-    <skip />
-    <!-- no translation found for osu_status_second_soap_exchange (7115332266758483909) -->
-    <skip />
-    <!-- no translation found for osu_status_third_soap_exchange (8460901783597440766) -->
-    <skip />
-    <!-- no translation found for osu_status_retrieving_trust_root_certs (1563445892926269689) -->
-    <skip />
-    <!-- no translation found for osu_provisioning_complete (5120178802493970149) -->
-    <skip />
+    <string name="osu_failure_ap_connection" msgid="598977488344424542">"Veza nije uspjela"</string>
+    <string name="osu_failure_server_url_invalid" msgid="2237477219243136714">"Nevažeći URL OSU servera"</string>
+    <string name="osu_failure_server_connection" msgid="8192988165059982174">"Povezivanje s OSU serverom nije uspjelo"</string>
+    <string name="osu_failure_server_validation" msgid="4631649978129606823">"Potvrda OSU servera nije uspjela"</string>
+    <string name="osu_failure_service_provider_verification" msgid="4854091521439785597">"Nevažeći certifikat OSU servera"</string>
+    <string name="osu_failure_provisioning_aborted" msgid="424627208135320329">"Pružanje usluga je prekinuto"</string>
+    <string name="osu_failure_provisioning_not_available" msgid="3021783729256985432">"Pružanje usluga nije dostupno"</string>
+    <string name="osu_failure_invalid_server_url" msgid="8548886196179435758">"Nevažeći URL OSU servera"</string>
+    <string name="osu_failure_unexpected_command_type" msgid="8245921319866603904">"Neočekivana vrsta komande"</string>
+    <string name="osu_failure_unexpected_soap_message_type" msgid="2255897608510053065">"Neočekivana vrsta poruke SOAP"</string>
+    <string name="osu_failure_soap_message_exchange" msgid="4357358438685987192">"Razmjena SOAP poruka nije uspjela"</string>
+    <string name="osu_failure_start_redirect_listener" msgid="4292769407279548482">"Preusmjereni slušalac nije pokrenuo sadržaj"</string>
+    <string name="osu_failure_timed_out_redirect_listener" msgid="3168657820278807508">"Vrijeme za preusmjeravanje je isteklo"</string>
+    <string name="osu_failure_no_osu_activity_found" msgid="4593038891437878675">"OSU aktivnosti nisu pronađene"</string>
+    <string name="osu_failure_unexpected_soap_message_status" msgid="6568467710235256675">"Status neočekivane SOAP poruke"</string>
+    <string name="osu_failure_no_pps_mo" msgid="850567403039076835">"PPS-MO nije pronađen"</string>
+    <string name="osu_failure_no_aaa_server_trust_root_node" msgid="8961455873459838456">"Pouzdani temeljni čvor za AAA server nije pronađen"</string>
+    <string name="osu_failure_no_remediation_server_trust_root_node" msgid="5041179688081545244">"Pouzdani temeljni čvor za server za uklanjanje problema nije pronađen"</string>
+    <string name="osu_failure_no_policy_server_trust_root_node" msgid="6617290380940513539">"Pouzdani temeljni čvor za server pravila nije pronađen"</string>
+    <string name="osu_failure_retrieve_trust_root_certificates" msgid="1499136256195528265">"Preuzimanje temeljnih pouzdanih certifikata nije uspjelo"</string>
+    <string name="osu_failure_no_aaa_trust_root_certificate" msgid="1904322497042226984">"Pouzdani temeljni certifikat za AAA server nije pronađen"</string>
+    <string name="osu_failure_add_passpoint_configuration" msgid="2173557755811446047">"Nije moguće dodati PassPoint konfiguraciju"</string>
+    <string name="osu_failure_osu_provider_not_found" msgid="6616172862116673082">"OSU pružatelj usluga nije pronađen"</string>
+    <string name="osu_status_ap_connecting" msgid="5296821043003441437">"Povezivanje"</string>
+    <string name="osu_status_ap_connected" msgid="3777289375683170728">"Povezano"</string>
+    <string name="osu_status_server_connecting" msgid="8499785407540355867">"Povezivanje na OSU server"</string>
+    <string name="osu_status_server_validated" msgid="3158727184762596355">"OSU server je potvrđen"</string>
+    <string name="osu_status_server_connected" msgid="8382024481520158168">"Povezano na OSU server"</string>
+    <string name="osu_status_init_soap_exchange" msgid="8628063888912101981">"Prva SOAP razmjena"</string>
+    <string name="osu_status_waiting_for_redirect_response" msgid="2343016207837053197">"Čekanje odgovora za preusmjeravanje"</string>
+    <string name="osu_status_redirect_response_received" msgid="5323368411922609405">"Primljen je odgovor o preusmjeravanju"</string>
+    <string name="osu_status_second_soap_exchange" msgid="7115332266758483909">"Druga SOAP razmjena"</string>
+    <string name="osu_status_third_soap_exchange" msgid="8460901783597440766">"Treća SOAP razmjena"</string>
+    <string name="osu_status_retrieving_trust_root_certs" msgid="1563445892926269689">"Preuzimanje pouzdanih temeljnih certifikata"</string>
+    <string name="osu_provisioning_complete" msgid="5120178802493970149">"Pružanje usluge je završeno"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Veoma sporo"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Sporo"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"UREDU"</string>
@@ -271,7 +234,8 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Ostani aktivan"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekran neće prelaziti u stanje mirovanja tokom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Omogući Bluetooth HCI snoop zapis"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Snimi sve Bluetooth HCI pakete u fajl (uključite/isključite Bluetooth nakon promjene ove postavke)"</string>
+    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
+    <skip />
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM otključavanje"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Dozvoli otključavanje bootloadera"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Želite li dozvoliti OEM otključavanje?"</string>
