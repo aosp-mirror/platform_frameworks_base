@@ -34,7 +34,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Process;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -162,7 +162,7 @@ public class RestoreUtils {
                             if (AppBackupUtils.signaturesMatch(sigs, pkg, pmi)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
-                                if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
+                                if (UserHandle.isCore(pkg.applicationInfo.uid)
                                         && (pkg.applicationInfo.backupAgentName == null)) {
                                     Slog.w(TAG, "Installed app " + info.packageName
                                             + " has restricted uid and no agent");
