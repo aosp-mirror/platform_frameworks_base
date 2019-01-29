@@ -17,9 +17,6 @@ package com.android.server.inputmethod;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.inputmethod.InputMethodSystemProperty.PER_PROFILE_IME_ENABLED;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -110,7 +107,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
@@ -483,7 +480,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     IBinder mLastImeTargetWindow;
 
     /**
-     * {@link WindowManager.LayoutParams#softInputMode} of {@link #mCurFocusedWindow}.
+     * {@link LayoutParams#softInputMode} of {@link #mCurFocusedWindow}.
      *
      * @see #mCurFocusedWindow
      */
@@ -2042,7 +2039,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
                             + mCurTokenDisplayId);
                 }
-                mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, mCurTokenDisplayId);
+                mIWindowManager.addWindowToken(mCurToken, LayoutParams.TYPE_INPUT_METHOD,
+                        mCurTokenDisplayId);
             } catch (RemoteException e) {
             }
             return new InputBindResult(
@@ -2892,8 +2890,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // by the IME) or if running on a large screen where there
         // is more room for the target window + IME.
         final boolean doAutoShow =
-                (softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                        == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                (softInputMode & LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                        == LayoutParams.SOFT_INPUT_ADJUST_RESIZE
                 || mRes.getConfiguration().isLayoutSizeAtLeast(
                         Configuration.SCREENLAYOUT_SIZE_LARGE);
         final boolean isTextEditor =
@@ -2905,10 +2903,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // new focused input, even if its window wants to hide the IME).
         boolean didStart = false;
 
-        switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
-            case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
+        switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
+            case LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
                 if (!isTextEditor || !doAutoShow) {
-                    if (WindowManager.LayoutParams.mayUseInputMethod(windowFlags)) {
+                    if (LayoutParams.mayUseInputMethod(windowFlags)) {
                         // There is no focus view, and this window will
                         // be behind any soft input window, so hide the
                         // soft input window if it is shown.
@@ -2924,8 +2922,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             unbindCurrentMethodLocked();
                         }
                     }
-                } else if (isTextEditor && doAutoShow && (softInputMode &
-                        WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                } else if (isTextEditor && doAutoShow
+                        && (softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                     // There is a focus view, and we are navigating forward
                     // into the window, so show the input window for the user.
                     // We only do this automatically if the window can resize
@@ -2942,23 +2940,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                 }
                 break;
-            case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
+            case LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
                 // Do nothing.
                 break;
-            case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
-                if ((softInputMode &
-                        WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+            case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                     if (DEBUG) Slog.v(TAG, "Window asks to hide input going forward");
                     hideCurrentInputLocked(0, null);
                 }
                 break;
-            case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
                 if (DEBUG) Slog.v(TAG, "Window asks to hide input");
                 hideCurrentInputLocked(0, null);
                 break;
-            case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
-                if ((softInputMode &
-                        WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+            case LayoutParams.SOFT_INPUT_STATE_VISIBLE:
+                if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                     if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
                     if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                             unverifiedTargetSdkVersion, startInputFlags)) {
@@ -2976,7 +2972,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
                 break;
-            case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                 if (DEBUG) Slog.v(TAG, "Window asks to always show input");
                 if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                         unverifiedTargetSdkVersion, startInputFlags)) {
@@ -3975,13 +3971,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.setCanceledOnTouchOutside(true);
             final Window w = mSwitchingDialog.getWindow();
-            final WindowManager.LayoutParams attrs = w.getAttributes();
-            w.setType(TYPE_INPUT_METHOD_DIALOG);
+            final LayoutParams attrs = w.getAttributes();
+            w.setType(LayoutParams.TYPE_INPUT_METHOD_DIALOG);
             // Use an alternate token for the dialog for that window manager can group the token
             // with other IME windows based on type vs. grouping based on whichever token happens
             // to get selected by the system later on.
             attrs.token = mSwitchingDialogToken;
-            attrs.privateFlags |= PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            attrs.privateFlags |= LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
             updateSystemUiLocked(mImeWindowVis, mBackDisposition);
