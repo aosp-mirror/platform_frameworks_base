@@ -6734,6 +6734,16 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the system defined content capture service package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getContentCaptureServicePackageName() {
+        throw new UnsupportedOperationException(
+                "getContentCaptureServicePackageName not implemented in subclass");
+    }
+
+    /**
      * @return whether a given package's state is protected, e.g. package cannot be disabled,
      *         suspended, hidden or force stopped.
      *

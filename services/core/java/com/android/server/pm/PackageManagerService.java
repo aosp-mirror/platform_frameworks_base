@@ -42,7 +42,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRAD
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.INSTALL_ALLOW_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
@@ -202,8 +201,8 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
-import android.content.rollback.IRollbackManager;
 import android.content.res.Resources;
+import android.content.rollback.IRollbackManager;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
@@ -20093,6 +20092,24 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         return appPredictionServiceComponentName.getPackageName();
+    }
+
+    @Override
+    public String getContentCaptureServicePackageName() {
+        String contentCaptureServiceName =
+                mContext.getString(R.string.config_defaultContentCaptureService);
+
+        if (TextUtils.isEmpty(contentCaptureServiceName)) {
+            return null;
+        }
+
+        int separatorIndex = contentCaptureServiceName.indexOf("/");
+
+        if (separatorIndex < 0) {
+            return null;
+        }
+
+        return contentCaptureServiceName.substring(0, separatorIndex);
     }
 
     @Override
