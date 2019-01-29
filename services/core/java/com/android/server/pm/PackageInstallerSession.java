@@ -1562,12 +1562,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
         }
-        if (baseApk.preferCodeIntegrity) {
+        if (baseApk.useEmbeddedDex) {
             for (File file : mResolvedStagedFiles) {
                 if (file.getName().endsWith(".apk")
-                        && !DexManager.auditUncompressedCodeInApk(file.getPath())) {
+                        && !DexManager.auditUncompressedDexInApk(file.getPath())) {
                     throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                            "Some code are not uncompressed and aligned correctly for "
+                            "Some dex are not uncompressed and aligned correctly for "
                             + mPackageName);
                 }
             }

@@ -408,8 +408,7 @@ public abstract class LayoutInflater {
 
         // Make sure the application allows code generation
         ApplicationInfo appInfo = mContext.getApplicationInfo();
-        if ((appInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PREFER_CODE_INTEGRITY) != 0
-            || appInfo.isPrivilegedApp()) {
+        if (appInfo.isEmbeddedDexUsed() || appInfo.isPrivilegedApp()) {
             mUseCompiledView = false;
             return;
         }

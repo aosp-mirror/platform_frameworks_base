@@ -740,10 +740,10 @@ public class DexManager {
     }
 
     /**
-     * Generates log if the archive located at {@code fileName} has uncompressed dex file and so
-     * files that can be direclty mapped.
+     * Generates log if the archive located at {@code fileName} has uncompressed dex file that can
+     * be direclty mapped.
      */
-    public static boolean auditUncompressedCodeInApk(String fileName) {
+    public static boolean auditUncompressedDexInApk(String fileName) {
         StrictJarFile jarFile = null;
         try {
             jarFile = new StrictJarFile(fileName,
@@ -760,16 +760,6 @@ public class DexManager {
                     } else if ((entry.getDataOffset() & 0x3) != 0) {
                         allCorrect = false;
                         Slog.w(TAG, "APK " + fileName + " has unaligned dex code " +
-                                entry.getName());
-                    }
-                } else if (entry.getName().endsWith(".so")) {
-                    if (entry.getMethod() != ZipEntry.STORED) {
-                        allCorrect = false;
-                        Slog.w(TAG, "APK " + fileName + " has compressed native code " +
-                                entry.getName());
-                    } else if ((entry.getDataOffset() & (0x1000 - 1)) != 0) {
-                        allCorrect = false;
-                        Slog.w(TAG, "APK " + fileName + " has unaligned native code " +
                                 entry.getName());
                     }
                 }
