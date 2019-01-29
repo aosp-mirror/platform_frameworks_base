@@ -15,10 +15,12 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureHelper.DEBUG;
 import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UiThread;
 import android.content.ComponentName;
@@ -50,6 +52,13 @@ import java.io.PrintWriter;
 public final class ContentCaptureManager {
 
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
+
+    /** @hide */
+    public static final int RESULT_CODE_TRUE = 1;
+    /** @hide */
+    public static final int RESULT_CODE_FALSE = 2;
+    /** @hide */
+    public static final int RESULT_CODE_NOT_SERVICE = -1;
 
     /**
      * Timeout for calls to system_server.
@@ -108,9 +117,7 @@ public final class ContentCaptureManager {
             if (mMainSession == null) {
                 mMainSession = new MainContentCaptureSession(mContext, mHandler, mService,
                         mDisabled);
-                if (VERBOSE) {
-                    Log.v(TAG, "getDefaultContentCaptureSession(): created " + mMainSession);
-                }
+                if (VERBOSE) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
         }
@@ -147,13 +154,9 @@ public final class ContentCaptureManager {
      */
     @Nullable
     public ComponentName getServiceComponentName() {
-        if (!isContentCaptureEnabled()) {
-            return null;
-        }
-        // Wait for system server to return the component name.
+        if (!isContentCaptureEnabled()) return null;
+
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-
-
         try {
             mService.getServiceComponentName(resultReceiver);
             return resultReceiver.getParcelableResult();
@@ -164,6 +167,17 @@ public final class ContentCaptureManager {
 
     /**
      * Checks whether content capture is enabled for this activity.
+     *
+     * <p>There are many reasons it could be disabled, such as:
+     * <ul>
+     *   <li>App itself disabled content capture through {@link #setContentCaptureEnabled(boolean)}.
+     *   <li>Service disabled content capture for this specific activity.
+     *   <li>Service disabled content capture for all activities of this package.
+     *   <li>Service disabled content capture globally.
+     *   <li>User disabled content capture globally (through Settings).
+     *   <li>OEM disabled content capture globally.
+     *   <li>Transient errors.
+     * </ul>
      */
     public boolean isContentCaptureEnabled() {
         synchronized (mLock) {
@@ -178,8 +192,78 @@ public final class ContentCaptureManager {
      * it on {@link android.app.Activity#onCreate(android.os.Bundle, android.os.PersistableBundle)}.
      */
     public void setContentCaptureEnabled(boolean enabled) {
+        if (DEBUG) {
+            Log.d(TAG, "setContentCaptureEnabled(): setting to " + enabled + " for " + mContext);
+        }
+
         synchronized (mLock) {
             mFlags |= enabled ? 0 : ContentCaptureContext.FLAG_DISABLED_BY_APP;
+        }
+    }
+
+    /**
+     * Gets whether Content Capture is enabled for the given user.
+     *
+     * <p>This method is typically used by the Content Capture Service settings page, so it can
+     * provide a toggle to enable / disable it.
+     *
+     * @throws SecurityException if caller is not the app that owns the Content Capture service
+     * associated with the user.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isContentCaptureFeatureEnabled() {
+        if (mService == null) return false;
+
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        final int resultCode;
+        try {
+            mService.isContentCaptureFeatureEnabled(resultReceiver);
+            resultCode = resultReceiver.getIntResult();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        switch (resultCode) {
+            case RESULT_CODE_TRUE:
+                return true;
+            case RESULT_CODE_FALSE:
+                return false;
+            case RESULT_CODE_NOT_SERVICE:
+                throw new SecurityException("caller is not user's ContentCapture service");
+            default:
+                throw new IllegalStateException("received invalid result: " + resultCode);
+        }
+    }
+
+    /**
+     * Sets whether Content Capture is enabled for the given user.
+     *
+     * @throws SecurityException if caller is not the app that owns the Content Capture service
+     * associated with the user.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setContentCaptureFeatureEnabled(boolean enabled) {
+        if (DEBUG) Log.d(TAG, "setContentCaptureFeatureEnabled(): setting to " + enabled);
+
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        final int resultCode;
+        try {
+            mService.setContentCaptureFeatureEnabled(enabled, resultReceiver);
+            resultCode = resultReceiver.getIntResult();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        switch (resultCode) {
+            case RESULT_CODE_TRUE:
+                // Our work is done here, in our void existance...
+                return;
+            case RESULT_CODE_NOT_SERVICE:
+                throw new SecurityException("caller is not user's ContentCapture service");
+            default:
+                throw new IllegalStateException("received invalid result: " + resultCode);
         }
     }
 

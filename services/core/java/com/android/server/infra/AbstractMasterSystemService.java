@@ -117,7 +117,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     @GuardedBy("mLock")
     @Nullable
-    private final SparseBooleanArray mDisabledUsers;
+    private final SparseBooleanArray mDisabledByUserRestriction;
 
     /**
      * Cache of services per user id.
@@ -148,9 +148,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
         }
         if (disallowProperty == null) {
-            mDisabledUsers = null;
+            mDisabledByUserRestriction = null;
         } else {
-            mDisabledUsers = new SparseBooleanArray();
+            mDisabledByUserRestriction = new SparseBooleanArray();
             // Hookup with UserManager to disable service when necessary.
             final UserManager um = context.getSystemService(UserManager.class);
             final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
@@ -159,15 +159,15 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 final int userId = users.get(i).id;
                 final boolean disabled = umi.getUserRestriction(userId, disallowProperty);
                 if (disabled) {
-                    Slog.i(mTag, "Disabling for user " + userId);
-                    mDisabledUsers.put(userId, disabled);
+                    Slog.i(mTag, "Disabling by restrictions user " + userId);
+                    mDisabledByUserRestriction.put(userId, disabled);
                 }
             }
             umi.addUserRestrictionsListener((userId, newRestrictions, prevRestrictions) -> {
                 final boolean disabledNow =
                         newRestrictions.getBoolean(disallowProperty, false);
                 synchronized (mLock) {
-                    final boolean disabledBefore = mDisabledUsers.get(userId);
+                    final boolean disabledBefore = mDisabledByUserRestriction.get(userId);
                     if (disabledBefore == disabledNow) {
                         // Nothing changed, do nothing.
                         if (debug) {
@@ -176,7 +176,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                         }
                     }
                     Slog.i(mTag, "Updating for user " + userId + ": disabled=" + disabledNow);
-                    mDisabledUsers.put(userId, disabledNow);
+                    mDisabledByUserRestriction.put(userId, disabledNow);
                     updateCachedServiceLocked(userId, disabledNow);
                 }
             });
@@ -414,7 +414,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * given user.
      */
     protected boolean isDisabledLocked(@UserIdInt int userId) {
-        return mDisabledUsers == null ? false : mDisabledUsers.get(userId);
+        return mDisabledByUserRestriction == null ? false : mDisabledByUserRestriction.get(userId);
     }
 
     /**
@@ -523,7 +523,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     mServiceNameResolver.dumpShort(pw, userId); pw.println();
                 }
             }
-            pw.print(prefix); pw.print("Disabled users: "); pw.println(mDisabledUsers);
+            pw.print(prefix); pw.print("Users disabled by restriction: ");
+            pw.println(mDisabledByUserRestriction);
             pw.print(prefix); pw.print("Allow instant service: "); pw.println(mAllowInstantService);
             final String settingsProperty = getServiceSettingsProperty();
             if (settingsProperty != null) {
