@@ -549,7 +549,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     // if we only close the file descriptor and not the file object it is used to
     // create.  If we don't explicitly clean up the file (which in turn closes the
     // descriptor) the buffers allocated internally by fseek will be leaked.
-    int dupDescriptor = dup(descriptor);
+    int dupDescriptor = fcntl(descriptor, F_DUPFD_CLOEXEC, 0);
 
     FILE* file = fdopen(dupDescriptor, "r");
     if (file == NULL) {

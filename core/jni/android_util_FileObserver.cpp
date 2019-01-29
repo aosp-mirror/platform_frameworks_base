@@ -42,7 +42,7 @@ static jmethodID method_onEvent;
 static jint android_os_fileobserver_init(JNIEnv* env, jobject object)
 {
 #if defined(__linux__)
-    return (jint)inotify_init();
+    return (jint)inotify_init1(IN_CLOEXEC);
 #else
     return -1;
 #endif
