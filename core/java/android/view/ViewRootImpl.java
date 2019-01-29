@@ -1375,6 +1375,9 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mStopped) {
+                if (mSurfaceHolder != null) {
+                    notifySurfaceDestroyed();
+                }
                 mSurface.release();
             }
         }
@@ -2249,13 +2252,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mIsCreating = false;
                 } else if (hadSurface) {
-                    mSurfaceHolder.ungetCallbacks();
-                    SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
-                    if (callbacks != null) {
-                        for (SurfaceHolder.Callback c : callbacks) {
-                            c.surfaceDestroyed(mSurfaceHolder);
-                        }
-                    }
+                    notifySurfaceDestroyed();
                     mSurfaceHolder.mSurfaceLock.lock();
                     try {
                         mSurfaceHolder.mSurface = new Surface();
@@ -2517,6 +2514,16 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mIsInTraversal = false;
+    }
+
+    private void notifySurfaceDestroyed() {
+        mSurfaceHolder.ungetCallbacks();
+        SurfaceHolder.Callback[] callbacks = mSurfaceHolder.getCallbacks();
+        if (callbacks != null) {
+            for (SurfaceHolder.Callback c : callbacks) {
+                c.surfaceDestroyed(mSurfaceHolder);
+            }
+        }
     }
 
     private void maybeHandleWindowMove(Rect frame) {
