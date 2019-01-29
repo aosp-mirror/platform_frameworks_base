@@ -579,24 +579,11 @@ public final class Magnifier {
             zoomCenterY = Math.round(yPosInView + mViewCoordinatesInSurface[1]);
         }
 
-        final Rect[] bounds = new Rect[3]; // [MAX_IN_SURFACE, MAX_IN_VIEW, MAX_VISIBLE]
+        final Rect[] bounds = new Rect[2]; // [MAX_IN_SURFACE, MAX_VISIBLE]
         // Obtain the surface bounds rectangle.
         final Rect surfaceBounds = new Rect(0, 0,
                 mContentCopySurface.mWidth, mContentCopySurface.mHeight);
         bounds[0] = surfaceBounds;
-        // Obtain the view bounds rectangle.
-        final Rect viewBounds;
-        if (mView instanceof SurfaceView) {
-            viewBounds = new Rect(0, 0, mContentCopySurface.mWidth, mContentCopySurface.mHeight);
-        } else {
-            viewBounds = new Rect(
-                    mViewCoordinatesInSurface[0],
-                    mViewCoordinatesInSurface[1],
-                    mViewCoordinatesInSurface[0] + mView.getWidth(),
-                    mViewCoordinatesInSurface[1] + mView.getHeight()
-            );
-        }
-        bounds[1] = viewBounds;
         // Obtain the visible view region rectangle.
         final Rect viewVisibleRegion = new Rect();
         mView.getGlobalVisibleRect(viewVisibleRegion);
@@ -609,7 +596,7 @@ public final class Magnifier {
             // If we copy content from a SurfaceView, clamp coordinates relative to it.
             viewVisibleRegion.offset(-mViewCoordinatesInSurface[0], -mViewCoordinatesInSurface[1]);
         }
-        bounds[2] = viewVisibleRegion;
+        bounds[1] = viewVisibleRegion;
 
         // Aggregate the above to obtain the bounds where the content copy will be restricted.
         int resolvedLeft = Integer.MIN_VALUE;
@@ -1301,11 +1288,6 @@ public final class Magnifier {
          *   {@link android.view.View#getGlobalVisibleRect(Rect)}. For example, this will take into
          *   account the case when the view is contained in a scrollable container, and the
          *   magnifier will refuse to copy content outside of the visible view region</li>
-         *   <li>{@link #SOURCE_BOUND_MAX_IN_VIEW}, which extends the bound as much as possible
-         *   while remaining in the bounds of the view. Note that, although this option is
-         *   used, the magnifier will always only display content visible on the screen: if the
-         *   view lays outside the screen or is covered by a different view either partially or
-         *   totally, the magnifier will not show any view region not visible on the screen.</li>
          *   <li>{@link #SOURCE_BOUND_MAX_IN_SURFACE}, which extends the bound as much
          *   as possible while remaining inside the surface the content is copied from.</li>
          * </ul>
@@ -1349,21 +1331,14 @@ public final class Magnifier {
      * A source bound that will extend as much as possible, while remaining within the surface
      * the content is copied from.
      */
-
     public static final int SOURCE_BOUND_MAX_IN_SURFACE = 0;
-    /**
-     * A source bound that will extend as much as possible, while remaining within the
-     * magnified view.
-     */
-
-    public static final int SOURCE_BOUND_MAX_IN_VIEW = 1;
 
     /**
      * A source bound that will extend as much as possible, while remaining within the
      * visible region of the magnified view, as determined by
      * {@link View#getGlobalVisibleRect(Rect)}.
      */
-    public static final int SOURCE_BOUND_MAX_VISIBLE = 2;
+    public static final int SOURCE_BOUND_MAX_VISIBLE = 1;
 
 
     /**
@@ -1373,7 +1348,7 @@ public final class Magnifier {
      *
      * @hide
      */
-    @IntDef({SOURCE_BOUND_MAX_IN_SURFACE, SOURCE_BOUND_MAX_IN_VIEW, SOURCE_BOUND_MAX_VISIBLE})
+    @IntDef({SOURCE_BOUND_MAX_IN_SURFACE, SOURCE_BOUND_MAX_VISIBLE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SourceBound {}
 
