@@ -16,12 +16,12 @@
 
 cc_defaults {
     name: "viewcompiler_defaults",
+    defaults: ["libdexfile_static_defaults"],
     header_libs: [
         "libbase_headers",
     ],
     shared_libs: [
         "libbase",
-        "libdexfile",
         "libz",
         "slicer",
     ],
