@@ -1178,12 +1178,12 @@ interface ITelephony {
     void factoryReset(int subId);
 
     /**
-     * An estimate of the users's current locale based on the default SIM.
+     * Returns users's current locale based on the SIM.
      *
      * The returned string will be a well formed BCP-47 language tag, or {@code null}
      * if no locale could be derived.
      */
-    String getLocaleFromDefaultSim();
+    String getSimLocaleForSubscriber(int subId);
 
     /**
      * Requests the modem activity info asynchronously.
