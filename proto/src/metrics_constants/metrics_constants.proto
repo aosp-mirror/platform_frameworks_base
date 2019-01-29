@@ -6766,10 +6766,10 @@ message MetricsEvent {
     // OS: Q
     ZEN_CUSTOM_SETTINGS_DIALOG = 1612;
 
-    // OPEN: Settings > Developer Options > Game Update Packages
+    // OPEN: Settings > Developer Options > Game Driver Preferences
     // CATEGORY: SETTINGS
     // OS: Q
-    SETTINGS_GUP_DASHBOARD = 1613;
+    SETTINGS_GAME_DRIVER_DASHBOARD = 1613;
 
     // CATEGORY: The category for all actions relating to language detection logging.
     // OS: Q
