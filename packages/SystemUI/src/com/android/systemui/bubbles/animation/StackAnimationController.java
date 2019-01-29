@@ -53,8 +53,8 @@ public class StackAnimationController extends
     /** Scale factor to use initially for new bubbles being animated in. */
     private static final float ANIMATE_IN_STARTING_SCALE = 1.15f;
 
-    /** Translation factor (multiplied by stack offset) to use for new bubbles being animated in. */
-    private static final int ANIMATE_IN_TRANSLATION_FACTOR = 4;
+    /** Translation factor (multiplied by stack offset) to use for bubbles being animated in/out. */
+    private static final int ANIMATE_TRANSLATION_FACTOR = 4;
 
     /**
      * Values to use for the default {@link SpringForce} provided to the physics animation layout.
@@ -309,7 +309,7 @@ public class StackAnimationController extends
             // animate in from this position. Since the animations are chained, when the new bubble
             // flies in from the side, it will push the other ones out of the way.
             float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
-            child.setTranslationX(mStackPosition.x - (ANIMATE_IN_TRANSLATION_FACTOR * xOffset));
+            child.setTranslationX(mStackPosition.x - ANIMATE_TRANSLATION_FACTOR * xOffset);
             mLayout.animateValueForChildAtIndex(
                     DynamicAnimation.TRANSLATION_X, 0, mStackPosition.x);
         }
@@ -318,27 +318,19 @@ public class StackAnimationController extends
     @Override
     void onChildToBeRemoved(View child, int index, Runnable actuallyRemove) {
         // Animate the child out, actually removing it once its alpha is zero.
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.ALPHA, index, 0f, () -> {
-                    actuallyRemove.run();
-                });
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.SCALE_X, index, ANIMATE_IN_STARTING_SCALE);
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.SCALE_Y, index, ANIMATE_IN_STARTING_SCALE);
+        mLayout.animateValueForChild(
+                DynamicAnimation.ALPHA, child, 0f, actuallyRemove);
+        mLayout.animateValueForChild(DynamicAnimation.SCALE_X, child, ANIMATE_IN_STARTING_SCALE);
+        mLayout.animateValueForChild(DynamicAnimation.SCALE_Y, child, ANIMATE_IN_STARTING_SCALE);
 
-        final boolean hasPrecedingChild = index + 1 < mLayout.getChildCount();
-        if (hasPrecedingChild) {
-            final int precedingViewIndex = mLayout.getPrecedingNonRemovedViewIndex(index);
-            if (precedingViewIndex >= 0) {
-                final float offsetX =
-                        getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
-                mLayout.animatePositionForChildAtIndex(
-                        precedingViewIndex,
-                        mStackPosition.x + (index * offsetX),
-                        mStackPosition.y);
-            }
-        }
+        // Animate the removing view in the opposite direction of the stack.
+        final float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
+        mLayout.animateValueForChild(DynamicAnimation.TRANSLATION_X, child,
+                mStackPosition.x - (-xOffset * ANIMATE_TRANSLATION_FACTOR));
+
+        // Pull the top of the stack to the correct position, the chained animations will instruct
+        // any children that are out of place to animate to the correct position.
+        mLayout.animateValueForChildAtIndex(DynamicAnimation.TRANSLATION_X, 0, mStackPosition.x);
     }
 
     /** Moves the stack, without any animation, to the starting position. */

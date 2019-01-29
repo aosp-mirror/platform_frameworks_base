@@ -27,9 +27,8 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -122,12 +121,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
     protected final HashMap<DynamicAnimation.ViewProperty, DynamicAnimation.OnAnimationEndListener>
             mEndListenerForProperty = new HashMap<>();
 
-    /**
-     * List of views that were passed to removeView, but are currently being animated out. These
-     * views will be actually removed by the controller (via super.removeView) once they're done
-     * animating out.
-     */
-    private final List<View> mViewsToBeActuallyRemoved = new ArrayList<>();
+    /** Set of currently rendered transient views. */
+    private final Set<View> mTransientViews = new HashSet<>();
 
     /** The currently active animation controller. */
     private PhysicsAnimationController mController;
@@ -186,23 +181,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
         mEndListenerForProperty.remove(property);
     }
 
-    /**
-     * Returns the index of the view that precedes the given index, ignoring views that were passed
-     * to removeView, but are currently being animated out before actually being removed.
-     *
-     * @return index of the preceding view, or -1 if there are none.
-     */
-    public int getPrecedingNonRemovedViewIndex(int index) {
-        for (int i = index + 1; i < getChildCount(); i++) {
-            View precedingView = getChildAt(i);
-            if (!mViewsToBeActuallyRemoved.contains(precedingView)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         super.addView(child, index, params);
@@ -224,6 +202,24 @@ public class PhysicsAnimationLayout extends FrameLayout {
         removeViewAndThen(view, /* callback */ null);
     }
 
+    @Override
+    public void addTransientView(View view, int index) {
+        super.addTransientView(view, index);
+        mTransientViews.add(view);
+    }
+
+    @Override
+    public void removeTransientView(View view) {
+        super.removeTransientView(view);
+        mTransientViews.remove(view);
+    }
+
+    /** Immediately moves the view from wherever it currently is, to the given index. */
+    public void moveViewTo(View view, int index) {
+        super.removeView(view);
+        addView(view, index);
+    }
+
     /**
      * Let the controller know that this view should be removed, and then call the callback once the
      * controller has finished any removal animations and the view has actually been removed.
@@ -231,23 +227,31 @@ public class PhysicsAnimationLayout extends FrameLayout {
     public void removeViewAndThen(View view, Runnable callback) {
         if (mController != null) {
             final int index = indexOfChild(view);
-            // Remove the view only if it exists in this layout, and we're not already working on
-            // animating its removal.
-            if (index > -1 && !mViewsToBeActuallyRemoved.contains(view)) {
-                mViewsToBeActuallyRemoved.add(view);
-                setChildrenVisibility();
 
-                // Tell the controller to animate this view out, and call the callback when it wants
-                // to actually remove the view.
-                mController.onChildToBeRemoved(view, index, () -> {
-                    removeViewImmediateAndThen(view, callback);
-                    mViewsToBeActuallyRemoved.remove(view);
-                });
-            }
+            // Remove the view and add it back as a transient view so we can animate it out.
+            super.removeView(view);
+            addTransientView(view, index);
+
+            setChildrenVisibility();
+
+            // Tell the controller to animate this view out, and call the callback when it's
+            // finished.
+            mController.onChildToBeRemoved(view, index, () -> {
+                // Done animating, remove the transient view.
+                removeTransientView(view);
+
+                if (callback != null) {
+                    callback.run();
+                }
+            });
         } else {
             // Without a controller, nobody will animate this view out, so it gets an unceremonious
             // departure.
-            removeViewImmediateAndThen(view, callback);
+            super.removeView(view);
+
+            if (callback != null) {
+                callback.run();
+            }
         }
     }
 
@@ -278,17 +282,18 @@ public class PhysicsAnimationLayout extends FrameLayout {
     }
 
     /**
-     * Animates the property of the child at the given index to the given value, then runs the
-     * callback provided when the animation ends.
+     * Animates the property of the given child view, then runs the callback provided when the
+     * animation ends.
      */
-    protected void animateValueForChildAtIndex(
+    protected void animateValueForChild(
             DynamicAnimation.ViewProperty property,
-            int index,
+            View view,
             float value,
             float startVel,
             Runnable after) {
-        if (index < getChildCount()) {
-            final SpringAnimation animation = getAnimationAtIndex(property, index);
+        if (view != null) {
+            final SpringAnimation animation =
+                    (SpringAnimation) view.getTag(getTagIdForProperty(property));
             if (after != null) {
                 animation.addEndListener(new OneTimeEndListener() {
                     @Override
@@ -300,12 +305,36 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 });
             }
 
-            if (startVel != Float.MAX_VALUE) {
-                animation.setStartVelocity(startVel);
-            }
-
             animation.animateToFinalPosition(value);
         }
+    }
+
+    protected void animateValueForChild(
+            DynamicAnimation.ViewProperty property,
+            View view,
+            float value,
+            Runnable after) {
+        animateValueForChild(property, view, value, Float.MAX_VALUE, after);
+    }
+
+    protected void animateValueForChild(
+            DynamicAnimation.ViewProperty property,
+            View view,
+            float value) {
+        animateValueForChild(property, view, value, Float.MAX_VALUE, /* after */ null);
+    }
+
+    /**
+     * Animates the property of the child at the given index to the given value, then runs the
+     * callback provided when the animation ends.
+     */
+    protected void animateValueForChildAtIndex(
+            DynamicAnimation.ViewProperty property,
+            int index,
+            float value,
+            float startVel,
+            Runnable after) {
+        animateValueForChild(property, getChildAt(index), value, startVel, after);
     }
 
     /** Shortcut to animate a value with a callback, but no start velocity. */
@@ -366,18 +395,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
         }
     }
 
-
-    /** Immediately removes the view, without notifying the controller, then runs the callback. */
-    private void removeViewImmediateAndThen(View view, Runnable callback) {
-        super.removeView(view);
-
-        if (callback != null) {
-            callback.run();
-        }
-
-        setChildrenVisibility();
-    }
-
     /**
      * Retrieves the animation of the given property from the view at the given index via the view
      * tag system.
@@ -401,7 +418,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
         newAnim.addUpdateListener((animation, value, velocity) -> {
             final int nextAnimInChain =
                     mController.getNextAnimationInChain(property, indexOfChild(child));
-            if (nextAnimInChain == PhysicsAnimationController.NONE) {
+
+            // If the controller doesn't want us to chain, or if we're a transient view in the
+            // process of being removed, don't chain.
+            if (nextAnimInChain == PhysicsAnimationController.NONE
+                    || mTransientViews.contains(child)) {
                 return;
             }
 
@@ -412,9 +433,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
             // If this property's animations should be chained, then check to see if there is a
             // subsequent animation within the rendering limit, and if so, tell it to animate to
             // this animation's new value (plus the offset).
-            if (nextAnimInChain < Math.min(
-                    getChildCount(),
-                    mMaxRenderedChildren + mViewsToBeActuallyRemoved.size())) {
+            if (nextAnimInChain < Math.min(getChildCount(), mMaxRenderedChildren)) {
                 getAnimationAtIndex(property, animIndex + 1)
                         .animateToFinalPosition(value + offset);
             } else if (nextAnimInChain < getChildCount()) {
@@ -442,9 +461,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
                     // Ignore views that are animating out when calculating whether to hide the
                     // view. That is, if we're supposed to render 5 views, but 4 are animating out
                     // and will soon be removed, render up to 9 views temporarily.
-                    i < (mMaxRenderedChildren + mViewsToBeActuallyRemoved.size())
-                        ? View.VISIBLE
-                        : View.GONE);
+                    i < mMaxRenderedChildren ? View.VISIBLE : View.GONE);
         }
     }
 

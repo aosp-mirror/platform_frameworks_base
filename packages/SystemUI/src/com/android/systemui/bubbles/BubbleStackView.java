@@ -320,8 +320,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         if (updatePosition && !mIsExpanded) {
             // If alerting it gets promoted to top of the stack.
             if (mBubbleContainer.indexOfChild(bubbleView) != 0) {
-                mBubbleContainer.removeViewAndThen(bubbleView,
-                        () -> mBubbleContainer.addView(bubbleView, 0));
+                mBubbleContainer.moveViewTo(bubbleView, 0);
             }
             requestUpdate();
         }
