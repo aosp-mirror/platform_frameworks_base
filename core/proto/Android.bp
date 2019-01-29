@@ -21,7 +21,10 @@ cc_library_static {
         type: "lite",
     },
     srcs: [
+        "android/bluetooth/a2dp/enums.proto",
         "android/bluetooth/enums.proto",
         "android/bluetooth/hci/enums.proto",
+        "android/bluetooth/hfp/enums.proto",
+        "android/bluetooth/smp/enums.proto",
     ],
 }

@@ -56,3 +56,57 @@ enum LinkTypeEnum {
     LINK_TYPE_ACL = 0x01;
     LINK_TYPE_ESCO = 0x02;
 }
+
+enum DeviceInfoSrcEnum {
+    DEVICE_INFO_SRC_UNKNOWN = 0;
+    // Within Android Bluetooth stack
+    DEVICE_INFO_INTERNAL = 1;
+    // Outside Android Bluetooth stack
+    DEVICE_INFO_EXTERNAL = 2;
+}
+
+enum DeviceTypeEnum {
+    DEVICE_TYPE_UNKNOWN = 0;
+    DEVICE_TYPE_CLASSIC = 1;
+    DEVICE_TYPE_LE = 2;
+    DEVICE_TYPE_DUAL = 3;
+}
+
+// Defined in frameworks/base/core/java/android/bluetooth/BluetoothDevice.java
+enum TransportTypeEnum {
+    TRANSPORT_TYPE_AUTO = 0;
+    TRANSPORT_TYPE_BREDR = 1;
+    TRANSPORT_TYPE_LE = 2;
+}
+
+// Bond state enum
+// Defined in frameworks/base/core/java/android/bluetooth/BluetoothDevice.java
+enum BondStateEnum {
+    BOND_STATE_UNKNOWN = 0;
+    BOND_STATE_NONE = 10;
+    BOND_STATE_BONDING = 11;
+    BOND_STATE_BONDED = 12;
+}
+
+// Sub states within the bonding general state
+enum BondSubStateEnum {
+    BOND_SUB_STATE_UNKNOWN = 0;
+    BOND_SUB_STATE_LOCAL_OOB_DATA_PROVIDED = 1;
+    BOND_SUB_STATE_LOCAL_PIN_REQUESTED = 2;
+    BOND_SUB_STATE_LOCAL_PIN_REPLIED = 3;
+    BOND_SUB_STATE_LOCAL_SSP_REQUESTED = 4;
+    BOND_SUB_STATE_LOCAL_SSP_REPLIED = 5;
+}
+
+enum UnbondReasonEnum {
+    UNBOND_REASON_UNKNOWN = 0;
+    UNBOND_REASON_AUTH_FAILED = 1;
+    UNBOND_REASON_AUTH_REJECTED = 2;
+    UNBOND_REASON_AUTH_CANCELED = 3;
+    UNBOND_REASON_REMOTE_DEVICE_DOWN = 4;
+    UNBOND_REASON_DISCOVERY_IN_PROGRESS = 5;
+    UNBOND_REASON_AUTH_TIMEOUT = 6;
+    UNBOND_REASON_REPEATED_ATTEMPTS = 7;
+    UNBOND_REASON_REMOTE_AUTH_CANCELED = 8;
+    UNBOND_REASON_REMOVED = 9;
+}
