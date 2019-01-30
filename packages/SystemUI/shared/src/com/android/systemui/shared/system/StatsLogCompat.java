@@ -32,4 +32,17 @@ public class StatsLogCompat {
         StatsLog.write(19, action, srcState, dstState, extension,
                 swipeUpEnabled);
     }
+
+    /**
+     *  StatsLog.write(StatsLog.STYLE_EVENT, action, colorPackageHash,
+     *           fontPackageHash, shapePackageHash, clockPackageHash,
+     *           launcherGrid, wallpaperCategoryHash, wallpaperIdHash);
+     */
+    public static void write(int action, int colorPackageHash,
+            int fontPackageHash, int shapePackageHash, int clockPackageHash,
+            int launcherGrid, int wallpaperCategoryHash, int wallpaperIdHash) {
+        StatsLog.write(179, action, colorPackageHash,
+                fontPackageHash, shapePackageHash, clockPackageHash,
+                launcherGrid, wallpaperCategoryHash, wallpaperIdHash);
+    }
 }
