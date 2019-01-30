@@ -926,6 +926,10 @@ class ActivityStarter {
         if (callerApp != null && callerApp.hasForegroundActivities()) {
             return false;
         }
+        // don't abort if the callerApp is instrumenting with background activity starts privileges
+        if (callerApp != null && callerApp.isInstrumentingWithBackgroundActivityStartPrivileges()) {
+            return false;
+        }
         // don't abort if the callingUid is in the foreground or is a persistent system process
         final int callingUidProcState = mService.getUidStateLocked(callingUid);
         final boolean callingUidHasAnyVisibleWindow =

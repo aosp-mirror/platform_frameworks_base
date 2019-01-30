@@ -138,6 +138,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mDebugging;
     // Active instrumentation running in process?
     private volatile boolean mInstrumenting;
+    // Active instrumentation with background activity starts privilege running in process?
+    private volatile boolean mInstrumentingWithBackgroundActivityStartPrivileges;
     // This process it perceptible by the user.
     private volatile boolean mPerceptible;
     // Set to true when process was launched with a wrapper attached
@@ -368,6 +370,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     boolean isInstrumenting() {
         return mInstrumenting;
+    }
+
+    /**
+     * {@see isInstrumentingWithBackgroundActivityStartPrivileges}
+     */
+    public void setInstrumentingWithBackgroundActivityStartPrivileges(
+            boolean instrumentingWithBackgroundActivityStartPrivileges) {
+        mInstrumentingWithBackgroundActivityStartPrivileges =
+                instrumentingWithBackgroundActivityStartPrivileges;
+    }
+
+    /**
+     * @return true if the instrumentation was started by a holder of
+     * START_ACTIVITIES_FROM_BACKGROUND permission
+     */
+    boolean isInstrumentingWithBackgroundActivityStartPrivileges() {
+        return mInstrumentingWithBackgroundActivityStartPrivileges;
     }
 
     public void setPerceptible(boolean perceptible) {
