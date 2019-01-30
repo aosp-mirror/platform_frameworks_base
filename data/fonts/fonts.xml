@@ -100,36 +100,6 @@
         <font weight="400" style="normal">CarroisGothicSC-Regular.ttf</font>
     </family>
 
-    <family name="arbutus-slab">
-        <font weight="400" style="normal">ArbutusSlab-Regular.ttf</font>
-    </family>
-
-    <family name="arvo">
-        <font weight="400" style="normal">Arvo-Regular.ttf</font>
-        <font weight="400" style="italic">Arvo-Italic.ttf</font>
-        <font weight="700" style="normal">Arvo-Bold.ttf</font>
-        <font weight="700" style="italic">Arvo-BoldItalic.ttf</font>
-    </family>
-    <alias name="arvo-bold" to="arvo" weight="700" />
-
-    <family name="lato">
-        <font weight="400" style="normal">Lato-Regular.ttf</font>
-        <font weight="400" style="italic">Lato-Italic.ttf</font>
-        <font weight="700" style="normal">Lato-Bold.ttf</font>
-        <font weight="700" style="italic">Lato-BoldItalic.ttf</font>
-    </family>
-    <alias name="lato-bold" to="lato" weight="700" />
-
-    <family name="rubik">
-        <font weight="400" style="normal">Rubik-Regular.ttf</font>
-        <font weight="400" style="italic">Rubik-Italic.ttf</font>
-        <font weight="500" style="normal">Rubik-Medium.ttf</font>
-        <font weight="500" style="italic">Rubik-MediumItalic.ttf</font>
-        <font weight="700" style="normal">Rubik-Bold.ttf</font>
-        <font weight="700" style="italic">Rubik-BoldItalic.ttf</font>
-    </family>
-    <alias name="rubik-medium" to="rubik" weight="500" />
-
     <family name="source-sans-pro">
         <font weight="400" style="normal">SourceSansPro-Regular.ttf</font>
         <font weight="400" style="italic">SourceSansPro-Italic.ttf</font>
