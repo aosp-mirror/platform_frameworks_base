@@ -75,6 +75,7 @@ public class InsetsControllerTest {
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
                     rect, rect);
         });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 
     @Test
@@ -95,6 +96,186 @@ public class InsetsControllerTest {
 
     @Test
     public void testAnimationEndState() {
+        InsetsSourceControl[] controls = prepareControls();
+        InsetsSourceControl navBar = controls[0];
+        InsetsSourceControl topBar = controls[1];
+        InsetsSourceControl ime = controls[2];
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mController.show(Type.all());
+            // quickly jump to final state by cancelling it.
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
+            // no focused view, no IME.
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            mController.hide(Type.all());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            mController.show(Type.ime());
+            mController.cancelExistingAnimation();
+            // no focused view, no IME.
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testApplyImeVisibility() {
+        final InsetsSourceControl ime = new InsetsSourceControl(TYPE_IME, mLeash, new Point());
+
+        InsetsSourceControl[] controls = new InsetsSourceControl[3];
+        controls[0] = ime;
+        mController.onControlsChanged(controls);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mController.applyImeVisibility(true);
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(ime.getType()).isVisible());
+            mController.applyImeVisibility(false);
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testShowHideSelectively() {
+        InsetsSourceControl[] controls = prepareControls();
+        InsetsSourceControl navBar = controls[0];
+        InsetsSourceControl topBar = controls[1];
+        InsetsSourceControl ime = controls[2];
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            int types = Type.sideBars() | Type.systemBars();
+            // test show select types.
+            mController.show(types);
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            // test hide all
+            mController.hide(types);
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testShowHideSingle() {
+        InsetsSourceControl[] controls = prepareControls();
+        InsetsSourceControl navBar = controls[0];
+        InsetsSourceControl topBar = controls[1];
+        InsetsSourceControl ime = controls[2];
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            int types = Type.sideBars() | Type.systemBars();
+            // test show select types.
+            mController.show(types);
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            // test hide all
+            mController.hide(Type.all());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            // test single show
+            mController.show(Type.sideBars());
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            // test single hide
+            mController.hide(Type.sideBars());
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testShowHideMultiple() {
+        InsetsSourceControl[] controls = prepareControls();
+        InsetsSourceControl navBar = controls[0];
+        InsetsSourceControl topBar = controls[1];
+        InsetsSourceControl ime = controls[2];
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // start two animations and see if previous is cancelled and final state is reached.
+            mController.show(Type.sideBars());
+            mController.show(Type.systemBars());
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            mController.hide(Type.sideBars());
+            mController.hide(Type.systemBars());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            int types = Type.sideBars() | Type.systemBars();
+            // show two at a time and hide one by one.
+            mController.show(types);
+            mController.hide(Type.sideBars());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            mController.hide(Type.systemBars());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testShowMultipleHideOneByOne() {
+        InsetsSourceControl[] controls = prepareControls();
+        InsetsSourceControl navBar = controls[0];
+        InsetsSourceControl topBar = controls[1];
+        InsetsSourceControl ime = controls[2];
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            int types = Type.sideBars() | Type.systemBars();
+            // show two at a time and hide one by one.
+            mController.show(types);
+            mController.hide(Type.sideBars());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+
+            mController.hide(Type.systemBars());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    private InsetsSourceControl[] prepareControls() {
         final InsetsSourceControl navBar = new InsetsSourceControl(TYPE_NAVIGATION_BAR, mLeash,
                 new Point());
         final InsetsSourceControl topBar = new InsetsSourceControl(TYPE_TOP_BAR, mLeash,
@@ -106,27 +287,6 @@ public class InsetsControllerTest {
         controls[1] = topBar;
         controls[2] = ime;
         mController.onControlsChanged(controls);
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mController.show(Type.all());
-            // quickly jump to final state by cancelling it.
-            mController.cancelExistingAnimation();
-            assertTrue(mController.getSourceConsumer(navBar.getType()).isVisible());
-            assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
-            assertTrue(mController.getSourceConsumer(ime.getType()).isVisible());
-
-            mController.hide(Type.all());
-            mController.cancelExistingAnimation();
-            assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
-            assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
-            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
-
-            mController.show(Type.ime());
-            mController.cancelExistingAnimation();
-            assertTrue(mController.getSourceConsumer(ime.getType()).isVisible());
-
-            mController.hide(Type.ime());
-            mController.cancelExistingAnimation();
-            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
-        });
+        return controls;
     }
 }
