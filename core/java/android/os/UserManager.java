@@ -2697,6 +2697,19 @@ public class UserManager {
     }
 
     /**
+     * Updates the calling user's name.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param name the new name for the user
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public void setUserName(String name) {
+        setUserName(getUserHandle(), name);
+    }
+
+    /**
      * Sets the user's photo.
      * @param userHandle the user for whom to change the photo.
      * @param icon the bitmap to set as the photo.
@@ -2708,6 +2721,19 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Sets the calling user's photo.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param icon the bitmap to set as the photo.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public void setUserIcon(Bitmap icon) {
+        setUserIcon(getUserHandle(), icon);
     }
 
     /**
@@ -2734,6 +2760,20 @@ public class UserManager {
             throw re.rethrowFromSystemServer();
         }
         return null;
+    }
+
+    /**
+     * Returns a Bitmap for the calling user's photo.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @return a {@link Bitmap} of the user's photo, or null if there's no photo.
+     * @see com.android.internal.util.UserIcons#getDefaultUserIcon for a default.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public Bitmap getUserIcon() {
+        return getUserIcon(getUserHandle());
     }
 
     /**

@@ -5537,6 +5537,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.PersistableBundle getSeedAccountOptions();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountType();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public long[] getSerialNumbersOfUsers(boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.graphics.Bitmap getUserIcon();
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
     method public boolean hasRestrictedProfiles();
@@ -5547,6 +5548,8 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isPrimaryUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isRestrictedProfile();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean removeUser(android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(android.graphics.Bitmap);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserName(String);
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field @Deprecated public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";

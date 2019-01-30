@@ -1324,6 +1324,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public ParcelFileDescriptor getUserIcon(int targetUserId) {
+        checkManageUsersPermission("get user icon");
         String iconPath;
         synchronized (mPackagesLock) {
             UserInfo targetUserInfo = getUserInfoNoChecks(targetUserId);
