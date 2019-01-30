@@ -14072,6 +14072,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         enforceCrossUsersPermission(userHandle);
         synchronized (getLockObject()) {
+            if (mInjector.settingsSecureGetIntForUser(
+                    Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED, 0, userHandle) == 0) {
+                return false;
+            }
             final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
             if (admin != null) {
                 if (admin.mCrossProfileCalendarPackages == null) {

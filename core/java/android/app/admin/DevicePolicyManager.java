@@ -10590,14 +10590,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns if a package is whitelisted to access cross-profile calendar APIs.
+     * Returns if a package is allowed to access cross-profile calendar APIs.
+     *
+     * <p>A package is allowed to access cross-profile calendar APIs if it's allowed by
+     * admins via {@link #setCrossProfileCalendarPackages(ComponentName, Set)} and
+     * {@link android.provider.Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED}
+     * is turned on in the managed profile.
      *
      * <p>To query for a specific user, use
      * {@link Context#createPackageContextAsUser(String, int, UserHandle)} to create a context for
      * that user, and get a {@link DevicePolicyManager} from this context.
      *
      * @param packageName the name of the package
-     * @return {@code true} if the package is whitelisted to access cross-profile calendar APIs.
+     * @return {@code true} if the package is allowed to access cross-profile calendar APIs.
      * {@code false} otherwise.
      *
      * @see #setCrossProfileCalendarPackages(ComponentName, Set)
