@@ -19,6 +19,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.UserHandle
 import android.util.IconDrawableFactory
@@ -157,16 +158,21 @@ class OngoingPrivacyDialog constructor(
         } else {
             icons.visibility = View.GONE
         }
-        item.setOnClickListener(object : View.OnClickListener {
-            val intent = Intent(Intent.ACTION_REVIEW_APP_PERMISSION_USAGE)
-                    .putExtra(Intent.EXTRA_PACKAGE_NAME, app.packageName)
-                    .putExtra(Intent.EXTRA_USER, UserHandle.getUserHandleForUid(app.uid))
-            override fun onClick(v: View?) {
-                Dependency.get(ActivityStarter::class.java)
-                        .postStartActivityDismissingKeyguard(intent, 0)
-                dismissDialog?.invoke()
-            }
-        })
+        try {
+            // Check if package exists
+            context.packageManager.getPackageInfo(app.packageName, 0)
+            item.setOnClickListener(object : View.OnClickListener {
+                val intent = Intent(Intent.ACTION_REVIEW_APP_PERMISSION_USAGE)
+                        .putExtra(Intent.EXTRA_PACKAGE_NAME, app.packageName)
+                        .putExtra(Intent.EXTRA_USER, UserHandle.getUserHandleForUid(app.uid))
+                override fun onClick(v: View?) {
+                    Dependency.get(ActivityStarter::class.java)
+                            .postStartActivityDismissingKeyguard(intent, 0)
+                    dismissDialog?.invoke()
+                }
+            })
+        } catch (e: PackageManager.NameNotFoundException) {}
+
         itemList.addView(item)
     }
 }
