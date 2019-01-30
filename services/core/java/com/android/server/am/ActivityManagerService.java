@@ -120,6 +120,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -13638,18 +13639,26 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Cause the target app to be launched if necessary and its backup agent
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
-    public boolean bindBackupAgent(String packageName, int backupMode, int userId) {
+    public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId) {
         if (DEBUG_BACKUP) {
-            Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode="
-                    + backupMode + " userId=" + userId + " callingUid = " + Binder.getCallingUid()
+            Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
+                    + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
                     + " uid = " + Process.myUid());
         }
         enforceCallingPermission("android.permission.CONFIRM_FULL_BACKUP", "bindBackupAgent");
 
+        // The instantiatedUserId is the user of the process the backup agent is started in. This is
+        // different from the targetUserId which is the user whose data is to be backed up or
+        // restored. This distinction is important for system-process packages that live in the
+        // system user's process but backup/restore data for non-system users.
+        // TODO (b/123688746): Handle all system-process packages with singleton check.
+        final int instantiatedUserId =
+                PLATFORM_PACKAGE_NAME.equals(packageName) ? UserHandle.USER_SYSTEM : targetUserId;
+
         IPackageManager pm = AppGlobals.getPackageManager();
         ApplicationInfo app = null;
         try {
-            app = pm.getApplicationInfo(packageName, STOCK_PM_FLAGS, userId);
+            app = pm.getApplicationInfo(packageName, STOCK_PM_FLAGS, instantiatedUserId);
         } catch (RemoteException e) {
             // can't happen; package manager is process-local
         }
@@ -13673,7 +13682,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode, userId);
+            BackupRecord r = new BackupRecord(app, backupMode, targetUserId);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
@@ -13695,10 +13704,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc.inFullBackup = true;
             }
             r.app = proc;
-            final BackupRecord backupTarget = mBackupTargets.get(userId);
+            final BackupRecord backupTarget = mBackupTargets.get(targetUserId);
             oldBackupUid = backupTarget != null ? backupTarget.appInfo.uid : -1;
             newBackupUid = proc.inFullBackup ? r.appInfo.uid : -1;
-            mBackupTargets.put(userId, r);
+            mBackupTargets.put(targetUserId, r);
 
             // Try not to kill the process during backup
             updateOomAdjLocked(proc, true);
@@ -13709,7 +13718,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     proc.thread.scheduleCreateBackupAgent(app,
-                            compatibilityInfoForPackage(app), backupMode, userId);
+                            compatibilityInfoForPackage(app), backupMode, targetUserId);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }
@@ -13749,16 +13758,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // A backup agent has just come up
     @Override
-    public void backupAgentCreated(String agentPackageName, IBinder agent) {
-        final int callingUserId = UserHandle.getCallingUserId();
+    public void backupAgentCreated(String agentPackageName, IBinder agent, int userId) {
+        // Resolve the target user id and enforce permissions.
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, /* allowAll */ false, ALLOW_FULL_ONLY, "backupAgentCreated", null);
         if (DEBUG_BACKUP) {
             Slog.v(TAG_BACKUP, "backupAgentCreated: " + agentPackageName + " = " + agent
-                    + " callingUserId = " + callingUserId + " callingUid = "
-                    + Binder.getCallingUid() + " uid = " + Process.myUid());
+                    + " callingUserId = " + UserHandle.getCallingUserId() + " userId = " + userId
+                    + " callingUid = " + Binder.getCallingUid() + " uid = " + Process.myUid());
         }
 
         synchronized(this) {
-            final BackupRecord backupTarget = mBackupTargets.get(callingUserId);
+            final BackupRecord backupTarget = mBackupTargets.get(userId);
             String backupAppName = backupTarget == null ? null : backupTarget.appInfo.packageName;
             if (!agentPackageName.equals(backupAppName)) {
                 Slog.e(TAG, "Backup agent created for " + agentPackageName + " but not requested!");
@@ -13770,7 +13781,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             IBackupManager bm = IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
-            bm.agentConnectedForUser(callingUserId, agentPackageName, agent);
+            bm.agentConnectedForUser(userId, agentPackageName, agent);
         } catch (RemoteException e) {
             // can't happen; the backup manager service is local
         } catch (Exception e) {
@@ -13823,7 +13834,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (proc.thread != null) {
                     try {
                         proc.thread.scheduleDestroyBackupAgent(appInfo,
-                                compatibilityInfoForPackage(appInfo));
+                                compatibilityInfoForPackage(appInfo), userId);
                     } catch (Exception e) {
                         Slog.e(TAG, "Exception when unbinding backup agent:");
                         e.printStackTrace();

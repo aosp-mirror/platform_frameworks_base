@@ -470,7 +470,7 @@ public class TransactionParcelTests {
 
         @Override
         public void scheduleDestroyBackupAgent(ApplicationInfo applicationInfo,
-                CompatibilityInfo compatibilityInfo) throws RemoteException {
+                CompatibilityInfo compatibilityInfo, int userId) throws RemoteException {
         }
 
         @Override
