@@ -64,10 +64,10 @@ public abstract class AttentionService extends Service {
     /** Attention is present. */
     public static final int ATTENTION_SUCCESS_PRESENT = 1;
 
-    /** Preempted by other camera user. */
+    /** Preempted by other client. */
     public static final int ATTENTION_FAILURE_PREEMPTED = 2;
 
-    /** Preempted by other camera user. */
+    /** Request timed out. */
     public static final int ATTENTION_FAILURE_TIMED_OUT = 3;
 
     /** Unknown reasons for failing to determine the attention. */
