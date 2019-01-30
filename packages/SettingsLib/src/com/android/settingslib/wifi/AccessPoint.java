@@ -888,13 +888,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         if (isOsuProvider()) {
             if (mOsuProvisioningComplete) {
-                summary.append(mContext.getString(R.string.osu_provisioning_complete));
+                summary.append(mContext.getString(R.string.osu_sign_up_complete));
             } else if (mOsuFailure != null) {
                 summary.append(mOsuFailure);
             } else if (mOsuStatus != null) {
                 summary.append(mOsuStatus);
             } else {
-                summary.append(mContext.getString(R.string.tap_to_set_up));
+                summary.append(mContext.getString(R.string.tap_to_sign_up));
             }
         } else if (isActive()) {
             if (isPasspoint()) {
@@ -1554,91 +1554,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * All methods are invoked on the Main Thread
      */
     private class AccessPointProvisioningCallback extends ProvisioningCallback {
-        // TODO: Remove logs and implement summary changing logic for these provisioning callbacks.
         @Override
         @MainThread public void onProvisioningFailure(int status) {
-            switch (status) {
-                case OSU_FAILURE_AP_CONNECTION:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_ap_connection);
-                    break;
-                case OSU_FAILURE_SERVER_URL_INVALID:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_server_url_invalid);
-                    break;
-                case OSU_FAILURE_SERVER_CONNECTION:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_server_connection);
-                    break;
-                case OSU_FAILURE_SERVER_VALIDATION:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_server_validation);
-                    break;
-                case OSU_FAILURE_SERVICE_PROVIDER_VERIFICATION:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_service_provider_verification);
-                    break;
-                case OSU_FAILURE_PROVISIONING_ABORTED:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_provisioning_aborted);
-                    break;
-                case OSU_FAILURE_PROVISIONING_NOT_AVAILABLE:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_provisioning_not_available);
-                    break;
-                case OSU_FAILURE_INVALID_URL_FORMAT_FOR_OSU:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_invalid_server_url);
-                    break;
-                case OSU_FAILURE_UNEXPECTED_COMMAND_TYPE:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_unexpected_command_type);
-                    break;
-                case OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_TYPE:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_unexpected_soap_message_type);
-                    break;
-                case OSU_FAILURE_SOAP_MESSAGE_EXCHANGE:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_soap_message_exchange);
-                    break;
-                case OSU_FAILURE_START_REDIRECT_LISTENER:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_start_redirect_listener);
-                    break;
-                case OSU_FAILURE_TIMED_OUT_REDIRECT_LISTENER:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_timed_out_redirect_listener);
-                    break;
-                case OSU_FAILURE_NO_OSU_ACTIVITY_FOUND:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_no_osu_activity_found);
-                    break;
-                case OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_STATUS:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_unexpected_soap_message_status);
-                    break;
-                case OSU_FAILURE_NO_PPS_MO:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_no_pps_mo);
-                    break;
-                case OSU_FAILURE_NO_AAA_SERVER_TRUST_ROOT_NODE:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_no_aaa_server_trust_root_node);
-                    break;
-                case OSU_FAILURE_NO_REMEDIATION_SERVER_TRUST_ROOT_NODE:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_no_remediation_server_trust_root_node);
-                    break;
-                case OSU_FAILURE_NO_POLICY_SERVER_TRUST_ROOT_NODE:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_no_policy_server_trust_root_node);
-                    break;
-                case OSU_FAILURE_RETRIEVE_TRUST_ROOT_CERTIFICATES:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_retrieve_trust_root_certificates);
-                    break;
-                case OSU_FAILURE_NO_AAA_TRUST_ROOT_CERTIFICATE:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_no_aaa_trust_root_certificate);
-                    break;
-                case OSU_FAILURE_ADD_PASSPOINT_CONFIGURATION:
-                    mOsuFailure = mContext.getString(
-                            R.string.osu_failure_add_passpoint_configuration);
-                    break;
-                case OSU_FAILURE_OSU_PROVIDER_NOT_FOUND:
-                    mOsuFailure = mContext.getString(R.string.osu_failure_osu_provider_not_found);
-                    break;
+            if (TextUtils.equals(mOsuStatus, mContext.getString(R.string.osu_completing_sign_up))) {
+                mOsuFailure = mContext.getString(R.string.osu_sign_up_failed);
+            } else {
+                mOsuFailure = mContext.getString(R.string.osu_connect_failed);
             }
             mOsuStatus = null;
             mOsuProvisioningComplete = false;
@@ -1651,50 +1572,37 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         @Override
         @MainThread public void onProvisioningStatus(int status) {
+            String newStatus = null;
             switch (status) {
                 case OSU_STATUS_AP_CONNECTING:
-                    mOsuStatus = mContext.getString(R.string.osu_status_ap_connecting);
-                    break;
                 case OSU_STATUS_AP_CONNECTED:
-                    mOsuStatus = mContext.getString(R.string.osu_status_ap_connected);
-                    break;
                 case OSU_STATUS_SERVER_CONNECTING:
-                    mOsuStatus = mContext.getString(R.string.osu_status_server_connecting);
-                    break;
                 case OSU_STATUS_SERVER_VALIDATED:
-                    mOsuStatus = mContext.getString(R.string.osu_status_server_validated);
-                    break;
                 case OSU_STATUS_SERVER_CONNECTED:
-                    mOsuStatus = mContext.getString(R.string.osu_status_server_connected);
-                    break;
                 case OSU_STATUS_INIT_SOAP_EXCHANGE:
-                    mOsuStatus = mContext.getString(R.string.osu_status_init_soap_exchange);
-                    break;
                 case OSU_STATUS_WAITING_FOR_REDIRECT_RESPONSE:
-                    mOsuStatus = mContext.getString(
-                            R.string.osu_status_waiting_for_redirect_response);
+                    newStatus = String.format(mContext.getString(R.string.osu_opening_provider),
+                            mOsuProvider.getFriendlyName());
                     break;
                 case OSU_STATUS_REDIRECT_RESPONSE_RECEIVED:
-                    mOsuStatus = mContext.getString(R.string.osu_status_redirect_response_received);
-                    break;
                 case OSU_STATUS_SECOND_SOAP_EXCHANGE:
-                    mOsuStatus = mContext.getString(R.string.osu_status_second_soap_exchange);
-                    break;
                 case OSU_STATUS_THIRD_SOAP_EXCHANGE:
-                    mOsuStatus = mContext.getString(R.string.osu_status_third_soap_exchange);
-                    break;
                 case OSU_STATUS_RETRIEVING_TRUST_ROOT_CERTS:
-                    mOsuStatus = mContext.getString(
-                            R.string.osu_status_retrieving_trust_root_certs);
+                    newStatus = mContext.getString(
+                            R.string.osu_completing_sign_up);
                     break;
             }
+            boolean updated = !TextUtils.equals(mOsuStatus, newStatus);
+            mOsuStatus = newStatus;
             mOsuFailure = null;
             mOsuProvisioningComplete = false;
-            ThreadUtils.postOnMainThread(() -> {
-                if (mAccessPointListener != null) {
-                    mAccessPointListener.onAccessPointChanged(AccessPoint.this);
-                }
-            });
+            if (updated) {
+                ThreadUtils.postOnMainThread(() -> {
+                    if (mAccessPointListener != null) {
+                        mAccessPointListener.onAccessPointChanged(AccessPoint.this);
+                    }
+                });
+            }
         }
 
         @Override
