@@ -28,9 +28,12 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
+import static com.android.systemui.statusbar.phone.NavigationBarView.WINDOW_TARGET_BOTTOM;
+import static com.android.systemui.statusbar.phone.NavigationPrototypeController.EDGE_SENSITIVITY_WIDTH_SETTING;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -42,11 +45,8 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewConfiguration;
 import android.view.ViewPropertyAnimator;
-
-import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -72,6 +72,7 @@ public class QuickStepController implements GestureHelper {
     /** Experiment to swipe home button left to execute a back key press */
     private static final String HIDE_BACK_BUTTON_PROP = "quickstepcontroller_hideback";
     private static final String ENABLE_CLICK_THROUGH_NAV_PROP = "quickstepcontroller_clickthrough";
+    private static final String GESTURE_REGION_THRESHOLD_SETTING = "gesture_region_threshold";
     private static final long BACK_BUTTON_FADE_IN_ALPHA = 150;
     private static final long CLICK_THROUGH_TAP_DELAY = 70;
     private static final long CLICK_THROUGH_TAP_RESET_DELAY = 100;
@@ -109,10 +110,10 @@ public class QuickStepController implements GestureHelper {
     private float mMaxDragLimit;
     private float mMinDragLimit;
     private float mDragDampeningFactor;
-    private float mEdgeSwipeThreshold;
     private boolean mClickThroughPressed;
     private float mClickThroughPressX;
     private float mClickThroughPressY;
+    private int mGestureRegionThreshold;
 
     private NavigationGestureAction mCurrentAction;
     private NavigationGestureAction[] mGestureActions = new NavigationGestureAction[MAX_GESTURES];
@@ -139,7 +140,7 @@ public class QuickStepController implements GestureHelper {
     };
 
     private final Runnable mClickThroughResetTap = () -> {
-        setWindowTouchable(true);
+        mNavigationBarView.setWindowTouchable(true);
         mClickThroughPressed = false;
     };
 
@@ -210,7 +211,8 @@ public class QuickStepController implements GestureHelper {
 
         // The same down event was just sent on intercept and therefore can be ignored here
         final boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
-                && mOverviewEventSender.getProxy() != null;
+                && mOverviewEventSender.getProxy() != null
+                && mNavigationBarView.getWindowTarget() == WINDOW_TARGET_BOTTOM;
         return ignoreProxyDownEvent || handleTouchEvent(event);
     }
 
@@ -268,12 +270,15 @@ public class QuickStepController implements GestureHelper {
                 mNavigationBarView.transformMatrixToLocal(mTransformLocalMatrix);
                 mAllowGestureDetection = true;
                 mNotificationsVisibleOnDown = !mNavigationBarView.isNotificationsFullyCollapsed();
-                mEdgeSwipeThreshold = mContext.getResources()
-                        .getDimensionPixelSize(R.dimen.navigation_bar_edge_swipe_threshold);
+                final int defaultRegionThreshold = mContext.getResources()
+                        .getDimensionPixelOffset(R.dimen.navigation_bar_default_edge_width);
+                mGestureRegionThreshold = convertDpToPixel(getIntGlobalSetting(mContext,
+                        EDGE_SENSITIVITY_WIDTH_SETTING, defaultRegionThreshold));
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                if (!mAllowGestureDetection) {
+                if (!mAllowGestureDetection
+                        || mNavigationBarView.getWindowTarget() != WINDOW_TARGET_BOTTOM) {
                     break;
                 }
                 int x = (int) event.getX();
@@ -330,18 +335,12 @@ public class QuickStepController implements GestureHelper {
                     } else if (exceededSwipeHorizontalTouchSlop) {
                         if (mDragHPositive ? (posH < touchDownH) : (posH > touchDownH)) {
                             // Swiping left (rtl) gesture
-                            int index = mGestureActions[ACTION_SWIPE_LEFT_FROM_EDGE_INDEX] != null
-                                        && isEdgeSwipeAlongNavBar(touchDownH, !mDragHPositive)
-                                    ? ACTION_SWIPE_LEFT_FROM_EDGE_INDEX : ACTION_SWIPE_LEFT_INDEX;
-                            tryToStartGesture(mGestureActions[index], true /* alignedWithNavBar */,
-                                    event);
+                            tryToStartGesture(mGestureActions[ACTION_SWIPE_LEFT_INDEX],
+                                    true /* alignedWithNavBar */, event);
                         } else {
                             // Swiping right (ltr) gesture
-                            int index = mGestureActions[ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX] != null
-                                        && isEdgeSwipeAlongNavBar(touchDownH, mDragHPositive)
-                                    ? ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX : ACTION_SWIPE_RIGHT_INDEX;
-                            tryToStartGesture(mGestureActions[index], true /* alignedWithNavBar */,
-                                    event);
+                            tryToStartGesture(mGestureActions[ACTION_SWIPE_RIGHT_INDEX],
+                                    true /* alignedWithNavBar */, event);
                         }
                     }
                 }
@@ -354,24 +353,34 @@ public class QuickStepController implements GestureHelper {
             case MotionEvent.ACTION_UP:
                 if (mCurrentAction != null) {
                     mCurrentAction.endGesture();
-                } else if (action == MotionEvent.ACTION_UP
-                        && getBoolGlobalSetting(mContext, ENABLE_CLICK_THROUGH_NAV_PROP)
-                        && !mClickThroughPressed) {
-                    // Enable click through functionality where no gesture has been detected and not
-                    // passed the drag slop so inject a touch event at the same location
-                    // after making the navigation bar window untouchable. After a some time, the
-                    // navigation bar will be able to take input events again
-                    float diffX = Math.abs(event.getX() - mTouchDownX);
-                    float diffY = Math.abs(event.getY() - mTouchDownY);
+                } else if (action == MotionEvent.ACTION_UP) {
+                    if (canTriggerEdgeSwipe(event)) {
+                        int index = mNavigationBarView.getWindowTarget() == NAV_BAR_LEFT
+                                ? ACTION_SWIPE_RIGHT_FROM_EDGE_INDEX
+                                : ACTION_SWIPE_LEFT_FROM_EDGE_INDEX;
+                        tryToStartGesture(mGestureActions[index], false /* alignedWithNavBar */,
+                                event);
+                        if (mCurrentAction != null) {
+                            mCurrentAction.endGesture();
+                        }
+                    } else if (getBoolGlobalSetting(mContext, ENABLE_CLICK_THROUGH_NAV_PROP)
+                            && !mClickThroughPressed) {
+                        // Enable click through functionality where no gesture has been detected and
+                        // not passed the drag slop so inject a touch event at the same location
+                        // after making the navigation bar window untouchable. After a some time,
+                        // the navigation bar will be able to take input events again
+                        float diffX = Math.abs(event.getX() - mTouchDownX);
+                        float diffY = Math.abs(event.getY() - mTouchDownY);
 
-                    if ((diffX <= NavigationBarCompat.getQuickStepDragSlopPx()
-                            && diffY <= NavigationBarCompat.getQuickStepDragSlopPx())) {
-                        setWindowTouchable(false);
-                        mClickThroughPressX = event.getRawX();
-                        mClickThroughPressY = event.getRawY();
-                        mClickThroughPressed = true;
-                        mNavigationBarView.postDelayed(mClickThroughSendTap,
-                                CLICK_THROUGH_TAP_DELAY);
+                        if ((diffX <= NavigationBarCompat.getQuickStepDragSlopPx()
+                                && diffY <= NavigationBarCompat.getQuickStepDragSlopPx())) {
+                            mNavigationBarView.setWindowTouchable(false);
+                            mClickThroughPressX = event.getRawX();
+                            mClickThroughPressY = event.getRawY();
+                            mClickThroughPressed = true;
+                            mNavigationBarView.postDelayed(mClickThroughSendTap,
+                                    CLICK_THROUGH_TAP_DELAY);
+                        }
                     }
                 }
 
@@ -403,30 +412,6 @@ public class QuickStepController implements GestureHelper {
         return mCurrentAction != null || deadZoneConsumed;
     }
 
-    private void setWindowTouchable(boolean flag) {
-        final WindowManager.LayoutParams lp = (WindowManager.LayoutParams)
-                ((ViewGroup) mNavigationBarView.getParent()).getLayoutParams();
-        if (flag) {
-            lp.flags &= ~LayoutParams.FLAG_NOT_TOUCHABLE;
-        } else {
-            lp.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
-        }
-        final WindowManager wm = (WindowManager) mNavigationBarView.getContext()
-                .getSystemService(Context.WINDOW_SERVICE);
-        wm.updateViewLayout((View) mNavigationBarView.getParent(), lp);
-    }
-
-    private boolean isEdgeSwipeAlongNavBar(int touchDown, boolean dragPositiveDirection) {
-        // Detect edge swipe from side of 0 -> threshold
-        if (dragPositiveDirection) {
-            return touchDown < mEdgeSwipeThreshold;
-        }
-        // Detect edge swipe from side of size -> (size - threshold)
-        final int largeSide = isNavBarVertical()
-                ? mNavigationBarView.getHeight() : mNavigationBarView.getWidth();
-        return touchDown > largeSide - mEdgeSwipeThreshold;
-    }
-
     private void handleDragHitTarget(int position, int touchDown) {
         // Drag the hit target if gesture action requires it
         if (mHitTarget != null && (mGestureVerticalDragsButton || mGestureHorizontalDragsButton)) {
@@ -448,6 +433,10 @@ public class QuickStepController implements GestureHelper {
     }
 
     private boolean shouldProxyEvents(int action) {
+        // Do not send events for side navigation bar panels
+        if (mNavigationBarView.getWindowTarget() != WINDOW_TARGET_BOTTOM) {
+            return false;
+        }
         final boolean actionValid = (mCurrentAction == null
                 || !mCurrentAction.disableProxyEvents());
         if (actionValid && !mIsInScreenPinning) {
@@ -619,6 +608,32 @@ public class QuickStepController implements GestureHelper {
         }
     }
 
+    /**
+     * To trigger an edge swipe, the user must start from the left or right edges of certain height
+     * from the bottom then past the drag slope towards the center of the screen, followed by either
+     * a timed trigger for fast swipes or distance if held on the screen longer.
+     * For time, user must swipe up quickly before the Tap Timeout (typically 100ms) and for
+     * distance, the user can drag back to cancel if the touch up has not past the threshold.
+     * @param event Touch up event
+     * @return whether or not edge swipe gesture occurs
+     */
+    private boolean canTriggerEdgeSwipe(MotionEvent event) {
+        if (mNavigationBarView.getWindowTarget() == WINDOW_TARGET_BOTTOM) {
+            return false;
+        }
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        int xDiff = Math.abs(x - mTouchDownX);
+        int yDiff = Math.abs(y - mTouchDownY);
+        final boolean exceededSwipeTouchSlop = xDiff > NavigationBarCompat.getQuickStepDragSlopPx()
+                && xDiff > yDiff;
+        if (exceededSwipeTouchSlop) {
+            long timeDiff = event.getEventTime() - event.getDownTime();
+            return xDiff > mGestureRegionThreshold || timeDiff < ViewConfiguration.getTapTimeout();
+        }
+        return false;
+    }
+
     private boolean canPerformAnyAction() {
         for (NavigationGestureAction action: mGestureActions) {
             if (action != null && action.isEnabled()) {
@@ -684,8 +699,16 @@ public class QuickStepController implements GestureHelper {
         return mNavBarPosition == NAV_BAR_LEFT || mNavBarPosition == NAV_BAR_RIGHT;
     }
 
+    private static int convertDpToPixel(float dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
     static boolean getBoolGlobalSetting(Context context, String key) {
         return Settings.Global.getInt(context.getContentResolver(), key, 0) != 0;
+    }
+
+    static int getIntGlobalSetting(Context context, String key, int defaultValue) {
+        return Settings.Global.getInt(context.getContentResolver(), key, defaultValue);
     }
 
     public static boolean shouldhideBackButton(Context context) {

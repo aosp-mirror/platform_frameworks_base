@@ -1829,6 +1829,9 @@
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
 
+    <!-- Label for navigation edge panel for gestures [CHAR LIMIT=60] -->
+    <string name="nav_bar_edge_panel" translatable="false">Navigation bar Edge Panel</string>
+
     <!-- SysUI Tuner: Button that controls layout of navigation bar [CHAR LIMIT=60] -->
     <string name="nav_bar_layout">Layout</string>
 
