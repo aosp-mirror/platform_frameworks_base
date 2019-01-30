@@ -405,7 +405,7 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
     <!-- Header for typographic clock face. [CHAR LIMIT=8] -->
     <string name="type_clock_header">It\u2019s</string>
 
-    <!-- Hour displayed in words on the typographic clock face. [CHAR LIMIT=8] -->
+    <!-- Hour displayed in words on the typographic clock face. [CHAR LIMIT=12] -->
     <string-array name="type_clock_hours">
         <item>Twelve</item>
         <item>One</item>
@@ -421,7 +421,7 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
         <item>Eleven</item>
     </string-array>
 
-    <!-- Minutes displayed in words on the typographic clock face. [CHAR LIMIT=16] -->
+    <!-- Minutes displayed in words on the typographic clock face. [CHAR LIMIT=20] -->
     <string-array name="type_clock_minutes">
         <item>O\u2019Clock</item>
         <item>O\u2019One</item>
