@@ -123,25 +123,6 @@ public final class MediaController {
      * @return true if the event was sent to the session, false otherwise.
      */
     public boolean dispatchMediaButtonEvent(@NonNull KeyEvent keyEvent) {
-        return dispatchMediaButtonEventInternal(false, keyEvent);
-    }
-
-    /**
-     * Dispatches the media button event as system service to the session.
-     * <p>
-     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
-     * foreground activity didn't consume the key from the hardware devices.
-     *
-     * @param keyEvent media key event
-     * @return {@code true} if the event was sent to the session, {@code false} otherwise
-     * @hide
-     */
-    public boolean dispatchMediaButtonEventAsSystemService(@NonNull KeyEvent keyEvent) {
-        return dispatchMediaButtonEventInternal(true, keyEvent);
-    }
-
-    private boolean dispatchMediaButtonEventInternal(boolean asSystemService,
-            @NonNull KeyEvent keyEvent) {
         if (keyEvent == null) {
             throw new IllegalArgumentException("KeyEvent may not be null");
         }
@@ -149,65 +130,11 @@ public final class MediaController {
             return false;
         }
         try {
-            return mSessionBinder.sendMediaButton(mContext.getPackageName(), mCbStub,
-                    asSystemService, keyEvent);
+            return mSessionBinder.sendMediaButton(mContext.getPackageName(), mCbStub, keyEvent);
         } catch (RuntimeException e) {
             // System is dead. =(
         }
         return false;
-    }
-
-    /**
-     * Dispatches the volume button event as system service to the session.
-     * <p>
-     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
-     * foreground activity didn't consume the key from the hardware devices.
-     *
-     * @param keyEvent volume key event
-     * @hide
-     */
-    public void dispatchVolumeButtonEventAsSystemService(@NonNull KeyEvent keyEvent) {
-        switch (keyEvent.getAction()) {
-            case KeyEvent.ACTION_DOWN: {
-                int direction = 0;
-                switch (keyEvent.getKeyCode()) {
-                    case KeyEvent.KEYCODE_VOLUME_UP:
-                        direction = AudioManager.ADJUST_RAISE;
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_DOWN:
-                        direction = AudioManager.ADJUST_LOWER;
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_MUTE:
-                        direction = AudioManager.ADJUST_TOGGLE_MUTE;
-                        break;
-                }
-                try {
-                    // Note: Need both package name and OP package name. Package name is used for
-                    //       RemoteUserInfo, and OP package name is used for AudioService's internal
-                    //       AppOpsManager usages.
-                    mSessionBinder.adjustVolume(mContext.getPackageName(),
-                            mContext.getOpPackageName(), mCbStub, true, direction,
-                            AudioManager.FLAG_SHOW_UI);
-                } catch (RuntimeException e) {
-                    Log.wtf(TAG, "Error calling adjustVolumeBy", e);
-                }
-                break;
-            }
-
-            case KeyEvent.ACTION_UP: {
-                final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
-                        | AudioManager.FLAG_FROM_KEY;
-                try {
-                    // Note: Need both package name and OP package name. Package name is used for
-                    //       RemoteUserInfo, and OP package name is used for AudioService's internal
-                    //       AppOpsManager usages.
-                    mSessionBinder.adjustVolume(mContext.getPackageName(),
-                            mContext.getOpPackageName(), mCbStub, true, 0, flags);
-                } catch (RuntimeException e) {
-                    Log.wtf(TAG, "Error calling adjustVolumeBy", e);
-                }
-            }
-        }
     }
 
     /**
@@ -394,7 +321,7 @@ public final class MediaController {
             //       RemoteUserInfo, and OP package name is used for AudioService's internal
             //       AppOpsManager usages.
             mSessionBinder.adjustVolume(mContext.getPackageName(), mContext.getOpPackageName(),
-                    mCbStub, false, direction, flags);
+                    mCbStub, direction, flags);
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
         }

@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.ResultReceiver;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
@@ -43,6 +44,7 @@ import android.text.TextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Allows interaction with media controllers, volume keys, media buttons, and
@@ -423,13 +425,20 @@ public final class MediaSession {
      */
     public static final class Token implements Parcelable {
 
-        private ControllerLink mControllerLink;
+        private final int mUid;
+        private final ControllerLink mControllerLink;
 
         /**
          * @hide
          */
         public Token(ControllerLink controllerLink) {
+            mUid = Process.myUid();
             mControllerLink = controllerLink;
+        }
+
+        Token(Parcel in) {
+            mUid = in.readInt();
+            mControllerLink = in.readParcelable(null);
         }
 
         @Override
@@ -439,13 +448,14 @@ public final class MediaSession {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mUid);
             dest.writeParcelable(mControllerLink, flags);
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
-            int result = 1;
+            int result = mUid;
             result = prime * result + ((mControllerLink == null)
                     ? 0 : mControllerLink.getBinder().hashCode());
             return result;
@@ -460,14 +470,18 @@ public final class MediaSession {
             if (getClass() != obj.getClass())
                 return false;
             Token other = (Token) obj;
-            if (mControllerLink == null) {
-                if (other.mControllerLink != null) {
-                    return false;
-                }
-            } else if (!mControllerLink.getBinder().equals(other.mControllerLink.getBinder())) {
+            if (mUid != other.mUid) {
                 return false;
             }
-            return true;
+            return Objects.equals(mControllerLink, other.mControllerLink);
+        }
+
+        /**
+         * Gets the UID of this token.
+         * @hide
+         */
+        public int getUid() {
+            return mUid;
         }
 
         /**
@@ -483,8 +497,7 @@ public final class MediaSession {
                 new Parcelable.Creator<Token>() {
             @Override
             public Token createFromParcel(Parcel in) {
-                ControllerLink link = in.readParcelable(null);
-                return new Token(link);
+                return new Token(in);
             }
 
             @Override
