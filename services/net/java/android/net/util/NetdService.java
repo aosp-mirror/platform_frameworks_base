@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.shared;
+package android.net.util;
 
 import android.content.Context;
 import android.net.INetd;

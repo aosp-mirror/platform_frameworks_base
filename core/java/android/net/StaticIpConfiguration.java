@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.net.shared.InetAddressUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -232,10 +233,10 @@ public final class StaticIpConfiguration implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(ipAddress, flags);
-        NetworkUtils.parcelInetAddress(dest, gateway, flags);
+        InetAddressUtils.parcelInetAddress(dest, gateway, flags);
         dest.writeInt(dnsServers.size());
         for (InetAddress dnsServer : dnsServers) {
-            NetworkUtils.parcelInetAddress(dest, dnsServer, flags);
+            InetAddressUtils.parcelInetAddress(dest, dnsServer, flags);
         }
         dest.writeString(domains);
     }
@@ -244,11 +245,11 @@ public final class StaticIpConfiguration implements Parcelable {
     public static StaticIpConfiguration readFromParcel(Parcel in) {
         final StaticIpConfiguration s = new StaticIpConfiguration();
         s.ipAddress = in.readParcelable(null);
-        s.gateway = NetworkUtils.unparcelInetAddress(in);
+        s.gateway = InetAddressUtils.unparcelInetAddress(in);
         s.dnsServers.clear();
         int size = in.readInt();
         for (int i = 0; i < size; i++) {
-            s.dnsServers.add(NetworkUtils.unparcelInetAddress(in));
+            s.dnsServers.add(InetAddressUtils.unparcelInetAddress(in));
         }
         s.domains = in.readString();
         return s;

@@ -28,6 +28,7 @@ import static android.net.shared.Inet4AddressUtils.getPrefixMaskAsInet4Address;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOCK_NONBLOCK;
 import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_REUSEADDR;
@@ -43,7 +44,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.INetworkStackStatusCallback;
 import android.net.MacAddress;
-import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.SharedLog;
 import android.net.util.SocketUtils;
@@ -207,7 +207,7 @@ public class DhcpServer extends IDhcpServer.Stub {
         @Override
         public void addArpEntry(@NonNull Inet4Address ipv4Addr, @NonNull MacAddress ethAddr,
                 @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException {
-            NetworkUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
+            SocketUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
         }
 
         @Override
@@ -630,7 +630,7 @@ public class DhcpServer extends IDhcpServer.Stub {
             // TODO: have and use an API to set a socket tag without going through the thread tag
             final int oldTag = TrafficStats.getAndSetThreadStatsTag(TAG_SYSTEM_DHCP_SERVER);
             try {
-                mSocket = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                mSocket = Os.socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
                 SocketUtils.bindSocketToInterface(mSocket, mIfName);
                 Os.setsockoptInt(mSocket, SOL_SOCKET, SO_REUSEADDR, 1);
                 Os.setsockoptInt(mSocket, SOL_SOCKET, SO_BROADCAST, 1);
