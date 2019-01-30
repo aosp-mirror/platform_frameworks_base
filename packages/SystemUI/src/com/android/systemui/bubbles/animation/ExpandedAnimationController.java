@@ -38,6 +38,12 @@ public class ExpandedAnimationController
         extends PhysicsAnimationLayout.PhysicsAnimationController {
 
     /**
+     * How much to translate the bubbles when they're animating in/out. This value is multiplied by
+     * the bubble size.
+     */
+    private static final int ANIMATE_TRANSLATION_FACTOR = 4;
+
+    /**
      * The stack position from which the bubbles were expanded. Saved in {@link #expandFromStack}
      * and used to return to stack form in {@link #collapseBackToStack}.
      */
@@ -125,7 +131,10 @@ public class ExpandedAnimationController
     Set<DynamicAnimation.ViewProperty> getAnimatedProperties() {
         return Sets.newHashSet(
                 DynamicAnimation.TRANSLATION_X,
-                DynamicAnimation.TRANSLATION_Y);
+                DynamicAnimation.TRANSLATION_Y,
+                DynamicAnimation.SCALE_X,
+                DynamicAnimation.SCALE_Y,
+                DynamicAnimation.ALPHA);
     }
 
     @Override
@@ -147,13 +156,55 @@ public class ExpandedAnimationController
 
     @Override
     void onChildAdded(View child, int index) {
-        // TODO: Animate the new bubble into the row, and push the other bubbles out of the way.
-        child.setTranslationY(getExpandedY());
+        // Pop in from the top.
+        // TODO: Reverse this when bubbles are at the bottom.
+        child.setTranslationX(getXForChildAtIndex(index));
+        child.setTranslationY(getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR);
+        mLayout.animateValueForChild(DynamicAnimation.TRANSLATION_Y, child, getExpandedY());
+
+        // Animate the remaining bubbles to the correct X position.
+        for (int i = index + 1; i < mLayout.getChildCount(); i++) {
+            mLayout.animateValueForChildAtIndex(
+                    DynamicAnimation.TRANSLATION_X, i, getXForChildAtIndex(i));
+        }
     }
 
     @Override
-    void onChildToBeRemoved(View child, int index, Runnable actuallyRemove) {
-        // TODO: Animate the bubble out, and pull the other bubbles into its position.
-        actuallyRemove.run();
+    void onChildRemoved(View child, int index, Runnable finishRemoval) {
+        // Bubble pops out to the top.
+        // TODO: Reverse this when bubbles are at the bottom.
+        mLayout.animateValueForChild(
+                DynamicAnimation.ALPHA, child, 0f, finishRemoval);
+        mLayout.animateValueForChild(
+                DynamicAnimation.TRANSLATION_Y,
+                child,
+                getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR);
+
+        // Animate the remaining bubbles to the correct X position.
+        for (int i = index; i < mLayout.getChildCount(); i++) {
+            mLayout.animateValueForChildAtIndex(
+                    DynamicAnimation.TRANSLATION_X, i, getXForChildAtIndex(i));
+        }
+    }
+
+    @Override
+    protected void setChildVisibility(View child, int index, int visibility) {
+        if (visibility == View.VISIBLE) {
+            // Set alpha to 0 but then become visible immediately so the animation is visible.
+            child.setAlpha(0f);
+            child.setVisibility(View.VISIBLE);
+        }
+
+        // Fade in.
+        mLayout.animateValueForChild(
+                DynamicAnimation.ALPHA,
+                child,
+                /* value */ visibility == View.GONE ? 0f : 1f,
+                () -> super.setChildVisibility(child, index, visibility));
+    }
+
+    /** Returns the appropriate X translation value for a bubble at the given index. */
+    private float getXForChildAtIndex(int index) {
+        return mBubblePaddingPx + (mBubbleSizePx + mBubblePaddingPx) * index;
     }
 }

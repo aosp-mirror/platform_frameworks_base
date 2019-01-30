@@ -26,7 +26,7 @@ Returns a SpringForce instance to use for animations of the given property. This
 
 ### Animation Control Methods
 ![Diagram of how calls to animateValueForChildAtIndex dispatch to DynamicAnimations.](physics-animation-layout-control-methods.png)
-Once the layout has used the controller’s configuration properties to build the animations, the controller can use them to actually run animations. This is done for two reasons - reacting to a view being added or removed, or responding to another class (such as a touch handler or broadcast receiver) requesting an animation. ```onChildAdded``` and ```onChildRemoved``` are called automatically by the layout, giving the controller the opportunity to animate the child in/out. Custom methods are called by anyone with access to the controller instance to do things like expand, collapse, or move the child views.
+Once the layout has used the controller’s configuration properties to build the animations, the controller can use them to actually run animations. This is done for two reasons - reacting to a view being added or removed, or responding to another class (such as a touch handler or broadcast receiver) requesting an animation. ```onChildAdded```, ```onChildRemoved```, and ```setChildVisibility``` are called automatically by the layout, giving the controller the opportunity to animate the child in/out/visible/gone. Custom methods are called by anyone with access to the controller instance to do things like expand, collapse, or move the child views.
 
 In either case, the controller has access to the layout’s protected ```animateValueForChildAtIndex(ViewProperty property, int index, float value)``` method. This method is used to actually run an animation.
 

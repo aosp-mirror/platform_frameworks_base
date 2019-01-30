@@ -55,11 +55,12 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubblePadding = res.getDimensionPixelSize(R.dimen.bubble_padding);
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+
+        mExpansionPoint = new PointF(100, 100);
     }
 
     @Test
     public void testExpansionAndCollapse() throws InterruptedException {
-        mExpansionPoint = new PointF(100, 100);
         Runnable afterExpand = Mockito.mock(Runnable.class);
         mExpandedController.expandFromStack(mExpansionPoint, afterExpand);
 
@@ -77,27 +78,48 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         Mockito.verify(afterExpand).run();
     }
 
+    @Test
+    public void testOnChildRemoved() throws InterruptedException {
+        Runnable afterExpand = Mockito.mock(Runnable.class);
+        mExpandedController.expandFromStack(mExpansionPoint, afterExpand);
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+        testExpanded();
+
+        // Remove some views and see if the remaining child views still pass the expansion test.
+        mLayout.removeView(mViews.get(0));
+        mLayout.removeView(mViews.get(3));
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+        testExpanded();
+    }
+
     /** Check that children are in the correct positions for being stacked. */
     private void testStackedAtPosition(float x, float y, int offsetMultiplier) {
         // Make sure the rest of the stack moved again, including the first bubble not moving, and
         // is stacked to the right now that we're on the right side of the screen.
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             assertEquals(x + i * offsetMultiplier * mStackOffset,
-                    mViews.get(i).getTranslationX(), 2f);
-            assertEquals(y, mViews.get(i).getTranslationY(), 2f);
+                    mLayout.getChildAt(i).getTranslationX(), 2f);
+            assertEquals(y, mLayout.getChildAt(i).getTranslationY(), 2f);
+
+            if (i < mMaxRenderedBubbles) {
+                assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
+            }
         }
     }
 
     /** Check that children are in the correct positions for being expanded. */
     private void testExpanded() {
-        // Make sure the rest of the stack moved again, including the first bubble not moving, and
-        // is stacked to the right now that we're on the right side of the screen.
-        for (int i = 0; i < mLayout.getChildCount(); i++) {
+        // Check all the visible bubbles to see if they're in the right place.
+        for (int i = 0; i < Math.min(mLayout.getChildCount(), mMaxRenderedBubbles); i++) {
             assertEquals(mBubblePadding + (i * (mBubbleSize + mBubblePadding)),
-                    mViews.get(i).getTranslationX(),
+                    mLayout.getChildAt(i).getTranslationX(),
                     2f);
             assertEquals(mBubblePadding + mCutoutInsetSize,
-                    mViews.get(i).getTranslationY(), 2f);
+                    mLayout.getChildAt(i).getTranslationY(), 2f);
+
+            if (i < mMaxRenderedBubbles) {
+                assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
+            }
         }
     }
 }
