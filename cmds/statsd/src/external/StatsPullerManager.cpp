@@ -231,6 +231,9 @@ bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
     if (kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end()) {
         bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(data);
         VLOG("pulled %d items", (int)data->size());
+        if (!ret) {
+            StatsdStats::getInstance().notePullFailed(tagId);
+        }
         return ret;
     } else {
         VLOG("Unknown tagId %d", tagId);

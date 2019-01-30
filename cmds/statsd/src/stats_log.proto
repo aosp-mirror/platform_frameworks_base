@@ -403,8 +403,22 @@ message StatsdStatsReport {
         optional int64 data_error = 9;
         optional int64 pull_timeout = 10;
         optional int64 pull_exceed_max_delay = 11;
+        optional int64 pull_failed = 12;
+        optional int64 stats_companion_pull_failed = 13;
+        optional int64 stats_companion_pull_binder_transaction_failed = 14;
+        optional int64 empty_data = 15;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
+
+    message AtomMetricStats {
+      optional int64 metric_id = 1;
+      optional int64 hard_dimension_limit_reached = 2;
+      optional int64 late_log_event_skipped = 3;
+      optional int64 skipped_forward_buckets = 4;
+      optional int64 bad_value_type = 5;
+      optional int64 condition_change_in_next_bucket = 6;
+    }
+    repeated AtomMetricStats atom_metric_stats = 17;
 
     message LoggerErrorStats {
         optional int32 logger_disconnection_sec = 1;

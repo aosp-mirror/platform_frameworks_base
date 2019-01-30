@@ -318,6 +318,53 @@ public:
     void noteLogLost(int32_t wallClockTimeSec, int32_t count, int lastError);
 
     /**
+     * Records that the pull of an atom has failed
+     */
+    void notePullFailed(int atomId);
+
+    /**
+     * Records that the pull of StatsCompanionService atom has failed
+     */
+    void noteStatsCompanionPullFailed(int atomId);
+
+    /**
+     * Records that the pull of a StatsCompanionService atom has failed due to a failed binder
+     * transaction. This can happen when StatsCompanionService returns too
+     * much data (the max Binder parcel size is 1MB)
+     */
+    void noteStatsCompanionPullBinderTransactionFailed(int atomId);
+
+    /**
+     * A pull with no data occurred
+     */
+    void noteEmptyData(int atomId);
+
+    /**
+     * Hard limit was reached in the cardinality of an atom
+     */
+    void noteHardDimensionLimitReached(int atomId);
+
+    /**
+     * A log event was too late, arrived in the wrong bucket and was skipped
+     */
+    void noteLateLogEventSkipped(int atomId);
+
+    /**
+     * Buckets were skipped as time elapsed without any data for them
+     */
+    void noteSkippedForwardBuckets(int atomId);
+
+    /**
+     * An unsupported value type was received
+     */
+    void noteBadValueType(int atomId);
+
+    /**
+     * A condition change was too late, arrived in the wrong bucket and was skipped
+     */
+    void noteConditionChangeInNextBucket(int atomId);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -349,7 +396,19 @@ public:
         long dataError = 0;
         long pullTimeout = 0;
         long pullExceedMaxDelay = 0;
+        long pullFailed = 0;
+        long statsCompanionPullFailed = 0;
+        long statsCompanionPullBinderTransactionFailed = 0;
+        long emptyData = 0;
     } PulledAtomStats;
+
+    typedef struct {
+        long hardDimensionLimitReached = 0;
+        long lateLogEventSkipped = 0;
+        long skippedForwardBuckets = 0;
+        long badValueType = 0;
+        long conditionChangeInNextBucket = 0;
+    } AtomMetricStats;
 
 private:
     StatsdStats();
@@ -377,6 +436,9 @@ private:
 
     // Maps PullAtomId to its stats. The size is capped by the puller atom counts.
     std::map<int, PulledAtomStats> mPulledAtomStats;
+
+    // Maps metric ID to its stats. The size is capped by the number of metrics.
+    std::map<int, AtomMetricStats> mAtomMetricStats;
 
     struct LogLossStats {
         LogLossStats(int32_t sec, int32_t count, int32_t error)
@@ -413,6 +475,12 @@ private:
     void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
 
     void addToIceBoxLocked(std::shared_ptr<ConfigStats>& stats);
+
+    /**
+     * Get a reference to AtomMetricStats for a metric. If none exists, create it. The reference
+     * will live as long as `this`.
+     */
+    StatsdStats::AtomMetricStats& getAtomMetricStats(int metricId);
 
     FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);

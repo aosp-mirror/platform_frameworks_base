@@ -73,6 +73,10 @@ int64_t MillisToNano(const int64_t millis);
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,
                               util::ProtoOutputStream* protoOutput);
 
+// Helper function to write AtomMetricStats to ProtoOutputStream
+void writeAtomMetricStatsToStream(const std::pair<int, StatsdStats::AtomMetricStats> &pair,
+                                  util::ProtoOutputStream *protoOutput);
+
 template<class T>
 bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
     std::string pbBytes;
