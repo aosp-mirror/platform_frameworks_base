@@ -10600,6 +10600,18 @@ public final class Settings {
         private static final Validator WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
+        /**
+         * Setting to enable the Wi-Fi link probing.
+         * Disabled by default, and setting it to 1 will enable it.
+         * The value is boolean (0 or 1).
+         * @hide
+         */
+        public static final String WIFI_LINK_PROBING_ENABLED =
+                "wifi_link_probing_enabled";
+
+        private static final Validator WIFI_LINK_PROBING_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
        /**
         * The maximum number of times we will retry a connection to an access
         * point for which we have failed in acquiring an IP address from DHCP.
@@ -13393,6 +13405,7 @@ public final class Settings {
                     WIFI_PNO_FREQUENCY_CULLING_ENABLED_VALIDATOR);
             VALIDATORS.put(WIFI_PNO_RECENCY_SORTING_ENABLED,
                     WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR);
+            VALIDATORS.put(WIFI_LINK_PROBING_ENABLED, WIFI_LINK_PROBING_ENABLED_VALIDATOR);
         }
 
         /**
