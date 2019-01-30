@@ -333,6 +333,12 @@ public final class Parcel {
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
+    @CriticalNative
+    private static native boolean nativeReplaceCallingWorkSourceUid(
+            long nativePtr, int workSourceUid);
+    @CriticalNative
+    private static native int nativeReadCallingWorkSourceUid(long nativePtr);
+
     /** Last time exception with a stack trace was written */
     private static volatile long sLastWriteExceptionStackTrace;
     /** Used for throttling of writing stack trace, which is costly */
@@ -610,6 +616,35 @@ public final class Parcel {
 
     public final void enforceInterface(String interfaceName) {
         nativeEnforceInterface(mNativePtr, interfaceName);
+    }
+
+    /**
+     * Writes the work source uid to the request headers.
+     *
+     * <p>It requires the headers to have been written/read already to replace the work source.
+     *
+     * @return true if the request headers have been updated.
+     *
+     * @hide
+     */
+    public boolean replaceCallingWorkSourceUid(int workSourceUid) {
+        return nativeReplaceCallingWorkSourceUid(mNativePtr, workSourceUid);
+    }
+
+    /**
+     * Reads the work source uid from the request headers.
+     *
+     * <p>Unlike other read methods, this method does not read the parcel at the current
+     * {@link #dataPosition}. It will set the {@link #dataPosition} before the read and restore the
+     * position after reading the request header.
+     *
+     * @return the work source uid or {@link Binder#UNSET_WORKSOURCE} if headers have not been
+     * written/parsed yet.
+     *
+     * @hide
+     */
+    public int readCallingWorkSourceUid() {
+        return nativeReadCallingWorkSourceUid(mNativePtr);
     }
 
     /**

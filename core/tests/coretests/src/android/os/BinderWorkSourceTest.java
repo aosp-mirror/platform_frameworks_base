@@ -27,6 +27,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
+import androidx.test.filters.Suppress;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
@@ -97,6 +98,8 @@ public class BinderWorkSourceTest {
     public void tearDown() throws Exception {
         sContext.unbindService(mConnection);
         sContext.unbindService(mNestedConnection);
+        Binder.setProxyTransactListener(null);
+        ThreadLocalWorkSource.clear();
     }
 
     @Test
@@ -121,6 +124,28 @@ public class BinderWorkSourceTest {
         assertEquals(UID, mService.getIncomingWorkSourceUid());
         assertEquals(UID, mService.getIncomingWorkSourceUid());
         assertEquals(UID, Binder.getCallingWorkSourceUid());
+    }
+
+    @Test
+    public void setWorkSource_propagatedFromBinderProxyListener() throws Exception {
+        Binder.setProxyTransactListener(new Binder.PropagateWorkSourceTransactListener());
+        Binder.clearCallingWorkSource();
+        ThreadLocalWorkSource.setUid(UID);
+        assertEquals(UID, mService.getIncomingWorkSourceUid());
+    }
+
+    @Test
+    public void threadWorkSourceNotPropagated() throws Exception {
+        Binder.clearCallingWorkSource();
+        ThreadLocalWorkSource.setUid(UID);
+        assertEquals(UID_NONE, mService.getIncomingWorkSourceUid());
+    }
+
+    @Test
+    public void setWorkSource_propagatedFromBinderProxyListener_unset() throws Exception {
+        Binder.setProxyTransactListener(new Binder.PropagateWorkSourceTransactListener());
+        Binder.clearCallingWorkSource();
+        assertEquals(UID_NONE, mService.getIncomingWorkSourceUid());
     }
 
     @Test
@@ -158,18 +183,6 @@ public class BinderWorkSourceTest {
     }
 
     @Test
-    public void nestedSetWorkSouceNotPropagated() throws Exception {
-        Binder.setCallingWorkSourceUid(UID);
-
-        int[] workSources = mNestedService.nestedCall();
-        assertEquals(UID, workSources[0]);
-        // No UID propagated.
-        assertEquals(UID_NONE, workSources[1]);
-        // Initial work source restored.
-        assertEquals(UID, Binder.getCallingWorkSourceUid());
-    }
-
-    @Test
     public void workSourceProvider_default() throws Exception {
         Binder.clearCallingWorkSource();
         mService.clearWorkSourceProvider();
@@ -177,6 +190,7 @@ public class BinderWorkSourceTest {
     }
 
     @Test
+    @Suppress // WorkSourceProvider is currently invoked only at the end of the binder call.
     public void workSourceProvider_customProvider() throws Exception {
         Binder.clearCallingWorkSource();
         mService.clearWorkSourceProvider();
@@ -187,5 +201,17 @@ public class BinderWorkSourceTest {
         } finally {
             mService.clearWorkSourceProvider();
         }
+    }
+
+    @Test
+    public void nestedSetWorkSouceNotPropagated() throws Exception {
+        Binder.setCallingWorkSourceUid(UID);
+
+        int[] workSources = mNestedService.nestedCall();
+        assertEquals(UID, workSources[0]);
+        // No UID propagated.
+        assertEquals(UID_NONE, workSources[1]);
+        // Initial work source restored.
+        assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
 }
