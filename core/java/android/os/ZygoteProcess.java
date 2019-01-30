@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Slog;
 
@@ -66,16 +67,6 @@ public class ZygoteProcess {
     /**
      * @hide for internal use only.
      */
-    public static final String ZYGOTE_SOCKET_NAME = "zygote";
-
-    /**
-     * @hide for internal use only.
-     */
-    public static final String ZYGOTE_SECONDARY_SOCKET_NAME = "zygote_secondary";
-
-    /**
-     * @hide for internal use only.
-     */
     public static final int ZYGOTE_CONNECT_TIMEOUT_MS = 20000;
 
     /**
@@ -89,17 +80,12 @@ public class ZygoteProcess {
     /**
      * @hide for internal use only
      */
-    public static final String BLASTULA_POOL_SOCKET_NAME = "blastula_pool";
-
-    /**
-     * @hide for internal use only
-     */
-    public static final String BLASTULA_POOL_SECONDARY_SOCKET_NAME = "blastula_pool_secondary";
-
-    /**
-     * @hide for internal use only
-     */
     private static final String LOG_TAG = "ZygoteProcess";
+
+    /**
+     * The default value for enabling the blastula pool.
+     */
+    private static final String BLASTULA_POOL_ENABLED_DEFAULT = "false";
 
     /**
      * The name of the socket used to communicate with the primary zygote.
@@ -110,6 +96,7 @@ public class ZygoteProcess {
      * The name of the secondary (alternate ABI) zygote socket.
      */
     private final LocalSocketAddress mZygoteSecondarySocketAddress;
+
     /**
      * The name of the socket used to communicate with the primary blastula pool.
      */
@@ -122,17 +109,21 @@ public class ZygoteProcess {
 
     public ZygoteProcess() {
         mZygoteSocketAddress =
-                new LocalSocketAddress(ZYGOTE_SOCKET_NAME, LocalSocketAddress.Namespace.RESERVED);
+                new LocalSocketAddress(Zygote.PRIMARY_SOCKET_NAME,
+                                       LocalSocketAddress.Namespace.RESERVED);
         mZygoteSecondarySocketAddress =
-                new LocalSocketAddress(ZYGOTE_SECONDARY_SOCKET_NAME,
+                new LocalSocketAddress(Zygote.SECONDARY_SOCKET_NAME,
                                        LocalSocketAddress.Namespace.RESERVED);
 
         mBlastulaPoolSocketAddress =
-                new LocalSocketAddress(BLASTULA_POOL_SOCKET_NAME,
+                new LocalSocketAddress(Zygote.BLASTULA_POOL_PRIMARY_SOCKET_NAME,
                                        LocalSocketAddress.Namespace.RESERVED);
         mBlastulaPoolSecondarySocketAddress =
-                new LocalSocketAddress(BLASTULA_POOL_SECONDARY_SOCKET_NAME,
+                new LocalSocketAddress(Zygote.BLASTULA_POOL_SECONDARY_SOCKET_NAME,
                                        LocalSocketAddress.Namespace.RESERVED);
+
+        // TODO (chriswailes): Uncomment when the blastula pool can be enabled.
+//        fetchBlastulaPoolEnabledProp();
     }
 
     public ZygoteProcess(LocalSocketAddress primarySocketAddress,
@@ -272,6 +263,15 @@ public class ZygoteProcess {
     private ZygoteState secondaryZygoteState;
 
     /**
+     * If the blastula pool should be created and used to start applications.
+     *
+     * Setting this value to false will disable the creation, maintenance, and use of the blastula
+     * pool.  When the blastula pool is disabled the application lifecycle will be identical to
+     * previous versions of Android.
+     */
+    private boolean mBlastulaPoolEnabled = false;
+
+    /**
      * Start a new process.
      *
      * <p>If processes are enabled, a new process is created and the
@@ -327,6 +327,14 @@ public class ZygoteProcess {
                                                   @Nullable String sandboxId,
                                                   boolean useBlastulaPool,
                                                   @Nullable String[] zygoteArgs) {
+        if (fetchBlastulaPoolEnabledProp()) {
+            // TODO (chriswailes): Send the appropriate command to the zygotes
+            Log.i(LOG_TAG, "Blastula pool enabled property set to: " + mBlastulaPoolEnabled);
+
+            // This can't be enabled yet, but we do want to test this code path.
+            mBlastulaPoolEnabled = false;
+        }
+
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
@@ -407,7 +415,7 @@ public class ZygoteProcess {
         Process.ProcessStartResult result = new Process.ProcessStartResult();
 
         // TODO (chriswailes): Move branch body into separate function.
-        if (useBlastulaPool && Zygote.BLASTULA_POOL_ENABLED && isValidBlastulaCommand(args)) {
+        if (useBlastulaPool && isValidBlastulaCommand(args)) {
             LocalSocket blastulaSessionSocket = null;
 
             try {
@@ -620,6 +628,7 @@ public class ZygoteProcess {
             final StringBuilder sb = new StringBuilder();
             sb.append("--packages-for-uid=");
 
+            // TODO (chriswailes): Replace with String.join
             for (int i = 0; i < packagesForUid.length; ++i) {
                 if (i != 0) {
                     sb.append(',');
@@ -656,9 +665,40 @@ public class ZygoteProcess {
 
         synchronized(mLock) {
             return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi),
-                                              useBlastulaPool,
+                                              useBlastulaPool && mBlastulaPoolEnabled,
                                               argsForZygote);
         }
+    }
+
+    private boolean fetchBlastulaPoolEnabledProp() {
+        boolean origVal = mBlastulaPoolEnabled;
+
+        final String propertyString =
+                Zygote.getSystemProperty(
+                        DeviceConfig.RuntimeNative.BLASTULA_POOL_ENABLED,
+                        BLASTULA_POOL_ENABLED_DEFAULT);
+
+        if (!propertyString.isEmpty()) {
+            mBlastulaPoolEnabled =
+                    Zygote.getSystemPropertyBoolean(
+                            DeviceConfig.RuntimeNative.BLASTULA_POOL_ENABLED,
+                            Boolean.parseBoolean(BLASTULA_POOL_ENABLED_DEFAULT));
+        }
+
+        return origVal != mBlastulaPoolEnabled;
+    }
+
+    private long mLastPropCheckTimestamp = 0;
+
+    private boolean fetchBlastulaPoolEnabledPropWithMinInterval() {
+        final long currentTimestamp = SystemClock.elapsedRealtime();
+
+        if (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL) {
+            mLastPropCheckTimestamp = currentTimestamp;
+            return fetchBlastulaPoolEnabledProp();
+        }
+
+        return false;
     }
 
     /**
@@ -940,7 +980,7 @@ public class ZygoteProcess {
 
     /**
      * Try connecting to the Zygote over and over again until we hit a time-out.
-     * @param socketName The name of the socket to connect to.
+     * @param zygoteSocketName The name of the socket to connect to.
      */
     public static void waitForConnectionToZygote(String zygoteSocketName) {
         final LocalSocketAddress zygoteSocketAddress =
@@ -950,7 +990,7 @@ public class ZygoteProcess {
 
     /**
      * Try connecting to the Zygote over and over again until we hit a time-out.
-     * @param address The name of the socket to connect to.
+     * @param zygoteSocketAddress The name of the socket to connect to.
      */
     public static void waitForConnectionToZygote(LocalSocketAddress zygoteSocketAddress) {
         int numRetries = ZYGOTE_CONNECT_TIMEOUT_MS / ZYGOTE_CONNECT_RETRY_DELAY_MS;
