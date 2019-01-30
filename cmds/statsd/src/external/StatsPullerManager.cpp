@@ -220,6 +220,9 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // BuildInformation.
         {android::util::BUILD_INFORMATION,
          {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
+        // RoleHolder.
+        {android::util::ROLE_HOLDER,
+         {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

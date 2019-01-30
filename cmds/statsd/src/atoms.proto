@@ -288,6 +288,7 @@ message Atom {
         DebugElapsedClock debug_elapsed_clock = 10046;
         DebugFailingElapsedClock debug_failing_elapsed_clock = 10047;
         NumBiometricsEnrolled num_faces_enrolled = 10048;
+        RoleHolder role_holder = 10049;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3971,6 +3972,20 @@ message NumBiometricsEnrolled {
     optional int32 user = 1;
     // Number of fingerprints registered to that user.
     optional int32 num_enrolled = 2;
+}
+
+/**
+ * A mapping of role holder -> role
+ */
+message RoleHolder {
+    // uid of the role holder
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // package name of the role holder
+    optional string package_name = 2;
+
+    // the role held
+    optional string role = 3;
 }
 
 message AggStats {
