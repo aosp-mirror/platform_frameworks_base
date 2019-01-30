@@ -32,7 +32,7 @@ public final class ModuleInfo implements Parcelable {
      // constructor, and writeToParcel.
 
     /** Public name of this module. */
-    private String mName;
+    private CharSequence mName;
 
     /** The package name of this module. */
     private String mPackageName;
@@ -57,13 +57,13 @@ public final class ModuleInfo implements Parcelable {
     }
 
     /** @hide Sets the public name of this module. */
-    public ModuleInfo setName(String name) {
+    public ModuleInfo setName(CharSequence name) {
         mName = name;
         return this;
     }
 
     /** Gets the public name of this module. */
-    public @Nullable String getName() {
+    public @Nullable CharSequence getName() {
         return mName;
     }
 
@@ -123,13 +123,13 @@ public final class ModuleInfo implements Parcelable {
 
     /** Flattens this object into the given {@link Parcel}. */
     public void writeToParcel(Parcel dest, int parcelableFlags) {
-        dest.writeString(mName);
+        dest.writeCharSequence(mName);
         dest.writeString(mPackageName);
         dest.writeBoolean(mHidden);
     }
 
     private ModuleInfo(Parcel source) {
-        mName = source.readString();
+        mName = source.readCharSequence();
         mPackageName = source.readString();
         mHidden = source.readBoolean();
     }
