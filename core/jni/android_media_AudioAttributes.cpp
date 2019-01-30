@@ -135,7 +135,7 @@ JNIAudioAttributeHelper::UniqueAaPtr JNIAudioAttributeHelper::makeUnique()
 {
     audio_attributes_t *aa = new (calloc(1, sizeof(audio_attributes_t)))
                 audio_attributes_t{AUDIO_ATTRIBUTES_INITIALIZER};
-    return UniqueAaPtr{aa, free};
+    return UniqueAaPtr{aa};
 }
 
 jint JNIAudioAttributeHelper::nativeFromJava(JNIEnv* env, jobject jAudioAttributes,
