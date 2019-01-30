@@ -978,8 +978,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
-    void onParentSet() {
-        super.onParentSet();
+    void onParentChanged() {
+        super.onParentChanged();
 
         final Task task = getTask();
 

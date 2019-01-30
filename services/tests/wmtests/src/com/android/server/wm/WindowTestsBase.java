@@ -91,6 +91,12 @@ class WindowTestsBase {
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
 
+    /**
+     * To restore the original SurfaceControl.Transaction factory if any tests changed
+     * {@link WindowManagerService#mTransactionFactory}.
+     */
+    private TransactionFactory mOriginalTransactionFactory;
+
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
@@ -121,6 +127,7 @@ class WindowTestsBase {
             final Context context = getInstrumentation().getTargetContext();
 
             mWm = TestSystemServices.getWindowManagerService();
+            mOriginalTransactionFactory = mWm.mTransactionFactory;
             beforeCreateDisplay();
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -170,6 +177,7 @@ class WindowTestsBase {
             // stable state to clean up for consistency.
             waitUntilHandlersIdle();
 
+            mWm.mTransactionFactory = mOriginalTransactionFactory;
             final LinkedList<WindowState> nonCommonWindows = new LinkedList<>();
 
             synchronized (mWm.mGlobalLock) {
