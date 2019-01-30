@@ -263,9 +263,21 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
      * <p>This method should be called from the constructor of the subclass,
      * before opening the database
      *
+     * <p>DO NOT USE this method unless you fully understand the implication
+     * of what it does.
+     * See the javadoc of
+     * {@link SQLiteDatabase.OpenParams.Builder#setIdleConnectionTimeout(long)}
+     * for the details.
+     *
      * @param idleConnectionTimeoutMs timeout in milliseconds. Use {@link Long#MAX_VALUE} value
      * to allow unlimited idle connections.
+     *
+     * @see SQLiteDatabase.OpenParams.Builder#setIdleConnectionTimeout(long)
+     *
+     * @deprecated DO NOT USE this method unless you fully understand the implication
+     * of what it does.
      */
+    @Deprecated
     public void setIdleConnectionTimeout(@IntRange(from = 0) final long idleConnectionTimeoutMs) {
         synchronized (this) {
             if (mDatabase != null && mDatabase.isOpen()) {
