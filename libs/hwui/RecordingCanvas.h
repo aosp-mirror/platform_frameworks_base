@@ -203,10 +203,41 @@ public:
 
     void drawVectorDrawable(VectorDrawableRoot* tree);
 
+    /**
+     * If "isClipMayBeComplex" returns false, it is guaranteed the current clip is a rectangle.
+     * If the return value is true, then clip may or may not be complex (there is no guarantee).
+     */
+    inline bool isClipMayBeComplex() { return mClipMayBeComplex; }
+
 private:
     typedef SkCanvasVirtualEnforcer<SkNoDrawCanvas> INHERITED;
 
+    inline void setClipMayBeComplex() {
+        if (!mClipMayBeComplex) {
+            mComplexSaveCount = mSaveCount;
+            mClipMayBeComplex = true;
+        }
+    }
+
     DisplayListData* fDL;
+
+    /**
+     * mClipMayBeComplex tracks if the current clip is a rectangle. This flag is used to promote
+     * FunctorDrawable to a layer, if it is clipped by a non-rect.
+     */
+    bool mClipMayBeComplex = false;
+
+    /**
+     * mSaveCount is the current level of our save tree.
+     */
+    int mSaveCount = 0;
+
+    /**
+     * mComplexSaveCount is the first save level, which has a complex clip. Every level below
+     * mComplexSaveCount is assumed to have a complex clip and every level above mComplexSaveCount
+     * is guaranteed to not be complex.
+     */
+    int mComplexSaveCount = 0;
 };
 
 }  // namespace uirenderer
