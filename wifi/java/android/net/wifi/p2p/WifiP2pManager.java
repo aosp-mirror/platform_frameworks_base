@@ -190,6 +190,10 @@ public class WifiP2pManager {
      * the network info in the form of a {@link android.net.NetworkInfo}. A third extra provides
      * the details of the group.
      *
+     * All of these permissions are required to receive this broadcast:
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
+     * {@link android.Manifest.permission#ACCESS_WIFI_STATE}
+     *
      * @see #EXTRA_WIFI_P2P_INFO
      * @see #EXTRA_NETWORK_INFO
      * @see #EXTRA_WIFI_P2P_GROUP
@@ -222,6 +226,10 @@ public class WifiP2pManager {
      * Broadcast intent action indicating that the available peer list has changed. This
      * can be sent as a result of peers being found, lost or updated.
      *
+     * All of these permissions are required to receive this broadcast:
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
+     * {@link android.Manifest.permission#ACCESS_WIFI_STATE}
+     *
      * <p> An extra {@link #EXTRA_P2P_DEVICE_LIST} provides the full list of
      * current peers. The full list of peers can also be obtained any time with
      * {@link #requestPeers}.
@@ -238,7 +246,7 @@ public class WifiP2pManager {
       *
       * <p>Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
       */
-     public static final String EXTRA_P2P_DEVICE_LIST = "wifiP2pDeviceList";
+    public static final String EXTRA_P2P_DEVICE_LIST = "wifiP2pDeviceList";
 
     /**
      * Broadcast intent action indicating that peer discovery has either started or stopped.
@@ -285,6 +293,18 @@ public class WifiP2pManager {
 
     /**
      * Broadcast intent action indicating that this device details have changed.
+     *
+     * <p> An extra {@link #EXTRA_WIFI_P2P_DEVICE} provides this device details.
+     * The valid device details can also be obtained with
+     * {@link #requestDeviceInfo(Channel, DeviceInfoListener)} when p2p is enabled.
+     * To get information notifications on P2P getting enabled refers
+     * {@link #WIFI_P2P_STATE_ENABLED}.
+     *
+     * All of these permissions are required to receive this broadcast:
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
+     * {@link android.Manifest.permission#ACCESS_WIFI_STATE}
+     *
+     * @see #EXTRA_WIFI_P2P_DEVICE
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String WIFI_P2P_THIS_DEVICE_CHANGED_ACTION =
@@ -546,6 +566,11 @@ public class WifiP2pManager {
     /** @hide */
     public static final int UPDATE_CHANNEL_INFO                     = BASE + 96;
 
+    /** @hide */
+    public static final int REQUEST_DEVICE_INFO                     = BASE + 97;
+    /** @hide */
+    public static final int RESPONSE_DEVICE_INFO                    = BASE + 98;
+
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -783,6 +808,17 @@ public class WifiP2pManager {
         void onOngoingPeerAvailable(WifiP2pConfig peerConfig);
     }
 
+    /** Interface for callback invocation when {@link android.net.wifi.p2p.WifiP2pDevice}
+     *  is available in response to {@link #requestDeviceInfo(Channel, DeviceInfoListener)}.
+     */
+    public interface DeviceInfoListener {
+        /**
+         * The requested {@link android.net.wifi.p2p.WifiP2pDevice} is available.
+         * @param wifiP2pDevice Wi-Fi p2p {@link android.net.wifi.p2p.WifiP2pDevice}
+         */
+        void onDeviceInfoAvailable(WifiP2pDevice wifiP2pDevice);
+    }
+
     /**
      * A channel that connects the application to the Wifi p2p framework.
      * Most p2p operations require a Channel as an argument. An instance of Channel is obtained
@@ -986,6 +1022,12 @@ public class WifiP2pManager {
                         if (listener != null) {
                             ((NetworkInfoListener) listener)
                                     .onNetworkInfoAvailable((NetworkInfo) message.obj);
+                        }
+                        break;
+                    case RESPONSE_DEVICE_INFO:
+                        if (listener != null) {
+                            ((DeviceInfoListener) listener)
+                                    .onDeviceInfoAvailable((WifiP2pDevice) message.obj);
                         }
                         break;
                     default:
@@ -1825,5 +1867,30 @@ public class WifiP2pManager {
         checkChannel(c);
         if (listener == null) throw new IllegalArgumentException("This listener cannot be null.");
         c.mAsyncChannel.sendMessage(REQUEST_NETWORK_INFO, 0, c.putListener(listener));
+    }
+
+     /**
+     * Request Device Info
+     *
+     * <p> This method provides the device info
+     * in the form of a {@link android.net.wifi.p2p.WifiP2pDevice}.
+     * Valid {@link android.net.wifi.p2p.WifiP2pDevice} is returned when p2p is enabled.
+     * To get information notifications on P2P getting enabled refers
+     * {@link #WIFI_P2P_STATE_ENABLED}.
+     *
+     * <p> This {@link android.net.wifi.p2p.WifiP2pDevice} is returned using the
+     * {@link DeviceInfoListener} listener.
+     *
+     * <p> This information is also included in the {@link #WIFI_P2P_THIS_DEVICE_CHANGED_ACTION}
+     * broadcast event with extra {@link #EXTRA_WIFI_P2P_DEVICE}.
+     *
+     * @param c is the channel created at {@link #initialize(Context, Looper, ChannelListener)}.
+     * @param listener for callback when network info is available.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    public void requestDeviceInfo(@NonNull Channel c, @NonNull DeviceInfoListener listener) {
+        checkChannel(c);
+        if (listener == null) throw new IllegalArgumentException("This listener cannot be null.");
+        c.mAsyncChannel.sendMessage(REQUEST_DEVICE_INFO, 0, c.putListener(listener));
     }
 }
