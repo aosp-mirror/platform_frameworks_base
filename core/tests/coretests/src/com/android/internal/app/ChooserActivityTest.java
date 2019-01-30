@@ -421,6 +421,83 @@ public class ChooserActivityTest {
         assertThat("text/plain", is(clipDescription.getMimeType(0)));
     }
 
+    @Test
+    public void oneVisibleImagePreview() throws InterruptedException {
+        Uri uri = Uri.parse("android.resource://com.android.frameworks.coretests/"
+                + com.android.frameworks.coretests.R.drawable.test320x240);
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+
+        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        sOverrides.previewThumbnail = createBitmap();
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_image_1_large)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_image_2_large)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.content_preview_image_2_small)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.content_preview_image_3_small)).check(matches(not(isDisplayed())));
+    }
+
+    @Test
+    public void twoVisibleImagePreview() throws InterruptedException {
+        Uri uri = Uri.parse("android.resource://com.android.frameworks.coretests/"
+                + com.android.frameworks.coretests.R.drawable.test320x240);
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+        uris.add(uri);
+
+        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        sOverrides.previewThumbnail = createBitmap();
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_image_1_large)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_image_2_large)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_image_2_small)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.content_preview_image_3_small)).check(matches(not(isDisplayed())));
+    }
+
+    @Test
+    public void threeOrMoreVisibleImagePreview() throws InterruptedException {
+        Uri uri = Uri.parse("android.resource://com.android.frameworks.coretests/"
+                + com.android.frameworks.coretests.R.drawable.test320x240);
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+        uris.add(uri);
+        uris.add(uri);
+        uris.add(uri);
+        uris.add(uri);
+
+        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        sOverrides.previewThumbnail = createBitmap();
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_image_1_large)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_image_2_large)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.content_preview_image_2_small)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_image_3_small)).check(matches(isDisplayed()));
+    }
+
     private Intent createSendTextIntent() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -436,6 +513,20 @@ public class ChooserActivityTest {
         if (imageThumbnail != null) {
             ClipData.Item clipItem = new ClipData.Item(imageThumbnail);
             sendIntent.setClipData(new ClipData("Clip Label", new String[]{"image/png"}, clipItem));
+        }
+
+        return sendIntent;
+    }
+
+    private Intent createSendImageIntentWithPreview(ArrayList<Uri> uris) {
+        Intent sendIntent = new Intent();
+
+        if (uris.size() > 1) {
+            sendIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            sendIntent.putExtra(Intent.EXTRA_STREAM, uris);
+        } else {
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_STREAM, uris.get(0));
         }
 
         return sendIntent;

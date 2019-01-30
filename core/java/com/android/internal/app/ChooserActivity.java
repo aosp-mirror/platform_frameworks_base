@@ -16,6 +16,9 @@
 
 package com.android.internal.app;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictionContext;
@@ -27,6 +30,7 @@ import android.app.prediction.AppTargetId;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,6 +50,7 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -93,11 +98,13 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.ImageUtils;
 
 import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -173,6 +180,15 @@ public class ChooserActivity extends ResolverActivity {
     private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT = 2;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 3;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
+
+    @Retention(SOURCE)
+    @IntDef({CONTENT_PREVIEW_FILE, CONTENT_PREVIEW_IMAGE, CONTENT_PREVIEW_TEXT})
+    private @interface ContentPreviewType {
+    }
+
+    private static final int CONTENT_PREVIEW_IMAGE = 0;
+    private static final int CONTENT_PREVIEW_FILE = 1;
+    private static final int CONTENT_PREVIEW_TEXT = 2;
 
     private final Handler mChooserHandler = new Handler() {
         @Override
@@ -448,18 +464,35 @@ public class ChooserActivity extends ResolverActivity {
             return;
         }
 
-        ViewGroup contentPreviewLayout = findViewById(R.id.content_preview);
         String action = targetIntent.getAction();
         if (!(Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action))) {
-            contentPreviewLayout.setVisibility(View.GONE);
             return;
         }
 
-        showDefaultContentPreview(contentPreviewLayout, targetIntent);
+        int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
+        displayContentPreview(previewType, targetIntent);
     }
 
-    private void showDefaultContentPreview(final ViewGroup parentLayout,
-            final Intent targetIntent) {
+    private void displayContentPreview(@ContentPreviewType int previewType, Intent targetIntent) {
+        switch (previewType) {
+            case CONTENT_PREVIEW_TEXT:
+                displayTextContentPreview(targetIntent);
+                break;
+            case CONTENT_PREVIEW_IMAGE:
+                displayImageContentPreview(targetIntent);
+                break;
+            case CONTENT_PREVIEW_FILE:
+                displayFileContentPreview(targetIntent);
+                break;
+            default:
+                Log.e(TAG, "Unexpected content preview type: " + previewType);
+        }
+    }
+
+    private void displayTextContentPreview(Intent targetIntent) {
+        ViewGroup contentPreviewLayout = findViewById(R.id.content_preview_text_area);
+        contentPreviewLayout.setVisibility(View.VISIBLE);
+
         CharSequence sharingText = targetIntent.getCharSequenceExtra(Intent.EXTRA_TEXT);
         if (sharingText == null) {
             findViewById(R.id.content_preview_text_layout).setVisibility(View.GONE);
@@ -496,6 +529,105 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
         }
+    }
+
+    private void displayImageContentPreview(Intent targetIntent) {
+        ViewGroup contentPreviewLayout = findViewById(R.id.content_preview_image_area);
+        contentPreviewLayout.setVisibility(View.VISIBLE);
+
+        String action = targetIntent.getAction();
+        if (Intent.ACTION_SEND.equals(action)) {
+            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            loadUriIntoView(R.id.content_preview_image_1_large, uri);
+        } else {
+            ContentResolver resolver = getContentResolver();
+
+            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            List<Uri> imageUris = new ArrayList<>();
+            for (Uri uri : uris) {
+                if (isImageType(resolver.getType(uri))) {
+                    imageUris.add(uri);
+                }
+            }
+
+            if (imageUris.size() == 0) {
+                Log.i(TAG, "Attempted to display image preview area with zero"
+                        + " available images detected in EXTRA_STREAM list");
+                return;
+            }
+
+            loadUriIntoView(R.id.content_preview_image_1_large, imageUris.get(0));
+
+            if (imageUris.size() == 2) {
+                loadUriIntoView(R.id.content_preview_image_2_large, imageUris.get(1));
+            } else if (imageUris.size() > 2) {
+                loadUriIntoView(R.id.content_preview_image_2_small, imageUris.get(1));
+                RoundedRectImageView imageView = loadUriIntoView(
+                        R.id.content_preview_image_3_small, imageUris.get(2));
+
+                if (imageUris.size() > 3) {
+                    imageView.setExtraImageCount(imageUris.size() - 3);
+                }
+            }
+        }
+    }
+
+    private void displayFileContentPreview(Intent targetIntent) {
+        // support coming
+    }
+
+    private RoundedRectImageView loadUriIntoView(int imageResourceId, Uri uri) {
+        RoundedRectImageView imageView = findViewById(imageResourceId);
+        imageView.setVisibility(View.VISIBLE);
+        Bitmap bmp = loadThumbnail(uri, new Size(200, 200));
+        imageView.setImageBitmap(bmp);
+
+        return imageView;
+    }
+
+    @VisibleForTesting
+    protected boolean isImageType(String mimeType) {
+        return mimeType != null && mimeType.startsWith("image/");
+    }
+
+    @ContentPreviewType
+    private int findPreferredContentPreview(Uri uri, ContentResolver resolver) {
+        if (uri == null) {
+            return CONTENT_PREVIEW_TEXT;
+        }
+
+        String mimeType = resolver.getType(uri);
+        return isImageType(mimeType) ? CONTENT_PREVIEW_IMAGE : CONTENT_PREVIEW_FILE;
+    }
+
+    /**
+     * In {@link android.content.Intent#getType}, the app may specify a very general
+     * mime-type that broadly covers all data being shared, such as {@literal *}/*
+     * when sending an image and text. We therefore should inspect each item for the
+     * the preferred type, in order of IMAGE, FILE, TEXT.
+     */
+    @ContentPreviewType
+    private int findPreferredContentPreview(Intent targetIntent, ContentResolver resolver) {
+        String action = targetIntent.getAction();
+        if (Intent.ACTION_SEND.equals(action)) {
+            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            return findPreferredContentPreview(uri, resolver);
+        } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            if (uris == null || uris.isEmpty()) {
+                return CONTENT_PREVIEW_TEXT;
+            }
+
+            for (Uri uri : uris) {
+                if (findPreferredContentPreview(uri, resolver) == CONTENT_PREVIEW_IMAGE) {
+                    return CONTENT_PREVIEW_IMAGE;
+                }
+            }
+
+            return CONTENT_PREVIEW_FILE;
+        }
+
+        return CONTENT_PREVIEW_TEXT;
     }
 
     static SharedPreferences getPinnedSharedPrefs(Context context) {
@@ -1114,7 +1246,8 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         try {
-            return getContentResolver().loadThumbnail(uri, size, null);
+            return ImageUtils.decodeSampledBitmapFromStream(getContentResolver(),
+                uri, size.getWidth(), size.getHeight());
         } catch (IOException | NullPointerException ex) {
             Log.w(TAG, "Error loading preview thumbnail for uri: " + uri.toString(), ex);
         }
@@ -2045,6 +2178,9 @@ public class ChooserActivity extends ResolverActivity {
     public static class RoundedRectImageView extends ImageView {
         private int mRadius = 0;
         private Path mPath = new Path();
+        private Paint mOverlayPaint = new Paint(0);
+        private Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private String mExtraImageCount = null;
 
         public RoundedRectImageView(Context context) {
             super(context);
@@ -2062,6 +2198,14 @@ public class ChooserActivity extends ResolverActivity {
                 int defStyleRes) {
             super(context, attrs, defStyleAttr, defStyleRes);
             mRadius = context.getResources().getDimensionPixelSize(R.dimen.chooser_corner_radius);
+
+            mOverlayPaint.setColor(0x99000000);
+            mOverlayPaint.setStyle(Paint.Style.FILL);
+
+            mTextPaint.setColor(Color.WHITE);
+            mTextPaint.setTextSize(context.getResources()
+                    .getDimensionPixelSize(R.dimen.chooser_preview_image_font_size));
+            mTextPaint.setTextAlign(Paint.Align.CENTER);
         }
 
         private void updatePath(int width, int height) {
@@ -2083,11 +2227,23 @@ public class ChooserActivity extends ResolverActivity {
             updatePath(getWidth(), getHeight());
         }
 
+        /**
+          * Display an overlay with extra image count on 3rd image
+          */
+        public void setExtraImageCount(int count) {
+            if (count > 0) {
+                this.mExtraImageCount = "+" + count;
+            } else {
+                this.mExtraImageCount = null;
+            }
+        }
+
         @Override
         protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
             super.onSizeChanged(width, height, oldWidth, oldHeight);
             updatePath(width, height);
         }
+
 
         @Override
         protected void onDraw(Canvas canvas) {
@@ -2096,6 +2252,16 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             super.onDraw(canvas);
+
+            if (mExtraImageCount != null) {
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mOverlayPaint);
+
+                int xPos = canvas.getWidth() / 2;
+                int yPos = (int) ((canvas.getHeight() / 2.0f)
+                        - ((mTextPaint.descent() + mTextPaint.ascent()) / 2.0f));
+
+                canvas.drawText(mExtraImageCount, xPos, yPos, mTextPaint);
+            }
         }
     }
 }

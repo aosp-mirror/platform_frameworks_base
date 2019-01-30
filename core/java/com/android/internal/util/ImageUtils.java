@@ -16,14 +16,20 @@
 
 package com.android.internal.util;
 
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Utility class for image analysis and processing.
@@ -80,7 +86,7 @@ public class ImageUtils {
             width = height = COMPACT_BITMAP_SIZE;
         }
 
-        final int size = height*width;
+        final int size = height * width;
         ensureBufferSize(size);
         bitmap.getPixels(mTempBuffer, 0, width, 0, 0, width, height);
         for (int i = 0; i < size; i++) {
@@ -155,5 +161,56 @@ public class ImageUtils {
         drawable.draw(canvas);
 
         return result;
+    }
+
+    /**
+     * @see https://developer.android.com/topic/performance/graphics/load-bitmap
+     */
+    public static int calculateInSampleSize(BitmapFactory.Options options,
+            int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    /**
+     * Load a bitmap, and attempt to downscale to the required size, to save
+     * on memory.
+     *
+     * @see https://developer.android.com/topic/performance/graphics/load-bitmap
+     */
+    public static Bitmap decodeSampledBitmapFromStream(ContentResolver resolver,
+            Uri uri, int reqWidth, int reqHeight) throws IOException {
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        try (InputStream is = resolver.openInputStream(uri)) {
+            // First decode with inJustDecodeBounds=true to check dimensions
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(is, null, options);
+
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        }
+
+        // need to do this twice as the InputStream is consumed in the first call,
+        // and not all InputStreams support marks
+        try (InputStream is = resolver.openInputStream(uri)) {
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeStream(is, null, options);
+        }
     }
 }

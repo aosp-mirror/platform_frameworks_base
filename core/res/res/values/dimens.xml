@@ -720,4 +720,5 @@
     <dimen name="chooser_view_spacing">18dp</dimen>
     <dimen name="chooser_edge_margin_thin">16dp</dimen>
     <dimen name="chooser_edge_margin_normal">24dp</dimen>
+    <dimen name="chooser_preview_image_font_size">20sp</dimen>
 </resources>

@@ -59,12 +59,84 @@
                   android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 
+    <!-- The following 3 layouts are mutually exclusive. One of them will be
+         set VISIBLE programatically, when the optimal preview type can be 
+         determined by inspecting the data being shared. This path was chosen
+         b/c inflating layouts in code had sizing problems with this widget. -->
+
+    <!-- Layout Option 1: Supporting up to 3 images for preview -->
     <LinearLayout
-        android:id="@+id/content_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/colorBackgroundFloating">
+        <RelativeLayout
+            android:id="@+id/content_preview_image_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="@dimen/chooser_view_spacing"
+            android:visibility="gone"
+            android:background="?attr/colorBackgroundFloating">
+
+            <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
+                  android:id="@+id/content_preview_image_1_large"
+                  android:visibility="gone"
+                  android:layout_width="120dp"
+                  android:layout_height="140dp"
+                  android:layout_alignParentTop="true"
+                  android:adjustViewBounds="true"
+                  android:gravity="center"
+                  android:scaleType="centerCrop"/>
+
+            <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
+                  android:id="@+id/content_preview_image_2_large"
+                  android:visibility="gone"
+                  android:layout_width="120dp"
+                  android:layout_height="140dp"
+                  android:layout_alignParentTop="true"
+                  android:layout_toRightOf="@id/content_preview_image_1_large"
+                  android:layout_marginLeft="10dp"
+                  android:adjustViewBounds="true"
+                  android:gravity="center"
+                  android:scaleType="centerCrop"/>
+
+            <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
+                  android:id="@+id/content_preview_image_2_small"
+                  android:visibility="gone"
+                  android:layout_width="120dp"
+                  android:layout_height="65dp"
+                  android:layout_alignParentTop="true"
+                  android:layout_toRightOf="@id/content_preview_image_1_large"
+                  android:layout_marginLeft="10dp"
+                  android:adjustViewBounds="true"
+                  android:gravity="center"
+                  android:scaleType="centerCrop"/>
+
+            <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
+                  android:id="@+id/content_preview_image_3_small"
+                  android:visibility="gone"
+                  android:layout_width="120dp"
+                  android:layout_height="65dp"
+                  android:layout_below="@id/content_preview_image_2_small"
+                  android:layout_toRightOf="@id/content_preview_image_1_large"
+                  android:layout_marginLeft="10dp"
+                  android:layout_marginTop="10dp"
+                  android:adjustViewBounds="true"
+                  android:gravity="center"
+                  android:scaleType="centerCrop"/>
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- Layout Option 2: Text preview, with optional title and thumbnail -->
+    <LinearLayout
+        android:id="@+id/content_preview_text_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="@dimen/chooser_view_spacing"
+        android:visibility="gone"
         android:background="?attr/colorBackgroundFloating">
 
         <LinearLayout
@@ -108,15 +180,12 @@
 
             <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
                   android:id="@+id/content_preview_thumbnail"
-                  android:layout_width="80dp"
-                  android:layout_height="80dp"
-                  android:layout_marginRight="12dp"
+                  android:layout_width="75dp"
+                  android:layout_height="75dp"
+                  android:layout_marginRight="16dp"
                   android:adjustViewBounds="true"
                   android:layout_gravity="center_vertical"
                   android:gravity="center"
-                  android:maxWidth="70dp"
-                  android:maxHeight="70dp"
-                  android:padding="5dp"
                   android:scaleType="centerCrop"/>
 
             <TextView
