@@ -10029,4 +10029,26 @@ public class TelephonyManager {
         }
         return true;
     }
+
+    /**
+     * Broadcast intent action for network country code changes.
+     *
+     * <p>
+     * The {@link #EXTRA_NETWORK_COUNTRY} extra indicates the country code of the current
+     * network returned by {@link #getNetworkCountryIso()}.
+     *
+     * @see #EXTRA_NETWORK_COUNTRY
+     * @see #getNetworkCountryIso()
+     */
+    public static final String ACTION_NETWORK_COUNTRY_CHANGED =
+            "android.telephony.action.NETWORK_COUNTRY_CHANGED";
+
+    /**
+     * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
+     * the country code in ISO 3166 format.
+     * <p class="note">
+     * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     */
+    public static final String EXTRA_NETWORK_COUNTRY =
+            "android.telephony.extra.NETWORK_COUNTRY";
 }
