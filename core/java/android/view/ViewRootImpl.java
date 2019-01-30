@@ -3175,8 +3175,8 @@ public final class ViewRootImpl implements ViewParent,
                     int numValidRequests = validLayoutRequesters.size();
                     for (int i = 0; i < numValidRequests; ++i) {
                         final View view = validLayoutRequesters.get(i);
-                        Log.w("View", "requestLayout() improperly called by " + view +
-                                " during layout: running second layout pass");
+                        // Log.w("View", "requestLayout() improperly called by " + view +
+                        //        " during layout: running second layout pass");
                         view.requestLayout();
                     }
                     measureHierarchy(host, lp, mView.getContext().getResources(),
@@ -3198,8 +3198,8 @@ public final class ViewRootImpl implements ViewParent,
                                 int numValidRequests = finalRequesters.size();
                                 for (int i = 0; i < numValidRequests; ++i) {
                                     final View view = finalRequesters.get(i);
-                                    Log.w("View", "requestLayout() improperly called by " + view +
-                                            " during second layout pass: posting in next frame");
+                                    // Log.w("View", "requestLayout() improperly called by " + view +
+                                    //         " during second layout pass: posting in next frame");
                                     view.requestLayout();
                                 }
                             }
