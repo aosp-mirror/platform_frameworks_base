@@ -180,7 +180,7 @@ public class NotificationCategorizerTest {
         assertFalse(nc.shouldSilence(NotificationCategorizer.CATEGORY_SYSTEM));
 
         when(mSbn.getUid()).thenReturn(FIRST_APPLICATION_UID);
-        assertEquals(NotificationCategorizer.CATEGORY_EVERYTHING_ELSE, nc.getCategory(mEntry));
+        assertEquals(NotificationCategorizer.CATEGORY_HIGH, nc.getCategory(mEntry));
     }
 
     @Test

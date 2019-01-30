@@ -24,7 +24,7 @@
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="android.ext.services"
+                     android:targetPackage="android.ext.services.tests.unit"
                      android:label="ExtServices Test Cases">
     </instrumentation>
 
