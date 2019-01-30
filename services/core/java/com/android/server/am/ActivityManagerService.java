@@ -2217,7 +2217,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = hasHandlerThread ? new ActivityManagerConstants(this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, new Object());
 
         mIntentFirewall = hasHandlerThread
                 ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
@@ -2265,7 +2265,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = new ActivityManagerConstants(this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, atm.getGlobalLock());
 
         // Broadcast policy parameters
         final BroadcastConstants foreConstants = new BroadcastConstants(
@@ -3091,7 +3091,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     UidRecord validateUid = mValidateUids.get(item.uid);
                     if (validateUid == null) {
-                        validateUid = new UidRecord(item.uid, mAtmInternal);
+                        validateUid = new UidRecord(item.uid);
                         mValidateUids.put(item.uid, validateUid);
                     }
                     if ((item.change & UidRecord.CHANGE_IDLE) != 0) {

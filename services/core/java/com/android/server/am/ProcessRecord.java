@@ -655,20 +655,12 @@ final class ProcessRecord implements WindowProcessListener {
         return mWindowProcessController.hasActivities();
     }
 
-    void clearActivities() {
-        mWindowProcessController.clearActivities();
-    }
-
     boolean hasActivitiesOrRecentTasks() {
         return mWindowProcessController.hasActivitiesOrRecentTasks();
     }
 
     boolean hasRecentTasks() {
         return mWindowProcessController.hasRecentTasks();
-    }
-
-    void clearRecentTasks() {
-        mWindowProcessController.clearRecentTasks();
     }
 
     /**

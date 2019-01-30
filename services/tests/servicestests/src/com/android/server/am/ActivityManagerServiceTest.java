@@ -250,7 +250,7 @@ public class ActivityManagerServiceTest {
     }
 
     private UidRecord addUidRecord(int uid) {
-        final UidRecord uidRec = new UidRecord(uid, null /* atmInternal */);
+        final UidRecord uidRec = new UidRecord(uid);
         uidRec.waitingForNetwork = true;
         uidRec.hasInternetPermission = true;
         mAms.mProcessList.mActiveUids.put(uid, uidRec);
@@ -405,7 +405,7 @@ public class ActivityManagerServiceTest {
 
     @Test
     public void testBlockStateForUid() {
-        final UidRecord uidRec = new UidRecord(TEST_UID, null /* atmInternal */);
+        final UidRecord uidRec = new UidRecord(TEST_UID);
         int expectedBlockState;
 
         final String errorTemplate = "Block state should be %s, prevState: %s, curState: %s";
@@ -732,7 +732,7 @@ public class ActivityManagerServiceTest {
 
     @Test
     public void testEnqueueUidChangeLocked_procStateSeqUpdated() {
-        final UidRecord uidRecord = new UidRecord(TEST_UID, null /* atmInternal */);
+        final UidRecord uidRecord = new UidRecord(TEST_UID);
         uidRecord.curProcStateSeq = TEST_PROC_STATE_SEQ1;
 
         // Verify with no pending changes for TEST_UID.
@@ -778,7 +778,7 @@ public class ActivityManagerServiceTest {
     @MediumTest
     @Test
     public void testEnqueueUidChangeLocked_dispatchUidsChanged() {
-        final UidRecord uidRecord = new UidRecord(TEST_UID, null /* atmInternal */);
+        final UidRecord uidRecord = new UidRecord(TEST_UID);
         final int expectedProcState = PROCESS_STATE_SERVICE;
         uidRecord.setProcState = expectedProcState;
         uidRecord.curProcStateSeq = TEST_PROC_STATE_SEQ1;
@@ -850,7 +850,7 @@ public class ActivityManagerServiceTest {
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,
             long lastDispatchedProcStateSeq, long lastNetworkUpdatedProcStateSeq,
             final long procStateSeqToWait, boolean expectWait) throws Exception {
-        final UidRecord record = new UidRecord(Process.myUid(), null /* atmInternal */);
+        final UidRecord record = new UidRecord(Process.myUid());
         record.curProcStateSeq = curProcStateSeq;
         record.lastDispatchedProcStateSeq = lastDispatchedProcStateSeq;
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;
