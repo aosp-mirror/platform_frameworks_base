@@ -39,4 +39,9 @@ public final class RollbackManagerService extends SystemService {
         mService = new RollbackManagerServiceImpl(getContext());
         publishBinderService(Context.ROLLBACK_SERVICE, mService);
     }
+
+    @Override
+    public void onUnlockUser(int user) {
+        mService.onUnlockUser(user);
+    }
 }
