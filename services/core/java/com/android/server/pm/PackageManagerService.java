@@ -130,6 +130,8 @@ import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
+import android.app.role.RoleManager;
+import android.app.role.RoleManagerCallback;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -287,6 +289,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -368,8 +371,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1926,7 +1931,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                             if (pkgSetting.getInstallReason(userId)
                                     != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                                mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                                setDefaultBrowserPackageName(null, userId);
                             }
                         }
 
@@ -2940,7 +2945,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!onlyCore && (mPromoteSystemApps || mFirstBoot)) {
                 for (UserInfo user : sUserManager.getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(user.id);
-                    applyFactoryDefaultBrowserLPw(user.id);
                     primeDomainVerificationsLPw(user.id);
                 }
             }
@@ -3012,8 +3016,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 ver.fingerprint = Build.FINGERPRINT;
             }
-
-            checkDefaultBrowser();
 
             // clear only after permissions and other defaults have been updated
             mExistingSystemPackages.clear();
@@ -3668,58 +3670,6 @@ public class PackageManagerService extends IPackageManager.Stub
         scheduleWriteSettingsLocked();
     }
 
-    @GuardedBy("mPackages")
-    private void applyFactoryDefaultBrowserLPw(int userId) {
-        // The default browser app's package name is stored in a string resource,
-        // with a product-specific overlay used for vendor customization.
-        String browserPkg = mContext.getResources().getString(
-                com.android.internal.R.string.default_browser);
-        if (!TextUtils.isEmpty(browserPkg)) {
-            // non-empty string => required to be a known package
-            PackageSetting ps = mSettings.mPackages.get(browserPkg);
-            if (ps == null) {
-                Slog.e(TAG, "Product default browser app does not exist: " + browserPkg);
-                browserPkg = null;
-            } else {
-                mSettings.setDefaultBrowserPackageNameLPw(browserPkg, userId);
-            }
-        }
-
-        // Nothing valid explicitly set? Make the factory-installed browser the explicit
-        // default.  If there's more than one, just leave everything alone.
-        if (browserPkg == null) {
-            calculateDefaultBrowserLPw(userId);
-        }
-    }
-
-    @GuardedBy("mPackages")
-    private void calculateDefaultBrowserLPw(int userId) {
-        List<String> allBrowsers = resolveAllBrowserApps(userId);
-        final String browserPkg = (allBrowsers.size() == 1) ? allBrowsers.get(0) : null;
-        mSettings.setDefaultBrowserPackageNameLPw(browserPkg, userId);
-    }
-
-    private List<String> resolveAllBrowserApps(int userId) {
-        // Resolve the canonical browser intent and check that the handleAllWebDataURI boolean is set
-        List<ResolveInfo> list = queryIntentActivitiesInternal(sBrowserIntent, null,
-                PackageManager.MATCH_ALL, userId);
-
-        final int count = list.size();
-        List<String> result = new ArrayList<>(count);
-        for (int i=0; i<count; i++) {
-            ResolveInfo info = list.get(i);
-            if (info.activityInfo == null
-                    || !info.handleAllWebDataURI
-                    || (info.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0
-                    || result.contains(info.activityInfo.packageName)) {
-                continue;
-            }
-            result.add(info.activityInfo.packageName);
-        }
-
-        return result;
-    }
-
     private boolean packageIsBrowser(String packageName, int userId) {
         List<ResolveInfo> list = queryIntentActivitiesInternal(sBrowserIntent, null,
                 PackageManager.MATCH_ALL, userId);
@@ -3731,20 +3681,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return false;
-    }
-
-    private void checkDefaultBrowser() {
-        final int myUserId = UserHandle.myUserId();
-        final String packageName = getDefaultBrowserPackageName(myUserId);
-        if (packageName != null) {
-            PackageInfo info = getPackageInfo(packageName, 0, myUserId);
-            if (info == null) {
-                Slog.w(TAG, "Default browser no longer installed: " + packageName);
-                synchronized (mPackages) {
-                    applyFactoryDefaultBrowserLPw(myUserId);    // leaves ambiguous when > 1
-                }
-            }
-        }
     }
 
     @Override
@@ -13644,14 +13580,33 @@ public class PackageManagerService extends IPackageManager.Stub
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
 
+        if (userId == UserHandle.USER_ALL) {
+            return false;
+        }
+        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        UserHandle user = UserHandle.of(userId);
+        RoleManagerCallback.Future future = new RoleManagerCallback.Future();
+        if (packageName != null) {
+            Binder.withCleanCallingIdentity(() -> roleManager.addRoleHolderAsUser(
+                    RoleManager.ROLE_BROWSER, packageName, user, AsyncTask.THREAD_POOL_EXECUTOR,
+                    future));
+        } else {
+            Binder.withCleanCallingIdentity(() -> roleManager.clearRoleHoldersAsUser(
+                    RoleManager.ROLE_BROWSER, user, AsyncTask.THREAD_POOL_EXECUTOR, future));
+        }
+        try {
+            future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            Slog.e(TAG, "Exception while setting default browser package name: " + packageName, e);
+            return false;
+        }
         synchronized (mPackages) {
-            boolean result = mSettings.setDefaultBrowserPackageNameLPw(packageName, userId);
             if (packageName != null) {
                 mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(
                         packageName, userId);
             }
-            return result;
         }
+        return true;
     }
 
     @Override
@@ -13663,9 +13618,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
-        synchronized (mPackages) {
-            return mSettings.getDefaultBrowserPackageNameLPw(userId);
-        }
+        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        List<String> packageNames = Binder.withCleanCallingIdentity(() ->
+                roleManager.getRoleHoldersAsUser(RoleManager.ROLE_BROWSER, UserHandle.of(userId)));
+        return CollectionUtils.firstOrNull(packageNames);
     }
 
     /**
@@ -19417,7 +19373,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // significant refactoring to keep all default apps in the package
                 // manager (cleaner but more work) or have the services provide
                 // callbacks to the package manager to request a default app reset.
-                applyFactoryDefaultBrowserLPw(userId);
+                setDefaultBrowserPackageName(null, userId);
                 clearIntentFilterVerificationsLPw(userId);
                 primeDomainVerificationsLPw(userId);
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(userId);
@@ -22710,7 +22666,6 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
-            applyFactoryDefaultBrowserLPw(userId);
             primeDomainVerificationsLPw(userId);
         }
     }
@@ -23907,6 +23862,14 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void finishPackageInstall(int token, boolean didLaunch) {
             PackageManagerService.this.finishPackageInstall(token, didLaunch);
+        }
+
+        @Nullable
+        @Override
+        public String removeLegacyDefaultBrowserPackageName(int userId) {
+            synchronized (mPackages) {
+                return mSettings.removeDefaultBrowserPackageNameLPw(userId);
+            }
         }
     }
 
