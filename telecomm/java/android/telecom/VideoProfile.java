@@ -16,7 +16,9 @@
 
 package android.telecom;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -364,7 +366,7 @@ public class VideoProfile implements Parcelable {
          * @param width The width of the camera video (in pixels).
          * @param height The height of the camera video (in pixels).
          */
-        public CameraCapabilities(int width, int height) {
+        public CameraCapabilities(@IntRange(from = 0) int width, @IntRange(from = 0) int height) {
             this(width, height, false, 1.0f);
         }
 
@@ -376,7 +378,8 @@ public class VideoProfile implements Parcelable {
          * @param zoomSupported True when camera supports zoom.
          * @param maxZoom Maximum zoom supported by camera.
          */
-        public CameraCapabilities(int width, int height, boolean zoomSupported, float maxZoom) {
+        public CameraCapabilities(@IntRange(from = 0) int width,  @IntRange(from = 0) int height,
+                                   boolean zoomSupported,  @FloatRange(from = 1.0f) float maxZoom) {
             mWidth = width;
             mHeight = height;
             mZoomSupported = zoomSupported;
