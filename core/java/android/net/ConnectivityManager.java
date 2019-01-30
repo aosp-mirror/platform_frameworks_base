@@ -1033,34 +1033,6 @@ public class ConnectivityManager {
         }
     }
 
-    /**
-     * Configures an always-on VPN connection through a specific application.
-     * This connection is automatically granted and persisted after a reboot.
-     *
-     * <p>The designated package should declare a {@link VpnService} in its
-     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
-     *    otherwise the call will fail.
-     *
-     * @param userId The identifier of the user to set an always-on VPN for.
-     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
-     *                   to remove an existing always-on VPN configuration.
-     * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
-     *        {@code false} otherwise.
-     * @return {@code true} if the package is set as always-on VPN controller;
-     *         {@code false} otherwise.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
-    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
-            boolean lockdownEnabled) {
-        try {
-            return mService.setAlwaysOnVpnPackage(
-                    userId, vpnPackage, lockdownEnabled, /* whitelist */ null);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
    /**
      * Returns the package name of the currently set always-on VPN application.
      * If there is no always-on VPN set, or the VPN is provided by the system instead
