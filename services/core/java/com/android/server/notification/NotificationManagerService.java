@@ -2366,6 +2366,28 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean shouldHideSilentStatusIcons(String callingPkg) {
+            checkCallerIsSameApp(callingPkg);
+
+            if (isCallerSystemOrPhone()
+                    || mListeners.isListenerPackage(callingPkg)) {
+                return mPreferencesHelper.shouldHideSilentStatusIcons();
+            } else {
+                throw new SecurityException("Only available for notification listeners");
+            }
+        }
+
+        @Override
+        public void setHideSilentStatusIcons(boolean hide) {
+            checkCallerIsSystem();
+
+            mPreferencesHelper.setHideSilentStatusIcons(hide);
+            handleSavePolicyFile();
+
+            mListeners.onStatusBarIconsBehaviorChanged(hide);
+        }
+
+        @Override
         public int getPackageImportance(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
             return mPreferencesHelper.getImportance(pkg, Binder.getCallingUid());
@@ -7322,6 +7344,20 @@ public class NotificationManagerService extends SystemService {
 
         public int getOnNotificationPostedTrim(ManagedServiceInfo info) {
             return mLightTrimListeners.contains(info) ? TRIM_LIGHT : TRIM_FULL;
+        }
+
+        public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
+            for (final ManagedServiceInfo info : getServices()) {
+                mHandler.post(() -> {
+                    final INotificationListener listener = (INotificationListener) info.service;
+                     try {
+                        listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
+                    } catch (RemoteException ex) {
+                        Log.e(TAG, "unable to notify listener "
+                                + "(hideSilentStatusIcons): " + listener, ex);
+                    }
+                });
+            }
         }
 
         /**

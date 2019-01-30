@@ -33,6 +33,7 @@ oneway interface INotificationListener
     void onListenerConnected(in NotificationRankingUpdate update);
     void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update);
+    void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons);
     // stats only for assistant
     void onNotificationRemoved(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update, in NotificationStats stats, int reason);

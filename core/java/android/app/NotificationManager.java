@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -353,7 +354,8 @@ public class NotificationManager {
     public static final int IMPORTANCE_MIN = 1;
 
     /**
-     * Low notification importance: shows everywhere, but is not intrusive.
+     * Low notification importance: Shows in the shade, and potentially in the status bar
+     * (see {@link #shouldHideSilentStatusBarIcons()}), but is not audibly intrusive.
      */
     public static final int IMPORTANCE_LOW = 2;
 
@@ -1157,6 +1159,22 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.isNotificationAssistantAccessGranted(assistant);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the user wants silent notifications (see {@link #IMPORTANCE_LOW} to appear
+     * in the status bar.
+     *
+     * <p>Only available for {@link #isNotificationListenerAccessGranted(ComponentName) notification
+     * listeners}.
+     */
+    public boolean shouldHideSilentStatusBarIcons() {
+        INotificationManager service = getService();
+        try {
+            return service.shouldHideSilentStatusIcons(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
