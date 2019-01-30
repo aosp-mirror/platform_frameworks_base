@@ -509,7 +509,6 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_ALWAYS_REQUESTED,
                     Settings.Global.WIFI_BADGING_THRESHOLDS,
                     Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
-                    Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
                     Settings.Global.WIFI_COUNTRY_CODE,
                     Settings.Global.WIFI_DATA_STALL_MIN_TX_BAD,
                     Settings.Global.WIFI_DATA_STALL_MIN_TX_SUCCESS_WITHOUT_RX,
