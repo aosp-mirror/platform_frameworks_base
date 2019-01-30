@@ -150,6 +150,16 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for all runtime native related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface RuntimeNative {
+        String NAMESPACE = "runtime_native";
+    }
+
+    /**
      * Namespace for attention-based features provided by on-device machine intelligence.
      *
      * @hide

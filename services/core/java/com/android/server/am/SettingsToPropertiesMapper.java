@@ -79,6 +79,7 @@ class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigScopes = new String[] {
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_NETD_NATIVE,
+        DeviceConfig.RuntimeNative.NAMESPACE,
     };
 
     private final String[] mGlobalSettings;
