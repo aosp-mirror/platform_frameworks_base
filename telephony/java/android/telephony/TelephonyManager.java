@@ -10066,4 +10066,24 @@ public class TelephonyManager {
             Rlog.e(TAG, "switchMultiSimConfig RemoteException", ex);
         }
     }
+
+    /**
+     * Get whether reboot is required or not after making changes to modem configurations.
+     * @Return {@code True} if reboot is required after making changes to modem configurations,
+     * otherwise return {@code False}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isRebootRequiredForModemConfigChange() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isRebootRequiredForModemConfigChange();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "isRebootRequiredForModemConfigChange RemoteException", e);
+        }
+        return false;
+    }
 }
