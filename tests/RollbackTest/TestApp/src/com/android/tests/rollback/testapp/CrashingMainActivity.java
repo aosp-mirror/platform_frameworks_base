@@ -17,17 +17,30 @@
 package com.android.tests.rollback.testapp;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 /**
  * A crashing test app for testing apk rollback support.
  */
 public class CrashingMainActivity extends Activity {
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        incrementCountAndBroadcast();
         throw new RuntimeException("Intended force crash");
+    }
+
+    public void incrementCountAndBroadcast() {
+        SharedPreferences preferences = getSharedPreferences("prefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        int count = preferences.getInt("crash_count", 0);
+        editor.putInt("crash_count", ++count).commit();
+
+        Intent intent = new Intent("com.android.tests.rollback.CRASH");
+        intent.putExtra("count", count);
+        sendBroadcast(intent);
     }
 }

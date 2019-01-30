@@ -17,6 +17,7 @@
 package com.android.tests.rollback;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,7 +37,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -413,7 +414,6 @@ public class RollbackTest {
 
     /**
      * Test that app user data is rolled back.
-     * TODO: Stop ignoring this test once user data rollback is supported.
      */
     @Test
     public void testUserDataRollback() throws Exception {
@@ -568,9 +568,7 @@ public class RollbackTest {
     }
 
     /**
-     * Test rollback of multi-package installs.
-     * TODO: Stop ignoring this test once support for multi-package rollback
-     * is implemented.
+     * Test rollback of multi-package installs is implemented.
      */
     @Test
     public void testMultiPackage() throws Exception {
@@ -630,18 +628,20 @@ public class RollbackTest {
         assertEquals(versionRolledBackTo, info.getVersionRolledBackTo().getLongVersionCode());
     }
 
-    // TODO(zezeozue): Stop ignoring after fixing race between rolling back and testing version
     /**
      * Test bad update automatic rollback.
      */
-    @Ignore("Flaky")
     @Test
     public void testBadUpdateRollback() throws Exception {
+        BroadcastReceiver crashCountReceiver = null;
+        Context context = InstrumentationRegistry.getContext();
         try {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.KILL_BACKGROUND_PROCESSES,
+                    Manifest.permission.RESTART_PACKAGES);
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
             // Prep installation of the test apps.
@@ -669,23 +669,52 @@ public class RollbackTest {
                     rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
+            BlockingQueue<Integer> crashQueue = new SynchronousQueue<>();
+
+            IntentFilter crashCountFilter = new IntentFilter();
+            crashCountFilter.addAction("com.android.tests.rollback.CRASH");
+            crashCountFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+            crashCountReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        try {
+                            // Sleep long enough for packagewatchdog to be notified of crash
+                            Thread.sleep(1000);
+                            // Kill app and close AppErrorDialog
+                            ActivityManager am = context.getSystemService(ActivityManager.class);
+                            am.killBackgroundProcesses(TEST_APP_A);
+                            // Allow another package launch
+                            crashQueue.offer(intent.getIntExtra("count", 0), 5, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            fail("Failed to communicate with test app");
+                        }
+                    }
+                };
+            context.registerReceiver(crashCountReceiver, crashCountFilter);
+
             // Start apps PackageWatchdog#TRIGGER_FAILURE_COUNT times so TEST_APP_A crashes
-            for (int i = 0; i < 5; i++) {
+            Integer crashCount = null;
+            do {
                 RollbackTestUtils.launchPackage(TEST_APP_A);
-                Thread.sleep(1000);
-            }
-            Thread.sleep(1000);
+                crashCount = crashQueue.poll(5, TimeUnit.SECONDS);
+                if (crashCount == null) {
+                    fail("Timed out waiting for crash signal from test app");
+                }
+            } while(crashCount < 5);
 
             // TEST_APP_A is automatically rolled back by the RollbackPackageHealthObserver
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
             // Instrumented app is still the package installer
-            Context context = InstrumentationRegistry.getContext();
             String installer = context.getPackageManager().getInstallerPackageName(TEST_APP_A);
             assertEquals(INSTRUMENTED_APP, installer);
             // TEST_APP_B is untouched
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
+            if (crashCountReceiver != null) {
+                context.unregisterReceiver(crashCountReceiver);
+            }
         }
     }
 
