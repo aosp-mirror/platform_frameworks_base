@@ -1454,6 +1454,17 @@ public class VibratorService extends IVibratorService.Stub
 
         private final IBinder mToken;
 
+        private final class CommonOptions {
+            public boolean force = false;
+            public void check(String opt) {
+                switch (opt) {
+                    case "-f":
+                        force = true;
+                        break;
+                }
+            }
+        }
+
         private VibratorShellCommand(IBinder token) {
             mToken = token;
         }
@@ -1473,11 +1484,11 @@ public class VibratorService extends IVibratorService.Stub
             return handleDefaultCommands(cmd);
         }
 
-        private boolean checkDoNotDisturb() {
+        private boolean checkDoNotDisturb(CommonOptions opts) {
             try {
                 final int zenMode = Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.ZEN_MODE);
-                if (zenMode != Settings.Global.ZEN_MODE_OFF) {
+                if (zenMode != Settings.Global.ZEN_MODE_OFF && !opts.force) {
                     try (PrintWriter pw = getOutPrintWriter();) {
                         pw.print("Ignoring because device is on DND mode ");
                         pw.println(DebugUtils.flagsToString(Settings.Global.class, "ZEN_MODE_",
@@ -1495,7 +1506,14 @@ public class VibratorService extends IVibratorService.Stub
         private int runVibrate() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runVibrate");
             try {
-                if (checkDoNotDisturb()) {
+                CommonOptions commonOptions = new CommonOptions();
+
+                String opt;
+                while ((opt = getNextOption()) != null) {
+                    commonOptions.check(opt);
+                }
+
+                if (checkDoNotDisturb(commonOptions)) {
                     return 0;
                 }
 
@@ -1518,13 +1536,10 @@ public class VibratorService extends IVibratorService.Stub
         private int runWaveform() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runWaveform");
             try {
-                if (checkDoNotDisturb()) {
-                    return 0;
-                }
-
                 String description = "Shell command";
                 int repeat = -1;
                 ArrayList<Integer> amplitudesList = null;
+                CommonOptions commonOptions = new CommonOptions();
 
                 String opt;
                 while ((opt = getNextOption()) != null) {
@@ -1540,7 +1555,14 @@ public class VibratorService extends IVibratorService.Stub
                                 amplitudesList = new ArrayList<Integer>();
                             }
                             break;
+                        default:
+                            commonOptions.check(opt);
+                            break;
                     }
+                }
+
+                if (checkDoNotDisturb(commonOptions)) {
+                    return 0;
                 }
 
                 ArrayList<Long> timingsList = new ArrayList<Long>();
@@ -1574,7 +1596,14 @@ public class VibratorService extends IVibratorService.Stub
         private int runPrebaked() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runPrebaked");
             try {
-                if (checkDoNotDisturb()) {
+                CommonOptions commonOptions = new CommonOptions();
+
+                String opt;
+                while ((opt = getNextOption()) != null) {
+                    commonOptions.check(opt);
+                }
+
+                if (checkDoNotDisturb(commonOptions)) {
                     return 0;
                 }
 
@@ -1618,6 +1647,8 @@ public class VibratorService extends IVibratorService.Stub
                 pw.println("    (Do Not Disturb) mode.");
                 pw.println("  cancel");
                 pw.println("    Cancels any active vibration");
+                pw.println("Common Options:");
+                pw.println("  -f - Force. Ignore Do Not Disturb setting.");
                 pw.println("");
             }
         }
