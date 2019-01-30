@@ -1541,10 +1541,6 @@ class StorageManagerService extends IStorageManager.Stub
         mCallbacks = new Callbacks(FgThread.get().getLooper());
         mLockPatternUtils = new LockPatternUtils(mContext);
 
-        mPmInternal = LocalServices.getService(PackageManagerInternal.class);
-        mUmInternal = LocalServices.getService(UserManagerInternal.class);
-        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
-
         HandlerThread hthread = new HandlerThread(TAG);
         hthread.start();
         mHandler = new StorageManagerServiceHandler(hthread.getLooper());
@@ -1662,6 +1658,19 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void servicesReady() {
+        mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+        mUmInternal = LocalServices.getService(UserManagerInternal.class);
+        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+
+        mIPackageManager = IPackageManager.Stub.asInterface(
+                ServiceManager.getService("package"));
+        mIAppOpsService = IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
+        try {
+            mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null, mAppOpsCallback);
+        } catch (RemoteException e) {
+        }
+
         synchronized (mLock) {
             final boolean thisIsolatedStorage = StorageManager.hasIsolatedStorage();
             if (mLastIsolatedStorage == thisIsolatedStorage) {
@@ -1734,14 +1743,6 @@ class StorageManagerService extends IStorageManager.Stub
                 .registerScreenObserver(this);
 
         mSystemReady = true;
-        mIPackageManager = IPackageManager.Stub.asInterface(
-                ServiceManager.getService("package"));
-        mIAppOpsService = IAppOpsService.Stub.asInterface(
-                ServiceManager.getService(Context.APP_OPS_SERVICE));
-        try {
-            mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null, mAppOpsCallback);
-        } catch (RemoteException e) {
-        }
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
     }
 
