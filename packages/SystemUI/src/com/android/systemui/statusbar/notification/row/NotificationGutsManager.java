@@ -25,7 +25,6 @@ import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -391,12 +390,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             // This view has no guts. Examples are the more card or the dismiss all view
             return false;
         }
-
-        LogMaker logMaker = (row.getStatusBarNotification() == null)
-                ? new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTE_CONTROLS)
-                : row.getStatusBarNotification().getLogMaker();
-        mMetricsLogger.write(logMaker.setCategory(MetricsProto.MetricsEvent.ACTION_NOTE_CONTROLS)
-                    .setType(MetricsProto.MetricsEvent.TYPE_ACTION));
 
         // ensure that it's laid but not visible until actually laid out
         guts.setVisibility(View.INVISIBLE);

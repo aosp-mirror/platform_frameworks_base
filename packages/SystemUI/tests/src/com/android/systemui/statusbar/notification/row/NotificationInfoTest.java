@@ -83,7 +83,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -107,11 +106,16 @@ public class NotificationInfoTest extends SysuiTestCase {
     private NotificationChannel mDefaultNotificationChannel;
     private StatusBarNotification mSbn;
 
-    @Rule public MockitoRule mockito = MockitoJUnit.rule();
-    @Mock private MetricsLogger mMetricsLogger;
-    @Mock private INotificationManager mMockINotificationManager;
-    @Mock private PackageManager mMockPackageManager;
-    @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
+    @Rule
+    public MockitoRule mockito = MockitoJUnit.rule();
+    @Mock
+    private MetricsLogger mMetricsLogger;
+    @Mock
+    private INotificationManager mMockINotificationManager;
+    @Mock
+    private PackageManager mMockPackageManager;
+    @Mock
+    private NotificationBlockingHelperManager mBlockingHelperManager;
 
     @Before
     public void setUp() throws Exception {
@@ -172,44 +176,25 @@ public class NotificationInfoTest extends SysuiTestCase {
         PollingCheck.waitFor(1000,
                 () -> VISIBLE == mNotificationInfo.findViewById(R.id.confirmation).getVisibility());
     }
+
     private void ensureNoUndoButton() {
         PollingCheck.waitFor(1000,
                 () -> GONE == mNotificationInfo.findViewById(R.id.confirmation).getVisibility()
                         && !mNotificationInfo.isAnimating());
     }
+
     private void waitForStopButton() {
         PollingCheck.waitFor(1000,
                 () -> VISIBLE == mNotificationInfo.findViewById(R.id.prompt).getVisibility());
-    }
-
-    class ImportanceChangeLogMaker implements ArgumentMatcher<LogMaker> {
-        private static final int CATEGORY = MetricsProto.MetricsEvent.ACTION_SAVE_IMPORTANCE;
-        private int mType, mSubtype;
-
-        ImportanceChangeLogMaker(int type, int subtype) {
-            mType = type;
-            mSubtype = subtype;
-        }
-        public boolean matches(LogMaker l) {
-            return (l.getCategory() == CATEGORY)
-                    && (l.getType() == mType)
-                    && (l.getSubtype() == mSubtype);
-        }
-
-        public String toString() {
-            return String.format("LogMaker(%d, %d, %d)", CATEGORY, mType, mSubtype);
-        }
-    }
-
-    private LogMaker importanceChangeLog(int type, int subtype) {
-        return argThat(new ImportanceChangeLogMaker(type, subtype));
     }
 
     @Test
     public void testBindNotification_SetsTextApplicationName() throws Exception {
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                null, null, null,
+                true, false,
                 IMPORTANCE_DEFAULT, true);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkgname);
         assertTrue(textView.getText().toString().contains("App Name"));
@@ -330,9 +315,9 @@ public class NotificationInfoTest extends SysuiTestCase {
 
     @Test
     public void testBindNotification_BlockButton() throws Exception {
-       mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-               TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
-               IMPORTANCE_DEFAULT, true);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
+                IMPORTANCE_DEFAULT, true);
         final View block = mNotificationInfo.findViewById(R.id.int_block);
         final View minimize = mNotificationInfo.findViewById(R.id.block_or_minimize);
         assertEquals(VISIBLE, block.getVisibility());
@@ -340,7 +325,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_BlockButton_BlockHelper() throws Exception {
+    public void testBindNotification_BlockButton_BlockingHelper() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
                 true /* isBlockingHelper */, false, IMPORTANCE_DEFAULT, true);
@@ -498,13 +483,29 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLogBlockingHelperCounter_logGutsViewDisplayed() throws Exception {
+    public void testBindNotificationLogging_notBlockingHelper() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                null, null, null,
+                true, false,
                 IMPORTANCE_DEFAULT, true);
-        mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
         verify(mMetricsLogger).write(argThat(logMaker ->
-                logMaker.getCategory() == MetricsEvent.NOTIFICATION_BLOCKING_HELPER
+                logMaker.getCategory() == MetricsEvent.ACTION_NOTE_CONTROLS
+                        && logMaker.getType() == MetricsEvent.TYPE_OPEN
+                        && logMaker.getSubtype() == MetricsEvent.BLOCKING_HELPER_UNKNOWN
+        ));
+    }
+
+    @Test
+    public void testBindNotificationLogging_BlockingHelper() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                null, null, null,
+                false, true,
+                true, true,
+                IMPORTANCE_DEFAULT, true);
+        verify(mMetricsLogger).write(argThat(logMaker ->
+                logMaker.getCategory() == MetricsEvent.ACTION_NOTE_CONTROLS
                         && logMaker.getType() == MetricsEvent.TYPE_OPEN
                         && logMaker.getSubtype() == MetricsEvent.BLOCKING_HELPER_DISPLAY
         ));
@@ -513,8 +514,11 @@ public class NotificationInfoTest extends SysuiTestCase {
     @Test
     public void testLogBlockingHelperCounter_logsForBlockingHelper() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, false, true,
-                true, true, IMPORTANCE_DEFAULT, true);
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                null, null, null,
+                false, true,
+                true, true,
+                IMPORTANCE_DEFAULT, true);
         mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
         verify(mMetricsLogger).count(eq("HowCanNotifsBeRealIfAppsArent"), eq(1));
     }
@@ -680,7 +684,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
                 10 /* numUniqueChannelsInRow */, mSbn, null /* checkSaveListener */,
-                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                null /* onSettingsClick */, null /* onAppSettingsClick */,
                 true, false /* isNonblockable */, IMPORTANCE_DEFAULT, false
         );
 
@@ -722,7 +726,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
                 10 /* numUniqueChannelsInRow */, mSbn, null /* checkSaveListener */,
-                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                null /* onSettingsClick */, null /* onAppSettingsClick */,
                 true /* provisioned */,
                 false /* isNonblockable */, true /* isForBlockingHelper */,
                 true /* isUserSentimentNegative */, IMPORTANCE_DEFAULT, true);
@@ -744,14 +748,14 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCloseControls_nonNullCheckSaveListenerDoesntDelayKeepShowing()
+    public void testCloseControls_nonNullCheckSaveListenerDoesntDelayKeepShowing_BlockingHelper()
             throws Exception {
         NotificationInfo.CheckSaveListener listener =
                 mock(NotificationInfo.CheckSaveListener.class);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
                 10 /* numUniqueChannelsInRow */, mSbn, listener /* checkSaveListener */,
-                null /* onSettingsClick */, null /* onAppSettingsClick */ , true /* provisioned */,
+                null /* onSettingsClick */, null /* onAppSettingsClick */, true /* provisioned */,
                 false /* isNonblockable */, true /* isForBlockingHelper */,
                 true /* isUserSentimentNegative */, IMPORTANCE_DEFAULT, true);
 
@@ -772,14 +776,14 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCloseControls_nonNullCheckSaveListenerDoesntDelayDismiss()
+    public void testCloseControls_nonNullCheckSaveListenerDoesntDelayDismiss_BlockingHelper()
             throws Exception {
         NotificationInfo.CheckSaveListener listener =
                 mock(NotificationInfo.CheckSaveListener.class);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
                 10 /* numUniqueChannelsInRow */, mSbn, listener /* checkSaveListener */,
-                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                null /* onSettingsClick */, null /* onAppSettingsClick */,
                 false /* isNonblockable */, true /* isForBlockingHelper */,
                 true, true /* isUserSentimentNegative */,  /* isNoisy */
                 IMPORTANCE_DEFAULT, true);
@@ -791,7 +795,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCloseControls_checkSaveListenerDelaysStopNotifications()
+    public void testCloseControls_checkSaveListenerDelaysStopNotifications_BlockingHelper()
             throws Exception {
         NotificationInfo.CheckSaveListener listener =
                 mock(NotificationInfo.CheckSaveListener.class);
@@ -849,18 +853,25 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBlockChangedCallsUpdateNotificationChannel() throws Exception {
+    public void testBlockChangedCallsUpdateNotificationChannel_notBlockingHelper()
+            throws Exception {
         mNotificationChannel.setImportance(IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                null, null, null,
+                true, false,
                 IMPORTANCE_DEFAULT, false);
 
         mNotificationInfo.findViewById(R.id.int_block).performClick();
         waitForUndoButton();
         mNotificationInfo.handleCloseControls(true, false);
 
-        verify(mMetricsLogger).write(importanceChangeLog(
-                MetricsProto.MetricsEvent.TYPE_ACTION, IMPORTANCE_NONE - IMPORTANCE_LOW));
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        verify(mMetricsLogger, times(2)).write(logMakerCaptor.capture());
+        assertEquals(MetricsProto.MetricsEvent.TYPE_ACTION,
+                logMakerCaptor.getValue().getType());
+        assertEquals(IMPORTANCE_NONE - IMPORTANCE_LOW,
+                logMakerCaptor.getValue().getSubtype());
 
         mTestableLooper.processAllMessages();
         ArgumentCaptor<NotificationChannel> updated =
@@ -896,8 +907,12 @@ public class NotificationInfoTest extends SysuiTestCase {
         waitForUndoButton();
         mNotificationInfo.handleCloseControls(true, false);
 
-        verify(mMetricsLogger).write(importanceChangeLog(
-                MetricsProto.MetricsEvent.TYPE_ACTION, IMPORTANCE_NONE - IMPORTANCE_LOW));
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        verify(mMetricsLogger, times(3)).write(logMakerCaptor.capture());
+        assertEquals(MetricsProto.MetricsEvent.TYPE_ACTION,
+                logMakerCaptor.getValue().getType());
+        assertEquals(IMPORTANCE_NONE - IMPORTANCE_LOW,
+                logMakerCaptor.getValue().getSubtype());
 
         mTestableLooper.processAllMessages();
         ArgumentCaptor<NotificationChannel> updated =
@@ -965,10 +980,12 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBlockUndoDoesNotBlockNotificationChannel() throws Exception {
+    public void testBlockUndoDoesNotBlockNotificationChannel_notBlockingHelper() throws Exception {
         mNotificationChannel.setImportance(IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                null, null, null,
+                true, false,
                 IMPORTANCE_DEFAULT, false);
 
         mNotificationInfo.findViewById(R.id.int_block).performClick();
@@ -977,8 +994,15 @@ public class NotificationInfoTest extends SysuiTestCase {
         waitForStopButton();
         // mNotificationInfo.handleCloseControls doesn't get called by this interaction.
 
-        verify(mMetricsLogger).write(importanceChangeLog(
-                MetricsProto.MetricsEvent.TYPE_DISMISS, IMPORTANCE_NONE - IMPORTANCE_LOW));
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        verify(mMetricsLogger, times(2)).write(logMakerCaptor.capture());
+        assertEquals(MetricsEvent.ACTION_SAVE_IMPORTANCE,
+                logMakerCaptor.getValue().getCategory());
+        assertEquals(MetricsEvent.TYPE_DISMISS,
+                logMakerCaptor.getValue().getType());
+        assertEquals(IMPORTANCE_NONE - IMPORTANCE_LOW,
+                logMakerCaptor.getValue().getSubtype());
+
 
         mTestableLooper.processAllMessages();
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
@@ -986,11 +1010,12 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testMinUndoDoesNotMinNotificationChannel() throws Exception {
+    public void testMinUndoDoesNotMinNotificationChannel_notBlockingHelper() throws Exception {
         mNotificationChannel.setImportance(IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, true,
-                IMPORTANCE_DEFAULT, false);
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                null, null, null, true,
+                true, IMPORTANCE_DEFAULT, false);
 
         mNotificationInfo.findViewById(R.id.minimize).performClick();
         waitForUndoButton();
