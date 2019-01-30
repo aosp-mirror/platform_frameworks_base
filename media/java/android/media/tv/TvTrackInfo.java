@@ -58,6 +58,7 @@ public final class TvTrackInfo implements Parcelable {
     private final String mId;
     private final String mLanguage;
     private final CharSequence mDescription;
+    private final boolean mEncrypted;
     private final int mAudioChannelCount;
     private final int mAudioSampleRate;
     private final int mVideoWidth;
@@ -69,13 +70,14 @@ public final class TvTrackInfo implements Parcelable {
     private final Bundle mExtra;
 
     private TvTrackInfo(int type, String id, String language, CharSequence description,
-            int audioChannelCount, int audioSampleRate, int videoWidth, int videoHeight,
-            float videoFrameRate, float videoPixelAspectRatio, byte videoActiveFormatDescription,
-            Bundle extra) {
+            boolean encrypted, int audioChannelCount, int audioSampleRate, int videoWidth,
+            int videoHeight, float videoFrameRate, float videoPixelAspectRatio,
+            byte videoActiveFormatDescription, Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
         mDescription = description;
+        mEncrypted = encrypted;
         mAudioChannelCount = audioChannelCount;
         mAudioSampleRate = audioSampleRate;
         mVideoWidth = videoWidth;
@@ -91,6 +93,7 @@ public final class TvTrackInfo implements Parcelable {
         mId = in.readString();
         mLanguage = in.readString();
         mDescription = in.readString();
+        mEncrypted = in.readInt() != 0;
         mAudioChannelCount = in.readInt();
         mAudioSampleRate = in.readInt();
         mVideoWidth = in.readInt();
@@ -130,6 +133,18 @@ public final class TvTrackInfo implements Parcelable {
      */
     public final CharSequence getDescription() {
         return mDescription;
+    }
+
+    /**
+     * Returns {@code true} if the track is encrypted, {@code false} otherwise. If the encryption
+     * status is unknown or could not be determined, the corresponding value will be {@code false}.
+     *
+     * <p>For example: ISO/IEC 13818-1 defines a CA descriptor that can be used to determine the
+     * encryption status of some broadcast streams.
+     */
+
+    public boolean isEncrypted() {
+        return mEncrypted;
     }
 
     /**
@@ -248,6 +263,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeString(mId);
         dest.writeString(mLanguage);
         dest.writeString(mDescription != null ? mDescription.toString() : null);
+        dest.writeInt(mEncrypted ? 1 : 0);
         dest.writeInt(mAudioChannelCount);
         dest.writeInt(mAudioSampleRate);
         dest.writeInt(mVideoWidth);
@@ -273,6 +289,7 @@ public final class TvTrackInfo implements Parcelable {
                 && mType == obj.mType
                 && TextUtils.equals(mLanguage, obj.mLanguage)
                 && TextUtils.equals(mDescription, obj.mDescription)
+                && mEncrypted == obj.mEncrypted
                 && Objects.equals(mExtra, obj.mExtra)
                 && (mType == TYPE_AUDIO
                         ? mAudioChannelCount == obj.mAudioChannelCount
@@ -310,6 +327,7 @@ public final class TvTrackInfo implements Parcelable {
         private final int mType;
         private String mLanguage;
         private CharSequence mDescription;
+        private boolean mEncrypted;
         private int mAudioChannelCount;
         private int mAudioSampleRate;
         private int mVideoWidth;
@@ -357,6 +375,19 @@ public final class TvTrackInfo implements Parcelable {
          */
         public final Builder setDescription(CharSequence description) {
             mDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets the encryption status of the track.
+         *
+         * <p>For example: ISO/IEC 13818-1 defines a CA descriptor that can be used to determine the
+         * encryption status of some broadcast streams.
+         *
+         * @param encrypted The encryption status of the track.
+         */
+        public Builder setEncrypted(boolean encrypted) {
+            mEncrypted = encrypted;
             return this;
         }
 
@@ -490,9 +521,9 @@ public final class TvTrackInfo implements Parcelable {
          * @return The new {@link TvTrackInfo} instance
          */
         public TvTrackInfo build() {
-            return new TvTrackInfo(mType, mId, mLanguage, mDescription, mAudioChannelCount,
-                    mAudioSampleRate, mVideoWidth, mVideoHeight, mVideoFrameRate,
-                    mVideoPixelAspectRatio, mVideoActiveFormatDescription, mExtra);
+            return new TvTrackInfo(mType, mId, mLanguage, mDescription, mEncrypted,
+                    mAudioChannelCount, mAudioSampleRate, mVideoWidth, mVideoHeight,
+                    mVideoFrameRate, mVideoPixelAspectRatio, mVideoActiveFormatDescription, mExtra);
         }
     }
 }
