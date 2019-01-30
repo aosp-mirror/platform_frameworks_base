@@ -18,6 +18,7 @@
 // system server on devices that run the stack there
 java_library {
     name: "NetworkStackLib",
+    sdk_version: "system_current",
     installable: true,
     srcs: [
         "src/**/*.java",
@@ -33,7 +34,7 @@ java_library {
 // Updatable network stack packaged as an application
 android_app {
     name: "NetworkStack",
-    platform_apis: true,
+    sdk_version: "system_current",
     certificate: "platform",
     privileged: true,
     static_libs: [
