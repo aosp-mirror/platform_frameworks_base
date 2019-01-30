@@ -2146,6 +2146,7 @@ package android.util.proto {
     method public static int getRawZigZag64Size(long);
     method public int getReadPos();
     method public int getReadableSize();
+    method public int getSize();
     method public int getWriteBufIndex();
     method public int getWriteIndex();
     method public int getWritePos();
@@ -2205,6 +2206,7 @@ package android.util.proto {
     method @Deprecated public void endRepeatedObject(long);
     method public void flush();
     method public byte[] getBytes();
+    method public int getRawSize();
     method public static long makeFieldId(int, long);
     method public long start(long);
     method @Deprecated public long startObject(long);
