@@ -45,9 +45,9 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -1174,7 +1174,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 //     b. the app does not state android:killAfterRestore="false" in its manifest
                 final int appFlags = mCurrentPackage.applicationInfo.flags;
                 final boolean killAfterRestore =
-                        (mCurrentPackage.applicationInfo.uid >= Process.FIRST_APPLICATION_UID)
+                        !UserHandle.isCore(mCurrentPackage.applicationInfo.uid)
                                 && ((mRestoreDescription.getDataType()
                                 == RestoreDescription.TYPE_FULL_STREAM)
                                 || ((appFlags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0));

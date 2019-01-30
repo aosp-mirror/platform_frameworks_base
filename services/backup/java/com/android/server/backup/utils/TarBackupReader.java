@@ -53,7 +53,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Bundle;
-import android.os.Process;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.backup.FileMetadata;
@@ -404,8 +404,7 @@ public class TarBackupReader {
             if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
                 // Restore system-uid-space packages only if they have
                 // defined a custom backup agent
-                if ((pkgInfo.applicationInfo.uid
-                        >= Process.FIRST_APPLICATION_UID)
+                if (!UserHandle.isCore(pkgInfo.applicationInfo.uid)
                         || (pkgInfo.applicationInfo.backupAgentName != null)) {
                     // Verify signatures against any installed version; if they
                     // don't match, then we fall though and ignore the data.  The
