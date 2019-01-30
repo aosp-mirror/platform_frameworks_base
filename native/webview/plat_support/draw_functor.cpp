@@ -102,7 +102,7 @@ void initializeVk(int functor, void* data,
       .device = init_vk_params.device,
       .queue = init_vk_params.queue,
       .graphics_queue_index = init_vk_params.graphics_queue_index,
-      .instance_version = init_vk_params.instance_version,
+      .api_version = init_vk_params.api_version,
       .enabled_instance_extension_names =
           init_vk_params.enabled_instance_extension_names,
       .enabled_instance_extension_names_length =

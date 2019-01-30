@@ -29,7 +29,7 @@ struct VkFunctorInitParams {
   VkDevice device;
   VkQueue queue;
   uint32_t graphics_queue_index;
-  uint32_t instance_version;
+  uint32_t api_version;
   const char* const* enabled_instance_extension_names;
   uint32_t enabled_instance_extension_names_length;
   const char* const* enabled_device_extension_names;
