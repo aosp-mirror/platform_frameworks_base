@@ -276,6 +276,7 @@ enum MountExternalKind {
 // Must match values in com.android.internal.os.Zygote.
 enum RuntimeFlags : uint32_t {
   DEBUG_ENABLE_JDWP = 1,
+  PROFILE_FROM_SHELL = 1 << 15,
 };
 
 // Forward declaration so we don't have to move the signal handler.
@@ -1223,6 +1224,13 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // Set process properties to enable debugging if required.
   if ((runtime_flags & RuntimeFlags::DEBUG_ENABLE_JDWP) != 0) {
     EnableDebugger();
+  }
+  if ((runtime_flags & RuntimeFlags::PROFILE_FROM_SHELL) != 0) {
+    // simpleperf needs the process to be dumpable to profile it.
+    if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) == -1) {
+      ALOGE("prctl(PR_SET_DUMPABLE) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 1) failed");
+    }
   }
 
   if (NeedsNoRandomizeWorkaround()) {
