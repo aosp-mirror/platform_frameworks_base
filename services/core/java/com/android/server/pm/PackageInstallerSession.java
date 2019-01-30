@@ -1000,10 +1000,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // cannot be modified anymore, there is no leak of information. For staged sessions,
         // further validation is performed by the staging manager.
         if (!params.isMultiPackage) {
-            if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
-                // For APEX, validation is done by StagingManager post-commit.
-                return;
-            }
             final PackageInfo pkgInfo = mPm.getPackageInfo(
                     params.appPackageName, PackageManager.GET_SIGNATURES
                             | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
@@ -1011,7 +1007,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             resolveStageDirLocked();
 
             try {
-                validateApkInstallLocked(pkgInfo);
+                if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                    validateApexInstallLocked();
+                } else {
+                    validateApkInstallLocked(pkgInfo);
+                }
             } catch (PackageManagerException e) {
                 throw e;
             } catch (Throwable e) {
@@ -1300,6 +1300,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return SystemProperties.getBoolean(PROPERTY_NAME_INHERIT_NATIVE, true) &&
                 params.mode == SessionParams.MODE_INHERIT_EXISTING &&
                 (params.installFlags & PackageManager.DONT_KILL_APP) != 0;
+    }
+
+    /**
+     * Validate apex install.
+     * <p>
+     * Sets {@link #mResolvedBaseFile} for RollbackManager to use.
+     */
+    @GuardedBy("mLock")
+    private void validateApexInstallLocked()
+            throws PackageManagerException {
+        final File[] addedFiles = mResolvedStageDir.listFiles(sAddedFilter);
+        if (ArrayUtils.isEmpty(addedFiles)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+        }
+
+        if (ArrayUtils.size(addedFiles) > 1) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Too many files for apex install");
+        }
+
+        mResolvedBaseFile = addedFiles[0];
     }
 
     /**
