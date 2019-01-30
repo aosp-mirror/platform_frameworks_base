@@ -19,6 +19,7 @@ package com.android.server.util;
 import static android.os.Binder.getCallingUid;
 
 import android.os.Process;
+import android.os.UserHandle;
 
 /**
  * Utility class to check calling permissions on the network stack.
@@ -32,7 +33,7 @@ public final class PermissionUtil {
     public static void checkNetworkStackCallingPermission() {
         // TODO: check that the calling PID is the system server.
         final int caller = getCallingUid();
-        if (caller != Process.SYSTEM_UID && caller != Process.BLUETOOTH_UID) {
+        if (caller != Process.SYSTEM_UID && UserHandle.getAppId(caller) != Process.BLUETOOTH_UID) {
             throw new SecurityException("Invalid caller: " + caller);
         }
     }
