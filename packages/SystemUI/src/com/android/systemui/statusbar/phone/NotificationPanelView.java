@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 
+
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -77,6 +80,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -95,6 +99,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener,
@@ -136,6 +143,7 @@ public class NotificationPanelView extends PanelView implements
 
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
+    private final NotificationWakeUpCoordinator mWakeUpCoordinator;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -317,11 +325,14 @@ public class NotificationPanelView extends PanelView implements
             Dependency.get(ShadeController.class);
     private int mDisplayId;
 
-    public NotificationPanelView(Context context, AttributeSet attrs) {
+    @Inject
+    public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            NotificationWakeUpCoordinator coordinator) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mFalsingManager = FalsingManager.getInstance(context);
         mPowerManager = context.getSystemService(PowerManager.class);
+        mWakeUpCoordinator = coordinator;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
@@ -364,6 +375,7 @@ public class NotificationPanelView extends PanelView implements
 
         initBottomArea();
 
+        mWakeUpCoordinator.setStackScroller(mNotificationStackScroller);
         mQsFrame = findViewById(R.id.qs_frame);
     }
 
@@ -2813,7 +2825,7 @@ public class NotificationPanelView extends PanelView implements
         final float darkAmount = dozing ? 1 : 0;
         mStatusBarStateController.setDozeAmount(darkAmount, animate);
         if (animate) {
-            mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
+            mWakeUpCoordinator.notifyAnimationStart(!mDozing);
         }
     }
 
@@ -2825,7 +2837,7 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusView.setDarkAmount(mInterpolatedDarkAmount);
         mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
         positionClockAndNotifications();
-        mNotificationStackScroller.setDarkAmount(linearAmount, mInterpolatedDarkAmount);
+        mWakeUpCoordinator.setDozeAmount(mLinearDarkAmount, mInterpolatedDarkAmount);
     }
 
     public void setPulsing(boolean pulsing) {
