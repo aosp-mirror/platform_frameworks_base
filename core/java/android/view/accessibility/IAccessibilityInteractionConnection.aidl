@@ -55,4 +55,6 @@ oneway interface IAccessibilityInteractionConnection {
     void performAccessibilityAction(long accessibilityNodeId, int action, in Bundle arguments,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
         int interrogatingPid, long interrogatingTid);
+
+    void clearAccessibilityFocus();
 }

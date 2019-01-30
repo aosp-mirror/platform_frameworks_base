@@ -8718,6 +8718,15 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         }
+
+        @Override
+        public void clearAccessibilityFocus() {
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null && viewRootImpl.mView != null) {
+                viewRootImpl.getAccessibilityInteractionController()
+                        .clearAccessibilityFocusClientThread();
+            }
+        }
     }
 
     private class SendWindowContentChangedAccessibilityEvent implements Runnable {

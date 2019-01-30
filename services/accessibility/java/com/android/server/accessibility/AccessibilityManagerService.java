@@ -3024,9 +3024,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public void clearAccessibilityFocusNotLocked(int windowId) {
-            AccessibilityNodeInfo focus = getAccessibilityFocusNotLocked(windowId);
-            if (focus != null) {
-                focus.performAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+            RemoteAccessibilityConnection connection;
+            synchronized (mLock) {
+                connection = getConnectionLocked(windowId);
+                if (connection == null) {
+                    return;
+                }
+            }
+            try {
+                connection.getRemote().clearAccessibilityFocus();
+            } catch (RemoteException re) {
+                if (DEBUG) {
+                    Slog.e(LOG_TAG, "Error calling clearAccessibilityFocus()");
+                }
             }
         }
 
