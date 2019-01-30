@@ -17,6 +17,7 @@ package android.app.prediction;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 
 import com.android.internal.util.Preconditions;
@@ -26,6 +27,7 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class AppPredictionManager {
 
     private final Context mContext;

@@ -19,6 +19,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.prediction.IPredictionCallback.Stub;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -63,6 +64,7 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class AppPredictor {
 
     private static final String TAG = AppPredictor.class.getSimpleName();
@@ -102,6 +104,10 @@ public final class AppPredictor {
      * Notifies the prediction service of an app target event.
      */
     public void notifyAppTargetEvent(@NonNull AppTargetEvent event) {
+        if (mIsClosed.get()) {
+            throw new IllegalStateException("This client has already been destroyed.");
+        }
+
         try {
             mPredictionManager.notifyAppTargetEvent(mSessionId, event);
         } catch (RemoteException e) {
@@ -114,6 +120,10 @@ public final class AppPredictor {
      */
     public void notifyLocationShown(@NonNull String launchLocation,
             @NonNull List<AppTargetId> targetIds) {
+        if (mIsClosed.get()) {
+            throw new IllegalStateException("This client has already been destroyed.");
+        }
+
         try {
             mPredictionManager.notifyLocationShown(mSessionId, launchLocation,
                     new ParceledListSlice<>(targetIds));
@@ -130,6 +140,10 @@ public final class AppPredictor {
      */
     public void registerPredictionUpdates(@NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull AppPredictor.Callback callback) {
+        if (mIsClosed.get()) {
+            throw new IllegalStateException("This client has already been destroyed.");
+        }
+
         if (mRegisteredCallbacks.containsKey(callback)) {
             // Skip if this callback is already registered
             return;
@@ -149,6 +163,10 @@ public final class AppPredictor {
      * callback until the callback is re-registered.
      */
     public void unregisterPredictionUpdates(@NonNull AppPredictor.Callback callback) {
+        if (mIsClosed.get()) {
+            throw new IllegalStateException("This client has already been destroyed.");
+        }
+
         if (!mRegisteredCallbacks.containsKey(callback)) {
             // Skip if this callback was never registered
             return;
@@ -168,6 +186,10 @@ public final class AppPredictor {
      * @see Callback#onTargetsAvailable(List)
      */
     public void requestPredictionUpdate() {
+        if (mIsClosed.get()) {
+            throw new IllegalStateException("This client has already been destroyed.");
+        }
+
         try {
             mPredictionManager.requestPredictionUpdate(mSessionId);
         } catch (RemoteException e) {
@@ -182,6 +204,10 @@ public final class AppPredictor {
     @Nullable
     public void sortTargets(@NonNull List<AppTarget> targets,
             @NonNull Executor callbackExecutor, @NonNull Consumer<List<AppTarget>> callback) {
+        if (mIsClosed.get()) {
+            throw new IllegalStateException("This client has already been destroyed.");
+        }
+
         try {
             mPredictionManager.sortAppTargets(mSessionId, new ParceledListSlice(targets),
                     new CallbackWrapper(callbackExecutor, callback));
@@ -206,6 +232,8 @@ public final class AppPredictor {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to notify app target event", e);
             }
+        } else {
+            throw new IllegalStateException("This client has already been destroyed.");
         }
     }
 
@@ -219,6 +247,16 @@ public final class AppPredictor {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * TODO(b/123591863): Add java docs
+     *
+     * @hide
+     */
+    @TestApi
+    public AppPredictionSessionId getSessionId() {
+        return mSessionId;
     }
 
     /**
