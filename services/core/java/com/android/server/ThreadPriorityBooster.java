@@ -43,9 +43,9 @@ public class ThreadPriorityBooster {
 
     public void boost() {
         final int tid = myTid();
-        final int prevPriority = getThreadPriority(tid);
         final PriorityState state = mThreadState.get();
         if (state.regionCounter == 0) {
+            final int prevPriority = getThreadPriority(tid);
             state.prevPriority = prevPriority;
             if (prevPriority > mBoostToPriority) {
                 setThreadPriority(tid, mBoostToPriority);
@@ -60,9 +60,11 @@ public class ThreadPriorityBooster {
     public void reset() {
         final PriorityState state = mThreadState.get();
         state.regionCounter--;
-        final int currentPriority = getThreadPriority(myTid());
-        if (state.regionCounter == 0 && state.prevPriority != currentPriority) {
-            setThreadPriority(myTid(), state.prevPriority);
+        if (state.regionCounter == 0) {
+            final int currentPriority = getThreadPriority(myTid());
+            if (state.prevPriority != currentPriority) {
+                setThreadPriority(myTid(), state.prevPriority);
+            }
         }
     }
 
@@ -77,9 +79,11 @@ public class ThreadPriorityBooster {
         mBoostToPriority = priority;
         final PriorityState state = mThreadState.get();
         final int tid = myTid();
-        final int prevPriority = getThreadPriority(tid);
-        if (state.regionCounter != 0 && prevPriority != priority) {
-            setThreadPriority(tid, priority);
+        if (state.regionCounter != 0) {
+            final int prevPriority = getThreadPriority(tid);
+            if (prevPriority != priority) {
+                setThreadPriority(tid, priority);
+            }
         }
     }
 
