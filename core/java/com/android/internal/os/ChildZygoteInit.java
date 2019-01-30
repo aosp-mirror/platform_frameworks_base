@@ -98,9 +98,11 @@ public class ChildZygoteInit {
             throw new RuntimeException("Passed in UID range is invalid, min > max.");
         }
 
-        // Verify the UIDs are in the isolated UID range, as that's the only thing that we should
-        // be forking right now
-        if (!Process.isIsolated(uidGidMin) || !Process.isIsolated(uidGidMax)) {
+        // Verify the UIDs at least do not include system UIDs; we can't easily verify there
+        // are just isolated UIDs in the range, because for the webview zygote, there is no
+        // single range that captures all possible isolated UIDs.
+        // TODO(b/123615476) narrow this down
+        if (uidGidMin < Process.FIRST_ISOLATED_UID) {
             throw new RuntimeException("Passed in UID range does not map to isolated processes.");
         }
 
