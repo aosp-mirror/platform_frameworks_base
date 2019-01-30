@@ -27,7 +27,11 @@ namespace android {
 class JNIAudioAttributeHelper
 {
 public:
-    using UniqueAaPtr = std::unique_ptr<audio_attributes_t, decltype(free)*>;
+    struct FreeDeleter {
+        void operator()(void *p) const { ::free(p); }
+    };
+
+    using UniqueAaPtr = std::unique_ptr<audio_attributes_t, FreeDeleter>;
 
     /**
      * @brief makeUnique helper to prevent leak
