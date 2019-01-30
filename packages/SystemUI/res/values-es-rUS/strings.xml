@@ -57,8 +57,14 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"¿Permitir depuración por USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"La huella digital de tu clave RSA es:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir siempre desde esta computadora"</string>
+    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
+    <skip />
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No tienes permitida la depuración por USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"El usuario al que accediste en este dispositivo no puede activar la depuración por USB. Para usar esta función, debes cambiar al usuario principal."</string>
+    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para ocupar la pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar p/ ocupar la pantalla"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -112,8 +118,7 @@
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Área de mensajes de ayuda"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Confirmar"</string>
-    <!-- no translation found for biometric_dialog_try_again (1900185172633183201) -->
-    <skip />
+    <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Volver a intentarlo"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor de huellas digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícono de huella digital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Autenticando tu rostro…"</string>
@@ -296,8 +301,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Auriculares"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Entrada"</string>
-    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (4930931771490695395) -->
-    <skip />
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Audífonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Activando…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillo"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotación automática"</string>
@@ -611,17 +615,13 @@
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Sueles descartar estas notificaciones. \n¿Quieres seguir recibiéndolas?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"¿Quieres seguir viendo estas notificaciones?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Detener notificaciones"</string>
-    <!-- no translation found for inline_block_button (8735843688021655065) -->
-    <skip />
+    <string name="inline_block_button" msgid="8735843688021655065">"Bloquear"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Seguir viendo"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizar"</string>
     <string name="inline_silent_button_silent" msgid="4411510650503783646">"Mostrar sin emitir sonido"</string>
-    <!-- no translation found for inline_silent_button_stay_silent (6308371431217601009) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_alert (7961887853830826523) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_keep_alerting (327696842264359693) -->
-    <skip />
+    <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Silenciar notificaciones"</string>
+    <string name="inline_silent_button_alert" msgid="7961887853830826523">"Avisarme"</string>
+    <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Seguir recibiendo alertas"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"¿Quieres seguir viendo las notificaciones de esta app?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"No se pueden desactivar estas notificaciones"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"por medio de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -871,11 +871,18 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Configuración"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Entendido"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Volcar pila de SysUI"</string>
-    <!-- no translation found for ongoing_privacy_chip_multiple_apps (1406406529558080714) -->
+    <plurals name="ongoing_privacy_chip_multiple_apps" formatted="false" msgid="1406406529558080714">
+      <item quantity="other"><xliff:g id="NUM_APPS_2">%d</xliff:g> apps</item>
+      <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> app</item>
+    </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> está usando tu <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Hay aplicaciones que están usando tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <!-- no translation found for ongoing_privacy_chip_content_multiple_apps_single_op (4871926099254314088) -->
-    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Cancelar"</string>
+    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
+      <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> aplicaciones están usando tu <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
+      <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> aplicación está usando tu <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
+    </plurals>
+    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <skip />
     <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Ver detalles"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Una app está usando tu <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apps que están usando tu <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
