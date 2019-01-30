@@ -66,7 +66,9 @@ filegroup {
 filegroup {
     name: "media1-srcs",
     srcs: [
+        "apex/java/android/media/MediaDescription.java",
         "apex/java/android/media/MediaParceledListSlice.java",
+        "apex/java/android/media/Rating.java",
         "apex/java/android/media/VolumeProvider.java",
         "apex/java/android/media/browse/MediaBrowser.java",
         "apex/java/android/media/browse/MediaBrowserUtils.java",
