@@ -196,7 +196,7 @@ public final class DeviceConfig {
         /**
          * Whether to show location access check notifications.
          */
-        String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "enable_location_access_check";
+        String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
     }
 
     /**
