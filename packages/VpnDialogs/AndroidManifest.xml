@@ -20,6 +20,7 @@
         package="com.android.vpndialogs">
 
     <uses-permission android:name="android.permission.CONTROL_VPN" />
+    <uses-permission android:name="android.permission.CONTROL_ALWAYS_ON_VPN" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
 
     <application android:label="VpnDialogs"
