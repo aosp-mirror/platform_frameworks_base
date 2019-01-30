@@ -23,6 +23,7 @@ import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
@@ -83,6 +84,7 @@ import android.os.storage.StorageManager;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
@@ -112,6 +114,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
+import com.android.server.role.RoleManagerServiceInternal;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
@@ -1781,6 +1784,60 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     /**
+     * Add a RoleHolder atom for each package that holds a role.
+     *
+     * @param elapsedNanos the time since boot
+     * @param wallClockNanos the time on the clock
+     * @param pulledData the data sink to write to
+     */
+    private void pullRoleHolders(long elapsedNanos, final long wallClockNanos,
+            @NonNull List<StatsLogEventWrapper> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            RoleManagerServiceInternal rm =
+                    LocalServices.getService(RoleManagerServiceInternal.class);
+
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                UserHandle user = users.get(userNum).getUserHandle();
+
+                ArrayMap<String, ArraySet<String>> roles = rm.getRoleHoldersAsUser(user);
+
+                int numRoles = roles.size();
+                for (int roleNum = 0; roleNum < numRoles; roleNum++) {
+                    String roleName = roles.keyAt(roleNum);
+                    ArraySet<String> holders = roles.valueAt(roleNum);
+
+                    int numHolders = holders.size();
+                    for (int holderNum = 0; holderNum < numHolders; holderNum++) {
+                        String holderName = holders.valueAt(holderNum);
+
+                        PackageInfo pkg;
+                        try {
+                            pkg = pm.getPackageInfoAsUser(holderName, 0, user.getIdentifier());
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Log.w(TAG, "Role holder " + holderName + " not found");
+                            return;
+                        }
+
+                        StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.ROLE_HOLDER,
+                                elapsedNanos, wallClockNanos);
+                        e.writeInt(pkg.applicationInfo.uid);
+                        e.writeString(holderName);
+                        e.writeString(roleName);
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    /**
      * Pulls various data.
      */
     @Override // Binder call
@@ -1952,6 +2009,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
                 pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.ROLE_HOLDER: {
+                pullRoleHolders(elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
