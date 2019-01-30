@@ -40,6 +40,7 @@ import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.NETWORKSTACK_PACKAGE_NAME;
 import static android.net.shared.NetworkMonitorUtils.isValidationRequired;
+import static android.net.shared.NetworkParcelableUtil.toStableParcelable;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
@@ -98,10 +99,10 @@ import android.net.VpnService;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
-import android.net.shared.NetdService;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -5012,8 +5013,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) log("registerNetworkAgent " + nai);
         final long token = Binder.clearCallingIdentity();
         try {
-            mContext.getSystemService(NetworkStack.class)
-                    .makeNetworkMonitor(nai.network, name, new NetworkMonitorCallbacks(nai));
+            mContext.getSystemService(NetworkStack.class).makeNetworkMonitor(
+                    toStableParcelable(nai.network), name, new NetworkMonitorCallbacks(nai));
         } finally {
             Binder.restoreCallingIdentity(token);
         }

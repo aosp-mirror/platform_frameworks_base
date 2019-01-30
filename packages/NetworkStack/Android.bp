@@ -25,7 +25,8 @@ java_library {
         ":services-networkstack-shared-srcs",
     ],
     static_libs: [
-        "services-netlink-lib",
+        "netd_aidl_interface-java",
+        "networkstack-aidl-interfaces-java",
     ]
 }
 

@@ -28,6 +28,7 @@ import static android.net.dhcp.DhcpPacket.DHCP_SUBNET_MASK;
 import static android.net.dhcp.DhcpPacket.DHCP_VENDOR_INFO;
 import static android.net.dhcp.DhcpPacket.INADDR_ANY;
 import static android.net.dhcp.DhcpPacket.INADDR_BROADCAST;
+import static android.net.util.NetworkStackUtils.closeSocketQuietly;
 import static android.net.util.SocketUtils.makePacketSocketAddress;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_PACKET;
@@ -44,7 +45,6 @@ import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
 
 import android.content.Context;
 import android.net.DhcpResults;
-import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.ip.IpClient;
 import android.net.metrics.DhcpClientEvent;
@@ -65,8 +65,6 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
-
-import libcore.io.IoBridge;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -107,6 +105,12 @@ public class DhcpClient extends StateMachine {
     private static final boolean STATE_DBG = false;
     private static final boolean MSG_DBG = false;
     private static final boolean PACKET_DBG = false;
+
+    // Metrics events: must be kept in sync with server-side aggregation code.
+    /** Represents transitions from DhcpInitState to DhcpBoundState */
+    private static final String EVENT_INITIAL_BOUND = "InitialBoundState";
+    /** Represents transitions from and to DhcpBoundState via DhcpRenewingState */
+    private static final String EVENT_RENEWING_BOUND = "RenewingBoundState";
 
     // Timers and timeouts.
     private static final int SECONDS = 1000;
@@ -313,8 +317,8 @@ public class DhcpClient extends StateMachine {
         try {
             mPacketSock = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IP);
             SocketAddress addr = makePacketSocketAddress((short) ETH_P_IP, mIface.index);
-            Os.bind(mPacketSock, addr);
-            NetworkUtils.attachDhcpFilter(mPacketSock);
+            SocketUtils.bindSocket(mPacketSock, addr);
+            SocketUtils.attachDhcpFilter(mPacketSock);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating packet socket", e);
             return false;
@@ -350,15 +354,9 @@ public class DhcpClient extends StateMachine {
         }
     }
 
-    private static void closeQuietly(FileDescriptor fd) {
-        try {
-            IoBridge.closeAndSignalBlockedThreads(fd);
-        } catch (IOException ignored) {}
-    }
-
     private void closeSockets() {
-        closeQuietly(mUdpSock);
-        closeQuietly(mPacketSock);
+        closeSocketQuietly(mUdpSock);
+        closeSocketQuietly(mPacketSock);
     }
 
     class ReceiveThread extends Thread {
@@ -414,7 +412,8 @@ public class DhcpClient extends StateMachine {
         try {
             if (encap == DhcpPacket.ENCAP_L2) {
                 if (DBG) Log.d(TAG, "Broadcasting " + description);
-                Os.sendto(mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
+                SocketUtils.sendTo(
+                        mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
             } else if (encap == DhcpPacket.ENCAP_BOOTP && to.equals(INADDR_BROADCAST)) {
                 if (DBG) Log.d(TAG, "Broadcasting " + description);
                 // We only send L3-encapped broadcasts in DhcpRebindingState,
@@ -928,9 +927,9 @@ public class DhcpClient extends StateMachine {
         private void logTimeToBoundState() {
             long now = SystemClock.elapsedRealtime();
             if (mLastBoundExitTime > mLastInitEnterTime) {
-                logState(DhcpClientEvent.RENEWING_BOUND, (int)(now - mLastBoundExitTime));
+                logState(EVENT_RENEWING_BOUND, (int) (now - mLastBoundExitTime));
             } else {
-                logState(DhcpClientEvent.INITIAL_BOUND, (int)(now - mLastInitEnterTime));
+                logState(EVENT_INITIAL_BOUND, (int) (now - mLastInitEnterTime));
             }
         }
     }
@@ -1021,7 +1020,7 @@ public class DhcpClient extends StateMachine {
 
             // We need to broadcast and possibly reconnect the socket to a
             // completely different server.
-            closeQuietly(mUdpSock);
+            closeSocketQuietly(mUdpSock);
             if (!initUdpSocket()) {
                 Log.e(TAG, "Failed to recreate UDP socket");
                 transitionTo(mDhcpInitState);

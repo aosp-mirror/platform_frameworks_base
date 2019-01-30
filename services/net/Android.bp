@@ -9,12 +9,6 @@ filegroup {
         "java/android/net/ip/InterfaceController.java", // TODO: move to NetworkStack with tethering
         "java/android/net/util/InterfaceParams.java", // TODO: move to NetworkStack with IpServer
         "java/android/net/shared/*.java",
-    ],
-}
-
-java_library {
-    name: "services-netlink-lib",
-    srcs: [
         "java/android/net/netlink/*.java",
-    ]
+    ],
 }

@@ -19,7 +19,6 @@ package android.net;
 import android.annotation.UnsupportedAppUsage;
 import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
-import android.os.Parcel;
 import android.system.ErrnoException;
 import android.util.Log;
 import android.util.Pair;
@@ -245,32 +244,6 @@ public class NetworkUtils {
             throws IllegalArgumentException {
         return InetAddress.parseNumericAddress(addrString);
     }
-
-    /**
-     * Writes an InetAddress to a parcel. The address may be null. This is likely faster than
-     * calling writeSerializable.
-     */
-    protected static void parcelInetAddress(Parcel parcel, InetAddress address, int flags) {
-        byte[] addressArray = (address != null) ? address.getAddress() : null;
-        parcel.writeByteArray(addressArray);
-    }
-
-    /**
-     * Reads an InetAddress from a parcel. Returns null if the address that was written was null
-     * or if the data is invalid.
-     */
-    protected static InetAddress unparcelInetAddress(Parcel in) {
-        byte[] addressArray = in.createByteArray();
-        if (addressArray == null) {
-            return null;
-        }
-        try {
-            return InetAddress.getByAddress(addressArray);
-        } catch (UnknownHostException e) {
-            return null;
-        }
-    }
-
 
     /**
      *  Masks a raw IP address byte array with the specified prefix length.
