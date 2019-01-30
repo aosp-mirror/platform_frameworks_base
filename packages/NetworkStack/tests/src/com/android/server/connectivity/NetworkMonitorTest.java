@@ -21,7 +21,6 @@ import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -51,7 +50,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkRequest;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.SharedLog;
@@ -103,7 +101,6 @@ public class NetworkMonitorTest {
     private @Mock NetworkMonitor.Dependencies mDependencies;
     private @Mock INetworkMonitorCallbacks mCallbacks;
     private @Spy Network mNetwork = new Network(TEST_NETID);
-    private NetworkRequest mRequest;
 
     private static final int TEST_NETID = 4242;
 
@@ -178,10 +175,6 @@ public class NetworkMonitorTest {
                 InetAddresses.parseNumericAddress("192.168.0.0")
         }).when(mNetwork).getAllByName(any());
 
-        mRequest = new NetworkRequest.Builder()
-                .addCapability(NET_CAPABILITY_INTERNET)
-                .addCapability(NET_CAPABILITY_NOT_RESTRICTED)
-                .build();
         // Default values. Individual tests can override these.
         when(mCm.getLinkProperties(any())).thenReturn(TEST_LINKPROPERTIES);
         when(mCm.getNetworkCapabilities(any())).thenReturn(METERED_CAPABILITIES);
@@ -195,9 +188,9 @@ public class NetworkMonitorTest {
     private class WrappedNetworkMonitor extends NetworkMonitor {
         private long mProbeTime = 0;
 
-        WrappedNetworkMonitor(Context context, Network network, NetworkRequest defaultRequest,
-                IpConnectivityLog logger, Dependencies deps) {
-                super(context, mCallbacks, network, defaultRequest, logger,
+        WrappedNetworkMonitor(Context context, Network network, IpConnectivityLog logger,
+                Dependencies deps) {
+                super(context, mCallbacks, network, logger,
                         new SharedLog("test_nm"), deps);
         }
 
@@ -213,7 +206,7 @@ public class NetworkMonitorTest {
 
     private WrappedNetworkMonitor makeMeteredWrappedNetworkMonitor() {
         final WrappedNetworkMonitor nm = new WrappedNetworkMonitor(
-                mContext, mNetwork, mRequest, mLogger, mDependencies);
+                mContext, mNetwork, mLogger, mDependencies);
         when(mCm.getNetworkCapabilities(any())).thenReturn(METERED_CAPABILITIES);
         nm.start();
         waitForIdle(nm.getHandler());
@@ -222,7 +215,7 @@ public class NetworkMonitorTest {
 
     private WrappedNetworkMonitor makeNotMeteredWrappedNetworkMonitor() {
         final WrappedNetworkMonitor nm = new WrappedNetworkMonitor(
-                mContext, mNetwork, mRequest, mLogger, mDependencies);
+                mContext, mNetwork, mLogger, mDependencies);
         when(mCm.getNetworkCapabilities(any())).thenReturn(NOT_METERED_CAPABILITIES);
         nm.start();
         waitForIdle(nm.getHandler());
@@ -231,7 +224,7 @@ public class NetworkMonitorTest {
 
     private NetworkMonitor makeMonitor() {
         final NetworkMonitor nm = new NetworkMonitor(
-                mContext, mCallbacks, mNetwork, mRequest, mLogger, mValidationLogger,
+                mContext, mCallbacks, mNetwork, mLogger, mValidationLogger,
                 mDependencies);
         nm.start();
         waitForIdle(nm.getHandler());

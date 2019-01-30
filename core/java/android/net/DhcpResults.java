@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.UnsupportedAppUsage;
+import android.net.shared.InetAddressUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -73,19 +74,21 @@ public final class DhcpResults implements Parcelable {
     public StaticIpConfiguration toStaticIpConfiguration() {
         final StaticIpConfiguration s = new StaticIpConfiguration();
         // All these except dnsServers are immutable, so no need to make copies.
-        s.ipAddress = ipAddress;
-        s.gateway = gateway;
-        s.dnsServers.addAll(dnsServers);
-        s.domains = domains;
+        s.setIpAddress(ipAddress);
+        s.setGateway(gateway);
+        for (InetAddress addr : dnsServers) {
+            s.addDnsServer(addr);
+        }
+        s.setDomains(domains);
         return s;
     }
 
     public DhcpResults(StaticIpConfiguration source) {
         if (source != null) {
-            ipAddress = source.ipAddress;
-            gateway = source.gateway;
-            dnsServers.addAll(source.dnsServers);
-            domains = source.domains;
+            ipAddress = source.getIpAddress();
+            gateway = source.getGateway();
+            dnsServers.addAll(source.getDnsServers());
+            domains = source.getDomains();
         }
     }
 
@@ -177,7 +180,7 @@ public final class DhcpResults implements Parcelable {
         toStaticIpConfiguration().writeToParcel(dest, flags);
         dest.writeInt(leaseDuration);
         dest.writeInt(mtu);
-        NetworkUtils.parcelInetAddress(dest, serverAddress, flags);
+        InetAddressUtils.parcelInetAddress(dest, serverAddress, flags);
         dest.writeString(vendorInfo);
     }
 
@@ -191,7 +194,7 @@ public final class DhcpResults implements Parcelable {
         final DhcpResults dhcpResults = new DhcpResults(s);
         dhcpResults.leaseDuration = in.readInt();
         dhcpResults.mtu = in.readInt();
-        dhcpResults.serverAddress = (Inet4Address) NetworkUtils.unparcelInetAddress(in);
+        dhcpResults.serverAddress = (Inet4Address) InetAddressUtils.unparcelInetAddress(in);
         dhcpResults.vendorInfo = in.readString();
         return dhcpResults;
     }
@@ -200,7 +203,7 @@ public final class DhcpResults implements Parcelable {
     // Not part of the superclass because they're only used by the JNI iterface to the DHCP daemon.
     public boolean setIpAddress(String addrString, int prefixLength) {
         try {
-            Inet4Address addr = (Inet4Address) NetworkUtils.numericToInetAddress(addrString);
+            Inet4Address addr = (Inet4Address) InetAddresses.parseNumericAddress(addrString);
             ipAddress = new LinkAddress(addr, prefixLength);
         } catch (IllegalArgumentException|ClassCastException e) {
             Log.e(TAG, "setIpAddress failed with addrString " + addrString + "/" + prefixLength);
@@ -211,7 +214,7 @@ public final class DhcpResults implements Parcelable {
 
     public boolean setGateway(String addrString) {
         try {
-            gateway = NetworkUtils.numericToInetAddress(addrString);
+            gateway = InetAddresses.parseNumericAddress(addrString);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "setGateway failed with addrString " + addrString);
             return true;
@@ -222,7 +225,7 @@ public final class DhcpResults implements Parcelable {
     public boolean addDns(String addrString) {
         if (TextUtils.isEmpty(addrString) == false) {
             try {
-                dnsServers.add(NetworkUtils.numericToInetAddress(addrString));
+                dnsServers.add(InetAddresses.parseNumericAddress(addrString));
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "addDns failed with addrString " + addrString);
                 return true;

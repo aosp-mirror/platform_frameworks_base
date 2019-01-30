@@ -17,7 +17,6 @@
 package android.net.ip;
 
 import android.net.INetd;
-import android.net.InterfaceConfiguration;
 import android.net.InterfaceConfigurationParcel;
 import android.net.LinkAddress;
 import android.net.util.SharedLog;
@@ -49,14 +48,18 @@ public class InterfaceController {
         mLog = log;
     }
 
-    private boolean setInterfaceConfig(InterfaceConfiguration config) {
-        final InterfaceConfigurationParcel cfgParcel = config.toParcel(mIfName);
-
+    private boolean setInterfaceAddress(LinkAddress addr) {
+        final InterfaceConfigurationParcel ifConfig = new InterfaceConfigurationParcel();
+        ifConfig.ifName = mIfName;
+        ifConfig.ipv4Addr = addr.getAddress().getHostAddress();
+        ifConfig.prefixLength = addr.getPrefixLength();
+        ifConfig.hwAddr = "";
+        ifConfig.flags = new String[0];
         try {
-            mNetd.interfaceSetCfg(cfgParcel);
+            mNetd.interfaceSetCfg(ifConfig);
         } catch (RemoteException | ServiceSpecificException e) {
             logError("Setting IPv4 address to %s/%d failed: %s",
-                    cfgParcel.ipv4Addr, cfgParcel.prefixLength, e);
+                    ifConfig.ipv4Addr, ifConfig.prefixLength, e);
             return false;
         }
         return true;
@@ -69,18 +72,14 @@ public class InterfaceController {
         if (!(address.getAddress() instanceof Inet4Address)) {
             return false;
         }
-        final InterfaceConfiguration ifConfig = new InterfaceConfiguration();
-        ifConfig.setLinkAddress(address);
-        return setInterfaceConfig(ifConfig);
+        return setInterfaceAddress(address);
     }
 
     /**
      * Clear the IPv4Address of the interface.
      */
     public boolean clearIPv4Address() {
-        final InterfaceConfiguration ifConfig = new InterfaceConfiguration();
-        ifConfig.setLinkAddress(new LinkAddress("0.0.0.0/0"));
-        return setInterfaceConfig(ifConfig);
+        return setInterfaceAddress(new LinkAddress("0.0.0.0/0"));
     }
 
     private boolean setEnableIPv6(boolean enabled) {
