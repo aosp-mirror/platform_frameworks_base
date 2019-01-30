@@ -899,8 +899,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         } else if (isActive()) {
             if (isPasspoint()) {
                 // This is the active connection on passpoint
-                summary.append(getSummary(mContext, ssid, getDetailedState(),
-                        false, null, mConfig.providerFriendlyName));
+                summary.append(getSummary(mContext, /* ssid */ null, getDetailedState(),
+                        /* isEphemeral */ false,
+                        /* suggestionOrSpecifierPackageName */ null));
             } else if (mConfig != null && getDetailedState() == DetailedState.CONNECTED
                     && mIsCarrierAp) {
                 // This is the active connection on a carrier AP
@@ -908,7 +909,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                         mCarrierName));
             } else {
                 // This is the active connection on non-passpoint network
-                summary.append(getSummary(mContext, getDetailedState(),
+                summary.append(getSummary(mContext, /* ssid */ null, getDetailedState(),
                         mInfo != null && mInfo.isEphemeral(),
                         mInfo != null ? mInfo.getNetworkSuggestionOrSpecifierPackageName() : null));
             }
@@ -1340,14 +1341,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public static String getSummary(Context context, String ssid, DetailedState state,
-            boolean isEphemeral, String suggestionOrSpecifierPackageName,
-            String passpointProvider) {
+            boolean isEphemeral, String suggestionOrSpecifierPackageName) {
         if (state == DetailedState.CONNECTED) {
-            if (!TextUtils.isEmpty(passpointProvider)) {
-                // Special case for connected + passpoint networks.
-                String format = context.getString(R.string.ssid_by_passpoint_provider);
-                return String.format(format, ssid, passpointProvider);
-            } else if (isEphemeral && !TextUtils.isEmpty(suggestionOrSpecifierPackageName)) {
+            if (isEphemeral && !TextUtils.isEmpty(suggestionOrSpecifierPackageName)) {
                 CharSequence appLabel =
                         getAppLabel(suggestionOrSpecifierPackageName, context.getPackageManager());
                 return context.getString(R.string.connected_via_app, appLabel);
@@ -1399,19 +1395,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return "";
         }
         return String.format(formats[index], ssid);
-    }
-
-    public static String getSummary(Context context, DetailedState state, boolean isEphemeral,
-                                    String suggestionOrSpecifierPackageName) {
-        return getSummary(context, null, state, isEphemeral, suggestionOrSpecifierPackageName,
-                null);
-    }
-
-    public static String getSummary(Context context, DetailedState state, boolean isEphemeral,
-                                    String suggestionOrSpecifierPackageName,
-                                    String passpointProvider) {
-        return getSummary(context, null, state, false, suggestionOrSpecifierPackageName,
-                passpointProvider);
     }
 
     public static String convertToQuotedString(String string) {
