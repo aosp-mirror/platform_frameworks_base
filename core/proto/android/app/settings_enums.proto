@@ -2189,4 +2189,9 @@ enum PageId {
 
     // OPEN: Settings > System > Aware > Disable > Dialog
     DIALOG_AWARE_DISABLE = 1633;
+
+    // OPEN: Settings > Settings > Network & internet > Click Mobile network to land on page with
+    // details for a SIM/eSIM mobile network > Click edit icon to bring up a rename dialog.
+    // OS: Q
+    MOBILE_NETWORK_RENAME_DIALOG = 1642;
 }
