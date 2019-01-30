@@ -257,6 +257,10 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
         if (shouldExtend) {
             mExtendedLifetimeAlertEntries.add(entry);
+            // We need to make sure that entries are stopping to alert eventually, let's remove
+            // this as soon as possible.
+            AlertEntry alertEntry = mAlertEntries.get(entry.key);
+            alertEntry.removeAsSoonAsPossible();
         } else {
             mExtendedLifetimeAlertEntries.remove(entry);
         }
