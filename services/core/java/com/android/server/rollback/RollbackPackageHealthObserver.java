@@ -54,8 +54,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public int onHealthCheckFailed(String packageName) {
-        RollbackInfo rollback = getAvailableRollback(packageName);
+    public int onHealthCheckFailed(String packageName, long versionCode) {
+        RollbackInfo rollback = getAvailableRollback(packageName, versionCode);
         if (rollback == null) {
             // Don't handle the notification, no rollbacks available for the package
             return PackageHealthObserverImpact.USER_IMPACT_NONE;
@@ -65,8 +65,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean execute(String packageName) {
-        RollbackInfo rollback = getAvailableRollback(packageName);
+    public boolean execute(String packageName, long versionCode) {
+        RollbackInfo rollback = getAvailableRollback(packageName, versionCode);
         if (rollback == null) {
             // Expected a rollback to be available, what happened?
             return false;
@@ -110,11 +110,12 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
     }
 
-    private RollbackInfo getAvailableRollback(String packageName) {
+    private RollbackInfo getAvailableRollback(String packageName, long versionCode) {
         for (RollbackInfo rollback : mRollbackManager.getAvailableRollbacks()) {
             for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
-                if (packageName.equals(packageRollback.getPackageName())) {
-                    // TODO(zezeozue): Only rollback if rollback version == failed package version
+                if (packageName.equals(packageRollback.getPackageName())
+                        && packageRollback.getVersionRolledBackFrom().getVersionCode()
+                        == versionCode) {
                     return rollback;
                 }
             }

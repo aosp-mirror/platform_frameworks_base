@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.VersionedPackage;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -230,7 +231,6 @@ public class PackageWatchdog {
         return null;
     }
 
-    // TODO(zezeozue:) Accept current versionCodes of failing packages?
     /**
      * Called when a process fails either due to a crash or ANR.
      *
@@ -239,15 +239,16 @@ public class PackageWatchdog {
      *
      * <p>This method could be called frequently if there is a severe problem on the device.
      */
-    public void onPackageFailure(String[] packages) {
+    public void onPackageFailure(List<VersionedPackage> packages) {
         mWorkerHandler.post(() -> {
             synchronized (mLock) {
                 if (mAllObservers.isEmpty()) {
                     return;
                 }
 
-                for (int pIndex = 0; pIndex < packages.length; pIndex++) {
-                    String packageToReport = packages[pIndex];
+                for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
+                    String packageToReport = packages.get(pIndex).getPackageName();
+                    long packageVersionCode = packages.get(pIndex).getVersionCode();
                     // Observer that will receive failure for packageToReport
                     PackageHealthObserver currentObserverToNotify = null;
                     int currentObserverImpact = Integer.MAX_VALUE;
@@ -258,7 +259,8 @@ public class PackageWatchdog {
                         PackageHealthObserver registeredObserver = observer.mRegisteredObserver;
                         if (registeredObserver != null
                                 && observer.onPackageFailure(packageToReport)) {
-                            int impact = registeredObserver.onHealthCheckFailed(packageToReport);
+                            int impact = registeredObserver.onHealthCheckFailed(packageToReport,
+                                    packageVersionCode);
                             if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                                     && impact < currentObserverImpact) {
                                 currentObserverToNotify = registeredObserver;
@@ -269,7 +271,7 @@ public class PackageWatchdog {
 
                     // Execute action with least user impact
                     if (currentObserverToNotify != null) {
-                        currentObserverToNotify.execute(packageToReport);
+                        currentObserverToNotify.execute(packageToReport, packageVersionCode);
                     }
                 }
             }
@@ -313,14 +315,14 @@ public class PackageWatchdog {
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
          * to the user on {@link #execute}
          */
-        @PackageHealthObserverImpact int onHealthCheckFailed(String packageName);
+        @PackageHealthObserverImpact int onHealthCheckFailed(String packageName, long versionCdoe);
 
         /**
          * Executes mitigation for {@link #onHealthCheckFailed}.
          *
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
-        boolean execute(String packageName);
+        boolean execute(String packageName, long versionCode);
 
         // TODO(zezeozue): Ensure uniqueness?
         /**
