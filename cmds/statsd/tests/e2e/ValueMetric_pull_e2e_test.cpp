@@ -31,8 +31,9 @@ namespace {
 StatsdConfig CreateStatsdConfig() {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
-    auto temperatureAtomMatcher = CreateTemperatureAtomMatcher();
-    *config.add_atom_matcher() = temperatureAtomMatcher;
+    auto pulledAtomMatcher =
+            CreateSimpleAtomMatcher("TestMatcher", android::util::SUBSYSTEM_SLEEP_STATE);
+    *config.add_atom_matcher() = pulledAtomMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
 
@@ -41,12 +42,12 @@ StatsdConfig CreateStatsdConfig() {
 
     auto valueMetric = config.add_value_metric();
     valueMetric->set_id(123456);
-    valueMetric->set_what(temperatureAtomMatcher.id());
+    valueMetric->set_what(pulledAtomMatcher.id());
     valueMetric->set_condition(screenIsOffPredicate.id());
     *valueMetric->mutable_value_field() =
-        CreateDimensions(android::util::TEMPERATURE, {3/* temperature degree field */ });
+            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
     *valueMetric->mutable_dimensions_in_what() =
-        CreateDimensions(android::util::TEMPERATURE, {2/* sensor name field */ });
+            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {1 /* subsystem name */});
     valueMetric->set_bucket(FIVE_MINUTES);
     valueMetric->set_use_absolute_value_on_reset(true);
     valueMetric->set_skip_zero_diff_output(false);
@@ -134,9 +135,9 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
     EXPECT_GT((int)valueMetrics.data_size(), 1);
 
     auto data = valueMetrics.data(0);
-    EXPECT_EQ(android::util::TEMPERATURE, data.dimensions_in_what().field());
+    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
-    EXPECT_EQ(2 /* sensor name field */,
+    EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
     EXPECT_EQ(5, data.bucket_info_size());
@@ -241,9 +242,9 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
     EXPECT_GT((int)valueMetrics.data_size(), 1);
 
     auto data = valueMetrics.data(0);
-    EXPECT_EQ(android::util::TEMPERATURE, data.dimensions_in_what().field());
+    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
-    EXPECT_EQ(2 /* sensor name field */,
+    EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
     EXPECT_EQ(3, data.bucket_info_size());
