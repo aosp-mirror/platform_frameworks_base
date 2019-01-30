@@ -2968,6 +2968,9 @@ message BiometricAuthenticated {
     optional bool is_crypto = 3;
     // The client that this acquisition was received for.
     optional android.hardware.biometrics.ClientEnum client = 4;
+    // If authentication requires user confirmation. See BiometricPrompt's
+    // setRequireConfirmation(bool) method.
+    optional bool require_confirmation = 5;
 
     enum State {
         UNKNOWN = 0;
@@ -2977,12 +2980,12 @@ message BiometricAuthenticated {
     }
 
     // State of the current auth attempt.
-    optional State state = 5;
+    optional State state = 6;
     // Time it took to authenticate. For BiometricPrompt where setRequireConfirmation(false) is
     // specified and supported by the biometric modality, this is from the first ACQUIRED_GOOD to
     // AUTHENTICATED. for setRequireConfirmation(true), this is from PENDING_CONFIRMATION to
     // CONFIRMED.
-    optional int64 latency_millis = 6;
+    optional int64 latency_millis = 7;
 }
 
 /**
