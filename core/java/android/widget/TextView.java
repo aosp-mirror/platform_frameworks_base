@@ -10275,7 +10275,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final ContentCaptureSession session = getContentCaptureSession();
                 if (session != null) {
                     // TODO(b/111276913): pass flags when edited by user / add CTS test
-                    session.notifyViewTextChanged(getAutofillId(), getText(), /* flags= */ 0);
+                    session.notifyViewTextChanged(getAutofillId(), getText());
                 }
             }
         }

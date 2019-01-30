@@ -54,7 +54,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * @hide
      */
     // NOTE: not prefixed by STATE_ so it's not printed on getStateAsString()
-    public static final int UNKNWON_STATE = 0x0;
+    public static final int UNKNOWN_STATE = 0x0;
 
     /**
      * Service's startSession() was called, but server didn't confirm it was created yet.
@@ -160,7 +160,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @Nullable
     protected final String mId;
 
-    private int mState = UNKNWON_STATE;
+    private int mState = UNKNOWN_STATE;
 
     // Lazily created on demand.
     private ContentCaptureSessionId mContentCaptureSessionId;
@@ -350,10 +350,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      *
      * @param id of the node.
      * @param text new text.
-     * @param flags currently ignored.
      */
-    public final void notifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text,
-            int flags) {
+    public final void notifyViewTextChanged(@NonNull AutofillId id, @Nullable CharSequence text) {
         Preconditions.checkNotNull(id);
 
         if (!isContentCaptureEnabled()) return;
@@ -439,7 +437,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /** @hide */
     @NonNull
     protected static String getStateAsString(int state) {
-        return state + " (" + (state == UNKNWON_STATE ? "UNKNOWN"
+        return state + " (" + (state == UNKNOWN_STATE ? "UNKNOWN"
                 : DebugUtils.flagsToString(ContentCaptureSession.class, "STATE_", state)) + ")";
     }
 
