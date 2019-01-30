@@ -1289,8 +1289,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Дакраніцеся, каб убачыць усе сеткі"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Падключыцца"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Усе сеткі"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Падключана да сеткі Wi‑Fi, прапанаванай праграмай \"<xliff:g id="NAME">%s</xliff:g>\""</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Хочаце дазволіць праграме \"<xliff:g id="NAME">%s</xliff:g>\" прапаноўваць вам сеткі?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Так"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi уключыцца аўтаматычна"</string>
@@ -1304,6 +1306,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"У Wi-Fi няма доступу да інтэрнэту"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Змяненні ў наладах хот-спота"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частата хот-спота змянілася."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Прылада не можа працаваць толькі на частаце 5 ГГц. Гэта частата будзе выкарыстоўвацца, калі гэта магчыма."</string>
@@ -1388,6 +1392,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Адладка па USB падключана"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Націсніце, каб адключыць адладку па USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Выберыце, каб адключыць адладку USB."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Стварэнне справаздачы пра памылку…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Падзяліцца справаздачай пра памылку?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Перадача справаздачы пра памылку..."</string>
