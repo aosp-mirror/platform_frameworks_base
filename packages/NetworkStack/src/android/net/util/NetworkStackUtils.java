@@ -16,6 +16,9 @@
 
 package android.net.util;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
+
 /**
  * Collection of utilities for the network stack.
  */
@@ -26,5 +29,15 @@ public class NetworkStackUtils {
      */
     public static <T> boolean isEmpty(T[] array) {
         return array == null || array.length == 0;
+    }
+
+    /**
+     * Close a socket, ignoring any exception while closing.
+     */
+    public static void closeSocketQuietly(FileDescriptor fd) {
+        try {
+            SocketUtils.closeSocket(fd);
+        } catch (IOException ignored) {
+        }
     }
 }

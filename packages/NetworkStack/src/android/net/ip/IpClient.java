@@ -16,6 +16,7 @@
 
 package android.net.ip;
 
+import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.shared.IpConfigurationParcelableUtil.toStableParcelable;
 import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
 import static android.net.shared.LinkPropertiesParcelableUtil.toStableParcelable;
@@ -36,7 +37,6 @@ import android.net.RouteInfo;
 import android.net.apf.ApfCapabilities;
 import android.net.apf.ApfFilter;
 import android.net.dhcp.DhcpClient;
-import android.net.ip.IIpClientCallbacks;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.shared.InitialConfiguration;
@@ -52,7 +52,6 @@ import android.util.LocalLog;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IState;
 import com.android.internal.util.IndentingPrintWriter;
@@ -992,7 +991,7 @@ public class IpClient extends StateMachine {
             // specified in the InitialConfiguration have been observed with Netlink.
             if (config.isProvisionedBy(newLp.getLinkAddresses(), null)) {
                 for (IpPrefix prefix : config.directlyConnectedRoutes) {
-                    newLp.addRoute(new RouteInfo(prefix, null, mInterfaceName));
+                    newLp.addRoute(new RouteInfo(prefix, null, mInterfaceName, RTN_UNICAST));
                 }
             }
             addAllReachableDnsServers(newLp, config.dnsServers);
@@ -1093,7 +1092,7 @@ public class IpClient extends StateMachine {
         // If we have a StaticIpConfiguration attempt to apply it and
         // handle the result accordingly.
         if (mConfiguration.mStaticIpConfig != null) {
-            if (mInterfaceCtrl.setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
+            if (mInterfaceCtrl.setIPv4Address(mConfiguration.mStaticIpConfig.getIpAddress())) {
                 handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
             } else {
                 return false;
@@ -1348,10 +1347,8 @@ public class IpClient extends StateMachine {
             apfConfig.apfCapabilities = mConfiguration.mApfCapabilities;
             apfConfig.multicastFilter = mMulticastFiltering;
             // Get the Configuration for ApfFilter from Context
-            apfConfig.ieee802_3Filter =
-                    mContext.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
-            apfConfig.ethTypeBlackList =
-                    mContext.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
+            apfConfig.ieee802_3Filter = ApfCapabilities.getApfDrop8023Frames(mContext);
+            apfConfig.ethTypeBlackList = ApfCapabilities.getApfEthTypeBlackList(mContext);
             mApfFilter = ApfFilter.maybeCreate(mContext, apfConfig, mInterfaceParams, mCallback);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.

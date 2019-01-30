@@ -20,12 +20,13 @@ import static android.net.util.SocketUtils.makePacketSocketAddress;
 import static android.system.OsConstants.AF_PACKET;
 import static android.system.OsConstants.ARPHRD_ETHER;
 import static android.system.OsConstants.ETH_P_ALL;
+import static android.system.OsConstants.SOCK_NONBLOCK;
 import static android.system.OsConstants.SOCK_RAW;
 
-import android.net.NetworkUtils;
 import android.net.util.ConnectivityPacketSummary;
 import android.net.util.InterfaceParams;
 import android.net.util.PacketReader;
+import android.net.util.SocketUtils;
 import android.os.Handler;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -33,7 +34,7 @@ import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
 
-import libcore.util.HexEncoding;
+import com.android.internal.util.HexDump;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -101,9 +102,10 @@ public class ConnectivityPacketTracker {
         protected FileDescriptor createFd() {
             FileDescriptor s = null;
             try {
-                s = Os.socket(AF_PACKET, SOCK_RAW, 0);
-                NetworkUtils.attachControlPacketFilter(s, ARPHRD_ETHER);
-                Os.bind(s, makePacketSocketAddress((short) ETH_P_ALL, mInterface.index));
+                s = Os.socket(AF_PACKET, SOCK_RAW | SOCK_NONBLOCK, 0);
+                SocketUtils.attachControlPacketFilter(s, ARPHRD_ETHER);
+                SocketUtils.bindSocket(
+                        s, makePacketSocketAddress((short) ETH_P_ALL, mInterface.index));
             } catch (ErrnoException | IOException e) {
                 logError("Failed to create packet tracking socket: ", e);
                 closeFd(s);
@@ -119,8 +121,7 @@ public class ConnectivityPacketTracker {
             if (summary == null) return;
 
             if (DBG) Log.d(mTag, summary);
-            addLogEntry(summary +
-                        "\n[" + new String(HexEncoding.encode(recvbuf, 0, length)) + "]");
+            addLogEntry(summary + "\n[" + HexDump.toHexString(recvbuf, 0, length) + "]");
         }
 
         @Override

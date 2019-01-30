@@ -31,10 +31,6 @@ import android.os.Parcelable;
 public final class DhcpClientEvent implements IpConnectivityLog.Event {
 
     // Names for recording DhcpClient pseudo-state transitions.
-    /** {@hide} Represents transitions from DhcpInitState to DhcpBoundState */
-    public static final String INITIAL_BOUND = "InitialBoundState";
-    /** {@hide} Represents transitions from and to DhcpBoundState via DhcpRenewingState */
-    public static final String RENEWING_BOUND = "RenewingBoundState";
 
     /** @hide */
     public final String msg;
