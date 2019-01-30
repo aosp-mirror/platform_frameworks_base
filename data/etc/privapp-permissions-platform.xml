@@ -329,6 +329,7 @@ applications that come with the platform
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.permission.STATUS_BAR_SERVICE"/>
         <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
     </privapp-permissions>
 
