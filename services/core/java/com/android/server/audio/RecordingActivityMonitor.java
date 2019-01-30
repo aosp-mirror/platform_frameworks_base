@@ -78,24 +78,27 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 updateSnapshot(event, uid, session, source, recordingInfo,
                 portId, silenced, activeSource, clientEffects, effects);
         if (configsSystem != null){
-            synchronized (mClients) {
-                // list of recording configurations for "public consumption". It is only computed if
-                // there are non-system recording activity listeners.
-                final List<AudioRecordingConfiguration> configsPublic = mHasPublicClients ?
-                        anonymizeForPublicConsumption(configsSystem) :
-                            new ArrayList<AudioRecordingConfiguration>();
-                final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
-                while (clientIterator.hasNext()) {
-                    final RecMonitorClient rmc = clientIterator.next();
-                    try {
-                        if (rmc.mIsPrivileged) {
-                            rmc.mDispatcherCb.dispatchRecordingConfigChange(configsSystem);
-                        } else {
-                            rmc.mDispatcherCb.dispatchRecordingConfigChange(configsPublic);
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Could not call dispatchRecordingConfigChange() on client", e);
+            dispatchCallbacks(configsSystem);
+        }
+    }
+    private void dispatchCallbacks(List<AudioRecordingConfiguration> configs) {
+        synchronized (mClients) {
+            // list of recording configurations for "public consumption". It is only computed if
+            // there are non-system recording activity listeners.
+            final List<AudioRecordingConfiguration> configsPublic = mHasPublicClients
+                    ? anonymizeForPublicConsumption(configs) :
+                      new ArrayList<AudioRecordingConfiguration>();
+            final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
+            while (clientIterator.hasNext()) {
+                final RecMonitorClient rmc = clientIterator.next();
+                try {
+                    if (rmc.mIsPrivileged) {
+                        rmc.mDispatcherCb.dispatchRecordingConfigChange(configs);
+                    } else {
+                        rmc.mDispatcherCb.dispatchRecordingConfigChange(configsPublic);
                     }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Could not call dispatchRecordingConfigChange() on client", e);
                 }
             }
         }
@@ -128,6 +131,13 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
 
     void initMonitor() {
         AudioSystem.setRecordingCallback(this);
+    }
+
+    void clear() {
+        synchronized (mRecordConfigs) {
+            mRecordConfigs.clear();
+        }
+        dispatchCallbacks(new ArrayList<AudioRecordingConfiguration>());
     }
 
     void registerRecordingCallback(IRecordingConfigDispatcher rcdb, boolean isPrivileged) {
