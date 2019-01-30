@@ -683,6 +683,7 @@ public final class LocationRequest implements Parcelable {
                     request.setSmallestDisplacement(in.readFloat());
                     request.setHideFromAppOps(in.readInt() != 0);
                     request.setLowPowerMode(in.readInt() != 0);
+                    request.setLocationSettingsIgnored(in.readInt() != 0);
                     String provider = in.readString();
                     if (provider != null) request.setProvider(provider);
                     WorkSource workSource = in.readParcelable(null);
@@ -711,6 +712,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeFloat(mSmallestDisplacement);
         parcel.writeInt(mHideFromAppOps ? 1 : 0);
         parcel.writeInt(mLowPowerMode ? 1 : 0);
+        parcel.writeInt(mLocationSettingsIgnored ? 1 : 0);
         parcel.writeString(mProvider);
         parcel.writeParcelable(mWorkSource, 0);
     }
@@ -755,6 +757,9 @@ public final class LocationRequest implements Parcelable {
             s.append(" num=").append(mNumUpdates);
         }
         s.append(" lowPowerMode=").append(mLowPowerMode);
+        if (mLocationSettingsIgnored) {
+            s.append(" ignoreSettings");
+        }
         s.append(']');
         return s.toString();
     }
