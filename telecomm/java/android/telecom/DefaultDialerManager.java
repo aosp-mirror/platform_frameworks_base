@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -162,7 +163,9 @@ public class DefaultDialerManager {
 
         final Intent dialIntentWithTelScheme = new Intent(Intent.ACTION_DIAL);
         dialIntentWithTelScheme.setData(Uri.fromParts(PhoneAccount.SCHEME_TEL, "", null));
-        return filterByIntent(context, packageNames, dialIntentWithTelScheme, userId);
+        packageNames = filterByIntent(context, packageNames, dialIntentWithTelScheme, userId);
+        packageNames = requireInCallService(packageNames, userId, context);
+        return packageNames;
     }
 
     public static List<String> getInstalledDialerApplications(Context context) {
@@ -220,6 +223,35 @@ public class DefaultDialerManager {
         return result;
     }
 
+    private static List<String> requireInCallService(List<String> packageNames, int userId,
+            Context context) {
+        if (packageNames == null || packageNames.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        final Intent intent = new Intent(InCallService.SERVICE_INTERFACE);
+        final List<ResolveInfo> resolveInfoList = context.getPackageManager()
+                .queryIntentServicesAsUser(intent, PackageManager.GET_META_DATA, userId);
+        final List<String> result = new ArrayList<>();
+        final int length = resolveInfoList.size();
+        for (int i = 0; i < length; i++) {
+            final ServiceInfo info = resolveInfoList.get(i).serviceInfo;
+            if (info == null || info.metaData == null) {
+                continue;
+            }
+            if (!info.metaData.getBoolean(TelecomManager.METADATA_IN_CALL_SERVICE_UI)) {
+                continue;
+            }
+            if (info.metaData.getBoolean(TelecomManager.METADATA_IN_CALL_SERVICE_CAR_MODE_UI)) {
+                continue;
+            }
+            if (packageNames.contains(info.packageName) && !result.contains(info.packageName)) {
+                result.add(info.packageName);
+            }
+        }
+
+        return result;
+    }
 
     private static TelecomManager getTelecomManager(Context context) {
         return (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
