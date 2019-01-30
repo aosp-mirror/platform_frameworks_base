@@ -1848,4 +1848,8 @@ interface ITelephony {
      * @hide
      */
     int getNumOfActiveSims();
+    /**
+     * Get if reboot is required upon altering modems configurations
+     */
+    boolean isRebootRequiredForModemConfigChange();
 }
