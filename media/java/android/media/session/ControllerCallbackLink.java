@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaMetadata;
@@ -41,7 +40,6 @@ import java.util.List;
  * Handles incoming commands to {@link MediaController.Callback}.
  * @hide
  */
-@SystemApi
 public final class ControllerCallbackLink implements Parcelable {
     final Context mContext;
     final CallbackStub mCallbackStub;

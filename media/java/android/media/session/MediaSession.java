@@ -19,7 +19,6 @@ package android.media.session;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -487,7 +486,6 @@ public final class MediaSession {
          * Gets the controller link in this token.
          * @hide
          */
-        @SystemApi
         public ControllerLink getControllerLink() {
             return mControllerLink;
         }
@@ -696,7 +694,6 @@ public final class MediaSession {
         /**
          * @hide
          */
-        @SystemApi
         public void onSetMediaButtonEventDelegate(
                 @NonNull MediaSessionEngine.MediaButtonEventDelegate delegate) {
             mMediaButtonEventDelegate = delegate;

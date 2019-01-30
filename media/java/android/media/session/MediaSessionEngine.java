@@ -18,7 +18,6 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -49,7 +48,6 @@ import java.util.Objects;
 /**
  * @hide
  */
-@SystemApi
 public final class MediaSessionEngine implements AutoCloseable {
     private static final String TAG = "MediaSession";
 
