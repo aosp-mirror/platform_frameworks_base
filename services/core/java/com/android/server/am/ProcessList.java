@@ -2197,7 +2197,7 @@ public final class ProcessList {
         }
         UidRecord uidRec = mActiveUids.get(proc.uid);
         if (uidRec == null) {
-            uidRec = new UidRecord(proc.uid, mService.mAtmInternal);
+            uidRec = new UidRecord(proc.uid);
             // This is the first appearance of the uid, report it now!
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
