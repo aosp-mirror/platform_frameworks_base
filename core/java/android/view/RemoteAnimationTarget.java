@@ -246,8 +246,12 @@ public class RemoteAnimationTarget implements Parcelable {
         position.writeToProto(proto, POSITION);
         sourceContainerBounds.writeToProto(proto, SOURCE_CONTAINER_BOUNDS);
         windowConfiguration.writeToProto(proto, WINDOW_CONFIGURATION);
-        startLeash.writeToProto(proto, START_LEASH);
-        startBounds.writeToProto(proto, START_BOUNDS);
+        if (startLeash != null) {
+            startLeash.writeToProto(proto, START_LEASH);
+        }
+        if (startBounds != null) {
+            startBounds.writeToProto(proto, START_BOUNDS);
+        }
         proto.end(token);
     }
 
