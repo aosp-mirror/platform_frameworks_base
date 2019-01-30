@@ -42,6 +42,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.MainThread;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
@@ -289,7 +291,10 @@ public class BubbleController {
 
     /**
      * Removes the bubble associated with the {@param uri}.
+     * <p>
+     * Must be called from the main thread.
      */
+    @MainThread
     void removeBubble(String key) {
         BubbleView bv = mBubbles.remove(key);
         if (mStackView != null && bv != null) {

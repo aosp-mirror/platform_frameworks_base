@@ -37,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -59,6 +60,7 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
 
     private NotificationEntry mEntry;
     private PendingIntent mAppOverlayIntent;
+    private BubbleController mBubbleController;
     private ActivityView mActivityView;
     private boolean mActivityViewReady;
     private boolean mActivityViewStarted;
@@ -81,6 +83,7 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
         // XXX: can this padding just be on the view and we look it up?
         mPadding = getResources().getDimensionPixelSize(R.dimen.bubble_view_padding);
         mIconInset = getResources().getDimensionPixelSize(R.dimen.bubble_icon_inset);
+        mBubbleController = Dependency.get(BubbleController.class);
     }
 
     @Override
@@ -247,6 +250,20 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
                 @Override
                 public void onActivityViewDestroyed(ActivityView view) {
                     mActivityViewReady = false;
+                }
+
+                /**
+                 * This is only called for tasks on this ActivityView, which is also set to
+                 * single-task mode -- meaning never more than one task on this display. If a task
+                 * is being removed, it's the top Activity finishing and this bubble should
+                 * be removed or collapsed.
+                 */
+                @Override
+                public void onTaskRemovalStarted(int taskId) {
+                    if (mEntry != null) {
+                        // Must post because this is called from a binder thread.
+                        post(() -> mBubbleController.removeBubble(mEntry.key));
+                    }
                 }
             });
         }
