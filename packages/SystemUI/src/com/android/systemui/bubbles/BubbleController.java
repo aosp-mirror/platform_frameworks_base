@@ -28,6 +28,9 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.NotificationAlertingManager.alertAgain;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.app.IActivityTaskManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -35,11 +38,13 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.StatsLog;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -52,6 +57,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
@@ -60,6 +67,7 @@ import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -93,6 +101,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
+    private final IActivityTaskManager mActivityTaskManager;
+    private final BubbleTaskStackListener mTaskStackListener;
     private BubbleStateChangeListener mStateChangeListener;
     private BubbleExpandListener mExpandListener;
     private LayoutInflater mInflater;
@@ -176,6 +186,10 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
         Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
+
+        mActivityTaskManager = ActivityTaskManager.getService();
+        mTaskStackListener = new BubbleTaskStackListener();
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
     }
 
     /**
@@ -531,6 +545,64 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
                 || (isImportantOngoing && autoBubbleOngoing)
                 || autoBubbleAll;
+    }
+
+    /**
+     * This task stack listener is responsible for responding to tasks moved to the front
+     * which are on the default (main) display. When this happens, expanded bubbles must be
+     * collapsed so the user may interact with the app which was just moved to the front.
+     * <p>
+     * This listener is registered with SystemUI's ActivityManagerWrapper which dispatches
+     * these calls via a main thread Handler.
+     */
+    @MainThread
+    private class BubbleTaskStackListener extends TaskStackChangeListener {
+
+        @Nullable
+        private ActivityManager.StackInfo findStackInfo(int taskId) throws RemoteException {
+            final List<ActivityManager.StackInfo> stackInfoList =
+                    mActivityTaskManager.getAllStackInfos();
+            // Iterate through stacks from top to bottom.
+            final int stackCount = stackInfoList.size();
+            for (int stackIndex = 0; stackIndex < stackCount; stackIndex++) {
+                final ActivityManager.StackInfo stackInfo = stackInfoList.get(stackIndex);
+                // Iterate through tasks from top to bottom.
+                for (int taskIndex = stackInfo.taskIds.length - 1; taskIndex >= 0; taskIndex--) {
+                    if (stackInfo.taskIds[taskIndex] == taskId) {
+                        return stackInfo;
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void onTaskMovedToFront(int taskId) {
+            ActivityManager.StackInfo stackInfo = null;
+            try {
+                stackInfo = findStackInfo(taskId);
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
+            if (stackInfo != null && stackInfo.displayId == Display.DEFAULT_DISPLAY
+                    && mStackView != null) {
+                mStackView.collapseStack();
+            }
+        }
+
+        /**
+         * This is a workaround for the case when the activity had to be created in a new task.
+         * Existing code in ActivityStackSupervisor checks the display where the activity
+         * ultimately ended up, displays an error message toast, and calls this method instead of
+         * onTaskMovedToFront.
+         */
+        // TODO(b/124058588): add requestedDisplayId to this callback, ignore unless matches
+        @Override
+        public void onActivityLaunchOnSecondaryDisplayFailed() {
+            if (mStackView != null) {
+                mStackView.collapseStack();
+            }
+        }
     }
 
     private static boolean shouldAutoBubbleMessages(Context context) {
