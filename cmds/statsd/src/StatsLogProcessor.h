@@ -49,7 +49,9 @@ public:
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
                       const sp<AlarmMonitor>& subscriberTriggerAlarmMonitor,
                       const int64_t timeBaseNs,
-                      const std::function<bool(const ConfigKey&)>& sendBroadcast);
+                      const std::function<bool(const ConfigKey&)>& sendBroadcast,
+                      const std::function<bool(const int&,
+                                               const vector<int64_t>&)>& sendActivationBroadcast);
     virtual ~StatsLogProcessor();
 
     void OnLogEvent(LogEvent* event);
@@ -59,6 +61,8 @@ public:
     void OnConfigRemoved(const ConfigKey& key);
 
     size_t GetMetricsSize(const ConfigKey& key) const;
+
+    void GetActiveConfigs(const int uid, vector<int64_t>& outActiveConfigs);
 
     void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
                       const bool include_current_partial_bucket, const bool erase_data,
@@ -125,6 +129,9 @@ private:
 
     std::unordered_map<ConfigKey, long> mLastBroadcastTimes;
 
+    // Last time we sent a broadcast to this uid that the active configs had changed.
+    std::unordered_map<int, long> mLastActivationBroadcastTimes;
+
     // Tracks when we last checked the bytes consumed for each config key.
     std::unordered_map<ConfigKey, long> mLastByteSizeTimes;
 
@@ -143,6 +150,8 @@ private:
 
     void OnConfigUpdatedLocked(
         const int64_t currentTimestampNs, const ConfigKey& key, const StatsdConfig& config);
+
+    void GetActiveConfigsLocked(const int uid, vector<int64_t>& outActiveConfigs);
 
     void WriteDataToDiskLocked(const DumpReportReason dumpReportReason);
     void WriteDataToDiskLocked(const ConfigKey& key, const int64_t timestampNs,
@@ -173,6 +182,10 @@ private:
     // Function used to send a broadcast so that receiver for the config key can call getData
     // to retrieve the stored data.
     std::function<bool(const ConfigKey& key)> mSendBroadcast;
+
+    // Function used to send a broadcast so that receiver can be notified of which configs
+    // are currently active.
+    std::function<bool(const int& uid, const vector<int64_t>& configIds)> mSendActivationBroadcast;
 
     const int64_t mTimeBaseNs;
 

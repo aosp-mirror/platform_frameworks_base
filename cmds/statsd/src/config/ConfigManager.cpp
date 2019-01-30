@@ -144,10 +144,20 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
     {
         lock_guard <mutex> lock(mMutex);
 
-        auto uidIt = mConfigs.find(key.GetUid());
+        auto uid = key.GetUid();
+        auto uidIt = mConfigs.find(uid);
         if (uidIt != mConfigs.end() && uidIt->second.find(key) != uidIt->second.end()) {
             // Remove from map
             uidIt->second.erase(key);
+
+            // No more configs for this uid, lets remove the active configs callback.
+            if (uidIt->second.empty()) {
+                auto itActiveConfigsChangedReceiver = mActiveConfigsChangedReceivers.find(uid);
+                    if (itActiveConfigsChangedReceiver != mActiveConfigsChangedReceivers.end()) {
+                        mActiveConfigsChangedReceivers.erase(itActiveConfigsChangedReceiver);
+                    }
+            }
+
             for (const sp<ConfigListener>& listener : mListeners) {
                 broadcastList.push_back(listener);
             }

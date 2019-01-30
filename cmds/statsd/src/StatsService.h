@@ -275,6 +275,12 @@ private:
      */
     status_t cmd_trigger_broadcast(int outFd, Vector<String8>& args);
 
+
+    /**
+     * Trigger an active configs changed broadcast.
+     */
+    status_t cmd_trigger_active_config_broadcast(int outFd, Vector<String8>& args);
+
     /**
      * Handle the config sub-command.
      */
@@ -339,6 +345,15 @@ private:
      * 3. the caller is AID_ROOT and the uid is AID_SHELL (i.e. ROOT can impersonate SHELL).
      */
     bool getUidFromArgs(const Vector<String8>& args, size_t uidArgIndex, int32_t& uid);
+
+    /**
+     * Writes the value of uidSting into uid.
+     * Returns whether the uid is reasonable (type uid_t) and whether
+     * 1. it is equal to the calling uid, or
+     * 2. the device is mEngBuild, or
+     * 3. the caller is AID_ROOT and the uid is AID_SHELL (i.e. ROOT can impersonate SHELL).
+     */
+     bool getUidFromString(const char* uidString, int32_t& uid);
 
     /**
      * Adds a configuration after checking permissions and obtaining UID from binder call.
