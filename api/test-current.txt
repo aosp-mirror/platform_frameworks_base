@@ -1790,6 +1790,10 @@ package android.view {
     method public boolean isSystemGroup();
   }
 
+  public abstract class LayoutInflater {
+    method public void setPrecompiledLayoutsEnabledForTesting(boolean);
+  }
+
   public final class MotionEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public void setActionButton(int);
     method public void setButtonState(int);
