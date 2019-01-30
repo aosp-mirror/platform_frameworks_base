@@ -45,6 +45,7 @@ import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
+import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
@@ -250,6 +251,7 @@ message Atom {
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
         StyleUIChanged style_ui_changed = 179;
         PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
+        AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
     }
 
     // Pulled events will start at field 10000.
@@ -2554,6 +2556,18 @@ message AppDowngraded {
  */
 message AppOptimizedAfterDowngraded {
     optional string package_name = 1;
+}
+
+/**
+ * Logs whenever an app is installed on external storage.
+ * Logged from:
+        frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
+ */
+message AppInstallOnExternalStorageReported {
+    // The type of external storage.
+    optional android.stats.storage.ExternalStorageType storage_type = 1;
+    // The name of the package that is installed on the sd card.
+    optional string package_name = 2;
 }
 
 /**
