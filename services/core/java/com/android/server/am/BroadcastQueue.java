@@ -450,7 +450,7 @@ public final class BroadcastQueue {
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
         }
-        if (r.allowBackgroundActivityStarts) {
+        if (r.allowBackgroundActivityStarts && r.curApp != null) {
             r.curApp.removeAllowBackgroundActivityStartsToken(r);
          }
         // If we're abandoning this broadcast before any receivers were actually spun up,
