@@ -349,41 +349,30 @@ public class TelephonyManager {
      * Returns 0 if none of voice, sms, data is not supported
      * Returns 1 for Single standby mode (Single SIM functionality)
      * Returns 2 for Dual standby mode.(Dual SIM functionality)
+     * Returns 3 for Tri standby mode.(Tri SIM functionality)
      */
     public int getPhoneCount() {
-        int phoneCount = 1;
-        switch (getMultiSimConfiguration()) {
-            case UNKNOWN:
-                // if voice or sms or data is supported, return 1 otherwise 0
-                if (isVoiceCapable() || isSmsCapable()) {
-                    phoneCount = 1;
-                } else {
-                    // todo: try to clean this up further by getting rid of the nested conditions
-                    if (mContext == null) {
-                        phoneCount = 1;
-                    } else {
-                        // check for data support
-                        ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
-                                Context.CONNECTIVITY_SERVICE);
-                        if (cm == null) {
-                            phoneCount = 1;
-                        } else {
-                            if (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                                phoneCount = 1;
-                            } else {
-                                phoneCount = 0;
-                            }
-                        }
-                    }
+        int phoneCount = 0;
+
+        // check for voice and data support, 0 if not supported
+        if (!isVoiceCapable() && !isSmsCapable()) {
+            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                if (!cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
+                    return phoneCount;
                 }
-                break;
-            case DSDS:
-            case DSDA:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
-                break;
-            case TSTS:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_TRI_SIM;
-                break;
+            }
+        }
+
+        phoneCount = 1;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                phoneCount = telephony.getNumOfActiveSims();
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getNumOfActiveSims RemoteException", ex);
         }
         return phoneCount;
     }
@@ -10213,5 +10202,32 @@ public class TelephonyManager {
             Log.e(TAG, "isMultisimCarrierRestricted RemoteException", e);
         }
         return true;
+    }
+
+    /**
+     * Switch configs to enable multi-sim or switch back to single-sim
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * @param numOfSims number of live SIMs we want to switch to
+     * @throws android.os.RemoteException
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void switchMultiSimConfig(int numOfSims) {
+        //only proceed if multi-sim is not restricted
+        if (isMultisimCarrierRestricted()) {
+            Rlog.e(TAG, "switchMultiSimConfig not possible. It is restricted.");
+            return;
+        }
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.switchMultiSimConfig(numOfSims);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "switchMultiSimConfig RemoteException", ex);
+        }
     }
 }
