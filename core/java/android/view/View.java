@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.content.res.Resources.ID_NULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
@@ -5052,6 +5053,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private WeakReference<ContentCaptureSession> mContentCaptureSession;
 
+    @LayoutRes
+    private int mSourceLayoutId = ID_NULL;
+
     /**
      * Simple constructor to use when creating a view from code.
      *
@@ -5216,6 +5220,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public View(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         this(context);
+
+        mSourceLayoutId = Resources.getAttributeSetSourceResId(attrs);
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
@@ -23250,6 +23256,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mUserPaddingRightInitial = end;
                 internalSetPadding(start, top, end, bottom);
         }
+    }
+
+    /**
+     * A {@link View} can be inflated from an XML layout. For such Views this method returns the
+     * resource ID of the source layout.
+     *
+     * @return The layout resource id if this view was inflated from XML, otherwise
+     * {@link Resources#ID_NULL}.
+     */
+    @LayoutRes
+    public int getSourceLayoutResId() {
+        return mSourceLayoutId;
     }
 
     /**

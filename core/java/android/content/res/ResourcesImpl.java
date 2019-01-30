@@ -15,6 +15,8 @@
  */
 package android.content.res;
 
+import static android.content.res.Resources.ID_NULL;
+
 import android.animation.Animator;
 import android.animation.StateListAnimator;
 import android.annotation.AnyRes;
@@ -1222,7 +1224,7 @@ public class ResourcesImpl {
                     for (int i = 0; i < num; i++) {
                         if (cachedXmlBlockCookies[i] == assetCookie && cachedXmlBlockFiles[i] != null
                                 && cachedXmlBlockFiles[i].equals(file)) {
-                            return cachedXmlBlocks[i].newParser();
+                            return cachedXmlBlocks[i].newParser(id);
                         }
                     }
 
@@ -1239,7 +1241,7 @@ public class ResourcesImpl {
                         cachedXmlBlockCookies[pos] = assetCookie;
                         cachedXmlBlockFiles[pos] = file;
                         cachedXmlBlocks[pos] = block;
-                        return block.newParser();
+                        return block.newParser(id);
                     }
                 }
             } catch (Exception e) {
@@ -1297,6 +1299,14 @@ public class ResourcesImpl {
             mPreloading = false;
             flushLayoutCache();
         }
+    }
+
+    @AnyRes
+    static int getAttributeSetSourceResId(@Nullable AttributeSet set) {
+        if (set == null) {
+            return ID_NULL;
+        }
+        return ((XmlBlock.Parser) set).getSourceResId();
     }
 
     LongSparseArray<Drawable.ConstantState> getPreloadedDrawables() {
