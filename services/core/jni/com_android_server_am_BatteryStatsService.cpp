@@ -32,8 +32,8 @@
 #include <android/hardware/power/1.0/IPower.h>
 #include <android/hardware/power/1.1/IPower.h>
 #include <android/hardware/power/stats/1.0/IPowerStats.h>
-#include <android/system/suspend/1.0/ISystemSuspend.h>
-#include <android/system/suspend/1.0/ISystemSuspendCallback.h>
+#include <android/system/suspend/BnSuspendCallback.h>
+#include <android/system/suspend/ISuspendControlService.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
 
@@ -46,14 +46,14 @@
 
 using android::hardware::Return;
 using android::hardware::Void;
+using android::system::suspend::BnSuspendCallback;
 using android::hardware::power::V1_0::PowerStatePlatformSleepState;
 using android::hardware::power::V1_0::PowerStateVoter;
 using android::hardware::power::V1_0::Status;
 using android::hardware::power::V1_1::PowerStateSubsystem;
 using android::hardware::power::V1_1::PowerStateSubsystemSleepState;
 using android::hardware::hidl_vec;
-using android::system::suspend::V1_0::ISystemSuspend;
-using android::system::suspend::V1_0::ISystemSuspendCallback;
+using android::system::suspend::ISuspendControlService;
 using IPowerV1_1 = android::hardware::power::V1_1::IPower;
 using IPowerV1_0 = android::hardware::power::V1_0::IPower;
 
@@ -68,7 +68,7 @@ static sem_t wakeup_sem;
 extern sp<IPowerV1_0> getPowerHalV1_0();
 extern sp<IPowerV1_1> getPowerHalV1_1();
 extern bool processPowerHalReturn(const Return<void> &ret, const char* functionName);
-extern sp<ISystemSuspend> getSuspendHal();
+extern sp<ISuspendControlService> getSuspendControl();
 
 // Java methods used in getLowPowerStats
 static jmethodID jgetAndUpdatePlatformState = NULL;
@@ -103,17 +103,17 @@ struct PowerHalDeathRecipient : virtual public hardware::hidl_death_recipient {
 
 sp<PowerHalDeathRecipient> gDeathRecipient = new PowerHalDeathRecipient();
 
-class WakeupCallback : public ISystemSuspendCallback {
-public:
-    Return<void> notifyWakeup(bool success) override {
-        ALOGV("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
+class WakeupCallback : public BnSuspendCallback {
+   public:
+    binder::Status notifyWakeup(bool success) override {
+        ALOGI("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
         int ret = sem_post(&wakeup_sem);
         if (ret < 0) {
             char buf[80];
             strerror_r(errno, buf, sizeof(buf));
             ALOGE("Error posting wakeup sem: %s\n", buf);
         }
-        return Void();
+        return binder::Status::ok();
     }
 };
 
@@ -136,9 +136,12 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
             jniThrowException(env, "java/lang/IllegalStateException", buf);
             return -1;
         }
-        ALOGV("Registering callback...");
-        sp<ISystemSuspend> suspendHal = getSuspendHal();
-        suspendHal->registerCallback(new WakeupCallback());
+        sp<ISuspendControlService> suspendControl = getSuspendControl();
+        bool isRegistered = false;
+        suspendControl->registerCallback(new WakeupCallback(), &isRegistered);
+        if (!isRegistered) {
+            ALOGE("Failed to register wakeup callback");
+        }
     }
 
     // Wait for wakeup.

@@ -127,6 +127,7 @@ cc_defaults {
         "android.frameworks.schedulerservice@1.0",
         "android.frameworks.sensorservice@1.0",
         "android.system.suspend@1.0",
+        "suspend_control_aidl_interface-cpp",
     ],
 
     static_libs: [
