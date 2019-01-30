@@ -160,6 +160,18 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for all activity manager related features that are used at the native level.
+     * These features are applied at reboot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface ActivityManagerNativeBoot {
+        String NAMESPACE = "activity_manager_native_boot";
+        String OFFLOAD_QUEUE_ENABLED = "offload_queue_enabled";
+    }
+
+    /**
      * Namespace for attention-based features provided by on-device machine intelligence.
      *
      * @hide
