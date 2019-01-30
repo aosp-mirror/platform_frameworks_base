@@ -1861,6 +1861,7 @@ public final class Settings {
      * This is the only type of reset available to non-system clients.
      * @hide
      */
+    @TestApi
     public static final int RESET_MODE_PACKAGE_DEFAULTS = 1;
 
     /**
@@ -5687,6 +5688,14 @@ public final class Settings {
                 "autofill_user_data_min_value_length";
 
         /**
+         * Defines whether Content Capture is enabled  for the user.
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead
          */
         @Deprecated
@@ -5829,6 +5838,16 @@ public final class Settings {
          * @hide
          */
         public static final String ALWAYS_ON_VPN_LOCKDOWN = "always_on_vpn_lockdown";
+
+        /**
+         * Comma separated list of packages that are allowed to access the network when VPN is in
+         * lockdown mode but not running.
+         * @see #ALWAYS_ON_VPN_LOCKDOWN
+         *
+         * @hide
+         */
+        public static final String ALWAYS_ON_VPN_LOCKDOWN_WHITELIST =
+                "always_on_vpn_lockdown_whitelist";
 
         /**
          * Whether applications can be installed for this user via the system's
@@ -11755,6 +11774,7 @@ public final class Settings {
          * entity_list_not_editable                 (String[])
          * entity_list_editable                     (String[])
          * lang_id_threshold_override               (float)
+         * template_intent_factory_enabled          (boolean)
          * </pre>
          *
          * <p>
@@ -12231,33 +12251,33 @@ public final class Settings {
                 "angle_whitelist";
 
         /**
-         * Game Update Package global preference for all Apps.
+         * Game Driver global preference for all Apps.
          * 0 = Default
-         * 1 = All Apps use Game Update Package
+         * 1 = All Apps use Game Driver
          * 2 = All Apps use system graphics driver
          * @hide
          */
-        public static final String GUP_DEV_ALL_APPS = "gup_dev_all_apps";
+        public static final String GAME_DRIVER_ALL_APPS = "game_driver_all_apps";
 
         /**
-         * List of Apps selected to use Game Update Package.
+         * List of Apps selected to use Game Driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
-        public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
+        public static final String GAME_DRIVER_OPT_IN_APPS = "game_driver_opt_in_apps";
 
         /**
-         * List of Apps selected not to use Game Update Package.
+         * List of Apps selected not to use Game Driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
-        public static final String GUP_DEV_OPT_OUT_APPS = "gup_dev_opt_out_apps";
+        public static final String GAME_DRIVER_OPT_OUT_APPS = "game_driver_opt_out_apps";
 
         /**
-         * Apps on the blacklist that are forbidden to use Game Update Package.
+         * Apps on the blacklist that are forbidden to use Game Driver.
          * @hide
          */
-        public static final String GUP_BLACKLIST = "gup_blacklist";
+        public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
 
         /**
          * Apps on the whitelist that are allowed to use Game Driver.
@@ -13261,29 +13281,6 @@ public final class Settings {
         public static final String MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY =
                 "max_sound_trigger_detection_service_ops_per_day";
 
-        /**
-         * Property used by {@code com.android.server.SystemServer} on start to decide whether
-         * the Content Capture service should be created or not.
-         *
-         * <p>Possible values are:
-         *
-         * <ul>
-         *   <li>If set to {@code default}, it will only be set if the OEM provides and defines the
-         *   service name by overlaying {@code config_defaultContentCaptureService} (this is the
-         *   "default" mode)
-         *   <li>If set to {@code always}, it will always be enabled, even when the resource is not
-         *   overlaid (this is useful during development and to run the CTS tests on AOSP builds).
-         *   <li>Otherwise, it's explicitly disabled (this could work as a "kill switch" so OEMs
-         *   can disable it remotely in case of emergency by setting to something else (like
-         *   {@code "false"}); notice that it's also disabled if the OEM doesn't explicitly set one
-         *   of the values above).
-         * </ul>
-         *
-         * @hide
-         */
-        public static final String CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED =
-                "content_capture_service_explicitly_enabled";
-
         /** {@hide} */
         public static final String ISOLATED_STORAGE_LOCAL = "isolated_storage_local";
         /** {@hide} */
@@ -14120,6 +14117,7 @@ public final class Settings {
          * edit_choices_before_sending       (boolean)
          * show_in_heads_up                  (boolean)
          * min_num_system_generated_replies  (int)
+         * max_num_actions                   (int)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
          * @hide

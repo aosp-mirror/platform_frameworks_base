@@ -227,10 +227,9 @@ public class TelephonyManager {
     public static final int SRVCC_STATE_HANDOVER_CANCELED  = 3;
 
     /**
-     * An invalid card identifier.
-     * @hide
+     * An invalid UICC card identifier. See {@link #getCardIdForDefaultEuicc()} and
+     * {@link UiccCardInfo#getCardId()}.
      */
-    @SystemApi
     public static final int INVALID_CARD_ID = -1;
 
     /** @hide */
@@ -3162,14 +3161,8 @@ public class TelephonyManager {
      * unique to a device, and always refer to the same UICC or eUICC card unless the device goes
      * through a factory reset.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     *
      * @return card ID of the default eUICC card.
-     * @hide
      */
-    @SystemApi
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getCardIdForDefaultEuicc() {
         try {
             ITelephony telephony = getITelephony();
@@ -3183,25 +3176,37 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets information about currently inserted UICCs and eUICCs. See {@link UiccCardInfo} for more
-     * details on the kind of information available.
+     * Gets information about currently inserted UICCs and enabled eUICCs.
+     * <p>
+     * Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * If the caller has carrier priviliges on any active subscription, then they have permission to
+     * get simple information like the card ID ({@link UiccCardInfo#getCardId()}), whether the card
+     * is an eUICC ({@link UiccCardInfo#isEuicc()}), and the slot index where the card is inserted
+     * ({@link UiccCardInfo#getSlotIndex()}).
+     * <p>
+     * To get private information such as the EID ({@link UiccCardInfo#getEid()}) or ICCID
+     * ({@link UiccCardInfo#getIccId()}), the caller must have carrier priviliges on that specific
+     * UICC or eUICC card.
+     * <p>
+     * See {@link UiccCardInfo} for more details on the kind of information available.
      *
-     * @return UiccCardInfo an array of UiccCardInfo objects, representing information on the
-     * currently inserted UICCs and eUICCs.
-     *
-     * @hide
+     * @return a list of UiccCardInfo objects, representing information on the currently inserted
+     * UICCs and eUICCs. Each UiccCardInfo in the list will have private information filtered out if
+     * the caller does not have adequate permissions for that card.
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public UiccCardInfo[] getUiccCardsInfo() {
+    public List<UiccCardInfo> getUiccCardsInfo() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null) {
-                return null;
+                Log.e(TAG, "Error in getUiccCardsInfo: unable to connect to Telephony service.");
+                return new ArrayList<UiccCardInfo>();
             }
-            return telephony.getUiccCardsInfo();
+            return telephony.getUiccCardsInfo(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            return null;
+            Log.e(TAG, "Error in getUiccCardsInfo: " + e);
+            return new ArrayList<UiccCardInfo>();
         }
     }
 
@@ -9095,6 +9100,9 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
+        if (carriers == null || !SubscriptionManager.isValidPhoneId(slotIndex)) {
+            return -1;
+        }
         // Execute the method setCarrierRestrictionRules with an empty excluded list and
         // indicating priority for the allowed list.
         CarrierRestrictionRules carrierRestrictionRules = CarrierRestrictionRules.newBuilder()
@@ -9105,7 +9113,7 @@ public class TelephonyManager {
 
         int result = setCarrierRestrictionRules(carrierRestrictionRules);
 
-        // Convert boolean result into int, as required by this method.
+        // Convert result into int, as required by this method.
         if (result == SET_CARRIER_RESTRICTION_SUCCESS) {
             return carriers.size();
         } else {
@@ -9198,9 +9206,11 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<CarrierIdentifier> getAllowedCarriers(int slotIndex) {
-        CarrierRestrictionRules carrierRestrictionRule = getCarrierRestrictionRules();
-        if (carrierRestrictionRule != null) {
-            return carrierRestrictionRule.getAllowedCarriers();
+        if (SubscriptionManager.isValidPhoneId(slotIndex)) {
+            CarrierRestrictionRules carrierRestrictionRule = getCarrierRestrictionRules();
+            if (carrierRestrictionRule != null) {
+                return carrierRestrictionRule.getAllowedCarriers();
+            }
         }
         return new ArrayList<CarrierIdentifier>(0);
     }

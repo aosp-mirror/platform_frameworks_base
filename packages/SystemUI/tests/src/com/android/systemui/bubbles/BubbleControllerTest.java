@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
@@ -72,6 +73,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
+    private ExpandableNotificationRow mNoChannelRow;
 
     @Mock
     private NotificationData mNotificationData;
@@ -91,10 +93,12 @@ public class BubbleControllerTest extends SysuiTestCase {
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mRow = mNotificationTestHelper.createBubble();
         mRow2 = mNotificationTestHelper.createBubble();
+        mNoChannelRow = mNotificationTestHelper.createBubble();
 
         // Return non-null notification data from the NEM
         when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
         when(mNotificationData.getChannel(mRow.getEntry().key)).thenReturn(mRow.getEntry().channel);
+        when(mNotificationData.getChannel(mNoChannelRow.getEntry().key)).thenReturn(null);
 
         mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController);
 
@@ -183,11 +187,21 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mRow.getEntry().showInShadeWhenBubble());
     }
 
+    @Test
+    public void testNotificationWithoutChannel() {
+        assertFalse(mBubbleController.shouldBubble(mNoChannelRow.getEntry()));
+    }
+
     static class TestableBubbleController extends BubbleController {
 
         TestableBubbleController(Context context,
                 StatusBarWindowController statusBarWindowController) {
             super(context, statusBarWindowController);
+        }
+
+        @Override
+        public boolean shouldAutoBubble(Context c, NotificationEntry entry) {
+            return entry.notification.getNotification().getBubbleMetadata() != null;
         }
     }
 }

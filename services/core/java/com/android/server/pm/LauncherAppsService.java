@@ -696,7 +696,7 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
             return new LauncherApps.AppUsageLimit(
-                    data.isGroupLimit(), data.getTotalUsageLimit(), data.getUsageRemaining());
+                    data.getTotalUsageLimit(), data.getUsageRemaining());
         }
 
         private void ensureShortcutPermission(@NonNull String callingPackage) {
@@ -837,7 +837,11 @@ public class LauncherAppsService extends SystemService {
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                         callingUid, user.getIdentifier());
-                return info != null;
+                // Note we don't check "exported" because if the caller has the same UID as the
+                // callee's UID, it can still be launched.
+                // (If an app doesn't export a front door activity and causes issues with the
+                // launcher, that's just the app's bug.)
+                return info != null && info.isEnabled();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

@@ -3180,6 +3180,7 @@ public abstract class Context {
             //@hide: CONTEXTHUB_SERVICE,
             SYSTEM_HEALTH_SERVICE,
             //@hide: INCIDENT_SERVICE,
+            //@hide: INCIDENT_COMPANION_SERVICE,
             //@hide: STATS_COMPANION_SERVICE,
             COMPANION_DEVICE_SERVICE,
             CROSS_PROFILE_APPS_SERVICE,
@@ -3620,9 +3621,10 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.app.StatusBarManager
+     *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
@@ -4464,6 +4466,13 @@ public abstract class Context {
      * @hide
      */
     public static final String INCIDENT_SERVICE = "incident";
+
+    /**
+     * Service to assist incidentd and dumpstated in reporting status to the user
+     * and in confirming authorization to take an incident report or bugreport
+     * @hide
+     */
+    public static final String INCIDENT_COMPANION_SERVICE = "incidentcompanion";
 
     /**
      * Service to assist statsd in obtaining general stats.

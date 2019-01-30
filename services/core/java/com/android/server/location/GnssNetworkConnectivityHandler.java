@@ -34,7 +34,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles network connection requests and network state change updates for AGPS data download.
@@ -80,10 +79,11 @@ class GnssNetworkConnectivityHandler {
 
     private static final int HASH_MAP_INITIAL_CAPACITY_TO_TRACK_CONNECTED_NETWORKS = 5;
 
-    // keeps track of networks and their state as notified by the network request callbacks.
+    // Keeps track of networks and their state as notified by the network request callbacks.
     // Limit initial capacity to 5 as the number of connected networks will likely be small.
-    private ConcurrentHashMap<Network, NetworkAttributes> mAvailableNetworkAttributes =
-            new ConcurrentHashMap<>(HASH_MAP_INITIAL_CAPACITY_TO_TRACK_CONNECTED_NETWORKS);
+    // NOTE: Must be accessed/modified only through the mHandler thread.
+    private HashMap<Network, NetworkAttributes> mAvailableNetworkAttributes =
+            new HashMap<>(HASH_MAP_INITIAL_CAPACITY_TO_TRACK_CONNECTED_NETWORKS);
 
     private final ConnectivityManager mConnMgr;
 
@@ -159,7 +159,7 @@ class GnssNetworkConnectivityHandler {
     /**
      * Interface to listen for network availability changes.
      */
-    public interface GnssNetworkListener {
+    interface GnssNetworkListener {
         void onNetworkAvailable();
     }
 
@@ -177,12 +177,7 @@ class GnssNetworkConnectivityHandler {
         mSuplConnectivityCallback = createSuplConnectivityCallback();
     }
 
-    public void registerNetworkCallbacks() {
-        mAvailableNetworkAttributes.clear();
-        if (mNetworkConnectivityCallback != null) {
-            mConnMgr.unregisterNetworkCallback(mNetworkConnectivityCallback);
-        }
-
+    void registerNetworkCallbacks() {
         // register for connectivity change events.
         NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
         networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
@@ -190,14 +185,14 @@ class GnssNetworkConnectivityHandler {
         networkRequestBuilder.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
         NetworkRequest networkRequest = networkRequestBuilder.build();
         mNetworkConnectivityCallback = createNetworkConnectivityCallback();
-        mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
+        mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback, mHandler);
     }
 
     /**
      * @return {@code true} if there is a data network available for outgoing connections,
      * {@code false} otherwise.
      */
-    public boolean isDataNetworkConnected() {
+    boolean isDataNetworkConnected() {
         NetworkInfo activeNetworkInfo = mConnMgr.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
@@ -205,15 +200,15 @@ class GnssNetworkConnectivityHandler {
     /**
      * called from native code to update AGPS status
      */
-    public void onReportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
+    void onReportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
         switch (agpsStatus) {
             case GPS_REQUEST_AGPS_DATA_CONN:
                 if (DEBUG) Log.d(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
-                requestSuplConnection(agpsType, suplIpAddr);
+                runOnHandler(() -> handleRequestSuplConnection(agpsType, suplIpAddr));
                 break;
             case GPS_RELEASE_AGPS_DATA_CONN:
                 if (DEBUG) Log.d(TAG, "GPS_RELEASE_AGPS_DATA_CONN");
-                releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
+                runOnHandler(() -> handleReleaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN));
                 break;
             case GPS_AGPS_DATA_CONNECTED:
                 if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONNECTED");
@@ -263,7 +258,7 @@ class GnssNetworkConnectivityHandler {
                 mGnssNetworkListener.onNetworkAvailable();
 
                 // Always on, notify HAL so it can get data it needs
-                updateNetworkState(network, true, capabilities);
+                handleUpdateNetworkState(network, true, capabilities);
             }
 
             @Override
@@ -276,7 +271,7 @@ class GnssNetworkConnectivityHandler {
 
                 Log.i(TAG, "Network connection lost. Available networks count: "
                         + mAvailableNetworkCapabilities.size());
-                updateNetworkState(network, false, null);
+                handleUpdateNetworkState(network, false, null);
             }
         };
     }
@@ -287,42 +282,25 @@ class GnssNetworkConnectivityHandler {
             public void onAvailable(Network network) {
                 if (DEBUG) Log.d(TAG, "SUPL network connection available.");
                 // Specific to a change to a SUPL enabled network becoming ready
-                suplConnectionAvailable(network);
+                handleSuplConnectionAvailable(network);
             }
 
             @Override
             public void onLost(Network network) {
                 Log.i(TAG, "SUPL network connection lost.");
-                releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
+                handleReleaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
             }
 
             @Override
             public void onUnavailable() {
                 Log.i(TAG, "SUPL network connection request timed out.");
                 // Could not setup the connection to the network in the specified time duration.
-                releaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
+                handleReleaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
             }
         };
     }
 
-    private void requestSuplConnection(int agpsType, byte[] suplIpAddr) {
-        postEvent(() -> handleRequestSuplConnection(agpsType, suplIpAddr));
-    }
-
-    private void suplConnectionAvailable(Network network) {
-        postEvent(() -> handleSuplConnectionAvailable(network));
-    }
-
-    private void releaseSuplConnection(int connStatus) {
-        postEvent(() -> handleReleaseSuplConnection(connStatus));
-    }
-
-    private void updateNetworkState(Network network, boolean isConnected,
-            NetworkCapabilities capabilities) {
-        postEvent(() -> handleUpdateNetworkState(network, isConnected, capabilities));
-    }
-
-    private void postEvent(Runnable event) {
+    private void runOnHandler(Runnable event) {
         // hold a wake lock until this message is delivered
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
@@ -486,6 +464,7 @@ class GnssNetworkConnectivityHandler {
         mConnMgr.requestNetwork(
                 request,
                 mSuplConnectivityCallback,
+                mHandler,
                 SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
     }
 

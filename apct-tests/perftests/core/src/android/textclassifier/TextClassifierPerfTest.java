@@ -47,7 +47,7 @@ public class TextClassifierPerfTest {
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameterized.Parameters(name = "size={0}")
+    @Parameterized.Parameters(name = "size{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{{ACTUAL_REQUEST}, {10}, {100}, {1000}});
     }

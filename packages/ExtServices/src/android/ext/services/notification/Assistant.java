@@ -215,9 +215,9 @@ public class Assistant extends NotificationAssistantService {
             return null;
         }
         NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel);
-        ArrayList<Notification.Action> actions = mSmartActionsHelper.suggestActions(entry);
-        ArrayList<CharSequence> replies = mSmartActionsHelper.suggestReplies(entry);
-        return createEnqueuedNotificationAdjustment(entry, actions, replies);
+        SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
+        return createEnqueuedNotificationAdjustment(
+                entry, suggestions.actions, suggestions.replies);
     }
 
     /** A convenience helper for creating an adjustment for an SBN. */

@@ -1716,6 +1716,14 @@ public class PermissionManagerService {
                 // this app is the documenter, then it gets the permission.
                 allowed = true;
             }
+            if (!allowed && bp.isIncidentReportApprover()
+                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                            PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER,
+                            UserHandle.USER_SYSTEM))) {
+                // If this permission is to be granted to the incident report approver and
+                // this app is the incident report approver, then it gets the permission.
+                allowed = true;
+            }
         }
         return allowed;
     }

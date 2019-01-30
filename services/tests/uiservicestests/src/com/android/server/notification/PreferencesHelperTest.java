@@ -2162,20 +2162,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testAllowBubbles_defaults() throws Exception {
-        assertTrue(mHelper.areBubblessAllowed(PKG_O, UID_O));
+        assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
         loadStreamXml(baos, false);
 
-        assertTrue(mHelper.areBubblessAllowed(PKG_O, UID_O));
+        assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
         assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
     }
 
     @Test
     public void testAllowBubbles_xml() throws Exception {
         mHelper.setBubblesAllowed(PKG_O, UID_O, false);
-        assertFalse(mHelper.areBubblessAllowed(PKG_O, UID_O));
+        assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
         assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
 
@@ -2183,7 +2183,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
         loadStreamXml(baos, false);
 
-        assertFalse(mHelper.areBubblessAllowed(PKG_O, UID_O));
+        assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
         assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
     }

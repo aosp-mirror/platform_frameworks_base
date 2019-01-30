@@ -1475,6 +1475,18 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
 
     /**
+     * An incident or bug report has been taken, and a system app has requested it to be shared,
+     * so trigger the confirmation screen.
+     *
+     * This will be sent directly to the registered receiver with the
+     * android.permission.APPROVE_INCIDENT_REPORTS permission.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_PENDING_INCIDENT_REPORTS_CHANGED =
+            "android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED";
+
+    /**
      * Activity Action: Show power usage information to the user.
      * <p>Input: Nothing.
      * <p>Output: Nothing.

@@ -281,7 +281,8 @@ public class QuickStepController implements GestureHelper {
                 int xDiff = Math.abs(x - mTouchDownX);
                 int yDiff = Math.abs(y - mTouchDownY);
 
-                boolean exceededSwipeHorizontalTouchSlop, exceededSwipeVerticalTouchSlop;
+                boolean exceededSwipeHorizontalTouchSlop, exceededSwipeVerticalTouchSlop,
+                        exceededSwipeVerticalDragSlop;
                 int posH, touchDownH, posV, touchDownV;
 
                 if (isNavBarVertical()) {
@@ -289,6 +290,8 @@ public class QuickStepController implements GestureHelper {
                             yDiff > NavigationBarCompat.getQuickScrubTouchSlopPx() && yDiff > xDiff;
                     exceededSwipeVerticalTouchSlop =
                             xDiff > NavigationBarCompat.getQuickStepTouchSlopPx() && xDiff > yDiff;
+                    exceededSwipeVerticalDragSlop =
+                            xDiff > NavigationBarCompat.getQuickStepDragSlopPx() && xDiff > yDiff;
                     posH = y;
                     touchDownH = mTouchDownY;
                     posV = x;
@@ -298,6 +301,8 @@ public class QuickStepController implements GestureHelper {
                             xDiff > NavigationBarCompat.getQuickScrubTouchSlopPx() && xDiff > yDiff;
                     exceededSwipeVerticalTouchSlop =
                             yDiff > NavigationBarCompat.getQuickStepTouchSlopPx() && yDiff > xDiff;
+                    exceededSwipeVerticalDragSlop =
+                            yDiff > NavigationBarCompat.getQuickStepDragSlopPx() && yDiff > xDiff;
                     posH = x;
                     touchDownH = mTouchDownX;
                     posV = y;
@@ -309,11 +314,14 @@ public class QuickStepController implements GestureHelper {
                     mCurrentAction.onGestureMove(x, y);
                 } else {
                     // Detect gesture and try to execute an action, only one can run at a time
-                    if (exceededSwipeVerticalTouchSlop) {
+                    if (exceededSwipeVerticalTouchSlop || exceededSwipeVerticalDragSlop) {
                         if (mDragVPositive ? (posV < touchDownV) : (posV > touchDownV)) {
-                            // Swiping up gesture
-                            tryToStartGesture(mGestureActions[ACTION_SWIPE_UP_INDEX],
-                                    false /* alignedWithNavBar */, event);
+                            // Swipe up gesture must use the larger slop
+                            if (exceededSwipeVerticalTouchSlop) {
+                                // Swiping up gesture
+                                tryToStartGesture(mGestureActions[ACTION_SWIPE_UP_INDEX],
+                                        false /* alignedWithNavBar */, event);
+                            }
                         } else {
                             // Swiping down gesture
                             tryToStartGesture(mGestureActions[ACTION_SWIPE_DOWN_INDEX],

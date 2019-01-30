@@ -1247,8 +1247,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"සියලු ජාල බැලීමට තට්ටු කරන්න"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"සම්බන්ධ කරන්න"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"සියලු ජාල"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"<xliff:g id="NAME">%s</xliff:g> විසින් යෝජිත Wi-Fi ජාලයට සම්බන්ධ වුණි"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"<xliff:g id="NAME">%s</xliff:g>ඔබට ඔබ සඳහා ජාල යෝජනා කිරීමට අවශ්‍යද?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ඔව්"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"නැත"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ස්වයංක්‍රියව ක්‍රියාත්මක වනු ඇත"</string>
@@ -1262,6 +1264,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi සඳහා අන්තර්ජාල ප්‍රවේශය නැත"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"විකල්ප සඳහා තට්ටු කරන්න"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ඔබගේ හොට්ස්පොට් සැකසීම්වලට වෙනස් කිරීම්"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ඔබගේ හොට්ස්පොට් කලාපය වෙනස් වී ඇත."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"මෙම උපාංගය 5GHz සඳහා ඔබේ මනාපවලට සහාය නොදක්වයි. ඒ වෙනුවට, මෙම උපාංගය ලබා ගත හැකි විට 5GHz කලාපය භාවිතා කරනු ඇත."</string>
@@ -1346,6 +1350,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB නිදොස් කිරීම ක්‍රියාවිරහිත කිරීමට තට්ටු කරන්න"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB නිදොස්කරණය අබල කිරීමට තෝරන්න."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"දෝෂ වාර්තාවක් ගනිමින්…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"දෝෂ වාර්තාව බෙදා ගන්නද?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"දෝෂ වාර්තාවක් බෙදා ගනිමින්..."</string>

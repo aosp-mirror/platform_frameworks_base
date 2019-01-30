@@ -23,6 +23,8 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -75,6 +77,8 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     @Mock protected ExpandableNotificationRow mRow;
 
     private final class TestableAlertingNotificationManager extends AlertingNotificationManager {
+        private AlertEntry mLastCreatedEntry;
+
         private TestableAlertingNotificationManager() {
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
@@ -86,6 +90,12 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
 
         @Override
         protected void onAlertEntryRemoved(AlertEntry alertEntry) {}
+
+        @Override
+        protected AlertEntry createAlertEntry() {
+            mLastCreatedEntry = spy(super.createAlertEntry());
+            return mLastCreatedEntry;
+        }
 
         @Override
         public int getContentFlag() {
@@ -203,6 +213,17 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         mAlertingNotificationManager.setShouldManageLifetime(mEntry, true /* shouldManage */);
 
         assertTrue(mAlertingNotificationManager.mExtendedLifetimeAlertEntries.contains(mEntry));
+    }
+
+    @Test
+    public void testSetShouldManageLifetime_setShouldManageCallsRemoval() {
+        mAlertingNotificationManager.showNotification(mEntry);
+        mAlertingNotificationManager.setShouldManageLifetime(mEntry, true /* shouldManage */);
+        if (mAlertingNotificationManager instanceof TestableAlertingNotificationManager) {
+            TestableAlertingNotificationManager testableManager =
+                    (TestableAlertingNotificationManager) mAlertingNotificationManager;
+            verify(testableManager.mLastCreatedEntry).removeAsSoonAsPossible();
+        }
     }
 
     @Test

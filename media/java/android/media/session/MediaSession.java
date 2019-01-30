@@ -115,6 +115,7 @@ public final class MediaSession {
     public @interface SessionFlags { }
 
     private final MediaSessionEngine mImpl;
+    private final int mMaxBitmapSize;
 
     // Do not change the name of mCallback. Support lib accesses this by using reflection.
     @UnsupportedAppUsage
@@ -142,9 +143,9 @@ public final class MediaSession {
             MediaSessionEngine.CallbackStub cbStub = new MediaSessionEngine.CallbackStub();
             SessionCallbackLink cbLink = new SessionCallbackLink(context, cbStub);
             SessionLink sessionLink = manager.createSession(cbLink, tag);
-            mImpl = new MediaSessionEngine(context, sessionLink, cbLink, cbStub,
-                    context.getResources().getDimensionPixelSize(
-                            android.R.dimen.config_mediaMetadataBitmapMaxSize));
+            mImpl = new MediaSessionEngine(context, sessionLink, cbLink, cbStub);
+            mMaxBitmapSize = context.getResources().getDimensionPixelSize(
+                    android.R.dimen.config_mediaMetadataBitmapMaxSize);
         } catch (RuntimeException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }
@@ -322,6 +323,9 @@ public final class MediaSession {
      * @see android.media.MediaMetadata.Builder#putBitmap
      */
     public void setMetadata(@Nullable MediaMetadata metadata) {
+        if (metadata != null) {
+            metadata = new MediaMetadata.Builder(metadata, mMaxBitmapSize).build();
+        }
         mImpl.setMetadata(metadata);
     }
 
@@ -389,16 +393,6 @@ public final class MediaSession {
      */
     public final @NonNull RemoteUserInfo getCurrentControllerInfo() {
         return mImpl.getCurrentControllerInfo();
-    }
-
-    /**
-     * Notify the system that the remote volume changed.
-     *
-     * @param provider The provider that is handling volume changes.
-     * @hide
-     */
-    public void notifyRemoteVolumeChanged(VolumeProvider provider) {
-        mImpl.notifyRemoteVolumeChanged(provider);
     }
 
     /**

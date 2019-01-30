@@ -17,9 +17,6 @@ package com.android.server.inputmethod;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.inputmethod.InputMethodSystemProperty.PER_PROFILE_IME_ENABLED;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -110,7 +107,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
@@ -483,7 +480,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     IBinder mLastImeTargetWindow;
 
     /**
-     * {@link WindowManager.LayoutParams#softInputMode} of {@link #mCurFocusedWindow}.
+     * {@link LayoutParams#softInputMode} of {@link #mCurFocusedWindow}.
      *
      * @see #mCurFocusedWindow
      */
@@ -2042,7 +2039,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
                             + mCurTokenDisplayId);
                 }
-                mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, mCurTokenDisplayId);
+                mIWindowManager.addWindowToken(mCurToken, LayoutParams.TYPE_INPUT_METHOD,
+                        mCurTokenDisplayId);
             } catch (RemoteException e) {
             }
             return new InputBindResult(
@@ -2757,9 +2755,34 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
         }
-        final InputBindResult result = startInputOrWindowGainedFocusInternal(startInputReason,
-                client, windowToken, startInputFlags, softInputMode, windowFlags, attribute,
-                inputContext, missingMethods, unverifiedTargetSdkVersion);
+        final int callingUserId = UserHandle.getCallingUserId();
+        final int userId;
+        if (attribute != null && attribute.targetInputMethodUser != null
+                && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "Using EditorInfo.targetInputMethodUser requires INTERACT_ACROSS_USERS_FULL.");
+            userId = attribute.targetInputMethodUser.getIdentifier();
+            if (!mUserManagerInternal.isUserRunning(userId)) {
+                // There is a chance that we hit here because of race condition.  Let's just return
+                // an error code instead of crashing the caller process, which at least has
+                // INTERACT_ACROSS_USERS_FULL permission thus is likely to be an important process.
+                Slog.e(TAG, "User #" + userId + " is not running.");
+                return InputBindResult.INVALID_USER;
+            }
+        } else {
+            userId = callingUserId;
+        }
+        final InputBindResult result;
+        synchronized (mMethodMap) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                result = startInputOrWindowGainedFocusInternalLocked(startInputReason, client,
+                        windowToken, startInputFlags, softInputMode, windowFlags, attribute,
+                        inputContext, missingMethods, unverifiedTargetSdkVersion, userId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
         if (result == null) {
             // This must never happen, but just in case.
             Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
@@ -2772,242 +2795,212 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @NonNull
-    private InputBindResult startInputOrWindowGainedFocusInternal(
+    private InputBindResult startInputOrWindowGainedFocusInternalLocked(
             @StartInputReason int startInputReason, IInputMethodClient client,
             @NonNull IBinder windowToken, @StartInputFlags int startInputFlags,
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
-            int unverifiedTargetSdkVersion) {
-        final int callingUserId = UserHandle.getCallingUserId();
-        final int userId;
-        if (attribute != null && attribute.targetInputMethodUser != null
-                && attribute.targetInputMethodUser.getIdentifier() != callingUserId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "Using EditorInfo.user requires INTERACT_ACROSS_USERS_FULL.");
-            userId = attribute.targetInputMethodUser.getIdentifier();
-            if (!mUserManagerInternal.isUserRunning(userId)) {
-                // There is a chance that we hit here because of race condition.  Let's just return
-                // an error code instead of crashing the caller process, which at least has
-                // INTERACT_ACROSS_USERS_FULL permission thus is likely to be an important process.
-                Slog.e(TAG, "User #" + userId + " is not running.");
-                return InputBindResult.INVALID_USER;
-            }
-        } else {
-            userId = callingUserId;
+            int unverifiedTargetSdkVersion, @UserIdInt int userId) {
+        if (DEBUG) {
+            Slog.v(TAG, "startInputOrWindowGainedFocusInternalLocked: reason="
+                    + InputMethodDebug.startInputReasonToString(startInputReason)
+                    + " client=" + client.asBinder()
+                    + " inputContext=" + inputContext
+                    + " missingMethods="
+                    + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
+                    + " attribute=" + attribute
+                    + " startInputFlags="
+                    + InputMethodDebug.startInputFlagsToString(startInputFlags)
+                    + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
+                    + " windowFlags=#" + Integer.toHexString(windowFlags)
+                    + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
         }
+
+        final int windowDisplayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
+
+        final ClientState cs = mClients.get(client.asBinder());
+        if (cs == null) {
+            throw new IllegalArgumentException("unknown client " + client.asBinder());
+        }
+        if (cs.selfReportedDisplayId != windowDisplayId) {
+            Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch."
+                    + " from client:" + cs.selfReportedDisplayId
+                    + " from window:" + windowDisplayId);
+            return InputBindResult.DISPLAY_ID_MISMATCH;
+        }
+
+        if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
+                cs.selfReportedDisplayId)) {
+            // Check with the window manager to make sure this client actually
+            // has a window with focus.  If not, reject.  This is thread safe
+            // because if the focus changes some time before or after, the
+            // next client receiving focus that has any interest in input will
+            // be calling through here after that change happens.
+            if (DEBUG) {
+                Slog.w(TAG, "Focus gain on non-focused client " + cs.client
+                        + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+            }
+            return InputBindResult.NOT_IME_TARGET_WINDOW;
+        }
+
+        // cross-profile access is always allowed here to allow profile-switching.
+        if (!mSettings.isCurrentProfile(userId)) {
+            Slog.w(TAG, "A background user is requesting window. Hiding IME.");
+            Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
+                    + " a background user, use EditorInfo.targetInputMethodUser with"
+                    + " INTERACT_ACROSS_USERS_FULL permission.");
+            hideCurrentInputLocked(0, null);
+            return InputBindResult.INVALID_USER;
+        }
+
+        if (PER_PROFILE_IME_ENABLED && userId != mSettings.getCurrentUserId()) {
+            switchUserLocked(userId);
+        }
+        // Master feature flag that overrides other conditions and forces IME preRendering.
+        if (DEBUG) {
+            Slog.v(TAG, "IME PreRendering MASTER flag: "
+                    + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() + ", LowRam: " + mIsLowRam);
+        }
+        // pre-rendering not supported on low-ram devices.
+        cs.shouldPreRenderIme = DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() && !mIsLowRam;
+
+        if (mCurFocusedWindow == windowToken) {
+            if (DEBUG) {
+                Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
+                        + " attribute=" + attribute + ", token = " + windowToken);
+            }
+            if (attribute != null) {
+                return startInputUncheckedLocked(cs, inputContext, missingMethods,
+                        attribute, startInputFlags, startInputReason);
+            }
+            return new InputBindResult(
+                    InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
+                    null, null, null, -1);
+        }
+        mCurFocusedWindow = windowToken;
+        mCurFocusedWindowSoftInputMode = softInputMode;
+        mCurFocusedWindowClient = cs;
+
+        // Should we auto-show the IME even if the caller has not
+        // specified what should be done with it?
+        // We only do this automatically if the window can resize
+        // to accommodate the IME (so what the user sees will give
+        // them good context without input information being obscured
+        // by the IME) or if running on a large screen where there
+        // is more room for the target window + IME.
+        final boolean doAutoShow =
+                (softInputMode & LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                        == LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                || mRes.getConfiguration().isLayoutSizeAtLeast(
+                        Configuration.SCREENLAYOUT_SIZE_LARGE);
+        final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
+
+        // We want to start input before showing the IME, but after closing
+        // it.  We want to do this after closing it to help the IME disappear
+        // more quickly (not get stuck behind it initializing itself for the
+        // new focused input, even if its window wants to hide the IME).
+        boolean didStart = false;
+
         InputBindResult res = null;
-        synchronized (mMethodMap) {
-            final int windowDisplayId =
-                    mWindowManagerInternal.getDisplayIdForWindow(windowToken);
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (DEBUG) Slog.v(TAG, "startInputOrWindowGainedFocusInternal: reason="
-                        + InputMethodDebug.startInputReasonToString(startInputReason)
-                        + " client=" + client.asBinder()
-                        + " inputContext=" + inputContext
-                        + " missingMethods="
-                        + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
-                        + " attribute=" + attribute
-                        + " startInputFlags="
-                        + InputMethodDebug.startInputFlagsToString(startInputFlags)
-                        + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
-                        + " windowFlags=#" + Integer.toHexString(windowFlags)
-                        + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
+        switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
+            case LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
+                if (!isTextEditor || !doAutoShow) {
+                    if (LayoutParams.mayUseInputMethod(windowFlags)) {
+                        // There is no focus view, and this window will
+                        // be behind any soft input window, so hide the
+                        // soft input window if it is shown.
+                        if (DEBUG) Slog.v(TAG, "Unspecified window will hide input");
+                        hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS, null);
 
-                ClientState cs = mClients.get(client.asBinder());
-                if (cs == null) {
-                    throw new IllegalArgumentException("unknown client "
-                            + client.asBinder());
-                }
-                if (cs.selfReportedDisplayId != windowDisplayId) {
-                    Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch."
-                            + " from client:" + cs.selfReportedDisplayId
-                            + " from window:" + windowDisplayId);
-                    return InputBindResult.DISPLAY_ID_MISMATCH;
-                }
-
-                if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                        cs.selfReportedDisplayId)) {
-                    // Check with the window manager to make sure this client actually
-                    // has a window with focus.  If not, reject.  This is thread safe
-                    // because if the focus changes some time before or after, the
-                    // next client receiving focus that has any interest in input will
-                    // be calling through here after that change happens.
-                    if (DEBUG) {
-                        Slog.w(TAG, "Focus gain on non-focused client " + cs.client
-                                + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                        // If focused display changed, we should unbind current method
+                        // to make app window in previous display relayout after Ime
+                        // window token removed.
+                        // Note that we can trust client's display ID as long as it matches
+                        // to the display ID obtained from the window.
+                        if (cs.selfReportedDisplayId != mCurTokenDisplayId) {
+                            unbindCurrentMethodLocked();
+                        }
                     }
-                    return InputBindResult.NOT_IME_TARGET_WINDOW;
-                }
-
-                // cross-profile access is always allowed here to allow profile-switching.
-                if (!mSettings.isCurrentProfile(userId)) {
-                    Slog.w(TAG, "A background user is requesting window. Hiding IME.");
-                    Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
-                            + " a background user, use EditorInfo.targetInputMethodUser with"
-                            + " INTERACT_ACROSS_USERS_FULL permission.");
-                    hideCurrentInputLocked(0, null);
-                    return InputBindResult.INVALID_USER;
-                }
-
-                if (PER_PROFILE_IME_ENABLED && userId != mSettings.getCurrentUserId()) {
-                    switchUserLocked(userId);
-                }
-                // Master feature flag that overrides other conditions and forces IME preRendering.
-                if (DEBUG) {
-                    Slog.v(TAG, "IME PreRendering MASTER flag: "
-                            + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value()
-                            + ", LowRam: " + mIsLowRam);
-                }
-                // pre-rendering not supported on low-ram devices.
-                cs.shouldPreRenderIme = DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() && !mIsLowRam;
-
-                if (mCurFocusedWindow == windowToken) {
-                    if (DEBUG) {
-                        Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
-                                + " attribute=" + attribute + ", token = " + windowToken);
-                    }
+                } else if (isTextEditor && doAutoShow
+                        && (softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                    // There is a focus view, and we are navigating forward
+                    // into the window, so show the input window for the user.
+                    // We only do this automatically if the window can resize
+                    // to accommodate the IME (so what the user sees will give
+                    // them good context without input information being obscured
+                    // by the IME) or if running on a large screen where there
+                    // is more room for the target window + IME.
+                    if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
                     if (attribute != null) {
-                        return startInputUncheckedLocked(cs, inputContext, missingMethods,
+                        res = startInputUncheckedLocked(cs, inputContext, missingMethods,
                                 attribute, startInputFlags, startInputReason);
+                        didStart = true;
                     }
-                    return new InputBindResult(
-                            InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                            null, null, null, -1);
+                    showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                 }
-                mCurFocusedWindow = windowToken;
-                mCurFocusedWindowSoftInputMode = softInputMode;
-                mCurFocusedWindowClient = cs;
-
-                // Should we auto-show the IME even if the caller has not
-                // specified what should be done with it?
-                // We only do this automatically if the window can resize
-                // to accommodate the IME (so what the user sees will give
-                // them good context without input information being obscured
-                // by the IME) or if running on a large screen where there
-                // is more room for the target window + IME.
-                final boolean doAutoShow =
-                        (softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                                == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                        || mRes.getConfiguration().isLayoutSizeAtLeast(
-                                Configuration.SCREENLAYOUT_SIZE_LARGE);
-                final boolean isTextEditor =
-                        (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
-
-                // We want to start input before showing the IME, but after closing
-                // it.  We want to do this after closing it to help the IME disappear
-                // more quickly (not get stuck behind it initializing itself for the
-                // new focused input, even if its window wants to hide the IME).
-                boolean didStart = false;
-
-                switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
-                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                        if (!isTextEditor || !doAutoShow) {
-                            if (WindowManager.LayoutParams.mayUseInputMethod(windowFlags)) {
-                                // There is no focus view, and this window will
-                                // be behind any soft input window, so hide the
-                                // soft input window if it is shown.
-                                if (DEBUG) Slog.v(TAG, "Unspecified window will hide input");
-                                hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS, null);
-
-                                // If focused display changed, we should unbind current method
-                                // to make app window in previous display relayout after Ime
-                                // window token removed.
-                                // Note that we can trust client's display ID as long as it matches
-                                // to the display ID obtained from the window.
-                                if (cs.selfReportedDisplayId != mCurTokenDisplayId) {
-                                    unbindCurrentMethodLocked();
-                                }
-                            }
-                        } else if (isTextEditor && doAutoShow && (softInputMode &
-                                WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                            // There is a focus view, and we are navigating forward
-                            // into the window, so show the input window for the user.
-                            // We only do this automatically if the window can resize
-                            // to accommodate the IME (so what the user sees will give
-                            // them good context without input information being obscured
-                            // by the IME) or if running on a large screen where there
-                            // is more room for the target window + IME.
-                            if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
-                            if (attribute != null) {
-                                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                        attribute, startInputFlags, startInputReason);
-                                didStart = true;
-                            }
-                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
-                        }
-                        break;
-                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
-                        // Do nothing.
-                        break;
-                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
-                        if ((softInputMode &
-                                WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                            if (DEBUG) Slog.v(TAG, "Window asks to hide input going forward");
-                            hideCurrentInputLocked(0, null);
-                        }
-                        break;
-                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                        if (DEBUG) Slog.v(TAG, "Window asks to hide input");
-                        hideCurrentInputLocked(0, null);
-                        break;
-                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
-                        if ((softInputMode &
-                                WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                            if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
-                            if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
-                                    unverifiedTargetSdkVersion, startInputFlags)) {
-                                if (attribute != null) {
-                                    res = startInputUncheckedLocked(cs, inputContext,
-                                            missingMethods, attribute, startInputFlags,
-                                            startInputReason);
-                                    didStart = true;
-                                }
-                                showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
-                            } else {
-                                Slog.e(TAG, "SOFT_INPUT_STATE_VISIBLE is ignored because"
-                                        + " there is no focused view that also returns true from"
-                                        + " View#onCheckIsTextEditor()");
-                            }
-                        }
-                        break;
-                    case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
-                        if (DEBUG) Slog.v(TAG, "Window asks to always show input");
-                        if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
-                                unverifiedTargetSdkVersion, startInputFlags)) {
-                            if (attribute != null) {
-                                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                        attribute, startInputFlags, startInputReason);
-                                didStart = true;
-                            }
-                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
-                        } else {
-                            Slog.e(TAG, "SOFT_INPUT_STATE_ALWAYS_VISIBLE is ignored because"
-                                    + " there is no focused view that also returns true from"
-                                    + " View#onCheckIsTextEditor()");
-                        }
-                        break;
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
+                // Do nothing.
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                    if (DEBUG) Slog.v(TAG, "Window asks to hide input going forward");
+                    hideCurrentInputLocked(0, null);
                 }
-
-                if (!didStart) {
-                    if (attribute != null) {
-                        if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
-                                || (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+                if (DEBUG) Slog.v(TAG, "Window asks to hide input");
+                hideCurrentInputLocked(0, null);
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_VISIBLE:
+                if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                    if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
+                    if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                            unverifiedTargetSdkVersion, startInputFlags)) {
+                        if (attribute != null) {
                             res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                    attribute,
-                                    startInputFlags, startInputReason);
-                        } else {
-                            res = InputBindResult.NO_EDITOR;
+                                    attribute, startInputFlags, startInputReason);
+                            didStart = true;
                         }
+                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                     } else {
-                        res = InputBindResult.NULL_EDITOR_INFO;
+                        Slog.e(TAG, "SOFT_INPUT_STATE_VISIBLE is ignored because"
+                                + " there is no focused view that also returns true from"
+                                + " View#onCheckIsTextEditor()");
                     }
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+                if (DEBUG) Slog.v(TAG, "Window asks to always show input");
+                if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                        unverifiedTargetSdkVersion, startInputFlags)) {
+                    if (attribute != null) {
+                        res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                attribute, startInputFlags, startInputReason);
+                        didStart = true;
+                    }
+                    showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                } else {
+                    Slog.e(TAG, "SOFT_INPUT_STATE_ALWAYS_VISIBLE is ignored because"
+                            + " there is no focused view that also returns true from"
+                            + " View#onCheckIsTextEditor()");
+                }
+                break;
         }
 
+        if (!didStart) {
+            if (attribute != null) {
+                if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
+                        || (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
+                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
+                            startInputFlags, startInputReason);
+                } else {
+                    res = InputBindResult.NO_EDITOR;
+                }
+            } else {
+                res = InputBindResult.NULL_EDITOR_INFO;
+            }
+        }
         return res;
     }
 
@@ -3975,13 +3968,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.setCanceledOnTouchOutside(true);
             final Window w = mSwitchingDialog.getWindow();
-            final WindowManager.LayoutParams attrs = w.getAttributes();
-            w.setType(TYPE_INPUT_METHOD_DIALOG);
+            final LayoutParams attrs = w.getAttributes();
+            w.setType(LayoutParams.TYPE_INPUT_METHOD_DIALOG);
             // Use an alternate token for the dialog for that window manager can group the token
             // with other IME windows based on type vs. grouping based on whichever token happens
             // to get selected by the system later on.
             attrs.token = mSwitchingDialogToken;
-            attrs.privateFlags |= PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            attrs.privateFlags |= LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
             updateSystemUiLocked(mImeWindowVis, mBackDisposition);

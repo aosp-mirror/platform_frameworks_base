@@ -505,71 +505,74 @@ public class ActivityManager {
     @UnsupportedAppUsage
     public static final int PROCESS_STATE_TOP = 2;
 
+    /** @hide Process is hosting a foreground service with location type. */
+    public static final int PROCESS_STATE_FOREGROUND_SERVICE_LOCATION = 3;
+
     /** @hide Process is hosting a foreground service. */
     @UnsupportedAppUsage
-    public static final int PROCESS_STATE_FOREGROUND_SERVICE = 3;
+    public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4;
 
     /** @hide Process is hosting a foreground service due to a system binding. */
     @UnsupportedAppUsage
-    public static final int PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 4;
+    public static final int PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 5;
 
     /** @hide Process is important to the user, and something they are aware of. */
-    public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 5;
+    public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 6;
 
     /** @hide Process is important to the user, but not something they are aware of. */
     @UnsupportedAppUsage
-    public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 6;
+    public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 7;
 
     /** @hide Process is in the background transient so we will try to keep running. */
-    public static final int PROCESS_STATE_TRANSIENT_BACKGROUND = 7;
+    public static final int PROCESS_STATE_TRANSIENT_BACKGROUND = 8;
 
     /** @hide Process is in the background running a backup/restore operation. */
-    public static final int PROCESS_STATE_BACKUP = 8;
+    public static final int PROCESS_STATE_BACKUP = 9;
 
     /** @hide Process is in the background running a service.  Unlike oom_adj, this level
      * is used for both the normal running in background state and the executing
      * operations state. */
     @UnsupportedAppUsage
-    public static final int PROCESS_STATE_SERVICE = 9;
+    public static final int PROCESS_STATE_SERVICE = 10;
 
     /** @hide Process is in the background running a receiver.   Note that from the
      * perspective of oom_adj, receivers run at a higher foreground level, but for our
      * prioritization here that is not necessary and putting them below services means
      * many fewer changes in some process states as they receive broadcasts. */
     @UnsupportedAppUsage
-    public static final int PROCESS_STATE_RECEIVER = 10;
+    public static final int PROCESS_STATE_RECEIVER = 11;
 
     /** @hide Same as {@link #PROCESS_STATE_TOP} but while device is sleeping. */
-    public static final int PROCESS_STATE_TOP_SLEEPING = 11;
+    public static final int PROCESS_STATE_TOP_SLEEPING = 12;
 
     /** @hide Process is in the background, but it can't restore its state so we want
      * to try to avoid killing it. */
-    public static final int PROCESS_STATE_HEAVY_WEIGHT = 12;
+    public static final int PROCESS_STATE_HEAVY_WEIGHT = 13;
 
     /** @hide Process is in the background but hosts the home activity. */
     @UnsupportedAppUsage
-    public static final int PROCESS_STATE_HOME = 13;
+    public static final int PROCESS_STATE_HOME = 14;
 
     /** @hide Process is in the background but hosts the last shown activity. */
-    public static final int PROCESS_STATE_LAST_ACTIVITY = 14;
+    public static final int PROCESS_STATE_LAST_ACTIVITY = 15;
 
     /** @hide Process is being cached for later use and contains activities. */
     @UnsupportedAppUsage
-    public static final int PROCESS_STATE_CACHED_ACTIVITY = 15;
+    public static final int PROCESS_STATE_CACHED_ACTIVITY = 16;
 
     /** @hide Process is being cached for later use and is a client of another cached
      * process that contains activities. */
-    public static final int PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 16;
+    public static final int PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 17;
 
     /** @hide Process is being cached for later use and has an activity that corresponds
      * to an existing recent task. */
-    public static final int PROCESS_STATE_CACHED_RECENT = 17;
+    public static final int PROCESS_STATE_CACHED_RECENT = 18;
 
     /** @hide Process is being cached for later use and is empty. */
-    public static final int PROCESS_STATE_CACHED_EMPTY = 18;
+    public static final int PROCESS_STATE_CACHED_EMPTY = 19;
 
     /** @hide Process does not exist. */
-    public static final int PROCESS_STATE_NONEXISTENT = 19;
+    public static final int PROCESS_STATE_NONEXISTENT = 20;
 
     // NOTE: If PROCESS_STATEs are added, then new fields must be added
     // to frameworks/base/core/proto/android/app/enums.proto and the following method must
@@ -594,6 +597,7 @@ public class ActivityManager {
                 return AppProtoEnums.PROCESS_STATE_PERSISTENT_UI;
             case PROCESS_STATE_TOP:
                 return AppProtoEnums.PROCESS_STATE_TOP;
+            case PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
             case PROCESS_STATE_FOREGROUND_SERVICE:
                 return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
             case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
@@ -644,6 +648,12 @@ public class ActivityManager {
     /** @hide Should this process state be considered a background state? */
     public static final boolean isProcStateBackground(int procState) {
         return procState >= PROCESS_STATE_TRANSIENT_BACKGROUND;
+    }
+
+    /** @hide Is this a foreground service type? */
+    public static boolean isForegroundService(int procState) {
+        return procState == PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
+                || procState == PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
     /** @hide requestType for assist context: only basic information. */
@@ -2874,7 +2884,7 @@ public class ActivityManager {
                 return IMPORTANCE_PERCEPTIBLE;
             } else if (procState >= PROCESS_STATE_IMPORTANT_FOREGROUND) {
                 return IMPORTANCE_VISIBLE;
-            } else if (procState >= PROCESS_STATE_FOREGROUND_SERVICE) {
+            } else if (procState >= PROCESS_STATE_FOREGROUND_SERVICE_LOCATION) {
                 return IMPORTANCE_FOREGROUND_SERVICE;
             } else {
                 return IMPORTANCE_FOREGROUND;
@@ -2936,6 +2946,7 @@ public class ActivityManager {
                 return PROCESS_STATE_IMPORTANT_FOREGROUND;
             } else if (importance >= IMPORTANCE_FOREGROUND_SERVICE) {
                 return PROCESS_STATE_FOREGROUND_SERVICE;
+                // TODO: Asymmetrical mapping for LOCATION service type. Ok?
             } else {
                 return PROCESS_STATE_TOP;
             }

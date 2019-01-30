@@ -24,8 +24,6 @@ import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
-import android.hardware.camera2.params.MandatoryStreamCombination;
-import android.hardware.camera2.params.MandatoryStreamCombination.MandatoryStreamInformation;
 import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
 import android.util.Rational;
@@ -92,11 +90,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         }
 
         /**
-         * Visible for testing and vendor extensions only.
+         * Construct a new Key with a given name and type.
          *
-         * @hide
+         * <p>Normally, applications should use the existing Key definitions in
+         * {@link CameraCharacteristics}, and not need to construct their own Key objects. However,
+         * they may be useful for testing purposes and for defining custom camera
+         * characteristics.</p>
          */
-        @UnsupportedAppUsage
         public Key(String name, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name,  type);
         }

@@ -34,6 +34,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
+import android.view.IDisplayFoldListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.RemoteAnimationAdapter;
@@ -401,6 +402,16 @@ interface IWindowManager
      * Return the touch region for the current IME window, or an empty region if there is none.
      */
     Region getCurrentImeTouchRegion();
+
+    /**
+     * Registers an IDisplayFoldListener.
+     */
+    void registerDisplayFoldListener(IDisplayFoldListener listener);
+
+    /**
+     * Unregisters an IDisplayFoldListener.
+     */
+    void unregisterDisplayFoldListener(IDisplayFoldListener listener);
 
     /**
      * Starts a window trace.

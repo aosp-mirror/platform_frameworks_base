@@ -56,6 +56,7 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_WELLBEING = 7;
     public static final int PACKAGE_DOCUMENTER = 8;
     public static final int PACKAGE_CONFIGURATOR = 9;
+    public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 10;
     @IntDef(value = {
         PACKAGE_SYSTEM,
         PACKAGE_SETUP_WIZARD,
@@ -67,6 +68,7 @@ public abstract class PackageManagerInternal {
         PACKAGE_WELLBEING,
         PACKAGE_DOCUMENTER,
         PACKAGE_CONFIGURATOR,
+        PACKAGE_INCIDENT_REPORT_APPROVER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {}

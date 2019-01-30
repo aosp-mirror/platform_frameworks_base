@@ -3787,6 +3787,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return findWindowIdLocked(token);
             }
         }
+
+        public boolean checkAccessibilityAccess(AbstractAccessibilityServiceConnection service) {
+            final String packageName = service.getComponentName().getPackageName();
+            final ResolveInfo resolveInfo = service.getServiceInfo().getResolveInfo();
+
+            if (resolveInfo == null) {
+                // For InteractionBridge and UiAutomation
+                return true;
+            }
+
+            final int uid = resolveInfo.serviceInfo.applicationInfo.uid;
+            final long identityToken = Binder.clearCallingIdentity();
+            try {
+                // For the caller is system, just block the data to a11y services.
+                if (OWN_PROCESS_ID == Binder.getCallingPid()) {
+                    return mAppOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_ACCESS_ACCESSIBILITY,
+                            uid, packageName) == AppOpsManager.MODE_ALLOWED;
+                }
+
+                return mAppOpsManager.noteOp(AppOpsManager.OPSTR_ACCESS_ACCESSIBILITY,
+                        uid, packageName) == AppOpsManager.MODE_ALLOWED;
+            } finally {
+                Binder.restoreCallingIdentity(identityToken);
+            }
+        }
     }
 
     /**

@@ -104,6 +104,8 @@ public final class IpPrefix implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
     public IpPrefix(String prefix) {
         // We don't reuse the (InetAddress, int) constructor because "error: call to this must be
         // first statement in constructor". We could factor out setting the member variables to an

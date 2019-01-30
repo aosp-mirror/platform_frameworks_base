@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.text.BreakIterator;
@@ -258,8 +259,9 @@ public class SmartReplyView extends ViewGroup {
                 return false;
             }
 
-            smartReplyController.smartReplySent(
-                    entry, replyIndex, b.getText(), smartReplies.fromAssistant);
+            smartReplyController.smartReplySent(entry, replyIndex, b.getText(),
+                    smartReplies.fromAssistant,
+                    NotificationLogger.getNotificationLocation(entry).toMetricsEventEnum());
             Bundle results = new Bundle();
             results.putString(smartReplies.remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -372,8 +374,17 @@ public class SmartReplyView extends ViewGroup {
         // reply button is added.
         SmartSuggestionMeasures actionsMeasures = null;
 
+        final int maxNumActions = mConstants.getMaxNumActions();
+        int numShownActions = 0;
+
         for (View child : smartSuggestions) {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            if (maxNumActions != -1 // -1 means 'no limit'
+                    && lp.buttonType == SmartButtonType.ACTION
+                    && numShownActions >= maxNumActions) {
+                // We've reached the maximum number of actions, don't add another one!
+                continue;
+            }
 
             child.setPadding(accumulatedMeasures.mButtonPaddingHorizontal, child.getPaddingTop(),
                     accumulatedMeasures.mButtonPaddingHorizontal, child.getPaddingBottom());
@@ -457,6 +468,9 @@ public class SmartReplyView extends ViewGroup {
 
             lp.show = true;
             displayedChildCount++;
+            if (lp.buttonType == SmartButtonType.ACTION) {
+                numShownActions++;
+            }
         }
 
         if (mSmartRepliesGeneratedByAssistant) {

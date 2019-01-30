@@ -24,10 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -75,7 +71,6 @@ class GnssVisibilityControl {
     private final Context mContext;
 
     private boolean mIsMasterLocationSettingsEnabled = true;
-    private boolean mIsOnRoamingNetwork = false;
 
     // Number of non-framework location access proxy apps is expected to be small (< 5).
     private static final int HASH_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
@@ -98,7 +93,6 @@ class GnssVisibilityControl {
 
         // Listen for proxy app package installation, removal events.
         listenForProxyAppsPackageUpdates();
-        listenForRoamingNetworkUpdate();
 
         // TODO(b/122855984): Handle global location settings on/off.
     }
@@ -348,8 +342,7 @@ class GnssVisibilityControl {
     }
 
     private boolean shouldDisableNfwLocationAccess() {
-        // TODO(b/122856189): Add disableWhenRoaming configuration per proxy app.
-        return mIsOnRoamingNetwork || !mIsMasterLocationSettingsEnabled;
+        return !mIsMasterLocationSettingsEnabled;
     }
 
     private String[] getLocationPermissionEnabledProxyApps() {
@@ -457,30 +450,6 @@ class GnssVisibilityControl {
                 notification.mInEmergencyMode,
                 notification.mIsCachedLocation,
                 isPermissionMismatched);
-    }
-
-    private void listenForRoamingNetworkUpdate() {
-        // Register for network capabilities changes to monitor roaming changes.
-        ConnectivityManager mConnMgr = (ConnectivityManager) mContext.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-        networkRequestBuilder.addCapability(NetworkCapabilities.TRANSPORT_CELLULAR);
-        NetworkRequest networkRequest = networkRequestBuilder.build();
-        mConnMgr.registerNetworkCallback(networkRequest,
-                new ConnectivityManager.NetworkCallback() {
-                    @Override
-                    public void onCapabilitiesChanged(Network network,
-                            NetworkCapabilities capabilities) {
-                        boolean isRoaming = !capabilities.hasTransport(
-                                NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
-                        // No locking required for this test and set because the callback
-                        // runs in mHandler thread.
-                        if (mIsOnRoamingNetwork != isRoaming) {
-                            mIsOnRoamingNetwork = isRoaming;
-                            updateNfwLocationAccessProxyAppsInGnssHal();
-                        }
-                    }
-                }, mHandler);
     }
 
     private void runOnHandler(Runnable event) {

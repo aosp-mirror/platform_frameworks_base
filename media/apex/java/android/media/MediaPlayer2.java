@@ -4844,7 +4844,12 @@ public class MediaPlayer2 implements AutoCloseable
                 msg = mTaskHandler.obtainMessage(
                         MEDIA_ERROR, status, MEDIA_ERROR_UNKNOWN, null);
             }
-            mTaskHandler.sendMessage(msg);
+            mTaskHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mTaskHandler.handleMessage(msg, mSrcId);
+                }
+            });
 
             sendDrmEvent(new DrmEventNotifier() {
                 @Override

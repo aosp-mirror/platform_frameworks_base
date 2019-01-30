@@ -2357,8 +2357,7 @@ public class MediaRouter {
                 return;
             }
             if (mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
-                @VolumeProvider.ControlType int volumeControl =
-                        VolumeProvider.VOLUME_CONTROL_FIXED;
+                int volumeControl = VolumeProvider.VOLUME_CONTROL_FIXED;
                 switch (mVolumeHandling) {
                     case RemoteControlClient.PLAYBACK_VOLUME_VARIABLE:
                         volumeControl = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
@@ -2384,8 +2383,7 @@ public class MediaRouter {
 
         class SessionVolumeProvider extends VolumeProvider {
 
-            public SessionVolumeProvider(@VolumeProvider.ControlType int volumeControl,
-                    int maxVolume, int currentVolume) {
+            SessionVolumeProvider(int volumeControl, int maxVolume, int currentVolume) {
                 super(volumeControl, maxVolume, currentVolume);
             }
 

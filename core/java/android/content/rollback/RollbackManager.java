@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.ParceledListSlice;
+import android.content.pm.VersionedPackage;
 import android.os.RemoteException;
 
 import java.util.List;
@@ -91,6 +93,50 @@ public final class RollbackManager {
     }
 
     /**
+     * Status of a rollback commit. Will be one of
+     * {@link #STATUS_SUCCESS}, {@link #STATUS_FAILURE},
+     * {@link #STATUS_FAILURE_ROLLBACK_UNAVAILABLE}, {@link #STATUS_FAILURE_INSTALL}
+     *
+     * @see Intent#getIntExtra(String, int)
+     */
+    public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
+
+    /**
+     * Detailed string representation of the status, including raw details that
+     * are useful for debugging.
+     *
+     * @see Intent#getStringExtra(String)
+     */
+    public static final String EXTRA_STATUS_MESSAGE =
+            "android.content.rollback.extra.STATUS_MESSAGE";
+
+    /**
+     * The rollback was successfully committed.
+     */
+    public static final int STATUS_SUCCESS = 0;
+
+    /**
+     * The rollback could not be committed due to some generic failure.
+     *
+     * @see #EXTRA_STATUS_MESSAGE
+     */
+    public static final int STATUS_FAILURE = 1;
+
+    /**
+     * The rollback could not be committed because it was no longer available.
+     *
+     * @see #EXTRA_STATUS_MESSAGE
+     */
+    public static final int STATUS_FAILURE_ROLLBACK_UNAVAILABLE = 2;
+
+    /**
+     * The rollback failed to install successfully.
+     *
+     * @see #EXTRA_STATUS_MESSAGE
+     */
+    public static final int STATUS_FAILURE_INSTALL = 3;
+
+    /**
      * Commit the rollback with given id, rolling back all versions of the
      * packages to the last good versions previously installed on the device
      * as specified in the corresponding RollbackInfo object. The
@@ -99,18 +145,22 @@ public final class RollbackManager {
      * rollback object, which can happen if a package has been updated or a
      * rollback expired since the rollback object was retrieved from
      * {@link #getAvailableRollbacks()}.
-     * <p>
-     * TODO: Specify the returns status codes.
      *
      * @param rollbackId ID of the rollback to commit
-     * @param statusReceiver where to deliver the results
+     * @param causePackages package versions to record as the motivation for this
+     *                      rollback.
+     * @param statusReceiver where to deliver the results. Intents sent to
+     *                       this receiver contain {@link #EXTRA_STATUS}
+     *                       and {@link #EXTRA_STATUS_MESSAGE}.
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
-    public void commitRollback(int rollbackId, @NonNull IntentSender statusReceiver) {
+    public void commitRollback(int rollbackId, @NonNull List<VersionedPackage> causePackages,
+            @NonNull IntentSender statusReceiver) {
         try {
-            mBinder.commitRollback(rollbackId, mCallerPackageName, statusReceiver);
+            mBinder.commitRollback(rollbackId, new ParceledListSlice(causePackages),
+                    mCallerPackageName, statusReceiver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

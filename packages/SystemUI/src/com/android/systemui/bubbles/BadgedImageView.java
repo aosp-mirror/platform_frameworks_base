@@ -16,7 +16,9 @@
 package com.android.systemui.bubbles;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -38,6 +40,7 @@ public class BadgedImageView extends ImageView {
 
     private float mDotScale = 0f;
     private int mUpdateDotColor;
+    private int mBubbleDefaultBgColor;
     private boolean mShowUpdateDot;
     private boolean mOnLeft;
 
@@ -59,6 +62,11 @@ public class BadgedImageView extends ImageView {
         setScaleType(ScaleType.CENTER_CROP);
         mIconSize = getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
         mDotRenderer = new BadgeRenderer(mIconSize);
+
+        TypedArray ta = context.obtainStyledAttributes(
+                new int[] {android.R.attr.colorBackgroundFloating});
+        mBubbleDefaultBgColor = ta.getColor(0, Color.WHITE);
+        ta.recycle();
     }
 
     // TODO: Clipping oval path isn't great: rerender image into a separate, rounded bitmap and
@@ -70,6 +78,7 @@ public class BadgedImageView extends ImageView {
         mClipPath.addOval(getPaddingStart(), getPaddingTop(),
                 getWidth() - getPaddingEnd(), getHeight() - getPaddingBottom(), Path.Direction.CW);
         canvas.clipPath(mClipPath);
+        canvas.drawColor(mBubbleDefaultBgColor);
         super.onDraw(canvas);
 
         // After we've circle cropped what we're showing, restore so we don't clip the badge

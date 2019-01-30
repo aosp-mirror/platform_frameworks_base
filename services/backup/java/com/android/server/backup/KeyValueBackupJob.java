@@ -58,8 +58,10 @@ public class KeyValueBackupJob extends JobService {
     @GuardedBy("KeyValueBackupJob.class")
     private static final SparseLongArray sNextScheduledForUserId = new SparseLongArray();
 
-    private static final int MIN_JOB_ID = 52417896;
-    private static final int MAX_JOB_ID = 52418896;
+    @VisibleForTesting
+    public static final int MIN_JOB_ID = 52417896;
+    @VisibleForTesting
+    public static final int MAX_JOB_ID = 52418896;
 
     public static void schedule(int userId, Context ctx, BackupManagerConstants constants) {
         schedule(userId, ctx, 0, constants);

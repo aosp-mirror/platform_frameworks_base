@@ -126,14 +126,17 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnKeepShowing = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         closeControls(v);
-        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setType(MetricsEvent.TYPE_ACTION)
                 .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_STAY_SILENT));
     };
 
     private OnClickListener mOnToggleSilent = v -> {
         Runnable saveImportance = () -> {
             swapContent(ACTION_TOGGLE_SILENT, true /* animate */);
-            mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+            mMetricsLogger.write(getLogMaker()
+                    .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                    .setType(MetricsEvent.TYPE_ACTION)
                     .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_ALERT_ME));
         };
         if (mCheckSaveListener != null) {
@@ -146,7 +149,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnStopOrMinimizeNotifications = v -> {
         Runnable saveImportance = () -> {
             swapContent(ACTION_BLOCK, true /* animate */);
-            mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+            mMetricsLogger.write(getLogMaker()
+                    .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                    .setType(MetricsEvent.TYPE_ACTION)
                     .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_BLOCKED));
         };
         if (mCheckSaveListener != null) {
@@ -162,7 +167,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
         mMetricsLogger.write(importanceChangeLogMaker().setType(MetricsEvent.TYPE_DISMISS));
         swapContent(ACTION_UNDO, true /* animate */);
-        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setType(MetricsEvent.TYPE_DISMISS)
                 .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_UNDO));
     };
 
@@ -263,7 +269,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindPrompt();
         bindButtons();
 
-        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setType(MetricsEvent.TYPE_OPEN)
                 .setSubtype(MetricsEvent.BLOCKING_HELPER_DISPLAY));
     }
 
@@ -609,8 +616,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         confirmation.setAlpha(1f);
         header.setVisibility(VISIBLE);
         header.setAlpha(1f);
-        mMetricsLogger.write(getLogMaker().setType(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                .setSubtype(MetricsEvent.BLOCKING_HELPER_DISMISS));
+        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                .setType(MetricsEvent.TYPE_CLOSE));
     }
 
     @Override
@@ -758,6 +765,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private LogMaker getLogMaker() {
-        return mSbn.getLogMaker().setCategory(MetricsEvent.NOTIFICATION_ITEM);
+        return mSbn.getLogMaker();
     }
 }

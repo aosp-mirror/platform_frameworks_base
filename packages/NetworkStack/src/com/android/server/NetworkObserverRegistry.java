@@ -18,11 +18,16 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
+import android.net.InetAddresses;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
+import android.net.RouteInfo;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * all INetworkManagementEventObserver objects that have registered with it.
  */
 public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub {
+    private static final String TAG = NetworkObserverRegistry.class.getSimpleName();
 
     /**
      * Constructs a new NetworkObserverRegistry.
@@ -50,7 +56,7 @@ public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub 
         netd.registerUnsolicitedEventListener(this);
     }
 
-    private final ConcurrentHashMap<NetworkObserver, Handler> mObservers =
+    private final ConcurrentHashMap<NetworkObserver, Optional<Handler>> mObservers =
             new ConcurrentHashMap<>();
 
     /**
@@ -58,7 +64,20 @@ public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub 
      * This method may be called on any thread.
      */
     public void registerObserver(@NonNull NetworkObserver observer, @NonNull Handler handler) {
-        mObservers.put(observer, handler);
+        if (handler == null) {
+            throw new IllegalArgumentException("handler must be non-null");
+        }
+        mObservers.put(observer, Optional.of(handler));
+    }
+
+    /**
+     * Registers the specified observer, and start sending callbacks to it.
+     *
+     * <p>This method must only be called with callbacks that are nonblocking, such as callbacks
+     * that only send a message to a StateMachine.
+     */
+    public void registerObserverForNonblockingCallback(@NonNull NetworkObserver observer) {
+        mObservers.put(observer, Optional.empty());
     }
 
     /**
@@ -77,9 +96,19 @@ public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub 
     private void invokeForAllObservers(@NonNull final NetworkObserverEventCallback callback) {
         // ConcurrentHashMap#entrySet is weakly consistent: observers that were in the map before
         // creation will be processed, those added during traversal may or may not.
-        for (Map.Entry<NetworkObserver, Handler> entry : mObservers.entrySet()) {
+        for (Map.Entry<NetworkObserver, Optional<Handler>> entry : mObservers.entrySet()) {
             final NetworkObserver observer = entry.getKey();
-            entry.getValue().post(() -> callback.sendCallback(observer));
+            final Optional<Handler> handler = entry.getValue();
+            if (handler.isPresent()) {
+                handler.get().post(() -> callback.sendCallback(observer));
+                return;
+            }
+
+            try {
+                callback.sendCallback(observer);
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Error sending callback to observer", e);
+            }
         }
     }
 
@@ -138,10 +167,13 @@ public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub 
 
     @Override
     public void onRouteChanged(boolean updated, String route, String gateway, String ifName) {
+        final RouteInfo processRoute = new RouteInfo(new IpPrefix(route),
+                ("".equals(gateway)) ? null : InetAddresses.parseNumericAddress(gateway),
+                ifName);
         if (updated) {
-            invokeForAllObservers(o -> o.onRouteUpdated(route, gateway, ifName));
+            invokeForAllObservers(o -> o.onRouteUpdated(processRoute));
         } else {
-            invokeForAllObservers(o -> o.onRouteRemoved(route, gateway, ifName));
+            invokeForAllObservers(o -> o.onRouteRemoved(processRoute));
         }
     }
 

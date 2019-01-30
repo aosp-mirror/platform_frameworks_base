@@ -218,6 +218,7 @@ public class AppOpsManager {
     @IntDef(flag = true, prefix = { "UID_STATE_" }, value = {
             UID_STATE_PERSISTENT,
             UID_STATE_TOP,
+            UID_STATE_FOREGROUND_SERVICE_LOCATION,
             UID_STATE_FOREGROUND_SERVICE,
             UID_STATE_FOREGROUND,
             UID_STATE_BACKGROUND,
@@ -248,18 +249,26 @@ public class AppOpsManager {
     public static final int UID_STATE_TOP = 1;
 
     /**
+     * Metrics about an op when its uid is running a foreground service with location type.
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 2;
+
+    /**
      * Metrics about an op when its uid is running a foreground service.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_FOREGROUND_SERVICE = 2;
+    public static final int UID_STATE_FOREGROUND_SERVICE = 3;
 
     /**
      * Last UID state in which we don't restrict what an op can do.
      * @hide
      */
-    public static final int UID_STATE_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
+    public static final int UID_STATE_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE_LOCATION;
 
     /**
      * Metrics about an op when its uid is in the foreground for any other reasons.
@@ -267,7 +276,7 @@ public class AppOpsManager {
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_FOREGROUND = 3;
+    public static final int UID_STATE_FOREGROUND = 4;
 
     /**
      * Metrics about an op when its uid is in the background for any reason.
@@ -275,7 +284,7 @@ public class AppOpsManager {
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_BACKGROUND = 4;
+    public static final int UID_STATE_BACKGROUND = 5;
 
     /**
      * Metrics about an op when its uid is cached.
@@ -283,13 +292,13 @@ public class AppOpsManager {
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_CACHED = 5;
+    public static final int UID_STATE_CACHED = 6;
 
     /**
      * Number of uid states we track.
      * @hide
      */
-    public static final int _NUM_UID_STATE = 6;
+    public static final int _NUM_UID_STATE = 7;
 
     // when adding one of these:
     //  - increment _NUM_OP
@@ -555,9 +564,11 @@ public class AppOpsManager {
     public static final int OP_WRITE_MEDIA_IMAGES = 86;
     /** @hide Has a legacy (non-isolated) view of storage. */
     public static final int OP_LEGACY_STORAGE = 87;
+    /** @hide Accessing accessibility features */
+    public static final int OP_ACCESS_ACCESSIBILITY = 88;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 88;
+    public static final int _NUM_OP = 89;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -826,6 +837,8 @@ public class AppOpsManager {
     public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
     /** @hide Has a legacy (non-isolated) view of storage. */
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+    /** @hide Interact with accessibility. */
+    public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -985,6 +998,7 @@ public class AppOpsManager {
             OP_READ_MEDIA_IMAGES,               // READ_MEDIA_IMAGES
             OP_WRITE_MEDIA_IMAGES,              // WRITE_MEDIA_IMAGES
             OP_LEGACY_STORAGE,                  // LEGACY_STORAGE
+            OP_ACCESS_ACCESSIBILITY,            // ACCESS_ACCESSIBILITY
     };
 
     /**
@@ -1079,6 +1093,7 @@ public class AppOpsManager {
             OPSTR_READ_MEDIA_IMAGES,
             OPSTR_WRITE_MEDIA_IMAGES,
             OPSTR_LEGACY_STORAGE,
+            OPSTR_ACCESS_ACCESSIBILITY,
     };
 
     /**
@@ -1174,6 +1189,7 @@ public class AppOpsManager {
             "READ_MEDIA_IMAGES",
             "WRITE_MEDIA_IMAGES",
             "LEGACY_STORAGE",
+            "ACCESS_ACCESSIBILITY",
     };
 
     /**
@@ -1270,6 +1286,7 @@ public class AppOpsManager {
             Manifest.permission.READ_MEDIA_IMAGES,
             null, // no permission for OP_WRITE_MEDIA_IMAGES
             null, // no permission for OP_LEGACY_STORAGE
+            null, // no permission for OP_ACCESS_ACCESSIBILITY
     };
 
     /**
@@ -1366,6 +1383,7 @@ public class AppOpsManager {
             null, // READ_MEDIA_IMAGES
             null, // WRITE_MEDIA_IMAGES
             null, // LEGACY_STORAGE
+            null, // ACCESS_ACCESSIBILITY
     };
 
     /**
@@ -1461,6 +1479,7 @@ public class AppOpsManager {
             false, // READ_MEDIA_IMAGES
             false, // WRITE_MEDIA_IMAGES
             false, // LEGACY_STORAGE
+            false, // ACCESS_ACCESSIBILITY
     };
 
     /**
@@ -1555,6 +1574,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // READ_MEDIA_IMAGES
             AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_IMAGES
             AppOpsManager.MODE_DEFAULT, // LEGACY_STORAGE
+            AppOpsManager.MODE_ALLOWED, // ACCESS_ACCESSIBILITY
     };
 
     /**
@@ -1653,6 +1673,7 @@ public class AppOpsManager {
             false, // READ_MEDIA_IMAGES
             false, // WRITE_MEDIA_IMAGES
             false, // LEGACY_STORAGE
+            false, // ACCESS_ACCESSIBILITY
     };
 
     /**
@@ -3258,6 +3279,7 @@ public class AppOpsManager {
          *
          * @param uidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          *
@@ -3308,6 +3330,7 @@ public class AppOpsManager {
          *
          * @param uidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          *
@@ -3358,6 +3381,7 @@ public class AppOpsManager {
          *
          * @param uidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          *
@@ -4774,6 +4798,9 @@ public class AppOpsManager {
             }
             case UID_STATE_TOP: {
                 return "UID_STATE_TOP";
+            }
+            case UID_STATE_FOREGROUND_SERVICE_LOCATION: {
+                return "UID_STATE_FOREGROUND_SERVICE_LOCATION";
             }
             case UID_STATE_FOREGROUND_SERVICE: {
                 return "UID_STATE_FOREGROUND_SERVICE";

@@ -51,6 +51,7 @@ import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+
 import java.util.List;
 
 /**
@@ -1142,6 +1143,15 @@ public class IPackageManagerStub implements IPackageManager {
 
     @Override
     public String getWellbeingPackageName() throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public String getContentCaptureServicePackageName() throws RemoteException {
+        return null;
+    }
+
+    public String getIncidentReportApproverPackageName() throws RemoteException {
         return null;
     }
 

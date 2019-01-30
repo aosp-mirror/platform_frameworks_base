@@ -279,7 +279,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    protected class EnrollClientImpl extends EnrollClient {
+    protected abstract class EnrollClientImpl extends EnrollClient {
 
         public EnrollClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int userId, int groupId,

@@ -78,6 +78,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.IApplicationToken;
+import android.view.IDisplayFoldListener;
 import android.view.IWindowManager;
 import android.view.InputEventReceiver;
 import android.view.KeyEvent;
@@ -1455,6 +1456,16 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * WindowManagerPolicyConstants#ACTION_USER_ACTIVITY_NOTIFICATION on the next user activity.
      */
     public void requestUserActivityNotification();
+
+    /**
+     * Registers an IDisplayFoldListener.
+     */
+    default void registerDisplayFoldListener(IDisplayFoldListener listener) {}
+
+    /**
+     * Unregisters an IDisplayFoldListener.
+     */
+    default void unregisterDisplayFoldListener(IDisplayFoldListener listener) {}
 
     /**
      * Updates the flag about whether AOD is showing.

@@ -11396,7 +11396,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setAssistBlocked(boolean)
      * @attr ref android.R.styleable#View_assistBlocked
      */
-    @InspectableProperty
     public boolean isAssistBlocked() {
         return (mPrivateFlags3 & PFLAG3_ASSIST_BLOCKED) != 0;
     }
@@ -18272,7 +18271,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_scrollbarDefaultDelayBeforeFade
      */
-    @InspectableProperty
+    @InspectableProperty(name = "scrollbarDefaultDelayBeforeFade")
     public int getScrollBarDefaultDelayBeforeFade() {
         return mScrollCache == null ? ViewConfiguration.getScrollDefaultDelay() :
                 mScrollCache.scrollBarDefaultDelayBeforeFade;
@@ -18297,7 +18296,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_scrollbarFadeDuration
      */
-    @InspectableProperty
+    @InspectableProperty(name = "scrollbarFadeDuration")
     public int getScrollBarFadeDuration() {
         return mScrollCache == null ? ViewConfiguration.getScrollBarFadeDuration() :
                 mScrollCache.scrollBarFadeDuration;
@@ -18322,7 +18321,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_scrollbarSize
      */
-    @InspectableProperty
+    @InspectableProperty(name = "scrollbarSize")
     public int getScrollBarSize() {
         return mScrollCache == null ? ViewConfiguration.get(mContext).getScaledScrollBarSize() :
                 mScrollCache.scrollBarSize;
@@ -18382,7 +18381,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = SCROLLBARS_OUTSIDE_OVERLAY, to = "OUTSIDE_OVERLAY"),
             @ViewDebug.IntToString(from = SCROLLBARS_OUTSIDE_INSET, to = "OUTSIDE_INSET")
     })
-    @InspectableProperty(enumMapping = {
+    @InspectableProperty(name = "scrollbarStyle", enumMapping = {
             @EnumMap(value = SCROLLBARS_INSIDE_OVERLAY, name = "insideOverlay"),
             @EnumMap(value = SCROLLBARS_INSIDE_INSET, name = "insideInset"),
             @EnumMap(value = SCROLLBARS_OUTSIDE_OVERLAY, name = "outsideOverlay"),

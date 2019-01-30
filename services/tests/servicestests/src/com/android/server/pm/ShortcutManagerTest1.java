@@ -75,6 +75,7 @@ import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.PinItemRequest;
@@ -6272,6 +6273,17 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Has permission, now it should pass.
         mCallerPermissions.add(permission.RESET_SHORTCUT_MANAGER_THROTTLING);
         mManager.onApplicationActive(CALLING_PACKAGE_1, USER_0);
+    }
+
+    public void testGetShareTargets_permission() {
+        IntentFilter filter = new IntentFilter();
+
+        assertExpectException(SecurityException.class, "Missing permission", () ->
+                mManager.getShareTargets(filter));
+
+        // Has permission, now it should pass.
+        mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
+        mManager.getShareTargets(filter);
     }
 
     public void testDumpsys_crossProfile() {

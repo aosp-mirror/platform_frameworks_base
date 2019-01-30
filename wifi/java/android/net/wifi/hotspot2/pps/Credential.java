@@ -1216,7 +1216,15 @@ public final class Credential implements Parcelable {
                 Arrays.equals(key1.getEncoded(), key2.getEncoded());
     }
 
-    private static boolean isX509CertificateEquals(X509Certificate cert1, X509Certificate cert2) {
+    /**
+     * Verify two X.509 certificates are identical.
+     *
+     * @param cert1 a certificate to compare
+     * @param cert2 a certificate to compare
+     * @return {@code true} if given certificates are the same each other, {@code false} otherwise.
+     * @hide
+     */
+    public static boolean isX509CertificateEquals(X509Certificate cert1, X509Certificate cert2) {
         if (cert1 == null && cert2 == null) {
             return true;
         }

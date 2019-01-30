@@ -26,8 +26,8 @@ interface IRollbackManager {
     ParceledListSlice getAvailableRollbacks();
     ParceledListSlice getRecentlyExecutedRollbacks();
 
-    void commitRollback(int rollbackId, String callerPackageName,
-            in IntentSender statusReceiver);
+    void commitRollback(int rollbackId, in ParceledListSlice causePackages,
+            String callerPackageName, in IntentSender statusReceiver);
 
     // Exposed for use from the system server only. Callback from the package
     // manager during the install flow when user data can be restored for a given

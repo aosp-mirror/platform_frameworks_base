@@ -275,6 +275,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS) == 0) {
             return false;
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return false;
+        }
         try {
             mServiceInterface.onKeyEvent(keyEvent, sequenceNumber);
         } catch (RemoteException e) {
@@ -388,6 +391,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (mSecurityPolicy.mWindows == null) {
                 return null;
             }
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+                return null;
+            }
             List<AccessibilityWindowInfo> windows = new ArrayList<>();
             final int windowCount = mSecurityPolicy.mWindows.size();
             for (int i = 0; i < windowCount; i++) {
@@ -411,6 +417,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final boolean permissionGranted =
                     mSecurityPolicy.canRetrieveWindowsLocked(this);
             if (!permissionGranted) {
+                return null;
+            }
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
                 return null;
             }
             AccessibilityWindowInfo window = mSecurityPolicy.findA11yWindowInfoById(windowId);
@@ -454,6 +463,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 partialInteractiveRegion = null;
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
+        }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
         }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
@@ -511,6 +523,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
@@ -566,6 +581,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 partialInteractiveRegion = null;
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
+        }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
         }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
@@ -623,6 +641,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
@@ -678,6 +699,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
@@ -721,6 +745,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (!mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId)) {
                 return false;
             }
+        }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return false;
         }
         boolean returnValue =
                 mSystemSupport.performAccessibilityAction(resolvedWindowId, accessibilityNodeId,
@@ -974,6 +1001,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 return;
             }
 
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+                return;
+            }
             // Make a copy since during dispatch it is possible the event to
             // be modified to remove its source if the receiving service does
             // not have permission to access the window content.

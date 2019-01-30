@@ -9795,7 +9795,7 @@ public class BatteryStatsImpl extends BatteryStats {
             int uidRunningState;
             // Make special note of Foreground Services
             final boolean userAwareService =
-                    (procState == ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                    (ActivityManager.isForegroundService(procState));
             uidRunningState = BatteryStats.mapToInternalProcessState(procState);
 
             if (mProcessState == uidRunningState && userAwareService == mInForegroundService) {

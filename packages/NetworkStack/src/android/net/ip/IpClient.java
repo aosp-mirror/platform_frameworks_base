@@ -40,15 +40,12 @@ import android.net.ip.IIpClientCallbacks;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.shared.InitialConfiguration;
-import android.net.shared.NetdService;
 import android.net.shared.ProvisioningConfiguration;
 import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
 import android.os.ConditionVariable;
-import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.LocalLog;
@@ -64,7 +61,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
-import com.android.server.net.NetlinkTracker;
+import com.android.server.NetworkObserverRegistry;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -338,8 +335,9 @@ public class IpClient extends StateMachine {
     private final Dependencies mDependencies;
     private final CountDownLatch mShutdownLatch;
     private final ConnectivityManager mCm;
-    private final INetworkManagementService mNwService;
-    private final NetlinkTracker mNetlinkTracker;
+    private final INetd mNetd;
+    private final NetworkObserverRegistry mObserverRegistry;
+    private final IpClientLinkObserver mLinkObserver;
     private final WakeupMessage mProvisioningTimeoutAlarm;
     private final WakeupMessage mDhcpActionTimeoutAlarm;
     private final SharedLog mLog;
@@ -373,15 +371,6 @@ public class IpClient extends StateMachine {
     private final ConditionVariable mApfDataSnapshotComplete = new ConditionVariable();
 
     public static class Dependencies {
-        public INetworkManagementService getNMS() {
-            return INetworkManagementService.Stub.asInterface(
-                    ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
-        }
-
-        public INetd getNetd() {
-            return NetdService.getInstance();
-        }
-
         /**
          * Get interface parameters for the specified interface.
          */
@@ -390,26 +379,14 @@ public class IpClient extends StateMachine {
         }
     }
 
-    public IpClient(Context context, String ifName, IIpClientCallbacks callback) {
-        this(context, ifName, callback, new Dependencies());
-    }
-
-    /**
-     * An expanded constructor, useful for dependency injection.
-     * TODO: migrate all test users to mock IpClient directly and remove this ctor.
-     */
     public IpClient(Context context, String ifName, IIpClientCallbacks callback,
-            INetworkManagementService nwService) {
-        this(context, ifName, callback, new Dependencies() {
-            @Override
-            public INetworkManagementService getNMS() {
-                return nwService;
-            }
-        });
+            NetworkObserverRegistry observerRegistry) {
+        this(context, ifName, callback, observerRegistry, new Dependencies());
     }
 
     @VisibleForTesting
-    IpClient(Context context, String ifName, IIpClientCallbacks callback, Dependencies deps) {
+    IpClient(Context context, String ifName, IIpClientCallbacks callback,
+            NetworkObserverRegistry observerRegistry, Dependencies deps) {
         super(IpClient.class.getSimpleName() + "." + ifName);
         Preconditions.checkNotNull(ifName);
         Preconditions.checkNotNull(callback);
@@ -422,7 +399,7 @@ public class IpClient extends StateMachine {
         mDependencies = deps;
         mShutdownLatch = new CountDownLatch(1);
         mCm = mContext.getSystemService(ConnectivityManager.class);
-        mNwService = deps.getNMS();
+        mObserverRegistry = observerRegistry;
 
         sSmLogs.putIfAbsent(mInterfaceName, new SharedLog(MAX_LOG_RECORDS, mTag));
         mLog = sSmLogs.get(mInterfaceName);
@@ -433,19 +410,15 @@ public class IpClient extends StateMachine {
 
         // TODO: Consider creating, constructing, and passing in some kind of
         // InterfaceController.Dependencies class.
-        mInterfaceCtrl = new InterfaceController(mInterfaceName, deps.getNetd(), mLog);
+        mNetd = mContext.getSystemService(INetd.class);
+        mInterfaceCtrl = new InterfaceController(mInterfaceName, mNetd, mLog);
 
-        mNetlinkTracker = new NetlinkTracker(
+        mLinkObserver = new IpClientLinkObserver(
                 mInterfaceName,
-                new NetlinkTracker.Callback() {
-                    @Override
-                    public void update() {
-                        sendMessage(EVENT_NETLINK_LINKPROPERTIES_CHANGED);
-                    }
-                }) {
+                () -> sendMessage(EVENT_NETLINK_LINKPROPERTIES_CHANGED)) {
             @Override
-            public void interfaceAdded(String iface) {
-                super.interfaceAdded(iface);
+            public void onInterfaceAdded(String iface) {
+                super.onInterfaceAdded(iface);
                 if (mClatInterfaceName.equals(iface)) {
                     mCallback.setNeighborDiscoveryOffload(false);
                 } else if (!mInterfaceName.equals(iface)) {
@@ -457,8 +430,8 @@ public class IpClient extends StateMachine {
             }
 
             @Override
-            public void interfaceRemoved(String iface) {
-                super.interfaceRemoved(iface);
+            public void onInterfaceRemoved(String iface) {
+                super.onInterfaceRemoved(iface);
                 // TODO: Also observe mInterfaceName going down and take some
                 // kind of appropriate action.
                 if (mClatInterfaceName.equals(iface)) {
@@ -570,19 +543,11 @@ public class IpClient extends StateMachine {
     }
 
     private void startStateMachineUpdaters() {
-        try {
-            mNwService.registerObserver(mNetlinkTracker);
-        } catch (RemoteException e) {
-            logError("Couldn't register NetlinkTracker: %s", e);
-        }
+        mObserverRegistry.registerObserverForNonblockingCallback(mLinkObserver);
     }
 
     private void stopStateMachineUpdaters() {
-        try {
-            mNwService.unregisterObserver(mNetlinkTracker);
-        } catch (RemoteException e) {
-            logError("Couldn't unregister NetlinkTracker: %s", e);
-        }
+        mObserverRegistry.unregisterObserver(mLinkObserver);
     }
 
     @Override
@@ -805,7 +770,7 @@ public class IpClient extends StateMachine {
     // we should only call this if we know for sure that there are no IP addresses
     // assigned to the interface, etc.
     private void resetLinkProperties() {
-        mNetlinkTracker.clearLinkProperties();
+        mLinkObserver.clearLinkProperties();
         mConfiguration = null;
         mDhcpResults = null;
         mTcpBufferSizes = "";
@@ -984,10 +949,10 @@ public class IpClient extends StateMachine {
         //         - IPv6 DNS servers
         //
         // N.B.: this is fundamentally race-prone and should be fixed by
-        // changing NetlinkTracker from a hybrid edge/level model to an
+        // changing IpClientLinkObserver from a hybrid edge/level model to an
         // edge-only model, or by giving IpClient its own netlink socket(s)
         // so as to track all required information directly.
-        LinkProperties netlinkLinkProperties = mNetlinkTracker.getLinkProperties();
+        LinkProperties netlinkLinkProperties = mLinkObserver.getLinkProperties();
         newLp.setLinkAddresses(netlinkLinkProperties.getLinkAddresses());
         for (RouteInfo route : netlinkLinkProperties.getRoutes()) {
             newLp.addRoute(route);
@@ -1166,8 +1131,7 @@ public class IpClient extends StateMachine {
             // necessary or does reading from settings at startup suffice?).
             final int numSolicits = 5;
             final int interSolicitIntervalMs = 750;
-            setNeighborParameters(mDependencies.getNetd(), mInterfaceName,
-                    numSolicits, interSolicitIntervalMs);
+            setNeighborParameters(mNetd, mInterfaceName, numSolicits, interSolicitIntervalMs);
         } catch (Exception e) {
             mLog.e("Failed to adjust neighbor parameters", e);
             // Carry on using the system defaults (currently: 3, 1000);

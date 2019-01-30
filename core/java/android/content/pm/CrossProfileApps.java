@@ -18,7 +18,6 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -74,18 +73,6 @@ public class CrossProfileApps {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * @deprecated use {@link #startActivity(ComponentName, UserHandle)} instead.
-     *
-     * @removed
-     * @hide
-     */
-    @Deprecated
-    @UnsupportedAppUsage
-    public void startAnyActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
-        startActivity(component, targetUser);
     }
 
     /**

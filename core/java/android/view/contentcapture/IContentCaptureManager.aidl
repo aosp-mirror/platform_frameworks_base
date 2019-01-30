@@ -62,4 +62,14 @@ oneway interface IContentCaptureManager {
      * Requests the removal of user data for the calling user.
      */
     void removeUserData(in UserDataRemovalRequest request);
+
+    /**
+     * Returns whether the content capture feature is enabled for the calling user.
+     */
+    void isContentCaptureFeatureEnabled(in IResultReceiver result);
+
+    /**
+     * Sets whether the content capture feature is enabled for the given user.
+     */
+    void setContentCaptureFeatureEnabled(boolean enabled, in IResultReceiver result);
 }

@@ -132,7 +132,7 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
                                "broken file descriptor; fstat returned -1", nullptr, source);
     }
 
-    int dupDescriptor = dup(descriptor);
+    int dupDescriptor = fcntl(descriptor, F_DUPFD_CLOEXEC, 0);
     FILE* file = fdopen(dupDescriptor, "r");
     if (file == NULL) {
         close(dupDescriptor);

@@ -37,7 +37,7 @@ static std::string buildFileName(const std::string& locale) {
 
 static const uint8_t* mmapPatternFile(const std::string& locale) {
     const std::string hyFilePath = buildFileName(locale);
-    const int fd = open(hyFilePath.c_str(), O_RDONLY);
+    const int fd = open(hyFilePath.c_str(), O_RDONLY | O_CLOEXEC);
     if (fd == -1) {
         return nullptr;  // Open failed.
     }

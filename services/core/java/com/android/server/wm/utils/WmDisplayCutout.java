@@ -170,4 +170,9 @@ public class WmDisplayCutout {
     public int hashCode() {
         return Objects.hash(mInner, mFrameSize);
     }
+
+    @Override
+    public String toString() {
+        return "WmDisplayCutout{" + mInner + ", mFrameSize=" + mFrameSize + '}';
+    }
 }

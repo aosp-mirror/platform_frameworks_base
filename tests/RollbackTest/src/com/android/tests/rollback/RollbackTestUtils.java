@@ -21,12 +21,14 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.VersionedPackage;
 import android.content.rollback.RollbackManager;
 import android.support.test.InstrumentationRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * Utilities to facilitate testing rollbacks.
@@ -92,10 +94,18 @@ class RollbackTestUtils {
      * Commit the given rollback.
      * @throws AssertionError if the rollback fails.
      */
-    static void rollback(int rollbackId) throws InterruptedException {
+    static void rollback(int rollbackId, VersionedPackage... causePackages)
+            throws InterruptedException {
         RollbackManager rm = getRollbackManager();
-        rm.commitRollback(rollbackId, LocalIntentSender.getIntentSender());
-        assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
+        rm.commitRollback(rollbackId, Arrays.asList(causePackages),
+                LocalIntentSender.getIntentSender());
+        Intent result = LocalIntentSender.getIntentSenderResult();
+        int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
+                RollbackManager.STATUS_FAILURE);
+        if (status != RollbackManager.STATUS_SUCCESS) {
+            String message = result.getStringExtra(RollbackManager.EXTRA_STATUS_MESSAGE);
+            throw new AssertionError(message);
+        }
     }
 
     /**

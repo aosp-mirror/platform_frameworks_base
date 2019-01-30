@@ -2346,14 +2346,7 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device has biometric hardware to detect a fingerprint.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_FINGERPRINT_PRE_29 = "android.hardware.fingerprint";
-
-    /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device has biometric hardware to detect a fingerprint.
-     */
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_FINGERPRINT = "android.hardware.biometrics.fingerprint";
+    public static final String FEATURE_FINGERPRINT = "android.hardware.fingerprint";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -6731,6 +6724,29 @@ public abstract class PackageManager {
     public String getWellbeingPackageName() {
         throw new UnsupportedOperationException(
                 "getWellbeingPackageName not implemented in subclass");
+    }
+
+    /**
+     * @return the system defined content capture service package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getContentCaptureServicePackageName() {
+        throw new UnsupportedOperationException(
+                "getContentCaptureServicePackageName not implemented in subclass");
+    }
+
+    /**
+     * @return the incident report approver app package name, or null if it's not defined
+     * by the OEM.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public String getIncidentReportApproverPackageName() {
+        throw new UnsupportedOperationException(
+                "getIncidentReportApproverPackageName not implemented in subclass");
     }
 
     /**

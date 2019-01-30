@@ -422,12 +422,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
                 GlobalSettingsProto.CONTACTS_DATABASE_WAL_ENABLED);
 
-        final long contentCaptureToken = p.start(GlobalSettingsProto.CONTENT_CAPTURE);
-        dumpSetting(s, p,
-                Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED,
-                GlobalSettingsProto.ContentCapture.SERVICE_EXPLICITLY_ENABLED);
-        p.end(contentCaptureToken);
-
         final long dataToken = p.start(GlobalSettingsProto.DATA);
         // Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA intentionally excluded.
         dumpSetting(s, p,
@@ -707,17 +701,17 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS_GLES,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS_GLES);
         dumpSetting(s, p,
-                Settings.Global.GUP_DEV_ALL_APPS,
-                GlobalSettingsProto.Gpu.GUP_DEV_ALL_APPS);
+                Settings.Global.GAME_DRIVER_ALL_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_ALL_APPS);
         dumpSetting(s, p,
-                Settings.Global.GUP_DEV_OPT_IN_APPS,
-                GlobalSettingsProto.Gpu.GUP_DEV_OPT_IN_APPS);
+                Settings.Global.GAME_DRIVER_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_IN_APPS);
         dumpSetting(s, p,
-                Settings.Global.GUP_DEV_OPT_OUT_APPS,
-                GlobalSettingsProto.Gpu.GUP_DEV_OPT_OUT_APPS);
+                Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
         dumpSetting(s, p,
-                Settings.Global.GUP_BLACKLIST,
-                GlobalSettingsProto.Gpu.GUP_BLACKLIST);
+                Settings.Global.GAME_DRIVER_BLACKLIST,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_BLACKLIST);
         dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_WHITELIST,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_WHITELIST);

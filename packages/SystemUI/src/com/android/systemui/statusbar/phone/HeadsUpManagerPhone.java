@@ -359,6 +359,14 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     @Override
+    public boolean shouldExtendLifetime(NotificationEntry entry) {
+        // We should not defer the removal if reordering isn't allowed since otherwise
+        // these won't disappear until reordering is allowed again, which happens only once
+        // the notification panel is collapsed again.
+        return mVisualStabilityManager.isReorderingAllowed() && super.shouldExtendLifetime(entry);
+    }
+
+    @Override
     public void onConfigChanged(Configuration newConfig) {
         Resources resources = mContext.getResources();
         mStatusBarHeight = resources.getDimensionPixelSize(

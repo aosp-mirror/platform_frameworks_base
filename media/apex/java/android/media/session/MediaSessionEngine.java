@@ -56,7 +56,6 @@ public final class MediaSessionEngine implements AutoCloseable {
     private static final String TAG = "MediaSession";
 
     private final Object mLock = new Object();
-    private final int mMaxBitmapSize;
 
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
@@ -82,10 +81,9 @@ public final class MediaSessionEngine implements AutoCloseable {
      * @param cbStub A callback link that handles incoming command to {@link MediaSession.Callback}.
      */
     public MediaSessionEngine(@NonNull Context context, @NonNull SessionLink sessionLink,
-            @NonNull SessionCallbackLink cbLink, @NonNull CallbackStub cbStub, int maxBitmapSize) {
+            @NonNull SessionCallbackLink cbLink, @NonNull CallbackStub cbStub) {
         mSessionLink = sessionLink;
         mCbLink = cbLink;
-        mMaxBitmapSize = maxBitmapSize;
 
         cbStub.setSessionImpl(this);
         mSessionToken = new MediaSession.Token(mSessionLink.getController());
@@ -346,7 +344,6 @@ public final class MediaSessionEngine implements AutoCloseable {
         int fields = 0;
         MediaDescription description = null;
         if (metadata != null) {
-            metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
             if (metadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
                 duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
             }
@@ -451,12 +448,24 @@ public final class MediaSessionEngine implements AutoCloseable {
     }
 
     /**
+     * Returns the name of the package that sent the last media button, transport control, or
+     * command from controllers and the system. This is only valid while in a request callback, such
+     * as {@link MediaSession.Callback#onPlay}.
+     */
+    public String getCallingPackage() {
+        if (mCallbackHandler != null && mCallbackHandler.mCurrentControllerInfo != null) {
+            return mCallbackHandler.mCurrentControllerInfo.getPackageName();
+        }
+        return null;
+    }
+
+
+    /**
      * Notify the system that the remote volume changed.
      *
      * @param provider The provider that is handling volume changes.
-     * @hide
      */
-    public void notifyRemoteVolumeChanged(VolumeProvider provider) {
+    private void notifyRemoteVolumeChanged(VolumeProvider provider) {
         synchronized (mLock) {
             if (provider == null || provider != mVolumeProvider) {
                 Log.w(TAG, "Received update from stale volume provider");
@@ -468,18 +477,6 @@ public final class MediaSessionEngine implements AutoCloseable {
         } catch (RuntimeException e) {
             Log.e(TAG, "Error in notifyVolumeChanged", e);
         }
-    }
-
-    /**
-     * Returns the name of the package that sent the last media button, transport control, or
-     * command from controllers and the system. This is only valid while in a request callback, such
-     * as {@link MediaSession.Callback#onPlay}.
-     */
-    public String getCallingPackage() {
-        if (mCallbackHandler != null && mCallbackHandler.mCurrentControllerInfo != null) {
-            return mCallbackHandler.mCurrentControllerInfo.getPackageName();
-        }
-        return null;
     }
 
     private void dispatchPrepare(RemoteUserInfo caller) {

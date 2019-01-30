@@ -352,6 +352,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
                 } else {
                     return Property.Type.OBJECT;
                 }
+            case ARRAY:
+                return Property.Type.OBJECT;
             default:
                 throw new ProcessingException(
                         String.format("Unsupported return type %s.", returnType),

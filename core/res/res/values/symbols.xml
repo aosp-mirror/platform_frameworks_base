@@ -3515,6 +3515,7 @@
   <java-symbol type="layout" name="car_user_switching_dialog" />
   <java-symbol type="id" name="user_loading_avatar" />
   <java-symbol type="id" name="user_loading" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.Alert.UserSwitchingDialog" />
 
   <java-symbol type="string" name="battery_saver_description_with_learn_more" />
 
@@ -3532,6 +3533,7 @@
   <java-symbol type="integer" name="config_defaultRingVibrationIntensity" />
 
   <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
+  <java-symbol type="bool" name="config_lidControlsDisplayFold" />
 
   <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
   <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
@@ -3579,4 +3581,6 @@
   <!-- For Attention Service -->
   <java-symbol type="integer" name="config_attentionMaximumExtension" />
   <java-symbol type="integer" name="config_attentionApiTimeout" />
+
+  <java-symbol type="string" name="config_incidentReportApproverPackage" />
 </resources>

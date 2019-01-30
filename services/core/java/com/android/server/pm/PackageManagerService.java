@@ -42,7 +42,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRAD
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.INSTALL_ALLOW_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
@@ -202,8 +201,8 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
-import android.content.rollback.IRollbackManager;
 import android.content.res.Resources;
+import android.content.rollback.IRollbackManager;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
@@ -1351,6 +1350,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
+    final @Nullable String mIncidentReportApproverPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2880,6 +2880,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mConfiguratorPackage =
                     mContext.getString(R.string.config_deviceConfiguratorPackageName);
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
+            mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -20096,6 +20097,28 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public String getContentCaptureServicePackageName() {
+        String contentCaptureServiceName =
+                mContext.getString(R.string.config_defaultContentCaptureService);
+
+        if (TextUtils.isEmpty(contentCaptureServiceName)) {
+            return null;
+        }
+
+        int separatorIndex = contentCaptureServiceName.indexOf("/");
+
+        if (separatorIndex < 0) {
+            return null;
+        }
+
+        return contentCaptureServiceName.substring(0, separatorIndex);
+    }
+
+    public String getIncidentReportApproverPackageName() {
+        return mContext.getString(R.string.config_incidentReportApproverPackage);
+    }
+
+    @Override
     public void setApplicationEnabledSetting(String appPackageName,
             int newState, int flags, int userId, String callingPackage) {
         if (!sUserManager.exists(userId)) return;
@@ -23258,6 +23281,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mDocumenterPackage;
                 case PackageManagerInternal.PACKAGE_CONFIGURATOR:
                     return mConfiguratorPackage;
+                case PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER:
+                    return mIncidentReportApproverPackage;
             }
             return null;
         }

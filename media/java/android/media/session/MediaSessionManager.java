@@ -202,10 +202,10 @@ public final class MediaSessionManager {
             @Nullable ComponentName notificationListener, int userId) {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();
         try {
-            List<ControllerLink> binders = mService.getSessions(notificationListener, userId);
-            int size = binders.size();
+            List<MediaSession.Token> tokens = mService.getSessions(notificationListener, userId);
+            int size = tokens.size();
             for (int i = 0; i < size; i++) {
-                MediaController controller = new MediaController(mContext, binders.get(i));
+                MediaController controller = new MediaController(mContext, tokens.get(i));
                 controllers.add(controller);
             }
         } catch (RemoteException e) {

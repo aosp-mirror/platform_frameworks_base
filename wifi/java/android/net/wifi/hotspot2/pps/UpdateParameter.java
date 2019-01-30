@@ -16,6 +16,7 @@
 
 package android.net.wifi.hotspot2.pps;
 
+import android.net.wifi.ParcelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -23,6 +24,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -167,7 +169,7 @@ public final class UpdateParameter implements Parcelable {
     }
 
     /**
-     * SHA-256 fingerprint of the certificate located at {@link #trustRootCertUrl}
+     * SHA-256 fingerprint of the certificate located at {@code mTrustRootCertUrl}
      */
     private byte[] mTrustRootCertSha256Fingerprint = null;
     public void setTrustRootCertSha256Fingerprint(byte[] fingerprint) {
@@ -175,6 +177,31 @@ public final class UpdateParameter implements Parcelable {
     }
     public byte[] getTrustRootCertSha256Fingerprint() {
         return mTrustRootCertSha256Fingerprint;
+    }
+
+    /**
+     * CA (Certificate Authority) X509 certificates.
+     */
+    private X509Certificate mCaCertificate;
+
+    /**
+     * Set the CA (Certification Authority) certificate associated with Policy/Subscription update.
+     *
+     * @param caCertificate The CA certificate to set
+     * @hide
+     */
+    public void setCaCertificate(X509Certificate caCertificate) {
+        mCaCertificate = caCertificate;
+    }
+
+    /**
+     * Get the CA (Certification Authority) certificate associated with Policy/Subscription update.
+     *
+     * @return CA certificate associated and {@code null} if certificate is not set.
+     * @hide
+     */
+    public X509Certificate getCaCertificate() {
+        return mCaCertificate;
     }
 
     /**
@@ -202,6 +229,7 @@ public final class UpdateParameter implements Parcelable {
             mTrustRootCertSha256Fingerprint = Arrays.copyOf(source.mTrustRootCertSha256Fingerprint,
                     source.mTrustRootCertSha256Fingerprint.length);
         }
+        mCaCertificate = source.mCaCertificate;
     }
 
     @Override
@@ -219,6 +247,7 @@ public final class UpdateParameter implements Parcelable {
         dest.writeString(mBase64EncodedPassword);
         dest.writeString(mTrustRootCertUrl);
         dest.writeByteArray(mTrustRootCertSha256Fingerprint);
+        ParcelUtil.writeCertificate(dest, mCaCertificate);
     }
 
     @Override
@@ -239,14 +268,15 @@ public final class UpdateParameter implements Parcelable {
                 && TextUtils.equals(mBase64EncodedPassword, that.mBase64EncodedPassword)
                 && TextUtils.equals(mTrustRootCertUrl, that.mTrustRootCertUrl)
                 && Arrays.equals(mTrustRootCertSha256Fingerprint,
-                        that.mTrustRootCertSha256Fingerprint);
+                that.mTrustRootCertSha256Fingerprint)
+                && Credential.isX509CertificateEquals(mCaCertificate, that.mCaCertificate);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mUpdateIntervalInMinutes, mUpdateMethod, mRestriction, mServerUri,
                 mUsername, mBase64EncodedPassword, mTrustRootCertUrl,
-                mTrustRootCertSha256Fingerprint);
+                Arrays.hashCode(mTrustRootCertSha256Fingerprint), mCaCertificate);
     }
 
     @Override
@@ -361,6 +391,7 @@ public final class UpdateParameter implements Parcelable {
                 updateParam.setBase64EncodedPassword(in.readString());
                 updateParam.setTrustRootCertUrl(in.readString());
                 updateParam.setTrustRootCertSha256Fingerprint(in.createByteArray());
+                updateParam.setCaCertificate(ParcelUtil.readCertificate(in));
                 return updateParam;
             }
 

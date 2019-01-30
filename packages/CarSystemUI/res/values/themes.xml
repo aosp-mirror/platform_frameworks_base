@@ -21,4 +21,7 @@
     <!--This Theme contains attributes required for components from the car support lib -->
     <style name="PagedListTheme" parent="Theme.CarSupportWrapper.NoActionBar">
     </style>
+
+    <style name="Theme.Notification" parent="Theme.DeviceDefault.NoActionBar.Notification">
+    </style>
 </resources>

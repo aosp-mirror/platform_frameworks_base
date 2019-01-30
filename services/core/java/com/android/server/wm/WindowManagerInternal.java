@@ -313,6 +313,22 @@ public abstract class WindowManagerInternal {
     public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout);
 
     /**
+     * Overrides the display size.
+     *
+     * @param displayId The display to override the display size.
+     * @param width The width to override.
+     * @param height The height to override.
+     */
+    public abstract void setForcedDisplaySize(int displayId, int width, int height);
+
+    /**
+     * Recover the display size to real display size.
+     *
+     * @param displayId The display to recover the display size.
+     */
+    public abstract void clearForcedDisplaySize(int displayId);
+
+    /**
      * Adds a window token for a given window type.
      *
      * @param token The token to add.

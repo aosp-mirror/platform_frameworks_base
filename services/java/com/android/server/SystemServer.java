@@ -55,6 +55,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
@@ -91,6 +92,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.hdmi.HdmiControlService;
+import com.android.server.incident.IncidentCompanionService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.MultiClientInputMethodManagerService;
@@ -1856,6 +1858,11 @@ public final class SystemServer {
         mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
         traceEnd();
 
+        // Incidentd and dumpstated helper
+        traceBeginAndSlog("StartIncidentCompanionService");
+        mSystemServiceManager.startService(IncidentCompanionService.class);
+        traceEnd();
+
         if (safeMode) {
             traceBeginAndSlog("EnterSafeModeAndDisableJitCompilation");
             mActivityManagerService.enterSafeMode();
@@ -2212,10 +2219,9 @@ public final class SystemServer {
     }
 
     private void startContentCaptureService(@NonNull Context context) {
-
-        // Check if it was explicitly enabled by Settings
-        final String settings = Settings.Global.getString(context.getContentResolver(),
-                Settings.Global.CONTENT_CAPTURE_SERVICE_EXPLICITLY_ENABLED);
+        // Check if it was explicitly enabled by DeviceConfig
+        final String settings = DeviceConfig.getProperty(DeviceConfig.ContentCapture.NAMESPACE,
+                DeviceConfig.ContentCapture.PROPERTY_CONTENTCAPTURE_ENABLED);
         if (settings == null) {
             // Better be safe than sorry...
             Slog.d(TAG, "ContentCaptureService disabled because its not set by OEM");
@@ -2224,7 +2230,7 @@ public final class SystemServer {
         switch (settings) {
             case "always":
                 // Should be used only during development
-                Slog.d(TAG, "ContentCaptureService explicitly enabled by Settings");
+                Slog.d(TAG, "ContentCaptureService explicitly enabled by DeviceConfig");
                 break;
             case "default":
                 // Default case: check if OEM overlaid the resource that defines the service.

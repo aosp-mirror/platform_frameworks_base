@@ -1245,8 +1245,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Докоснете, за да видите всички мрежи"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Свързване"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Всички мрежи"</string>
-    <string name="wifi_suggestion_title" msgid="1524719325616630906">"Установена е връзка с Wi‑Fi мрежа, предложена от <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_content" msgid="4505530604935334589">"Искате ли да разрешите на <xliff:g id="NAME">%s</xliff:g> да ви предлага мрежи?"</string>
+    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ще се включи автоматично"</string>
@@ -1260,6 +1262,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi мрежата няма достъп до интернет"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Докоснете за опции"</string>
+    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промени в настройките ви за точка за достъп"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Честотната лента на точката ви за достъп е променена."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Това устройство не поддържа предпочитанието ви за използване само на честотната лента от 5 ГХц. Вместо това то ще я ползва, когато е възможно."</string>
@@ -1344,6 +1348,14 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отстраняване на грешки през USB"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Докоснете, за да изключите отстраняването на грешки през USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изберете, за да деактивирате отстраняването на грешки през USB."</string>
+    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Сигналът за програмна грешка се извлича…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели ли сигналът за програмна грешка?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Сигналът за програмна грешка се споделя…"</string>

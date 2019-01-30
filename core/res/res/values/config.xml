@@ -861,6 +861,11 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
+    <!-- Indicate whether closing the lid causes the device to enter the folded state which means
+         to get a smaller screen and opening the lid causes the device to enter the unfolded state
+         which means to get a larger screen. -->
+    <bool name="config_lidControlsDisplayFold">false</bool>
+
     <!-- Desk dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a desk dock.
@@ -3487,6 +3492,13 @@
          See android.attention.AttentionManagerService.
     -->
     <string name="config_defaultAttentionService" translatable="false"></string>
+
+    <!-- The package name for the incident report approver app.
+        This app is usually PermissionController or an app that replaces it.  When
+        a bugreport or incident report with EXPLICT-level sharing flags is going to be
+        shared, this app will be sent the PENDING_INCIDENT_REPORTS_CHANGED broadcast.
+    -->
+    <string name="config_incidentReportApproverPackage" translatable="false">com.android.permissioncontroller</string>
 
     <!-- The package name for the system's content capture service.
          This service must be trusted, as it can be activated without explicit consent of the user.

@@ -395,8 +395,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     /**
      * Tests that home activities can be started on the displays that supports system decorations.
      */
-    // TODO (b/118206886): Will add it back once launcher's patch is merged into master.
-    private void testStartHomeOnAllDisplays() {
+    @Test
+    public void testStartHomeOnAllDisplays() {
         // Create secondary displays.
         final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
         mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);

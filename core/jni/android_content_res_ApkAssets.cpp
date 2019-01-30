@@ -72,7 +72,7 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, jobject file_descri
     return 0;
   }
 
-  unique_fd dup_fd(::dup(fd));
+  unique_fd dup_fd(::fcntl(fd, F_DUPFD_CLOEXEC, 0));
   if (dup_fd < 0) {
     jniThrowIOException(env, errno);
     return 0;

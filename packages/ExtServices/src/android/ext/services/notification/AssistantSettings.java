@@ -46,24 +46,6 @@ final class AssistantSettings extends ContentObserver {
     private static final Uri NOTIFICATION_NEW_INTERRUPTION_MODEL_URI =
             Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL);
 
-    /**
-     * Flag determining whether the Notification Assistant should generate replies for
-     * notifications.
-     * <p>
-     * This flag belongs to the namespace: {@link DeviceConfig#NAMESPACE_NOTIFICATION_ASSISTANT}.
-     */
-    @VisibleForTesting
-    static final String KEY_GENERATE_REPLIES = "notification_assistant_generate_replies";
-
-    /**
-     * Flag determining whether the Notification Assistant should generate contextual actions in
-     * notifications.
-     * <p>
-     * This flag belongs to the namespace: {@link DeviceConfig#NAMESPACE_NOTIFICATION_ASSISTANT}.
-     */
-    @VisibleForTesting
-    static final String KEY_GENERATE_ACTIONS = "notification_assistant_generate_actions";
-
     private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final ContentResolver mResolver;
     private final int mUserId;
@@ -118,7 +100,7 @@ final class AssistantSettings extends ContentObserver {
 
     private void registerDeviceConfigs() {
         DeviceConfig.addOnPropertyChangedListener(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
+                DeviceConfig.NotificationAssistant.NAMESPACE,
                 this::postToHandler,
                 this::onDeviceConfigPropertyChanged);
 
@@ -132,7 +114,7 @@ final class AssistantSettings extends ContentObserver {
 
     @VisibleForTesting
     void onDeviceConfigPropertyChanged(String namespace, String name, String value) {
-        if (!DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT.equals(namespace)) {
+        if (!DeviceConfig.NotificationAssistant.NAMESPACE.equals(namespace)) {
             Log.e(LOG_TAG, "Received update from DeviceConfig for unrelated namespace: "
                     + namespace + " " + name + "=" + value);
             return;
@@ -143,8 +125,8 @@ final class AssistantSettings extends ContentObserver {
 
     private void updateFromDeviceConfigFlags() {
         String generateRepliesFlag = DeviceConfig.getProperty(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                KEY_GENERATE_REPLIES);
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES);
         if (TextUtils.isEmpty(generateRepliesFlag)) {
             mGenerateReplies = DEFAULT_GENERATE_REPLIES;
         } else {
@@ -154,8 +136,8 @@ final class AssistantSettings extends ContentObserver {
         }
 
         String generateActionsFlag = DeviceConfig.getProperty(
-                DeviceConfig.NAMESPACE_NOTIFICATION_ASSISTANT,
-                KEY_GENERATE_ACTIONS);
+                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS);
         if (TextUtils.isEmpty(generateActionsFlag)) {
             mGenerateActions = DEFAULT_GENERATE_ACTIONS;
         } else {

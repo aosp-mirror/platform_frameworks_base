@@ -124,7 +124,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
      */
     public boolean satisfiesNetworkSpecifier(@NonNull WifiNetworkSpecifier ns) {
         // None of these should be null by construction.
-        // {@link WifiNetworkConfigBuilder} enforces non-null in {@link WifiNetworkSpecifier}.
+        // {@link WifiNetworkSpecifier.Builder} enforces non-null in {@link WifiNetworkSpecifier}.
         // {@link WifiNetworkFactory} ensures non-null in {@link WifiNetworkAgentSpecifier}.
         checkNotNull(ns);
         checkNotNull(ns.ssidPatternMatcher);
