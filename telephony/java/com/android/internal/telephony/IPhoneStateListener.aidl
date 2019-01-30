@@ -27,6 +27,7 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
+import android.telephony.ims.ImsReasonInfo;
 
 oneway interface IPhoneStateListener {
     void onServiceStateChanged(in ServiceState serviceState);
@@ -58,5 +59,6 @@ oneway interface IPhoneStateListener {
     void onCallAttributesChanged(in CallAttributes callAttributes);
     void onEmergencyNumberListChanged(in Map emergencyNumberList);
     void onCallDisconnectCauseChanged(in int disconnectCause, in int preciseDisconnectCause);
+    void onImsCallDisconnectCauseChanged(in ImsReasonInfo imsReasonInfo);
 }
 
