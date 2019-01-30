@@ -46,8 +46,6 @@ import com.android.hotspot2.R;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-
-
 /**
  * Online Sign Up Login Web View launched during Provision Process of Hotspot 2.0 rel2.
  */
@@ -64,6 +62,7 @@ public class OsuLoginActivity extends Activity {
     private WebView mWebView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
+    private boolean mForceDisconnect = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -141,6 +140,7 @@ public class OsuLoginActivity extends Activity {
                 if (DBG) {
                     Log.d(TAG, "Lost for the current Network, close the browser");
                 }
+                mForceDisconnect = false; // It is already disconnected.
                 if (mNetwork.equals(network)) {
                     finishAndRemoveTask();
                 }
@@ -193,12 +193,6 @@ public class OsuLoginActivity extends Activity {
                 mWebView.goBack();
                 return true;
             }
-
-            // In case of back key, it needs to disconnect current connection with OSU AP to
-            // abort current Provisioning flow.
-            if (mWifiManager != null) {
-                mWifiManager.disconnect();
-            }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -207,6 +201,11 @@ public class OsuLoginActivity extends Activity {
     protected void onDestroy() {
         if (mNetworkCallback != null) {
             mCm.unregisterNetworkCallback(mNetworkCallback);
+            mNetworkCallback = null;
+        }
+        if (mWifiManager != null && mForceDisconnect) {
+            mWifiManager.disconnect();
+            mWifiManager = null;
         }
         super.onDestroy();
     }
@@ -232,6 +231,7 @@ public class OsuLoginActivity extends Activity {
 
     private class OsuWebViewClient extends WebViewClient {
         boolean mPageError = false;
+        boolean mRedirectResponseReceived = false;
 
         @Override
         public void onPageStarted(WebView view, String urlString, Bitmap favicon) {
@@ -247,6 +247,10 @@ public class OsuLoginActivity extends Activity {
 
             // Do not show the page error on UI.
             if (mPageError) {
+                if (mRedirectResponseReceived) {
+                    // Do not disconnect current connection while provisioning is in progress.
+                    mForceDisconnect = false;
+                }
                 finishAndRemoveTask();
             }
         }
@@ -255,6 +259,7 @@ public class OsuLoginActivity extends Activity {
         public void onReceivedError(WebView view, WebResourceRequest request,
                 WebResourceError error) {
             if (request.getUrl().toString().startsWith("http://127.0.0.1")) {
+                mRedirectResponseReceived = true;
                 view.stopLoading();
             }
 
@@ -266,5 +271,4 @@ public class OsuLoginActivity extends Activity {
             }
          }
     }
-
 }
