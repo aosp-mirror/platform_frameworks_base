@@ -686,6 +686,8 @@ interface IPackageManager {
 
     String getWellbeingPackageName();
 
+    String getAppPredictionServicePackageName();
+
     String getContentCaptureServicePackageName();
 
     String getIncidentReportApproverPackageName();

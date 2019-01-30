@@ -20103,7 +20103,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return mContext.getString(R.string.config_defaultWellbeingPackage);
     }
 
-    private String getAppPredictionServicePackageName() {
+    @Override
+    public String getAppPredictionServicePackageName() {
         String flattenedAppPredictionServiceComponentName =
                 mContext.getString(R.string.config_defaultAppPredictionService);
         if (flattenedAppPredictionServiceComponentName == null) {
@@ -23304,6 +23305,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mConfiguratorPackage;
                 case PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER:
                     return mIncidentReportApproverPackage;
+                case PackageManagerInternal.PACKAGE_APP_PREDICTOR:
+                    return mAppPredictionServicePackage;
             }
             return null;
         }

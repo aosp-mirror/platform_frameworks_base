@@ -1724,6 +1724,12 @@ public class PermissionManagerService {
                 // this app is the incident report approver, then it gets the permission.
                 allowed = true;
             }
+            if (!allowed && bp.isAppPredictor()
+                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                        PackageManagerInternal.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM))) {
+                // Special permissions for the system app predictor.
+                allowed = true;
+            }
         }
         return allowed;
     }
