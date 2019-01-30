@@ -3659,7 +3659,7 @@ package android.media.session {
   }
 
   public final class MediaSessionEngine implements java.lang.AutoCloseable {
-    ctor public MediaSessionEngine(@NonNull android.content.Context, @NonNull android.media.session.SessionLink, @NonNull android.media.session.SessionCallbackLink, @NonNull android.media.session.MediaSessionEngine.CallbackStub, int);
+    ctor public MediaSessionEngine(@NonNull android.content.Context, @NonNull android.media.session.SessionLink, @NonNull android.media.session.SessionCallbackLink, @NonNull android.media.session.MediaSessionEngine.CallbackStub);
     method public void close();
     method public String getCallingPackage();
     method @NonNull public android.media.session.MediaController getController();
