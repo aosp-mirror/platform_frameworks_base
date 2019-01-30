@@ -60,7 +60,6 @@ import android.widget.TextView;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.io.IOException;
@@ -107,11 +106,11 @@ public class CaptivePortalLoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCaptivePortal = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
         logMetricsEvent(MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_ACTIVITY);
 
         mCm = ConnectivityManager.from(this);
         mNetwork = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_NETWORK);
-        mCaptivePortal = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
         mUserAgent =
                 getIntent().getStringExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT);
         mUrl = getUrl();
@@ -637,7 +636,7 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private void logMetricsEvent(int event) {
-        MetricsLogger.action(this, event, getPackageName());
+        mCaptivePortal.logEvent(event, getPackageName());
     }
 
     private static final SparseArray<String> SSL_ERRORS = new SparseArray<>();
