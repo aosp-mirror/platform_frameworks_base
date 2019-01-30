@@ -120,8 +120,6 @@ public final class Zygote {
      * */
     protected static FileDescriptor sBlastulaPoolEventFD;
 
-    private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
-
     /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
      * in the abstract socket namespace. This socket name is what the new child zygote
@@ -213,7 +211,7 @@ public final class Zygote {
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir) {
-        VM_HOOKS.preFork();
+        ZygoteHooks.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
@@ -226,7 +224,7 @@ public final class Zygote {
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
         }
-        VM_HOOKS.postForkCommon();
+        ZygoteHooks.postForkCommon();
         return pid;
     }
 
@@ -275,7 +273,7 @@ public final class Zygote {
          *
          * TODO (chriswailes): Look into moving this to immediately after the fork.
          */
-        VM_HOOKS.postForkCommon();
+        ZygoteHooks.postForkCommon();
     }
 
     private static native void nativeSpecializeBlastula(int uid, int gid, int[] gids,
@@ -312,7 +310,7 @@ public final class Zygote {
      */
     public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
-        VM_HOOKS.preFork();
+        ZygoteHooks.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkSystemServer(
@@ -322,7 +320,7 @@ public final class Zygote {
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
         }
-        VM_HOOKS.postForkCommon();
+        ZygoteHooks.postForkCommon();
         return pid;
     }
 
@@ -390,7 +388,7 @@ public final class Zygote {
 
             // Disable some VM functionality and reset some system values
             // before forking.
-            VM_HOOKS.preFork();
+            ZygoteHooks.preFork();
             resetNicePriority();
 
             while (blastulaPoolCount++ < sBlastulaPoolMax) {
@@ -403,7 +401,7 @@ public final class Zygote {
 
             // Re-enable runtime services for the Zygote.  Blastula services
             // are re-enabled in specializeBlastula.
-            VM_HOOKS.postForkCommon();
+            ZygoteHooks.postForkCommon();
 
             Log.i("zygote", "Filled the blastula pool. New blastulas: " + numBlastulasToSpawn);
         }
@@ -817,12 +815,12 @@ public final class Zygote {
 
     private static void callPostForkSystemServerHooks() {
         // SystemServer specific post fork hooks run before child post fork hooks.
-        VM_HOOKS.postForkSystemServer();
+        ZygoteHooks.postForkSystemServer();
     }
 
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
             boolean isZygote, String instructionSet) {
-        VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
+        ZygoteHooks.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
     }
 
     /**
