@@ -1,0 +1,26 @@
+android_test {
+    name: "ExtServicesUnitTests",
+
+    // Include all test java files.
+    srcs: ["src/**/*.java"],
+
+    // We only want this apk build for tests.
+    certificate: "platform",
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+
+    static_libs: [
+        "ExtServices-core",
+        "android-support-test",
+        "mockito-target-minus-junit4",
+        "espresso-core",
+        "truth-prebuilt",
+        "testables",
+        "testng",
+    ],
+
+    platform_apis: true,
+}
