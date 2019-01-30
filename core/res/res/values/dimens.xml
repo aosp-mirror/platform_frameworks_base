@@ -240,7 +240,7 @@
     <dimen name="notification_header_icon_size">18dp</dimen>
 
     <!-- size (width and height) of the icon in the notification header -->
-    <dimen name="notification_header_icon_size_ambient">20dp</dimen>
+    <dimen name="notification_header_icon_size_ambient">18dp</dimen>
 
     <!-- The margin before the start of the app name in the header. -->
     <dimen name="notification_header_app_name_margin_start">3dp</dimen>
