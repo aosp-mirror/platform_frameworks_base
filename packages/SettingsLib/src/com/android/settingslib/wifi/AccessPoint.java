@@ -900,7 +900,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             if (isPasspoint()) {
                 // This is the active connection on passpoint
                 summary.append(getSummary(mContext, ssid, getDetailedState(),
-                        false, mConfig.providerFriendlyName));
+                        false, null, mConfig.providerFriendlyName));
             } else if (mConfig != null && getDetailedState() == DetailedState.CONNECTED
                     && mIsCarrierAp) {
                 // This is the active connection on a carrier AP
@@ -909,7 +909,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             } else {
                 // This is the active connection on non-passpoint network
                 summary.append(getSummary(mContext, getDetailedState(),
-                        mInfo != null && mInfo.isEphemeral()));
+                        mInfo != null && mInfo.isEphemeral(),
+                        mInfo != null ? mInfo.getNetworkSuggestionOrSpecifierPackageName() : null));
             }
         } else { // not active
             if (mConfig != null && mConfig.hasNoInternetAccess()) {
@@ -1322,13 +1323,34 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mRssi != UNREACHABLE_RSSI;
     }
 
+    private static CharSequence getAppLabel(String packageName, PackageManager packageManager) {
+        CharSequence appLabel = "";
+        ApplicationInfo appInfo = null;
+        try {
+            int userId = UserHandle.getUserId(UserHandle.USER_CURRENT);
+            appInfo = packageManager.getApplicationInfoAsUser(packageName, 0 /* flags */, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Failed to get app info", e);
+            return appLabel;
+        }
+        if (appInfo != null) {
+            appLabel = appInfo.loadLabel(packageManager);
+        }
+        return appLabel;
+    }
+
     public static String getSummary(Context context, String ssid, DetailedState state,
-            boolean isEphemeral, String passpointProvider) {
+            boolean isEphemeral, String suggestionOrSpecifierPackageName,
+            String passpointProvider) {
         if (state == DetailedState.CONNECTED) {
             if (!TextUtils.isEmpty(passpointProvider)) {
                 // Special case for connected + passpoint networks.
                 String format = context.getString(R.string.ssid_by_passpoint_provider);
                 return String.format(format, ssid, passpointProvider);
+            } else if (isEphemeral && !TextUtils.isEmpty(suggestionOrSpecifierPackageName)) {
+                CharSequence appLabel =
+                        getAppLabel(suggestionOrSpecifierPackageName, context.getPackageManager());
+                return context.getString(R.string.connected_via_app, appLabel);
             } else if (isEphemeral) {
                 // Special case for connected + ephemeral networks.
                 final NetworkScoreManager networkScoreManager = context.getSystemService(
@@ -1379,13 +1401,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return String.format(formats[index], ssid);
     }
 
-    public static String getSummary(Context context, DetailedState state, boolean isEphemeral) {
-        return getSummary(context, null, state, isEphemeral, null);
+    public static String getSummary(Context context, DetailedState state, boolean isEphemeral,
+                                    String suggestionOrSpecifierPackageName) {
+        return getSummary(context, null, state, isEphemeral, suggestionOrSpecifierPackageName,
+                null);
     }
 
     public static String getSummary(Context context, DetailedState state, boolean isEphemeral,
-            String passpointProvider) {
-        return getSummary(context, null, state, isEphemeral, passpointProvider);
+                                    String suggestionOrSpecifierPackageName,
+                                    String passpointProvider) {
+        return getSummary(context, null, state, false, suggestionOrSpecifierPackageName,
+                passpointProvider);
     }
 
     public static String convertToQuotedString(String string) {
