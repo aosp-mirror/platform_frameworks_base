@@ -50,8 +50,8 @@ public class IorapForwardingService extends SystemService {
     public static final String TAG = "IorapForwardingService";
     /** $> adb shell 'setprop log.tag.IorapdForwardingService VERBOSE' */
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    /** $> adb shell 'setprop iorapd.enable true' */
-    private static boolean IS_ENABLED = SystemProperties.getBoolean("iorapd.enable", true);
+    /** $> adb shell 'setprop ro.iorapd.enable true' */
+    private static boolean IS_ENABLED = SystemProperties.getBoolean("ro.iorapd.enable", true);
     /** $> adb shell 'setprop iorapd.forwarding_service.wtf_crash true' */
     private static boolean WTF_CRASH = SystemProperties.getBoolean(
             "iorapd.forwarding_service.wtf_crash", false);
