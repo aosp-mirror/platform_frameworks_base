@@ -83,7 +83,7 @@ public final class RollbackInfo implements Parcelable {
      * Returns the session ID for the committed rollback for staged rollbacks.
      * Only applicable for rollbacks that have been committed.
      */
-    public int getSessionId() {
+    public int getCommittedSessionId() {
         // TODO: Support rollback of staged installs.
         return PackageInstaller.SessionInfo.INVALID_ID;
     }
