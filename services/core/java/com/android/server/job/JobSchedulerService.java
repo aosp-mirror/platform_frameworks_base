@@ -509,7 +509,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
         private static final boolean DEFAULT_USE_HEARTBEATS = false;
-        private static final boolean DEFAULT_TIME_CONTROLLER_SKIP_NOT_READY_JOBS = false;
+        private static final boolean DEFAULT_TIME_CONTROLLER_SKIP_NOT_READY_JOBS = true;
         private static final long DEFAULT_QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS =
                 10 * 60 * 1000L; // 10 minutes
         private static final long DEFAULT_QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS =
