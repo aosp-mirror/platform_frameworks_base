@@ -1526,11 +1526,33 @@ public class HdmiControlService extends SystemService {
                     if (mCecController != null) {
                         HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(deviceType);
                         if (localDevice == null) {
-                            Slog.w(TAG, "Local device not available");
+                            Slog.w(TAG, "Local device not available to send key event.");
                             return;
                         }
                         localDevice.sendKeyEvent(keyCode, isPressed);
                     }
+                }
+            });
+        }
+
+        @Override
+        public void sendVolumeKeyEvent(
+            final int deviceType, final int keyCode, final boolean isPressed) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mCecController == null) {
+                        Slog.w(TAG, "CEC controller not available to send volume key event.");
+                        return;
+                    }
+                    HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(deviceType);
+                    if (localDevice == null) {
+                        Slog.w(TAG, "Local device " + deviceType
+                              + " not available to send volume key event.");
+                        return;
+                    }
+                    localDevice.sendVolumeKeyEvent(keyCode, isPressed);
                 }
             });
         }

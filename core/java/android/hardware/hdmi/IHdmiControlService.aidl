@@ -47,6 +47,7 @@ interface IHdmiControlService {
     void deviceSelect(int deviceId, IHdmiControlCallback callback);
     void portSelect(int portId, IHdmiControlCallback callback);
     void sendKeyEvent(int deviceType, int keyCode, boolean isPressed);
+    void sendVolumeKeyEvent(int deviceType, int keyCode, boolean isPressed);
     List<HdmiPortInfo> getPortInfo();
     boolean canChangeSystemAudioMode();
     boolean getSystemAudioMode();
