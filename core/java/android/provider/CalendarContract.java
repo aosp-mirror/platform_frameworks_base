@@ -138,8 +138,8 @@ public final class CalendarContract {
      * Action used to help apps show calendar events in the managed profile.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_VIEW_WORK_CALENDAR_EVENT =
-            "android.provider.calendar.action.VIEW_WORK_CALENDAR_EVENT";
+    public static final String ACTION_VIEW_MANAGED_PROFILE_CALENDAR_EVENT =
+            "android.provider.calendar.action.VIEW_MANAGED_PROFILE_CALENDAR_EVENT";
 
     /**
      * Intent Extras key: {@link EventsColumns#CUSTOM_APP_URI} for the event in
@@ -166,7 +166,7 @@ public final class CalendarContract {
     public static final String EXTRA_EVENT_ALL_DAY = "allDay";
 
     /**
-     * Intent Extras key: The id of an event.
+     * Intent Extras key: An extra of type {@code long} holding the id of an event.
      */
     public static final String EXTRA_EVENT_ID = "id";
 
@@ -218,7 +218,7 @@ public final class CalendarContract {
      * When this API is called, the system will attempt to start an activity
      * in the managed profile with an intent targeting the same caller package.
      * The intent will have its action set to
-     * {@link CalendarContract#ACTION_VIEW_WORK_CALENDAR_EVENT} and contain extras
+     * {@link CalendarContract#ACTION_VIEW_MANAGED_PROFILE_CALENDAR_EVENT} and contain extras
      * corresponding to the API's arguments. A calendar app intending to support
      * cross-profile events viewing should handle this intent, parse the arguments
      * and show the appropriate UI.
@@ -226,10 +226,10 @@ public final class CalendarContract {
      * @param context the context.
      * @param eventId the id of the event to be viewed. Will be put into {@link #EXTRA_EVENT_ID}
      *                field of the intent.
-     * @param start the start time of the event. Will be put into {@link #EXTRA_EVENT_BEGIN_TIME}
-     *              field of the intent.
-     * @param end the end time of the event. Will be put into {@link #EXTRA_EVENT_END_TIME} field
-     *            of the intent.
+     * @param startMs the start time of the event in milliseconds since epoch.
+     *                Will be put into {@link #EXTRA_EVENT_BEGIN_TIME} field of the intent.
+     * @param endMs the end time of the event in milliseconds since epoch.
+     *              Will be put into {@link #EXTRA_EVENT_END_TIME} field of the intent.
      * @param allDay if the event is an all-day event. Will be put into
      *               {@link #EXTRA_EVENT_ALL_DAY} field of the intent.
      * @param flags flags to be set on the intent via {@link Intent#setFlags}
@@ -241,12 +241,12 @@ public final class CalendarContract {
      * @see #EXTRA_EVENT_ALL_DAY
      */
     public static boolean startViewCalendarEventInManagedProfile(@NonNull Context context,
-            long eventId, long start, long end, boolean allDay, int flags) {
+            long eventId, long startMs, long endMs, boolean allDay, int flags) {
         Preconditions.checkNotNull(context, "Context is null");
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-        return dpm.startViewCalendarEventInManagedProfile(eventId, start,
-                end, allDay, flags);
+        return dpm.startViewCalendarEventInManagedProfile(eventId, startMs,
+                endMs, allDay, flags);
     }
 
     /**
