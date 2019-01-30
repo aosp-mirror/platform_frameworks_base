@@ -144,6 +144,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
@@ -2682,6 +2683,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
                     EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_HIDE,
                     mNai.network.netId));
+        }
+
+        @Override
+        public void logCaptivePortalLoginEvent(int eventId, String packageName) {
+            new MetricsLogger().action(eventId, packageName);
         }
     }
 
