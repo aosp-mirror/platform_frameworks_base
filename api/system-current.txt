@@ -2959,10 +2959,12 @@ package android.location {
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
     method public int describeContents();
     method public double getAltitudeMeters();
+    method public double getHorizontalPositionUncertaintyMeters();
     method public double getLatitudeDegrees();
     method public double getLongitudeDegrees();
     method @Nullable public java.util.List<android.location.GnssSingleSatCorrection> getSingleSatCorrectionList();
     method public long getToaGpsNanosecondsOfWeek();
+    method public double getVerticalPositionUncertaintyMeters();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
   }
@@ -2971,10 +2973,12 @@ package android.location {
     ctor public GnssMeasurementCorrections.Builder();
     method public android.location.GnssMeasurementCorrections build();
     method public android.location.GnssMeasurementCorrections.Builder setAltitudeMeters(double);
+    method public android.location.GnssMeasurementCorrections.Builder setHorizontalPositionUncertaintyMeters(double);
     method public android.location.GnssMeasurementCorrections.Builder setLatitudeDegrees(double);
     method public android.location.GnssMeasurementCorrections.Builder setLongitudeDegrees(double);
     method public android.location.GnssMeasurementCorrections.Builder setSingleSatCorrectionList(@Nullable java.util.List<android.location.GnssSingleSatCorrection>);
     method public android.location.GnssMeasurementCorrections.Builder setToaGpsNanosecondsOfWeek(long);
+    method public android.location.GnssMeasurementCorrections.Builder setVerticalPositionUncertaintyMeters(double);
   }
 
   public final class GnssReflectingPlane implements android.os.Parcelable {

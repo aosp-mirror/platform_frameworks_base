@@ -48,6 +48,8 @@ public class GnssMeasurementCorrectionsTest extends TestCase {
         assertEquals(37.386051, measurementCorrections.getLatitudeDegrees());
         assertEquals(-122.083855, measurementCorrections.getLongitudeDegrees());
         assertEquals(32.0, measurementCorrections.getAltitudeMeters());
+        assertEquals(9.25, measurementCorrections.getHorizontalPositionUncertaintyMeters());
+        assertEquals(2.3, measurementCorrections.getVerticalPositionUncertaintyMeters());
         assertEquals(604000000000000L, measurementCorrections.getToaGpsNanosecondsOfWeek());
 
         GnssSingleSatCorrection singleSatCorrection =
@@ -74,6 +76,8 @@ public class GnssMeasurementCorrectionsTest extends TestCase {
                 .setLatitudeDegrees(37.386051)
                 .setLongitudeDegrees(-122.083855)
                 .setAltitudeMeters(32)
+                .setHorizontalPositionUncertaintyMeters(9.25)
+                .setVerticalPositionUncertaintyMeters(2.3)
                 .setToaGpsNanosecondsOfWeek(604000000000000L);
         List<GnssSingleSatCorrection> singleSatCorrectionList = new ArrayList<>();
         singleSatCorrectionList.add(GnssSingleSatCorrectionsTest.generateTestSingleSatCorrection());

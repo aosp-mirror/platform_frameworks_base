@@ -317,8 +317,8 @@ public final class GnssSingleSatCorrection implements Parcelable {
          * between 0 and 1.
          */
         public Builder setProbSatIsLos(@FloatRange(from = 0f, to = 1f) float probSatIsLos) {
-            Preconditions.checkArgumentInRange(probSatIsLos, 0, 1,
-                    "probSatIsLos should be between 0 and 1.");
+            Preconditions.checkArgumentInRange(
+                    probSatIsLos, 0, 1, "probSatIsLos should be between 0 and 1.");
             mProbSatIsLos = probSatIsLos;
             mSingleSatCorrectionFlags =
                     (byte) (mSingleSatCorrectionFlags | HAS_PROB_SAT_IS_LOS_MASK);

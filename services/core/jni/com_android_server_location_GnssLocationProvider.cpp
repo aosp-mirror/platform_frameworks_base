@@ -73,6 +73,8 @@ static jmethodID method_reportGnssServiceDied;
 static jmethodID method_correctionsGetLatitudeDegrees;
 static jmethodID method_correctionsGetLongitudeDegrees;
 static jmethodID method_correctionsGetAltitudeMeters;
+static jmethodID method_correctionsGetHorPosUncMeters;
+static jmethodID method_correctionsGetVerPosUncMeters;
 static jmethodID method_correctionsGetToaGpsNanosecondsOfWeek;
 static jmethodID method_correctionsGetSingleSatCorrectionList;
 static jmethodID method_listSize;
@@ -2233,6 +2235,12 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
         method_correctionsGetAltitudeMeters = env->GetMethodID(
             measCorrClass, "getAltitudeMeters", "()D");
 
+        method_correctionsGetHorPosUncMeters = env->GetMethodID(
+            measCorrClass, "getHorizontalPositionUncertaintyMeters", "()D");
+
+        method_correctionsGetVerPosUncMeters = env->GetMethodID(
+            measCorrClass, "getVerticalPositionUncertaintyMeters", "()D");
+
         method_correctionsGetToaGpsNanosecondsOfWeek = env->GetMethodID(
             measCorrClass, "getToaGpsNanosecondsOfWeek", "()J");
 
@@ -2246,6 +2254,10 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
         correctionsObj, method_correctionsGetLongitudeDegrees);
     jdouble altitudeDegreesCorr = env->CallDoubleMethod(
         correctionsObj, method_correctionsGetAltitudeMeters);
+    jdouble horizontalPositionUncertaintyMeters = env->CallDoubleMethod(
+        correctionsObj, method_correctionsGetHorPosUncMeters);
+    jdouble verticalPositionUncertaintyMeters = env->CallDoubleMethod(
+            correctionsObj, method_correctionsGetVerPosUncMeters);
     jlong toaGpsNanosOfWeek = env->CallLongMethod(
         correctionsObj, method_correctionsGetToaGpsNanosecondsOfWeek);
     jobject singleSatCorrectionList = env->CallObjectMethod(correctionsObj,
@@ -2348,6 +2360,8 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
         .latitudeDegrees = latitudeDegreesCorr,
         .longitudeDegrees = longitudeDegreesCorr,
         .altitudeMeters = altitudeDegreesCorr,
+        .horizontalPositionUncertaintyMeters = horizontalPositionUncertaintyMeters,
+        .verticalPositionUncertaintyMeters = verticalPositionUncertaintyMeters,
         .toaGpsNanosecondsOfWeek = static_cast<uint64_t>(toaGpsNanosOfWeek),
         .satCorrections = list,
     };
