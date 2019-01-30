@@ -16,7 +16,6 @@
 package android.view.contentcapture;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.net.Uri;
 import android.os.Parcel;
@@ -67,9 +66,7 @@ public final class UserDataRemovalRequest implements Parcelable {
 
     /**
      * Gets the name of the app that's making the request.
-     * @hide
      */
-    @SystemApi
     @NonNull
     public String getPackageName() {
         return mPackageName;
@@ -77,20 +74,14 @@ public final class UserDataRemovalRequest implements Parcelable {
 
     /**
      * Checks if app is requesting to remove all user data associated with its package.
-     *
-     * @hide
      */
-    @SystemApi
     public boolean isForEverything() {
         return mForEverything;
     }
 
     /**
      * Gets the list of {@code Uri}s the apps is requesting to remove.
-     *
-     * @hide
      */
-    @SystemApi
     @NonNull
     public List<UriRequest> getUriRequests() {
         return mUriRequests;
@@ -203,9 +194,7 @@ public final class UserDataRemovalRequest implements Parcelable {
 
     /**
      * Representation of a request to remove data associated with an {@link Uri}.
-     * @hide
      */
-    @SystemApi
     public final class UriRequest {
         private final @NonNull Uri mUri;
         private final boolean mRecursive;
