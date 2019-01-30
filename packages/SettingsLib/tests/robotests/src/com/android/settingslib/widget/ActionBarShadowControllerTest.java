@@ -22,6 +22,7 @@ import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +50,8 @@ public class ActionBarShadowControllerTest {
     @Mock
     private RecyclerView mRecyclerView;
     @Mock
+    private View mScrollView;
+    @Mock
     private Activity mActivity;
     @Mock
     private ActionBar mActionBar;
@@ -66,51 +69,60 @@ public class ActionBarShadowControllerTest {
     }
 
     @Test
-    public void attachToRecyclerView_shouldAddScrollWatcherAndUpdateActionBar() {
+    public void attachToView_shouldAddScrollWatcherAndUpdateActionBar() {
         when(mRecyclerView.canScrollVertically(-1)).thenReturn(false);
 
-        ActionBarShadowController.attachToRecyclerView(mActivity, mLifecycle, mRecyclerView);
+        ActionBarShadowController.attachToView(mActivity, mLifecycle, mRecyclerView);
 
         verify(mActionBar).setElevation(ActionBarShadowController.ELEVATION_LOW);
     }
 
     @Test
-    public void attachToRecyclerView_customViewAsActionBar_shouldUpdateElevationOnScroll() {
+    public void attachToView_scrollView_shouldAddScrollWatcherAndUpdateActionBar() {
+        when(mScrollView.canScrollVertically(-1)).thenReturn(false);
+
+        ActionBarShadowController.attachToView(mActivity, mLifecycle, mScrollView);
+
+        verify(mActionBar).setElevation(ActionBarShadowController.ELEVATION_LOW);
+    }
+
+    @Test
+    public void attachToView_customViewAsActionBar_shouldUpdateElevationOnScroll() {
         // Setup
         mView.setElevation(50);
         when(mRecyclerView.canScrollVertically(-1)).thenReturn(false);
         final ActionBarShadowController controller =
-                ActionBarShadowController.attachToRecyclerView(mView, mLifecycle, mRecyclerView);
+                ActionBarShadowController.attachToView(mView, mLifecycle, mRecyclerView);
         assertThat(mView.getElevation()).isEqualTo(ActionBarShadowController.ELEVATION_LOW);
 
         // Scroll
         when(mRecyclerView.canScrollVertically(-1)).thenReturn(true);
-        controller.mScrollChangeWatcher.onScrolled(mRecyclerView, 10 /* dx */, 10 /* dy */);
+        controller.mScrollChangeWatcher.onScrollChange(mRecyclerView, 10, 10, 0, 0);
         assertThat(mView.getElevation()).isEqualTo(ActionBarShadowController.ELEVATION_HIGH);
     }
 
     @Test
-    public void attachToRecyclerView_lifecycleChange_shouldAttachDetach() {
-        ActionBarShadowController.attachToRecyclerView(mActivity, mLifecycle, mRecyclerView);
+    public void attachToView_lifecycleChange_shouldAttachDetach() {
+        ActionBarShadowController.attachToView(mActivity, mLifecycle, mRecyclerView);
 
-        verify(mRecyclerView).addOnScrollListener(any());
+        verify(mRecyclerView).setOnScrollChangeListener(any());
 
         mLifecycle.handleLifecycleEvent(ON_START);
         mLifecycle.handleLifecycleEvent(ON_STOP);
-        verify(mRecyclerView).removeOnScrollListener(any());
+        verify(mRecyclerView).setOnScrollChangeListener(isNull());
 
         mLifecycle.handleLifecycleEvent(ON_START);
-        verify(mRecyclerView, times(2)).addOnScrollListener(any());
+        verify(mRecyclerView, times(3)).setOnScrollChangeListener(any());
     }
 
     @Test
     public void onScrolled_nullAnchorViewAndActivity_shouldNotCrash() {
         final Activity activity = null;
         final ActionBarShadowController controller =
-                ActionBarShadowController.attachToRecyclerView(activity, mLifecycle, mRecyclerView);
+                ActionBarShadowController.attachToView(activity, mLifecycle, mRecyclerView);
 
         // Scroll
-        controller.mScrollChangeWatcher.onScrolled(mRecyclerView, 10 /* dx */, 10 /* dy */);
+        controller.mScrollChangeWatcher.onScrollChange(mRecyclerView, 10, 10, 0, 0);
         // no crash
     }
 }
