@@ -34,6 +34,9 @@ import static org.mockito.Mockito.when;
 
 import android.app.usage.UsageStatsManager;
 import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -390,6 +393,32 @@ public class ChooserActivityTest {
                 .perform(click());
         waitForIdle();
         assertThat(chosen[0], is(toChoose));
+    }
+
+    @Test
+    public void copyTextToClipboard() throws Exception {
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(1);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        onView(withId(R.id.copy_button)).perform(click());
+
+        ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(
+                Context.CLIPBOARD_SERVICE);
+        ClipData clipData = clipboard.getPrimaryClip();
+        assertThat("testing intent sending", is(clipData.getItemAt(0).getText()));
+
+        ClipDescription clipDescription = clipData.getDescription();
+        assertThat("text/plain", is(clipDescription.getMimeType(0)));
     }
 
     private Intent createSendTextIntent() {
