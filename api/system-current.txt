@@ -9404,17 +9404,6 @@ package android.view.contentcapture {
     method public void setContentCaptureFeatureEnabled(boolean);
   }
 
-  public final class UserDataRemovalRequest implements android.os.Parcelable {
-    method @NonNull public String getPackageName();
-    method @NonNull public java.util.List<android.view.contentcapture.UserDataRemovalRequest.UriRequest> getUriRequests();
-    method public boolean isForEverything();
-  }
-
-  public final class UserDataRemovalRequest.UriRequest {
-    method @NonNull public android.net.Uri getUri();
-    method @NonNull public boolean isRecursive();
-  }
-
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
     method @Nullable public android.view.autofill.AutofillId getParentAutofillId();
   }
