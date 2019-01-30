@@ -78,7 +78,18 @@
             android:id="@+id/certificate_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginBottom="16dip" >
+            <TextView
+                android:id="@+id/ssl_error_msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_marginStart="20dip"
+                android:layout_marginEnd="20dip"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dip"
+                android:layout_marginTop="16dip" />
         </LinearLayout>
 
     </ScrollView>

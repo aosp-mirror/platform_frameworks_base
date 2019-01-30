@@ -109,6 +109,8 @@ public class NetworkMonitor extends StateMachine {
     private static final boolean DBG  = true;
     private static final boolean VDBG = false;
     private static final boolean VDBG_STALL = Log.isLoggable(TAG, Log.DEBUG);
+    // TODO: use another permission for CaptivePortalLoginActivity once it has its own certificate
+    private static final String PERMISSION_NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     // Default configuration values for captive portal detection probes.
     // TODO: append a random length parameter to the default HTTPS url.
     // TODO: randomize browser version ids in the default User-Agent String.
@@ -682,7 +684,7 @@ public class NetworkMonitor extends StateMachine {
                                 public void appResponse(int response) {
                                     if (response == APP_RETURN_WANTED_AS_IS) {
                                         mContext.enforceCallingPermission(
-                                                android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                                                PERMISSION_NETWORK_SETTINGS,
                                                 "CaptivePortal");
                                     }
                                     sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
@@ -692,7 +694,7 @@ public class NetworkMonitor extends StateMachine {
                                 public void logEvent(int eventId, String packageName)
                                         throws RemoteException {
                                     mContext.enforceCallingPermission(
-                                            android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                                            PERMISSION_NETWORK_SETTINGS,
                                             "CaptivePortal");
                                     mCallback.logCaptivePortalLoginEvent(eventId, packageName);
                                 }
