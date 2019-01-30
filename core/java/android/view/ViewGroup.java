@@ -3603,7 +3603,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return;
         }
 
-        final ChildListForAutoFill children = getChildrenForAutofill(flags);
+        final ChildListForAutoFillOrContentCapture children = getChildrenForAutofill(flags);
         final int childrenCount = children.size();
         structure.setChildCount(childrenCount);
         for (int i = 0; i < childrenCount; i++) {
@@ -3614,13 +3614,31 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         children.recycle();
     }
 
+    /** @hide */
+    @Override
+    public void dispatchProvideContentCaptureStructure() {
+        super.dispatchProvideContentCaptureStructure();
+
+        if (!isLaidOut()) return;
+
+        final ChildListForAutoFillOrContentCapture children = getChildrenForContentCapture();
+        final int childrenCount = children.size();
+        for (int i = 0; i < childrenCount; i++) {
+            final View child = children.get(i);
+            child.dispatchProvideContentCaptureStructure();
+        }
+        children.recycle();
+    }
+
     /**
      * Gets the children for autofill. Children for autofill are the first
      * level descendants that are important for autofill. The returned
      * child list object is pooled and the caller must recycle it once done.
      * @hide */
-    private @NonNull ChildListForAutoFill getChildrenForAutofill(@AutofillFlags int flags) {
-        final ChildListForAutoFill children = ChildListForAutoFill.obtain();
+    private @NonNull ChildListForAutoFillOrContentCapture getChildrenForAutofill(
+            @AutofillFlags int flags) {
+        final ChildListForAutoFillOrContentCapture children = ChildListForAutoFillOrContentCapture
+                .obtain();
         populateChildrenForAutofill(children, flags);
         return children;
     }
@@ -3643,6 +3661,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);
+            }
+        }
+    }
+
+    private @NonNull ChildListForAutoFillOrContentCapture getChildrenForContentCapture() {
+        final ChildListForAutoFillOrContentCapture children = ChildListForAutoFillOrContentCapture
+                .obtain();
+        populateChildrenForContentCapture(children);
+        return children;
+    }
+
+    /** @hide */
+    private void populateChildrenForContentCapture(ArrayList<View> list) {
+        final int childrenCount = mChildrenCount;
+        if (childrenCount <= 0) {
+            return;
+        }
+        final ArrayList<View> preorderedList = buildOrderedChildList();
+        final boolean customOrder = preorderedList == null
+                && isChildrenDrawingOrderEnabled();
+        for (int i = 0; i < childrenCount; i++) {
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = (preorderedList == null)
+                    ? mChildren[childIndex] : preorderedList.get(childIndex);
+            if (child.isImportantForContentCapture()) {
+                list.add(child);
+            } else if (child instanceof ViewGroup) {
+                ((ViewGroup) child).populateChildrenForContentCapture(list);
             }
         }
     }
@@ -8544,16 +8590,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Pooled class that to hold the children for autifill.
      */
-    static class ChildListForAutoFill extends ArrayList<View> {
+    private static class ChildListForAutoFillOrContentCapture extends ArrayList<View> {
         private static final int MAX_POOL_SIZE = 32;
 
-        private static final Pools.SimplePool<ChildListForAutoFill> sPool =
+        private static final Pools.SimplePool<ChildListForAutoFillOrContentCapture> sPool =
                 new Pools.SimplePool<>(MAX_POOL_SIZE);
 
-        public static ChildListForAutoFill obtain() {
-            ChildListForAutoFill list = sPool.acquire();
+        public static ChildListForAutoFillOrContentCapture obtain() {
+            ChildListForAutoFillOrContentCapture list = sPool.acquire();
             if (list == null) {
-                list = new ChildListForAutoFill();
+                list = new ChildListForAutoFillOrContentCapture();
             }
             return list;
         }

@@ -15,6 +15,8 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARING;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_FINISHED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_STARTED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_APPEARED;
@@ -65,6 +67,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class MainContentCaptureSession extends ContentCaptureSession {
 
     private static final String TAG = MainContentCaptureSession.class.getSimpleName();
+
+    private static final boolean FORCE_FLUSH = true;
 
     /**
      * Handler message used to flush the buffer.
@@ -268,6 +272,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get()
                     + ", binder=" + binder + ", events=" + (mEvents == null ? 0 : mEvents.size()));
         }
+    }
+
+    private void handleSendEvent(@NonNull ContentCaptureEvent event) {
+        handleSendEvent(event, /* forceFlush= */ false);
     }
 
     private void handleSendEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
@@ -518,6 +526,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    public void internalNotifyViewHierarchyEvent(boolean started) {
+        notifyInitialViewHierarchyEvent(mId, started);
+    }
+
+    @Override
     boolean isContentCaptureEnabled() {
         return super.isContentCaptureEnabled() && mManager.isContentCaptureEnabled();
     }
@@ -536,33 +549,57 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 new ContentCaptureEvent(childSessionId, TYPE_SESSION_STARTED)
                         .setParentSessionId(parentSessionId)
                         .setClientContext(clientContext),
-                        /* forceFlush= */ true));
+                        FORCE_FLUSH));
     }
 
     void notifyChildSessionFinished(@NonNull String parentSessionId,
             @NonNull String childSessionId) {
         mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
                 new ContentCaptureEvent(childSessionId, TYPE_SESSION_FINISHED)
-                        .setParentSessionId(parentSessionId), /* forceFlush= */ true));
+                        .setParentSessionId(parentSessionId), FORCE_FLUSH));
     }
 
     void notifyViewAppeared(@NonNull String sessionId, @NonNull ViewStructureImpl node) {
         mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
-                new ContentCaptureEvent(sessionId, TYPE_VIEW_APPEARED)
-                        .setViewNode(node.mNode), /* forceFlush= */ false));
+                new ContentCaptureEvent(sessionId, TYPE_VIEW_APPEARED).setViewNode(node.mNode)));
     }
 
     void notifyViewDisappeared(@NonNull String sessionId, @NonNull AutofillId id) {
         mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
-                new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id),
-                        /* forceFlush= */ false));
+                new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id)));
+    }
+
+    /** @hide */
+    public void notifyViewsDisappeared(@NonNull String sessionId,
+            @NonNull ArrayList<AutofillId> ids) {
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED);
+        if (ids.size() == 1) {
+            event.setAutofillId(ids.get(0));
+        } else {
+            event.setAutofillIds(ids);
+        }
+
+        mHandler.sendMessage(
+                obtainMessage(MainContentCaptureSession::handleSendEvent, this, event));
     }
 
     void notifyViewTextChanged(@NonNull String sessionId, @NonNull AutofillId id,
             @Nullable CharSequence text) {
         mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
                 new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED).setAutofillId(id)
-                        .setText(text), /* forceFlush= */ false));
+                        .setText(text)));
+    }
+
+    void notifyInitialViewHierarchyEvent(@NonNull String sessionId, boolean started) {
+        if (started) {
+            mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
+                    new ContentCaptureEvent(sessionId, TYPE_INITIAL_VIEW_TREE_APPEARING)));
+        } else {
+            mHandler.sendMessage(obtainMessage(MainContentCaptureSession::handleSendEvent, this,
+                    new ContentCaptureEvent(sessionId, TYPE_INITIAL_VIEW_TREE_APPEARED),
+                            FORCE_FLUSH));
+
+        }
     }
 
     @Override

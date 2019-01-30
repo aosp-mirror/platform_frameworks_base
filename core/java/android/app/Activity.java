@@ -7155,7 +7155,8 @@ public class Activity extends ContextThemeWrapper
         mInstrumentation.onEnterAnimationComplete();
         onEnterAnimationComplete();
         if (getWindow() != null && getWindow().getDecorView() != null) {
-            getWindow().getDecorView().getViewTreeObserver().dispatchOnEnterAnimationComplete();
+            View decorView = getWindow().getDecorView();
+            decorView.getViewTreeObserver().dispatchOnEnterAnimationComplete();
         }
     }
 

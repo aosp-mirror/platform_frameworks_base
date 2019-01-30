@@ -93,6 +93,11 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    public void internalNotifyViewHierarchyEvent(boolean started) {
+        getMainCaptureSession().notifyInitialViewHierarchyEvent(mId, started);
+    }
+
+    @Override
     boolean isContentCaptureEnabled() {
         return getMainCaptureSession().isContentCaptureEnabled();
     }
