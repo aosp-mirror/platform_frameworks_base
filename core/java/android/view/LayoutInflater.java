@@ -20,6 +20,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -399,10 +400,15 @@ public abstract class LayoutInflater {
     }
 
     private void initPrecompiledViews() {
-        // Check if precompiled layouts are enabled by a system property.
-        mUseCompiledView =
-            SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false);
+        initPrecompiledViews(
+                SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false));
+    }
+
+    private void initPrecompiledViews(boolean enablePrecompiledViews) {
+        mUseCompiledView = enablePrecompiledViews;
+
         if (!mUseCompiledView) {
+            mPrecompiledClassLoader = null;
             return;
         }
 
@@ -431,6 +437,17 @@ public abstract class LayoutInflater {
             }
             mUseCompiledView = false;
         }
+        if (!mUseCompiledView) {
+            mPrecompiledClassLoader = null;
+        }
+    }
+
+    /**
+     * @hide for use by CTS tests
+     */
+    @TestApi
+    public void setPrecompiledLayoutsEnabledForTesting(boolean enablePrecompiledLayouts) {
+        initPrecompiledViews(enablePrecompiledLayouts);
     }
 
     /**
