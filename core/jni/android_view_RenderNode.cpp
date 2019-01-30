@@ -507,15 +507,15 @@ jmethodID gPositionListener_PositionChangedMethod;
 jmethodID gPositionListener_PositionLostMethod;
 
 static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
-        jlong renderNodePtr, jobject surfaceview) {
-    class SurfaceViewPositionUpdater : public RenderNode::PositionListener {
+        jlong renderNodePtr, jobject listener) {
+    class PositionListenerTrampoline : public RenderNode::PositionListener {
     public:
-        SurfaceViewPositionUpdater(JNIEnv* env, jobject surfaceview) {
+        PositionListenerTrampoline(JNIEnv* env, jobject listener) {
             env->GetJavaVM(&mVm);
-            mWeakRef = env->NewWeakGlobalRef(surfaceview);
+            mWeakRef = env->NewWeakGlobalRef(listener);
         }
 
-        virtual ~SurfaceViewPositionUpdater() {
+        virtual ~PositionListenerTrampoline() {
             jnienv()->DeleteWeakGlobalRef(mWeakRef);
             mWeakRef = nullptr;
         }
@@ -539,9 +539,14 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 bounds.roundOut();
             }
 
+            if (mPreviousPosition == bounds) {
+                return;
+            }
+            mPreviousPosition = bounds;
+
             incStrong(0);
             auto functor = std::bind(
-                std::mem_fn(&SurfaceViewPositionUpdater::doUpdatePositionAsync), this,
+                std::mem_fn(&PositionListenerTrampoline::doUpdatePositionAsync), this,
                 (jlong) info.canvasContext.getFrameNumber(),
                 (jint) bounds.left, (jint) bounds.top,
                 (jint) bounds.right, (jint) bounds.bottom);
@@ -552,6 +557,11 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) override {
             if (CC_UNLIKELY(!mWeakRef || (info && !info->updateWindowPositions))) return;
 
+            if (mPreviousPosition.isEmpty()) {
+                return;
+            }
+            mPreviousPosition.setEmpty();
+
             ATRACE_NAME("SurfaceView position lost");
             JNIEnv* env = jnienv();
             jobject localref = env->NewLocalRef(mWeakRef);
@@ -561,6 +571,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 return;
             }
 
+            // TODO: Remember why this is synchronous and then make a comment
             env->CallVoidMethod(localref, gPositionListener_PositionLostMethod,
                     info ? info->canvasContext.getFrameNumber() : 0);
             env->DeleteLocalRef(localref);
@@ -596,10 +607,11 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
         JavaVM* mVm;
         jobject mWeakRef;
+        uirenderer::Rect mPreviousPosition;
     };
 
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    renderNode->setPositionListener(new SurfaceViewPositionUpdater(env, surfaceview));
+    renderNode->setPositionListener(new PositionListenerTrampoline(env, listener));
 }
 
 // ----------------------------------------------------------------------------
