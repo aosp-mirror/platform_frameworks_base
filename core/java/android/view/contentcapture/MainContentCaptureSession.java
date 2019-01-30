@@ -115,7 +115,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Nullable
     private DeathRecipient mDirectServiceVulture;
 
-    private int mState = UNKNWON_STATE;
+    private int mState = UNKNOWN_STATE;
 
     @Nullable
     private IBinder mApplicationToken;
@@ -367,7 +367,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     private boolean handleHasStarted() {
-        return mState != UNKNWON_STATE;
+        return mState != UNKNOWN_STATE;
     }
 
     private void handleScheduleFlush(@FlushReason int reason, boolean checkExisting) {

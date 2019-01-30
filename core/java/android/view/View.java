@@ -8210,7 +8210,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * changed by calling
      * {@link ContentCaptureSession#notifyViewAppeared(ViewStructure)},
      * {@link ContentCaptureSession#notifyViewDisappeared(AutofillId)}, and
-     * {@link ContentCaptureSession#notifyViewTextChanged(AutofillId, CharSequence, int)}
+     * {@link ContentCaptureSession#notifyViewTextChanged(AutofillId, CharSequence)}
      * respectively. The structure for the a child must be created using
      * {@link ContentCaptureSession#newVirtualViewStructure(AutofillId, long)}, and the
      * {@code autofillId} for a child can be obtained either through
