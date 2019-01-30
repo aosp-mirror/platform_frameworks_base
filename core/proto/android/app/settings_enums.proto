@@ -595,6 +595,11 @@ enum Action {
 
     // ACTION: Tap & Pay -> Default Application Setting -> Use Default
     ACTION_NFC_PAYMENT_ALWAYS_SETTING = 1623;
+
+    // ACTION: Settings > Search Bar > Avatar
+    // CATEGORY: SETTINGS
+    // OS: Q
+    CLICK_ACCOUNT_AVATAR = 1643;
 }
 
 /**
