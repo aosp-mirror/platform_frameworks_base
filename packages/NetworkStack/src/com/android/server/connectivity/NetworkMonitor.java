@@ -687,6 +687,15 @@ public class NetworkMonitor extends StateMachine {
                                     }
                                     sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
                                 }
+
+                                @Override
+                                public void logEvent(int eventId, String packageName)
+                                        throws RemoteException {
+                                    mContext.enforceCallingPermission(
+                                            android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                                            "CaptivePortal");
+                                    mCallback.logCaptivePortalLoginEvent(eventId, packageName);
+                                }
                             }));
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
                     intent.putExtra(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
