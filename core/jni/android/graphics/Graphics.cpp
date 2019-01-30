@@ -187,6 +187,8 @@ static jmethodID gColorSpaceRGB_constructorMethodID;
 
 static jclass gColorSpace_Named_class;
 static jfieldID gColorSpace_Named_sRGBFieldID;
+static jfieldID gColorSpace_Named_ExtendedSRGBFieldID;
+static jfieldID gColorSpace_Named_LinearSRGBFieldID;
 static jfieldID gColorSpace_Named_LinearExtendedSRGBFieldID;
 
 static jclass gTransferParameters_class;
@@ -412,67 +414,78 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jobject GraphicsJNI::getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
+jobject GraphicsJNI::getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
         SkColorType decodeColorType) {
-    jobject colorSpace = nullptr;
-
-    // No need to match, we know what the output color space will be
-    if (decodeColorType == kRGBA_F16_SkColorType) {
-        jobject linearExtendedSRGB = env->GetStaticObjectField(
-                gColorSpace_Named_class, gColorSpace_Named_LinearExtendedSRGBFieldID);
-        colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
-                gColorSpace_getMethodID, linearExtendedSRGB);
-    } else {
-        // Same here, no need to match
-        if (decodeColorSpace->isSRGB()) {
-            jobject sRGB = env->GetStaticObjectField(
-                    gColorSpace_Named_class, gColorSpace_Named_sRGBFieldID);
-            colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
-                    gColorSpace_getMethodID, sRGB);
-        } else if (decodeColorSpace.get() != nullptr) {
-            // Try to match against known RGB color spaces using the CIE XYZ D50
-            // conversion matrix and numerical transfer function parameters
-            skcms_Matrix3x3 xyzMatrix;
-            LOG_ALWAYS_FATAL_IF(!decodeColorSpace->toXYZD50(&xyzMatrix));
-
-            skcms_TransferFunction transferParams;
-            // We can only handle numerical transfer functions at the moment
-            LOG_ALWAYS_FATAL_IF(!decodeColorSpace->isNumericalTransferFn(&transferParams));
-
-            jobject params = env->NewObject(gTransferParameters_class,
-                    gTransferParameters_constructorMethodID,
-                    transferParams.a, transferParams.b, transferParams.c,
-                    transferParams.d, transferParams.e, transferParams.f,
-                    transferParams.g);
-
-            jfloatArray xyzArray = env->NewFloatArray(9);
-            jfloat xyz[9] = {
-                    xyzMatrix.vals[0][0],
-                    xyzMatrix.vals[1][0],
-                    xyzMatrix.vals[2][0],
-                    xyzMatrix.vals[0][1],
-                    xyzMatrix.vals[1][1],
-                    xyzMatrix.vals[2][1],
-                    xyzMatrix.vals[0][2],
-                    xyzMatrix.vals[1][2],
-                    xyzMatrix.vals[2][2]
-            };
-            env->SetFloatArrayRegion(xyzArray, 0, 9, xyz);
-
-            colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
-                    gColorSpace_matchMethodID, xyzArray, params);
-
-            if (colorSpace == nullptr) {
-                // We couldn't find an exact match, let's create a new color space
-                // instance with the 3x3 conversion matrix and transfer function
-                colorSpace = env->NewObject(gColorSpaceRGB_class,
-                        gColorSpaceRGB_constructorMethodID,
-                        env->NewStringUTF("Unknown"), xyzArray, params);
-            }
-
-            env->DeleteLocalRef(xyzArray);
-        }
+    if (!decodeColorSpace || decodeColorType == kAlpha_8_SkColorType) {
+        return nullptr;
     }
+
+    // Special checks for the common sRGB cases and their extended variants.
+    jobject namedCS = nullptr;
+    sk_sp<SkColorSpace> srgbLinear = SkColorSpace::MakeSRGBLinear();
+    if (decodeColorType == kRGBA_F16_SkColorType) {
+        // An F16 Bitmap will always report that it is EXTENDED if
+        // it matches a ColorSpace that has an EXTENDED variant.
+        if (decodeColorSpace->isSRGB()) {
+            namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                                gColorSpace_Named_ExtendedSRGBFieldID);
+        } else if (decodeColorSpace == srgbLinear.get()) {
+            namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                                gColorSpace_Named_LinearExtendedSRGBFieldID);
+        }
+    } else if (decodeColorSpace->isSRGB()) {
+        namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                            gColorSpace_Named_sRGBFieldID);
+    } else if (decodeColorSpace == srgbLinear.get()) {
+        namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                            gColorSpace_Named_LinearSRGBFieldID);
+    }
+
+    if (namedCS) {
+        return env->CallStaticObjectMethod(gColorSpace_class, gColorSpace_getMethodID, namedCS);
+    }
+
+    // Try to match against known RGB color spaces using the CIE XYZ D50
+    // conversion matrix and numerical transfer function parameters
+    skcms_Matrix3x3 xyzMatrix;
+    LOG_ALWAYS_FATAL_IF(!decodeColorSpace->toXYZD50(&xyzMatrix));
+
+    skcms_TransferFunction transferParams;
+    // We can only handle numerical transfer functions at the moment
+    LOG_ALWAYS_FATAL_IF(!decodeColorSpace->isNumericalTransferFn(&transferParams));
+
+    jobject params = env->NewObject(gTransferParameters_class,
+            gTransferParameters_constructorMethodID,
+            transferParams.a, transferParams.b, transferParams.c,
+            transferParams.d, transferParams.e, transferParams.f,
+            transferParams.g);
+
+    jfloatArray xyzArray = env->NewFloatArray(9);
+    jfloat xyz[9] = {
+            xyzMatrix.vals[0][0],
+            xyzMatrix.vals[1][0],
+            xyzMatrix.vals[2][0],
+            xyzMatrix.vals[0][1],
+            xyzMatrix.vals[1][1],
+            xyzMatrix.vals[2][1],
+            xyzMatrix.vals[0][2],
+            xyzMatrix.vals[1][2],
+            xyzMatrix.vals[2][2]
+    };
+    env->SetFloatArrayRegion(xyzArray, 0, 9, xyz);
+
+    jobject colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
+            gColorSpace_matchMethodID, xyzArray, params);
+
+    if (colorSpace == nullptr) {
+        // We couldn't find an exact match, let's create a new color space
+        // instance with the 3x3 conversion matrix and transfer function
+        colorSpace = env->NewObject(gColorSpaceRGB_class,
+                gColorSpaceRGB_constructorMethodID,
+                env->NewStringUTF("Unknown"), xyzArray, params);
+    }
+
+    env->DeleteLocalRef(xyzArray);
     return colorSpace;
 }
 
@@ -658,6 +671,10 @@ int register_android_graphics_Graphics(JNIEnv* env)
             FindClassOrDie(env, "android/graphics/ColorSpace$Named"));
     gColorSpace_Named_sRGBFieldID = GetStaticFieldIDOrDie(env,
             gColorSpace_Named_class, "SRGB", "Landroid/graphics/ColorSpace$Named;");
+    gColorSpace_Named_ExtendedSRGBFieldID = GetStaticFieldIDOrDie(env,
+            gColorSpace_Named_class, "EXTENDED_SRGB", "Landroid/graphics/ColorSpace$Named;");
+    gColorSpace_Named_LinearSRGBFieldID = GetStaticFieldIDOrDie(env,
+            gColorSpace_Named_class, "LINEAR_SRGB", "Landroid/graphics/ColorSpace$Named;");
     gColorSpace_Named_LinearExtendedSRGBFieldID = GetStaticFieldIDOrDie(env,
             gColorSpace_Named_class, "LINEAR_EXTENDED_SRGB", "Landroid/graphics/ColorSpace$Named;");
 
