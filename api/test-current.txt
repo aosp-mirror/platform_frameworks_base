@@ -520,6 +520,7 @@ package android.graphics {
 
   public final class Bitmap implements android.os.Parcelable {
     method public void eraseColor(@ColorLong long);
+    method public android.graphics.Color getColor(int, int);
     method public void setColorSpace(@NonNull android.graphics.ColorSpace);
   }
 

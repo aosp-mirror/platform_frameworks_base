@@ -986,6 +986,19 @@ static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
     return static_cast<jint>(dst);
 }
 
+static jlong Bitmap_getColor(JNIEnv* env, jobject, jlong bitmapHandle,
+        jint x, jint y) {
+    SkBitmap bitmap;
+    reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
+
+    SkImageInfo dstInfo = SkImageInfo::Make(
+            1, 1, kRGBA_F16_SkColorType, kUnpremul_SkAlphaType, bitmap.refColorSpace());
+
+    uint64_t dst;
+    bitmap.readPixels(dstInfo, &dst, dstInfo.minRowBytes(), x, y);
+    return static_cast<jlong>(dst);
+}
+
 static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
         jintArray pixelArray, jint offset, jint stride,
         jint x, jint y, jint width, jint height) {
@@ -1231,6 +1244,7 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_extractAlpha },
     {   "nativeGenerationId",       "(J)I", (void*)Bitmap_getGenerationId },
     {   "nativeGetPixel",           "(JII)I", (void*)Bitmap_getPixel },
+    {   "nativeGetColor",           "(JII)J", (void*)Bitmap_getColor },
     {   "nativeGetPixels",          "(J[IIIIIII)V", (void*)Bitmap_getPixels },
     {   "nativeSetPixel",           "(JIII)V", (void*)Bitmap_setPixel },
     {   "nativeSetPixels",          "(J[IIIIIII)V", (void*)Bitmap_setPixels },
