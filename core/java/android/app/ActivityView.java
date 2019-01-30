@@ -28,15 +28,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
-import android.hardware.input.InputManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IWindowManager;
-import android.view.InputDevice;
-import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceSession;
@@ -51,9 +48,7 @@ import dalvik.system.CloseGuard;
 import java.util.List;
 
 /**
- * Activity container that allows launching activities into itself and does input forwarding.
- * <p>Creation of this view is only allowed to callers who have
- * {@link android.Manifest.permission#INJECT_EVENTS} permission.
+ * Activity container that allows launching activities into itself.
  * <p>Activity launching into this container is restricted by the same rules that apply to launching
  * on VirtualDisplays.
  * @hide
@@ -76,9 +71,8 @@ public class ActivityView extends ViewGroup {
     private StateCallback mActivityViewCallback;
 
     private IActivityTaskManager mActivityTaskManager;
-    private IInputForwarder mInputForwarder;
-    // Temp container to store view coordinates on screen.
-    private final int[] mLocationOnScreen = new int[2];
+    // Temp container to store view coordinates in window.
+    private final int[] mLocationInWindow = new int[2];
 
     private TaskStackListener mTaskStackListener;
 
@@ -280,7 +274,7 @@ public class ActivityView extends ViewGroup {
     }
 
     /**
-     * Triggers an update of {@link ActivityView}'s location on screen to properly set touch exclude
+     * Triggers an update of {@link ActivityView}'s location in window to properly set touch exclude
      * regions and avoid focus switches by touches on this view.
      */
     public void onLocationChanged() {
@@ -295,43 +289,12 @@ public class ActivityView extends ViewGroup {
     /** Send current location and size to the WM to set tap exclude region for this view. */
     private void updateLocation() {
         try {
-            getLocationOnScreen(mLocationOnScreen);
+            getLocationInWindow(mLocationInWindow);
             WindowManagerGlobal.getWindowSession().updateTapExcludeRegion(getWindow(), hashCode(),
-                    mLocationOnScreen[0], mLocationOnScreen[1], getWidth(), getHeight());
+                    mLocationInWindow[0], mLocationInWindow[1], getWidth(), getHeight());
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return injectInputEvent(event) || super.onTouchEvent(event);
-    }
-
-    @Override
-    public boolean onGenericMotionEvent(MotionEvent event) {
-        if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-            if (injectInputEvent(event)) {
-                return true;
-            }
-        }
-        return super.onGenericMotionEvent(event);
-    }
-
-    private boolean injectInputEvent(MotionEvent event) {
-        if (mInputForwarder != null) {
-            try {
-                // The touch event that the ActivityView gets is in View space, but the event needs
-                // to get forwarded in screen space. This offsets the touch event by the location
-                // the ActivityView is on screen and sends it to the input forwarder.
-                getLocationOnScreen(mLocationOnScreen);
-                event.offsetLocation(mLocationOnScreen[0], mLocationOnScreen[1]);
-                return mInputForwarder.forwardEvent(event);
-            } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
-            }
-        }
-        return false;
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -416,7 +379,6 @@ public class ActivityView extends ViewGroup {
         }
 
         mTmpTransaction.show(mRootSurfaceControl).apply();
-        mInputForwarder = InputManager.getInstance().createInputForwarder(displayId);
         mTaskStackListener = new TaskStackListenerImpl();
         try {
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
@@ -432,9 +394,6 @@ public class ActivityView extends ViewGroup {
 
         mSurfaceView.getHolder().removeCallback(mSurfaceCallback);
 
-        if (mInputForwarder != null) {
-            mInputForwarder = null;
-        }
         cleanTapExcludeRegion();
 
         if (mTaskStackListener != null) {

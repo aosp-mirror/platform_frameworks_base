@@ -55,6 +55,7 @@ static struct {
     jfieldID ownerUid;
     jfieldID inputFeatures;
     jfieldID displayId;
+    jfieldID portalToDisplayId;
 } gInputWindowHandleClassInfo;
 
 static Mutex gHandleMutex;
@@ -154,6 +155,8 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.inputFeatures);
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
+    mInfo.portalToDisplayId = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.portalToDisplayId);
 
     jobject inputApplicationHandleObj = env->GetObjectField(obj,
             gInputWindowHandleClassInfo.inputApplicationHandle);
@@ -307,6 +310,9 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.displayId, clazz,
             "displayId", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.portalToDisplayId, clazz,
+            "portalToDisplayId", "I");
     return 0;
 }
 

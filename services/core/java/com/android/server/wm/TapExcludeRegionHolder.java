@@ -49,7 +49,9 @@ class TapExcludeRegionHolder {
     void amendRegion(Region region, Rect boundingRegion) {
         for (int i = mTapExcludeRects.size() - 1; i>= 0 ; --i) {
             final Rect rect = mTapExcludeRects.valueAt(i);
-            rect.intersect(boundingRegion);
+            if (boundingRegion != null) {
+                rect.intersect(boundingRegion);
+            }
             region.union(rect);
         }
     }
