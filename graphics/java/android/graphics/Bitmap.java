@@ -21,7 +21,6 @@ import android.annotation.ColorInt;
 import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.res.ResourcesImpl;
@@ -1762,9 +1761,7 @@ public final class Bitmap implements Parcelable {
      *         previously assigned color space.
      *
      * @param colorSpace to assign to the bitmap
-     * @hide
      */
-    @TestApi
     public void setColorSpace(@NonNull ColorSpace colorSpace) {
         checkRecycled("setColorSpace called on a recycled bitmap");
         if (colorSpace == null) {
@@ -1815,9 +1812,7 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the color space encoded in the long
      *                                  is invalid or unknown.
      *
-     * @hide pending API approval
      */
-    @TestApi
     public void eraseColor(@ColorLong long c) {
         checkRecycled("Can't erase a recycled bitmap");
         if (!isMutable()) {
@@ -1864,9 +1859,7 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if x, y exceed the bitmap's bounds
      * @throws IllegalStateException if the bitmap's config is {@link Config#HARDWARE}
      *
-     * @hide pending API approval
      */
-    @TestApi
     public Color getColor(int x, int y) {
         checkRecycled("Can't call getColor() on a recycled bitmap");
         checkHardware("unable to getColor(), "

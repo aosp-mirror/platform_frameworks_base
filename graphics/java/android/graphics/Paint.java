@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.Size;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
@@ -974,10 +973,7 @@ public class Paint {
      * @see Color for APIs that help manipulate a color long.
      *
      * @return the paint's color (and alpha).
-     *
-     * @hide pending API approval
      */
-    @TestApi
     @ColorLong
     public long getColorLong() {
         return mColor;
@@ -1006,10 +1002,7 @@ public class Paint {
      *      to set in the paint.
      * @throws IllegalArgumentException if the color space encoded in the long
      *      is invalid or unknown.
-     *
-     * @hide pending API approval
      */
-    @TestApi
     public void setColor(@ColorLong long color) {
         ColorSpace cs = Color.colorSpace(color);
         float r = Color.red(color);
@@ -1445,10 +1438,7 @@ public class Paint {
      *
      * @throws IllegalArgumentException if the color space encoded in the long
      *      is invalid or unknown.
-     *
-     * @hide pending API approval
      */
-    @TestApi
     public void setShadowLayer(float radius, float dx, float dy, @ColorLong long shadowColor) {
         ColorSpace cs = Color.colorSpace(shadowColor);
         float r = Color.red(shadowColor);
@@ -1517,9 +1507,7 @@ public class Paint {
      * Returns the color of the shadow layer.
      * @see #setShadowLayer(float,float,float,int)
      * @see #setShadowLayer(float,float,float,long)
-     * @hide pending API approval
      */
-    @TestApi
     public @ColorLong long getShadowLayerColorLong() {
         return mShadowLayerColor;
     }
