@@ -5859,10 +5859,10 @@ package android.provider {
     field public static final String NAMESPACE = "content_capture";
   }
 
-  public static interface DeviceConfig.FsiBoot {
-    field public static final String NAMESPACE = "fsi_boot";
-    field public static final String OOB_ENABLED = "oob_enabled";
-    field public static final String OOB_WHITELIST = "oob_whitelist";
+  public static interface DeviceConfig.DexBoot {
+    field public static final String NAMESPACE = "dex_boot";
+    field public static final String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
+    field public static final String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
   }
 
   public static interface DeviceConfig.IntelligenceAttention {

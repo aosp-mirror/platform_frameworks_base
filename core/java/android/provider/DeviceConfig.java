@@ -218,16 +218,15 @@ public final class DeviceConfig {
     }
 
     /**
-     * Namespace for Full Stack Integrity to run privileged apps only in JIT mode. The flag applies
-     * at process start, so reboot is a way to bring the device to a clean state.
+     * Namespace for how dex runs.  The feature may requires reboot to a clean state.
      *
      * @hide
      */
     @SystemApi
-    public interface FsiBoot {
-        String NAMESPACE = "fsi_boot";
-        String OOB_ENABLED = "oob_enabled";
-        String OOB_WHITELIST = "oob_whitelist";
+    public interface DexBoot {
+        String NAMESPACE = "dex_boot";
+        String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
+        String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
     }
 
     /**
