@@ -59,7 +59,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -3321,27 +3320,48 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether the current password the user has set is sufficient to meet the policy
-     * requirements (e.g. quality, minimum length) that have been requested by the admins of this
-     * user and its participating profiles. Restrictions on profiles that have a separate challenge
-     * are not taken into account. The user must be unlocked in order to perform the check.
-     * <p>
-     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
-     * password is always treated as empty - i.e. this method will always return false on such
-     * devices, provided any password requirements were set.
-     * <p>
-     * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
-     * not, a security exception will be thrown.
-     * <p>
-     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * Determines whether the calling user's current password meets policy requirements
+     * (e.g. quality, minimum length). The user must be unlocked to perform this check.
+     *
+     * <p>Policy requirements which affect this check can be set by admins of the user, but also
+     * by the admin of a managed profile associated with the calling user (when the managed profile
+     * doesn't have a separate work challenge). When a managed profile has a separate work
+     * challenge, its policy requirements only affect the managed profile.
+     *
+     * <p>Depending on the user, this method checks the policy requirement against one of the
+     * following passwords:
+     * <ul>
+     * <li>For the primary user or secondary users: the personal keyguard password.
+     * <li>For managed profiles: a work challenge if set, otherwise the parent user's personal
+     *     keyguard password.
+     * <ul/>
+     * In other words, it's always checking the requirement against the password that is protecting
+     * the calling user.
+     *
+     * <p>Note that this method considers all policy requirements targeting the password in
+     * question. For example a profile owner might set a requirement on the parent profile i.e.
+     * personal keyguard but not on the profile itself. When the device has a weak personal keyguard
+     * password and no separate work challenge, calling this method will return {@code false}
+     * despite the profile owner not setting a policy on the profile itself. This is because the
+     * profile's current password is the personal keyguard password, and it does not meet all policy
+     * requirements.
+     *
+     * <p>Device admins must request {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} before
+     * calling this method. Note, this policy type is deprecated for device admins in Android 9.0
+     * (API level 28) or higher.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to determine if the password set on
      * the parent profile is sufficient.
      *
-     * @return Returns true if the password meets the current requirements, else false.
-     * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
-     * @throws IllegalStateException if the user is not unlocked.
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty - i.e. this method will always return false on such
+     * devices, provided any password requirements were set.
+     *
+     * @return {@code true} if the password meets the policy requirements, {@code false} otherwise
+     * @throws SecurityException if the calling application isn't an active admin that uses
+     *     {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the user isn't unlocked
      */
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
