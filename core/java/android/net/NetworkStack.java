@@ -20,7 +20,9 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -46,9 +48,22 @@ import java.util.ArrayList;
  * @hide
  */
 @SystemService(Context.NETWORK_STACK_SERVICE)
+@SystemApi
+@TestApi
 public class NetworkStack {
     private static final String TAG = NetworkStack.class.getSimpleName();
 
+    /**
+     * Permission granted only to the NetworkStack APK, defined in NetworkStackStub with signature
+     * protection level.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String PERMISSION_MAINLINE_NETWORK_STACK =
+            "android.permission.MAINLINE_NETWORK_STACK";
+
+    /** @hide */
     public static final String NETWORKSTACK_PACKAGE_NAME = "com.android.mainline.networkstack";
 
     private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
@@ -66,12 +81,14 @@ public class NetworkStack {
         void onNetworkStackConnected(INetworkStackConnector connector);
     }
 
+    /** @hide */
     public NetworkStack() { }
 
     /**
      * Create a DHCP server according to the specified parameters.
      *
      * <p>The server will be returned asynchronously through the provided callbacks.
+     * @hide
      */
     public void makeDhcpServer(final String ifName, final DhcpServingParamsParcel params,
             final IDhcpServerCallbacks cb) {
@@ -88,6 +105,7 @@ public class NetworkStack {
      * Create an IpClient on the specified interface.
      *
      * <p>The IpClient will be returned asynchronously through the provided callbacks.
+     * @hide
      */
     public void makeIpClient(String ifName, IIpClientCallbacks cb) {
         requestConnector(connector -> {
@@ -103,6 +121,7 @@ public class NetworkStack {
      * Create a NetworkMonitor.
      *
      * <p>The INetworkMonitor will be returned asynchronously through the provided callbacks.
+     * @hide
      */
     public void makeNetworkMonitor(
             NetworkParcelable network, String name, INetworkMonitorCallbacks cb) {
@@ -153,6 +172,7 @@ public class NetworkStack {
      * the system server on devices that do not support the network stack module. The network stack
      * connector will then be delivered asynchronously to clients that requested it before it was
      * started.
+     * @hide
      */
     public void start(Context context) {
         mNetworkStackStartRequested = true;
