@@ -45,12 +45,13 @@ public class NotificationCategorizer {
     protected static final int CATEGORY_PEOPLE = 4;
     protected static final int CATEGORY_ALARM = 5;
     protected static final int CATEGORY_CALL = 6;
+    protected static final int CATEGORY_HIGH = 7;
 
     /** @hide */
     @IntDef(prefix = { "CATEGORY_" }, value = {
             CATEGORY_MIN, CATEGORY_EVERYTHING_ELSE, CATEGORY_ONGOING, CATEGORY_CALL,
             CATEGORY_SYSTEM_LOW, CATEGORY_EVENT, CATEGORY_REMINDER, CATEGORY_SYSTEM,
-            CATEGORY_PEOPLE, CATEGORY_ALARM
+            CATEGORY_PEOPLE, CATEGORY_ALARM, CATEGORY_HIGH
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Category {}
@@ -95,6 +96,9 @@ public class NotificationCategorizer {
             } else {
                 return CATEGORY_SYSTEM_LOW;
             }
+        }
+        if (entry.getChannel().getImportance() == IMPORTANCE_HIGH) {
+            return CATEGORY_HIGH;
         }
         if (entry.isOngoing()) {
             return CATEGORY_ONGOING;
