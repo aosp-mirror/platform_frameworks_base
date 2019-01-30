@@ -291,6 +291,7 @@ message Atom {
         DebugFailingElapsedClock debug_failing_elapsed_clock = 10047;
         NumBiometricsEnrolled num_faces_enrolled = 10048;
         RoleHolder role_holder = 10049;
+        DangerousPermissionState dangerous_permission_state = 10050;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -5359,5 +5360,22 @@ message ProcessStartTime {
     // hostingNameStr field in ProcessRecord. The component class name that runs
     // in this process.
     optional string hosting_name = 9;
+}
+
+/**
+ * State of a dangerous permission requested by a package
+ */
+message DangerousPermissionState {
+    // Name of the permission
+    optional string permission_name = 1;
+
+    // Uid of the package
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Package requesting the permission
+    optional string package_name = 3;
+
+    // If the permission is granted to the uid
+    optional bool is_granted = 4;
 }
 
