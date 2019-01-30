@@ -1652,6 +1652,13 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
     im->setCustomPointerIcon(spriteIcon);
 }
 
+static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jclass /* clazz */, jlong ptr,
+        jint deviceId, jint displayId) {
+
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    return im->getInputManager()->getReader()->canDispatchToDisplay(deviceId, displayId);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -1726,6 +1733,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeReloadPointerIcons },
     { "nativeSetCustomPointerIcon", "(JLandroid/view/PointerIcon;)V",
             (void*) nativeSetCustomPointerIcon },
+    { "nativeCanDispatchToDisplay", "(JII)Z",
+            (void*) nativeCanDispatchToDisplay },
 };
 
 #define FIND_CLASS(var, className) \

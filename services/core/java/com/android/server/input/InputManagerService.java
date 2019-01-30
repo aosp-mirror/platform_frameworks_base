@@ -234,6 +234,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeReloadPointerIcons(long ptr);
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
     private static native void nativeSetPointerCapture(long ptr, boolean detached);
+    private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -1888,6 +1889,16 @@ public class InputManagerService extends IInputManager.Stub
             Slog.e(TAG, "Could not parse '" + confFile.getAbsolutePath() + "'", e);
         }
         return new String[0];
+    }
+
+    /**
+     * Gets if an input device could dispatch to the given display".
+     * @param deviceId The input device id.
+     * @param displayId The specific display id.
+     * @return True if the device could dispatch to the given display, false otherwise.
+     */
+    public boolean canDispatchToDisplay(int deviceId, int displayId) {
+        return nativeCanDispatchToDisplay(mPtr, deviceId, displayId);
     }
 
     // Native callback.
