@@ -38,7 +38,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.NetworkUtils;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IpClient.IpClientCallbacksWrapper;
@@ -47,6 +46,8 @@ import android.net.metrics.ApfStats;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.RaEvent;
 import android.net.util.InterfaceParams;
+import android.net.util.NetworkStackUtils;
+import android.net.util.SocketUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
@@ -59,8 +60,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
-
-import libcore.io.IoBridge;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -200,10 +199,8 @@ public class ApfFilter {
 
         public void halt() {
             mStopped = true;
-            try {
-                // Interrupts the read() call the thread is blocked in.
-                IoBridge.closeAndSignalBlockedThreads(mSocket);
-            } catch (IOException ignored) {}
+            // Interrupts the read() call the thread is blocked in.
+            NetworkStackUtils.closeSocketQuietly(mSocket);
         }
 
         @Override
@@ -470,8 +467,8 @@ public class ApfFilter {
             socket = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IPV6);
             SocketAddress addr = makePacketSocketAddress(
                     (short) ETH_P_IPV6, mInterfaceParams.index);
-            Os.bind(socket, addr);
-            NetworkUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
+            SocketUtils.bindSocket(socket, addr);
+            SocketUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error starting filter", e);
             return;

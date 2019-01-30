@@ -20,6 +20,10 @@ import static android.net.netlink.NetlinkConstants.RTM_DELNEIGH;
 import static android.net.netlink.NetlinkConstants.hexify;
 import static android.net.netlink.NetlinkConstants.stringForNlMsgType;
 import static android.net.util.SocketUtils.makeNetlinkSocketAddress;
+import static android.system.OsConstants.AF_NETLINK;
+import static android.system.OsConstants.NETLINK_ROUTE;
+import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOCK_NONBLOCK;
 
 import android.net.MacAddress;
 import android.net.netlink.NetlinkErrorMessage;
@@ -27,16 +31,16 @@ import android.net.netlink.NetlinkMessage;
 import android.net.netlink.NetlinkSocket;
 import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdMsg;
+import android.net.util.NetworkStackUtils;
 import android.net.util.PacketReader;
 import android.net.util.SharedLog;
+import android.net.util.SocketUtils;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
-
-import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
@@ -77,7 +81,7 @@ public class IpNeighborMonitor extends PacketReader {
                 1, ip, StructNdMsg.NUD_PROBE, ifIndex, null);
 
         try {
-            NetlinkSocket.sendOneShotKernelMessage(OsConstants.NETLINK_ROUTE, msg);
+            NetlinkSocket.sendOneShotKernelMessage(NETLINK_ROUTE, msg);
         } catch (ErrnoException e) {
             Log.e(TAG, "Error " + msgSnippet + ": " + e);
             return -e.errno;
@@ -145,8 +149,8 @@ public class IpNeighborMonitor extends PacketReader {
         FileDescriptor fd = null;
 
         try {
-            fd = NetlinkSocket.forProto(OsConstants.NETLINK_ROUTE);
-            Os.bind(fd, makeNetlinkSocketAddress(0, OsConstants.RTMGRP_NEIGH));
+            fd = Os.socket(AF_NETLINK, SOCK_DGRAM | SOCK_NONBLOCK, NETLINK_ROUTE);
+            SocketUtils.bindSocket(fd, makeNetlinkSocketAddress(0, OsConstants.RTMGRP_NEIGH));
             NetlinkSocket.connectToKernel(fd);
 
             if (VDBG) {
@@ -155,7 +159,7 @@ public class IpNeighborMonitor extends PacketReader {
             }
         } catch (ErrnoException|SocketException e) {
             logError("Failed to create rtnetlink socket", e);
-            IoUtils.closeQuietly(fd);
+            NetworkStackUtils.closeSocketQuietly(fd);
             return null;
         }
 

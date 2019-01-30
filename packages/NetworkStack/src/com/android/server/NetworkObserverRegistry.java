@@ -15,6 +15,8 @@
  */
 package com.android.server;
 
+import static android.net.RouteInfo.RTN_UNICAST;
+
 import android.annotation.NonNull;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
@@ -169,7 +171,7 @@ public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub 
     public void onRouteChanged(boolean updated, String route, String gateway, String ifName) {
         final RouteInfo processRoute = new RouteInfo(new IpPrefix(route),
                 ("".equals(gateway)) ? null : InetAddresses.parseNumericAddress(gateway),
-                ifName);
+                ifName, RTN_UNICAST);
         if (updated) {
             invokeForAllObservers(o -> o.onRouteUpdated(processRoute));
         } else {
