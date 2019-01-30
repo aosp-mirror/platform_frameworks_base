@@ -57,8 +57,14 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ਕੰਪਿਊਟਰ ਦਾ RSA ਕੁੰਜੀ ਫਿੰਗਰਪ੍ਰਿੰਟ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ਹਮੇਸ਼ਾਂ ਇਸ ਕੰਪਿਊਟਰ ਤੋਂ ਆਗਿਆ ਦਿਓ"</string>
+    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
+    <skip />
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ਡਿਬੱਗਿੰਗ ਦੀ ਆਗਿਆ ਨਹੀਂ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user."</string>
+    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਜ਼ੂਮ ਕਰੋ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਸਟ੍ਰੈਚ ਕਰੋ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
@@ -112,8 +118,7 @@
     <string name="cancel" msgid="6442560571259935130">"ਰੱਦ ਕਰੋ"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"ਮਦਦ ਸੁਨੇਹਾ ਖੇਤਰ"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"ਪੁਸ਼ਟੀ ਕਰੋ"</string>
-    <!-- no translation found for biometric_dialog_try_again (1900185172633183201) -->
-    <skip />
+    <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਪ੍ਰਤੀਕ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ਤੁਹਾਡੀ ਪਛਾਣ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
@@ -296,8 +301,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ਆਡੀਓ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"ਹੈੱਡਸੈੱਟ"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"ਇਨਪੁੱਟ"</string>
-    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (4930931771490695395) -->
-    <skip />
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ਚਮਕ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ਆਟੋ-ਰੋਟੇਟ"</string>
@@ -611,17 +615,13 @@
     <string name="inline_blocking_helper" msgid="3055064577771478591">"ਤੁਸੀਂ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਆਮ ਤੌਰ \'ਤੇ ਖਾਰਜ ਕਰਦੇ ਹੋ। \nਕੀ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ਕੀ ਇਨ੍ਹਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
-    <!-- no translation found for inline_block_button (8735843688021655065) -->
-    <skip />
+    <string name="inline_block_button" msgid="8735843688021655065">"ਬਲਾਕ ਕਰੋ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ਛੋਟਾ ਕਰੋ"</string>
     <string name="inline_silent_button_silent" msgid="4411510650503783646">"ਚੁੱਪ-ਚਪੀਤੇ ਦਿਖਾਓ"</string>
-    <!-- no translation found for inline_silent_button_stay_silent (6308371431217601009) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_alert (7961887853830826523) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_keep_alerting (327696842264359693) -->
-    <skip />
+    <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"ਚੁੱਪ ਰਹੋ"</string>
+    <string name="inline_silent_button_alert" msgid="7961887853830826523">"ਮੈਨੂੰ ਸੁਚੇਤ ਕਰੋ"</string>
+    <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ਸੁਚੇਤ ਰਖੋ"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ਇਨ੍ਹਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬੰਦ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਰਾਹੀਂ"</string>
@@ -871,11 +871,18 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ਸਮਝ ਲਿਆ"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ਹੀਪ ਡੰਪ ਕਰੋ"</string>
-    <!-- no translation found for ongoing_privacy_chip_multiple_apps (1406406529558080714) -->
+    <plurals name="ongoing_privacy_chip_multiple_apps" formatted="false" msgid="1406406529558080714">
+      <item quantity="one"><xliff:g id="NUM_APPS_2">%d</xliff:g> ਐਪ</item>
+      <item quantity="other"><xliff:g id="NUM_APPS_2">%d</xliff:g> ਐਪਾਂ</item>
+    </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"ਐਪਲੀਕੇਸ਼ਨਾਂ ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ।"</string>
-    <!-- no translation found for ongoing_privacy_chip_content_multiple_apps_single_op (4871926099254314088) -->
-    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"ਰੱਦ ਕਰੋ"</string>
+    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
+      <item quantity="one"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ਐਪਲੀਕੇਸ਼ਨ ਤੁਹਾਡੇ <xliff:g id="TYPE_5">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।</item>
+      <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ਐਪਲੀਕੇਸ਼ਨਾਂ ਤੁਹਾਡੇ <xliff:g id="TYPE_5">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ।</item>
+    </plurals>
+    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <skip />
     <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"ਵੇਰਵੇ ਦੇਖੋ"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਐਪ"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਐਪਾਂ"</string>

@@ -57,8 +57,14 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB 디버깅을 허용하시겠습니까?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"컴퓨터 RSA 키 지문:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"이 컴퓨터에서 항상 허용"</string>
+    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
+    <skip />
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB 디버깅이 허용되지 않음"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
+    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"스크린샷"</string>
@@ -112,8 +118,7 @@
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"도움말 메시지 영역"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"확인"</string>
-    <!-- no translation found for biometric_dialog_try_again (1900185172633183201) -->
-    <skip />
+    <string name="biometric_dialog_try_again" msgid="1900185172633183201">"다시 시도하세요."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"지문 센서를 터치하세요."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"지문 아이콘"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"찾는 중..."</string>
@@ -296,8 +301,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"오디오"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"헤드셋"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"입력"</string>
-    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (4930931771490695395) -->
-    <skip />
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"보청기"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"켜는 중..."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"밝기"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"자동 회전"</string>
@@ -611,17 +615,13 @@
     <string name="inline_blocking_helper" msgid="3055064577771478591">"보통 이 알림을 닫았습니다. \n알림을 계속 표시하시겠습니까?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"이 알림을 계속 표시하시겠습니까?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"알림 중지"</string>
-    <!-- no translation found for inline_block_button (8735843688021655065) -->
-    <skip />
+    <string name="inline_block_button" msgid="8735843688021655065">"차단"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"계속 표시하기"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"최소화"</string>
     <string name="inline_silent_button_silent" msgid="4411510650503783646">"소리 없이 표시"</string>
-    <!-- no translation found for inline_silent_button_stay_silent (6308371431217601009) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_alert (7961887853830826523) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_keep_alerting (327696842264359693) -->
-    <skip />
+    <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"계속 무음으로 알림"</string>
+    <string name="inline_silent_button_alert" msgid="7961887853830826523">"내게 알림"</string>
+    <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"계속 알림"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"이 앱의 알림을 계속 표시하시겠습니까?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"이 알림은 끌 수 없습니다"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"제공: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -871,11 +871,18 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"설정"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"확인"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
-    <!-- no translation found for ongoing_privacy_chip_multiple_apps (1406406529558080714) -->
+    <plurals name="ongoing_privacy_chip_multiple_apps" formatted="false" msgid="1406406529558080714">
+      <item quantity="other">앱 <xliff:g id="NUM_APPS_2">%d</xliff:g>개</item>
+      <item quantity="one">앱 <xliff:g id="NUM_APPS_0">%d</xliff:g>개</item>
+    </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="TYPES_LIST">%2$s</xliff:g>을(를) 사용 중입니다."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"애플리케이션이 <xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중입니다."</string>
-    <!-- no translation found for ongoing_privacy_chip_content_multiple_apps_single_op (4871926099254314088) -->
-    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"취소"</string>
+    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
+      <item quantity="other">애플리케이션 <xliff:g id="NUM_APPS_4">%1$d</xliff:g>개가 <xliff:g id="TYPE_5">%2$s</xliff:g>을(를) 사용하고 있습니다.</item>
+      <item quantity="one">애플리케이션 <xliff:g id="NUM_APPS_0">%1$d</xliff:g>개가 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) 사용하고 있습니다.</item>
+    </plurals>
+    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <skip />
     <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"세부정보 보기"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"<xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중인 앱"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"<xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중인 앱"</string>
