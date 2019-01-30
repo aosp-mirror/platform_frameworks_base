@@ -158,6 +158,20 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
             }
         }
     }
+
+    fprintf(out, "};\n");
+    fprintf(out, "\n");
+
+    fprintf(out,
+            "const std::set<int> AtomsInfo::kWhitelistedAtoms = {\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+         atom != atoms.decls.end(); atom++) {
+        if (atom->whitelisted) {
+            string constant = make_constant_name(atom->name);
+            fprintf(out, " %s,\n", constant.c_str());
+        }
+    }
+
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
@@ -728,6 +742,8 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out,
             "  const static std::map<int, std::vector<int>> "
             "kBytesFieldAtoms;");
+    fprintf(out,
+            "  const static std::set<int> kWhitelistedAtoms;\n");
     fprintf(out, "};\n");
 
     fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n",

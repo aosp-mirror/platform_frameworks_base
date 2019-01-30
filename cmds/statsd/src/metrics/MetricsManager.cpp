@@ -234,12 +234,22 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
     VLOG("=========================Metric Reports End==========================");
 }
 
-// Consume the stats log if it's interesting to this metric.
-void MetricsManager::onLogEvent(const LogEvent& event) {
-    if (!mConfigValid) {
-        return;
-    }
 
+bool MetricsManager::checkLogCredentials(const LogEvent& event) {
+    if (android::util::AtomsInfo::kWhitelistedAtoms.find(event.GetTagId()) !=
+      android::util::AtomsInfo::kWhitelistedAtoms.end()) 
+    {
+        return true;
+    }
+    std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
+    if (mAllowedLogSources.find(event.GetUid()) == mAllowedLogSources.end()) {
+        VLOG("log source %d not on the whitelist", event.GetUid());
+        return false;
+    }
+    return true;
+}
+
+bool MetricsManager::eventSanityCheck(const LogEvent& event) {
     if (event.GetTagId() == android::util::APP_BREADCRUMB_REPORTED) {
         // Check that app breadcrumb reported fields are valid.
         status_t err = NO_ERROR;
@@ -249,23 +259,23 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         long appHookUid = event.GetLong(event.size()-2, &err);
         if (err != NO_ERROR ) {
             VLOG("APP_BREADCRUMB_REPORTED had error when parsing the uid");
-            return;
+            return false;
         }
         int32_t loggerUid = event.GetUid();
         if (loggerUid != appHookUid && loggerUid != AID_STATSD) {
             VLOG("APP_BREADCRUMB_REPORTED has invalid uid: claimed %ld but caller is %d",
                  appHookUid, loggerUid);
-            return;
+            return false;
         }
 
         // The state must be from 0,3. This part of code must be manually updated.
         long appHookState = event.GetLong(event.size(), &err);
         if (err != NO_ERROR ) {
             VLOG("APP_BREADCRUMB_REPORTED had error when parsing the state field");
-            return;
+            return false;
         } else if (appHookState < 0 || appHookState > 3) {
             VLOG("APP_BREADCRUMB_REPORTED does not have valid state %ld", appHookState);
-            return;
+            return false;
         }
     } else if (event.GetTagId() == android::util::DAVEY_OCCURRED) {
         // Daveys can be logged from any app since they are logged in libs/hwui/JankTracker.cpp.
@@ -276,29 +286,40 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         long jankUid = event.GetLong(1, &err);
         if (err != NO_ERROR ) {
             VLOG("Davey occurred had error when parsing the uid");
-            return;
+            return false;
         }
         int32_t loggerUid = event.GetUid();
         if (loggerUid != jankUid && loggerUid != AID_STATSD) {
             VLOG("DAVEY_OCCURRED has invalid uid: claimed %ld but caller is %d", jankUid,
                  loggerUid);
-            return;
+            return false;
         }
 
         long duration = event.GetLong(event.size(), &err);
         if (err != NO_ERROR ) {
             VLOG("Davey occurred had error when parsing the duration");
-            return;
+            return false;
         } else if (duration > 100000) {
             VLOG("Davey duration is unreasonably long: %ld", duration);
-            return;
+            return false;
         }
-    } else {
-        std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
-        if (mAllowedLogSources.find(event.GetUid()) == mAllowedLogSources.end()) {
-            VLOG("log source %d not on the whitelist", event.GetUid());
-            return;
-        }
+    }
+
+    return true;
+}
+
+// Consume the stats log if it's interesting to this metric.
+void MetricsManager::onLogEvent(const LogEvent& event) {
+    if (!mConfigValid) {
+        return;
+    }
+
+    if (!checkLogCredentials(event)) {
+        return;
+    }
+
+    if (!eventSanityCheck(event)) {
+        return;
     }
 
     int tagId = event.GetTagId();

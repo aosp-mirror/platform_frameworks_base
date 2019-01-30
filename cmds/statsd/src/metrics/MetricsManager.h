@@ -48,6 +48,10 @@ public:
     // Return whether the configuration is valid.
     bool isConfigValid() const;
 
+    bool checkLogCredentials(const LogEvent& event);
+
+    bool eventSanityCheck(const LogEvent& event);
+
     void onLogEvent(const LogEvent& event);
 
     void onAnomalyAlarmFired(
