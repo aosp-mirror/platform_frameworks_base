@@ -26,6 +26,7 @@ import static android.system.OsConstants.STDOUT_FILENO;
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
 
+import android.metrics.LogMaker;
 import android.net.Credentials;
 import android.net.LocalSocket;
 import android.os.Process;
@@ -34,6 +35,9 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructPollfd;
 import android.util.Log;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import dalvik.system.VMRuntime;
 
@@ -311,9 +315,43 @@ class ZygoteConnection {
         }
     }
 
-    private void handleHiddenApiAccessLogSampleRate(int percent) {
+    private class HiddenApiUsageLogger implements VMRuntime.HiddenApiUsageLogger {
+
+        private final MetricsLogger mMetricsLogger = new MetricsLogger();
+
+        public void hiddenApiUsed(String packageName, String signature,
+                int accessMethod, boolean accessDenied) {
+            int accessMethodMetric = HiddenApiUsageLogger.ACCESS_METHOD_NONE;
+            switch(accessMethod) {
+                case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
+                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_NONE;
+                    break;
+                case HiddenApiUsageLogger.ACCESS_METHOD_REFLECTION:
+                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_REFLECTION;
+                    break;
+                case HiddenApiUsageLogger.ACCESS_METHOD_JNI:
+                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_JNI;
+                    break;
+                case HiddenApiUsageLogger.ACCESS_METHOD_LINKING:
+                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_LINKING;
+                    break;
+            }
+            LogMaker logMaker = new LogMaker(MetricsEvent.ACTION_HIDDEN_API_ACCESSED)
+                    .setPackageName(packageName)
+                    .addTaggedData(MetricsEvent.FIELD_HIDDEN_API_SIGNATURE, signature)
+                    .addTaggedData(MetricsEvent.FIELD_HIDDEN_API_ACCESS_METHOD,
+                        accessMethodMetric);
+            if (accessDenied) {
+                logMaker.addTaggedData(MetricsEvent.FIELD_HIDDEN_API_ACCESS_DENIED, 1);
+            }
+            mMetricsLogger.write(logMaker);
+        }
+    }
+
+    private void handleHiddenApiAccessLogSampleRate(int samplingRate) {
         try {
-            ZygoteInit.setHiddenApiAccessLogSampleRate(percent);
+            ZygoteInit.setHiddenApiAccessLogSampleRate(samplingRate);
+            ZygoteInit.setHiddenApiUsageLogger(new HiddenApiUsageLogger());
             mSocketOutStream.writeInt(0);
         } catch (IOException ioe) {
             throw new IllegalStateException("Error writing to command socket", ioe);

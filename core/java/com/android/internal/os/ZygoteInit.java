@@ -533,6 +533,14 @@ public class ZygoteInit {
     }
 
     /**
+     * Sets the implementation to be used for logging hidden API accesses
+     * @param logger the implementation of the VMRuntime.HiddenApiUsageLogger interface
+     */
+    public static void setHiddenApiUsageLogger(VMRuntime.HiddenApiUsageLogger logger) {
+        VMRuntime.getRuntime().setHiddenApiUsageLogger(logger);
+    }
+
+    /**
      * Creates a PathClassLoader for the given class path that is associated with a shared
      * namespace, i.e., this classloader can access platform-private native libraries. The
      * classloader will use java.library.path as the native library path.
