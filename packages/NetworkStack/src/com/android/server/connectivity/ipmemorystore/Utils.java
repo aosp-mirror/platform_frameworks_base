@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package android.net.ipmemorystore;
+package com.android.server.connectivity.ipmemorystore;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.ipmemorystore.Blob;
 
 /** {@hide} */
 public class Utils {
