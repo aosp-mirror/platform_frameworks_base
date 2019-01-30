@@ -1942,7 +1942,6 @@ Lcom/android/internal/R$id;->title:I
 Lcom/android/internal/R$id;->titleDivider:I
 Lcom/android/internal/R$id;->titleDividerTop:I
 Lcom/android/internal/R$id;->title_container:I
-Lcom/android/internal/R$id;->title_icon:I
 Lcom/android/internal/R$id;->title_template:I
 Lcom/android/internal/R$id;->topPanel:I
 Lcom/android/internal/R$id;->up:I

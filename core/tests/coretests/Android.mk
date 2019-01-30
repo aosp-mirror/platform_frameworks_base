@@ -37,7 +37,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockwebserver \
     guava \
     androidx.test.runner \
+    androidx.test.ext.junit \
     androidx.test.rules \
+    androidx.test.espresso.core \
     mockito-target-minus-junit4 \
     espresso-core \
     ub-uiautomator \
