@@ -34,6 +34,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
@@ -51,6 +52,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -647,20 +649,50 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testFinishDisabledPackageActivities() {
+    public void testFinishDisabledPackageActivities_FinishAliveActivities() {
         final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
         final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        firstActivity.setState(STOPPED, "testFinishDisabledPackageActivities");
+        secondActivity.setState(RESUMED, "testFinishDisabledPackageActivities");
+        mStack.mResumedActivity = secondActivity;
 
-        // Making the second activity a task overlay without an app means it will be removed from
-        // the task's activities as well once first activity is removed.
-        secondActivity.mTaskOverlay = true;
-        secondActivity.app = null;
+        // Note the activities have non-null ActivityRecord.app, so it won't remove directly.
+        mStack.finishDisabledPackageActivitiesLocked(firstActivity.packageName,
+                null /* filterByClasses */, true /* doit */, true /* evenPersistent */,
+                UserHandle.USER_ALL);
+
+        // If the activity is disabled with {@link android.content.pm.PackageManager#DONT_KILL_APP}
+        // the activity should still follow the normal flow to finish and destroy.
+        assertThat(firstActivity.getState()).isEqualTo(DESTROYING);
+        assertThat(secondActivity.getState()).isEqualTo(PAUSING);
+        assertTrue(secondActivity.finishing);
+    }
+
+    @Test
+    public void testFinishDisabledPackageActivities_RemoveNonAliveActivities() {
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(mTask).build();
+
+        // The overlay activity is not in the disabled package but it is in the same task.
+        final ActivityRecord overlayActivity = new ActivityBuilder(mService).setTask(mTask)
+                .setComponent(new ComponentName("package.overlay", ".OverlayActivity")).build();
+        // If the task only remains overlay activity, the task should also be removed.
+        // See {@link ActivityStack#removeActivityFromHistoryLocked}.
+        overlayActivity.mTaskOverlay = true;
+
+        // The activity without an app means it will be removed immediately.
+        // See {@link ActivityStack#destroyActivityLocked}.
+        activity.app = null;
+        overlayActivity.app = null;
 
         assertEquals(2, mTask.mActivities.size());
 
-        mStack.finishDisabledPackageActivitiesLocked(firstActivity.packageName, null,
-                true /* doit */, true /* evenPersistent */, UserHandle.USER_ALL);
+        mStack.finishDisabledPackageActivitiesLocked(activity.packageName,
+                null  /* filterByClasses */, true /* doit */, true /* evenPersistent */,
+                UserHandle.USER_ALL);
 
+        // Although the overlay activity is in another package, the non-overlay activities are
+        // removed from the task. Since the overlay activity should be removed as well, the task
+        // should be empty.
         assertThat(mTask.mActivities).isEmpty();
         assertThat(mStack.getAllTasks()).isEmpty();
     }
