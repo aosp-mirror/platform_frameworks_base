@@ -23,17 +23,9 @@ import android.security.Credentials;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -1125,6 +1117,12 @@ public class WifiEnterpriseConfig implements Parcelable {
             // Don't display password in toString().
             String value = PASSWORD_KEY.equals(key) ? "<removed>" : mFields.get(key);
             sb.append(key).append(" ").append(value).append("\n");
+        }
+        if (mEapMethod >= 0 && mEapMethod < Eap.strings.length) {
+            sb.append("eap_method: ").append(Eap.strings[mEapMethod]).append("\n");
+        }
+        if (mPhase2Method > 0 && mPhase2Method < Phase2.strings.length) {
+            sb.append("phase2_method: ").append(Phase2.strings[mPhase2Method]).append("\n");
         }
         return sb.toString();
     }
