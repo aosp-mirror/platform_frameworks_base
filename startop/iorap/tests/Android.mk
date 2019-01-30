@@ -43,4 +43,7 @@ LOCAL_JAVA_LIBRARIES := \
 LOCAL_CERTIFICATE := platform
 LOCAL_PRIVATE_PLATFORM_APIS := true
 
+# Disable presubmit test until it works with disabled iorap by default.
+LOCAL_PRESUBMIT_DISABLED := true
+
 include $(BUILD_PACKAGE)
