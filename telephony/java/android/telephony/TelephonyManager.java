@@ -9981,4 +9981,52 @@ public class TelephonyManager {
         }
         return ret;
     }
+
+    /**
+     * Indicate if the user is allowed to use multiple SIM cards at the same time to register
+     * on the network (e.g. Dual Standby or Dual Active) when the device supports it, or if the
+     * usage is restricted. This API is used to prevent usage of multiple SIM card, based on
+     * policies of the carrier.
+     * <p>Note: the API does not prevent access to the SIM cards for operations that don't require
+     * access to the network.
+     *
+     * @param isMultisimCarrierRestricted true if usage of multiple SIMs is restricted, false
+     * otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.setMultisimCarrierRestriction(isMultisimCarrierRestricted);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "setMultisimCarrierRestriction RemoteException", e);
+        }
+    }
+
+    /**
+     * Returns if the usage of multiple SIM cards at the same time to register on the network
+     * (e.g. Dual Standby or Dual Active) is restricted.
+     *
+     * @return true if usage of multiple SIMs is restricted, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isMultisimCarrierRestricted() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isMultisimCarrierRestricted();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "isMultisimCarrierRestricted RemoteException", e);
+        }
+        return true;
+    }
 }
