@@ -52,7 +52,7 @@ public class PhoneMediaDevice extends MediaDevice {
     @Override
     public int getIcon() {
         //TODO(b/117129183): This is not final icon for phone device, just for demo.
-        return com.android.internal.R.drawable.ic_bt_cellphone;
+        return com.android.internal.R.drawable.ic_phone;
     }
 
     @Override

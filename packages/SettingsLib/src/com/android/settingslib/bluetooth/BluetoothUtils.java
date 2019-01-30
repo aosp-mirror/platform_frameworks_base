@@ -68,7 +68,7 @@ public class BluetoothUtils {
                 case BluetoothClass.Device.Major.PHONE:
                     return new Pair<>(
                             getBluetoothDrawable(context,
-                                    com.android.internal.R.drawable.ic_bt_cellphone, level,
+                                    com.android.internal.R.drawable.ic_phone, level,
                                     iconScale),
                             context.getString(R.string.bluetooth_talkback_phone));
 

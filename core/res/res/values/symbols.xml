@@ -1424,7 +1424,7 @@
   <java-symbol type="drawable" name="ic_signal_cellular_alt_24px" />
 
   <java-symbol type="drawable" name="btn_borderless_rect" />
-  <java-symbol type="drawable" name="ic_bt_cellphone" />
+  <java-symbol type="drawable" name="ic_phone" />
   <java-symbol type="drawable" name="ic_bt_headphones_a2dp" />
   <java-symbol type="drawable" name="ic_bt_headset_hfp" />
   <java-symbol type="drawable" name="ic_bt_hearing_aid" />
