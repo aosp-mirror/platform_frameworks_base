@@ -1487,6 +1487,24 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED";
 
     /**
+     * An incident report has been taken, and the user has approved it for sharing.
+     * <p>
+     * This will be sent directly to the registered receiver, which must have
+     * both the DUMP and USAGE_STATS permissions.
+     * <p>
+     * After receiving this, the application should wait until a suitable time
+     * (e.g. network available), get the list of available reports with
+     * {@link IncidentManager#getIncidentReportList IncidentManager.getIncidentReportList(String)}
+     * and then when the reports have been successfully uploaded, call
+     * {@link IncidentManager#deleteIncidentReport IncidentManager.deleteIncidentReport(Uri)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_INCIDENT_REPORT_READY =
+            "android.intent.action.INCIDENT_REPORT_READY";
+
+    /**
      * Activity Action: Show power usage information to the user.
      * <p>Input: Nothing.
      * <p>Output: Nothing.
