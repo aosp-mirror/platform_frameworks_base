@@ -613,6 +613,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger = Dependency.get(NotificationLogger.class);
         mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         mNotificationListener =  Dependency.get(NotificationListener.class);
+        mNotificationListener.registerAsSystemService();
         mNetworkController = Dependency.get(NetworkController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
@@ -1055,7 +1056,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mDeviceProvisionedController);
 
         mAppOpsController.addCallback(APP_OPS, this);
-        mNotificationListener.setUpWithPresenter(mPresenter);
         mNotificationShelf.setOnActivatedListener(mPresenter);
         mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
 
