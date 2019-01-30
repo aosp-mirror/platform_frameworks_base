@@ -154,6 +154,8 @@ interface INotificationManager
     void setNotificationAssistantAccessGrantedForUser(in ComponentName assistant, int userId, boolean enabled);
     List<String> getEnabledNotificationListenerPackages();
     List<ComponentName> getEnabledNotificationListeners(int userId);
+    ComponentName getAllowedNotificationAssistantForUser(int userId);
+    ComponentName getAllowedNotificationAssistant();
 
     int getZenMode();
     ZenModeConfig getZenModeConfig();
