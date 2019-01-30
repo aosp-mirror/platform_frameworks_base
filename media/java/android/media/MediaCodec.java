@@ -3314,7 +3314,7 @@ final public class MediaCodec {
      */
     public void setAudioPresentation(@NonNull AudioPresentation presentation) {
         if (presentation == null) {
-            throw new IllegalArgumentException("audio presentation is null");
+            throw new NullPointerException("audio presentation is null");
         }
         native_setAudioPresentation(presentation.getPresentationId(), presentation.getProgramId());
     }
