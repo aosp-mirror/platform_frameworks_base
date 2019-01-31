@@ -6083,7 +6083,12 @@ public final class ActivityThread extends ClientTransactionHandler {
             instrApp.initForUser(UserHandle.myUserId());
             final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
                     appContext.getClassLoader(), false, true, false);
-            final ContextImpl instrContext = ContextImpl.createAppContext(this, pi);
+
+            // The test context's op package name == the target app's op package name, because
+            // the app ops manager checks the op package name against the real calling UID,
+            // which is what the target package name is associated with.
+            final ContextImpl instrContext = ContextImpl.createAppContext(this, pi,
+                    appContext.getOpPackageName());
 
             try {
                 final ClassLoader cl = instrContext.getClassLoader();
