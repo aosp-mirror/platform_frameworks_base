@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.UserHandle
+import android.provider.Settings
 import android.util.IconDrawableFactory
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -64,7 +65,7 @@ class OngoingPrivacyDialog constructor(
             setPositiveButton(R.string.ongoing_privacy_dialog_ok, null)
             setNeutralButton(R.string.ongoing_privacy_dialog_open_settings,
                     object : DialogInterface.OnClickListener {
-                        val intent = Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE).putExtra(
+                        val intent = Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS).putExtra(
                                 Intent.EXTRA_DURATION_MILLIS, TimeUnit.MINUTES.toMillis(1))
 
                         @Suppress("DEPRECATION")
