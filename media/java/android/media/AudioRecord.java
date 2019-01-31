@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1713,12 +1714,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     /**
      * Specifies the logical microphone (for processing).
      *
-     * @param direction Direction constant (MicrophoneDirection.MIC_DIRECTION_*)
-     * @return retval OK if the call is successful, an error code otherwise.
-     * @hide
+     * @param direction Direction constant.
+     * @return true if sucessful.
      */
-    public int setMicrophoneDirection(int direction) {
-        return native_set_microphone_direction(direction);
+    public boolean setMicrophoneDirection(int direction) {
+        return native_set_microphone_direction(direction) == 0;
     }
 
     /**
@@ -1727,11 +1727,10 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      *
      * @param zoom the desired field dimension of microphone capture. Range is from -1 (wide angle),
      * though 0 (no zoom) to 1 (maximum zoom).
-     * @return retval OK if the call is successful, an error code otherwise.
-     * @hide
+     * @return true if sucessful.
      */
-    public int setMicrophoneFieldDimension(float zoom) {
-        return native_set_microphone_field_dimension(zoom);
+    public boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom) {
+        return native_set_microphone_field_dimension(zoom) == 0;
     }
 
     //---------------------------------------------------------
