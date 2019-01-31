@@ -33,7 +33,7 @@ public class CrashingMainActivity extends Activity {
         throw new RuntimeException("Intended force crash");
     }
 
-    public void incrementCountAndBroadcast() {
+    private void incrementCountAndBroadcast() {
         SharedPreferences preferences = getSharedPreferences("prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         int count = preferences.getInt("crash_count", 0);
