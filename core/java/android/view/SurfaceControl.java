@@ -155,6 +155,8 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetActiveConfig(IBinder displayToken);
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
     private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
+    private static native SurfaceControl.DisplayPrimaries nativeGetDisplayNativePrimaries(
+            IBinder displayToken);
     private static native int[] nativeGetCompositionDataspaces();
     private static native int nativeGetActiveColorMode(IBinder displayToken);
     private static native boolean nativeSetActiveColorMode(IBinder displayToken,
@@ -1533,6 +1535,73 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("displayToken must not be null");
         }
         return nativeGetDisplayColorModes(displayToken);
+    }
+
+    /**
+     * Color coordinates in CIE1931 XYZ color space
+     *
+     * @hide
+     */
+    public static final class CieXyz {
+        /**
+         * @hide
+         */
+        public float X;
+
+        /**
+         * @hide
+         */
+        public float Y;
+
+        /**
+         * @hide
+         */
+        public float Z;
+    }
+
+    /**
+     * Contains a display's color primaries
+     *
+     * @hide
+     */
+    public static final class DisplayPrimaries {
+        /**
+         * @hide
+         */
+        public CieXyz red;
+
+        /**
+         * @hide
+         */
+        public CieXyz green;
+
+        /**
+         * @hide
+         */
+        public CieXyz blue;
+
+        /**
+         * @hide
+         */
+        public CieXyz white;
+
+        /**
+         * @hide
+         */
+        public DisplayPrimaries() {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static SurfaceControl.DisplayPrimaries getDisplayNativePrimaries(
+            IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        return nativeGetDisplayNativePrimaries(displayToken);
     }
 
     /**
