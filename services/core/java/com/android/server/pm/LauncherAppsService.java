@@ -34,9 +34,11 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -56,6 +58,7 @@ import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -153,6 +156,8 @@ public class LauncherAppsService extends SystemService {
 
         private final Object mVouchedSignaturesLocked = new Object();
 
+        private PackageInstallerService mPackageInstallerService;
+
         public LauncherAppsImpl(Context context) {
             mContext = context;
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
@@ -204,8 +209,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         /*
-         * @see android.content.pm.ILauncherApps#addOnAppsChangedListener(
-         *          android.content.pm.IOnAppsChangedListener)
+         * @see android.content.pm.ILauncherApps#addOnAppsChangedListener
          */
         @Override
         public void addOnAppsChangedListener(String callingPackage, IOnAppsChangedListener listener)
@@ -228,8 +232,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         /*
-         * @see android.content.pm.ILauncherApps#removeOnAppsChangedListener(
-         *          android.content.pm.IOnAppsChangedListener)
+         * @see android.content.pm.ILauncherApps#removeOnAppsChangedListener
          */
         @Override
         public void removeOnAppsChangedListener(IOnAppsChangedListener listener)
@@ -243,6 +246,44 @@ public class LauncherAppsService extends SystemService {
                     stopWatchingPackageBroadcasts();
                 }
             }
+        }
+
+        /**
+         * @see android.content.pm.ILauncherApps#registerPackageInstallerCallback
+         */
+        @Override
+        public void registerPackageInstallerCallback(String callingPackage,
+                IPackageInstallerCallback callback) {
+            verifyCallingPackage(callingPackage);
+            UserHandle callingIdUserHandle = new UserHandle(getCallingUserId());
+            getPackageInstallerService().registerCallback(callback, eventUserId ->
+                            isEnabledProfileOf(callingIdUserHandle,
+                                    new UserHandle(eventUserId), "shouldReceiveEvent"));
+        }
+
+        @Override
+        public ParceledListSlice<SessionInfo> getAllSessions(String callingPackage) {
+            verifyCallingPackage(callingPackage);
+            List<SessionInfo> sessionInfos = new ArrayList<>();
+            int[] userIds = mUm.getEnabledProfileIds(getCallingUserId());
+            long token = Binder.clearCallingIdentity();
+            try {
+                for (int userId : userIds) {
+                    sessionInfos.addAll(getPackageInstallerService().getAllSessions(userId)
+                            .getList());
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return new ParceledListSlice<>(sessionInfos);
+        }
+
+        private PackageInstallerService getPackageInstallerService() {
+            if (mPackageInstallerService == null) {
+                mPackageInstallerService = ((PackageInstallerService) ((PackageManagerService)
+                        ServiceManager.getService("package")).getPackageInstaller());
+            }
+            return mPackageInstallerService;
         }
 
         /**
@@ -866,6 +907,29 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override
+        public void startSessionDetailsActivityAsUser(IApplicationThread caller,
+                String callingPackage, SessionInfo sessionInfo, Rect sourceBounds,
+                Bundle opts, UserHandle userHandle) throws RemoteException {
+            int userId = userHandle.getIdentifier();
+            if (!canAccessProfile(userId, "Cannot start details activity")) {
+                return;
+            }
+
+            Intent i = new Intent(Intent.ACTION_VIEW)
+                    .setData(new Uri.Builder()
+                            .scheme("market")
+                            .authority("details")
+                            .appendQueryParameter("id", sessionInfo.appPackageName)
+                            .build())
+                    .putExtra(Intent.EXTRA_REFERRER, new Uri.Builder().scheme("android-app")
+                            .authority(callingPackage).build());
+            i.setSourceBounds(sourceBounds);
+
+            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage, i, opts,
+                    userId);
         }
 
         @Override

@@ -17,3 +17,24 @@ java_library_static {
         },
     },
 }
+
+java_library_static {
+    name: "metrics-constants-protos",
+    host_supported: true,
+    proto: {
+        type: "nano",
+    },
+    srcs: ["src/metrics_constants/metrics_constants.proto"],
+    no_framework_libs: true,
+    sdk_version: "system_current",
+    // Pin java_version until jarjar is certified to support later versions. http://b/72703434
+    java_version: "1.8",
+    target: {
+        android: {
+            jarjar_rules: "jarjar-rules.txt",
+        },
+        host: {
+            static_libs: ["libprotobuf-java-nano"],
+        },
+    },
+}

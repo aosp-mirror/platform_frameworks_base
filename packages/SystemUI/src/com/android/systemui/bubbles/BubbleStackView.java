@@ -237,6 +237,10 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      * Sets the bubble that should be expanded and expands if needed.
      */
     public void setExpandedBubble(BubbleView bubbleToExpand) {
+        if (mIsExpanded && !bubbleToExpand.equals(mExpandedBubble)) {
+            // Previously expanded, notify that this bubble is no longer expanded
+            notifyExpansionChanged(mExpandedBubble, false /* expanded */);
+        }
         mExpandedBubble = bubbleToExpand;
         if (!mIsExpanded) {
             // If we weren't previously expanded we should animate open.
@@ -291,12 +295,12 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             int nextIndex = bubbleCount > removedIndex ? removedIndex : bubbleCount - 1;
             BubbleView expandedBubble = (BubbleView) mBubbleContainer.getChildAt(nextIndex);
             setExpandedBubble(expandedBubble);
+            requestUpdate();
         }
         mIsExpanded = wasExpanded && mBubbleContainer.getChildCount() > 0;
         if (wasExpanded != mIsExpanded) {
             notifyExpansionChanged(mExpandedBubble, mIsExpanded);
         }
-        requestUpdate();
     }
 
     /**
@@ -373,9 +377,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     public void expandStack() {
         if (!mIsExpanded) {
             mExpandedBubble = getTopBubble();
-            mExpandedBubble.getEntry().setShowInShadeWhenBubble(false);
-            animateExpansion(true /* shouldExpand */);
-            notifyExpansionChanged(mExpandedBubble, true /* expanded */);
+            setExpandedBubble(mExpandedBubble);
         }
     }
 

@@ -32,7 +32,7 @@ interface IRollbackManager {
     // Exposed for use from the system server only. Callback from the package
     // manager during the install flow when user data can be restored for a given
     // package.
-    void restoreUserData(String packageName, int userId, int appId, long ceDataInode,
+    void restoreUserData(String packageName, in int[] userIds, int appId, long ceDataInode,
             String seInfo, int token);
 
     // Exposed for test purposes only.

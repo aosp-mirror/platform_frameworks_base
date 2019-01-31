@@ -147,18 +147,20 @@ public final class AudioDeviceInventory {
     }
 
     /*package*/ void onSetA2dpSinkConnectionState(@NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo,
-            @AudioService.BtProfileConnectionState int state, int a2dpVolume) {
+            @AudioService.BtProfileConnectionState int state) {
         final BluetoothDevice btDevice = btInfo.getBtDevice();
+        int a2dpVolume = btInfo.getVolume();
         if (AudioService.DEBUG_DEVICES) {
             Log.d(TAG, "onSetA2dpSinkConnectionState btDevice=" + btDevice + " state="
-                    + state + " is dock=" + btDevice.isBluetoothDock());
+                    + state + " is dock=" + btDevice.isBluetoothDock() + " vol=" + a2dpVolume);
         }
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
         }
         AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                "A2DP sink connected: device addr=" + address + " state=" + state));
+                "A2DP sink connected: device addr=" + address + " state=" + state
+                        + " vol=" + a2dpVolume));
 
         final int a2dpCodec;
         synchronized (mDeviceBroker.mA2dpAvrcpLock) {

@@ -53,6 +53,15 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
+    public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
+            int flags) {
+        if (mActualStarter == null) {
+            return;
+        }
+        mActualStarter.startActivity(intent, onlyProvisioned, dismissShade, flags);
+    }
+
+    @Override
     public void startActivity(Intent intent, boolean dismissShade) {
         if (mActualStarter == null) {
             return;

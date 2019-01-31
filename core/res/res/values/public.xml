@@ -2936,6 +2936,7 @@
         <public name="minAspectRatio" />
         <!-- @hide @SystemApi -->
         <public name="inheritShowWhenLocked" />
+        <public name="zygotePreloadName" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

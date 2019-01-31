@@ -51,6 +51,8 @@ per-file UserManagerService.java = omakoto@google.com
 per-file UserManagerService.java = yamasani@google.com
 per-file UserRestrictionsUtils.java = omakoto@google.com
 per-file UserRestrictionsUtils.java = yamasani@google.com
+per-file UserRestrictionsUtils.java = rubinxu@google.com
+per-file UserRestrictionsUtils.java = sandness@google.com
 
 # security
 per-file KeySetHandle.java = cbrubaker@google.com

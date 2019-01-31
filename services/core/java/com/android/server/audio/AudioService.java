@@ -392,12 +392,14 @@ public class AudioService extends IAudioService.Stub
     * e.g. user on homescreen, no app playing anything, presses hardware volume buttons, this
     *    stream type is controlled.
     */
-   protected static final int DEFAULT_VOL_STREAM_NO_PLAYBACK = AudioSystem.STREAM_MUSIC;
+    protected static final int DEFAULT_VOL_STREAM_NO_PLAYBACK = AudioSystem.STREAM_MUSIC;
 
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
             switch (error) {
             case AudioSystem.AUDIO_STATUS_SERVER_DIED:
+                mRecordMonitor.clear();
+
                 sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED,
                         SENDMSG_NOOP, 0, 0, null, 0);
                 sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,

@@ -27,7 +27,7 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
  */
 @ProvidesInterface(version = ActivityStarter.VERSION)
 public interface ActivityStarter {
-    int VERSION = 1;
+    int VERSION = 2;
 
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
 
@@ -37,6 +37,11 @@ public interface ActivityStarter {
      */
     void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback);
+
+    /**
+     * The intent flag can be specified in startActivity().
+     */
+    void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade, int flags);
     void startActivity(Intent intent, boolean dismissShade);
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);

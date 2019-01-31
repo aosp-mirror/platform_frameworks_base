@@ -22,6 +22,7 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.SynchronousUserSwitchObserver;
@@ -42,6 +43,7 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
+import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2875,8 +2877,7 @@ public final class PowerManagerService extends SystemService
     @VisibleForTesting
     void updatePowerRequestFromBatterySaverPolicy(DisplayPowerRequest displayPowerRequest) {
         PowerSaveState state = mBatterySaverPolicy.
-                getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS,
-                        mBatterySaverController.isEnabled());
+                getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS);
         displayPowerRequest.lowPowerMode = state.batterySaverEnabled;
         displayPowerRequest.screenLowPowerBrightnessFactor = state.brightnessFactor;
     }
@@ -4451,8 +4452,7 @@ public final class PowerManagerService extends SystemService
         public PowerSaveState getPowerSaveState(@ServiceType int serviceType) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverPolicy.getBatterySaverPolicy(
-                        serviceType, mBatterySaverController.isEnabled());
+                return mBatterySaverPolicy.getBatterySaverPolicy(serviceType);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4491,6 +4491,36 @@ public final class PowerManagerService extends SystemService
                             dynamicPowerSavingsEnabled ? 1 : 0);
                 }
                 return success;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean setAdaptivePowerSavePolicy(@NonNull BatterySaverPolicyConfig config) {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, "setAdaptivePowerSavePolicy");
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mBatterySaverStateMachine.setAdaptiveBatterySaverPolicy(config);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean setAdaptivePowerSaveEnabled(boolean enabled) {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, "setAdaptivePowerSaveEnabled");
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mBatterySaverStateMachine.setAdaptiveBatterySaverEnabled(enabled);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4846,8 +4876,7 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public PowerSaveState getLowPowerState(@ServiceType int serviceType) {
-            return mBatterySaverPolicy.getBatterySaverPolicy(serviceType,
-                    mBatterySaverController.isEnabled());
+            return mBatterySaverPolicy.getBatterySaverPolicy(serviceType);
         }
 
         @Override

@@ -957,6 +957,10 @@ package android.net {
     method public boolean satisfiedByNetworkCapabilities(android.net.NetworkCapabilities);
   }
 
+  public class NetworkStack {
+    field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
+  }
+
   public final class RouteInfo implements android.os.Parcelable {
     ctor public RouteInfo(android.net.IpPrefix, java.net.InetAddress, String, int);
     method public int getType();
@@ -1744,7 +1748,7 @@ package android.provider {
 
   public static interface DeviceConfig.Privacy {
     field public static final String NAMESPACE = "privacy";
-    field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "enable_location_access_check";
+    field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
   }
 
   public final class MediaStore {

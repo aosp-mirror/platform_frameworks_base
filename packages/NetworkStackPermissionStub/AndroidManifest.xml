@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.mainline.networkstack.permissionstub">
+    <!--
+    This package only exists to define the below permissions, and enforce that they are only
+    granted to apps sharing the same signature.
+    Permissions defined here are intended to be used only by the NetworkStack: both
+    NetworkStack and this stub APK are to be signed with a dedicated certificate to ensure
+    that, with the below permissions being signature permissions.
+
+    This APK *must* be installed, even if the NetworkStack app is not installed, because otherwise,
+    any application will be able to define this permission and the system will give that application
+    full access to the network stack.
+     -->
+    <permission android:name="android.permission.MAINLINE_NETWORK_STACK"
+                android:protectionLevel="signature"/>
+
+    <application android:name="com.android.server.NetworkStackPermissionStub"/>
+</manifest>

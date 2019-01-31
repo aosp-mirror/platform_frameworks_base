@@ -1730,7 +1730,7 @@
     <permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows a system application to access hardware packet offload capabilities.
+    <!-- @SystemApi Allows a system application to access hardware packet offload capabilities.
          @hide -->
     <permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD"
         android:protectionLevel="signature|privileged" />
@@ -1866,6 +1866,10 @@
          @hide
     -->
     <permission android:name="android.permission.HARDWARE_TEST"
+        android:protectionLevel="signature" />
+
+    <!-- @hide Allows an application to manage DynamicAndroid image -->
+    <permission android:name="android.permission.MANAGE_DYNAMIC_ANDROID"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows access to Broadcast Radio

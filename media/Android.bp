@@ -1,30 +1,4 @@
 java_library {
-    name: "updatable-media1",
-
-    srcs: [
-        ":media1-srcs",
-        ":framework-media-annotation-srcs",
-    ],
-
-    aidl: {
-        export_include_dirs: [
-            "apex/java",
-        ],
-
-        // TODO: find out a way to include only the necessary aidl files instead of dirs.
-        include_dirs: [
-            "frameworks/base/core/java",
-            "frameworks/base/media/java",
-        ],
-    },
-
-    installable: true,
-
-    // Make sure that the implementaion only relies on SDK or system APIs.
-    sdk_version: "system_current",
-}
-
-java_library {
     name: "updatable-media",
 
     srcs: [
@@ -57,51 +31,8 @@ java_library {
 filegroup {
     name: "media-srcs-without-aidls",
     srcs : [
-        ":media1-srcs-without-aidls",
         ":mediasession2-srcs-without-aidls",
         ":mediaplayer2-srcs",
-    ],
-}
-
-filegroup {
-    name: "media1-srcs",
-    srcs: [
-        "apex/java/android/media/MediaDescription.java",
-        "apex/java/android/media/MediaParceledListSlice.java",
-        "apex/java/android/media/Rating.java",
-        "apex/java/android/media/VolumeProvider.java",
-        "apex/java/android/media/browse/MediaBrowser.java",
-        "apex/java/android/media/browse/MediaBrowserUtils.java",
-        "apex/java/android/media/session/ControllerCallbackLink.java",
-        "apex/java/android/media/session/ControllerLink.java",
-        "apex/java/android/media/session/ISession.aidl",
-        "apex/java/android/media/session/ISessionCallback.aidl",
-        "apex/java/android/media/session/ISessionController.aidl",
-        "apex/java/android/media/session/ISessionControllerCallback.aidl",
-        "apex/java/android/media/session/MediaController.java",
-        "apex/java/android/media/session/MediaSessionEngine.java",
-        "apex/java/android/media/session/MediaSessionProviderService.java",
-        "apex/java/android/media/session/PlaybackState.java",
-        "apex/java/android/media/session/SessionCallbackLink.java",
-        "apex/java/android/media/session/SessionLink.java",
-        "apex/java/android/service/media/IMediaBrowserService.aidl",
-        "apex/java/android/service/media/IMediaBrowserServiceCallbacks.aidl",
-        "apex/java/android/service/media/MediaBrowserService.java",
-    ],
-}
-
-filegroup {
-    name: "media1-srcs-without-aidls",
-    srcs: [
-        ":media1-srcs",
-    ],
-    exclude_srcs: [
-        "apex/java/android/media/session/ISession.aidl",
-        "apex/java/android/media/session/ISessionCallback.aidl",
-        "apex/java/android/media/session/ISessionController.aidl",
-        "apex/java/android/media/session/ISessionControllerCallback.aidl",
-        "apex/java/android/service/media/IMediaBrowserService.aidl",
-        "apex/java/android/service/media/IMediaBrowserServiceCallbacks.aidl",
     ],
 }
 

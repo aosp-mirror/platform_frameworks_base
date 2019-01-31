@@ -36,20 +36,21 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.FileBridge;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.os.HandlerExecutor;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ExceptionUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -61,6 +62,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Offers the ability to install, upgrade, and remove applications on the
@@ -659,8 +661,7 @@ public class PackageInstaller {
     }
 
     /** {@hide} */
-    private static class SessionCallbackDelegate extends IPackageInstallerCallback.Stub implements
-            Handler.Callback {
+    static class SessionCallbackDelegate extends IPackageInstallerCallback.Stub {
         private static final int MSG_SESSION_CREATED = 1;
         private static final int MSG_SESSION_BADGING_CHANGED = 2;
         private static final int MSG_SESSION_ACTIVE_CHANGED = 3;
@@ -668,63 +669,41 @@ public class PackageInstaller {
         private static final int MSG_SESSION_FINISHED = 5;
 
         final SessionCallback mCallback;
-        final Handler mHandler;
+        final Executor mExecutor;
 
-        public SessionCallbackDelegate(SessionCallback callback, Looper looper) {
+        SessionCallbackDelegate(SessionCallback callback, Executor executor) {
             mCallback = callback;
-            mHandler = new Handler(looper, this);
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            final int sessionId = msg.arg1;
-            switch (msg.what) {
-                case MSG_SESSION_CREATED:
-                    mCallback.onCreated(sessionId);
-                    return true;
-                case MSG_SESSION_BADGING_CHANGED:
-                    mCallback.onBadgingChanged(sessionId);
-                    return true;
-                case MSG_SESSION_ACTIVE_CHANGED:
-                    final boolean active = msg.arg2 != 0;
-                    mCallback.onActiveChanged(sessionId, active);
-                    return true;
-                case MSG_SESSION_PROGRESS_CHANGED:
-                    mCallback.onProgressChanged(sessionId, (float) msg.obj);
-                    return true;
-                case MSG_SESSION_FINISHED:
-                    mCallback.onFinished(sessionId, msg.arg2 != 0);
-                    return true;
-            }
-            return false;
+            mExecutor = executor;
         }
 
         @Override
         public void onSessionCreated(int sessionId) {
-            mHandler.obtainMessage(MSG_SESSION_CREATED, sessionId, 0).sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onCreated, mCallback,
+                    sessionId).recycleOnUse());
         }
 
         @Override
         public void onSessionBadgingChanged(int sessionId) {
-            mHandler.obtainMessage(MSG_SESSION_BADGING_CHANGED, sessionId, 0).sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onBadgingChanged,
+                    mCallback, sessionId).recycleOnUse());
         }
 
         @Override
         public void onSessionActiveChanged(int sessionId, boolean active) {
-            mHandler.obtainMessage(MSG_SESSION_ACTIVE_CHANGED, sessionId, active ? 1 : 0)
-                    .sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onActiveChanged,
+                    mCallback, sessionId, active).recycleOnUse());
         }
 
         @Override
         public void onSessionProgressChanged(int sessionId, float progress) {
-            mHandler.obtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, 0, progress)
-                    .sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onProgressChanged,
+                    mCallback, sessionId, progress).recycleOnUse());
         }
 
         @Override
         public void onSessionFinished(int sessionId, boolean success) {
-            mHandler.obtainMessage(MSG_SESSION_FINISHED, sessionId, success ? 1 : 0)
-                    .sendToTarget();
+            mExecutor.execute(PooledLambda.obtainRunnable(SessionCallback::onFinished,
+                    mCallback, sessionId, success).recycleOnUse());
         }
     }
 
@@ -758,7 +737,7 @@ public class PackageInstaller {
     public void registerSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
         synchronized (mDelegates) {
             final SessionCallbackDelegate delegate = new SessionCallbackDelegate(callback,
-                    handler.getLooper());
+                    new HandlerExecutor(handler));
             try {
                 mInstaller.registerCallback(delegate, mUserId);
             } catch (RemoteException e) {
@@ -1649,6 +1628,8 @@ public class PackageInstaller {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int sessionId;
         /** {@hide} */
+        public int userId;
+        /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String installerPackageName;
         /** {@hide} */
@@ -1720,6 +1701,7 @@ public class PackageInstaller {
         /** {@hide} */
         public SessionInfo(Parcel source) {
             sessionId = source.readInt();
+            userId = source.readInt();
             installerPackageName = source.readString();
             resolvedBaseCodePath = source.readString();
             progress = source.readFloat();
@@ -1758,6 +1740,13 @@ public class PackageInstaller {
          */
         public int getSessionId() {
             return sessionId;
+        }
+
+        /**
+         * Return the user associated with this session.
+         */
+        public UserHandle getUser() {
+            return new UserHandle(userId);
         }
 
         /**
@@ -2091,6 +2080,7 @@ public class PackageInstaller {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(sessionId);
+            dest.writeInt(userId);
             dest.writeString(installerPackageName);
             dest.writeString(resolvedBaseCodePath);
             dest.writeFloat(progress);

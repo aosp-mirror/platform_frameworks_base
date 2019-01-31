@@ -2581,6 +2581,7 @@ public class ConnectivityManager {
     }
 
     /** {@hide} */
+    @SystemApi
     public static final int TETHER_ERROR_NO_ERROR           = 0;
     /** {@hide} */
     public static final int TETHER_ERROR_UNKNOWN_IFACE      = 1;
@@ -2603,9 +2604,13 @@ public class ConnectivityManager {
     /** {@hide} */
     public static final int TETHER_ERROR_IFACE_CFG_ERROR      = 10;
     /** {@hide} */
+    @SystemApi
     public static final int TETHER_ERROR_PROVISION_FAILED     = 11;
     /** {@hide} */
     public static final int TETHER_ERROR_DHCPSERVER_ERROR     = 12;
+    /** {@hide} */
+    @SystemApi
+    public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN  = 13;
 
     /**
      * Get a more detailed error code after a Tethering or Untethering
@@ -2622,6 +2627,65 @@ public class ConnectivityManager {
     public int getLastTetherError(String iface) {
         try {
             return mService.getLastTetherError(iface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callback for use with {@link #getLatestTetheringEntitlementValue} to find out whether
+     * entitlement succeeded.
+     * @hide
+     */
+    @SystemApi
+    public abstract static class TetheringEntitlementValueListener  {
+        /**
+         * Called to notify entitlement result.
+         *
+         * @param resultCode a int value of entitlement result. It may be one of
+         *         {@link #TETHER_ERROR_NO_ERROR},
+         *         {@link #TETHER_ERROR_PROVISION_FAILED}, or
+         *         {@link #TETHER_ERROR_ENTITLEMENT_UNKONWN}.
+         */
+        public void onEntitlementResult(int resultCode) {}
+    }
+
+    /**
+     * Get the last value of the entitlement check on this downstream. If the cached value is
+     * {@link #TETHER_ERROR_NO_ERROR} or showEntitlementUi argument is false, it just return the
+     * cached value. Otherwise, a UI-based entitlement check would be performed. It is not
+     * guaranteed that the UI-based entitlement check will complete in any specific time period
+     * and may in fact never complete. Any successful entitlement check the platform performs for
+     * any reason will update the cached value.
+     *
+     * @param type the downstream type of tethering. Must be one of
+     *         {@link #TETHERING_WIFI},
+     *         {@link #TETHERING_USB}, or
+     *         {@link #TETHERING_BLUETOOTH}.
+     * @param showEntitlementUi a boolean indicating whether to run UI-based entitlement check.
+     * @param listener an {@link TetheringEntitlementValueListener} which will be called to notify
+     *         the caller of the result of entitlement check. The listener may be called zero or
+     *         one time.
+     * @param handler {@link Handler} to specify the thread upon which the listener will be invoked.
+     * {@hide}
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void getLatestTetheringEntitlementValue(int type, boolean showEntitlementUi,
+            @NonNull final TetheringEntitlementValueListener listener, @Nullable Handler handler) {
+        Preconditions.checkNotNull(listener, "TetheringEntitlementValueListener cannot be null.");
+        ResultReceiver wrappedListener = new ResultReceiver(handler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                listener.onEntitlementResult(resultCode);
+            }
+        };
+
+        try {
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "getLatestTetheringEntitlementValue:" + pkgName);
+            mService.getLatestTetheringEntitlementValue(type, wrappedListener,
+                    showEntitlementUi, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3958,10 +4022,17 @@ public class ConnectivityManager {
     @Deprecated
     public static boolean setProcessDefaultNetwork(@Nullable Network network) {
         int netId = (network == null) ? NETID_UNSET : network.netId;
-        if (netId == NetworkUtils.getBoundNetworkForProcess()) {
-            return true;
+        boolean isSameNetId = (netId == NetworkUtils.getBoundNetworkForProcess());
+
+        if (netId != NETID_UNSET) {
+            netId = network.getNetIdForResolv();
         }
-        if (NetworkUtils.bindProcessToNetwork(netId)) {
+
+        if (!NetworkUtils.bindProcessToNetwork(netId)) {
+            return false;
+        }
+
+        if (!isSameNetId) {
             // Set HTTP proxy system properties to match network.
             // TODO: Deprecate this static method and replace it with a non-static version.
             try {
@@ -3975,10 +4046,9 @@ public class ConnectivityManager {
             // Must flush socket pool as idle sockets will be bound to previous network and may
             // cause subsequent fetches to be performed on old network.
             NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();
-            return true;
-        } else {
-            return false;
         }
+
+        return true;
     }
 
     /**

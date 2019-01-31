@@ -5874,30 +5874,24 @@ public final class Settings {
                 "unknown_sources_default_reversed";
 
         /**
-         * Comma-separated list of location providers that activities may access. Do not rely on
-         * this value being present in settings.db or on ContentObserver notifications on the
+         * Comma-separated list of location providers that are accessible. Do not rely on
+         * this value being present or correct, or on ContentObserver notifications on the
          * corresponding Uri.
          *
-         * @deprecated Providers should not be controlled individually. See {@link #LOCATION_MODE}
-          * documentation for information on reading/writing location information.
+         * @deprecated The preferred methods for checking provider status and listening for changes
+         * are via {@link LocationManager#isProviderEnabled(String)} and
+         * {@link LocationManager#PROVIDERS_CHANGED_ACTION}.
          */
         @Deprecated
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
 
         /**
-         * The degree of location access enabled by the user.
-         * <p>
-         * When used with {@link #putInt(ContentResolver, String, int)}, must be one of {@link
-         * #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY}, {@link
-         * #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}. When used with {@link
-         * #getInt(ContentResolver, String)}, the caller must gracefully handle additional location
-         * modes that might be added in the future.
-         * <p>
-         * Note: do not rely on this value being present in settings.db or on ContentObserver
-         * notifications for the corresponding Uri. Use {@link LocationManager#MODE_CHANGED_ACTION}
-         * to receive changes in this value.
+         * The current location mode of the device. Do not rely on this value being present or on
+         * ContentObserver notifications on the corresponding Uri.
          *
-         * @deprecated To check location mode, use {@link LocationManager#isLocationEnabled()}.
+         * @deprecated The preferred methods for checking location mode and listening for changes
+         * are via {@link LocationManager#isLocationEnabled()} and
+         * {@link LocationManager#MODE_CHANGED_ACTION}.
          */
         @Deprecated
         public static final String LOCATION_MODE = "location_mode";
@@ -5924,7 +5918,7 @@ public final class Settings {
         public static final int LOCATION_CHANGER_QUICK_SETTINGS = 2;
 
         /**
-         * Location access disabled.
+         * Location mode is off.
          *
          * @deprecated See {@link #LOCATION_MODE}.
          */
@@ -5932,32 +5926,39 @@ public final class Settings {
         public static final int LOCATION_MODE_OFF = 0;
 
         /**
-         * Network Location Provider disabled, but GPS and other sensors enabled.
+         * This mode no longer has any distinct meaning, but is interpreted as the location mode is
+         * on.
          *
-         * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
-         *             get the status of a location provider, use
-         *             {@link LocationManager#isProviderEnabled(String)}.
+         * @deprecated See {@link #LOCATION_MODE_ON}.
          */
         @Deprecated
         public static final int LOCATION_MODE_SENSORS_ONLY = 1;
 
         /**
-         * Reduced power usage, such as limiting the number of GPS updates per hour. Requests
-         * with {@link android.location.Criteria#POWER_HIGH} may be downgraded to
-         * {@link android.location.Criteria#POWER_MEDIUM}.
+         * This mode no longer has any distinct meaning, but is interpreted as the location mode is
+         * on.
          *
-         * @deprecated See {@link #LOCATION_MODE}.
+         * @deprecated See {@link #LOCATION_MODE_ON}.
          */
         @Deprecated
         public static final int LOCATION_MODE_BATTERY_SAVING = 2;
 
         /**
-         * Best-effort location computation allowed.
+         * This mode no longer has any distinct meaning, but is interpreted as the location mode is
+         * on.
+         *
+         * @deprecated See {@link #LOCATION_MODE_ON}.
+         */
+        @Deprecated
+        public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
+
+        /**
+         * Location mode is on.
          *
          * @deprecated See {@link #LOCATION_MODE}.
          */
         @Deprecated
-        public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
+        public static final int LOCATION_MODE_ON = LOCATION_MODE_HIGH_ACCURACY;
 
         /**
          * A flag containing settings used for biometric weak
@@ -7466,14 +7467,6 @@ public final class Settings {
         private static final Validator DOZE_TAP_SCREEN_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
-         * Gesture that wakes up the lock screen.
-         * @hide
-         */
-        public static final String DOZE_WAKE_LOCK_SCREEN_GESTURE = "doze_wake_lock_screen_gesture";
-
-        private static final Validator DOZE_WAKE_LOCK_SCREEN_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
-
-        /**
          * Gesture that wakes up the display, showing the ambient version of the status bar.
          * @hide
          */
@@ -8588,7 +8581,6 @@ public final class Settings {
             DOZE_PICK_UP_GESTURE,
             DOZE_DOUBLE_TAP_GESTURE,
             DOZE_TAP_SCREEN_GESTURE,
-            DOZE_WAKE_LOCK_SCREEN_GESTURE,
             DOZE_WAKE_SCREEN_GESTURE,
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
@@ -8748,7 +8740,6 @@ public final class Settings {
             VALIDATORS.put(DOZE_PICK_UP_GESTURE, DOZE_PICK_UP_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_DOUBLE_TAP_GESTURE, DOZE_DOUBLE_TAP_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_TAP_SCREEN_GESTURE, DOZE_TAP_SCREEN_GESTURE_VALIDATOR);
-            VALIDATORS.put(DOZE_WAKE_LOCK_SCREEN_GESTURE, DOZE_WAKE_LOCK_SCREEN_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_WAKE_SCREEN_GESTURE, DOZE_WAKE_SCREEN_GESTURE_VALIDATOR);
             VALIDATORS.put(NFC_PAYMENT_DEFAULT_COMPONENT, NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR);
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
@@ -11437,6 +11428,9 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
+         * advertise_is_enabled              (boolean)
+         * datasaver_disabled                (boolean)
+         * launch_boost_disabled             (boolean)
          * vibration_disabled                (boolean)
          * animation_disabled                (boolean)
          * soundtrigger_disabled             (boolean)
@@ -11460,12 +11454,38 @@ public final class Settings {
         /**
          * Battery Saver device specific settings
          * This is encoded as a key=value list, separated by commas.
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         *     cpufreq-i (list of "core-number:frequency" pairs concatenated with /)
+         *     cpufreq-n (list of "core-number:frequency" pairs concatenated with /)
+         * </pre>
+         *
          * See {@link com.android.server.power.batterysaver.BatterySaverPolicy} for the details.
          *
          * @hide
          */
         public static final String BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS =
                 "battery_saver_device_specific_constants";
+
+        /**
+         * Settings for adaptive Battery Saver mode. Uses the same flags as
+         * {@link #BATTERY_SAVER_CONSTANTS}.
+         *
+         * @hide
+         */
+        public static final String BATTERY_SAVER_ADAPTIVE_CONSTANTS =
+                "battery_saver_adaptive_constants";
+
+        /**
+         * Device specific settings for adaptive Battery Saver mode. Uses the same flags as
+         * {@link #BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS}.
+         *
+         * @hide
+         */
+        public static final String BATTERY_SAVER_ADAPTIVE_DEVICE_SPECIFIC_CONSTANTS =
+                "battery_saver_adaptive_device_specific_constants";
 
         /**
          * Battery tip specific settings

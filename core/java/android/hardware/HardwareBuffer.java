@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
+import android.graphics.GraphicBuffer;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -214,6 +215,19 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     }
 
     /**
+     * @hide
+     * Returns a <code>HardwareBuffer</code> instance from <code>GraphicBuffer</code>
+     *
+     * @param graphicBuffer A GraphicBuffer to be wrapped as HardwareBuffer
+     * @return A <code>HardwareBuffer</code> instance.
+     */
+    @NonNull
+    public static HardwareBuffer createFromGraphicBuffer(@NonNull GraphicBuffer graphicBuffer) {
+        long nativeObject = nCreateFromGraphicBuffer(graphicBuffer);
+        return new HardwareBuffer(nativeObject);
+    }
+
+    /**
      * Private use only. See {@link #create(int, int, int, int, long)}. May also be
      * called from JNI using an already allocated native <code>HardwareBuffer</code>.
      */
@@ -405,6 +419,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
 
     private static native long nCreateHardwareBuffer(int width, int height, int format, int layers,
             long usage);
+    private static native long nCreateFromGraphicBuffer(GraphicBuffer graphicBuffer);
     private static native long nGetNativeFinalizer();
     private static native void nWriteHardwareBufferToParcel(long nativeObject, Parcel dest);
     private static native long nReadHardwareBufferFromParcel(Parcel in);

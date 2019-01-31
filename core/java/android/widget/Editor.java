@@ -4112,9 +4112,9 @@ public class Editor {
             }
         }
 
-        private MenuItem addAssistMenuItem(Menu menu, RemoteAction action, int intemId, int order,
+        private MenuItem addAssistMenuItem(Menu menu, RemoteAction action, int itemId, int order,
                 int showAsAction) {
-            final MenuItem item = menu.add(TextView.ID_ASSIST, intemId, order, action.getTitle())
+            final MenuItem item = menu.add(TextView.ID_ASSIST, itemId, order, action.getTitle())
                     .setContentDescription(action.getContentDescription());
             if (action.shouldShowIcon()) {
                 item.setIcon(action.getIcon().loadDrawable(mTextView.getContext()));
@@ -4188,7 +4188,8 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            getSelectionActionModeHelper().onSelectionAction(item.getItemId());
+            getSelectionActionModeHelper()
+                    .onSelectionAction(item.getItemId(), item.getTitle().toString());
 
             if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
                 return true;

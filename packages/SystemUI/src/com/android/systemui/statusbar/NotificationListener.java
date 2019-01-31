@@ -55,8 +55,6 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
     private final Context mContext;
 
-    protected NotificationPresenter mPresenter;
-
     public NotificationListener(Context context) {
         mContext = context;
     }
@@ -152,9 +150,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         }
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter) {
-        mPresenter = presenter;
-
+    public void registerAsSystemService() {
         try {
             registerAsSystemService(mContext,
                     new ComponentName(mContext.getPackageName(), getClass().getCanonicalName()),

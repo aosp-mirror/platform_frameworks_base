@@ -641,6 +641,8 @@ public final class MediaStore {
          * location. For example, when this value is left undefined, pending
          * {@link MediaStore.Audio.Media} items are stored under
          * {@link Environment#DIRECTORY_MUSIC}.
+         *
+         * @see MediaColumns#PRIMARY_DIRECTORY
          */
         public void setPrimaryDirectory(@Nullable String primaryDirectory) {
             this.primaryDirectory = primaryDirectory;
@@ -652,6 +654,8 @@ public final class MediaStore {
          * <p>
          * You may leave this value undefined to store the media as a direct
          * descendant of the {@link #setPrimaryDirectory(String)} location.
+         *
+         * @see MediaColumns#SECONDARY_DIRECTORY
          */
         public void setSecondaryDirectory(@Nullable String secondaryDirectory) {
             this.secondaryDirectory = secondaryDirectory;
@@ -980,6 +984,26 @@ public final class MediaStore {
          * Type: TEXT
          */
         public static final String OWNER_PACKAGE_NAME = "owner_package_name";
+
+        /**
+         * The primary directory name this media exists under. The value may be
+         * {@code NULL} if the media doesn't have a primary directory name.
+         * <p>
+         * Type: TEXT
+         *
+         * @see PendingParams#setPrimaryDirectory(String)
+         */
+        public static final String PRIMARY_DIRECTORY = "primary_directory";
+
+        /**
+         * The secondary directory name this media exists under. The value may
+         * be {@code NULL} if the media doesn't have a secondary directory name.
+         * <p>
+         * Type: TEXT
+         *
+         * @see PendingParams#setSecondaryDirectory(String)
+         */
+        public static final String SECONDARY_DIRECTORY = "secondary_directory";
     }
 
     /**
@@ -1428,13 +1452,20 @@ public final class MediaStore {
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
 
             /**
-             * The secondary bucket ID of this media item. This can be useful to
-             * present the user a second-level clustering of related media
-             * items. This is a read-only column that is automatically computed.
+             * The group ID of this media item. This can be useful to present
+             * the user a grouping of related media items, such a burst of
+             * images, or a {@code JPG} and {@code DNG} version of the same
+             * image.
+             * <p>
+             * This is a read-only column that is automatically computed based
+             * on the first portion of the filename. For example,
+             * {@code IMG1024.BURST001.JPG} and {@code IMG1024.BURST002.JPG}
+             * will have the same {@link #GROUP_ID} because the first portion of
+             * their filenames is identical.
              * <p>
              * Type: INTEGER
              */
-            public static final String SECONDARY_BUCKET_ID = "secondary_bucket_id";
+            public static final String GROUP_ID = "group_id";
         }
 
         public static final class Media implements ImageColumns {
@@ -2697,13 +2728,20 @@ public final class MediaStore {
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
 
             /**
-             * The secondary bucket ID of this media item. This can be useful to
-             * present the user a second-level clustering of related media
-             * items. This is a read-only column that is automatically computed.
+             * The group ID of this media item. This can be useful to present
+             * the user a grouping of related media items, such a burst of
+             * images, or a {@code JPG} and {@code DNG} version of the same
+             * image.
+             * <p>
+             * This is a read-only column that is automatically computed based
+             * on the first portion of the filename. For example,
+             * {@code IMG1024.BURST001.JPG} and {@code IMG1024.BURST002.JPG}
+             * will have the same {@link #GROUP_ID} because the first portion of
+             * their filenames is identical.
              * <p>
              * Type: INTEGER
              */
-            public static final String SECONDARY_BUCKET_ID = "secondary_bucket_id";
+            public static final String GROUP_ID = "group_id";
 
             /**
              * The bookmark for the video. Time in ms. Represents the location in the video that the

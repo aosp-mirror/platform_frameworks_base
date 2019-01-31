@@ -43,6 +43,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.MediaTransferManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
@@ -163,11 +164,13 @@ public class NotificationContentView extends FrameLayout {
     private boolean mIsContentExpandable;
     private boolean mRemoteInputVisible;
     private int mUnrestrictedContentHeight;
+    private MediaTransferManager mMediaTransferManager;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        mMediaTransferManager = new MediaTransferManager(getContext());
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
         mSmartReplyController = Dependency.get(SmartReplyController.class);
         initView();
@@ -1250,6 +1253,7 @@ public class NotificationContentView extends FrameLayout {
             mAmbientWrapper.onContentUpdated(row);
         }
         applyRemoteInputAndSmartReply(entry);
+        applyMediaTransfer(entry);
         updateLegacy();
         mForceSelectNextLayout = true;
         setDark(mDark, false /* animate */, 0 /* delay */);
@@ -1292,6 +1296,22 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
+    private void applyMediaTransfer(final NotificationEntry entry) {
+        View bigContentView = mExpandedChild;
+        if (bigContentView == null || !entry.isMediaNotification()) {
+            return;
+        }
+
+        View mediaActionContainer = bigContentView.findViewById(
+                com.android.internal.R.id.media_actions);
+        if (!(mediaActionContainer instanceof LinearLayout)) {
+            return;
+        }
+
+        mMediaTransferManager.applyMediaTransferView((ViewGroup) mediaActionContainer,
+                entry);
+    }
+
     private void applyRemoteInputAndSmartReply(final NotificationEntry entry) {
         if (mRemoteInputController == null) {
             return;
@@ -1314,15 +1334,20 @@ public class NotificationContentView extends FrameLayout {
     static SmartRepliesAndActions chooseSmartRepliesAndActions(
             SmartReplyConstants smartReplyConstants,
             final NotificationEntry entry) {
-        boolean enableAppGeneratedSmartReplies = (smartReplyConstants.isEnabled()
-                && (!smartReplyConstants.requiresTargetingP()
-                || entry.targetSdk >= Build.VERSION_CODES.P));
-
         Notification notification = entry.notification.getNotification();
         Pair<RemoteInput, Notification.Action> remoteInputActionPair =
                 notification.findRemoteInputActionPair(false /* freeform */);
         Pair<RemoteInput, Notification.Action> freeformRemoteInputActionPair =
                 notification.findRemoteInputActionPair(true /* freeform */);
+
+        if (!smartReplyConstants.isEnabled()) {
+            return new SmartRepliesAndActions(null, null, freeformRemoteInputActionPair != null);
+        }
+        // Only use smart replies from the app if they target P or above. We have this check because
+        // the smart reply API has been used for other things (Wearables) in the past. The API to
+        // add smart actions is new in Q so it doesn't require a target-sdk check.
+        boolean enableAppGeneratedSmartReplies = (!smartReplyConstants.requiresTargetingP()
+                || entry.targetSdk >= Build.VERSION_CODES.P);
 
         boolean appGeneratedSmartRepliesExist =
                 enableAppGeneratedSmartReplies

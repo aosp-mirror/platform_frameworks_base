@@ -191,6 +191,7 @@
   <java-symbol type="id" name="action2" />
   <java-symbol type="id" name="action3" />
   <java-symbol type="id" name="action4" />
+  <java-symbol type="id" name="media_seamless" />
   <java-symbol type="id" name="big_picture" />
   <java-symbol type="id" name="big_text" />
   <java-symbol type="id" name="chronometer" />
@@ -2237,6 +2238,7 @@
   <java-symbol type="string" name="ext_media_init_action" />
   <java-symbol type="string" name="ext_media_unmount_action" />
   <java-symbol type="string" name="ext_media_browse_action" />
+  <java-symbol type="string" name="ext_media_seamless_action" />
   <java-symbol type="string" name="ext_media_missing_title" />
   <java-symbol type="string" name="ext_media_missing_message" />
   <java-symbol type="string" name="ext_media_move_specific_title" />
@@ -3098,6 +3100,7 @@
   <java-symbol type="drawable" name="ic_restart" />
   <java-symbol type="drawable" name="ic_screenshot" />
   <java-symbol type="drawable" name="ic_faster_emergency" />
+  <java-symbol type="drawable" name="ic_media_seamless" />
   <java-symbol type="drawable" name="emergency_icon" />
 
   <java-symbol type="array" name="config_convert_to_emergency_number_map" />

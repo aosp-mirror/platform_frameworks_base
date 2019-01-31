@@ -122,6 +122,7 @@ package android {
     field public static final String OBSERVE_ROLE_HOLDERS = "android.permission.OBSERVE_ROLE_HOLDERS";
     field public static final String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
+    field public static final String PACKET_KEEPALIVE_OFFLOAD = "android.permission.PACKET_KEEPALIVE_OFFLOAD";
     field public static final String PEERS_MAC_ADDRESS = "android.permission.PEERS_MAC_ADDRESS";
     field public static final String PERFORM_CDMA_PROVISIONING = "android.permission.PERFORM_CDMA_PROVISIONING";
     field public static final String PERFORM_SIM_ACTIVATION = "android.permission.PERFORM_SIM_ACTIVATION";
@@ -1290,6 +1291,7 @@ package android.content {
     field public static final String BACKUP_SERVICE = "backup";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
+    field public static final String DYNAMIC_ANDROID_SERVICE = "dynamic_android";
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String NETD_SERVICE = "netd";
@@ -3482,15 +3484,6 @@ package android.media {
     method @NonNull public android.media.TimedMetaData.Builder setTimedMetaData(long, @NonNull byte[]);
   }
 
-  public abstract class VolumeProvider {
-    method public void setCallback(android.media.VolumeProvider.Callback);
-  }
-
-  public abstract static class VolumeProvider.Callback {
-    ctor public VolumeProvider.Callback();
-    method public abstract void onVolumeChanged(android.media.VolumeProvider);
-  }
-
 }
 
 package android.media.audiopolicy {
@@ -3579,165 +3572,8 @@ package android.media.audiopolicy {
 
 package android.media.session {
 
-  public final class ControllerCallbackLink implements android.os.Parcelable {
-    ctor public ControllerCallbackLink(@NonNull android.content.Context, @NonNull android.media.session.ControllerCallbackLink.CallbackStub);
-    ctor public ControllerCallbackLink(android.os.IBinder);
-    method public int describeContents();
-    method @NonNull public android.os.IBinder getBinder();
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyEvent(@NonNull String, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyExtrasChanged(@Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyMetadataChanged(@Nullable android.media.MediaMetadata);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlaybackStateChanged(@Nullable android.media.session.PlaybackState);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyQueueChanged(@Nullable java.util.List<android.media.session.MediaSession.QueueItem>);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyQueueTitleChanged(@Nullable CharSequence);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySessionDestroyed();
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyVolumeInfoChanged(@NonNull android.media.session.MediaController.PlaybackInfo);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.session.ControllerCallbackLink> CREATOR;
-  }
-
-  public abstract static class ControllerCallbackLink.CallbackStub {
-    ctor public ControllerCallbackLink.CallbackStub();
-    method public void onEvent(@NonNull String, @Nullable android.os.Bundle);
-    method public void onExtrasChanged(@Nullable android.os.Bundle);
-    method public void onMetadataChanged(@Nullable android.media.MediaMetadata);
-    method public void onPlaybackStateChanged(@Nullable android.media.session.PlaybackState);
-    method public void onQueueChanged(@Nullable java.util.List<android.media.session.MediaSession.QueueItem>);
-    method public void onQueueTitleChanged(@Nullable CharSequence);
-    method public void onSessionDestroyed();
-    method public void onVolumeInfoChanged(@NonNull android.media.session.MediaController.PlaybackInfo);
-  }
-
-  public final class ControllerLink implements android.os.Parcelable {
-    ctor public ControllerLink(@NonNull android.media.session.ControllerLink.ControllerStub);
-    ctor public ControllerLink(android.os.IBinder);
-    method public int describeContents();
-    method @NonNull public android.os.IBinder getBinder();
-    method @Nullable public android.os.Bundle getExtras();
-    method @Nullable public android.media.MediaMetadata getMetadata();
-    method @Nullable public android.media.session.PlaybackState getPlaybackState();
-    method @Nullable public java.util.List<android.media.session.MediaSession.QueueItem> getQueue();
-    method @Nullable public CharSequence getQueueTitle();
-    method public int getRatingType();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.session.ControllerLink> CREATOR;
-  }
-
-  public abstract static class ControllerLink.ControllerStub {
-    ctor public ControllerLink.ControllerStub();
-    method public void adjustVolume(@NonNull String, @NonNull String, @NonNull android.media.session.ControllerCallbackLink, int, int);
-    method public void fastForward(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method @Nullable public android.os.Bundle getExtras();
-    method public long getFlags();
-    method @Nullable public android.app.PendingIntent getLaunchPendingIntent();
-    method @Nullable public android.media.MediaMetadata getMetadata();
-    method @NonNull public String getPackageName();
-    method @Nullable public android.media.session.PlaybackState getPlaybackState();
-    method @Nullable public java.util.List<android.media.session.MediaSession.QueueItem> getQueue();
-    method @Nullable public CharSequence getQueueTitle();
-    method public int getRatingType();
-    method @NonNull public String getTag();
-    method @NonNull public android.media.session.MediaController.PlaybackInfo getVolumeAttributes();
-    method public void next(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void pause(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void play(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void playFromMediaId(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method public void playFromSearch(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method public void playFromUri(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
-    method public void prepare(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void prepareFromMediaId(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method public void prepareFromSearch(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method public void prepareFromUri(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
-    method public void previous(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void rate(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.media.Rating);
-    method public void registerCallback(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void rewind(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void seekTo(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, long);
-    method public void sendCommand(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle, @Nullable android.os.ResultReceiver);
-    method public void sendCustomAction(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method public boolean sendMediaButton(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.view.KeyEvent);
-    method public void setVolumeTo(@NonNull String, @NonNull String, @NonNull android.media.session.ControllerCallbackLink, int, int);
-    method public void skipToQueueItem(@NonNull String, @NonNull android.media.session.ControllerCallbackLink, long);
-    method public void stop(@NonNull String, @NonNull android.media.session.ControllerCallbackLink);
-    method public void unregisterCallback(@NonNull android.media.session.ControllerCallbackLink);
-  }
-
   public static final class MediaController.PlaybackInfo implements android.os.Parcelable {
     ctor public MediaController.PlaybackInfo(int, int, int, int, android.media.AudioAttributes);
-  }
-
-  public abstract static class MediaSession.Callback {
-    method public void onSetMediaButtonEventDelegate(@NonNull android.media.session.MediaSessionEngine.MediaButtonEventDelegate);
-  }
-
-  public static final class MediaSession.Token implements android.os.Parcelable {
-    method public android.media.session.ControllerLink getControllerLink();
-  }
-
-  public final class MediaSessionEngine implements java.lang.AutoCloseable {
-    ctor public MediaSessionEngine(@NonNull android.content.Context, @NonNull android.media.session.SessionLink, @NonNull android.media.session.SessionCallbackLink, @NonNull android.media.session.MediaSessionEngine.CallbackStub);
-    method public void close();
-    method public String getCallingPackage();
-    method @NonNull public android.media.session.MediaController getController();
-    method @NonNull public android.media.session.MediaSessionManager.RemoteUserInfo getCurrentControllerInfo();
-    method @NonNull public android.media.session.MediaSession.Token getSessionToken();
-    method public boolean isActive();
-    method public static boolean isActiveState(int);
-    method public void sendSessionEvent(@NonNull String, @Nullable android.os.Bundle);
-    method public void setActive(boolean);
-    method public void setCallback(@Nullable android.media.session.MediaSession.Callback);
-    method public void setCallback(@Nullable android.media.session.MediaSession.Callback, @NonNull android.os.Handler);
-    method public void setExtras(@Nullable android.os.Bundle);
-    method public void setFlags(int);
-    method public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
-    method public void setMetadata(@Nullable android.media.MediaMetadata);
-    method public void setPlaybackState(@Nullable android.media.session.PlaybackState);
-    method public void setPlaybackToLocal(android.media.AudioAttributes);
-    method public void setPlaybackToRemote(@NonNull android.media.VolumeProvider);
-    method public void setQueue(@Nullable java.util.List<android.media.session.MediaSession.QueueItem>);
-    method public void setQueueTitle(@Nullable CharSequence);
-    method public void setRatingType(int);
-    method public void setSessionActivity(@Nullable android.app.PendingIntent);
-  }
-
-  public static final class MediaSessionEngine.CallbackStub {
-    ctor public MediaSessionEngine.CallbackStub();
-    method public void onAdjustVolume(String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void onCommand(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle, android.os.ResultReceiver);
-    method public void onCustomAction(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onFastForward(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onMediaButton(String, int, int, android.content.Intent, int, android.os.ResultReceiver);
-    method public void onMediaButtonFromController(String, int, int, android.media.session.ControllerCallbackLink, android.content.Intent);
-    method public void onNext(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPause(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPlay(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPlayFromMediaId(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPlayFromSearch(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPlayFromUri(String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void onPrepare(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPrepareFromMediaId(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPrepareFromSearch(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPrepareFromUri(String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void onPrevious(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onRate(String, int, int, android.media.session.ControllerCallbackLink, android.media.Rating);
-    method public void onRewind(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onSeekTo(String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void onSetVolumeTo(String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void onSkipToTrack(String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void onStop(String, int, int, android.media.session.ControllerCallbackLink);
-  }
-
-  public static interface MediaSessionEngine.MediaButtonEventDelegate {
-    method public boolean onMediaButtonIntent(android.content.Intent);
-  }
-
-  public static final class MediaSessionEngine.QueueItem {
-    ctor public MediaSessionEngine.QueueItem(android.media.MediaDescription, long);
-    ctor public MediaSessionEngine.QueueItem(android.os.Parcel);
-    method public android.media.MediaDescription getDescription();
-    method public long getQueueId();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int UNKNOWN_ID = -1; // 0xffffffff
   }
 
   public final class MediaSessionManager {
@@ -3751,66 +3587,6 @@ package android.media.session {
 
   public static interface MediaSessionManager.OnVolumeKeyLongPressListener {
     method public void onVolumeKeyLongPress(android.view.KeyEvent);
-  }
-
-  public final class SessionCallbackLink implements android.os.Parcelable {
-    ctor public SessionCallbackLink(android.os.IBinder);
-    method public int describeContents();
-    method @NonNull public android.os.IBinder getBinder();
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyAdjustVolume(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, int);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyCommand(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle, @Nullable android.os.ResultReceiver);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyCustomAction(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyFastForward(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyMediaButton(@NonNull String, int, int, @NonNull android.content.Intent, int, @Nullable android.os.ResultReceiver);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyMediaButtonFromController(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.content.Intent);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyNext(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPause(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlay(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlayFromMediaId(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlayFromSearch(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPlayFromUri(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepare(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepareFromMediaId(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepareFromSearch(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull String, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrepareFromUri(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.net.Uri, @Nullable android.os.Bundle);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyPrevious(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyRate(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, @NonNull android.media.Rating);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyRewind(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySeekTo(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, long);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySetVolumeTo(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, int);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifySkipToTrack(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink, long);
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void notifyStop(@NonNull String, int, int, @NonNull android.media.session.ControllerCallbackLink);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.session.SessionCallbackLink> CREATOR;
-  }
-
-  public final class SessionLink implements android.os.Parcelable {
-    ctor public SessionLink(@NonNull android.media.session.SessionLink.SessionStub);
-    ctor public SessionLink(android.os.IBinder);
-    method public int describeContents();
-    method @NonNull public android.os.IBinder getBinder();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.session.SessionLink> CREATOR;
-  }
-
-  public abstract static class SessionLink.SessionStub {
-    ctor public SessionLink.SessionStub();
-    method public void destroySession();
-    method @NonNull public android.media.session.ControllerLink getController();
-    method public void sendEvent(@NonNull String, @Nullable android.os.Bundle);
-    method public void setActive(boolean);
-    method public void setCurrentVolume(int);
-    method public void setExtras(@Nullable android.os.Bundle);
-    method public void setFlags(int);
-    method public void setLaunchPendingIntent(@Nullable android.app.PendingIntent);
-    method public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
-    method public void setMetadata(@Nullable android.media.MediaMetadata, long, @Nullable String);
-    method public void setPlaybackState(@Nullable android.media.session.PlaybackState);
-    method public void setPlaybackToLocal(@NonNull android.media.AudioAttributes);
-    method public void setPlaybackToRemote(int, int);
-    method public void setQueue(@Nullable java.util.List<android.media.session.MediaSession.QueueItem>);
-    method public void setQueueTitle(@Nullable CharSequence);
-    method public void setRatingType(int);
   }
 
 }
@@ -4114,9 +3890,10 @@ package android.net {
   }
 
   public class ConnectivityManager {
-    method @RequiresPermission("android.permission.PACKET_KEEPALIVE_OFFLOAD") public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull java.io.FileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
+    method @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull java.io.FileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method public boolean getAvoidBadWifi();
     method @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS) public String getCaptivePortalServerUrl();
+    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementValue(int, boolean, @NonNull android.net.ConnectivityManager.TetheringEntitlementValueListener, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void setAirplaneMode(boolean);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
@@ -4127,12 +3904,20 @@ package android.net {
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
     field public static final int TETHERING_USB = 1; // 0x1
     field public static final int TETHERING_WIFI = 0; // 0x0
+    field public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN = 13; // 0xd
+    field public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
+    field public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
   }
 
   public abstract static class ConnectivityManager.OnStartTetheringCallback {
     ctor public ConnectivityManager.OnStartTetheringCallback();
     method public void onTetheringFailed();
     method public void onTetheringStarted();
+  }
+
+  public abstract static class ConnectivityManager.TetheringEntitlementValueListener {
+    ctor public ConnectivityManager.TetheringEntitlementValueListener();
+    method public void onEntitlementResult(int);
   }
 
   public final class IpPrefix implements android.os.Parcelable {
@@ -4248,6 +4033,10 @@ package android.net {
     field public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
     field public static final String EXTRA_NEW_SCORER = "newScorer";
     field public static final String EXTRA_PACKAGE_NAME = "packageName";
+  }
+
+  public class NetworkStack {
+    field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 
   public final class RouteInfo implements android.os.Parcelable {
@@ -5169,6 +4958,53 @@ package android.os {
     field public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
   }
 
+  public final class BatterySaverPolicyConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public float getAdjustBrightnessFactor();
+    method public boolean getAdvertiseIsEnabled();
+    method public boolean getDeferFullBackup();
+    method public boolean getDeferKeyValueBackup();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.String> getDeviceSpecificSettings();
+    method public boolean getDisableAnimation();
+    method public boolean getDisableAod();
+    method public boolean getDisableLaunchBoost();
+    method public boolean getDisableOptionalSensors();
+    method public boolean getDisableSoundTrigger();
+    method public boolean getDisableVibration();
+    method public boolean getEnableAdjustBrightness();
+    method public boolean getEnableDataSaver();
+    method public boolean getEnableFirewall();
+    method public boolean getEnableQuickDoze();
+    method public boolean getForceAllAppsStandby();
+    method public boolean getForceBackgroundCheck();
+    method public int getGpsMode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.BatterySaverPolicyConfig> CREATOR;
+  }
+
+  public static final class BatterySaverPolicyConfig.Builder {
+    ctor public BatterySaverPolicyConfig.Builder();
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder addDeviceSpecificSetting(@NonNull String, @NonNull String);
+    method @NonNull public android.os.BatterySaverPolicyConfig build();
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setAdjustBrightnessFactor(float);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setAdvertiseIsEnabled(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDeferFullBackup(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDeferKeyValueBackup(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableAnimation(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableAod(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableLaunchBoost(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableOptionalSensors(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableSoundTrigger(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableVibration(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableAdjustBrightness(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableDataSaver(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableFirewall(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableQuickDoze(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceAllAppsStandby(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceBackgroundCheck(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setGpsMode(int);
+  }
+
   public class Binder implements android.os.IBinder {
     method public static final long clearCallingWorkSource();
     method public static final int getCallingWorkSourceUid();
@@ -5444,6 +5280,8 @@ package android.os {
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public int getPowerSaveMode();
+    method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSaveEnabled(boolean);
+    method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setDynamicPowerSavings(boolean, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setPowerSaveMode(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.USER_ACTIVITY}) public void userActivity(long, int, int);
@@ -5582,6 +5420,7 @@ package android.os {
   }
 
   public final class UserHandle implements android.os.Parcelable {
+    method public static int getAppId(int);
     method public int getIdentifier();
     method @Deprecated public boolean isOwner();
     method public boolean isSystem();
@@ -5844,6 +5683,7 @@ package android.provider {
   public static interface DeviceConfig.ActivityManager {
     field public static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
     field public static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
+    field public static final String KEY_COMPACT_STATSD_SAMPLE_RATE = "compact_statsd_sample_rate";
     field public static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
     field public static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
     field public static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
@@ -5859,9 +5699,9 @@ package android.provider {
   }
 
   public static interface DeviceConfig.AttentionManagerService {
+    field public static final String COMPONENT_NAME = "component_name";
     field public static final String NAMESPACE = "attention_manager_service";
-    field public static final String PROPERTY_COMPONENT_NAME = "component_name";
-    field public static final String PROPERTY_SERVICE_ENABLED = "service_enabled";
+    field public static final String SERVICE_ENABLED = "service_enabled";
   }
 
   public static interface DeviceConfig.ContentCapture {
@@ -5875,9 +5715,9 @@ package android.provider {
   }
 
   public static interface DeviceConfig.IntelligenceAttention {
+    field public static final String ATTENTION_ENABLED = "attention_enabled";
+    field public static final String ATTENTION_SETTINGS = "attention_settings";
     field public static final String NAMESPACE = "intelligence_attention";
-    field public static final String PROPERTY_ATTENTION_ENABLED = "attention_enabled";
-    field public static final String PROPERTY_ATTENTION_SETTINGS = "attention_settings";
   }
 
   public static interface DeviceConfig.NotificationAssistant {
@@ -5892,8 +5732,8 @@ package android.provider {
 
   public static interface DeviceConfig.Privacy {
     field public static final String NAMESPACE = "privacy";
-    field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "enable_location_access_check";
-    field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
+    field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
+    field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
   }
 
   public static interface DeviceConfig.RuntimeNative {
@@ -5907,8 +5747,9 @@ package android.provider {
 
   public static interface DeviceConfig.Telephony {
     field public static final String NAMESPACE = "telephony";
-    field public static final String PROPERTY_ENABLE_RAMPING_RINGER = "enable_ramping_ringer";
-    field public static final String PROPERTY_RAMPING_RINGER_DURATION = "ramping_duration";
+    field public static final String RAMPING_RINGER_DURATION = "ramping_ringer_duration";
+    field public static final String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
+    field public static final String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
   }
 
   public final class DocumentsContract {
@@ -7931,6 +7772,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.util.Pair<java.lang.Integer,java.lang.Integer>> getLogicalToPhysicalSlotMapping();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmap();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();

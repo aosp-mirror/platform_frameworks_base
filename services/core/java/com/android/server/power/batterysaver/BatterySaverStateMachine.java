@@ -24,8 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.os.BatterySaverPolicyConfig;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -46,8 +48,7 @@ import java.io.PrintWriter;
  * IMPORTANT: This class shares the power manager lock, which is very low in the lock hierarchy.
  * Do not call out with the lock held. (Settings provider is okay.)
  *
- * Test:
-  atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/power/batterysaver/BatterySaverStateMachineTest.java
+ * Test: atest com.android.server.power.batterysaver.BatterySaverStateMachineTest
  */
 public class BatterySaverStateMachine {
     private static final String TAG = "BatterySaverStateMachine";
@@ -56,6 +57,8 @@ public class BatterySaverStateMachine {
     private final Object mLock;
 
     private static final boolean DEBUG = BatterySaverPolicy.DEBUG;
+
+    private static final long ADAPTIVE_CHANGE_TIMEOUT_MS = 24 * 60 * 60 * 1000L;
 
     private final Context mContext;
     private final BatterySaverController mBatterySaverController;
@@ -157,6 +160,13 @@ public class BatterySaverStateMachine {
     @GuardedBy("mLock")
     private String mLastChangedStrReason;
 
+    /**
+     * The last time adaptive battery saver was changed by an external service, using elapsed
+     * realtime as the timebase.
+     */
+    @GuardedBy("mLock")
+    private long mLastAdaptiveBatterySaverChangedExternallyElapsed;
+
     private final ContentObserver mSettingsObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean selfChange) {
@@ -176,10 +186,6 @@ public class BatterySaverStateMachine {
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled);
         mDynamicPowerSavingsDefaultDisableThreshold = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold);
-    }
-
-    private boolean isBatterySaverEnabled() {
-        return mBatterySaverController.isEnabled();
     }
 
     private boolean isAutoBatterySaverConfiguredLocked() {
@@ -392,6 +398,36 @@ public class BatterySaverStateMachine {
         }
     }
 
+    /**
+     * Enable or disable the current adaptive battery saver policy. This may not change what's in
+     * effect if full battery saver is also enabled.
+     */
+    public boolean setAdaptiveBatterySaverEnabled(boolean enabled) {
+        if (DEBUG) {
+            Slog.d(TAG, "setAdaptiveBatterySaverEnabled: enabled=" + enabled);
+        }
+        synchronized (mLock) {
+            mLastAdaptiveBatterySaverChangedExternallyElapsed = SystemClock.elapsedRealtime();
+            return mBatterySaverController.setAdaptivePolicyEnabledLocked(
+                    enabled, BatterySaverController.REASON_ADAPTIVE_DYNAMIC_POWER_SAVINGS_CHANGED);
+        }
+    }
+
+    /**
+     * Change the adaptive battery saver policy.
+     */
+    public boolean setAdaptiveBatterySaverPolicy(BatterySaverPolicyConfig config) {
+        if (DEBUG) {
+            Slog.d(TAG, "setAdaptiveBatterySaverPolicy: config=" + config);
+        }
+
+        synchronized (mLock) {
+            mLastAdaptiveBatterySaverChangedExternallyElapsed = SystemClock.elapsedRealtime();
+            return mBatterySaverController.setAdaptivePolicyLocked(config,
+                    BatterySaverController.REASON_ADAPTIVE_DYNAMIC_POWER_SAVINGS_CHANGED);
+        }
+    }
+
     @GuardedBy("mLock")
     private boolean isBatteryLowLocked() {
         final boolean percentageLow =
@@ -427,11 +463,25 @@ public class BatterySaverStateMachine {
         if (!isBatteryLowLocked()) {
             updateSnoozingLocked(false, "Battery not low");
         }
+
+        if (SystemClock.elapsedRealtime() - mLastAdaptiveBatterySaverChangedExternallyElapsed
+                > ADAPTIVE_CHANGE_TIMEOUT_MS) {
+            mBatterySaverController.setAdaptivePolicyEnabledLocked(
+                    false, BatterySaverController.REASON_TIMEOUT);
+            mBatterySaverController.resetAdaptivePolicyLocked(
+                    BatterySaverController.REASON_TIMEOUT);
+        }
+
         if (mIsPowered) {
             updateSnoozingLocked(false, "Plugged in");
             enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false,
                     BatterySaverController.REASON_PLUGGED_IN,
                     "Plugged in");
+
+            if (mBatteryLevel >= 80 /* Arbitrary level */) {
+                mBatterySaverController.setAdaptivePolicyEnabledLocked(
+                        false, BatterySaverController.REASON_PLUGGED_IN);
+            }
 
         } else if (mSettingBatterySaverEnabledSticky && !mBatterySaverStickyBehaviourDisabled) {
             if (mSettingBatterySaverStickyAutoDisableEnabled
@@ -472,7 +522,7 @@ public class BatterySaverStateMachine {
         // do nothing if automatic battery saver mode = PERCENTAGE and low warning threshold = 0%
     }
 
-  /**
+    /**
      * {@link com.android.server.power.PowerManagerService} calls it when
      * {@link android.os.PowerManager#setPowerSaveMode} is called.
      *
@@ -501,7 +551,7 @@ public class BatterySaverStateMachine {
             Slog.d(TAG, "enableBatterySaver: enable=" + enable + " manual=" + manual
                     + " reason=" + strReason + "(" + intReason + ")");
         }
-        final boolean wasEnabled = mBatterySaverController.isEnabled();
+        final boolean wasEnabled = mBatterySaverController.isFullEnabled();
 
         if (wasEnabled == enable) {
             if (DEBUG) {
@@ -523,9 +573,10 @@ public class BatterySaverStateMachine {
                 // When battery saver is disabled manually (while battery saver is enabled)
                 // when the battery level is low, we "snooze" BS -- i.e. disable auto battery saver.
                 // We resume auto-BS once the battery level is not low, or the device is plugged in.
-                if (isBatterySaverEnabled() && isBatteryLowLocked()) {
+                if (mBatterySaverController.isFullEnabled() && isBatteryLowLocked()) {
                     updateSnoozingLocked(true, "Manual snooze");
                 }
+                // TODO: maybe turn off adaptive if it's on and advertiseIsEnabled is true
             }
         }
 
@@ -622,6 +673,17 @@ public class BatterySaverStateMachine {
 
             pw.print("  Enabled=");
             pw.println(mBatterySaverController.isEnabled());
+            pw.print("    full=");
+            pw.println(mBatterySaverController.isFullEnabled());
+            pw.print("    adaptive=");
+            pw.print(mBatterySaverController.isAdaptiveEnabled());
+            if (mBatterySaverController.isAdaptiveEnabled()) {
+                pw.print(" (advertise=");
+                pw.print(
+                        mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
+                pw.print(")");
+            }
+            pw.println();
 
             pw.print("  mLastChangedIntReason=");
             pw.println(mLastChangedIntReason);
@@ -657,6 +719,9 @@ public class BatterySaverStateMachine {
             pw.println(mSettingBatterySaverTriggerThreshold);
             pw.print("  mBatterySaverStickyBehaviourDisabled=");
             pw.println(mBatterySaverStickyBehaviourDisabled);
+
+            pw.print("  mLastAdaptiveBatterySaverChangedExternallyElapsed=");
+            pw.println(mLastAdaptiveBatterySaverChangedExternallyElapsed);
         }
     }
 
@@ -666,6 +731,12 @@ public class BatterySaverStateMachine {
 
             proto.write(BatterySaverStateMachineProto.ENABLED,
                     mBatterySaverController.isEnabled());
+            proto.write(BatterySaverStateMachineProto.IS_FULL_ENABLED,
+                    mBatterySaverController.isFullEnabled());
+            proto.write(BatterySaverStateMachineProto.IS_ADAPTIVE_ENABLED,
+                    mBatterySaverController.isAdaptiveEnabled());
+            proto.write(BatterySaverStateMachineProto.SHOULD_ADVERTISE_IS_ENABLED,
+                    mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
 
             proto.write(BatterySaverStateMachineProto.BOOT_COMPLETED, mBootCompleted);
             proto.write(BatterySaverStateMachineProto.SETTINGS_LOADED, mSettingsLoaded);
@@ -691,6 +762,11 @@ public class BatterySaverStateMachine {
                     BatterySaverStateMachineProto
                             .SETTING_BATTERY_SAVER_STICKY_AUTO_DISABLE_THRESHOLD,
                     mSettingBatterySaverStickyAutoDisableThreshold);
+
+            proto.write(
+                    BatterySaverStateMachineProto
+                            .LAST_ADAPTIVE_BATTERY_SAVER_CHANGED_EXTERNALLY_ELAPSED,
+                    mLastAdaptiveBatterySaverChangedExternallyElapsed);
 
             proto.end(token);
         }

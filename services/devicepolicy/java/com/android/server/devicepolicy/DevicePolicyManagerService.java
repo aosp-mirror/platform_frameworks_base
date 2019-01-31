@@ -8364,16 +8364,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 != PackageManager.PERMISSION_GRANTED) {
             return false;
         }
-        // Allow access to the device owner.
+
+        // Allow access to the device owner or delegate cert installer.
         ComponentName deviceOwner = getDeviceOwnerComponent(true);
-        if (deviceOwner != null && deviceOwner.getPackageName().equals(packageName)) {
+        if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
+                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
             return true;
         }
-        // Allow access to the profile owner for the specified user.
+        // Allow access to the profile owner for the specified user, or delegate cert installer
         ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
-        if (profileOwner != null && profileOwner.getPackageName().equals(packageName)) {
+        if (profileOwner != null && (profileOwner.getPackageName().equals(packageName)
+                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
             return true;
         }
+
+        Log.w(LOG_TAG, String.format("Package if %s (uid=%d, pid=%d) cannot access Device IDs",
+                    packageName, uid, pid));
         return false;
     }
 

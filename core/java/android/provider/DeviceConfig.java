@@ -181,10 +181,10 @@ public final class DeviceConfig {
         String NAMESPACE = "intelligence_attention";
 
         /** If {@code true}, enables the attention features. */
-        String PROPERTY_ATTENTION_ENABLED = "attention_enabled";
+        String ATTENTION_ENABLED = "attention_enabled";
 
         /** Settings for the attention features. */
-        String PROPERTY_ATTENTION_SETTINGS = "attention_settings";
+        String ATTENTION_SETTINGS = "attention_settings";
     }
 
     /**
@@ -203,12 +203,12 @@ public final class DeviceConfig {
          * @hide
          */
         @SystemApi
-        String PROPERTY_PERMISSIONS_HUB_ENABLED = "enable_permissions_hub";
+        String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
 
         /**
          * Whether to show location access check notifications.
          */
-        String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "enable_location_access_check";
+        String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
     }
 
     /**
@@ -220,13 +220,17 @@ public final class DeviceConfig {
     public interface Telephony {
         String NAMESPACE = "telephony";
         /**
-         * Whether to apply ramping ringer on incoming phone calls.
-         */
-        String PROPERTY_ENABLE_RAMPING_RINGER = "enable_ramping_ringer";
-        /**
          * Ringer ramping time in milliseconds.
          */
-        String PROPERTY_RAMPING_RINGER_DURATION = "ramping_duration";
+        String RAMPING_RINGER_DURATION = "ramping_ringer_duration";
+        /**
+         * Whether to apply ramping ringer on incoming phone calls.
+         */
+        String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
+        /**
+         * Vibration time in milliseconds before ramping ringer starts.
+         */
+        String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
     }
 
     /**
@@ -261,6 +265,7 @@ public final class DeviceConfig {
         String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
         String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
         String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+        String KEY_COMPACT_STATSD_SAMPLE_RATE = "compact_statsd_sample_rate";
 
         /**
          * Maximum number of cached processes. See
@@ -279,10 +284,10 @@ public final class DeviceConfig {
         String NAMESPACE = "attention_manager_service";
 
         /** If {@code true}, enables {@link AttentionManagerService} features. */
-        String PROPERTY_SERVICE_ENABLED = "service_enabled";
+        String SERVICE_ENABLED = "service_enabled";
 
         /** Allows a CTS to inject a fake implementation. */
-        String PROPERTY_COMPONENT_NAME = "component_name";
+        String COMPONENT_NAME = "component_name";
     }
 
     /**

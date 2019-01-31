@@ -18,7 +18,6 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
@@ -36,7 +35,6 @@ import java.util.List;
  * Handles incoming commands from {@link MediaSession}.
  * @hide
  */
-@SystemApi
 public final class SessionLink implements Parcelable {
     public static final Parcelable.Creator<SessionLink> CREATOR =
             new Parcelable.Creator<SessionLink>() {

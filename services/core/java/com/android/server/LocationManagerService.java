@@ -405,6 +405,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // initialize in-memory settings values
         onBackgroundThrottleWhitelistChangedLocked();
+        onIgnoreSettingsWhitelistChangedLocked();
     }
 
     @GuardedBy("mLock")
@@ -547,17 +548,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private void onBackgroundThrottleWhitelistChangedLocked() {
-        String setting = Settings.Global.getString(
-                mContext.getContentResolver(),
-                Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
-        if (setting == null) {
-            setting = "";
-        }
-
         mBackgroundThrottlePackageWhitelist.clear();
         mBackgroundThrottlePackageWhitelist.addAll(
                 SystemConfig.getInstance().getAllowUnthrottledLocation());
-        mBackgroundThrottlePackageWhitelist.addAll(Arrays.asList(setting.split(",")));
+
+        String setting = Settings.Global.getString(
+                mContext.getContentResolver(),
+                Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
+        if (!TextUtils.isEmpty(setting)) {
+            mBackgroundThrottlePackageWhitelist.addAll(Arrays.asList(setting.split(",")));
+        }
 
         for (LocationProvider p : mProviders) {
             applyRequirementsLocked(p);
@@ -566,17 +566,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("lock")
     private void onIgnoreSettingsWhitelistChangedLocked() {
-        String setting = Settings.Global.getString(
-                mContext.getContentResolver(),
-                Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST);
-        if (setting == null) {
-            setting = "";
-        }
-
         mIgnoreSettingsPackageWhitelist.clear();
         mIgnoreSettingsPackageWhitelist.addAll(
                 SystemConfig.getInstance().getAllowIgnoreLocationSettings());
-        mIgnoreSettingsPackageWhitelist.addAll(Arrays.asList(setting.split(",")));
+
+        String setting = Settings.Global.getString(
+                mContext.getContentResolver(),
+                Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST);
+        if (!TextUtils.isEmpty(setting)) {
+            mIgnoreSettingsPackageWhitelist.addAll(Arrays.asList(setting.split(",")));
+        }
 
         for (LocationProvider p : mProviders) {
             applyRequirementsLocked(p);
@@ -2200,7 +2199,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             return false;
         }
 
-        if (mBackgroundThrottlePackageWhitelist.contains(record.mReceiver.mIdentity.mPackageName)) {
+        if (mIgnoreSettingsPackageWhitelist.contains(record.mReceiver.mIdentity.mPackageName)) {
             return true;
         }
 

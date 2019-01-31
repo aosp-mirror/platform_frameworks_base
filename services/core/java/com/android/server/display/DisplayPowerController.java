@@ -592,6 +592,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+        if (mAutomaticBrightnessController == null) {
+            return null;
+        }
         return mAutomaticBrightnessController.getDefaultConfig();
     }
 

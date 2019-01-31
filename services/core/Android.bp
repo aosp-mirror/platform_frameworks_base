@@ -8,6 +8,7 @@ java_library_static {
             "frameworks/native/cmds/dumpstate/binder",
             "system/core/storaged/binder",
             "system/vold/binder",
+            "system/gsid/aidl",
         ],
     },
     srcs: [
@@ -17,6 +18,7 @@ java_library_static {
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
+        ":gsiservice_aidl",
         ":mediaupdateservice_aidl",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
