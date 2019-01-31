@@ -7889,6 +7889,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             if (listApex) {
+                // TODO(b/119767311): include uninstalled/inactive APEX if
+                //  MATCH_UNINSTALLED_PACKAGES is set.
                 final IApexService apex = IApexService.Stub.asInterface(
                         ServiceManager.getService("apexservice"));
                 if (apex != null) {
