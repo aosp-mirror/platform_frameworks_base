@@ -4,3 +4,6 @@ per-file *Camera*,*camera* = shuzhenwang@google.com, yinchiayeh@google.com, zhij
 
 # Connectivity
 per-file android_net_* = ek@google.com, lorenzo@google.com, satk@google.com
+
+# Zygote
+per-file com_android_inernal_os_Zygote.*,fd_utils.* = chriswailes@google.com, ngeoffray@google.com, sehr@google.com, narayan@google.com, maco@google.com
