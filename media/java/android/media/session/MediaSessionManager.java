@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
+import android.media.MediaSession2;
 import android.media.Session2Token;
 import android.os.Handler;
 import android.os.IBinder;
@@ -114,11 +115,11 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Notifies that a new MediaSession2 with type {@link Session2Token#TYPE_SESSION} is
+     * Notifies that a new {@link MediaSession2} with type {@link Session2Token#TYPE_SESSION} is
      * created.
      * <p>
      * Do not use this API directly, but create a new instance through the
-     * MediaSession2.Builder instead.
+     * {@link MediaSession2.Builder} instead.
      *
      * @param token newly created session2 token
      */
@@ -129,36 +130,8 @@ public final class MediaSessionManager {
         if (token.getType() != Session2Token.TYPE_SESSION) {
             throw new IllegalArgumentException("token's type should be TYPE_SESSION");
         }
-        if (token.isDestroyed()) {
-            throw new IllegalArgumentException("token is already destroyed");
-        }
         try {
             mService.notifySession2Created(token);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Notifies that a new MediaSession2 with type {@link Session2Token#TYPE_SESSION} is
-     * destroyed.
-     * <p>
-     * Do not use this API directly, but close a session with MediaSession2#close() instead.
-     *
-     * @param token destroyed session2 token
-     */
-    public void notifySession2Destroyed(@NonNull Session2Token token) {
-        if (token == null) {
-            throw new IllegalArgumentException("token shouldn't be null");
-        }
-        if (token.getType() != Session2Token.TYPE_SESSION) {
-            throw new IllegalArgumentException("token's type should be TYPE_SESSION");
-        }
-        if (!token.isDestroyed()) {
-            throw new IllegalArgumentException("token should have been destroyed");
-        }
-        try {
-            mService.notifySession2Destroyed(token);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -219,7 +192,7 @@ public final class MediaSessionManager {
      * current user.
      * <p>
      * Although this API can be used without any restriction, each session owners can accept or
-     * reject your uses of MediaSession2.
+     * reject your uses of {@link MediaSession2}.
      *
      * @return A list of {@link Session2Token}.
      */
