@@ -16,6 +16,9 @@
 
 package android.content.res;
 
+import static android.content.res.Resources.ID_NULL;
+
+import android.annotation.AnyRes;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.util.TypedValue;
@@ -73,19 +76,29 @@ final class XmlBlock implements AutoCloseable {
 
     @UnsupportedAppUsage
     public XmlResourceParser newParser() {
+        return newParser(ID_NULL);
+    }
+
+    public XmlResourceParser newParser(@AnyRes int resId) {
         synchronized (this) {
             if (mNative != 0) {
-                return new Parser(nativeCreateParseState(mNative), this);
+                return new Parser(nativeCreateParseState(mNative), this, resId);
             }
             return null;
         }
     }
 
     /*package*/ final class Parser implements XmlResourceParser {
-        Parser(long parseState, XmlBlock block) {
+        Parser(long parseState, XmlBlock block, @AnyRes int sourceResId) {
             mParseState = parseState;
             mBlock = block;
             block.mOpenCount++;
+            mSourceResId = sourceResId;
+        }
+
+        @AnyRes
+        public int getSourceResId() {
+            return mSourceResId;
         }
 
         public void setFeature(String name, boolean state) throws XmlPullParserException {
@@ -473,6 +486,7 @@ final class XmlBlock implements AutoCloseable {
         private boolean mDecNextDepth = false;
         private int mDepth = 0;
         private int mEventType = START_DOCUMENT;
+        private @AnyRes int mSourceResId;
     }
 
     protected void finalize() throws Throwable {
