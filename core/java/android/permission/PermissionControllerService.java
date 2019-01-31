@@ -16,9 +16,13 @@
 
 package android.permission;
 
+import static android.permission.PermissionControllerManager.COUNT_ONLY_WHEN_GRANTED;
+import static android.permission.PermissionControllerManager.COUNT_WHEN_SYSTEM;
+
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
+import static com.android.internal.util.Preconditions.checkFlagsArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -37,6 +41,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.permission.PermissionControllerManager.CountPermissionAppsFlag;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -121,13 +126,13 @@ public abstract class PermissionControllerService extends Service {
      * Count how many apps have one of a set of permissions.
      *
      * @param permissionNames The permissions the app might have
-     * @param countOnlyGranted Count an app only if the permission is granted to the app
-     * @param countSystem Also count system apps
+     * @param flags Modify which apps to count. By default all non-system apps that request a
+     *              permission are counted
      *
      * @return the number of apps that have one of the permissions
      */
     public abstract int onCountPermissionApps(@NonNull List<String> permissionNames,
-            boolean countOnlyGranted, boolean countSystem);
+            @CountPermissionAppsFlag int flags);
 
     /**
      * Count how many apps have used permissions.
@@ -226,17 +231,18 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void countPermissionApps(List<String> permissionNames, boolean countOnlyGranted,
-                    boolean countSystem, RemoteCallback callback) {
+            public void countPermissionApps(List<String> permissionNames, int flags,
+                    RemoteCallback callback) {
                 checkCollectionElementsNotNull(permissionNames, "permissionNames");
+                checkFlagsArgument(flags, COUNT_WHEN_SYSTEM | COUNT_ONLY_WHEN_GRANTED);
                 checkNotNull(callback, "callback");
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
                 mHandler.sendMessage(
                         obtainMessage(PermissionControllerService::countPermissionApps,
-                                PermissionControllerService.this, permissionNames, countOnlyGranted,
-                                countSystem, callback));
+                                PermissionControllerService.this, permissionNames, flags,
+                                callback));
             }
 
             @Override
@@ -311,8 +317,8 @@ public abstract class PermissionControllerService extends Service {
     }
 
     private void countPermissionApps(@NonNull List<String> permissionNames,
-            boolean countOnlyGranted, boolean countSystem, @NonNull RemoteCallback callback) {
-        int numApps = onCountPermissionApps(permissionNames, countOnlyGranted, countSystem);
+            @CountPermissionAppsFlag int flags, @NonNull RemoteCallback callback) {
+        int numApps = onCountPermissionApps(permissionNames, flags);
 
         Bundle result = new Bundle();
         result.putInt(PermissionControllerManager.KEY_RESULT, numApps);

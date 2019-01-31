@@ -5501,6 +5501,8 @@ package android.permission {
 
   public final class PermissionControllerManager {
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
+    field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
+    field public static final int COUNT_WHEN_SYSTEM = 2; // 0x2
     field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2
     field public static final int REASON_MALWARE = 1; // 0x1
   }
@@ -5514,7 +5516,7 @@ package android.permission {
     ctor public PermissionControllerService();
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract int onCountPermissionApps(@NonNull java.util.List<java.lang.String>, boolean, boolean);
+    method public abstract int onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int);
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(@NonNull String);
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
     method public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
