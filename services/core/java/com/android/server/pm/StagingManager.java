@@ -500,10 +500,7 @@ public class StagingManager {
         } else {
             // Session had already being marked ready. Start the checks to verify if there is any
             // follow-up work.
-            // TODO(b/123690624): Resuming of session should happen before processes start. The
-            //  potential problem here is that installation of APKs in the staged session might
-            //  cause existing processes to restart.
-            mBgHandler.post(() -> resumeSession(session));
+            resumeSession(session);
         }
     }
 
