@@ -21,6 +21,9 @@ import static android.net.ConnectivityManager.EXTRA_PROVISION_CALLBACK;
 import static android.net.ConnectivityManager.EXTRA_REM_TETHER_TYPE;
 import static android.net.ConnectivityManager.EXTRA_RUN_PROVISION;
 import static android.net.ConnectivityManager.EXTRA_SET_ALARM;
+import static android.net.ConnectivityManager.TETHER_ERROR_ENTITLEMENT_UNKONWN;
+import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
+import static android.net.ConnectivityManager.TETHER_ERROR_PROVISION_FAILED;
 
 import static com.android.internal.R.string.config_wifi_tether_enable;
 
@@ -31,15 +34,21 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.util.SharedLog;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.util.ArraySet;
+import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.StateMachine;
 import com.android.server.connectivity.MockableSystemProperties;
 
 /**
@@ -50,6 +59,7 @@ import com.android.server.connectivity.MockableSystemProperties;
  */
 public class EntitlementManager {
     private static final String TAG = EntitlementManager.class.getSimpleName();
+    private static final boolean DBG = false;
 
     // {@link ComponentName} of the Service used to run tether provisioning.
     private static final ComponentName TETHER_SERVICE = ComponentName.unflattenFromString(
@@ -65,15 +75,19 @@ public class EntitlementManager {
     private final Context mContext;
     private final MockableSystemProperties mSystemProperties;
     private final SharedLog mLog;
+    private final Handler mMasterHandler;
+    private final SparseIntArray mEntitlementCacheValue;
     @Nullable
     private TetheringConfiguration mConfig;
 
-    public EntitlementManager(Context ctx, SharedLog log,
+    public EntitlementManager(Context ctx, StateMachine tetherMasterSM, SharedLog log,
             MockableSystemProperties systemProperties) {
         mContext = ctx;
-        mLog = log;
+        mLog = log.forSubComponent(TAG);
         mCurrentTethers = new ArraySet<Integer>();
         mSystemProperties = systemProperties;
+        mEntitlementCacheValue = new SparseIntArray();
+        mMasterHandler = tetherMasterSM.getHandler();
     }
 
     /**
@@ -128,6 +142,10 @@ public class EntitlementManager {
      * Reference ConnectivityManager.TETHERING_{@code *} for each tether type.
      */
     public void reevaluateSimCardProvisioning() {
+        synchronized (mEntitlementCacheValue) {
+            mEntitlementCacheValue.clear();
+        }
+
         if (!mConfig.hasMobileHotspotProvisionApp()) return;
         if (carrierConfigAffirmsEntitlementCheckNotRequired()) return;
 
@@ -175,6 +193,11 @@ public class EntitlementManager {
     }
 
     public void runUiTetherProvisioningAndEnable(int type, ResultReceiver receiver) {
+        runUiTetherProvisioning(type, receiver);
+    }
+
+    @VisibleForTesting
+    protected void runUiTetherProvisioning(int type, ResultReceiver receiver) {
         Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING);
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
@@ -219,6 +242,72 @@ public class EntitlementManager {
             mContext.startServiceAsUser(intent, UserHandle.CURRENT);
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private ResultReceiver buildProxyReceiver(int type, final ResultReceiver receiver) {
+        ResultReceiver rr = new ResultReceiver(mMasterHandler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                int updatedCacheValue = updateEntitlementCacheValue(type, resultCode);
+                receiver.send(updatedCacheValue, null);
+            }
+        };
+
+        return writeToParcel(rr);
+    }
+
+    private ResultReceiver writeToParcel(final ResultReceiver receiver) {
+        // This is necessary to avoid unmarshalling issues when sending the receiver
+        // across processes.
+        Parcel parcel = Parcel.obtain();
+        receiver.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return receiverForSending;
+    }
+
+    /**
+     * Update the last entitlement value to internal cache
+     *
+     * @param type tethering type from ConnectivityManager.TETHERING_{@code *}
+     * @param resultCode last entitlement value
+     * @return the last updated entitlement value
+     */
+    public int updateEntitlementCacheValue(int type, int resultCode) {
+        if (DBG) {
+            Log.d(TAG, "updateEntitlementCacheValue: " + type + ", result: " + resultCode);
+        }
+        synchronized (mEntitlementCacheValue) {
+            if (resultCode == TETHER_ERROR_NO_ERROR) {
+                mEntitlementCacheValue.put(type, resultCode);
+                return resultCode;
+            } else {
+                mEntitlementCacheValue.put(type, TETHER_ERROR_PROVISION_FAILED);
+                return TETHER_ERROR_PROVISION_FAILED;
+            }
+        }
+    }
+
+    /** Get the last value of the tethering entitlement check. */
+    public void getLatestTetheringEntitlementValue(int downstream, ResultReceiver receiver,
+            boolean showEntitlementUi) {
+        if (!isTetherProvisioningRequired()) {
+            receiver.send(TETHER_ERROR_NO_ERROR, null);
+            return;
+        }
+
+        final int cacheValue;
+        synchronized (mEntitlementCacheValue) {
+            cacheValue = mEntitlementCacheValue.get(
+                downstream, TETHER_ERROR_ENTITLEMENT_UNKONWN);
+        }
+        if (cacheValue == TETHER_ERROR_NO_ERROR || !showEntitlementUi) {
+            receiver.send(cacheValue, null);
+        } else {
+            ResultReceiver proxy = buildProxyReceiver(downstream, receiver);
+            runUiTetherProvisioning(downstream, proxy);
         }
     }
 }
