@@ -3967,6 +3967,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     return generatePackageInfo(ps, flags, userId);
                 }
+                // TODO(b/123680735): support MATCH_APEX|MATCH_FACTORY_ONLY case
             }
 
             PackageParser.Package p = mPackages.get(packageName);
@@ -3995,6 +3996,30 @@ public class PackageManagerService extends IPackageManager.Stub
                     return null;
                 }
                 return generatePackageInfo(ps, flags, userId);
+            }
+            //
+            if (!matchFactoryOnly && (flags & MATCH_APEX) != 0) {
+                //TODO(b/123052859) Don't do file operations every time there is a query.
+                final IApexService apex = IApexService.Stub.asInterface(
+                        ServiceManager.getService("apexservice"));
+                if (apex != null) {
+                    try {
+                        final ApexInfo activePkg = apex.getActivePackage(packageName);
+                        if (activePkg != null) {
+                            try {
+                                return PackageParser.generatePackageInfoFromApex(
+                                        new File(activePkg.packagePath), true /* collect certs */);
+                            } catch (PackageParserException pe) {
+                                throw new IllegalStateException("Unable to parse: " + activePkg,
+                                        pe);
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to retrieve packages from apexservice: " + e.toString());
+                    }
+                } else {
+                    Log.e(TAG, "Unable to connect to apexservice for querying packages.");
+                }
             }
         }
         return null;
