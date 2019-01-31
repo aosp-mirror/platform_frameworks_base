@@ -384,16 +384,22 @@ public class SmsMessage extends SmsMessageBase {
                 }
             }
         } catch (EncodeException ex) {
-            // Encoding to the 7-bit alphabet failed. Let's see if we can
-            // send it as a UCS-2 encoded message
-            try {
-                userData = encodeUCS2(message, header);
-                encoding = ENCODING_16BIT;
-            } catch(UnsupportedEncodingException uex) {
-                Rlog.e(LOG_TAG,
-                        "Implausible UnsupportedEncodingException ",
-                        uex);
+            if (ex.getError() == EncodeException.ERROR_EXCEED_SIZE) {
+                Rlog.e(LOG_TAG, "Exceed size limitation EncodeException", ex);
                 return null;
+            } else {
+                // Encoding to the 7-bit alphabet failed. Let's see if we can
+                // send it as a UCS-2 encoded message
+                try {
+                    userData = encodeUCS2(message, header);
+                    encoding = ENCODING_16BIT;
+                } catch (EncodeException ex1) {
+                    Rlog.e(LOG_TAG, "Exceed size limitation EncodeException", ex1);
+                    return null;
+                } catch (UnsupportedEncodingException uex) {
+                    Rlog.e(LOG_TAG, "Implausible UnsupportedEncodingException ", uex);
+                    return null;
+                }
             }
         }
 
@@ -438,9 +444,10 @@ public class SmsMessage extends SmsMessageBase {
      *
      * @return encoded message as UCS2
      * @throws UnsupportedEncodingException
+     * @throws EncodeException if String is too large to encode
      */
     private static byte[] encodeUCS2(String message, byte[] header)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException, EncodeException {
         byte[] userData, textPart;
         textPart = message.getBytes("utf-16be");
 
@@ -454,6 +461,10 @@ public class SmsMessage extends SmsMessageBase {
         }
         else {
             userData = textPart;
+        }
+        if (userData.length > 255) {
+            throw new EncodeException(
+                    "Payload cannot exceed 255 bytes", EncodeException.ERROR_EXCEED_SIZE);
         }
         byte[] ret = new byte[userData.length+1];
         ret[0] = (byte) (userData.length & 0xff );
