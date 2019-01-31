@@ -197,4 +197,7 @@ interface IConnectivityManager
     int getConnectionOwnerUid(in ConnectionInfo connectionInfo);
     boolean isCallerCurrentAlwaysOnVpnApp();
     boolean isCallerCurrentAlwaysOnVpnLockdownApp();
+
+    void getLatestTetheringEntitlementValue(int type, in ResultReceiver receiver,
+            boolean showEntitlementUi, String callerPkg);
 }
