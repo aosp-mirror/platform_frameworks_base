@@ -2029,6 +2029,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testGetAssistantAllowedForUser() throws Exception {
+        UserHandle user = UserHandle.of(10);
+        try {
+            mBinderService.getAllowedNotificationAssistantForUser(user.getIdentifier());
+        } catch (IllegalStateException e) {
+            if (!e.getMessage().contains("At most one NotificationAssistant")) {
+                throw e;
+            }
+        }
+        verify(mAssistants, times(1)).getAllowedComponents(user.getIdentifier());
+    }
+
+    @Test
+    public void testGetAssistantAllowed() throws Exception {
+        try {
+            mBinderService.getAllowedNotificationAssistant();
+        } catch (IllegalStateException e) {
+            if (!e.getMessage().contains("At most one NotificationAssistant")) {
+                throw e;
+            }
+        }
+        verify(mAssistants, times(1)).getAllowedComponents(0);
+    }
+
+    @Test
     public void testSetDndAccessForUser() throws Exception {
         UserHandle user = UserHandle.of(10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
@@ -2084,6 +2109,54 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 c.flattenToString(), 0, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, false, true);
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetAssistantAccess_nullWithAllowedAssistant() throws Exception {
+        ArrayList<ComponentName> componentList = new ArrayList<>();
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        componentList.add(c);
+        when(mAssistants.getAllowedComponents(anyInt())).thenReturn(componentList);
+
+        try {
+            mBinderService.setNotificationAssistantAccessGranted(null, true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, false);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false,  false);
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetAssistantAccessForUser_nullWithAllowedAssistant() throws Exception {
+        UserHandle user = UserHandle.of(10);
+        ArrayList<ComponentName> componentList = new ArrayList<>();
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        componentList.add(c);
+        when(mAssistants.getAllowedComponents(anyInt())).thenReturn(componentList);
+
+        try {
+            mBinderService.setNotificationAssistantAccessGrantedForUser(
+                    null, user.getIdentifier(), true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), user.getIdentifier(), true, false);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), user.getIdentifier(), false,  false);
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }

@@ -508,6 +508,37 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Dispatches the media button event as system service to the session.
+     * <p>
+     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
+     * foreground activity didn't consume the key from the hardware devices.
+     *
+     * @param sessionToken session token
+     * @param keyEvent media key event
+     * @return {@code true} if the event was sent to the session, {@code false} otherwise
+     * @hide
+     */
+    public boolean dispatchMediaKeyEventAsSystemService(@NonNull MediaSession.Token sessionToken,
+            @NonNull KeyEvent keyEvent) {
+        if (sessionToken == null) {
+            throw new IllegalArgumentException("sessionToken shouldn't be null");
+        }
+        if (keyEvent == null) {
+            throw new IllegalArgumentException("keyEvent shouldn't be null");
+        }
+        if (!KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {
+            return false;
+        }
+        try {
+            return mService.dispatchMediaKeyEventToSessionAsSystemService(mContext.getPackageName(),
+                    sessionToken, keyEvent);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to send key event.", e);
+        }
+        return false;
+    }
+
+    /**
      * Send a volume key event. The receiver will be selected automatically.
      *
      * @param keyEvent The volume KeyEvent to send.
@@ -540,6 +571,32 @@ public final class MediaSessionManager {
                     asSystemService, keyEvent, stream, musicOnly);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send volume key event.", e);
+        }
+    }
+
+    /**
+     * Dispatches the volume key event as system service to the session.
+     * <p>
+     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
+     * foreground activity didn't consume the key from the hardware devices.
+     *
+     * @param sessionToken sessionToken
+     * @param keyEvent volume key event
+     * @hide
+     */
+    public void dispatchVolumeKeyEventAsSystemService(@NonNull MediaSession.Token sessionToken,
+            @NonNull KeyEvent keyEvent) {
+        if (sessionToken == null) {
+            throw new IllegalArgumentException("sessionToken shouldn't be null");
+        }
+        if (keyEvent == null) {
+            throw new IllegalArgumentException("keyEvent shouldn't be null");
+        }
+        try {
+            mService.dispatchVolumeKeyEventToSessionAsSystemService(mContext.getPackageName(),
+                    mContext.getOpPackageName(), sessionToken, keyEvent);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling dispatchVolumeKeyEventAsSystemService", e);
         }
     }
 

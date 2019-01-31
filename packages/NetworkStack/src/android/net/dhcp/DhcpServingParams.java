@@ -209,7 +209,7 @@ public class DhcpServingParams {
          * but it must always be set explicitly before building the {@link DhcpServingParams}.
          */
         public Builder setDefaultRouters(@NonNull Inet4Address... defaultRouters) {
-            return setDefaultRouters(new ArraySet<>(Arrays.asList(defaultRouters)));
+            return setDefaultRouters(makeArraySet(defaultRouters));
         }
 
         /**
@@ -239,7 +239,7 @@ public class DhcpServingParams {
          * building the {@link DhcpServingParams}.
          */
         public Builder setDnsServers(@NonNull Inet4Address... dnsServers) {
-            return setDnsServers(new ArraySet<>(Arrays.asList(dnsServers)));
+            return setDnsServers(makeArraySet(dnsServers));
         }
 
         /**
@@ -269,7 +269,7 @@ public class DhcpServingParams {
          * and do not need to be set here.
          */
         public Builder setExcludedAddrs(@NonNull Inet4Address... excludedAddrs) {
-            return setExcludedAddrs(new ArraySet<>(Arrays.asList(excludedAddrs)));
+            return setExcludedAddrs(makeArraySet(excludedAddrs));
         }
 
         /**
@@ -367,5 +367,11 @@ public class DhcpServingParams {
     @NonNull
     static IpPrefix makeIpPrefix(@NonNull LinkAddress addr) {
         return new IpPrefix(addr.getAddress(), addr.getPrefixLength());
+    }
+
+    private static <T> ArraySet<T> makeArraySet(T[] elements) {
+        final ArraySet<T> set = new ArraySet<>(elements.length);
+        set.addAll(Arrays.asList(elements));
+        return set;
     }
 }

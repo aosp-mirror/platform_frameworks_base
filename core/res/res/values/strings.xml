@@ -3082,7 +3082,7 @@
     <!-- Label for a link to a intent resolver dialog when selecting an editor application -->
     <string name="whichEditApplicationLabel">Edit</string>
     <!-- Title of intent resolver dialog when selecting a sharing application to run. -->
-    <string name="whichSendApplication">Share with</string>
+    <string name="whichSendApplication">Share</string>
     <!-- Title of intent resolver dialog when selecting a sharing application to run
          and a previously used application is known. -->
     <string name="whichSendApplicationNamed">Share with %1$s</string>

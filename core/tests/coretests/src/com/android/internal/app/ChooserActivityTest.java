@@ -16,12 +16,12 @@
 
 package com.android.internal.app;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 
@@ -33,12 +33,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.usage.UsageStatsManager;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.net.Uri;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
@@ -69,7 +75,21 @@ public class ChooserActivityTest {
 
     @Test
     public void customTitle() throws InterruptedException {
-        Intent sendIntent = createSendImageIntent();
+        Intent viewIntent = createViewTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(viewIntent, "chooser test"));
+
+        waitForIdle();
+        onView(withId(R.id.title)).check(matches(withText("chooser test")));
+    }
+
+    @Test
+    public void customTitleIgnoredForSendIntents() throws InterruptedException {
+        Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
@@ -77,12 +97,12 @@ public class ChooserActivityTest {
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "chooser test"));
         waitForIdle();
-        onView(withId(R.id.title)).check(matches(withText("chooser test")));
+        onView(withId(R.id.title)).check(matches(withText(R.string.whichSendApplication)));
     }
 
     @Test
     public void emptyTitle() throws InterruptedException {
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
@@ -95,8 +115,72 @@ public class ChooserActivityTest {
     }
 
     @Test
+    public void emptyPreviewTitleAndThumbnail() throws InterruptedException {
+        Intent sendIntent = createSendTextIntentWithPreview(null, null);
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_title)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.content_preview_thumbnail)).check(matches(not(isDisplayed())));
+    }
+
+    @Test
+    public void visiblePreviewTitleWithoutThumbnail() throws InterruptedException {
+        String previewTitle = "My Content Preview Title";
+        Intent sendIntent = createSendTextIntentWithPreview(previewTitle, null);
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_title)).check(matches(withText(previewTitle)));
+        onView(withId(R.id.content_preview_thumbnail)).check(matches(not(isDisplayed())));
+    }
+
+    @Test
+    public void visiblePreviewTitleWithInvalidThumbnail() throws InterruptedException {
+        String previewTitle = "My Content Preview Title";
+        Intent sendIntent = createSendTextIntentWithPreview(previewTitle,
+                Uri.parse("tel:(+49)12345789"));
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_thumbnail)).check(matches(not(isDisplayed())));
+    }
+
+    @Test
+    public void visiblePreviewTitleAndThumbnail() throws InterruptedException {
+        String previewTitle = "My Content Preview Title";
+        Intent sendIntent = createSendTextIntentWithPreview(previewTitle,
+                Uri.parse("android.resource://com.android.frameworks.coretests/"
+                        + com.android.frameworks.coretests.R.drawable.test320x240));
+        sOverrides.previewThumbnail = createBitmap();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_thumbnail)).check(matches(isDisplayed()));
+    }
+
+    @Test
     public void twoOptionsAndUserSelectsOne() throws InterruptedException {
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
@@ -125,7 +209,7 @@ public class ChooserActivityTest {
 
     @Test
     public void updateChooserCountsAndModelAfterUserSelection() throws InterruptedException {
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
@@ -158,7 +242,7 @@ public class ChooserActivityTest {
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(null);
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         final ChooserWrapperActivity activity = mActivityRule
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
@@ -186,7 +270,7 @@ public class ChooserActivityTest {
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         final ChooserWrapperActivity activity = mActivityRule
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
@@ -197,7 +281,7 @@ public class ChooserActivityTest {
 
     @Test
     public void hasOtherProfileOneOption() throws Exception {
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos =
                 createResolvedComponentsForTestWithOtherProfile(2);
         ResolveInfo toChoose = resolvedComponentInfos.get(1).getResolveInfoAt(0);
@@ -234,7 +318,7 @@ public class ChooserActivityTest {
 
     @Test
     public void hasOtherProfileTwoOptionsAndUserSelectsOne() throws Exception {
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos =
                 createResolvedComponentsForTestWithOtherProfile(3);
         ResolveInfo toChoose = resolvedComponentInfos.get(1).getResolveInfoAt(0);
@@ -273,7 +357,7 @@ public class ChooserActivityTest {
 
     @Test
     public void hasLastChosenActivityAndOtherProfile() throws Exception {
-        Intent sendIntent = createSendImageIntent();
+        Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos =
                 createResolvedComponentsForTestWithOtherProfile(3);
         ResolveInfo toChoose = resolvedComponentInfos.get(1).getResolveInfoAt(0);
@@ -308,12 +392,31 @@ public class ChooserActivityTest {
         assertThat(chosen[0], is(toChoose));
     }
 
-    private Intent createSendImageIntent() {
+    private Intent createSendTextIntent() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, "testing intent sending");
-        sendIntent.setType("image/jpeg");
         return sendIntent;
+    }
+
+    private Intent createSendTextIntentWithPreview(String title, Uri imageThumbnail) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "testing intent sending");
+        sendIntent.putExtra(Intent.EXTRA_TITLE, title);
+        if (imageThumbnail != null) {
+            ClipData.Item clipItem = new ClipData.Item(imageThumbnail);
+            sendIntent.setClipData(new ClipData("Clip Label", new String[]{"image/png"}, clipItem));
+        }
+
+        return sendIntent;
+    }
+
+    private Intent createViewTextIntent() {
+        Intent viewIntent = new Intent();
+        viewIntent.setAction(Intent.ACTION_VIEW);
+        viewIntent.putExtra(Intent.EXTRA_TEXT, "testing intent viewing");
+        return viewIntent;
     }
 
     private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults) {
@@ -339,5 +442,25 @@ public class ChooserActivityTest {
 
     private void waitForIdle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    private Bitmap createBitmap() {
+        int width = 200;
+        int height = 200;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawPaint(paint);
+
+        paint.setColor(Color.WHITE);
+        paint.setAntiAlias(true);
+        paint.setTextSize(14.f);
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("Hi!", (width / 2.f), (height / 2.f), paint);
+
+        return bitmap;
     }
 }

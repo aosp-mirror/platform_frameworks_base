@@ -41,11 +41,11 @@ import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
+import android.hardware.usb.V1_0.IUsb;
 import android.hardware.usb.V1_0.PortRole;
 import android.hardware.usb.V1_0.PortRoleType;
 import android.hardware.usb.V1_0.Status;
 import android.hardware.usb.V1_1.PortStatus_1_1;
-import android.hardware.usb.V1_2.IUsb;
 import android.hardware.usb.V1_2.IUsbCallback;
 import android.hardware.usb.V1_2.PortStatus;
 import android.hidl.manager.V1_0.IServiceManager;
@@ -320,9 +320,12 @@ public class UsbPortManager {
 
         try {
             // Oneway call into the hal
-            mProxy.enableContaminantPresenceDetection(portId, enable);
+            android.hardware.usb.V1_2.IUsb proxy = (android.hardware.usb.V1_2.IUsb) mProxy;
+            proxy.enableContaminantPresenceDetection(portId, enable);
         } catch (RemoteException e) {
-            logAndPrintException(null, "Failed to set contaminant detection", e);
+            logAndPrintException(pw, "Failed to set contaminant detection", e);
+        } catch (ClassCastException e) {
+            logAndPrintException(pw, "Method only applicable to V1.2 or above implementation", e);
         }
     }
 

@@ -188,6 +188,18 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
+     * Returns the uncompressed buffer size
+     * @return the uncompressed buffer size
+     */
+    public int getRawSize() {
+        if (mCompacted) {
+            return getBytes().length;
+        } else {
+            return mBuffer.getSize();
+        }
+    }
+
+    /**
      * Write a value for the given fieldId.
      *
      * Will automatically convert for the following field types, and

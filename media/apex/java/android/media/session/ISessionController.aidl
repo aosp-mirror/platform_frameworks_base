@@ -39,7 +39,7 @@ interface ISessionController {
     void sendCommand(String packageName, in ControllerCallbackLink caller,
             String command, in Bundle args, in ResultReceiver cb);
     boolean sendMediaButton(String packageName, in ControllerCallbackLink caller,
-            boolean asSystemService, in KeyEvent mediaButton);
+            in KeyEvent mediaButton);
     void registerCallback(String packageName, in ControllerCallbackLink cb);
     void unregisterCallback(in ControllerCallbackLink cb);
     String getPackageName();
@@ -48,8 +48,7 @@ interface ISessionController {
     long getFlags();
     MediaController.PlaybackInfo getVolumeAttributes();
     void adjustVolume(String packageName, String opPackageName,
-            in ControllerCallbackLink caller, boolean asSystemService, int direction,
-            int flags);
+            in ControllerCallbackLink caller, int direction, int flags);
     void setVolumeTo(String packageName, String opPackageName, in ControllerCallbackLink caller,
             int value, int flags);
 

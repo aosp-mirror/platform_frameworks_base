@@ -6532,8 +6532,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Update a tap exclude region with a rectangular area in the window identified by the provided
-     * id. Touches on this region will not switch focus to this window. Passing an empty rect will
-     * remove the area from the exclude region of this window.
+     * id. Touches down on this region will not:
+     * <ol>
+     * <li>Switch focus to this window.</li>
+     * <li>Move the display of this window to top.</li>
+     * <li>Send the touch events to this window.</li>
+     * </ol>
+     * Passing an empty rect will remove the area from the exclude region of this window.
      */
     void updateTapExcludeRegion(IWindow client, int regionId, int left, int top, int width,
             int height) {

@@ -1825,4 +1825,31 @@ interface ITelephony {
      * Enable or disable a logical modem stack associated with the slotIndex.
      */
     boolean enableModemForSlot(int slotIndex, boolean enable);
+
+    /**
+     * Indicate if the enablement of multi SIM functionality is restricted.
+     * @hide
+     */
+    void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted);
+
+    /**
+     * Returns if the usage of multiple SIM cards at the same time is restricted.
+     * @hide
+     */
+    boolean isMultisimCarrierRestricted();
+    
+    /**
+     * Switch configs to enable multi-sim or switch back to single-sim
+     * @hide
+     */
+    void switchMultiSimConfig(int numOfSims);
+    /**
+     * Get how many modems have been activated on the phone
+     * @hide
+     */
+    int getNumOfActiveSims();
+    /**
+     * Get if reboot is required upon altering modems configurations
+     */
+    boolean isRebootRequiredForModemConfigChange();
 }

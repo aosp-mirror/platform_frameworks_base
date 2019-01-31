@@ -349,6 +349,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
+    /**
+     * It is the same instance as {@link mGlobalLock}, just declared as a type that the
+     * locked-region-code-injection does't recognize it. It is used to skip wrapping priority
+     * booster for places that are already in the scope of another booster (e.g. computing oom-adj).
+     *
+     * @see WindowManagerThreadPriorityBooster
+     */
+    final Object mGlobalLockWithoutBoost = mGlobalLock;
     ActivityStackSupervisor mStackSupervisor;
     RootActivityContainer mRootActivityContainer;
     WindowManagerService mWindowManager;
@@ -6837,7 +6845,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public WindowProcessController getTopApp() {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 final ActivityRecord top = mRootActivityContainer.getTopResumedActivity();
                 return top != null ? top.app : null;
             }
@@ -6845,7 +6853,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void rankTaskLayersIfNeeded() {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 if (mRootActivityContainer != null) {
                     mRootActivityContainer.rankTaskLayersIfNeeded();
                 }
@@ -6889,28 +6897,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void onUidActive(int uid, int procState) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mActiveUids.put(uid, procState);
             }
         }
 
         @Override
         public void onUidInactive(int uid) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mActiveUids.remove(uid);
             }
         }
 
         @Override
         public void onActiveUidsCleared() {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mActiveUids.clear();
             }
         }
 
         @Override
         public void onUidProcStateChanged(int uid, int procState) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 if (mActiveUids.get(uid) != null) {
                     mActiveUids.put(uid, procState);
                 }
@@ -6919,14 +6927,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void onUidAddedToPendingTempWhitelist(int uid, String tag) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mPendingTempWhitelist.put(uid, tag);
             }
         }
 
         @Override
         public void onUidRemovedFromPendingTempWhitelist(int uid) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mPendingTempWhitelist.remove(uid);
             }
         }

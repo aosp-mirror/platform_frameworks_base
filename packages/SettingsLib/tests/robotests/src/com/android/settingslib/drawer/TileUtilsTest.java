@@ -253,7 +253,7 @@ public class TileUtilsTest {
 
         resolveInfo.activityInfo.metaData = new Bundle(oldMetadata);
         resolveInfo.activityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON,
-                com.android.internal.R.drawable.ic_bt_cellphone);
+                com.android.internal.R.drawable.ic_phone);
         outTiles.clear();
         TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);

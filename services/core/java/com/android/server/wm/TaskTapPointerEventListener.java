@@ -70,6 +70,18 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                     // method target window will lose the focus.
                     return;
                 }
+                final Region windowTapExcludeRegion = Region.obtain();
+                mDisplayContent.amendWindowTapExcludeRegion(windowTapExcludeRegion);
+                if (windowTapExcludeRegion.contains(x, y)) {
+                    windowTapExcludeRegion.recycle();
+                    // The user is tapping on the window tap exclude region. We don't move this
+                    // display to top. A window tap exclude region, for example, may be set by an
+                    // ActivityView, and the region would match the bounds of both the ActivityView
+                    // and the virtual display in it. In this case, we would take the tap that is on
+                    // the embedded virtual display instead of this display.
+                    return;
+                }
+                windowTapExcludeRegion.recycle();
                 WindowContainer parent = mDisplayContent.getParent();
                 if (parent != null && parent.getTopChild() != mDisplayContent) {
                     parent.positionChildAt(WindowContainer.POSITION_TOP, mDisplayContent,
@@ -81,9 +93,6 @@ public class TaskTapPointerEventListener implements PointerEventListener {
 
     @Override
     public void onPointerEvent(MotionEvent motionEvent) {
-        if (motionEvent.getDisplayId() != getDisplayId()) {
-            return;
-        }
         switch (motionEvent.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 final int x = (int) motionEvent.getX();

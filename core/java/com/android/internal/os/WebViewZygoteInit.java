@@ -78,18 +78,7 @@ class WebViewZygoteInit {
             ClassLoader loader = loadedApk.getClassLoader();
             doPreload(loader, WebViewFactory.getWebViewLibrary(appInfo));
 
-            // Add the APK to the Zygote's list of allowed files for children.
-            Zygote.nativeAllowFileAcrossFork(appInfo.sourceDir);
-            if (appInfo.splitSourceDirs != null) {
-                for (String path : appInfo.splitSourceDirs) {
-                    Zygote.nativeAllowFileAcrossFork(path);
-                }
-            }
-            if (appInfo.sharedLibraryFiles != null) {
-                for (String path : appInfo.sharedLibraryFiles) {
-                    Zygote.nativeAllowFileAcrossFork(path);
-                }
-            }
+            Zygote.allowAppFilesAcrossFork(appInfo);
 
             Log.i(TAG, "Application preload done");
         }

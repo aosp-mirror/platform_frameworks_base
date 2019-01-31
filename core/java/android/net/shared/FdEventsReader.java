@@ -21,15 +21,15 @@ import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.util.SocketUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 
-import libcore.io.IoUtils;
-
 import java.io.FileDescriptor;
+import java.io.IOException;
 
 
 /**
@@ -81,7 +81,10 @@ public abstract class FdEventsReader<BufferType> {
     private long mPacketsReceived;
 
     protected static void closeFd(FileDescriptor fd) {
-        IoUtils.closeQuietly(fd);
+        try {
+            SocketUtils.closeSocket(fd);
+        } catch (IOException ignored) {
+        }
     }
 
     protected FdEventsReader(@NonNull Handler h, @NonNull BufferType buffer) {
@@ -136,8 +139,8 @@ public abstract class FdEventsReader<BufferType> {
     }
 
     /**
-     * Subclasses MUST create the listening socket here, including setting
-     * all desired socket options, interface or address/port binding, etc.
+     * Subclasses MUST create the listening socket here, including setting all desired socket
+     * options, interface or address/port binding, etc. The socket MUST be created nonblocking.
      */
     @Nullable
     protected abstract FileDescriptor createFd();
@@ -181,10 +184,6 @@ public abstract class FdEventsReader<BufferType> {
 
         try {
             mFd = createFd();
-            if (mFd != null) {
-                // Force the socket to be non-blocking.
-                IoUtils.setBlocking(mFd, false);
-            }
         } catch (Exception e) {
             logError("Failed to create socket: ", e);
             closeFd(mFd);

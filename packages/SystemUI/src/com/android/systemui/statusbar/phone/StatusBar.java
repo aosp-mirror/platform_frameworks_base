@@ -480,8 +480,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateAodMaskVisibility(deviceSupportsAodWallpaper && aodImageWallpaperEnabled);
             // If WallpaperInfo is null, it must be ImageWallpaper.
             final boolean supportsAmbientMode = deviceSupportsAodWallpaper
-                    && (info == null && aodImageWallpaperEnabled
-                        || info != null && info.supportsAmbientMode());
+                    && (info == null || info.supportsAmbientMode());
 
             mStatusBarWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
@@ -801,7 +800,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
-                .createNotificationIconAreaController(context, this, mStatusBarStateController);
+                .createNotificationIconAreaController(
+                        context, this, mStatusBarStateController, mNotificationListener);
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
 

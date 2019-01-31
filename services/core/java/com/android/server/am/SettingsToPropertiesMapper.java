@@ -77,8 +77,10 @@ class SettingsToPropertiesMapper {
     // permission in the corresponding .te file your feature belongs to.
     @VisibleForTesting
     static final String[] sDeviceConfigScopes = new String[] {
+        DeviceConfig.ActivityManagerNativeBoot.NAMESPACE,
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_NETD_NATIVE,
+        DeviceConfig.RuntimeNative.NAMESPACE,
     };
 
     private final String[] mGlobalSettings;

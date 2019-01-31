@@ -10521,8 +10521,10 @@ public final class Settings {
         /**
          * Setting to enable connected MAC randomization in Wi-Fi; disabled by default, and
          * setting to 1 will enable it. In the future, additional values may be supported.
+         * @deprecated MAC randomization is now a per-network setting
          * @hide
          */
+        @Deprecated
         public static final String WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED =
                 "wifi_connected_mac_randomization_enabled";
 
@@ -10596,6 +10598,18 @@ public final class Settings {
                 "wifi_pno_recency_sorting_enabled";
 
         private static final Validator WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Setting to enable the Wi-Fi link probing.
+         * Disabled by default, and setting it to 1 will enable it.
+         * The value is boolean (0 or 1).
+         * @hide
+         */
+        public static final String WIFI_LINK_PROBING_ENABLED =
+                "wifi_link_probing_enabled";
+
+        private static final Validator WIFI_LINK_PROBING_ENABLED_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
        /**
@@ -13391,6 +13405,7 @@ public final class Settings {
                     WIFI_PNO_FREQUENCY_CULLING_ENABLED_VALIDATOR);
             VALIDATORS.put(WIFI_PNO_RECENCY_SORTING_ENABLED,
                     WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR);
+            VALIDATORS.put(WIFI_LINK_PROBING_ENABLED, WIFI_LINK_PROBING_ENABLED_VALIDATOR);
         }
 
         /**

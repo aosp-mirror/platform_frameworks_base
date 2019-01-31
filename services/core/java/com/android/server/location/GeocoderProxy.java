@@ -21,7 +21,7 @@ import android.location.Address;
 import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 
-import com.android.internal.os.BackgroundThread;
+import com.android.server.FgThread;
 import com.android.server.ServiceWatcher;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public class GeocoderProxy {
             int initialPackageNamesResId) {
         mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, overlaySwitchResId,
                 defaultServicePackageNameResId, initialPackageNamesResId,
-                BackgroundThread.getHandler());
+                FgThread.getHandler());
     }
 
     private boolean bind() {

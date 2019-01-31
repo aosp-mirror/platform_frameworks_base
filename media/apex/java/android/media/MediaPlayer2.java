@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -3758,6 +3759,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @throws IllegalStateException if called before being prepared
      * @hide
      */
+    @TestApi
     public DrmInfo getDrmInfo(@NonNull DataSourceDesc dsd) {
         final SourceInfo sourceInfo = getSourceInfo(dsd);
         if (sourceInfo != null) {
@@ -3814,6 +3816,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @hide
      */
     // This is an asynchronous call.
+    @TestApi
     public Object prepareDrm(@NonNull DataSourceDesc dsd, @NonNull UUID uuid) {
         return addTask(newPrepareDrmTask(dsd, uuid));
     }
@@ -3905,6 +3908,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @hide
      */
     // This is a synchronous call.
+    @TestApi
     public void releaseDrm(@NonNull DataSourceDesc dsd)
             throws NoDrmSchemeException {
         final SourceInfo sourceInfo = getSourceInfo(dsd);
@@ -3955,6 +3959,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @throws NoDrmSchemeException if there is no active DRM session
      * @hide
      */
+    @TestApi
     public MediaDrm.KeyRequest getDrmKeyRequest(
             @NonNull DataSourceDesc dsd,
             @Nullable byte[] keySetId, @Nullable byte[] initData,
@@ -3997,6 +4002,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @hide
      */
     // This is a synchronous call.
+    @TestApi
     public byte[] provideDrmKeyResponse(
             @NonNull DataSourceDesc dsd,
             @Nullable byte[] keySetId, @NonNull byte[] response)
@@ -4023,6 +4029,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @hide
      */
     // This is a synchronous call.
+    @TestApi
     public void restoreDrmKeys(
             @NonNull DataSourceDesc dsd,
             @NonNull byte[] keySetId)
@@ -4050,6 +4057,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @throws NoDrmSchemeException if there is no active DRM session
      * @hide
      */
+    @TestApi
     public String getDrmPropertyString(
             @NonNull DataSourceDesc dsd,
             @NonNull @MediaDrmStringProperty String propertyName)
@@ -4078,6 +4086,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @hide
      */
     // This is a synchronous call.
+    @TestApi
     public void setDrmPropertyString(
             @NonNull DataSourceDesc dsd,
             @NonNull @MediaDrmStringProperty String propertyName, @NonNull String value)

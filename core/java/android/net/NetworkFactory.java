@@ -32,6 +32,7 @@ import com.android.internal.util.Protocol;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A NetworkFactory is an entity that creates NetworkAgent objects.
@@ -49,6 +50,20 @@ import java.io.PrintWriter;
  * @hide
  **/
 public class NetworkFactory extends Handler {
+    /** @hide */
+    public static class SerialNumber {
+        // Guard used by no network factory.
+        public static final int NONE = -1;
+        // A hardcoded serial number for NetworkAgents representing VPNs. These agents are
+        // not created by any factory, so they use this constant for clarity instead of NONE.
+        public static final int VPN = -2;
+        private static final AtomicInteger sNetworkFactorySerialNumber = new AtomicInteger(1);
+        /** Returns a unique serial number for a factory. */
+        public static final int nextSerialNumber() {
+            return sNetworkFactorySerialNumber.getAndIncrement();
+        }
+    }
+
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
@@ -64,7 +79,7 @@ public class NetworkFactory extends Handler {
      * disregard any that it will never be able to service, for example
      * those requiring a different bearer.
      * msg.obj = NetworkRequest
-     * msg.arg1 = score - the score of the any network currently satisfying this
+     * msg.arg1 = score - the score of the network currently satisfying this
      *            request.  If this bearer knows in advance it cannot
      *            exceed this score it should not try to connect, holding the request
      *            for the future.
@@ -74,6 +89,8 @@ public class NetworkFactory extends Handler {
      *            with the same NetworkRequest but an updated score.
      *            Also, network conditions may change for this bearer
      *            allowing for a better score in the future.
+     * msg.arg2 = the serial number of the factory currently responsible for the
+     *            NetworkAgent handling this request, or SerialNumber.NONE if none.
      */
     public static final int CMD_REQUEST_NETWORK = BASE;
 
@@ -107,6 +124,7 @@ public class NetworkFactory extends Handler {
 
     private int mRefCount = 0;
     private Messenger mMessenger = null;
+    private int mSerialNumber;
 
     @UnsupportedAppUsage
     public NetworkFactory(Looper looper, Context context, String logTag,
@@ -121,7 +139,8 @@ public class NetworkFactory extends Handler {
         if (DBG) log("Registering NetworkFactory");
         if (mMessenger == null) {
             mMessenger = new Messenger(this);
-            ConnectivityManager.from(mContext).registerNetworkFactory(mMessenger, LOG_TAG);
+            mSerialNumber = ConnectivityManager.from(mContext).registerNetworkFactory(mMessenger,
+                    LOG_TAG);
         }
     }
 
@@ -137,7 +156,7 @@ public class NetworkFactory extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case CMD_REQUEST_NETWORK: {
-                handleAddRequest((NetworkRequest)msg.obj, msg.arg1);
+                handleAddRequest((NetworkRequest) msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             case CMD_CANCEL_REQUEST: {
@@ -159,11 +178,13 @@ public class NetworkFactory extends Handler {
         public final NetworkRequest request;
         public int score;
         public boolean requested; // do we have a request outstanding, limited by score
+        public int factorySerialNumber;
 
-        public NetworkRequestInfo(NetworkRequest request, int score) {
+        NetworkRequestInfo(NetworkRequest request, int score, int factorySerialNumber) {
             this.request = request;
             this.score = score;
             this.requested = false;
+            this.factorySerialNumber = factorySerialNumber;
         }
 
         @Override
@@ -172,16 +193,51 @@ public class NetworkFactory extends Handler {
         }
     }
 
+    /**
+     * Add a NetworkRequest that the bearer may want to attempt to satisfy.
+     * @see #CMD_REQUEST_NETWORK
+     *
+     * @param request the request to handle.
+     * @param score the score of the NetworkAgent currently satisfying this request.
+     * @param servingFactorySerialNumber the serial number of the NetworkFactory that
+     *         created the NetworkAgent currently satisfying this request.
+     */
+    // TODO : remove this method. It is a stopgap measure to help sheperding a number
+    // of dependent changes that would conflict throughout the automerger graph. Having this
+    // temporarily helps with the process of going through with all these dependent changes across
+    // the entire tree.
     @VisibleForTesting
     protected void handleAddRequest(NetworkRequest request, int score) {
+        handleAddRequest(request, score, SerialNumber.NONE);
+    }
+
+    /**
+     * Add a NetworkRequest that the bearer may want to attempt to satisfy.
+     * @see #CMD_REQUEST_NETWORK
+     *
+     * @param request the request to handle.
+     * @param score the score of the NetworkAgent currently satisfying this request.
+     * @param servingFactorySerialNumber the serial number of the NetworkFactory that
+     *         created the NetworkAgent currently satisfying this request.
+     */
+    @VisibleForTesting
+    protected void handleAddRequest(NetworkRequest request, int score,
+            int servingFactorySerialNumber) {
         NetworkRequestInfo n = mNetworkRequests.get(request.requestId);
         if (n == null) {
-            if (DBG) log("got request " + request + " with score " + score);
-            n = new NetworkRequestInfo(request, score);
+            if (DBG) {
+                log("got request " + request + " with score " + score
+                        + " and serial " + servingFactorySerialNumber);
+            }
+            n = new NetworkRequestInfo(request, score, servingFactorySerialNumber);
             mNetworkRequests.put(n.request.requestId, n);
         } else {
-            if (VDBG) log("new score " + score + " for exisiting request " + request);
+            if (VDBG) {
+                log("new score " + score + " for exisiting request " + request
+                        + " with serial " + servingFactorySerialNumber);
+            }
             n.score = score;
+            n.factorySerialNumber = servingFactorySerialNumber;
         }
         if (VDBG) log("  my score=" + mScore + ", my filter=" + mCapabilityFilter);
 
@@ -231,16 +287,19 @@ public class NetworkFactory extends Handler {
     }
 
     private void evalRequest(NetworkRequestInfo n) {
-        if (VDBG) log("evalRequest");
-        if (n.requested == false && n.score < mScore &&
-                n.request.networkCapabilities.satisfiedByNetworkCapabilities(
-                mCapabilityFilter) && acceptRequest(n.request, n.score)) {
+        if (VDBG) {
+            log("evalRequest");
+            log(" n.requests = " + n.requested);
+            log(" n.score = " + n.score);
+            log(" mScore = " + mScore);
+            log(" n.factorySerialNumber = " + n.factorySerialNumber);
+            log(" mSerialNumber = " + mSerialNumber);
+        }
+        if (shouldNeedNetworkFor(n)) {
             if (VDBG) log("  needNetworkFor");
             needNetworkFor(n.request, n.score);
             n.requested = true;
-        } else if (n.requested == true &&
-                (n.score > mScore || n.request.networkCapabilities.satisfiedByNetworkCapabilities(
-                mCapabilityFilter) == false || acceptRequest(n.request, n.score) == false)) {
+        } else if (shouldReleaseNetworkFor(n)) {
             if (VDBG) log("  releaseNetworkFor");
             releaseNetworkFor(n.request);
             n.requested = false;
@@ -249,10 +308,39 @@ public class NetworkFactory extends Handler {
         }
     }
 
+    private boolean shouldNeedNetworkFor(NetworkRequestInfo n) {
+        // If this request is already tracked, it doesn't qualify for need
+        return !n.requested
+            // If the score of this request is higher or equal to that of this factory and some
+            // other factory is responsible for it, then this factory should not track the request
+            // because it has no hope of satisfying it.
+            && (n.score < mScore || n.factorySerialNumber == mSerialNumber)
+            // If this factory can't satisfy the capability needs of this request, then it
+            // should not be tracked.
+            && n.request.networkCapabilities.satisfiedByNetworkCapabilities(mCapabilityFilter)
+            // Finally if the concrete implementation of the factory rejects the request, then
+            // don't track it.
+            && acceptRequest(n.request, n.score);
+    }
+
+    private boolean shouldReleaseNetworkFor(NetworkRequestInfo n) {
+        // Don't release a request that's not tracked.
+        return n.requested
+            // The request should be released if it can't be satisfied by this factory. That
+            // means either of the following conditions are met :
+            // - Its score is too high to be satisfied by this factory and it's not already
+            //   assigned to the factory
+            // - This factory can't satisfy the capability needs of the request
+            // - The concrete implementation of the factory rejects the request
+            && ((n.score > mScore && n.factorySerialNumber != mSerialNumber)
+                    || !n.request.networkCapabilities.satisfiedByNetworkCapabilities(
+                            mCapabilityFilter)
+                    || !acceptRequest(n.request, n.score));
+    }
+
     private void evalRequests() {
         for (int i = 0; i < mNetworkRequests.size(); i++) {
             NetworkRequestInfo n = mNetworkRequests.valueAt(i);
-
             evalRequest(n);
         }
     }
@@ -280,16 +368,6 @@ public class NetworkFactory extends Handler {
         if (--mRefCount == 0) stopNetwork();
     }
 
-
-    public void addNetworkRequest(NetworkRequest networkRequest, int score) {
-        sendMessage(obtainMessage(CMD_REQUEST_NETWORK,
-                new NetworkRequestInfo(networkRequest, score)));
-    }
-
-    public void removeNetworkRequest(NetworkRequest networkRequest) {
-        sendMessage(obtainMessage(CMD_CANCEL_REQUEST, networkRequest));
-    }
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setScoreFilter(int score) {
         sendMessage(obtainMessage(CMD_SET_SCORE, score, 0));
@@ -302,6 +380,10 @@ public class NetworkFactory extends Handler {
     @VisibleForTesting
     protected int getRequestCount() {
         return mNetworkRequests.size();
+    }
+
+    public int getSerialNumber() {
+        return mSerialNumber;
     }
 
     protected void log(String s) {
@@ -321,10 +403,11 @@ public class NetworkFactory extends Handler {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("{").append(LOG_TAG).append(" - ScoreFilter=").
-                append(mScore).append(", Filter=").append(mCapabilityFilter).append(", requests=").
-                append(mNetworkRequests.size()).append(", refCount=").append(mRefCount).
-                append("}");
+        StringBuilder sb = new StringBuilder("{").append(LOG_TAG).append(" - mSerialNumber=")
+                .append(mSerialNumber).append(", ScoreFilter=")
+                .append(mScore).append(", Filter=").append(mCapabilityFilter).append(", requests=")
+                .append(mNetworkRequests.size()).append(", refCount=").append(mRefCount)
+                .append("}");
         return sb.toString();
     }
 }

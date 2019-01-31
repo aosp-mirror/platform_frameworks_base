@@ -61,12 +61,12 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.DisplayCutout;
 import android.view.IWindowSession;
+import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 

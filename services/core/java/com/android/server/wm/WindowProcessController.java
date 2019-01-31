@@ -138,6 +138,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mDebugging;
     // Active instrumentation running in process?
     private volatile boolean mInstrumenting;
+    // Active instrumentation with background activity starts privilege running in process?
+    private volatile boolean mInstrumentingWithBackgroundActivityStartPrivileges;
     // This process it perceptible by the user.
     private volatile boolean mPerceptible;
     // Set to true when process was launched with a wrapper attached
@@ -370,6 +372,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mInstrumenting;
     }
 
+    /**
+     * {@see isInstrumentingWithBackgroundActivityStartPrivileges}
+     */
+    public void setInstrumentingWithBackgroundActivityStartPrivileges(
+            boolean instrumentingWithBackgroundActivityStartPrivileges) {
+        mInstrumentingWithBackgroundActivityStartPrivileges =
+                instrumentingWithBackgroundActivityStartPrivileges;
+    }
+
+    /**
+     * @return true if the instrumentation was started by a holder of
+     * START_ACTIVITIES_FROM_BACKGROUND permission
+     */
+    boolean isInstrumentingWithBackgroundActivityStartPrivileges() {
+        return mInstrumentingWithBackgroundActivityStartPrivileges;
+    }
+
     public void setPerceptible(boolean perceptible) {
         mPerceptible = perceptible;
     }
@@ -394,13 +413,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     public void addPackage(String packageName) {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             mPkgList.add(packageName);
         }
     }
 
     public void clearPackageList() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             mPkgList.clear();
         }
     }
@@ -416,20 +435,24 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mActivities.remove(r);
     }
 
-    public void clearActivities() {
-        synchronized (mAtm.mGlobalLock) {
-            mActivities.clear();
+    void makeFinishingForProcessRemoved() {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            mActivities.get(i).makeFinishingLocked();
         }
     }
 
+    void clearActivities() {
+        mActivities.clear();
+    }
+
     public boolean hasActivities() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mActivities.isEmpty();
         }
     }
 
     public boolean hasVisibleActivities() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             for (int i = mActivities.size() - 1; i >= 0; --i) {
                 final ActivityRecord r = mActivities.get(i);
                 if (r.visible) {
@@ -441,7 +464,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     public boolean hasActivitiesOrRecentTasks() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mActivities.isEmpty() || !mRecentTasks.isEmpty();
         }
     }
@@ -456,15 +479,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    public void finishActivities() {
-        synchronized (mAtm.mGlobalLock) {
-            ArrayList<ActivityRecord> activities = new ArrayList<>(mActivities);
-            for (int i = 0; i < activities.size(); i++) {
-                final ActivityRecord r = activities.get(i);
-                if (!r.finishing && r.isInStackLocked()) {
-                    r.getActivityStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
-                            null, "finish-heavy", true);
-                }
+    void finishActivities() {
+        ArrayList<ActivityRecord> activities = new ArrayList<>(mActivities);
+        for (int i = 0; i < activities.size(); i++) {
+            final ActivityRecord r = activities.get(i);
+            if (!r.finishing && r.isInStackLocked()) {
+                r.getActivityStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
+                        null, "finish-heavy", true);
             }
         }
     }
@@ -525,15 +546,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
 
-    public void updateIntentForHeavyWeightActivity(Intent intent) {
-        synchronized (mAtm.mGlobalLock) {
-            if (mActivities.isEmpty()) {
-                return;
-            }
-            ActivityRecord hist = mActivities.get(0);
-            intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP, hist.packageName);
-            intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTaskRecord().taskId);
+    void updateIntentForHeavyWeightActivity(Intent intent) {
+        if (mActivities.isEmpty()) {
+            return;
         }
+        ActivityRecord hist = mActivities.get(0);
+        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP, hist.packageName);
+        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTaskRecord().taskId);
     }
 
     boolean shouldKillProcessForRemovedTask(TaskRecord tr) {
@@ -603,7 +622,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     public int computeOomAdjFromActivities(int minTaskLayer, ComputeOomAdjCallback callback) {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             final int activitiesSize = mActivities.size();
             for (int j = 0; j < activitiesSize; j++) {
                 final ActivityRecord r = mActivities.get(j);
@@ -693,12 +712,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mH.sendMessage(m);
     }
 
-    void setRemoved(boolean removed) {
-        if (mListener == null) return;
-        // Posting on handler so WM lock isn't held when we call into AM.
-        final Message m = PooledLambda.obtainMessage(
-                WindowProcessListener::setRemoved, mListener, removed);
-        mAtm.mH.sendMessage(m);
+    boolean isRemoved() {
+        return mListener == null ? false : mListener.isRemoved();
     }
 
     void clearWaitingToKill() {
@@ -840,18 +855,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     public boolean hasRecentTasks() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mRecentTasks.isEmpty();
         }
     }
 
-    public void clearRecentTasks() {
-        synchronized (mAtm.mGlobalLock) {
-            for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
-                mRecentTasks.get(i).clearRootProcess();
-            }
-            mRecentTasks.clear();
+    void clearRecentTasks() {
+        for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
+            mRecentTasks.get(i).clearRootProcess();
         }
+        mRecentTasks.clear();
     }
 
     public void appEarlyNotResponding(String annotation, Runnable killAppCallback) {
@@ -905,19 +918,19 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     public void onTopProcChanged() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             mAtm.mVrController.onTopProcChangedLocked(this);
         }
     }
 
     public boolean isHomeProcess() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             return this == mAtm.mHomeProcess;
         }
     }
 
     public boolean isPreviousProcess() {
-        synchronized (mAtm.mGlobalLock) {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
             return this == mAtm.mPreviousProcess;
         }
     }

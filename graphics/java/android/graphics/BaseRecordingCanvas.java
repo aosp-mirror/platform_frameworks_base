@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -214,6 +215,13 @@ public class BaseRecordingCanvas extends Canvas {
     @Override
     public final void drawColor(@ColorInt int color, @NonNull BlendMode mode) {
         nDrawColor(mNativeCanvasWrapper, color, mode.getXfermode().porterDuffMode);
+    }
+
+    @Override
+    public final void drawColor(@ColorLong long color, @NonNull BlendMode mode) {
+        ColorSpace cs = Color.colorSpace(color);
+        nDrawColor(mNativeCanvasWrapper, cs.getNativeInstance(), color,
+                mode.getXfermode().porterDuffMode);
     }
 
     @Override
@@ -588,6 +596,10 @@ public class BaseRecordingCanvas extends Canvas {
 
     @FastNative
     private static native void nDrawColor(long nativeCanvas, int color, int mode);
+
+    @FastNative
+    private static native void nDrawColor(long nativeCanvas, long nativeColorSpace,
+            @ColorLong long color, int mode);
 
     @FastNative
     private static native void nDrawPaint(long nativeCanvas, long nativePaint);

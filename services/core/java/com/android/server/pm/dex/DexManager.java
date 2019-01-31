@@ -16,7 +16,7 @@
 
 package com.android.server.pm.dex;
 
-import static android.provider.DeviceConfig.FsiBoot;
+import static android.provider.DeviceConfig.DexBoot;
 
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
@@ -710,8 +710,8 @@ public class DexManager {
         return isPackageSelectedToRunOobInternal(
                 SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false),
                 SystemProperties.get(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, "ALL"),
-                DeviceConfig.getProperty(FsiBoot.NAMESPACE, FsiBoot.OOB_ENABLED),
-                DeviceConfig.getProperty(FsiBoot.NAMESPACE, FsiBoot.OOB_WHITELIST),
+                DeviceConfig.getProperty(DexBoot.NAMESPACE, DexBoot.PRIV_APPS_OOB_ENABLED),
+                DeviceConfig.getProperty(DexBoot.NAMESPACE, DexBoot.PRIV_APPS_OOB_WHITELIST),
                 packageNamesInSameProcess);
     }
 

@@ -322,6 +322,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
+        StatsdStats::getInstance().noteConditionChangeInNextBucket(mMetricId);
         return;
     }
 
@@ -359,6 +360,12 @@ void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     }
     StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
 
+    if (timestampNs < mCurrentBucketStartTimeNs) {
+        // The data will be skipped in onMatchedLogEventInternalLocked, but we don't want to report
+        // for every event, just the pull
+        StatsdStats::getInstance().noteLateLogEventSkipped(mMetricId);
+    }
+
     for (const auto& data : allData) {
         // make a copy before doing and changes
         LogEvent localCopy = data->makeCopy();
@@ -380,6 +387,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
     if (mCondition) {
         if (allData.size() == 0) {
             VLOG("Data pulled is empty");
+            StatsdStats::getInstance().noteEmptyData(mPullTagId);
             return;
         }
         // For scheduled pulled data, the effective event time is snap to the nearest
@@ -394,6 +402,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         if (bucketEndTime < mCurrentBucketStartTimeNs) {
             VLOG("Skip bucket end pull due to late arrival: %lld vs %lld", (long long)bucketEndTime,
                  (long long)mCurrentBucketStartTimeNs);
+            StatsdStats::getInstance().noteLateLogEventSkipped(mMetricId);
             return;
         }
         for (const auto& data : allData) {
@@ -442,6 +451,7 @@ bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
         if (newTupleCount > mDimensionHardLimit) {
             ALOGE("ValueMetric %lld dropping data for dimension key %s", (long long)mMetricId,
                   newKey.toString().c_str());
+            StatsdStats::getInstance().noteHardDimensionLimitReached(mMetricId);
             return true;
         }
     }
@@ -539,6 +549,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
         Value value;
         if (!getDoubleOrLong(event, matcher, value)) {
             VLOG("Failed to get value %d from event %s", i, event.ToString().c_str());
+            StatsdStats::getInstance().noteBadValueType(mMetricId);
             return;
         }
         interval.seenNewData = true;
@@ -656,6 +667,7 @@ void ValueMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
 
     if (numBucketsForward > 1) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
+        StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
         // take base again in future good bucket.
         resetBase();
     }

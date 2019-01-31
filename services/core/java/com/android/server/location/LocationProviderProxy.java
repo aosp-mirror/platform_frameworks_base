@@ -31,8 +31,8 @@ import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.TransferPipe;
+import com.android.server.FgThread;
 import com.android.server.LocationManagerService;
 import com.android.server.ServiceWatcher;
 
@@ -105,7 +105,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
         mServiceWatcher = new ServiceWatcher(context, TAG, action, overlaySwitchResId,
                 defaultServicePackageNameResId, initialPackageNamesResId,
-                BackgroundThread.getHandler()) {
+                FgThread.getHandler()) {
 
             @Override
             protected void onBind() {

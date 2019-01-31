@@ -1033,34 +1033,6 @@ public class ConnectivityManager {
         }
     }
 
-    /**
-     * Configures an always-on VPN connection through a specific application.
-     * This connection is automatically granted and persisted after a reboot.
-     *
-     * <p>The designated package should declare a {@link VpnService} in its
-     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
-     *    otherwise the call will fail.
-     *
-     * @param userId The identifier of the user to set an always-on VPN for.
-     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
-     *                   to remove an existing always-on VPN configuration.
-     * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
-     *        {@code false} otherwise.
-     * @return {@code true} if the package is set as always-on VPN controller;
-     *         {@code false} otherwise.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
-    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
-            boolean lockdownEnabled) {
-        try {
-            return mService.setAlwaysOnVpnPackage(
-                    userId, vpnPackage, lockdownEnabled, /* whitelist */ null);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
    /**
      * Returns the package name of the currently set always-on VPN application.
      * If there is no always-on VPN set, or the VPN is provided by the system instead
@@ -2918,11 +2890,11 @@ public class ConnectivityManager {
         }
     }
 
-    /** {@hide} */
+    /** {@hide} - returns the factory serial number */
     @UnsupportedAppUsage
-    public void registerNetworkFactory(Messenger messenger, String name) {
+    public int registerNetworkFactory(Messenger messenger, String name) {
         try {
-            mService.registerNetworkFactory(messenger, name);
+            return mService.registerNetworkFactory(messenger, name);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2938,6 +2910,10 @@ public class ConnectivityManager {
         }
     }
 
+    // TODO : remove this method. It is a stopgap measure to help sheperding a number
+    // of dependent changes that would conflict throughout the automerger graph. Having this
+    // temporarily helps with the process of going through with all these dependent changes across
+    // the entire tree.
     /**
      * @hide
      * Register a NetworkAgent with ConnectivityService.
@@ -2945,8 +2921,20 @@ public class ConnectivityManager {
      */
     public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc) {
+        return registerNetworkAgent(messenger, ni, lp, nc, score, misc,
+                NetworkFactory.SerialNumber.NONE);
+    }
+
+    /**
+     * @hide
+     * Register a NetworkAgent with ConnectivityService.
+     * @return NetID corresponding to NetworkAgent.
+     */
+    public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
+            NetworkCapabilities nc, int score, NetworkMisc misc, int factorySerialNumber) {
         try {
-            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
+            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc,
+                    factorySerialNumber);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

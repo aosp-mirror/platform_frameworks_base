@@ -1241,27 +1241,59 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    @Nullable
+    private IBinder getDisplayToken(int displayId) {
+        synchronized (mSyncRoot) {
+            final LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display != null) {
+                final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
+                if (device != null) {
+                    return device.getDisplayTokenLocked();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private boolean screenshotInternal(int displayId, Surface outSurface) {
+        final IBinder token = getDisplayToken(displayId);
+        if (token == null) {
+            return false;
+        }
+        SurfaceControl.screenshot(token, outSurface);
+        return true;
+    }
+
     @VisibleForTesting
     DisplayedContentSamplingAttributes getDisplayedContentSamplingAttributesInternal(
             int displayId) {
-        IBinder displayToken = SurfaceControl.getBuiltInDisplay(displayId);
-        return SurfaceControl.getDisplayedContentSamplingAttributes(displayToken);
+        final IBinder token = getDisplayToken(displayId);
+        if (token == null) {
+            return null;
+        }
+        return SurfaceControl.getDisplayedContentSamplingAttributes(token);
     }
 
     @VisibleForTesting
     boolean setDisplayedContentSamplingEnabledInternal(
             int displayId, boolean enable, int componentMask, int maxFrames) {
-        IBinder displayToken = SurfaceControl.getBuiltInDisplay(displayId);
+        final IBinder token = getDisplayToken(displayId);
+        if (token == null) {
+            return false;
+        }
         return SurfaceControl.setDisplayedContentSamplingEnabled(
-                displayToken, enable, componentMask, maxFrames);
+                token, enable, componentMask, maxFrames);
     }
 
     @VisibleForTesting
     DisplayedContentSample getDisplayedContentSampleInternal(int displayId,
             long maxFrames, long timestamp) {
-        IBinder displayToken = SurfaceControl.getBuiltInDisplay(displayId);
-        return SurfaceControl.getDisplayedContentSample(
-            displayToken, maxFrames, timestamp);
+        final IBinder token = getDisplayToken(displayId);
+        if (token == null) {
+            return null;
+        }
+        return SurfaceControl.getDisplayedContentSample(token, maxFrames, timestamp);
     }
 
     private void clearViewportsLocked() {
@@ -2257,20 +2289,7 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public boolean screenshot(int displayId, Surface outSurface) {
-            synchronized (mSyncRoot) {
-                final LogicalDisplay display = mLogicalDisplays.get(displayId);
-                if (display != null) {
-                    final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
-                    if (device != null) {
-                        final IBinder token = device.getDisplayTokenLocked();
-                        if (token != null) {
-                            SurfaceControl.screenshot(token, outSurface);
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
+            return screenshotInternal(displayId, outSurface);
         }
 
         @Override

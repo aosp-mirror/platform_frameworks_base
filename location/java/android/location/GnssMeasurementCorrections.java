@@ -43,13 +43,27 @@ public final class GnssMeasurementCorrections implements Parcelable {
      * are computed.
      */
     private double mAltitudeMeters;
+    /**
+     * Represents the horizontal uncertainty (68% confidence) in meters on the device position at
+     * which the corrections are provided.
+     *
+     * <p> This value is useful for example to judge how accurate the provided corrections are.
+     */
+    private double mHorizontalPositionUncertaintyMeters;
+    /**
+     * Represents the vertical uncertainty (68% confidence) in meters on the device position at
+     * which the corrections are provided.
+     *
+     * <p> This value is useful for example to judge how accurate the provided corrections are.
+     */
+    private double mVerticalPositionUncertaintyMeters;
 
-    /** Time Of Applicability, GPS time of week */
+    /** Time Of Applicability, GPS time of week in nanoseconds. */
     private long mToaGpsNanosecondsOfWeek;
 
     /**
      * A set of {@link GnssSingleSatCorrection} each containing measurement corrections for a
-     * satellite in view
+     * satellite in view.
      */
     private @Nullable List<GnssSingleSatCorrection> mSingleSatCorrectionList;
 
@@ -57,6 +71,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
         mLatitudeDegrees = builder.mLatitudeDegrees;
         mLongitudeDegrees = builder.mLongitudeDegrees;
         mAltitudeMeters = builder.mAltitudeMeters;
+        mHorizontalPositionUncertaintyMeters = builder.mHorizontalPositionUncertaintyMeters;
+        mVerticalPositionUncertaintyMeters = builder.mVerticalPositionUncertaintyMeters;
         mToaGpsNanosecondsOfWeek = builder.mToaGpsNanosecondsOfWeek;
         mSingleSatCorrectionList =
                 builder.mSingleSatCorrectionList == null
@@ -81,6 +97,22 @@ public final class GnssMeasurementCorrections implements Parcelable {
      */
     public double getAltitudeMeters() {
         return mAltitudeMeters;
+    }
+
+    /**
+     * Gets the horizontal uncertainty (68% confidence) in meters on the device position at
+     * which the corrections are provided.
+     */
+    public double getHorizontalPositionUncertaintyMeters() {
+        return mHorizontalPositionUncertaintyMeters;
+    }
+
+    /**
+     * Gets the vertical uncertainty (68% confidence) in meters on the device position at
+     * which the corrections are provided.
+     */
+    public double getVerticalPositionUncertaintyMeters() {
+        return mVerticalPositionUncertaintyMeters;
     }
 
     /** Gets the time of applicability, GPS time of week in nanoseconds. */
@@ -110,6 +142,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
                                     .setLatitudeDegrees(parcel.readDouble())
                                     .setLongitudeDegrees(parcel.readDouble())
                                     .setAltitudeMeters(parcel.readDouble())
+                                    .setHorizontalPositionUncertaintyMeters(parcel.readDouble())
+                                    .setVerticalPositionUncertaintyMeters(parcel.readDouble())
                                     .setToaGpsNanosecondsOfWeek(parcel.readLong());
                     List<GnssSingleSatCorrection> singleSatCorrectionList = new ArrayList<>();
                     parcel.readTypedList(singleSatCorrectionList, GnssSingleSatCorrection.CREATOR);
@@ -131,6 +165,10 @@ public final class GnssMeasurementCorrections implements Parcelable {
         builder.append(String.format(format, "LatitudeDegrees = ", mLatitudeDegrees));
         builder.append(String.format(format, "LongitudeDegrees = ", mLongitudeDegrees));
         builder.append(String.format(format, "AltitudeMeters = ", mAltitudeMeters));
+        builder.append(String.format(format, "HorizontalPositionUncertaintyMeters = ",
+                mHorizontalPositionUncertaintyMeters));
+        builder.append(String.format(format, "VerticalPositionUncertaintyMeters = ",
+                mVerticalPositionUncertaintyMeters));
         builder.append(
                 String.format(format, "ToaGpsNanosecondsOfWeek = ", mToaGpsNanosecondsOfWeek));
         builder.append(
@@ -143,6 +181,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
         parcel.writeDouble(mLatitudeDegrees);
         parcel.writeDouble(mLongitudeDegrees);
         parcel.writeDouble(mAltitudeMeters);
+        parcel.writeDouble(mHorizontalPositionUncertaintyMeters);
+        parcel.writeDouble(mVerticalPositionUncertaintyMeters);
         parcel.writeLong(mToaGpsNanosecondsOfWeek);
         parcel.writeTypedList(mSingleSatCorrectionList);
     }
@@ -154,9 +194,10 @@ public final class GnssMeasurementCorrections implements Parcelable {
          * GnssMeasurementCorrections}.
          */
         private double mLatitudeDegrees;
-
         private double mLongitudeDegrees;
         private double mAltitudeMeters;
+        private double mHorizontalPositionUncertaintyMeters;
+        private double mVerticalPositionUncertaintyMeters;
         private long mToaGpsNanosecondsOfWeek;
         private List<GnssSingleSatCorrection> mSingleSatCorrectionList;
 
@@ -178,6 +219,27 @@ public final class GnssMeasurementCorrections implements Parcelable {
          */
         public Builder setAltitudeMeters(double altitudeMeters) {
             mAltitudeMeters = altitudeMeters;
+            return this;
+        }
+
+
+        /**
+         * Sets the horizontal uncertainty (68% confidence) in meters on the device position at
+         * which the corrections are provided.
+         */
+        public Builder setHorizontalPositionUncertaintyMeters(
+                double horizontalPositionUncertaintyMeters) {
+            mHorizontalPositionUncertaintyMeters = horizontalPositionUncertaintyMeters;
+            return this;
+        }
+
+        /**
+         * Sets the vertical uncertainty (68% confidence) in meters on the device position at which
+         * the corrections are provided.
+         */
+        public Builder setVerticalPositionUncertaintyMeters(
+                double verticalPositionUncertaintyMeters) {
+            mVerticalPositionUncertaintyMeters = verticalPositionUncertaintyMeters;
             return this;
         }
 

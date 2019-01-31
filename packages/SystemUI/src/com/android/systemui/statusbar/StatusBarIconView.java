@@ -594,8 +594,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                     mCurrentSetColor, Color.WHITE, mDarkAmount);
             updateTintMatrix(mMatrix, color, DARK_ALPHA_BOOST * mDarkAmount);
             mMatrixColorFilter.setColorMatrixArray(mMatrix);
+            setColorFilter(null);  // setColorFilter only invalidates if the instance changed.
             setColorFilter(mMatrixColorFilter);
-            invalidate();  // setColorFilter only invalidates if the filter instance changed.
         } else {
             mDozer.updateGrayscale(this, mDarkAmount);
         }

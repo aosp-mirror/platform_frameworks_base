@@ -21,6 +21,7 @@ import android.annotation.CallSuper;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
@@ -49,6 +50,7 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
+@TestApi
 public abstract class AppPredictionService extends Service {
 
     private static final String TAG = "AppPredictionService";
@@ -140,6 +142,7 @@ public abstract class AppPredictionService extends Service {
 
     @Override
     public final IBinder onBind(Intent intent) {
+        // TODO(b/111701043): Verify that the action is valid
         return mInterface.asBinder();
     }
 
@@ -228,6 +231,7 @@ public abstract class AppPredictionService extends Service {
     public void onStopPredictionUpdates() {}
 
     private void doRequestPredictionUpdate(@NonNull AppPredictionSessionId sessionId) {
+        // Just an optimization, if there are no callbacks, then don't bother notifying the service
         final ArrayList<CallbackWrapper> callbacks = mSessionCallbacks.get(sessionId);
         if (callbacks != null && !callbacks.isEmpty()) {
             onRequestPredictionUpdate(sessionId);

@@ -47,7 +47,6 @@ import android.net.INetworkMonitorCallbacks;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
@@ -310,14 +309,14 @@ public class NetworkMonitor extends StateMachine {
     private long mLastProbeTime;
 
     public NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
-            NetworkRequest defaultRequest, SharedLog validationLog) {
-        this(context, cb, network, defaultRequest, new IpConnectivityLog(), validationLog,
+            SharedLog validationLog) {
+        this(context, cb, network, new IpConnectivityLog(), validationLog,
                 Dependencies.DEFAULT);
     }
 
     @VisibleForTesting
     protected NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
-            NetworkRequest defaultRequest, IpConnectivityLog logger, SharedLog validationLogs,
+            IpConnectivityLog logger, SharedLog validationLogs,
             Dependencies deps) {
         // Add suffix indicating which NetworkMonitor we're talking about.
         super(TAG + "/" + network.toString());
@@ -369,8 +368,7 @@ public class NetworkMonitor extends StateMachine {
         // we can ever fetch them.
         // TODO: Delete ASAP.
         mLinkProperties = new LinkProperties();
-        mNetworkCapabilities = new NetworkCapabilities();
-        mNetworkCapabilities.clearAll();
+        mNetworkCapabilities = new NetworkCapabilities(null);
     }
 
     /**
@@ -688,6 +686,15 @@ public class NetworkMonitor extends StateMachine {
                                                 "CaptivePortal");
                                     }
                                     sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
+                                }
+
+                                @Override
+                                public void logEvent(int eventId, String packageName)
+                                        throws RemoteException {
+                                    mContext.enforceCallingPermission(
+                                            android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                                            "CaptivePortal");
+                                    mCallback.logCaptivePortalLoginEvent(eventId, packageName);
                                 }
                             }));
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;

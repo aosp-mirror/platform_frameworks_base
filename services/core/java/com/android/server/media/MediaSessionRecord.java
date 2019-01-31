@@ -283,6 +283,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 Log.w(TAG, "Muting remote playback is not supported");
                 return;
             }
+            if (DEBUG) {
+                Log.w(TAG, "adjusting volume, pkg=" + packageName + ", asSystemService="
+                        + asSystemService + ", dir=" + direction);
+            }
             mSessionCb.adjustVolume(packageName, pid, uid, caller, asSystemService, direction);
 
             int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
@@ -456,9 +460,25 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return mSessionCb.mCb;
     }
 
-    public void sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
+    /**
+     * Sends media button.
+     *
+     * @param packageName caller package name
+     * @param pid caller pid
+     * @param uid caller uid
+     * @param asSystemService {@code true} if the event sent to the session as if it was come from
+     *          the system service instead of the app process.
+     * @param ke key events
+     * @param sequenceId (optional) sequence id. Use this only when a wake lock is needed.
+     * @param cb (optional) result receiver to receive callback. Use this only when a wake lock is
+     *           needed.
+     * @return {@code true} if the attempt to send media button was successfuly.
+     *         {@code false} otherwise.
+     */
+    public boolean sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
             KeyEvent ke, int sequenceId, ResultReceiver cb) {
-        mSessionCb.sendMediaButton(packageName, pid, uid, asSystemService, ke, sequenceId, cb);
+        return mSessionCb.sendMediaButton(packageName, pid, uid, asSystemService, ke, sequenceId,
+                cb);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -492,6 +512,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             final String callingOpPackageName, final int callingPid, final int callingUid,
             final boolean asSystemService, final boolean useSuggested,
             final int previousFlagPlaySound) {
+        if (DEBUG) {
+            Log.w(TAG, "adjusting local volume, stream=" + stream + ", dir=" + direction
+                    + ", asSystemService=" + asSystemService + ", useSuggested=" + useSuggested);
+        }
         // Must use opPackageName for adjusting volumes with UID.
         final String opPackageName;
         final int uid;
@@ -1223,9 +1247,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public boolean sendMediaButton(String packageName, ControllerCallbackLink cb,
-                boolean asSystemService, KeyEvent keyEvent) {
+                KeyEvent keyEvent) {
             return mSessionCb.sendMediaButton(packageName, Binder.getCallingPid(),
-                    Binder.getCallingUid(), cb, asSystemService, keyEvent);
+                    Binder.getCallingUid(), cb, false, keyEvent);
         }
 
         @Override
@@ -1292,14 +1316,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void adjustVolume(String packageName, String opPackageName,
-                ControllerCallbackLink caller, boolean asSystemService, int direction,
-                int flags) {
+                ControllerCallbackLink caller, int direction, int flags) {
             int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaSessionRecord.this.adjustVolume(packageName, opPackageName, pid, uid, caller,
-                        asSystemService, direction, flags, false /* useSuggested */);
+                        false, direction, flags, false /* useSuggested */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

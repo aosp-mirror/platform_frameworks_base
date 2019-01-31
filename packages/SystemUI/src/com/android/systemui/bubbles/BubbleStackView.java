@@ -238,14 +238,14 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      */
     public void setExpandedBubble(BubbleView bubbleToExpand) {
         mExpandedBubble = bubbleToExpand;
-        boolean prevExpanded = mIsExpanded;
-        mIsExpanded = true;
-        if (!prevExpanded) {
+        if (!mIsExpanded) {
             // If we weren't previously expanded we should animate open.
             animateExpansion(true /* expand */);
         } else {
-            // If we were expanded just update the views
+            // Otherwise just update the views
+            // TODO: probably animate / page to expanded one
             updateExpandedBubble();
+            updatePointerPosition();
             requestUpdate();
         }
         mExpandedBubble.getEntry().setShowInShadeWhenBubble(false);
@@ -387,7 +387,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             mIsExpanded = shouldExpand;
             updateExpandedBubble();
             applyCurrentState();
-            //requestUpdate();
 
             mIsAnimating = true;
 
@@ -400,7 +399,10 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             if (shouldExpand) {
                 mBubbleContainer.setController(mExpandedAnimationController);
                 mExpandedAnimationController.expandFromStack(
-                                mStackAnimationController.getStackPosition(), updateAfter);
+                                mStackAnimationController.getStackPosition(), () -> {
+                                updatePointerPosition();
+                                updateAfter.run();
+                        });
             } else {
                 mBubbleContainer.cancelAllAnimations();
                 mExpandedAnimationController.collapseBackToStack(
@@ -649,10 +651,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             }
             // Bubble with notification as expanded state doesn't need a header / title
             mExpandedViewContainer.setHeaderText(null);
-
         }
-        float pointerPosition = mExpandedBubble.getPosition().x + (mExpandedBubble.getWidth() / 2);
-        mExpandedViewContainer.setPointerPosition((int) pointerPosition);
     }
 
     private void applyCurrentState() {
@@ -687,6 +686,14 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
                 }
             });
             bv.setClipToOutline(false);
+        }
+    }
+
+    private void updatePointerPosition() {
+        if (mExpandedBubble != null) {
+            float pointerPosition = mExpandedBubble.getPosition().x
+                    + (mExpandedBubble.getWidth() / 2f);
+            mExpandedViewContainer.setPointerPosition((int) pointerPosition);
         }
     }
 

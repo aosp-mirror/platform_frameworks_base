@@ -42,8 +42,12 @@ interface ISessionManager {
     List<Session2Token> getSession2Tokens(int userId);
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
+    boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
+            in MediaSession.Token sessionToken, in KeyEvent keyEvent);
     void dispatchVolumeKeyEvent(String packageName, String opPackageName, boolean asSystemService,
             in KeyEvent keyEvent, int stream, boolean musicOnly);
+    void dispatchVolumeKeyEventToSessionAsSystemService(String packageName, String opPackageName,
+            in MediaSession.Token sessionToken, in KeyEvent keyEvent);
     void dispatchAdjustVolume(String packageName, String opPackageName, int suggestedStream,
             int delta, int flags);
     void addSessionsListener(in IActiveSessionsListener listener, in ComponentName compName,

@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -256,6 +257,16 @@ public abstract class BaseCanvas {
      */
     public void drawColor(@ColorInt int color, @NonNull BlendMode mode) {
         nDrawColor(mNativeCanvasWrapper, color, mode.getXfermode().porterDuffMode);
+    }
+
+    /**
+     * Make lint happy.
+     * See {@link Canvas#drawColor(long, BlendMode)}
+     */
+    public void drawColor(@ColorLong long color, @NonNull BlendMode mode) {
+        ColorSpace cs = Color.colorSpace(color);
+        nDrawColor(mNativeCanvasWrapper, cs.getNativeInstance(), color,
+                mode.getXfermode().porterDuffMode);
     }
 
     public void drawLine(float startX, float startY, float stopX, float stopY,
@@ -668,6 +679,9 @@ public abstract class BaseCanvas {
             float x, float y, int width, int height, boolean hasAlpha, long nativePaintOrZero);
 
     private static native void nDrawColor(long nativeCanvas, int color, int mode);
+
+    private static native void nDrawColor(long nativeCanvas, long nativeColorSpace,
+            @ColorLong long color, int mode);
 
     private static native void nDrawPaint(long nativeCanvas, long nativePaint);
 

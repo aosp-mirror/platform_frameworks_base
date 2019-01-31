@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -353,7 +354,8 @@ public class NotificationManager {
     public static final int IMPORTANCE_MIN = 1;
 
     /**
-     * Low notification importance: shows everywhere, but is not intrusive.
+     * Low notification importance: Shows in the shade, and potentially in the status bar
+     * (see {@link #shouldHideSilentStatusBarIcons()}), but is not audibly intrusive.
      */
     public static final int IMPORTANCE_LOW = 2;
 
@@ -826,6 +828,7 @@ public class NotificationManager {
     /**
      * @hide
      */
+    @TestApi
     public boolean matchesCallFilter(Bundle extras) {
         INotificationManager service = getService();
         try {
@@ -1153,10 +1156,39 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Checks whether the user has approved a given
+     * {@link android.service.notification.NotificationAssistantService}.
+     *
+     * <p>
+     * The assistant service must belong to the calling app.
+     *
+     * <p>
+     * Apps can request notification assistant access by sending the user to the activity that
+     * matches the system intent action
+     * TODO: STOPSHIP: Add correct intent
+     * {@link android.provider.Settings#ACTION_MANAGE_DEFAULT_APPS_SETTINGS}.
+     */
     public boolean isNotificationAssistantAccessGranted(ComponentName assistant) {
         INotificationManager service = getService();
         try {
             return service.isNotificationAssistantAccessGranted(assistant);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the user wants silent notifications (see {@link #IMPORTANCE_LOW} to appear
+     * in the status bar.
+     *
+     * <p>Only available for {@link #isNotificationListenerAccessGranted(ComponentName) notification
+     * listeners}.
+     */
+    public boolean shouldHideSilentStatusBarIcons() {
+        INotificationManager service = getService();
+        try {
+            return service.shouldHideSilentStatusIcons(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1248,6 +1280,45 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Grants/revokes Notification Assistant access to {@code assistant} for current user.
+     *
+     * @param assistant Name of component to grant/revoke access or {@code null} to revoke access to
+     *                  current assistant
+     * @param granted Grant/revoke access
+     * @hide
+     */
+    @SystemApi
+    public void setNotificationAssistantAccessGranted(ComponentName assistant, boolean granted) {
+        INotificationManager service = getService();
+        try {
+            service.setNotificationAssistantAccessGranted(assistant, granted);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Grants/revokes Notification Assistant access to {@code assistant} for given user.
+     *
+     * @param assistant Name of component to grant/revoke access or {@code null} to revoke access to
+     *                  current assistant
+     * @param user handle to associate assistant with
+     * @param granted Grant/revoke access
+     * @hide
+     */
+    @SystemApi
+    public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
+            UserHandle user, boolean granted) {
+        INotificationManager service = getService();
+        try {
+            service.setNotificationAssistantAccessGrantedForUser(assistant, user.getIdentifier(),
+                    granted);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     public List<ComponentName> getEnabledNotificationListeners(int userId) {
         INotificationManager service = getService();
@@ -1257,6 +1328,29 @@ public class NotificationManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /** @hide */
+    @SystemApi
+    public @Nullable ComponentName getAllowedNotificationAssistantForUser(UserHandle user) {
+        INotificationManager service = getService();
+        try {
+            return service.getAllowedNotificationAssistantForUser(user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @SystemApi
+    public @Nullable ComponentName getAllowedNotificationAssistant() {
+        INotificationManager service = getService();
+        try {
+            return service.getAllowedNotificationAssistant();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     private Context mContext;
 

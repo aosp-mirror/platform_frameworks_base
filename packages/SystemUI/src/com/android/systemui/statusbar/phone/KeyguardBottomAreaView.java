@@ -862,7 +862,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                         R.string.accessibility_voice_assist_button);
             } else {
                 mIconState.isVisible = mUserSetupComplete && showAffordance && isPhoneVisible();
-                mIconState.drawable = mContext.getDrawable(R.drawable.ic_phone_24dp);
+                mIconState.drawable = mContext.getDrawable(
+                        com.android.internal.R.drawable.ic_phone);
                 mIconState.contentDescription = mContext.getString(
                         R.string.accessibility_phone_button);
             }

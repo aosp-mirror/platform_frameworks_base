@@ -113,6 +113,10 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     // Record the child node. Drawable dtor will be invoked when mChildNodes deque is cleared.
     mDisplayList->mChildNodes.emplace_back(renderNode, asSkCanvas(), true, mCurrentBarrier);
     auto& renderNodeDrawable = mDisplayList->mChildNodes.back();
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        // Put Vulkan WebViews with non-rectangular clips in a HW layer
+        renderNode->mutateStagingProperties().setClipMayBeComplex(mRecorder.isClipMayBeComplex());
+    }
     drawDrawable(&renderNodeDrawable);
 
     // use staging property, since recording on UI thread

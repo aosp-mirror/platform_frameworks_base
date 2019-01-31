@@ -52,6 +52,7 @@ import android.os.UserManagerInternal;
 import android.service.sms.FinancialSmsService;
 import android.telephony.IFinancialSmsCallback;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.PackageUtils;
 import android.util.Slog;
@@ -144,6 +145,9 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
+
+        LocalServices.addService(RoleManagerServiceInternal.class,
+                new RoleManagerServiceInternalImpl());
 
         registerUserRemovedReceiver();
     }
@@ -380,6 +384,19 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         } finally {
             listeners.finishBroadcast();
         }
+    }
+
+    /**
+     * Get all roles and packages hold them.
+     *
+     * @param user The user to query to roles for
+     *
+     * @return The roles and their holders
+     */
+    @NonNull
+    private ArrayMap<String, ArraySet<String>> getRoleHoldersAsUser(@NonNull UserHandle user) {
+        RoleUserState userState = getOrCreateUserState(user.getIdentifier());
+        return userState.getRoleHolders();
     }
 
     private class Stub extends IRoleManager.Stub {
@@ -674,6 +691,18 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    /**
+     * Entry point for internal calls into role manager
+     */
+    private final class RoleManagerServiceInternalImpl extends RoleManagerServiceInternal {
+
+        @NonNull
+        @Override
+        public ArrayMap<String, ArraySet<String>> getRoleHoldersAsUser(@NonNull UserHandle user) {
+            return RoleManagerService.this.getRoleHoldersAsUser(user);
         }
     }
 }

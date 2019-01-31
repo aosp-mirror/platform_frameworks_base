@@ -126,18 +126,23 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnKeepShowing = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         closeControls(v);
-        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                .setType(MetricsEvent.TYPE_ACTION)
-                .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_STAY_SILENT));
+        if (mIsForBlockingHelper) {
+            mMetricsLogger.write(getLogMaker().setCategory(
+                    MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                    .setType(MetricsEvent.TYPE_ACTION)
+                    .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_STAY_SILENT));
+        }
     };
 
     private OnClickListener mOnToggleSilent = v -> {
         Runnable saveImportance = () -> {
             swapContent(ACTION_TOGGLE_SILENT, true /* animate */);
-            mMetricsLogger.write(getLogMaker()
-                    .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                    .setType(MetricsEvent.TYPE_ACTION)
-                    .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_ALERT_ME));
+            if (mIsForBlockingHelper) {
+                mMetricsLogger.write(getLogMaker()
+                        .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_ALERT_ME));
+            }
         };
         if (mCheckSaveListener != null) {
             mCheckSaveListener.checkSave(saveImportance, mSbn);
@@ -149,10 +154,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnStopOrMinimizeNotifications = v -> {
         Runnable saveImportance = () -> {
             swapContent(ACTION_BLOCK, true /* animate */);
-            mMetricsLogger.write(getLogMaker()
-                    .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                    .setType(MetricsEvent.TYPE_ACTION)
-                    .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_BLOCKED));
+            if (mIsForBlockingHelper) {
+                mMetricsLogger.write(getLogMaker()
+                        .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_BLOCKED));
+            }
         };
         if (mCheckSaveListener != null) {
             mCheckSaveListener.checkSave(saveImportance, mSbn);
@@ -164,12 +171,16 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnUndo = v -> {
         // Reset exit counter that we'll log and record an undo event separately (not an exit event)
         mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
-        logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
-        mMetricsLogger.write(importanceChangeLogMaker().setType(MetricsEvent.TYPE_DISMISS));
+        if (mIsForBlockingHelper) {
+            logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
+            mMetricsLogger.write(getLogMaker().setCategory(
+                    MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                    .setType(MetricsEvent.TYPE_DISMISS)
+                    .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_UNDO));
+        } else {
+            mMetricsLogger.write(importanceChangeLogMaker().setType(MetricsEvent.TYPE_DISMISS));
+        }
         swapContent(ACTION_UNDO, true /* animate */);
-        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                .setType(MetricsEvent.TYPE_DISMISS)
-                .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_UNDO));
     };
 
     public NotificationInfo(Context context, AttributeSet attrs) {
@@ -269,10 +280,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindPrompt();
         bindButtons();
 
-        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                .setType(MetricsEvent.TYPE_OPEN)
-                .setSubtype(MetricsEvent.BLOCKING_HELPER_DISPLAY));
+        mMetricsLogger.write(notificationControlsLogMaker());
     }
+
+
 
     private void bindHeader() throws RemoteException {
         // Package name
@@ -402,19 +413,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         if (mIsForBlockingHelper) {
             mMetricsLogger.count(counterTag, 1);
         }
-    }
-
-    /**
-     * Returns an initialized LogMaker for logging importance changes.
-     * The caller may override the type (to DISMISS) before passing it to mMetricsLogger.
-     * @return new LogMaker
-     */
-    private LogMaker importanceChangeLogMaker() {
-        Integer chosenImportance =
-                mChosenImportance != null ? mChosenImportance : mStartingChannelImportance;
-        return new LogMaker(MetricsEvent.ACTION_SAVE_IMPORTANCE)
-                .setType(MetricsEvent.TYPE_ACTION)
-                .setSubtype(chosenImportance - mStartingChannelImportance);
     }
 
     private boolean hasImportanceChanged() {
@@ -616,8 +614,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         confirmation.setAlpha(1f);
         header.setVisibility(VISIBLE);
         header.setAlpha(1f);
-        mMetricsLogger.write(getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                .setType(MetricsEvent.TYPE_CLOSE));
+
+        mMetricsLogger.write(notificationControlsLogMaker().setType(MetricsEvent.TYPE_CLOSE));
     }
 
     @Override
@@ -764,7 +762,39 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
     }
 
+    /**
+     * Returns a LogMaker with all available notification information.
+     * Caller should set category, type, and maybe subtype, before passing it to mMetricsLogger.
+     * @return LogMaker
+     */
     private LogMaker getLogMaker() {
-        return mSbn.getLogMaker();
+        // The constructor requires a category, so also do it in the other branch for consistency.
+        return mSbn == null ? new LogMaker(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
+                : mSbn.getLogMaker().setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER);
+    }
+
+    /**
+     * Returns an initialized LogMaker for logging importance changes.
+     * The caller may override the type before passing it to mMetricsLogger.
+     * @return LogMaker
+     */
+    private LogMaker importanceChangeLogMaker() {
+        Integer chosenImportance =
+                mChosenImportance != null ? mChosenImportance : mStartingChannelImportance;
+        return getLogMaker().setCategory(MetricsEvent.ACTION_SAVE_IMPORTANCE)
+                .setType(MetricsEvent.TYPE_ACTION)
+                .setSubtype(chosenImportance - mStartingChannelImportance);
+    }
+
+    /**
+     * Returns an initialized LogMaker for logging open/close of the info display.
+     * The caller may override the type before passing it to mMetricsLogger.
+     * @return LogMaker
+     */
+    private LogMaker notificationControlsLogMaker() {
+        return getLogMaker().setCategory(MetricsEvent.ACTION_NOTE_CONTROLS)
+                .setType(MetricsEvent.TYPE_OPEN)
+                .setSubtype(mIsForBlockingHelper ? MetricsEvent.BLOCKING_HELPER_DISPLAY
+                        : MetricsEvent.BLOCKING_HELPER_UNKNOWN);
     }
 }

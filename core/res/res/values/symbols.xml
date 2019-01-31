@@ -50,6 +50,10 @@
   <java-symbol type="id" name="characterPicker" />
   <java-symbol type="id" name="clearDefaultHint" />
   <java-symbol type="id" name="contentPanel" />
+  <java-symbol type="id" name="content_preview" />
+  <java-symbol type="id" name="content_preview_thumbnail" />
+  <java-symbol type="id" name="content_preview_text" />
+  <java-symbol type="id" name="content_preview_title" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -1424,7 +1428,7 @@
   <java-symbol type="drawable" name="ic_signal_cellular_alt_24px" />
 
   <java-symbol type="drawable" name="btn_borderless_rect" />
-  <java-symbol type="drawable" name="ic_bt_cellphone" />
+  <java-symbol type="drawable" name="ic_phone" />
   <java-symbol type="drawable" name="ic_bt_headphones_a2dp" />
   <java-symbol type="drawable" name="ic_bt_headset_hfp" />
   <java-symbol type="drawable" name="ic_bt_hearing_aid" />
@@ -1906,6 +1910,7 @@
   <java-symbol type="bool" name="config_wifi_convert_apband_5ghz_to_any" />
   <java-symbol type="bool" name="config_wifi_local_only_hotspot_5ghz" />
   <java-symbol type="bool" name="config_wifi_connected_mac_randomization_supported" />
+  <java-symbol type="bool" name="config_wifi_link_probing_supported" />
   <java-symbol type="bool" name="config_wifi_fast_bss_transition_enabled" />
   <java-symbol type="bool" name="config_wimaxEnabled" />
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
@@ -2703,9 +2708,9 @@
   <java-symbol type="layout" name="date_picker_month_item_material" />
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
+  <java-symbol type="dimen" name="chooser_corner_radius" />
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="resolve_grid_item" />
-  <java-symbol type="id" name="title_icon" />
   <java-symbol type="id" name="day_picker_view_pager" />
   <java-symbol type="layout" name="day_picker_content_material" />
   <java-symbol type="drawable" name="scroll_indicator_material" />

@@ -235,6 +235,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
 
+    public final int factorySerialNumber;
+
     // Used by ConnectivityService to keep track of 464xlat.
     public Nat464Xlat clatd;
 
@@ -252,7 +254,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
             NetworkMisc misc, ConnectivityService connService, INetd netd,
-            INetworkManagementService nms) {
+            INetworkManagementService nms, int factorySerialNumber) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = net;
@@ -266,6 +268,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         mContext = context;
         mHandler = handler;
         networkMisc = misc;
+        this.factorySerialNumber = factorySerialNumber;
     }
 
     /**

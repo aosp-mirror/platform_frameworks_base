@@ -148,7 +148,6 @@ import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
@@ -377,8 +376,6 @@ class ActivityStack extends ConfigurationContainer {
     /** Stores the override windowing-mode from before a transient mode change (eg. split) */
     private int mRestoreOverrideWindowingMode = WINDOWING_MODE_UNDEFINED;
 
-    private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
-    private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
     private final Rect mTmpRect3 = new Rect();
@@ -4668,6 +4665,14 @@ class ActivityStack extends ConfigurationContainer {
         removeHistoryRecordsForAppLocked(mStackSupervisor.mFinishingActivities, app,
                 "mFinishingActivities");
 
+        final boolean isProcessRemoved = app.isRemoved();
+        if (isProcessRemoved) {
+            // The package of the died process should be force-stopped, so make its activities as
+            // finishing to prevent the process from being started again if the next top (or being
+            // visible) activity also resides in the same process.
+            app.makeFinishingForProcessRemoved();
+        }
+
         boolean hasVisibleActivities = false;
 
         // Clean out the history list.
@@ -4720,7 +4725,7 @@ class ActivityStack extends ConfigurationContainer {
                                 + " stateNotNeeded=" + r.stateNotNeeded
                                 + " finishing=" + r.finishing
                                 + " state=" + r.getState() + " callers=" + Debug.getCallers(5));
-                        if (!r.finishing) {
+                        if (!r.finishing || isProcessRemoved) {
                             Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
                             EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                                     r.mUserId, System.identityHashCode(r),
@@ -4992,21 +4997,10 @@ class ActivityStack extends ConfigurationContainer {
         // Update override configurations of all tasks in the stack.
         final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
 
-        mTmpBounds.clear();
-        mTmpInsetBounds.clear();
-
         for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
             final TaskRecord task = mTaskHistory.get(i);
             if (task.isResizeable()) {
                 task.updateOverrideConfiguration(taskBounds, tempTaskInsetBounds);
-            }
-
-            if (task.hasDisplayedBounds()) {
-                mTmpBounds.put(task.taskId, task.getDisplayedBounds());
-                mTmpInsetBounds.put(task.taskId, task.getRequestedOverrideBounds());
-            } else {
-                mTmpBounds.put(task.taskId, task.getRequestedOverrideBounds());
-                mTmpInsetBounds.put(task.taskId, null);
             }
         }
 
@@ -5125,12 +5119,6 @@ class ActivityStack extends ConfigurationContainer {
                     }
                     didSomething = true;
                     Slog.i(TAG, "  Force finishing activity " + r);
-                    if (sameComponent) {
-                        if (r.hasProcess()) {
-                            r.app.setRemoved(true);
-                        }
-                        r.app = null;
-                    }
                     lastTask = r.getTaskRecord();
                     finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
                             true);

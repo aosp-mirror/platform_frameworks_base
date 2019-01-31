@@ -104,10 +104,11 @@ public class NetworkStack {
      *
      * <p>The INetworkMonitor will be returned asynchronously through the provided callbacks.
      */
-    public void makeNetworkMonitor(Network network, String name, INetworkMonitorCallbacks cb) {
+    public void makeNetworkMonitor(
+            NetworkParcelable network, String name, INetworkMonitorCallbacks cb) {
         requestConnector(connector -> {
             try {
-                connector.makeNetworkMonitor(network.netId, name, cb);
+                connector.makeNetworkMonitor(network, name, cb);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }

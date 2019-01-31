@@ -41,12 +41,14 @@ import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityRequestPreparer;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
@@ -64,8 +66,11 @@ import java.util.function.Predicate;
  * called from the interaction connection ViewAncestor gives the system to
  * talk to it and a corresponding *UiThread method that is executed on the
  * UI thread.
+ *
+ * @hide
  */
-final class AccessibilityInteractionController {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public final class AccessibilityInteractionController {
 
     private static final String LOG_TAG = "AccessibilityInteractionController";
 
@@ -85,7 +90,7 @@ final class AccessibilityInteractionController {
 
     private final Object mLock = new Object();
 
-    private final Handler mHandler;
+    private final PrivateHandler mHandler;
 
     private final ViewRootImpl mViewRootImpl;
 
@@ -131,11 +136,19 @@ final class AccessibilityInteractionController {
             // thread in this process, set the message as a static reference so
             // after this call completes the same thread but in the interrogating
             // client can handle the message to generate the result.
-            if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
+            if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId
+                    && mHandler.hasAccessibilityCallback(message)) {
                 AccessibilityInteractionClient.getInstanceForThread(
                         interrogatingTid).setSameThreadMessage(message);
             } else {
-                mHandler.sendMessage(message);
+                // For messages without callback of interrogating client, just handle the
+                // message immediately if this is UI thread.
+                if (!mHandler.hasAccessibilityCallback(message)
+                        && Thread.currentThread().getId() == mMyLooperThreadId) {
+                    mHandler.handleMessage(message);
+                } else {
+                    mHandler.sendMessage(message);
+                }
             }
         }
     }
@@ -731,6 +744,52 @@ final class AccessibilityInteractionController {
         }
     }
 
+    /**
+     * Finds the accessibility focused node in the root, and clears the accessibility focus.
+     */
+    public void clearAccessibilityFocusClientThread() {
+        final Message message = mHandler.obtainMessage();
+        message.what = PrivateHandler.MSG_CLEAR_ACCESSIBILITY_FOCUS;
+
+        // Don't care about pid and tid because there's no interrogating client for this message.
+        scheduleMessage(message, 0, 0, CONSIDER_REQUEST_PREPARERS);
+    }
+
+    private void clearAccessibilityFocusUiThread() {
+        if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null) {
+            return;
+        }
+        try {
+            mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags =
+                    AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+            final View root = mViewRootImpl.mView;
+            if (root != null && isShown(root)) {
+                final View host = mViewRootImpl.mAccessibilityFocusedHost;
+                // If there is no accessibility focus host or it is not a descendant
+                // of the root from which to start the search, then the search failed.
+                if (host == null || !ViewRootImpl.isViewDescendantOf(host, root)) {
+                    return;
+                }
+                final AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
+                final AccessibilityNodeInfo focusNode =
+                        mViewRootImpl.mAccessibilityFocusedVirtualView;
+                if (provider != null && focusNode != null) {
+                    final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
+                            focusNode.getSourceNodeId());
+                    provider.performAction(virtualNodeId,
+                            AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS.getId(),
+                            null);
+                } else {
+                    host.performAccessibilityAction(
+                            AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS.getId(),
+                            null);
+                }
+            }
+        } finally {
+            mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+        }
+    }
+
     private View findViewByAccessibilityId(int accessibilityId) {
         View root = mViewRootImpl.mView;
         if (root == null) {
@@ -1294,6 +1353,12 @@ final class AccessibilityInteractionController {
         private static final int MSG_APP_PREPARATION_FINISHED = 8;
         private static final int MSG_APP_PREPARATION_TIMEOUT = 9;
 
+        // Uses FIRST_NO_ACCESSIBILITY_CALLBACK_MSG for messages that don't need to call back
+        // results to interrogating client.
+        private static final int FIRST_NO_ACCESSIBILITY_CALLBACK_MSG = 100;
+        private static final int MSG_CLEAR_ACCESSIBILITY_FOCUS =
+                FIRST_NO_ACCESSIBILITY_CALLBACK_MSG + 1;
+
         public PrivateHandler(Looper looper) {
             super(looper);
         }
@@ -1320,6 +1385,8 @@ final class AccessibilityInteractionController {
                     return "MSG_APP_PREPARATION_FINISHED";
                 case MSG_APP_PREPARATION_TIMEOUT:
                     return "MSG_APP_PREPARATION_TIMEOUT";
+                case MSG_CLEAR_ACCESSIBILITY_FOCUS:
+                    return "MSG_CLEAR_ACCESSIBILITY_FOCUS";
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
@@ -1356,9 +1423,16 @@ final class AccessibilityInteractionController {
                 case MSG_APP_PREPARATION_TIMEOUT: {
                     requestPreparerTimeoutUiThread();
                 } break;
+                case MSG_CLEAR_ACCESSIBILITY_FOCUS: {
+                    clearAccessibilityFocusUiThread();
+                } break;
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
+        }
+
+        boolean hasAccessibilityCallback(Message message) {
+            return message.what < FIRST_NO_ACCESSIBILITY_CALLBACK_MSG ? true : false;
         }
     }
 

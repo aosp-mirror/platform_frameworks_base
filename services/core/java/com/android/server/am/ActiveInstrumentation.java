@@ -49,6 +49,9 @@ class ActiveInstrumentation {
     // Connection to use the UI introspection APIs.
     IUiAutomationConnection mUiAutomationConnection;
 
+    // Whether the caller holds START_ACTIVITIES_FROM_BACKGROUND permission
+    boolean mHasBackgroundActivityStartsPermission;
+
     // As given to us
     Bundle mArguments;
 
@@ -117,6 +120,8 @@ class ActiveInstrumentation {
             pw.print(prefix); pw.print("mUiAutomationConnection=");
             pw.println(mUiAutomationConnection);
         }
+        pw.print("mHasBackgroundActivityStartsPermission=");
+        pw.println(mHasBackgroundActivityStartsPermission);
         pw.print(prefix); pw.print("mArguments=");
         pw.println(mArguments);
     }

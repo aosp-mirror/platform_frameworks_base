@@ -61,6 +61,10 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.content.rollback.IRollbackManager;
+import android.content.rollback.PackageRollbackInfo;
+import android.content.rollback.RollbackInfo;
+import android.content.rollback.RollbackManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -263,6 +267,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return getStagedSessions();
                 case "uninstall-system-updates":
                     return uninstallSystemUpdates();
+                case "rollback-app":
+                    return runRollbackApp();
                 default: {
                     String nextArg = getNextArg();
                     if (nextArg == null) {
@@ -346,6 +352,55 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         pw.println("Success");
         return 1;
+    }
+
+    private int runRollbackApp() {
+        final PrintWriter pw = getOutPrintWriter();
+
+        final String packageName = getNextArgRequired();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+
+        final LocalIntentReceiver receiver = new LocalIntentReceiver();
+        try {
+            IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
+
+            RollbackInfo rollback = null;
+            for (RollbackInfo r : (List<RollbackInfo>) rm.getAvailableRollbacks().getList()) {
+                for (PackageRollbackInfo info : r.getPackages()) {
+                    if (packageName.equals(info.getPackageName())) {
+                        rollback = r;
+                        break;
+                    }
+                }
+            }
+
+            if (rollback == null) {
+                pw.println("No available rollbacks for: " + packageName);
+                return 1;
+            }
+
+            rm.commitRollback(rollback.getRollbackId(),
+                    ParceledListSlice.<VersionedPackage>emptyList(),
+                    "com.android.shell", receiver.getIntentSender());
+        } catch (RemoteException re) {
+            // Cannot happen.
+        }
+
+        final Intent result = receiver.getResult();
+        final int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
+                RollbackManager.STATUS_FAILURE);
+        if (status == RollbackManager.STATUS_SUCCESS) {
+            pw.println("Success");
+            return 0;
+        } else {
+            pw.println("Failure ["
+                    + result.getStringExtra(RollbackManager.EXTRA_STATUS_MESSAGE) + "]");
+            return 1;
+        }
     }
 
     private void setParamsSize(InstallParams params, String inPath) {

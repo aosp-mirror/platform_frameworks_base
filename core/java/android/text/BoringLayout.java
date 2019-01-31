@@ -272,16 +272,27 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     }
 
     /**
-     * Returns null if not boring; the width, ascent, and descent if boring.
+     * Determine and compute metrics if given text can be handled by BoringLayout.
+     *
+     * @param text a text
+     * @param paint a paint
+     * @return layout metric for the given text. null if given text is unable to be handled by
+     *         BoringLayout.
      */
     public static Metrics isBoring(CharSequence text, TextPaint paint) {
         return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, null);
     }
 
     /**
-     * Returns null if not boring; the width, ascent, and descent in the
-     * provided Metrics object (or a new one if the provided one was null)
-     * if boring.
+     * Determine and compute metrics if given text can be handled by BoringLayout.
+     *
+     * @param text a text
+     * @param paint a paint
+     * @param metrics a metrics object to be recycled. If null is passed, this function creat new
+     *                object.
+     * @return layout metric for the given text. If metrics is not null, this method fills values
+     *         to given metrics object instead of allocating new metrics object. null if given text
+     *         is unable to be handled by BoringLayout.
      */
     public static Metrics isBoring(CharSequence text, TextPaint paint, Metrics metrics) {
         return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, metrics);

@@ -419,11 +419,19 @@ public final class Downloads {
 
         /**
          * The column that is used to remember whether the media scanner was invoked.
-         * It can take the values: null or 0(not scanned), 1(scanned), 2 (not scannable).
+         * It can take the values: {@link #MEDIA_NOT_SCANNED}, {@link #MEDIA_SCANNED} or
+         * {@link #MEDIA_NOT_SCANNABLE} or {@code null}. If it's value is {@code null}, it will be
+         * treated as {@link #MEDIA_NOT_SCANNED}.
+         *
          * <P>Type: TEXT</P>
          */
         @UnsupportedAppUsage
         public static final String COLUMN_MEDIA_SCANNED = "scanned";
+
+        /** Possible values for column {@link #COLUMN_MEDIA_SCANNED} */
+        public static final int MEDIA_NOT_SCANNED = 0;
+        public static final int MEDIA_SCANNED = 1;
+        public static final int MEDIA_NOT_SCANNABLE = 2;
 
         /**
          * The column with errorMsg for a failed downloaded.

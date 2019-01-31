@@ -20,6 +20,7 @@ import static android.net.shared.ParcelableUtil.fromParcelableArray;
 import static android.net.shared.ParcelableUtil.toParcelableArray;
 import static android.text.TextUtils.join;
 
+import android.net.InetAddresses;
 import android.net.InitialConfigurationParcelable;
 import android.net.IpPrefix;
 import android.net.IpPrefixParcelable;
@@ -27,7 +28,7 @@ import android.net.LinkAddress;
 import android.net.LinkAddressParcelable;
 import android.net.RouteInfo;
 
-import java.net.Inet6Address;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,8 @@ public class InitialConfiguration {
 
     private static final int RFC6177_MIN_PREFIX_LENGTH = 48;
     private static final int RFC7421_PREFIX_LENGTH = 64;
+
+    public static final InetAddress INET6_ANY = InetAddresses.parseNumericAddress("::");
 
     /**
      * Create a InitialConfiguration that is a copy of the specified configuration.
@@ -102,7 +105,7 @@ public class InitialConfiguration {
             return false;
         }
         // There no more than one IPv4 address
-        if (ipAddresses.stream().filter(LinkAddress::isIPv4).count() > 1) {
+        if (ipAddresses.stream().filter(InitialConfiguration::isIPv4).count() > 1) {
             return false;
         }
 
@@ -184,11 +187,11 @@ public class InitialConfiguration {
     }
 
     private static boolean isPrefixLengthCompliant(LinkAddress addr) {
-        return addr.isIPv4() || isCompliantIPv6PrefixLength(addr.getPrefixLength());
+        return isIPv4(addr) || isCompliantIPv6PrefixLength(addr.getPrefixLength());
     }
 
     private static boolean isPrefixLengthCompliant(IpPrefix prefix) {
-        return prefix.isIPv4() || isCompliantIPv6PrefixLength(prefix.getPrefixLength());
+        return isIPv4(prefix) || isCompliantIPv6PrefixLength(prefix.getPrefixLength());
     }
 
     private static boolean isCompliantIPv6PrefixLength(int prefixLength) {
@@ -196,8 +199,16 @@ public class InitialConfiguration {
                 && (prefixLength <= RFC7421_PREFIX_LENGTH);
     }
 
+    private static boolean isIPv4(IpPrefix prefix) {
+        return prefix.getAddress() instanceof Inet4Address;
+    }
+
+    private static boolean isIPv4(LinkAddress addr) {
+        return addr.getAddress() instanceof Inet4Address;
+    }
+
     private static boolean isIPv6DefaultRoute(IpPrefix prefix) {
-        return prefix.getAddress().equals(Inet6Address.ANY);
+        return prefix.getAddress().equals(INET6_ANY);
     }
 
     private static boolean isIPv6GUA(LinkAddress addr) {

@@ -57,8 +57,14 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"السماح دائمًا من هذا الكمبيوتر"</string>
+    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
+    <skip />
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏لا يُسمح بتصحيح أخطاء USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
+    <skip />
+    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"تكبير/تصغير لملء الشاشة"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"توسيع بملء الشاشة"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"لقطة شاشة"</string>
@@ -112,8 +118,7 @@
     <string name="cancel" msgid="6442560571259935130">"إلغاء"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"منطقة رسالة المساعدة"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"تأكيد"</string>
-    <!-- no translation found for biometric_dialog_try_again (1900185172633183201) -->
-    <skip />
+    <string name="biometric_dialog_try_again" msgid="1900185172633183201">"إعادة المحاولة"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"المس جهاز استشعار بصمات الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"رمز بصمة الإصبع"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"جارٍ البحث عن وجهك…"</string>
@@ -300,8 +305,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"صوت"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"سماعة الرأس"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"الإدخال"</string>
-    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (4930931771490695395) -->
-    <skip />
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"جارٍ التفعيل…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"السطوع"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"دوران تلقائي"</string>
@@ -623,17 +627,13 @@
     <string name="inline_blocking_helper" msgid="3055064577771478591">"أنت تتجاهل عادةً هذه الإشعارات. \nهل تريد الاستمرار في عرضها؟"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"هل تريد الاستمرار في تلقي هذه الإشعارات؟"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"إيقاف الإشعارات"</string>
-    <!-- no translation found for inline_block_button (8735843688021655065) -->
-    <skip />
+    <string name="inline_block_button" msgid="8735843688021655065">"حظر"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"الاستمرار في تلقّي الإشعارات"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"تصغير"</string>
     <string name="inline_silent_button_silent" msgid="4411510650503783646">"عرض بدون تنبيه صوتي"</string>
-    <!-- no translation found for inline_silent_button_stay_silent (6308371431217601009) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_alert (7961887853830826523) -->
-    <skip />
-    <!-- no translation found for inline_silent_button_keep_alerting (327696842264359693) -->
-    <skip />
+    <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"متابعة عرض الإشعارات بدون صوت"</string>
+    <string name="inline_silent_button_alert" msgid="7961887853830826523">"إرسال تنبيه إليّ"</string>
+    <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"متابعة إرسال التنبيهات"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"يتعذَّر إيقاف هذه الإشعارات."</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"عبر <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -755,7 +755,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"مفتاح تبديل لوحة المفاتيح"</string>
     <string name="save" msgid="2311877285724540644">"حفظ"</string>
-    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة الضبط"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ضبط عرض الزر"</string>
     <string name="clipboard" msgid="1313879395099896312">"الحافظة"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"زر التنقل المخصص"</string>
@@ -891,11 +891,26 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"الإعدادات"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"حسنًا"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"‏تفريغ ذاكرة SysUI"</string>
-    <!-- no translation found for ongoing_privacy_chip_multiple_apps (1406406529558080714) -->
+    <plurals name="ongoing_privacy_chip_multiple_apps" formatted="false" msgid="1406406529558080714">
+      <item quantity="zero"><xliff:g id="NUM_APPS_2">%d</xliff:g> تطبيق</item>
+      <item quantity="two">تطبيقان (<xliff:g id="NUM_APPS_2">%d</xliff:g>)</item>
+      <item quantity="few"><xliff:g id="NUM_APPS_1">%d</xliff:g> تطبيقات</item>
+      <item quantity="many"><xliff:g id="NUM_APPS_2">%d</xliff:g> تطبيقًا</item>
+      <item quantity="other"><xliff:g id="NUM_APPS_2">%d</xliff:g> تطبيق</item>
+      <item quantity="one">تطبيق واحد (<xliff:g id="NUM_APPS_0">%d</xliff:g>)</item>
+    </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"التطبيق <xliff:g id="APP">%1$s</xliff:g> يستخدم <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <!-- no translation found for ongoing_privacy_chip_content_multiple_apps_single_op (4871926099254314088) -->
-    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"إلغاء"</string>
+    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
+      <item quantity="zero">هناك <xliff:g id="NUM_APPS_4">%1$d</xliff:g> تطبيق يستخدِم <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
+      <item quantity="two">هناك تطبيقان (<xliff:g id="NUM_APPS_4">%1$d</xliff:g>) يستخدِمان <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
+      <item quantity="few">هناك <xliff:g id="NUM_APPS_2">%1$d</xliff:g> تطبيقات تستخدِم <xliff:g id="TYPE_3">%2$s</xliff:g>.</item>
+      <item quantity="many">هناك <xliff:g id="NUM_APPS_4">%1$d</xliff:g> تطبيقًا يستخدِم <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
+      <item quantity="other">هناك <xliff:g id="NUM_APPS_4">%1$d</xliff:g> تطبيق يستخدِم <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
+      <item quantity="one">هناك تطبيق واحد (<xliff:g id="NUM_APPS_0">%1$d</xliff:g>) يستخدِم <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
+    </plurals>
+    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <skip />
     <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"عرض التفاصيل"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"التطبيق الذي يستخدِم <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"التطبيقات التي تستخدِم <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>

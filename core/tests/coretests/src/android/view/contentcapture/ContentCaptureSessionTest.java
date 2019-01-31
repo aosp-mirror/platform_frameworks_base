@@ -78,7 +78,7 @@ public class ContentCaptureSessionTest {
         assertThrows(NullPointerException.class, () -> mSession1.notifyViewAppeared(null));
         assertThrows(NullPointerException.class, () -> mSession1.notifyViewDisappeared(null));
         assertThrows(NullPointerException.class,
-                () -> mSession1.notifyViewTextChanged(null, "whatever", 0));
+                () -> mSession1.notifyViewTextChanged(null, "whatever"));
     }
 
     @Test

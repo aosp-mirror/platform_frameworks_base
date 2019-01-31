@@ -150,6 +150,28 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for all runtime native related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface RuntimeNative {
+        String NAMESPACE = "runtime_native";
+    }
+
+    /**
+     * Namespace for all activity manager related features that are used at the native level.
+     * These features are applied at reboot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface ActivityManagerNativeBoot {
+        String NAMESPACE = "activity_manager_native_boot";
+        String OFFLOAD_QUEUE_ENABLED = "offload_queue_enabled";
+    }
+
+    /**
      * Namespace for attention-based features provided by on-device machine intelligence.
      *
      * @hide
@@ -208,16 +230,15 @@ public final class DeviceConfig {
     }
 
     /**
-     * Namespace for Full Stack Integrity to run privileged apps only in JIT mode. The flag applies
-     * at process start, so reboot is a way to bring the device to a clean state.
+     * Namespace for how dex runs.  The feature may requires reboot to a clean state.
      *
      * @hide
      */
     @SystemApi
-    public interface FsiBoot {
-        String NAMESPACE = "fsi_boot";
-        String OOB_ENABLED = "oob_enabled";
-        String OOB_WHITELIST = "oob_whitelist";
+    public interface DexBoot {
+        String NAMESPACE = "dex_boot";
+        String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
+        String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
     }
 
     /**

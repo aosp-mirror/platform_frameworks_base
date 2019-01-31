@@ -65,6 +65,9 @@ interface INotificationManager
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
 
+    boolean shouldHideSilentStatusIcons(String callingPkg);
+    void setHideSilentStatusIcons(boolean hide);
+
     void setBubblesAllowed(String pkg, int uid, boolean allowed);
     boolean areBubblesAllowed(String pkg);
     boolean areBubblesAllowedForPackage(String pkg, int uid);
@@ -151,6 +154,8 @@ interface INotificationManager
     void setNotificationAssistantAccessGrantedForUser(in ComponentName assistant, int userId, boolean enabled);
     List<String> getEnabledNotificationListenerPackages();
     List<ComponentName> getEnabledNotificationListeners(int userId);
+    ComponentName getAllowedNotificationAssistantForUser(int userId);
+    ComponentName getAllowedNotificationAssistant();
 
     int getZenMode();
     ZenModeConfig getZenModeConfig();

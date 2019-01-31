@@ -24,7 +24,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.os.BackgroundThread;
+import com.android.server.FgThread;
 import com.android.server.ServiceWatcher;
 
 /**
@@ -84,7 +84,7 @@ public class ActivityRecognitionProxy {
                 overlaySwitchResId,
                 defaultServicePackageNameResId,
                 initialPackageNameResId,
-                BackgroundThread.getHandler()) {
+                FgThread.getHandler()) {
             @Override
             protected void onBind() {
                 runOnBinder(ActivityRecognitionProxy.this::initializeService);

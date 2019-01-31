@@ -242,6 +242,7 @@ package android.app {
 
   public class NotificationManager {
     method public android.content.ComponentName getEffectsSuppressor();
+    method public boolean matchesCallFilter(android.os.Bundle);
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
@@ -328,6 +329,91 @@ package android.app.backup {
     method @RequiresPermission("android.permission.BACKUP") public android.content.Intent getDataManagementIntent(String);
     method @RequiresPermission("android.permission.BACKUP") public String getDataManagementLabel(String);
     method @RequiresPermission("android.permission.BACKUP") public String getDestinationString(String);
+  }
+
+}
+
+package android.app.prediction {
+
+  public final class AppPredictionContext implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public String getPackageName();
+    method public int getPredictedTargetCount();
+    method public String getUiSurface();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionContext> CREATOR;
+  }
+
+  public static final class AppPredictionContext.Builder {
+    ctor public AppPredictionContext.Builder(@NonNull android.content.Context);
+    method public android.app.prediction.AppPredictionContext build();
+    method public android.app.prediction.AppPredictionContext.Builder setExtras(@Nullable android.os.Bundle);
+    method public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(int);
+    method public android.app.prediction.AppPredictionContext.Builder setUiSurface(@Nullable String);
+  }
+
+  public final class AppPredictionManager {
+    method public android.app.prediction.AppPredictor createAppPredictionSession(@NonNull android.app.prediction.AppPredictionContext);
+  }
+
+  public final class AppPredictionSessionId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionSessionId> CREATOR;
+  }
+
+  public final class AppPredictor {
+    method public void destroy();
+    method public android.app.prediction.AppPredictionSessionId getSessionId();
+    method public void notifyAppTargetEvent(@NonNull android.app.prediction.AppTargetEvent);
+    method public void notifyLocationShown(@NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);
+    method public void registerPredictionUpdates(@NonNull java.util.concurrent.Executor, @NonNull android.app.prediction.AppPredictor.Callback);
+    method public void requestPredictionUpdate();
+    method @Nullable public void sortTargets(@NonNull java.util.List<android.app.prediction.AppTarget>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
+    method public void unregisterPredictionUpdates(@NonNull android.app.prediction.AppPredictor.Callback);
+  }
+
+  public static interface AppPredictor.Callback {
+    method public void onTargetsAvailable(@NonNull java.util.List<android.app.prediction.AppTarget>);
+  }
+
+  public final class AppTarget implements android.os.Parcelable {
+    ctor public AppTarget(@NonNull android.app.prediction.AppTargetId, @NonNull String, @Nullable String, @NonNull android.os.UserHandle);
+    method public int describeContents();
+    method @Nullable public String getClassName();
+    method @NonNull public android.app.prediction.AppTargetId getId();
+    method @NonNull public String getPackageName();
+    method public int getRank();
+    method @Nullable public android.content.pm.ShortcutInfo getShortcutInfo();
+    method @NonNull public android.os.UserHandle getUser();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTarget> CREATOR;
+  }
+
+  public final class AppTargetEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public int getAction();
+    method @NonNull public String getLaunchLocation();
+    method @Nullable public android.app.prediction.AppTarget getTarget();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACTION_DISMISS = 2; // 0x2
+    field public static final int ACTION_LAUNCH = 1; // 0x1
+    field public static final int ACTION_PIN = 3; // 0x3
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetEvent> CREATOR;
+  }
+
+  public static final class AppTargetEvent.Builder {
+    ctor public AppTargetEvent.Builder(@Nullable android.app.prediction.AppTarget, int);
+    method public android.app.prediction.AppTargetEvent build();
+    method public android.app.prediction.AppTargetEvent.Builder setLaunchLocation(String);
+  }
+
+  public final class AppTargetId implements android.os.Parcelable {
+    ctor public AppTargetId(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetId> CREATOR;
   }
 
 }
@@ -518,20 +604,8 @@ package android.database.sqlite {
 
 package android.graphics {
 
-  public final class Bitmap implements android.os.Parcelable {
-    method public void eraseColor(@ColorLong long);
-    method public void setColorSpace(@NonNull android.graphics.ColorSpace);
-  }
-
   public final class ImageDecoder implements java.lang.AutoCloseable {
     method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
-  }
-
-  public class Paint {
-    method @ColorLong public long getColorLong();
-    method @ColorLong public long getShadowLayerColorLong();
-    method public void setColor(@ColorLong long);
-    method public void setShadowLayer(float, float, float, @ColorLong long);
   }
 
 }
@@ -753,6 +827,17 @@ package android.media {
     method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
   }
 
+  public class MediaPlayer2 implements android.media.AudioRouting java.lang.AutoCloseable {
+    method public android.media.MediaPlayer2.DrmInfo getDrmInfo(@NonNull android.media.DataSourceDesc);
+    method public android.media.MediaDrm.KeyRequest getDrmKeyRequest(@NonNull android.media.DataSourceDesc, @Nullable byte[], @Nullable byte[], @Nullable String, int, @Nullable java.util.Map<java.lang.String,java.lang.String>) throws android.media.MediaPlayer2.NoDrmSchemeException;
+    method public String getDrmPropertyString(@NonNull android.media.DataSourceDesc, @NonNull String) throws android.media.MediaPlayer2.NoDrmSchemeException;
+    method public Object prepareDrm(@NonNull android.media.DataSourceDesc, @NonNull java.util.UUID);
+    method public byte[] provideDrmKeyResponse(@NonNull android.media.DataSourceDesc, @Nullable byte[], @NonNull byte[]) throws android.media.DeniedByServerException, android.media.MediaPlayer2.NoDrmSchemeException;
+    method public void releaseDrm(@NonNull android.media.DataSourceDesc) throws android.media.MediaPlayer2.NoDrmSchemeException;
+    method public void restoreDrmKeys(@NonNull android.media.DataSourceDesc, @NonNull byte[]) throws android.media.MediaPlayer2.NoDrmSchemeException;
+    method public void setDrmPropertyString(@NonNull android.media.DataSourceDesc, @NonNull String, @NonNull String) throws android.media.MediaPlayer2.NoDrmSchemeException;
+  }
+
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
@@ -803,6 +888,7 @@ package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
     ctor public CaptivePortal(android.os.IBinder);
+    method public void logEvent(int, String);
     method public void useNetwork();
     field public static final int APP_RETURN_DISMISSED = 0; // 0x0
     field public static final int APP_RETURN_UNWANTED = 1; // 0x1
@@ -1285,17 +1371,34 @@ package android.os {
   public class IncidentManager {
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void approveReport(android.net.Uri);
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void cancelAuthorization(android.os.IncidentManager.AuthListener);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void deleteIncidentReports(android.net.Uri);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void denyReport(android.net.Uri);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @Nullable public android.os.IncidentManager.IncidentReport getIncidentReport(android.net.Uri);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @NonNull public java.util.List<android.net.Uri> getIncidentReportList(String);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public java.util.List<android.os.IncidentManager.PendingReport> getPendingReports();
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void reportIncident(android.os.IncidentReportArgs);
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void requestAuthorization(int, String, int, android.os.IncidentManager.AuthListener);
     field public static final int FLAG_CONFIRMATION_DIALOG = 1; // 0x1
+    field public static final int PRIVACY_POLICY_AUTO = 200; // 0xc8
+    field public static final int PRIVACY_POLICY_EXPLICIT = 100; // 0x64
+    field public static final int PRIVACY_POLICY_LOCAL = 0; // 0x0
   }
 
   public static class IncidentManager.AuthListener {
     ctor public IncidentManager.AuthListener();
     method public void onReportApproved();
     method public void onReportDenied();
+  }
+
+  public static class IncidentManager.IncidentReport implements java.io.Closeable android.os.Parcelable {
+    ctor public IncidentManager.IncidentReport(android.os.Parcel);
+    method public void close();
+    method public int describeContents();
+    method public java.io.InputStream getInputStream() throws java.io.IOException;
+    method public long getPrivacyPolicy();
+    method public long getTimestamp();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.IncidentManager.IncidentReport> CREATOR;
   }
 
   public static class IncidentManager.PendingReport {
@@ -1755,6 +1858,24 @@ package android.security.keystore {
 
 }
 
+package android.service.appprediction {
+
+  public abstract class AppPredictionService extends android.app.Service {
+    ctor public AppPredictionService();
+    method @MainThread public abstract void onAppTargetEvent(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull android.app.prediction.AppTargetEvent);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onCreatePredictionSession(@NonNull android.app.prediction.AppPredictionContext, @NonNull android.app.prediction.AppPredictionSessionId);
+    method @MainThread public void onDestroyPredictionSession(@NonNull android.app.prediction.AppPredictionSessionId);
+    method @MainThread public abstract void onLocationShown(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);
+    method @MainThread public abstract void onRequestPredictionUpdate(@NonNull android.app.prediction.AppPredictionSessionId);
+    method @MainThread public abstract void onSortAppTargets(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull java.util.List<android.app.prediction.AppTarget>, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
+    method @MainThread public void onStartPredictionUpdates();
+    method @MainThread public void onStopPredictionUpdates();
+    method public final void updatePredictions(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull java.util.List<android.app.prediction.AppTarget>);
+  }
+
+}
+
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
@@ -2146,6 +2267,7 @@ package android.util.proto {
     method public static int getRawZigZag64Size(long);
     method public int getReadPos();
     method public int getReadableSize();
+    method public int getSize();
     method public int getWriteBufIndex();
     method public int getWriteIndex();
     method public int getWritePos();
@@ -2205,6 +2327,7 @@ package android.util.proto {
     method @Deprecated public void endRepeatedObject(long);
     method public void flush();
     method public byte[] getBytes();
+    method public int getRawSize();
     method public static long makeFieldId(int, long);
     method public long start(long);
     method @Deprecated public long startObject(long);
@@ -2364,6 +2487,10 @@ package android.view {
     ctor public KeyboardShortcutGroup(@Nullable CharSequence, @NonNull java.util.List<android.view.KeyboardShortcutInfo>, boolean);
     ctor public KeyboardShortcutGroup(@Nullable CharSequence, boolean);
     method public boolean isSystemGroup();
+  }
+
+  public abstract class LayoutInflater {
+    method public void setPrecompiledLayoutsEnabledForTesting(boolean);
   }
 
   public final class MotionEvent extends android.view.InputEvent implements android.os.Parcelable {

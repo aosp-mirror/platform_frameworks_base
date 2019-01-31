@@ -1044,7 +1044,10 @@ public class ResolverActivity extends Activity {
         }
     }
 
-    public void setTitleAndIcon() {
+    /**
+     * Configure the area above the app selection list (title, content preview, etc).
+     */
+    public void setHeader() {
         if (mAdapter.getCount() == 0 && mAdapter.mPlaceholderCount == 0) {
             final TextView titleView = findViewById(R.id.title);
             if (titleView != null) {
@@ -1062,23 +1065,6 @@ public class ResolverActivity extends Activity {
                 titleView.setText(title);
             }
             setTitle(title);
-
-            // Try to initialize the title icon if we have a view for it and a title to match
-            final ImageView titleIcon = findViewById(R.id.title_icon);
-            if (titleIcon != null) {
-                ApplicationInfo ai = null;
-                try {
-                    if (!TextUtils.isEmpty(mReferrerPackage)) {
-                        ai = mPm.getApplicationInfo(mReferrerPackage, 0);
-                    }
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "Could not find referrer package " + mReferrerPackage);
-                }
-
-                if (ai != null) {
-                    titleIcon.setImageDrawable(ai.loadIcon(mPm));
-                }
-            }
         }
 
         final ImageView iconView = findViewById(R.id.icon);
@@ -1692,7 +1678,7 @@ public class ResolverActivity extends Activity {
                 mPostListReadyRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        setTitleAndIcon();
+                        setHeader();
                         resetButtonBar();
                         onListRebuilt();
                         mPostListReadyRunnable = null;

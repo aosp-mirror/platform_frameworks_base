@@ -21,7 +21,6 @@ import android.annotation.ColorInt;
 import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.res.ResourcesImpl;
@@ -31,6 +30,7 @@ import android.os.Parcelable;
 import android.os.StrictMode;
 import android.os.Trace;
 import android.util.DisplayMetrics;
+import android.util.Half;
 import android.util.Log;
 import android.view.ThreadedRenderer;
 
@@ -1761,9 +1761,7 @@ public final class Bitmap implements Parcelable {
      *         previously assigned color space.
      *
      * @param colorSpace to assign to the bitmap
-     * @hide
      */
-    @TestApi
     public void setColorSpace(@NonNull ColorSpace colorSpace) {
         checkRecycled("setColorSpace called on a recycled bitmap");
         if (colorSpace == null) {
@@ -1814,9 +1812,7 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the color space encoded in the long
      *                                  is invalid or unknown.
      *
-     * @hide pending API approval
      */
-    @TestApi
     public void eraseColor(@ColorLong long c) {
         checkRecycled("Can't erase a recycled bitmap");
         if (!isMutable()) {
@@ -1846,6 +1842,45 @@ public final class Bitmap implements Parcelable {
                 + "pixel access is not supported on Config#HARDWARE bitmaps");
         checkPixelAccess(x, y);
         return nativeGetPixel(mNativePtr, x, y);
+    }
+
+    private static float clamp(float value, @NonNull ColorSpace cs, int index) {
+        return Math.max(Math.min(value, cs.getMaxValue(index)), cs.getMinValue(index));
+    }
+
+    /**
+     * Returns the {@link Color} at the specified location. Throws an exception
+     * if x or y are out of bounds (negative or >= to the width or height
+     * respectively).
+     *
+     * @param x    The x coordinate (0...width-1) of the pixel to return
+     * @param y    The y coordinate (0...height-1) of the pixel to return
+     * @return     The {@link Color} at the specified coordinate
+     * @throws IllegalArgumentException if x, y exceed the bitmap's bounds
+     * @throws IllegalStateException if the bitmap's config is {@link Config#HARDWARE}
+     *
+     */
+    public Color getColor(int x, int y) {
+        checkRecycled("Can't call getColor() on a recycled bitmap");
+        checkHardware("unable to getColor(), "
+                + "pixel access is not supported on Config#HARDWARE bitmaps");
+        checkPixelAccess(x, y);
+
+        final ColorSpace cs = getColorSpace();
+        if (cs.equals(ColorSpace.get(ColorSpace.Named.SRGB))) {
+            return Color.valueOf(nativeGetPixel(mNativePtr, x, y));
+        }
+        // The returned value is in kRGBA_F16_SkColorType, which is packed as
+        // four half-floats, r,g,b,a.
+        long rgba = nativeGetColor(mNativePtr, x, y);
+        float r = Half.toFloat((short) ((rgba >>  0) & 0xffff));
+        float g = Half.toFloat((short) ((rgba >> 16) & 0xffff));
+        float b = Half.toFloat((short) ((rgba >> 32) & 0xffff));
+        float a = Half.toFloat((short) ((rgba >> 48) & 0xffff));
+
+        // Skia may draw outside of the numerical range of the colorSpace.
+        // Clamp to get an expected value.
+        return Color.valueOf(clamp(r, cs, 0), clamp(g, cs, 1), clamp(b, cs, 2), a, cs);
     }
 
     /**
@@ -2176,6 +2211,7 @@ public final class Bitmap implements Parcelable {
     private static native boolean nativeIsConfigF16(long nativeBitmap);
 
     private static native int nativeGetPixel(long nativeBitmap, int x, int y);
+    private static native long nativeGetColor(long nativeBitmap, int x, int y);
     private static native void nativeGetPixels(long nativeBitmap, int[] pixels,
                                                int offset, int stride, int x, int y,
                                                int width, int height);

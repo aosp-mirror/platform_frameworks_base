@@ -220,6 +220,9 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // BuildInformation.
         {android::util::BUILD_INFORMATION,
          {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
+        // RoleHolder.
+        {android::util::ROLE_HOLDER,
+         {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
@@ -231,6 +234,9 @@ bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
     if (kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end()) {
         bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(data);
         VLOG("pulled %d items", (int)data->size());
+        if (!ret) {
+            StatsdStats::getInstance().notePullFailed(tagId);
+        }
         return ret;
     } else {
         VLOG("Unknown tagId %d", tagId);

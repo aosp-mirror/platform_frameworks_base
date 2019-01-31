@@ -22,6 +22,7 @@ import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.REMOVE_TASKS;
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
@@ -2217,7 +2218,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = hasHandlerThread ? new ActivityManagerConstants(this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, new Object());
 
         mIntentFirewall = hasHandlerThread
                 ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
@@ -2265,7 +2266,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = new ActivityManagerConstants(this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, atm.getGlobalLock());
 
         // Broadcast policy parameters
         final BroadcastConstants foreConstants = new BroadcastConstants(
@@ -3091,7 +3092,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     UidRecord validateUid = mValidateUids.get(item.uid);
                     if (validateUid == null) {
-                        validateUid = new UidRecord(item.uid, mAtmInternal);
+                        validateUid = new UidRecord(item.uid);
                         mValidateUids.put(item.uid, validateUid);
                     }
                     if ((item.change & UidRecord.CHANGE_IDLE) != 0) {
@@ -3891,7 +3892,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 synchronized (this) {
                     mProcessList.killPackageProcessesLocked(packageName, appId, targetUserId,
-                            ProcessList.SERVICE_ADJ, false, true, true, false, "kill background");
+                            ProcessList.SERVICE_ADJ, "kill background");
                 }
             }
         } finally {
@@ -4252,7 +4253,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void cleanupDisabledPackageComponentsLocked(
-            String packageName, int userId, boolean killProcess, String[] changedClasses) {
+            String packageName, int userId, String[] changedClasses) {
 
         Set<String> disabledClasses = null;
         boolean packageDisabled = false;
@@ -4315,7 +4316,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Clean-up disabled services.
         mServices.bringDownDisabledPackageServicesLocked(
-                packageName, disabledClasses, userId, false, killProcess, true);
+                packageName, disabledClasses, userId, false /* evenPersistent */, true /* doIt */);
 
         // Clean-up disabled providers.
         ArrayList<ContentProviderRecord> providers = new ArrayList<>();
@@ -4372,14 +4373,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         boolean didSomething = mProcessList.killPackageProcessesLocked(packageName, appId, userId,
-                ProcessList.INVALID_ADJ, callerWillRestart, true, doit, evenPersistent,
+                ProcessList.INVALID_ADJ, callerWillRestart, true /* allowRestart */, doit,
+                evenPersistent, true /* setRemoved */,
                 packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
         didSomething |=
                 mAtmInternal.onForceStopPackage(packageName, doit, evenPersistent, userId);
 
         if (mServices.bringDownDisabledPackageServicesLocked(
-                packageName, null, userId, evenPersistent, true, doit)) {
+                packageName, null /* filterByClasses */, userId, evenPersistent, doit)) {
             if (!doit) {
                 return true;
             }
@@ -8336,9 +8338,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mProcessList.killPackageProcessesLocked(null, appId, userId,
-                        ProcessList.PERSISTENT_PROC_ADJ, false, true, true, true,
-                        reason != null ? reason : "kill uid");
+                mProcessList.killPackageProcessesLocked(null /* packageName */, appId, userId,
+                        ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
+                        true /* callerWillRestart */, true /* doit */, true /* evenPersistent */,
+                        false /* setRemoved */, reason != null ? reason : "kill uid");
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -14573,10 +14576,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                 -1);
                                         mProcessList.killPackageProcessesLocked(ssp,
                                                 UserHandle.getAppId(extraUid),
-                                                userId, ProcessList.INVALID_ADJ,
-                                                false, true, true, false, "change " + ssp);
+                                                userId, ProcessList.INVALID_ADJ, "change " + ssp);
                                     }
-                                    cleanupDisabledPackageComponentsLocked(ssp, userId, killProcess,
+                                    cleanupDisabledPackageComponentsLocked(ssp, userId,
                                             intent.getStringArrayExtra(
                                                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
                                 }
@@ -15194,7 +15196,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             IInstrumentationWatcher watcher, IUiAutomationConnection uiAutomationConnection,
             int userId, String abiOverride) {
         enforceNotIsolatedCaller("startInstrumentation");
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        userId = mUserController.handleIncomingUser(callingPid, callingUid,
                 userId, false, ALLOW_FULL_ONLY, "startInstrumentation", null);
         // Refuse possible leaked file descriptors
         if (arguments != null && arguments.hasFileDescriptors()) {
@@ -15259,6 +15263,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mWatcher = watcher;
             activeInstr.mUiAutomationConnection = uiAutomationConnection;
             activeInstr.mResultClass = className;
+            activeInstr.mHasBackgroundActivityStartsPermission = checkPermission(
+                    START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
+                            == PackageManager.PERMISSION_GRANTED;
 
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
@@ -17232,10 +17239,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             // We don't kill persistent processes.
                             continue;
                         }
-                        if (app.removed) {
-                            procs.add(app);
-                        } else if (app.userId == userHandle && app.hasForegroundActivities()) {
-                            app.removed = true;
+                        if (app.removed
+                                || (app.userId == userHandle && app.hasForegroundActivities())) {
                             procs.add(app);
                         }
                     }
@@ -18080,8 +18085,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized(this) {
                 mProcessList.killPackageProcessesLocked(packageName, UserHandle.getAppId(pkgUid),
-                        userId, ProcessList.FOREGROUND_APP_ADJ, false, true, true, false,
-                        "dep: " + packageName);
+                        userId, ProcessList.FOREGROUND_APP_ADJ, "dep: " + packageName);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);

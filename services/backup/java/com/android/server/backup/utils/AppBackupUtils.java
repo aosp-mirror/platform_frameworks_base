@@ -31,7 +31,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -72,7 +71,7 @@ public class AppBackupUtils {
         }
 
         // 2. they run as a system-level uid
-        if ((app.uid < Process.FIRST_APPLICATION_UID)) {
+        if (UserHandle.isCore(app.uid)) {
             // and the backup is happening for non-system user
             if (userId != UserHandle.USER_SYSTEM && !app.packageName.equals(
                     PACKAGE_MANAGER_SENTINEL)) {

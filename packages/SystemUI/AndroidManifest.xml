@@ -22,6 +22,11 @@
         android:sharedUserId="android.uid.systemui"
         coreApp="true">
 
+    <!-- Using OpenGL ES 2.0 -->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
     <!-- SysUI must be the one to define this permission; its name is
          referenced by the core OS. -->
     <permission android:name="android.permission.systemui.IDENTITY"
@@ -593,11 +598,6 @@
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:process=":ui"
                 android:visibleToInstantApps="true">
-            <intent-filter>
-                <action android:name="android.intent.action.CHOOSER_UI" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.VOICE" />
-            </intent-filter>
         </activity>
 
         <!-- Doze with notifications, run in main sysui process for every user  -->

@@ -117,4 +117,17 @@ public class CaptivePortal implements Parcelable {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Log a captive portal login event.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void logEvent(int eventId, String packageName) {
+        try {
+            ICaptivePortal.Stub.asInterface(mBinder).logEvent(eventId, packageName);
+        } catch (RemoteException e) {
+        }
+    }
 }

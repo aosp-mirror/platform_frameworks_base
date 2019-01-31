@@ -288,6 +288,7 @@ message Atom {
         DebugElapsedClock debug_elapsed_clock = 10046;
         DebugFailingElapsedClock debug_failing_elapsed_clock = 10047;
         NumBiometricsEnrolled num_faces_enrolled = 10048;
+        RoleHolder role_holder = 10049;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2968,6 +2969,9 @@ message BiometricAuthenticated {
     optional bool is_crypto = 3;
     // The client that this acquisition was received for.
     optional android.hardware.biometrics.ClientEnum client = 4;
+    // If authentication requires user confirmation. See BiometricPrompt's
+    // setRequireConfirmation(bool) method.
+    optional bool require_confirmation = 5;
 
     enum State {
         UNKNOWN = 0;
@@ -2977,12 +2981,12 @@ message BiometricAuthenticated {
     }
 
     // State of the current auth attempt.
-    optional State state = 5;
+    optional State state = 6;
     // Time it took to authenticate. For BiometricPrompt where setRequireConfirmation(false) is
     // specified and supported by the biometric modality, this is from the first ACQUIRED_GOOD to
     // AUTHENTICATED. for setRequireConfirmation(true), this is from PENDING_CONFIRMATION to
     // CONFIRMED.
-    optional int64 latency_millis = 6;
+    optional int64 latency_millis = 7;
 }
 
 /**
@@ -3968,6 +3972,20 @@ message NumBiometricsEnrolled {
     optional int32 user = 1;
     // Number of fingerprints registered to that user.
     optional int32 num_enrolled = 2;
+}
+
+/**
+ * A mapping of role holder -> role
+ */
+message RoleHolder {
+    // uid of the role holder
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // package name of the role holder
+    optional string package_name = 2;
+
+    // the role held
+    optional string role = 3;
 }
 
 message AggStats {

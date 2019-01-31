@@ -714,4 +714,7 @@
     <dimen name="harmful_app_message_padding_bottom">24dp</dimen>
     <!-- Line spacing modifier for the message field of the harmful app dialog -->
     <item name="harmful_app_message_line_spacing_modifier" type="dimen">1.22</item>
+
+    <!-- chooser corner radius -->
+    <dimen name="chooser_corner_radius">4dp</dimen>
 </resources>

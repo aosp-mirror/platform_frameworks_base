@@ -29,15 +29,13 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InsetsState.TYPE_IME;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -46,6 +44,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -143,9 +142,11 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -160,6 +161,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InputWindowHandle;
 import android.view.InsetsState.InternalInsetType;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
@@ -168,7 +170,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -518,6 +519,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final PointerEventDispatcher mPointerEventDispatcher;
 
     private final InsetsStateController mInsetsStateController;
+
+    private SurfaceControl mParentSurfaceControl;
+    private InputWindowHandle mPortalWindowHandle;
 
     // Last systemUiVisibility we received from status bar.
     private int mLastStatusBarVisibility = 0;
@@ -888,7 +892,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession).setOpaque(true);
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
+                .setOpaque(true)
+                .setContainerLayer();
         mWindowingLayer = b.setName("Display Root").build();
         mOverlayLayer = b.setName("Display Overlays").build();
 
@@ -1659,35 +1665,42 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int len = devices != null ? devices.length : 0;
         for (int i = 0; i < len; i++) {
             InputDevice device = devices[i];
-            if (!device.isVirtual()) {
-                final int sources = device.getSources();
-                final int presenceFlag = device.isExternal() ?
-                        WindowManagerPolicy.PRESENCE_EXTERNAL :
-                        WindowManagerPolicy.PRESENCE_INTERNAL;
+            // Ignore virtual input device.
+            if (device.isVirtual()) {
+                continue;
+            }
 
-                // TODO(multi-display): Configure on per-display basis.
-                if (mWmService.mIsTouchDevice) {
-                    if ((sources & InputDevice.SOURCE_TOUCHSCREEN) ==
-                            InputDevice.SOURCE_TOUCHSCREEN) {
-                        config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
-                    }
-                } else {
-                    config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
-                }
+            // Check if input device can dispatch events to current display.
+            // If display type is virtual, will follow the default display.
+            if (!mWmService.mInputManager.canDispatchToDisplay(device.getId(),
+                    displayInfo.type == Display.TYPE_VIRTUAL ? DEFAULT_DISPLAY : mDisplayId)) {
+                continue;
+            }
 
-                if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
-                    config.navigation = Configuration.NAVIGATION_TRACKBALL;
-                    navigationPresence |= presenceFlag;
-                } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
-                        && config.navigation == Configuration.NAVIGATION_NONAV) {
-                    config.navigation = Configuration.NAVIGATION_DPAD;
-                    navigationPresence |= presenceFlag;
-                }
+            final int sources = device.getSources();
+            final int presenceFlag = device.isExternal()
+                    ? WindowManagerPolicy.PRESENCE_EXTERNAL : WindowManagerPolicy.PRESENCE_INTERNAL;
 
-                if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
-                    config.keyboard = Configuration.KEYBOARD_QWERTY;
-                    keyboardPresence |= presenceFlag;
+            if (mWmService.mIsTouchDevice) {
+                if ((sources & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN) {
+                    config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
                 }
+            } else {
+                config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+            }
+
+            if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
+                config.navigation = Configuration.NAVIGATION_TRACKBALL;
+                navigationPresence |= presenceFlag;
+            } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
+                    && config.navigation == Configuration.NAVIGATION_NONAV) {
+                config.navigation = Configuration.NAVIGATION_DPAD;
+                navigationPresence |= presenceFlag;
+            }
+
+            if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+                config.keyboard = Configuration.KEYBOARD_QWERTY;
+                keyboardPresence |= presenceFlag;
             }
         }
 
@@ -2412,10 +2425,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             win.getTouchableRegion(mTmpRegion);
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }
-        for (int i = mTapExcludeProvidingWindows.size() - 1; i >= 0; i--) {
-            final WindowState win = mTapExcludeProvidingWindows.valueAt(i);
-            win.amendTapExcludeRegion(mTouchExcludeRegion);
-        }
+        amendWindowTapExcludeRegion(mTouchExcludeRegion);
         // TODO(multi-display): Support docked stacks on secondary displays.
         if (mDisplayId == DEFAULT_DISPLAY && getSplitScreenPrimaryStack() != null) {
             mDividerControllerLocked.getTouchRegion(mTmpRect);
@@ -2424,6 +2434,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         if (mTapDetector != null) {
             mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
+        }
+    }
+
+    /**
+     * Union the region with all the tap exclude region provided by windows on this display.
+     *
+     * @param inOutRegion The region to be amended.
+     */
+    void amendWindowTapExcludeRegion(Region inOutRegion) {
+        for (int i = mTapExcludeProvidingWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = mTapExcludeProvidingWindows.valueAt(i);
+            win.amendTapExcludeRegion(inOutRegion);
         }
     }
 
@@ -3588,6 +3610,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private void updateBounds() {
         calculateBounds(mDisplayInfo, mTmpBounds);
         setBounds(mTmpBounds);
+        if (mPortalWindowHandle != null && mParentSurfaceControl != null) {
+            mPortalWindowHandle.touchableRegion.getBounds(mTmpRect);
+            if (!mTmpBounds.equals(mTmpRect)) {
+                mPortalWindowHandle.touchableRegion.set(mTmpBounds);
+                mPendingTransaction.setInputWindowInfo(mParentSurfaceControl, mPortalWindowHandle);
+            }
+        }
     }
 
     // Determines the current display bounds based on the current state
@@ -4569,7 +4598,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     SurfaceControl.Builder makeChildSurface(WindowContainer child) {
         SurfaceSession s = child != null ? child.getSession() : getSession();
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(s);
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(s).setContainerLayer();
         if (child == null) {
             return b;
         }
@@ -4832,15 +4861,43 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 || mWmService.mForceDesktopModeOnExternalDisplays;
     }
 
-     /**
+    /**
      * Re-parent the DisplayContent's top surfaces, {@link #mWindowingLayer} and
      * {@link #mOverlayLayer} to the specified surfaceControl.
      *
-     * @param surfaceControlHandle The new SurfaceControl, where the DisplayContent's
-     *                             surfaces will be re-parented to.
+     * @param sc The new SurfaceControl, where the DisplayContent's surfaces will be re-parented to.
      */
     void reparentDisplayContent(SurfaceControl sc) {
-        mPendingTransaction.reparent(mWindowingLayer, sc)
-                .reparent(mOverlayLayer, sc);
+        mParentSurfaceControl = sc;
+        if (mPortalWindowHandle == null) {
+            mPortalWindowHandle = createPortalWindowHandle(sc.toString());
+        }
+        mPendingTransaction.setInputWindowInfo(sc, mPortalWindowHandle)
+                .reparent(mWindowingLayer, sc).reparent(mOverlayLayer, sc);
+    }
+
+    /**
+     * Create a portal window handle for input. This window transports any touch to the display
+     * indicated by {@link InputWindowHandle#portalToDisplayId} if the touch hits this window.
+     *
+     * @param name The name of the portal window handle.
+     * @return the new portal window handle.
+     */
+    private InputWindowHandle createPortalWindowHandle(String name) {
+        // Let surface flinger to set the display ID of this input window handle because we don't
+        // know which display the parent surface control is on.
+        final InputWindowHandle portalWindowHandle = new InputWindowHandle(
+                null /* inputApplicationHandle */, null /* clientWindow */, INVALID_DISPLAY);
+        portalWindowHandle.name = name;
+        portalWindowHandle.token = new Binder();
+        portalWindowHandle.layoutParamsFlags =
+                FLAG_SPLIT_TOUCH | FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL;
+        getBounds(mTmpBounds);
+        portalWindowHandle.touchableRegion.set(mTmpBounds);
+        portalWindowHandle.scaleFactor = 1f;
+        portalWindowHandle.ownerPid = Process.myPid();
+        portalWindowHandle.ownerUid = Process.myUid();
+        portalWindowHandle.portalToDisplayId = mDisplayId;
+        return portalWindowHandle;
     }
 }

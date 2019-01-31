@@ -26,7 +26,6 @@ import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.wm.ActivityTaskManagerInternal;
 
 /**
  * Overall information about a uid that has actively running processes.
@@ -43,7 +42,6 @@ public final class UidRecord {
     boolean idle;
     boolean setIdle;
     int numProcs;
-    final ActivityTaskManagerInternal mAtmInternal;
 
     /**
      * Sequence number associated with the {@link #mCurProcState}. This is incremented using
@@ -117,10 +115,9 @@ public final class UidRecord {
     ChangeItem pendingChange;
     int lastReportedChange;
 
-    public UidRecord(int _uid, ActivityTaskManagerInternal atmInternal) {
+    public UidRecord(int _uid) {
         uid = _uid;
         idle = true;
-        mAtmInternal = atmInternal;
         reset();
     }
 
@@ -130,9 +127,6 @@ public final class UidRecord {
 
     public void setCurProcState(int curProcState) {
         mCurProcState = curProcState;
-        if (mAtmInternal != null) {
-            mAtmInternal.onUidProcStateChanged(uid, curProcState);
-        }
     }
 
     public void reset() {

@@ -18,6 +18,7 @@ package android.app.prediction;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.pm.ShortcutInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,6 +31,7 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class AppTarget implements Parcelable {
 
     private final AppTargetId mId;
@@ -42,8 +44,12 @@ public final class AppTarget implements Parcelable {
     private int mRank;
 
     /**
+     * TODO(b/123591863): Add java docs
+     *
      * @hide
      */
+    @SystemApi
+    @TestApi
     public AppTarget(@NonNull AppTargetId id, @NonNull String packageName,
             @Nullable String className, @NonNull UserHandle user) {
         mId = id;
@@ -55,15 +61,19 @@ public final class AppTarget implements Parcelable {
     }
 
     /**
+     * TODO(b/123591863): Add java docs
+     *
      * @hide
      */
-    public AppTarget(@NonNull AppTargetId id, @NonNull ShortcutInfo shortcutInfo) {
+    @SystemApi
+    public AppTarget(@NonNull AppTargetId id, @NonNull ShortcutInfo shortcutInfo,
+            @Nullable String className) {
         mId = id;
         mShortcutInfo = Preconditions.checkNotNull(shortcutInfo);
 
         mPackageName = mShortcutInfo.getPackage();
         mUser = mShortcutInfo.getUserHandle();
-        mClassName = null;
+        mClassName = className;
     }
 
     private AppTarget(Parcel parcel) {
@@ -71,13 +81,12 @@ public final class AppTarget implements Parcelable {
         mShortcutInfo = parcel.readTypedObject(ShortcutInfo.CREATOR);
         if (mShortcutInfo == null) {
             mPackageName = parcel.readString();
-            mClassName = parcel.readString();
             mUser = UserHandle.of(parcel.readInt());
         } else {
             mPackageName = mShortcutInfo.getPackage();
             mUser = mShortcutInfo.getUserHandle();
-            mClassName = null;
         }
+        mClassName = parcel.readString();
         mRank = parcel.readInt();
     }
 
@@ -129,8 +138,29 @@ public final class AppTarget implements Parcelable {
         mRank = rank;
     }
 
+    /**
+     * Returns the rank for the target.
+     */
     public int getRank() {
         return mRank;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!getClass().equals(o != null ? o.getClass() : null)) return false;
+
+        AppTarget other = (AppTarget) o;
+        boolean sameClassName = (mClassName == null && other.mClassName == null)
+                || (mClassName != null && mClassName.equals(other.mClassName));
+        boolean sameShortcutInfo = (mShortcutInfo == null && other.mShortcutInfo == null)
+                || (mShortcutInfo != null && other.mShortcutInfo != null
+                        && mShortcutInfo.getId() == other.mShortcutInfo.getId());
+        return mId.equals(other.mId)
+                && mPackageName.equals(other.mPackageName)
+                && sameClassName
+                && mUser.equals(other.mUser)
+                && sameShortcutInfo
+                && mRank == other.mRank;
     }
 
     @Override
@@ -144,9 +174,9 @@ public final class AppTarget implements Parcelable {
         dest.writeTypedObject(mShortcutInfo, flags);
         if (mShortcutInfo == null) {
             dest.writeString(mPackageName);
-            dest.writeString(mClassName);
             dest.writeInt(mUser.getIdentifier());
         }
+        dest.writeString(mClassName);
         dest.writeInt(mRank);
     }
 

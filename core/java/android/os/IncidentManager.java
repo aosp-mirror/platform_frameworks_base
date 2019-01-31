@@ -16,7 +16,9 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -25,6 +27,11 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Slog;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +101,33 @@ public class IncidentManager {
      * It is possible for the dialog to be downgraded to a notification in some cases.
      */
     public static final int FLAG_CONFIRMATION_DIALOG = 0x1;
+
+    /**
+     * Flag marking fields and incident reports than can be taken
+     * off the device only via adb.
+     */
+    public static final int PRIVACY_POLICY_LOCAL = 0;
+
+    /**
+     * Flag marking fields and incident reports than can be taken
+     * off the device with contemporary consent.
+     */
+    public static final int PRIVACY_POLICY_EXPLICIT = 100;
+
+    /**
+     * Flag marking fields and incident reports than can be taken
+     * off the device with prior consent.
+     */
+    public static final int PRIVACY_POLICY_AUTO = 200;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = { "PRIVACY_POLICY_" }, value = {
+            PRIVACY_POLICY_AUTO,
+            PRIVACY_POLICY_EXPLICIT,
+            PRIVACY_POLICY_LOCAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrivacyPolicy {}
 
     private final Context mContext;
 
@@ -203,6 +237,110 @@ public class IncidentManager {
     }
 
     /**
+     * Record of an incident report that has previously been taken.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static class IncidentReport implements Parcelable, Closeable {
+        private final long mTimestampMs;
+        private final int mPrivacyPolicy;
+        private ParcelFileDescriptor mFileDescriptor;
+
+        public IncidentReport(Parcel in) {
+            mTimestampMs = in.readLong();
+            mPrivacyPolicy = in.readInt();
+            if (in.readInt() != 0) {
+                mFileDescriptor = ParcelFileDescriptor.CREATOR.createFromParcel(in);
+            } else {
+                mFileDescriptor = null;
+            }
+        }
+
+        /**
+         * Close the input stream associated with this entry.
+         */
+        public void close() {
+            try {
+                if (mFileDescriptor != null) {
+                    mFileDescriptor.close();
+                    mFileDescriptor = null;
+                }
+            } catch (IOException e) {
+            }
+        }
+
+        /**
+         * Get the time at which this incident report was taken, in wall clock time
+         * ({@link System#uptimeMillis System.uptimeMillis()} time base).
+         */
+        public long getTimestamp() {
+            return mTimestampMs;
+        }
+
+        /**
+         * Get the privacy level to which this report has been filtered.
+         *
+         * @see #PRIVACY_POLICY_AUTO
+         * @see #PRIVACY_POLICY_EXPLICIT
+         * @see #PRIVACY_POLICY_LOCAL
+         */
+        public long getPrivacyPolicy() {
+            return mPrivacyPolicy;
+        }
+
+        /**
+         * Get the contents of this incident report.
+         */
+        public InputStream getInputStream() throws IOException {
+            if (mFileDescriptor == null) {
+                return null;
+            }
+            return new ParcelFileDescriptor.AutoCloseInputStream(mFileDescriptor);
+        }
+
+        /**
+         * @inheritDoc
+         */
+        public int describeContents() {
+            return mFileDescriptor != null ? Parcelable.CONTENTS_FILE_DESCRIPTOR : 0;
+        }
+
+        /**
+         * @inheritDoc
+         */
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeLong(mTimestampMs);
+            out.writeInt(mPrivacyPolicy);
+            if (mFileDescriptor != null) {
+                out.writeInt(1);
+                mFileDescriptor.writeToParcel(out, flags);
+            } else {
+                out.writeInt(0);
+            }
+        }
+
+        /**
+         * {@link Parcelable.Creator Creator} for {@link IncidentReport}.
+         */
+        public static final Parcelable.Creator<IncidentReport> CREATOR = new Parcelable.Creator() {
+            /**
+             * @inheritDoc
+             */
+            public IncidentReport[] newArray(int size) {
+                return new IncidentReport[size];
+            }
+
+            /**
+             * @inheritDoc
+             */
+            public IncidentReport createFromParcel(Parcel in) {
+                return new IncidentReport(in);
+            }
+        };
+    }
+
+    /**
      * Listener for the status of an incident report being authroized or denied.
      *
      * @see #requestAuthorization
@@ -242,7 +380,7 @@ public class IncidentManager {
     }
 
     /**
-     * Take an incident report and put it in dropbox.
+     * Take an incident report.
      */
     @RequiresPermission(allOf = {
             android.Manifest.permission.DUMP,
@@ -323,6 +461,52 @@ public class IncidentManager {
             // System process going down
             throw new RuntimeException(ex);
         }
+    }
+
+    /**
+     * Get the incident reports that are available for upload for the supplied
+     * broadcast recevier.
+     *
+     * @param receiverClass Class name of broadcast receiver in this package that
+     *   was registered to retrieve reports.
+     *
+     * @return A list of {@link Uri Uris} that are awaiting upload.
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.DUMP,
+            android.Manifest.permission.PACKAGE_USAGE_STATS
+    })
+    public @NonNull List<Uri> getIncidentReportList(String receiverClass) {
+        throw new RuntimeException("implement me");
+    }
+
+    /**
+     * Get the incident report with the given URI id.
+     *
+     * @param uri Identifier of the incident report.
+     *
+     * @return an IncidentReport object, or null if the incident report has been
+     *  expired from disk.
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.DUMP,
+            android.Manifest.permission.PACKAGE_USAGE_STATS
+    })
+    public @Nullable IncidentReport getIncidentReport(Uri uri) {
+        throw new RuntimeException("implement me");
+    }
+
+    /**
+     * Delete the incident report with the given URI id.
+     *
+     * @param uri Identifier of the incident report.
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.DUMP,
+            android.Manifest.permission.PACKAGE_USAGE_STATS
+    })
+    public void deleteIncidentReports(Uri uri) {
+        throw new RuntimeException("implement me");
     }
 
     private void reportIncidentInternal(IncidentReportArgs args) {

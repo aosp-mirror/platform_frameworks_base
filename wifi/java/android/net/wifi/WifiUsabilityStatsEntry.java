@@ -16,9 +16,13 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class makes a subset of
@@ -28,6 +32,24 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class WifiUsabilityStatsEntry implements Parcelable {
+    /** {@hide} */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"PROBE_STATUS_"}, value = {
+            PROBE_STATUS_UNKNOWN,
+            PROBE_STATUS_NO_PROBE,
+            PROBE_STATUS_SUCCESS,
+            PROBE_STATUS_FAILURE})
+    public @interface ProbeStatus {}
+
+    /** Link probe status is unknown */
+    public static final int PROBE_STATUS_UNKNOWN = 0;
+    /** Link probe is not triggered */
+    public static final int PROBE_STATUS_NO_PROBE = 1;
+    /** Link probe is triggered and the result is success */
+    public static final int PROBE_STATUS_SUCCESS = 2;
+    /** Link probe is triggered and the result is failure */
+    public static final int PROBE_STATUS_FAILURE = 3;
+
     /** Absolute milliseconds from device boot when these stats were sampled */
     public final long timeStampMs;
     /** The RSSI (in dBm) at the sample time */
@@ -68,6 +90,14 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
     public final long totalRadioOnFreqTimeMs;
     /** The total number of beacons received from the last radio chip reset */
     public final long totalBeaconRx;
+    /** The status of link probe since last stats update */
+    public final int probeStatusSinceLastUpdate;
+    /** The elapsed time of the most recent link probe since last stats update */
+    public final int probeElapsedTimeMsSinceLastUpdate;
+    /** The MCS rate of the most recent link probe since last stats update */
+    public final int probeMcsRateSinceLastUpdate;
+    /** Rx link speed at the sample time in Mbps */
+    public final int rxLinkSpeedMbps;
 
     /** Constructor function {@hide} */
     public WifiUsabilityStatsEntry(long timeStampMs, int rssi,
@@ -76,7 +106,9 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
             long totalRadioTxTimeMs, long totalRadioRxTimeMs, long totalScanTimeMs,
             long totalNanScanTimeMs, long totalBackgroundScanTimeMs, long totalRoamScanTimeMs,
             long totalPnoScanTimeMs, long totalHotspot2ScanTimeMs, long totalCcaBusyFreqTimeMs,
-            long totalRadioOnFreqTimeMs, long totalBeaconRx) {
+            long totalRadioOnFreqTimeMs, long totalBeaconRx,
+            @ProbeStatus int probeStatusSinceLastUpdate, int probeElapsedTimeMsSinceLastUpdate,
+            int probeMcsRateSinceLastUpdate, int rxLinkSpeedMbps) {
         this.timeStampMs = timeStampMs;
         this.rssi = rssi;
         this.linkSpeedMbps = linkSpeedMbps;
@@ -96,6 +128,10 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
         this.totalCcaBusyFreqTimeMs = totalCcaBusyFreqTimeMs;
         this.totalRadioOnFreqTimeMs = totalRadioOnFreqTimeMs;
         this.totalBeaconRx = totalBeaconRx;
+        this.probeStatusSinceLastUpdate = probeStatusSinceLastUpdate;
+        this.probeElapsedTimeMsSinceLastUpdate = probeElapsedTimeMsSinceLastUpdate;
+        this.probeMcsRateSinceLastUpdate = probeMcsRateSinceLastUpdate;
+        this.rxLinkSpeedMbps = rxLinkSpeedMbps;
     }
 
     /** Implement the Parcelable interface */
@@ -124,6 +160,10 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
         dest.writeLong(totalCcaBusyFreqTimeMs);
         dest.writeLong(totalRadioOnFreqTimeMs);
         dest.writeLong(totalBeaconRx);
+        dest.writeInt(probeStatusSinceLastUpdate);
+        dest.writeInt(probeElapsedTimeMsSinceLastUpdate);
+        dest.writeInt(probeMcsRateSinceLastUpdate);
+        dest.writeInt(rxLinkSpeedMbps);
     }
 
     /** Implement the Parcelable interface */
@@ -137,7 +177,8 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
                     in.readLong(), in.readLong(), in.readLong(),
                     in.readLong(), in.readLong(), in.readLong(),
                     in.readLong(), in.readLong(), in.readLong(),
-                    in.readLong(), in.readLong()
+                    in.readLong(), in.readLong(), in.readInt(),
+                    in.readInt(), in.readInt(), in.readInt()
             );
         }
 
