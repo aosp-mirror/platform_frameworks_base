@@ -20754,6 +20754,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         mModuleInfoProvider.systemReady();
+
+        // Installer service might attempt to install some packages that have been staged for
+        // installation on reboot. Make sure this is the last component to be call since the
+        // installation might require other components to be ready.
+        mInstallerService.restoreAndApplyStagedSessionIfNeeded();
     }
 
     public void waitForAppDataPrepared() {
