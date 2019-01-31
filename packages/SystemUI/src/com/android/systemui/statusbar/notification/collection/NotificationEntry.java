@@ -241,6 +241,13 @@ public final class NotificationEntry {
     }
 
     /**
+     * Returns the data needed for a bubble for this notification, if it exists.
+     */
+    public Notification.BubbleMetadata getBubbleMetadata() {
+        return notification.getNotification().getBubbleMetadata();
+    }
+
+    /**
      * Resets the notification entry to be re-used.
      */
     public void reset() {
