@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -201,11 +202,30 @@ class RollbackStore {
     }
 
     /**
-     * Returns the directory where the code for a package should be stored for
-     * given rollback <code>data</code> and <code>packageName</code>.
+     * Creates a backup copy of the apk or apex for a package.
      */
-    File packageCodePathForAvailableRollback(RollbackData data, String packageName) {
-        return new File(data.backupDir, packageName);
+    static void backupPackageCode(RollbackData data, String packageName, String codePath)
+            throws IOException {
+        File sourceFile = new File(codePath);
+        File targetDir = new File(data.backupDir, packageName);
+        targetDir.mkdirs();
+        File targetFile = new File(targetDir, sourceFile.getName());
+
+        // TODO: Copy by hard link instead to save on cpu and storage space?
+        Files.copy(sourceFile.toPath(), targetFile.toPath());
+    }
+
+    /**
+     * Returns the apk or apex file backed up for the given package.
+     * Returns null if none found.
+     */
+    static File getPackageCode(RollbackData data, String packageName) {
+        File targetDir = new File(data.backupDir, packageName);
+        File[] files = targetDir.listFiles();
+        if (files == null || files.length != 1) {
+            return null;
+        }
+        return files[0];
     }
 
     /**
