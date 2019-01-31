@@ -226,6 +226,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @TestApi
+    @SystemApi
     public static @AppIdInt int getAppId(int uid) {
         return uid % PER_USER_RANGE;
     }
