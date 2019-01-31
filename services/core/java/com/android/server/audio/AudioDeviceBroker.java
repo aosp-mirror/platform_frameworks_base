@@ -600,7 +600,7 @@ import java.util.ArrayList;
                     break;
                 case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE:
                     mDeviceInventory.onSetA2dpSinkConnectionState(
-                            (BtHelper.BluetoothA2dpDeviceInfo) msg.obj, msg.arg1, msg.arg2);
+                            (BtHelper.BluetoothA2dpDeviceInfo) msg.obj, msg.arg1);
                     break;
                 case MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE:
                     mDeviceInventory.onSetA2dpSourceConnectionState(
