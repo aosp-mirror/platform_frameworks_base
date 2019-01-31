@@ -23,7 +23,6 @@ import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.KeyValueListParser;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,6 +36,9 @@ final class AssistantSettings extends ContentObserver {
     private static final boolean DEFAULT_GENERATE_REPLIES = true;
     private static final boolean DEFAULT_GENERATE_ACTIONS = true;
     private static final int DEFAULT_NEW_INTERRUPTION_MODEL_INT = 1;
+    private static final int DEFAULT_MAX_MESSAGES_TO_EXTRACT = 5;
+    @VisibleForTesting
+    static final int DEFAULT_MAX_SUGGESTIONS = 3;
 
     private static final Uri STREAK_LIMIT_URI =
             Settings.Global.getUriFor(Settings.Global.BLOCKING_HELPER_STREAK_LIMIT);
@@ -46,7 +48,6 @@ final class AssistantSettings extends ContentObserver {
     private static final Uri NOTIFICATION_NEW_INTERRUPTION_MODEL_URI =
             Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL);
 
-    private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final ContentResolver mResolver;
     private final int mUserId;
 
@@ -55,12 +56,14 @@ final class AssistantSettings extends ContentObserver {
     @VisibleForTesting
     protected final Runnable mOnUpdateRunnable;
 
-    // Actuall configuration settings.
+    // Actual configuration settings.
     float mDismissToViewRatioLimit;
     int mStreakLimit;
     boolean mGenerateReplies = DEFAULT_GENERATE_REPLIES;
     boolean mGenerateActions = DEFAULT_GENERATE_ACTIONS;
     boolean mNewInterruptionModel;
+    int mMaxMessagesToExtract = DEFAULT_MAX_MESSAGES_TO_EXTRACT;
+    int mMaxSuggestions = DEFAULT_MAX_SUGGESTIONS;
 
     private AssistantSettings(Handler handler, ContentResolver resolver, int userId,
             Runnable onUpdateRunnable) {
@@ -124,27 +127,18 @@ final class AssistantSettings extends ContentObserver {
     }
 
     private void updateFromDeviceConfigFlags() {
-        String generateRepliesFlag = DeviceConfig.getProperty(
-                DeviceConfig.NotificationAssistant.NAMESPACE,
-                DeviceConfig.NotificationAssistant.GENERATE_REPLIES);
-        if (TextUtils.isEmpty(generateRepliesFlag)) {
-            mGenerateReplies = DEFAULT_GENERATE_REPLIES;
-        } else {
-            // parseBoolean returns false for everything that isn't 'true' so there's no need to
-            // sanitise the flag string here.
-            mGenerateReplies = Boolean.parseBoolean(generateRepliesFlag);
-        }
+        mGenerateReplies = DeviceConfigHelper.getBoolean(
+                DeviceConfig.NotificationAssistant.GENERATE_REPLIES, DEFAULT_GENERATE_REPLIES);
 
-        String generateActionsFlag = DeviceConfig.getProperty(
-                DeviceConfig.NotificationAssistant.NAMESPACE,
-                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS);
-        if (TextUtils.isEmpty(generateActionsFlag)) {
-            mGenerateActions = DEFAULT_GENERATE_ACTIONS;
-        } else {
-            // parseBoolean returns false for everything that isn't 'true' so there's no need to
-            // sanitise the flag string here.
-            mGenerateActions = Boolean.parseBoolean(generateActionsFlag);
-        }
+        mGenerateActions = DeviceConfigHelper.getBoolean(
+                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS, DEFAULT_GENERATE_ACTIONS);
+
+        mMaxMessagesToExtract = DeviceConfigHelper.getInteger(
+                DeviceConfig.NotificationAssistant.MAX_MESSAGES_TO_EXTRACT,
+                DEFAULT_MAX_MESSAGES_TO_EXTRACT);
+
+        mMaxSuggestions = DeviceConfigHelper.getInteger(
+                DeviceConfig.NotificationAssistant.MAX_SUGGESTIONS, DEFAULT_MAX_SUGGESTIONS);
 
         mOnUpdateRunnable.run();
     }
@@ -173,6 +167,35 @@ final class AssistantSettings extends ContentObserver {
         }
 
         mOnUpdateRunnable.run();
+    }
+
+    static class DeviceConfigHelper {
+
+        static int getInteger(String key, int defaultValue) {
+            String value = getValue(key);
+            if (TextUtils.isEmpty(value)) {
+                return defaultValue;
+            }
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException ex) {
+                return defaultValue;
+            }
+        }
+
+        static boolean getBoolean(String key, boolean defaultValue) {
+            String value = getValue(key);
+            if (TextUtils.isEmpty(value)) {
+                return defaultValue;
+            }
+            return Boolean.parseBoolean(value);
+        }
+
+        private static String getValue(String key) {
+            return DeviceConfig.getProperty(
+                    DeviceConfig.NotificationAssistant.NAMESPACE,
+                    key);
+        }
     }
 
     public interface Factory {

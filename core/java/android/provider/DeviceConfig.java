@@ -147,6 +147,10 @@ public final class DeviceConfig {
          * Whether the Notification Assistant should generate contextual actions for notifications.
          */
         String GENERATE_ACTIONS = "generate_actions";
+
+        String MAX_MESSAGES_TO_EXTRACT = "max_messages_to_extract";
+
+        String MAX_SUGGESTIONS = "max_suggestions";
     }
 
     /**
