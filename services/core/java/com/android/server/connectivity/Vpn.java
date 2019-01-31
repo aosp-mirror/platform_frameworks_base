@@ -166,6 +166,7 @@ public class Vpn {
     private final NetworkInfo mNetworkInfo;
     private String mPackage;
     private int mOwnerUID;
+    private boolean mIsPackageTargetingAtLeastQ;
     private String mInterface;
     private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
@@ -227,6 +228,7 @@ public class Vpn {
 
         mPackage = VpnConfig.LEGACY_VPN;
         mOwnerUID = getAppUid(mPackage, mUserHandle);
+        mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(mPackage);
 
         try {
             netService.registerObserver(mObserver);
@@ -268,8 +270,11 @@ public class Vpn {
 
     public void updateCapabilities() {
         final Network[] underlyingNetworks = (mConfig != null) ? mConfig.underlyingNetworks : null;
+        // Only apps targeting Q and above can explicitly declare themselves as metered.
+        final boolean isAlwaysMetered =
+                mIsPackageTargetingAtLeastQ && (mConfig == null || mConfig.isMetered);
         updateCapabilities(mContext.getSystemService(ConnectivityManager.class), underlyingNetworks,
-                mNetworkCapabilities);
+                mNetworkCapabilities, isAlwaysMetered);
 
         if (mNetworkAgent != null) {
             mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
@@ -278,11 +283,13 @@ public class Vpn {
 
     @VisibleForTesting
     public static void updateCapabilities(ConnectivityManager cm, Network[] underlyingNetworks,
-            NetworkCapabilities caps) {
+            NetworkCapabilities caps, boolean isAlwaysMetered) {
         int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
         int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
-        boolean metered = false;
+        // VPN's meteredness is OR'd with isAlwaysMetered and meteredness of its underlying
+        // networks.
+        boolean metered = isAlwaysMetered;
         boolean roaming = false;
         boolean congested = false;
 
@@ -725,6 +732,7 @@ public class Vpn {
             Log.i(TAG, "Switched from " + mPackage + " to " + newPackage);
             mPackage = newPackage;
             mOwnerUID = getAppUid(newPackage, mUserHandle);
+            mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(newPackage);
             try {
                 mNetd.allowProtect(mOwnerUID);
             } catch (Exception e) {
@@ -788,6 +796,21 @@ public class Vpn {
             result = -1;
         }
         return result;
+    }
+
+    private boolean doesPackageTargetAtLeastQ(String packageName) {
+        if (VpnConfig.LEGACY_VPN.equals(packageName)) {
+            return true;
+        }
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            ApplicationInfo appInfo =
+                    pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserHandle);
+            return appInfo.targetSdkVersion >= VERSION_CODES.Q;
+        } catch (NameNotFoundException unused) {
+            Log.w(TAG, "Can't find \"" + packageName + "\"");
+            return false;
+        }
     }
 
     public NetworkInfo getNetworkInfo() {
@@ -1078,6 +1101,8 @@ public class Vpn {
                 // as rules are deleted. This prevents data leakage as the rules are moved over.
                 agentDisconnect(oldNetworkAgent);
             }
+            // Set up VPN's capabilities such as meteredness.
+            updateCapabilities();
 
             if (oldConnection != null) {
                 mContext.unbindService(oldConnection);
@@ -1778,6 +1803,7 @@ public class Vpn {
         config.user = profile.key;
         config.interfaze = iface;
         config.session = profile.name;
+        config.isMetered = false;
 
         config.addLegacyRoutes(profile.routes);
         if (!profile.dnsServers.isEmpty()) {
