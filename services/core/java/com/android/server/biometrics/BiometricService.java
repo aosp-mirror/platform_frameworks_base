@@ -719,14 +719,17 @@ public class BiometricService extends SystemService {
             // result back to the client.
             // TODO(b/123378871): Remove when moved.
             if (bundle.getBoolean(BiometricPrompt.KEY_ENABLE_FALLBACK)) {
-                mConfirmDeviceCredentialReceiver = receiver;
-                final KeyguardManager kgm = getContext().getSystemService(KeyguardManager.class);
-                // Use this so we don't need to duplicate logic..
-                final Intent intent = kgm.createConfirmDeviceCredentialIntent(null /* title */,
-                        null /* description */);
-                // Then give it the bundle to do magic behavior..
-                intent.putExtra(KeyguardManager.EXTRA_BIOMETRIC_PROMPT_BUNDLE, bundle);
-                getContext().startActivityAsUser(intent, UserHandle.CURRENT);
+                mHandler.post(() -> {
+                    mConfirmDeviceCredentialReceiver = receiver;
+                    final KeyguardManager kgm = getContext().getSystemService(
+                            KeyguardManager.class);
+                    // Use this so we don't need to duplicate logic..
+                    final Intent intent = kgm.createConfirmDeviceCredentialIntent(null /* title */,
+                            null /* description */);
+                    // Then give it the bundle to do magic behavior..
+                    intent.putExtra(KeyguardManager.EXTRA_BIOMETRIC_PROMPT_BUNDLE, bundle);
+                    getContext().startActivityAsUser(intent, UserHandle.CURRENT);
+                });
                 return;
             }
 
