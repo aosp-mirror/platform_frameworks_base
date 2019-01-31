@@ -157,7 +157,10 @@ public abstract class DataService extends Service {
                                   @Nullable LinkProperties linkProperties,
                                   @Nullable DataServiceCallback callback) {
             // The default implementation is to return unsupported.
-            callback.onSetupDataCallComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED, null);
+            if (callback != null) {
+                callback.onSetupDataCallComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED,
+                        null);
+            }
         }
 
         /**
@@ -176,7 +179,9 @@ public abstract class DataService extends Service {
         public void deactivateDataCall(int cid, @DeactivateDataReason int reason,
                                        @Nullable DataServiceCallback callback) {
             // The default implementation is to return unsupported.
-            callback.onDeactivateDataCallComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            if (callback != null) {
+                callback.onDeactivateDataCallComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            }
         }
 
         /**
@@ -190,7 +195,10 @@ public abstract class DataService extends Service {
         public void setInitialAttachApn(DataProfile dataProfile, boolean isRoaming,
                                         @Nullable DataServiceCallback callback) {
             // The default implementation is to return unsupported.
-            callback.onSetInitialAttachApnComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            if (callback != null) {
+                callback.onSetInitialAttachApnComplete(
+                        DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            }
         }
 
         /**
@@ -206,7 +214,9 @@ public abstract class DataService extends Service {
         public void setDataProfile(List<DataProfile> dps, boolean isRoaming,
                                    @Nullable DataServiceCallback callback) {
             // The default implementation is to return unsupported.
-            callback.onSetDataProfileComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            if (callback != null) {
+                callback.onSetDataProfileComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            }
         }
 
         /**
