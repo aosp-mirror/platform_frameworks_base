@@ -70,8 +70,13 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 public class BubbleExpandedView extends LinearLayout implements View.OnClickListener {
     private static final String TAG = "BubbleExpandedView";
 
+    // Configurable via bubble settings; just for testing
+    private boolean mUseFooter;
+    private boolean mShowOnTop;
+
     // The triangle pointing to the expanded view
     private View mPointerView;
+    private int mPointerMargin;
 
     // Header
     private View mHeaderView;
@@ -90,6 +95,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     private int mMinHeight;
     private int mHeaderHeight;
+    private int mBubbleHeight;
+    private int mPermissionHeight;
 
     private NotificationEntry mEntry;
     private PackageManager mPm;
@@ -150,6 +157,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPm = context.getPackageManager();
         mMinHeight = getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_default_height);
+        mPointerMargin = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_margin);
         try {
             mNotificationManagerService = INotificationManager.Stub.asInterface(
                     ServiceManager.getServiceOrThrow(Context.NOTIFICATION_SERVICE));
@@ -172,8 +180,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         int bgColor = ta.getColor(0, Color.WHITE);
         ta.recycle();
 
+        mShowOnTop = BubbleController.showBubblesAtTop(getContext());
+        mUseFooter = BubbleController.useFooter(getContext());
+
         ShapeDrawable triangleDrawable = new ShapeDrawable(
-                TriangleShape.create(width, height, true /* pointUp */));
+                TriangleShape.create(width, height, mShowOnTop /* pointUp */));
         triangleDrawable.setTint(bgColor);
         mPointerView.setBackground(triangleDrawable);
 
@@ -195,6 +206,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
         mHeaderHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
+        mPermissionHeight = getContext().getResources().getDimensionPixelSize(
+                R.dimen.bubble_permission_height);
         mHeaderView = findViewById(R.id.header_layout);
         mDeepLinkIcon = findViewById(R.id.deep_link_button);
         mSettingsIcon = findViewById(R.id.settings_button);
@@ -226,6 +239,15 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             activityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
             return view.onApplyWindowInsets(insets);
         });
+
+        if (!mShowOnTop) {
+            removeView(mPointerView);
+            if (mUseFooter) {
+                removeView(viewWrapper);
+                addView(viewWrapper);
+            }
+            addView(mPointerView);
+        }
     }
 
     /**
@@ -332,7 +354,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
             // Use notification view
             mNotifRow = mEntry.getRow();
-            addView(mNotifRow);
+            if (mShowOnTop) {
+                addView(mNotifRow);
+            } else {
+                addView(mNotifRow, mUseFooter ? 0 : 1);
+            }
         }
         updateView();
     }
@@ -343,6 +369,17 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         }
         mActivityView.performBackPress();
         return true;
+    }
+
+    /**
+     * @return total height that the expanded view occupies.
+     */
+    int getExpandedSize() {
+        int chromeHeight = mPermissionView.getVisibility() != View.VISIBLE
+                ? mHeaderHeight
+                : mPermissionHeight;
+        return mBubbleHeight + mPointerView.getHeight() + mPointerMargin
+                + chromeHeight;
     }
 
     void updateHeight() {
@@ -358,12 +395,19 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                         ? data.getDesiredHeight()
                         : mMinHeight;
             }
-            int max = mStackView.getMaxExpandedHeight() - mHeaderHeight;
+            int chromeHeight = mPermissionView.getVisibility() != View.VISIBLE
+                    ? mHeaderHeight
+                    : mPermissionHeight;
+            int max = mStackView.getMaxExpandedHeight() - chromeHeight - mPointerView.getHeight()
+                    - mPointerMargin;
             int height = Math.min(desiredHeight, max);
             height = Math.max(height, mMinHeight);
             LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
             lp.height = height;
+            mBubbleHeight = height;
             mActivityView.setLayoutParams(lp);
+        } else {
+            mBubbleHeight = mNotifRow != null ? mNotifRow.getIntrinsicHeight() : mMinHeight;
         }
     }
 
@@ -412,6 +456,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             } else if (mOnBubbleBlockedListener != null) {
                 mOnBubbleBlockedListener.onBubbleBlocked(mEntry);
             }
+            mStackView.onExpandedHeightChanged();
             logBubbleClickEvent(mEntry.notification,
                     allowed ? StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_OPT_IN :
                             StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_OPT_OUT);

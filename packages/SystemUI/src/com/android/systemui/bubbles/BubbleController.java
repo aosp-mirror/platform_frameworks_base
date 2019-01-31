@@ -80,15 +80,20 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     // Enables some subset of notifs to automatically become bubbles
     private static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
 
-    // Secure settings flags
-    // Feature level flag
+    /** Flag to enable or disable the entire feature */
     private static final String ENABLE_BUBBLES = "experiment_enable_bubbles";
-    // Auto bubble flags set whether different notification types should be presented as a bubble
+    /** Auto bubble flags set whether different notif types should be presented as a bubble */
     private static final String ENABLE_AUTO_BUBBLE_MESSAGES = "experiment_autobubble_messaging";
     private static final String ENABLE_AUTO_BUBBLE_ONGOING = "experiment_autobubble_ongoing";
     private static final String ENABLE_AUTO_BUBBLE_ALL = "experiment_autobubble_all";
-    // Use an activity view for an auto-bubbled notification if it has an appropriate content intent
+
+    /** Use an activityView for an auto-bubbled notifs if it has an appropriate content intent */
     private static final String ENABLE_BUBBLE_CONTENT_INTENT = "experiment_bubble_content_intent";
+
+    /** Whether the row of bubble circles are anchored to the top or bottom of the screen. */
+    private static final String ENABLE_BUBBLES_AT_TOP = "experiment_enable_top_bubbles";
+    /** Flag to position the header below the activity view */
+    private static final String ENABLE_BUBBLE_FOOTER = "experiment_enable_bubble_footer";
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -546,6 +551,22 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     private static boolean areBubblesEnabled(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 ENABLE_BUBBLES, 1) != 0;
+    }
+
+    /**
+     * Whether bubbles should be positioned at the top of the screen or not.
+     */
+    public static boolean showBubblesAtTop(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                ENABLE_BUBBLES_AT_TOP, 0) != 0;
+    }
+
+    /**
+     * Whether the bubble chrome should display as a footer or not (in which case it's a header).
+     */
+    public static boolean useFooter(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                ENABLE_BUBBLE_FOOTER, 0) != 0;
     }
 
     /** PinnedStackListener that dispatches IME visibility updates to the stack. */

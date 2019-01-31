@@ -19,6 +19,7 @@ package com.android.systemui.bubbles.animation;
 import static org.junit.Assert.assertEquals;
 
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -40,7 +41,8 @@ import org.mockito.Spy;
 public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestCase {
 
     @Spy
-    private ExpandedAnimationController mExpandedController = new ExpandedAnimationController();
+    private ExpandedAnimationController mExpandedController =
+            new ExpandedAnimationController(new Point(500, 1000) /* displaySize */);
 
     private int mStackOffset;
     private float mBubblePadding;
@@ -167,7 +169,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
             assertEquals(mBubblePadding + (i * (mBubbleSize + mBubblePadding)),
                     mLayout.getChildAt(i).getTranslationX(),
                     2f);
-            assertEquals(mBubblePadding + mCutoutInsetSize,
+            assertEquals(mExpandedController.getExpandedY(),
                     mLayout.getChildAt(i).getTranslationY(), 2f);
 
             if (i < mMaxRenderedBubbles) {
