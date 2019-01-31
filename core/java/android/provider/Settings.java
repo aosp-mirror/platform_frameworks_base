@@ -5874,30 +5874,24 @@ public final class Settings {
                 "unknown_sources_default_reversed";
 
         /**
-         * Comma-separated list of location providers that activities may access. Do not rely on
-         * this value being present in settings.db or on ContentObserver notifications on the
+         * Comma-separated list of location providers that are accessible. Do not rely on
+         * this value being present or correct, or on ContentObserver notifications on the
          * corresponding Uri.
          *
-         * @deprecated Providers should not be controlled individually. See {@link #LOCATION_MODE}
-          * documentation for information on reading/writing location information.
+         * @deprecated The preferred methods for checking provider status and listening for changes
+         * are via {@link LocationManager#isProviderEnabled(String)} and
+         * {@link LocationManager#PROVIDERS_CHANGED_ACTION}.
          */
         @Deprecated
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
 
         /**
-         * The degree of location access enabled by the user.
-         * <p>
-         * When used with {@link #putInt(ContentResolver, String, int)}, must be one of {@link
-         * #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY}, {@link
-         * #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}. When used with {@link
-         * #getInt(ContentResolver, String)}, the caller must gracefully handle additional location
-         * modes that might be added in the future.
-         * <p>
-         * Note: do not rely on this value being present in settings.db or on ContentObserver
-         * notifications for the corresponding Uri. Use {@link LocationManager#MODE_CHANGED_ACTION}
-         * to receive changes in this value.
+         * The current location mode of the device. Do not rely on this value being present or on
+         * ContentObserver notifications on the corresponding Uri.
          *
-         * @deprecated To check location mode, use {@link LocationManager#isLocationEnabled()}.
+         * @deprecated The preferred methods for checking location mode and listening for changes
+         * are via {@link LocationManager#isLocationEnabled()} and
+         * {@link LocationManager#MODE_CHANGED_ACTION}.
          */
         @Deprecated
         public static final String LOCATION_MODE = "location_mode";
@@ -5924,7 +5918,7 @@ public final class Settings {
         public static final int LOCATION_CHANGER_QUICK_SETTINGS = 2;
 
         /**
-         * Location access disabled.
+         * Location mode is off.
          *
          * @deprecated See {@link #LOCATION_MODE}.
          */
@@ -5932,32 +5926,39 @@ public final class Settings {
         public static final int LOCATION_MODE_OFF = 0;
 
         /**
-         * Network Location Provider disabled, but GPS and other sensors enabled.
+         * This mode no longer has any distinct meaning, but is interpreted as the location mode is
+         * on.
          *
-         * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
-         *             get the status of a location provider, use
-         *             {@link LocationManager#isProviderEnabled(String)}.
+         * @deprecated See {@link #LOCATION_MODE_ON}.
          */
         @Deprecated
         public static final int LOCATION_MODE_SENSORS_ONLY = 1;
 
         /**
-         * Reduced power usage, such as limiting the number of GPS updates per hour. Requests
-         * with {@link android.location.Criteria#POWER_HIGH} may be downgraded to
-         * {@link android.location.Criteria#POWER_MEDIUM}.
+         * This mode no longer has any distinct meaning, but is interpreted as the location mode is
+         * on.
          *
-         * @deprecated See {@link #LOCATION_MODE}.
+         * @deprecated See {@link #LOCATION_MODE_ON}.
          */
         @Deprecated
         public static final int LOCATION_MODE_BATTERY_SAVING = 2;
 
         /**
-         * Best-effort location computation allowed.
+         * This mode no longer has any distinct meaning, but is interpreted as the location mode is
+         * on.
+         *
+         * @deprecated See {@link #LOCATION_MODE_ON}.
+         */
+        @Deprecated
+        public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
+
+        /**
+         * Location mode is on.
          *
          * @deprecated See {@link #LOCATION_MODE}.
          */
         @Deprecated
-        public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
+        public static final int LOCATION_MODE_ON = LOCATION_MODE_HIGH_ACCURACY;
 
         /**
          * A flag containing settings used for biometric weak
