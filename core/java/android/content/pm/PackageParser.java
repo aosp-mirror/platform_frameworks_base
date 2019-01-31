@@ -1533,7 +1533,7 @@ public class PackageParser {
         SigningDetails verified;
         if (skipVerify) {
             // systemDir APKs are already trusted, save time by not verifying
-            verified = ApkSignatureVerifier.plsCertsNoVerifyOnlyCerts(
+            verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
                         apkPath, minSignatureScheme);
         } else {
             verified = ApkSignatureVerifier.verify(apkPath, minSignatureScheme);
