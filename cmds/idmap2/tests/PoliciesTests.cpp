@@ -27,44 +27,42 @@ using android::idmap2::PolicyFlags;
 namespace android::idmap2 {
 
 TEST(PoliciesTests, PoliciesToBitmasks) {
-  const Result<PolicyBitmask> bitmask1 = PoliciesToBitmask({"system"}, std::cerr);
-  ASSERT_NE(bitmask1, kResultError);
-  ASSERT_EQ(bitmask1, PolicyFlags::POLICY_SYSTEM_PARTITION);
+  const auto bitmask1 = PoliciesToBitmask({"system"});
+  ASSERT_TRUE(bitmask1);
+  ASSERT_EQ(*bitmask1, PolicyFlags::POLICY_SYSTEM_PARTITION);
 
-  const Result<PolicyBitmask> bitmask2 = PoliciesToBitmask({"system", "vendor"}, std::cerr);
-  ASSERT_NE(bitmask2, kResultError);
-  ASSERT_EQ(bitmask2, PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION);
+  const auto bitmask2 = PoliciesToBitmask({"system", "vendor"});
+  ASSERT_TRUE(bitmask2);
+  ASSERT_EQ(*bitmask2, PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION);
 
-  const Result<PolicyBitmask> bitmask3 = PoliciesToBitmask({"vendor", "system"}, std::cerr);
-  ASSERT_NE(bitmask3, kResultError);
-  ASSERT_EQ(bitmask3, PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION);
+  const auto bitmask3 = PoliciesToBitmask({"vendor", "system"});
+  ASSERT_TRUE(bitmask3);
+  ASSERT_EQ(*bitmask3, PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION);
 
-  const Result<PolicyBitmask> bitmask4 =
-      PoliciesToBitmask({"public", "product", "system", "vendor"}, std::cerr);
-  ASSERT_NE(bitmask4, kResultError);
-  ASSERT_EQ(bitmask4, PolicyFlags::POLICY_PUBLIC | PolicyFlags::POLICY_PRODUCT_PARTITION |
-                          PolicyFlags::POLICY_SYSTEM_PARTITION |
-                          PolicyFlags::POLICY_VENDOR_PARTITION);
+  const auto bitmask4 = PoliciesToBitmask({"public", "product", "system", "vendor"});
+  ASSERT_TRUE(bitmask4);
+  ASSERT_EQ(*bitmask4, PolicyFlags::POLICY_PUBLIC | PolicyFlags::POLICY_PRODUCT_PARTITION |
+                           PolicyFlags::POLICY_SYSTEM_PARTITION |
+                           PolicyFlags::POLICY_VENDOR_PARTITION);
 
-  const Result<PolicyBitmask> bitmask5 =
-      PoliciesToBitmask({"system", "system", "system"}, std::cerr);
-  ASSERT_NE(bitmask5, kResultError);
-  ASSERT_EQ(bitmask5, PolicyFlags::POLICY_SYSTEM_PARTITION);
+  const auto bitmask5 = PoliciesToBitmask({"system", "system", "system"});
+  ASSERT_TRUE(bitmask5);
+  ASSERT_EQ(*bitmask5, PolicyFlags::POLICY_SYSTEM_PARTITION);
 
-  const Result<PolicyBitmask> bitmask6 = PoliciesToBitmask({""}, std::cerr);
-  ASSERT_EQ(bitmask6, kResultError);
+  const auto bitmask6 = PoliciesToBitmask({""});
+  ASSERT_FALSE(bitmask6);
 
-  const Result<PolicyBitmask> bitmask7 = PoliciesToBitmask({"foo"}, std::cerr);
-  ASSERT_EQ(bitmask7, kResultError);
+  const auto bitmask7 = PoliciesToBitmask({"foo"});
+  ASSERT_FALSE(bitmask7);
 
-  const Result<PolicyBitmask> bitmask8 = PoliciesToBitmask({"system", "foo"}, std::cerr);
-  ASSERT_EQ(bitmask8, kResultError);
+  const auto bitmask8 = PoliciesToBitmask({"system", "foo"});
+  ASSERT_FALSE(bitmask8);
 
-  const Result<PolicyBitmask> bitmask9 = PoliciesToBitmask({"system", ""}, std::cerr);
-  ASSERT_EQ(bitmask9, kResultError);
+  const auto bitmask9 = PoliciesToBitmask({"system", ""});
+  ASSERT_FALSE(bitmask9);
 
-  const Result<PolicyBitmask> bitmask10 = PoliciesToBitmask({"system "}, std::cerr);
-  ASSERT_EQ(bitmask10, kResultError);
+  const auto bitmask10 = PoliciesToBitmask({"system "});
+  ASSERT_FALSE(bitmask10);
 }
 
 }  // namespace android::idmap2

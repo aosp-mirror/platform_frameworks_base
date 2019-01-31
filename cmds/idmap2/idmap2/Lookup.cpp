@@ -53,6 +53,7 @@ using android::ResTable_config;
 using android::StringPiece16;
 using android::base::StringPrintf;
 using android::idmap2::CommandLineOptions;
+using android::idmap2::Error;
 using android::idmap2::IdmapHeader;
 using android::idmap2::ResourceId;
 using android::idmap2::Result;
@@ -71,17 +72,17 @@ Result<ResourceId> WARN_UNUSED ParseResReference(const AssetManager2& am, const 
   ResourceId resid;
   resid = strtol(res.c_str(), &endptr, kBaseHex);
   if (*endptr == '\0') {
-    return {resid};
+    return resid;
   }
 
   // next, try to parse as a package:type/name string
   resid = am.GetResourceId(res, "", fallback_package);
   if (is_valid_resid(resid)) {
-    return {resid};
+    return resid;
   }
 
   // end of the road: res could not be parsed
-  return {};
+  return Error("failed to obtain resource id for %s", res.c_str());
 }
 
 Result<std::string> WARN_UNUSED GetValue(const AssetManager2& am, ResourceId resid) {
@@ -90,7 +91,7 @@ Result<std::string> WARN_UNUSED GetValue(const AssetManager2& am, ResourceId res
   uint32_t flags;
   ApkAssetsCookie cookie = am.GetResource(resid, false, 0, &value, &config, &flags);
   if (cookie == kInvalidCookie) {
-    return {};
+    return Error("no resource 0x%08x in asset manager", resid);
   }
 
   std::string out;
@@ -128,31 +129,31 @@ Result<std::string> WARN_UNUSED GetValue(const AssetManager2& am, ResourceId res
       out.append(StringPrintf("dataType=0x%02x data=0x%08x", value.dataType, value.data));
       break;
   }
-  return {out};
+  return out;
 }
 
 Result<std::string> GetTargetPackageNameFromManifest(const std::string& apk_path) {
   const auto zip = ZipFile::Open(apk_path);
   if (!zip) {
-    return {};
+    return Error("failed to open %s as zip", apk_path.c_str());
   }
   const auto entry = zip->Uncompress("AndroidManifest.xml");
   if (!entry) {
-    return {};
+    return Error("failed to uncompress AndroidManifest.xml in %s", apk_path.c_str());
   }
   const auto xml = Xml::Create(entry->buf, entry->size);
   if (!xml) {
-    return {};
+    return Error("failed to create XML buffer");
   }
   const auto tag = xml->FindTag("overlay");
   if (!tag) {
-    return {};
+    return Error("failed to find <overlay> tag");
   }
   const auto iter = tag->find("targetPackage");
   if (iter == tag->end()) {
-    return {};
+    return Error("failed to find targetPackage attribute");
   }
-  return {iter->second};
+  return iter->second;
 }
 }  // namespace
 

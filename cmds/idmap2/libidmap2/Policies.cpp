@@ -16,7 +16,6 @@
 
 #include <iterator>
 #include <map>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -39,16 +38,14 @@ const std::map<android::StringPiece, PolicyFlags> kStringToFlag = {
 };
 }  // namespace
 
-Result<PolicyBitmask> PoliciesToBitmask(const std::vector<std::string>& policies,
-                                        std::ostream& err) {
+Result<PolicyBitmask> PoliciesToBitmask(const std::vector<std::string>& policies) {
   PolicyBitmask bitmask = 0;
   for (const std::string& policy : policies) {
     const auto iter = kStringToFlag.find(policy);
     if (iter != kStringToFlag.end()) {
       bitmask |= iter->second;
     } else {
-      err << "error: unknown policy \"" << policy << "\"";
-      return kResultError;
+      return Error("unknown policy \"%s\"", policy.c_str());
     }
   }
 

@@ -34,7 +34,6 @@
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
-#include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 
 #include "idmap2d/Idmap2Service.h"
@@ -45,7 +44,6 @@ using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;
 using android::idmap2::PolicyBitmask;
-using android::idmap2::Result;
 using android::idmap2::utils::kIdmapCacheDir;
 using android::idmap2::utils::kIdmapFilePermissionMask;
 using android::idmap2::utils::UidHasWriteAccessToPath;

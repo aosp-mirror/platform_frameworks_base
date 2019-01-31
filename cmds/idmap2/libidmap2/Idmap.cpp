@@ -121,7 +121,9 @@ const LoadedPackage* GetPackageAtIndex0(const LoadedArsc& loaded_arsc) {
 Result<uint32_t> GetCrc(const ZipFile& zip) {
   const Result<uint32_t> a = zip.Crc("resources.arsc");
   const Result<uint32_t> b = zip.Crc("AndroidManifest.xml");
-  return a && b ? Result<uint32_t>(*a ^ *b) : kResultError;
+  return a && b
+             ? Result<uint32_t>(*a ^ *b)
+             : Error("Couldn't get CRC for \"%s\"", a ? "AndroidManifest.xml" : "resources.arsc");
 }
 
 }  // namespace
@@ -355,9 +357,9 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
     return nullptr;
   }
 
-  Result<utils::OverlayManifestInfo> overlay_info =
-      utils::ExtractOverlayManifestInfo(overlay_apk_path, out_error);
+  auto overlay_info = utils::ExtractOverlayManifestInfo(overlay_apk_path);
   if (!overlay_info) {
+    out_error << "error: " << overlay_info.GetErrorMessage() << std::endl;
     return nullptr;
   }
 
