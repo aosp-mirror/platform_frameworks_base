@@ -24,6 +24,7 @@
 #include "core_jni_helpers.h"
 
 #include <hwui/Bitmap.h>
+#include <HardwareBitmapUploader.h>
 
 #include <SkAndroidCodec.h>
 #include <SkEncodedImageFormat.h>
@@ -256,6 +257,17 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         // This is currently the only way to know that we should decode to F16.
         colorType = codec->computeOutputColorType(colorType);
     }
+
+    const bool isHardware = !requireMutable
+        && (allocator == ImageDecoder::kDefault_Allocator ||
+            allocator == ImageDecoder::kHardware_Allocator)
+        && colorType != kGray_8_SkColorType;
+
+    if (colorType == kRGBA_F16_SkColorType && isHardware &&
+            !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        colorType = kN32_SkColorType;
+    }
+
     sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
     colorSpace = codec->computeOutputColorSpace(colorType, colorSpace);
     decodeInfo = decodeInfo.makeColorType(colorType).makeColorSpace(colorSpace);
@@ -449,10 +461,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (requireMutable) {
         bitmapCreateFlags |= bitmap::kBitmapCreateFlag_Mutable;
     } else {
-        if ((allocator == ImageDecoder::kDefault_Allocator ||
-             allocator == ImageDecoder::kHardware_Allocator)
-            && bm.colorType() != kAlpha_8_SkColorType)
-        {
+        if (isHardware) {
             sk_sp<Bitmap> hwBitmap = Bitmap::allocateHardwareBitmap(bm);
             if (hwBitmap) {
                 hwBitmap->setImmutable();
