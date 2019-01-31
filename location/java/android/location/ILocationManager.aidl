@@ -93,10 +93,10 @@ interface ILocationManager
     ProviderProperties getProviderProperties(String provider);
     boolean isProviderPackage(String packageName);
 
-    void setLocationControllerExtraPackage(String packageName);
-    String getLocationControllerExtraPackage();
-    void setLocationControllerExtraPackageEnabled(boolean enabled);
-    boolean isLocationControllerExtraPackageEnabled();
+    void setExtraLocationControllerPackage(String packageName);
+    String getExtraLocationControllerPackage();
+    void setExtraLocationControllerPackageEnabled(boolean enabled);
+    boolean isExtraLocationControllerPackageEnabled();
 
     boolean isProviderEnabledForUser(String provider, int userId);
     boolean isLocationEnabledForUser(int userId);
