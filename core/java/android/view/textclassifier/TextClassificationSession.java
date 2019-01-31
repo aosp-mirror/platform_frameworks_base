@@ -71,10 +71,23 @@ final class TextClassificationSession implements TextClassifier {
 
     @Override
     public void onSelectionEvent(SelectionEvent event) {
-        checkDestroyed();
-        Preconditions.checkNotNull(event);
-        if (mEventHelper.sanitizeEvent(event)) {
-            mDelegate.onSelectionEvent(event);
+        try {
+            if (mEventHelper.sanitizeEvent(event)) {
+                mDelegate.onSelectionEvent(event);
+            }
+        } catch (Exception e) {
+            // Avoid crashing for event reporting.
+            Log.e(LOG_TAG, "Error reporting text classifier selection event", e);
+        }
+    }
+
+    @Override
+    public void onTextClassifierEvent(TextClassifierEvent event) {
+        try {
+            mDelegate.onTextClassifierEvent(event);
+        } catch (Exception e) {
+            // Avoid crashing for event reporting.
+            Log.e(LOG_TAG, "Error reporting text classifier event", e);
         }
     }
 
