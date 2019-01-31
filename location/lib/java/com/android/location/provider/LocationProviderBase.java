@@ -36,6 +36,8 @@ import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base class for location providers implemented as unbundled services.
@@ -88,6 +90,7 @@ public abstract class LocationProviderBase {
     @Nullable private volatile ILocationProviderManager mManager;
     private volatile ProviderProperties mProperties;
     private volatile boolean mEnabled;
+    private final ArrayList<String> mAdditionalProviderPackages;
 
     public LocationProviderBase(String tag, ProviderPropertiesUnbundled properties) {
         mTag = tag;
@@ -99,6 +102,7 @@ public abstract class LocationProviderBase {
         mManager = null;
         mProperties = properties.getProviderProperties();
         mEnabled = true;
+        mAdditionalProviderPackages = new ArrayList<>(0);
     }
 
     public IBinder getBinder() {
@@ -153,6 +157,29 @@ public abstract class LocationProviderBase {
         if (manager != null) {
             try {
                 manager.onSetProperties(mProperties);
+            } catch (RemoteException | RuntimeException e) {
+                Log.w(mTag, e);
+            }
+        }
+    }
+
+    /**
+     * Sets a list of additional packages that should be considered as part of this location
+     * provider for the purposes of generating locations. This should generally only be used when
+     * another package may issue location requests on behalf of this package in the course of
+     * providing location. This will inform location services to treat the other packages as
+     * location providers as well.
+     */
+    public void setAdditionalProviderPackages(List<String> packageNames) {
+        synchronized (mBinder) {
+            mAdditionalProviderPackages.clear();
+            mAdditionalProviderPackages.addAll(packageNames);
+        }
+
+        ILocationProviderManager manager = mManager;
+        if (manager != null) {
+            try {
+                manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
             } catch (RemoteException | RuntimeException e) {
                 Log.w(mTag, e);
             }
@@ -275,6 +302,9 @@ public abstract class LocationProviderBase {
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
+                    if (!mAdditionalProviderPackages.isEmpty()) {
+                        manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
+                    }
                     manager.onSetProperties(mProperties);
                     manager.onSetEnabled(mEnabled);
                 } catch (RemoteException e) {

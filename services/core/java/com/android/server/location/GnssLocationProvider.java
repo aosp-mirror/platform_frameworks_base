@@ -368,7 +368,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private int mC2KServerPort;
     private boolean mSuplEsEnabled = false;
 
-    private final Context mContext;
     private final Looper mLooper;
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusListenerHelper mGnssStatusListenerHelper;
@@ -562,9 +561,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     public GnssLocationProvider(Context context, LocationProviderManager locationProviderManager,
             Looper looper) {
-        super(locationProviderManager);
+        super(context, locationProviderManager);
 
-        mContext = context;
         mLooper = looper;
 
         // Create a wake lock

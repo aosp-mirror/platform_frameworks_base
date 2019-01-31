@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationProvider;
 import android.os.Bundle;
@@ -41,9 +42,9 @@ public class MockProvider extends AbstractLocationProvider {
     private long mStatusUpdateTime;
     private Bundle mExtras;
 
-    public MockProvider(
+    public MockProvider(Context context,
             LocationProviderManager locationProviderManager, ProviderProperties properties) {
-        super(locationProviderManager);
+        super(context, locationProviderManager);
 
         mEnabled = true;
         mLocation = null;
