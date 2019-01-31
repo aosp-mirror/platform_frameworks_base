@@ -50,7 +50,7 @@ java_library_static {
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
-        "android.hidl.manager-V1.0-java",
+        "android.hidl.manager-V1.2-java",
         "netd_aidl_interface-java",
         "netd_event_listener_interface-java",
     ],
