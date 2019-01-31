@@ -38,7 +38,7 @@ public class AmbientDisplayConfiguration {
         return pulseOnNotificationEnabled(user)
                 || pulseOnLongPressEnabled(user)
                 || alwaysOnEnabled(user)
-                || wakeLockScreenGestureEnabled(user);
+                || wakeScreenGestureEnabled(user);
     }
 
     public boolean pulseOnNotificationEnabled(int user) {
@@ -74,11 +74,6 @@ public class AmbientDisplayConfiguration {
 
     public boolean doubleTapSensorAvailable() {
         return !TextUtils.isEmpty(doubleTapSensorType());
-    }
-
-    public boolean wakeLockScreenGestureEnabled(int user) {
-        return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE, user)
-                && wakeScreenGestureAvailable();
     }
 
     public boolean wakeScreenGestureAvailable() {
