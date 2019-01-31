@@ -86,7 +86,7 @@ static EGLDisplay getUploadEglDisplay() {
     return sEglManager.eglDisplay();
 }
 
-static bool hasFP16Support() {
+bool HardwareBitmapUploader::hasFP16Support() {
     static std::once_flag sOnce;
     static bool hasFP16Support = false;
 
@@ -127,7 +127,7 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap) {
             formatInfo.type = GL_UNSIGNED_BYTE;
             break;
         case kRGBA_F16_SkColorType:
-            formatInfo.isSupported = hasFP16Support();
+            formatInfo.isSupported = HardwareBitmapUploader::hasFP16Support();
             if (formatInfo.isSupported) {
                 formatInfo.type = GL_HALF_FLOAT;
                 formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_FP16;

@@ -20,10 +20,12 @@
 
 namespace android::uirenderer {
 
-class HardwareBitmapUploader {
+class ANDROID_API HardwareBitmapUploader {
 public:
     static sk_sp<Bitmap> allocateHardwareBitmap(const SkBitmap& sourceBitmap);
     static void terminate();
+
+    static bool hasFP16Support();
 };
 
 }  // namespace android::uirenderer

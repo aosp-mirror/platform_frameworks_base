@@ -33,6 +33,7 @@
 #include "android_util_Binder.h"
 #include "core_jni_helpers.h"
 
+#include <HardwareBitmapUploader.h>
 #include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <binder/Parcel.h>
@@ -166,6 +167,10 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
 
     SkBitmapRegionDecoder* brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     SkColorType decodeColorType = brd->computeOutputColorType(colorType);
+    if (decodeColorType == kRGBA_F16_SkColorType && isHardware &&
+            !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        decodeColorType = kN32_SkColorType;
+    }
 
     // Set up the pixel allocator
     SkBRDAllocator* allocator = nullptr;

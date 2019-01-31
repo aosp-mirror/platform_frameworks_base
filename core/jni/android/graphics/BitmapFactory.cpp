@@ -15,6 +15,7 @@
 #include "Utils.h"
 #include "core_jni_helpers.h"
 
+#include <HardwareBitmapUploader.h>
 #include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
@@ -278,6 +279,11 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     // Set the decode colorType
     SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
+    if (decodeColorType == kRGBA_F16_SkColorType && isHardware &&
+            !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        decodeColorType = kN32_SkColorType;
+    }
+
     sk_sp<SkColorSpace> decodeColorSpace = codec->computeOutputColorSpace(
             decodeColorType, prefColorSpace);
 
