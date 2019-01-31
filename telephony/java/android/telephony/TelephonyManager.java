@@ -7808,9 +7808,7 @@ public class TelephonyManager {
      * support for the feature and device firmware support.
      *
      * @return {@code true} if the device and carrier both support RTT, {@code false} otherwise.
-     * @hide
      */
-    @TestApi
     public boolean isRttSupported() {
         try {
             ITelephony telephony = getITelephony();
