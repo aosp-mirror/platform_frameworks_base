@@ -97,7 +97,6 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 mDelegate);
         lockscreenUserManager.setUpWithPresenter(mPresenter);
         viewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
-        notificationListener.setUpWithPresenter(mPresenter);
 
         TestableLooper.get(this).processAllMessages();
         assertFalse(mDependency.hasInstantiatedDependency(StatusBarWindowController.class));
