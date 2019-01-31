@@ -53,7 +53,10 @@
   <java-symbol type="id" name="content_preview" />
   <java-symbol type="id" name="content_preview_thumbnail" />
   <java-symbol type="id" name="content_preview_text" />
+  <java-symbol type="id" name="content_preview_text_layout" />
   <java-symbol type="id" name="content_preview_title" />
+  <java-symbol type="id" name="content_preview_title_layout" />
+  <java-symbol type="id" name="copy_button" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -545,6 +548,7 @@
   <java-symbol type="string" name="activity_resolver_work_profiles_support" />
   <java-symbol type="string" name="app_running_notification_title" />
   <java-symbol type="string" name="app_running_notification_text" />
+  <java-symbol type="string" name="copied" />
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
   <java-symbol type="string" name="grant_permissions_header_text" />
@@ -2711,6 +2715,9 @@
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
   <java-symbol type="dimen" name="chooser_corner_radius" />
+  <java-symbol type="dimen" name="chooser_view_spacing" />
+  <java-symbol type="dimen" name="chooser_edge_margin_thin" />
+  <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="resolve_grid_item" />
   <java-symbol type="id" name="day_picker_view_pager" />
