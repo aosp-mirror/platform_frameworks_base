@@ -332,7 +332,14 @@ public class Trampoline extends IBackupManager.Stub {
                 // If the user is unlocked, we can start the backup service for it. Otherwise we
                 // will start the service when the user is unlocked as part of its unlock callback.
                 if (getUserManager().isUserUnlocked(userId)) {
-                    startServiceForUser(userId);
+                    // Clear calling identity as initialization enforces the system identity but we
+                    // can be coming from shell.
+                    long oldId = Binder.clearCallingIdentity();
+                    try {
+                        startServiceForUser(userId);
+                    } finally {
+                        Binder.restoreCallingIdentity(oldId);
+                    }
                 }
             } else {
                 try {
