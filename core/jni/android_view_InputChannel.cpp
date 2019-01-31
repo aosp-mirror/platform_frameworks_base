@@ -17,7 +17,7 @@
 #define LOG_TAG "InputChannel-JNI"
 
 #include <nativehelper/JNIHelp.h>
-
+#include "nativehelper/scoped_utf_chars.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <binder/Parcel.h>
 #include <utils/Log.h>
@@ -123,9 +123,8 @@ static jobject android_view_InputChannel_createInputChannel(JNIEnv* env,
 
 static jobjectArray android_view_InputChannel_nativeOpenInputChannelPair(JNIEnv* env,
         jclass clazz, jstring nameObj) {
-    const char* nameChars = env->GetStringUTFChars(nameObj, NULL);
-    std::string name = nameChars;
-    env->ReleaseStringUTFChars(nameObj, nameChars);
+    ScopedUtfChars nameChars(env, nameObj);
+    std::string name = nameChars.c_str();
 
     sp<InputChannel> serverChannel;
     sp<InputChannel> clientChannel;

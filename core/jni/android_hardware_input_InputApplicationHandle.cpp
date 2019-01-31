@@ -17,6 +17,7 @@
 #define LOG_TAG "InputApplicationHandle"
 
 #include <nativehelper/JNIHelp.h>
+#include "core_jni_helpers.h"
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
@@ -63,16 +64,7 @@ bool NativeInputApplicationHandle::updateInfo() {
         mInfo = new InputApplicationInfo();
     }
 
-    jstring nameObj = jstring(env->GetObjectField(obj,
-            gInputApplicationHandleClassInfo.name));
-    if (nameObj) {
-        const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-        mInfo->name = nameStr;
-        env->ReleaseStringUTFChars(nameObj, nameStr);
-        env->DeleteLocalRef(nameObj);
-    } else {
-        mInfo->name = "<null>";
-    }
+    mInfo->name = getStringField(env, obj, gInputApplicationHandleClassInfo.name, "<null>");
 
     mInfo->dispatchingTimeout = env->GetLongField(obj,
             gInputApplicationHandleClassInfo.dispatchingTimeoutNanos);
