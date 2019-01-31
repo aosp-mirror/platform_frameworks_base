@@ -258,10 +258,10 @@ class ActivityTransitionState {
         }
     }
 
-    public void onResume(Activity activity, boolean isTopOfTask) {
+    public void onResume(Activity activity) {
         // After orientation change, the onResume can come in before the top Activity has
         // left, so if the Activity is not top, wait a second for the top Activity to exit.
-        if (isTopOfTask || mEnterTransitionCoordinator == null) {
+        if (mEnterTransitionCoordinator == null || activity.isTopOfTask()) {
             restoreExitedViews();
             restoreReenteringViews();
         } else {
