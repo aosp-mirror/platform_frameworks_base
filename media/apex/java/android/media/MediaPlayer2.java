@@ -40,6 +40,7 @@ import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -61,7 +62,6 @@ import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -299,7 +299,7 @@ public class MediaPlayer2 implements AutoCloseable
     private final AtomicLong mSrcIdGenerator = new AtomicLong(0);
 
     private volatile float mVolume = 1.0f;
-    private VideoSize mVideoSize = new VideoSize(0, 0);
+    private Size mVideoSize = new Size(0, 0);
 
     private static ExecutorService sDrmThreadPool = Executors.newCachedThreadPool();
 
@@ -1526,7 +1526,7 @@ public class MediaPlayer2 implements AutoCloseable
      * notification {@code EventCallback.onVideoSizeChanged} when the size
      * is available.
      */
-    public VideoSize getVideoSize() {
+    public Size getVideoSize() {
         return mVideoSize;
     }
 
@@ -2526,7 +2526,7 @@ public class MediaPlayer2 implements AutoCloseable
                     final int width = msg.arg1;
                     final int height = msg.arg2;
 
-                    mVideoSize = new VideoSize(width, height);
+                    mVideoSize = new Size(width, height);
                     sendEvent(new EventNotifier() {
                         @Override
                         public void notify(EventCallback callback) {
@@ -2765,7 +2765,7 @@ public class MediaPlayer2 implements AutoCloseable
          * @param size the size of the video
          */
         public void onVideoSizeChanged(
-                @NonNull MediaPlayer2 mp, @NonNull DataSourceDesc dsd, @NonNull VideoSize size) { }
+                @NonNull MediaPlayer2 mp, @NonNull DataSourceDesc dsd, @NonNull Size size) { }
 
         /**
          * Called to indicate an avaliable timed text
