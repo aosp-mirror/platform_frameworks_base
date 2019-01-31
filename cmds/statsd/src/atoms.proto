@@ -5263,6 +5263,7 @@ message BubbleUIChanged {
         PERMISSION_IGNORED = 12;
         SWIPE_LEFT = 13;
         SWIPE_RIGHT = 14;
+        STACK_EXPANDED = 15;
     }
     optional Action action = 6;
 
