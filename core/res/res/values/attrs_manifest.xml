@@ -1138,10 +1138,12 @@
          resource] to be present in order to function. Default value is false. -->
     <attr name="isSplitRequired" format="boolean" />
 
-    <!-- Flag to specify if this app prioritizes code integrity. The system may choose
-         to run with better integrity guarantee in various components if possible based on the app's
-         <code>targetSdkVersion</code>. -->
-    <attr name="preferCodeIntegrity" format="boolean" />
+    <!-- Flag to specify if this app wants to run the dex within its APK but not extracted or
+         locally compiled variants. This keeps the dex code protected by the APK signature. Such
+         apps will always run in JIT mode (same when they are first installed), and the system will
+         never generate ahead-of-time compiled code for them. Depending on the app's workload,
+         there may be some run time performance change, noteably the cold start time. -->
+    <attr name="useEmbeddedDex" format="boolean" />
 
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
          {@code <application>} tag. If specified on the {@code <application>}
@@ -1611,7 +1613,7 @@
              to honor this flag as well. -->
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
-        <attr name="preferCodeIntegrity" />
+        <attr name="useEmbeddedDex" />
         <attr name="extractNativeLibs" />
         <attr name="defaultToDeviceProtectedStorage" format="boolean" />
         <attr name="directBootAware" />
