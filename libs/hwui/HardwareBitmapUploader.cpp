@@ -116,7 +116,6 @@ struct FormatInfo {
 
 static FormatInfo determineFormat(const SkBitmap& skBitmap) {
     FormatInfo formatInfo;
-    // TODO: add support for linear blending (when ANDROID_ENABLE_LINEAR_BLENDING is defined)
     switch (skBitmap.info().colorType()) {
         case kRGBA_8888_SkColorType:
             formatInfo.isSupported = true;

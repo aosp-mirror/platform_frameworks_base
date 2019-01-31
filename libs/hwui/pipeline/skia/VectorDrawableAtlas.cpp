@@ -262,12 +262,7 @@ void VectorDrawableAtlas::delayedReleaseEntries() {
 }
 
 sk_sp<SkSurface> VectorDrawableAtlas::createSurface(int width, int height, GrContext* context) {
-#ifndef ANDROID_ENABLE_LINEAR_BLENDING
-    sk_sp<SkColorSpace> colorSpace = nullptr;
-#else
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-#endif
-    SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
+    SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType);
     // This must have a top-left origin so that calls to surface->canvas->writePixels
     // performs a basic texture upload instead of a more complex drawing operation
     return SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, info, 0, kTopLeft_GrSurfaceOrigin,
