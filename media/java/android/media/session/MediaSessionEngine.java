@@ -19,7 +19,6 @@ package android.media.session;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -44,7 +43,6 @@ import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,10 +58,7 @@ public final class MediaSessionEngine implements AutoCloseable {
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
     private final SessionLink mSessionLink;
-    private final SessionCallbackLink mCbLink;
 
-    // Do not change the name of mCallbackWrapper. Support lib accesses this by using reflection.
-    @UnsupportedAppUsage
     private CallbackMessageHandler mCallbackHandler;
     private VolumeProvider mVolumeProvider;
     private PlaybackState mPlaybackState;
@@ -78,14 +73,12 @@ public final class MediaSessionEngine implements AutoCloseable {
      *
      * @param context The context to use to create the session.
      * @param sessionLink A session link for the binder of MediaSessionRecord
-     * @param cbStub A callback link that handles incoming command to {@link MediaSession.Callback}.
      */
     public MediaSessionEngine(@NonNull Context context, @NonNull SessionLink sessionLink,
-            @NonNull SessionCallbackLink cbLink, @NonNull CallbackStub cbStub) {
+            @NonNull SessionCallbackLink cbLink) {
         mSessionLink = sessionLink;
-        mCbLink = cbLink;
 
-        cbStub.setSessionImpl(this);
+        cbLink.setSessionEngine(this);
         mSessionToken = new MediaSession.Token(mSessionLink.getController());
         mController = new MediaController(context, mSessionToken);
     }
@@ -479,97 +472,97 @@ public final class MediaSessionEngine implements AutoCloseable {
         }
     }
 
-    private void dispatchPrepare(RemoteUserInfo caller) {
+    void dispatchPrepare(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_PREPARE, null, null);
     }
 
-    private void dispatchPrepareFromMediaId(RemoteUserInfo caller, String mediaId, Bundle extras) {
+    void dispatchPrepareFromMediaId(RemoteUserInfo caller, String mediaId, Bundle extras) {
         postToCallback(caller, CallbackMessageHandler.MSG_PREPARE_MEDIA_ID, mediaId, extras);
     }
 
-    private void dispatchPrepareFromSearch(RemoteUserInfo caller, String query, Bundle extras) {
+    void dispatchPrepareFromSearch(RemoteUserInfo caller, String query, Bundle extras) {
         postToCallback(caller, CallbackMessageHandler.MSG_PREPARE_SEARCH, query, extras);
     }
 
-    private void dispatchPrepareFromUri(RemoteUserInfo caller, Uri uri, Bundle extras) {
+    void dispatchPrepareFromUri(RemoteUserInfo caller, Uri uri, Bundle extras) {
         postToCallback(caller, CallbackMessageHandler.MSG_PREPARE_URI, uri, extras);
     }
 
-    private void dispatchPlay(RemoteUserInfo caller) {
+    void dispatchPlay(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_PLAY, null, null);
     }
 
-    private void dispatchPlayFromMediaId(RemoteUserInfo caller, String mediaId, Bundle extras) {
+    void dispatchPlayFromMediaId(RemoteUserInfo caller, String mediaId, Bundle extras) {
         postToCallback(caller, CallbackMessageHandler.MSG_PLAY_MEDIA_ID, mediaId, extras);
     }
 
-    private void dispatchPlayFromSearch(RemoteUserInfo caller, String query, Bundle extras) {
+    void dispatchPlayFromSearch(RemoteUserInfo caller, String query, Bundle extras) {
         postToCallback(caller, CallbackMessageHandler.MSG_PLAY_SEARCH, query, extras);
     }
 
-    private void dispatchPlayFromUri(RemoteUserInfo caller, Uri uri, Bundle extras) {
+    void dispatchPlayFromUri(RemoteUserInfo caller, Uri uri, Bundle extras) {
         postToCallback(caller, CallbackMessageHandler.MSG_PLAY_URI, uri, extras);
     }
 
-    private void dispatchSkipToItem(RemoteUserInfo caller, long id) {
+    void dispatchSkipToItem(RemoteUserInfo caller, long id) {
         postToCallback(caller, CallbackMessageHandler.MSG_SKIP_TO_ITEM, id, null);
     }
 
-    private void dispatchPause(RemoteUserInfo caller) {
+    void dispatchPause(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_PAUSE, null, null);
     }
 
-    private void dispatchStop(RemoteUserInfo caller) {
+    void dispatchStop(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_STOP, null, null);
     }
 
-    private void dispatchNext(RemoteUserInfo caller) {
+    void dispatchNext(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_NEXT, null, null);
     }
 
-    private void dispatchPrevious(RemoteUserInfo caller) {
+    void dispatchPrevious(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_PREVIOUS, null, null);
     }
 
-    private void dispatchFastForward(RemoteUserInfo caller) {
+    void dispatchFastForward(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_FAST_FORWARD, null, null);
     }
 
-    private void dispatchRewind(RemoteUserInfo caller) {
+    void dispatchRewind(RemoteUserInfo caller) {
         postToCallback(caller, CallbackMessageHandler.MSG_REWIND, null, null);
     }
 
-    private void dispatchSeekTo(RemoteUserInfo caller, long pos) {
+    void dispatchSeekTo(RemoteUserInfo caller, long pos) {
         postToCallback(caller, CallbackMessageHandler.MSG_SEEK_TO, pos, null);
     }
 
-    private void dispatchRate(RemoteUserInfo caller, Rating rating) {
+    void dispatchRate(RemoteUserInfo caller, Rating rating) {
         postToCallback(caller, CallbackMessageHandler.MSG_RATE, rating, null);
     }
 
-    private void dispatchCustomAction(RemoteUserInfo caller, String action, Bundle args) {
+    void dispatchCustomAction(RemoteUserInfo caller, String action, Bundle args) {
         postToCallback(caller, CallbackMessageHandler.MSG_CUSTOM_ACTION, action, args);
     }
 
-    private void dispatchMediaButton(RemoteUserInfo caller, Intent mediaButtonIntent) {
+    void dispatchMediaButton(RemoteUserInfo caller, Intent mediaButtonIntent) {
         postToCallback(caller, CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent, null);
     }
 
-    private void dispatchMediaButtonDelayed(RemoteUserInfo info, Intent mediaButtonIntent,
+    void dispatchMediaButtonDelayed(RemoteUserInfo info, Intent mediaButtonIntent,
             long delay) {
         postToCallbackDelayed(info, CallbackMessageHandler.MSG_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT,
                 mediaButtonIntent, null, delay);
     }
 
-    private void dispatchAdjustVolume(RemoteUserInfo caller, int direction) {
+    void dispatchAdjustVolume(RemoteUserInfo caller, int direction) {
         postToCallback(caller, CallbackMessageHandler.MSG_ADJUST_VOLUME, direction, null);
     }
 
-    private void dispatchSetVolumeTo(RemoteUserInfo caller, int volume) {
+    void dispatchSetVolumeTo(RemoteUserInfo caller, int volume) {
         postToCallback(caller, CallbackMessageHandler.MSG_SET_VOLUME, volume, null);
     }
 
-    private void dispatchCommand(RemoteUserInfo caller, String command, Bundle args,
+    void dispatchCommand(RemoteUserInfo caller, String command, Bundle args,
             ResultReceiver resultCb) {
         Command cmd = new Command(command, args, resultCb);
         postToCallback(caller, CallbackMessageHandler.MSG_COMMAND, cmd, null);
@@ -979,259 +972,7 @@ public final class MediaSessionEngine implements AutoCloseable {
         }
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
-    public static final class CallbackStub extends SessionCallbackLink.CallbackStub {
-        private WeakReference<MediaSessionEngine> mSessionImpl;
-
-        private static RemoteUserInfo createRemoteUserInfo(String packageName, int pid, int uid) {
-            return new RemoteUserInfo(packageName, pid, uid);
-        }
-
-        public CallbackStub() {
-        }
-
-        @Override
-        public void onCommand(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String command, Bundle args, ResultReceiver cb) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchCommand(createRemoteUserInfo(packageName, pid, uid),
-                        command, args, cb);
-            }
-        }
-
-        @Override
-        public void onMediaButton(String packageName, int pid, int uid, Intent mediaButtonIntent,
-                int sequenceNumber, ResultReceiver cb) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            try {
-                if (sessionImpl != null) {
-                    sessionImpl.dispatchMediaButton(
-                            createRemoteUserInfo(packageName, pid, uid), mediaButtonIntent);
-                }
-            } finally {
-                if (cb != null) {
-                    cb.send(sequenceNumber, null);
-                }
-            }
-        }
-
-        @Override
-        public void onMediaButtonFromController(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, Intent mediaButtonIntent) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchMediaButton(createRemoteUserInfo(packageName, pid, uid),
-                        mediaButtonIntent);
-            }
-        }
-
-        @Override
-        public void onPrepare(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPrepare(createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onPrepareFromMediaId(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String mediaId,
-                Bundle extras) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPrepareFromMediaId(
-                        createRemoteUserInfo(packageName, pid, uid), mediaId, extras);
-            }
-        }
-
-        @Override
-        public void onPrepareFromSearch(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String query,
-                Bundle extras) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPrepareFromSearch(
-                        createRemoteUserInfo(packageName, pid, uid), query, extras);
-            }
-        }
-
-        @Override
-        public void onPrepareFromUri(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, Uri uri, Bundle extras) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPrepareFromUri(
-                        createRemoteUserInfo(packageName, pid, uid), uri, extras);
-            }
-        }
-
-        @Override
-        public void onPlay(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPlay(createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onPlayFromMediaId(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String mediaId,
-                Bundle extras) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPlayFromMediaId(
-                        createRemoteUserInfo(packageName, pid, uid), mediaId, extras);
-            }
-        }
-
-        @Override
-        public void onPlayFromSearch(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String query,
-                Bundle extras) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPlayFromSearch(
-                        createRemoteUserInfo(packageName, pid, uid), query, extras);
-            }
-        }
-
-        @Override
-        public void onPlayFromUri(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, Uri uri, Bundle extras) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPlayFromUri(
-                        createRemoteUserInfo(packageName, pid, uid), uri, extras);
-            }
-        }
-
-        @Override
-        public void onSkipToTrack(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, long id) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchSkipToItem(
-                        createRemoteUserInfo(packageName, pid, uid), id);
-            }
-        }
-
-        @Override
-        public void onPause(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPause(createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onStop(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchStop(createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onNext(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchNext(createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onPrevious(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchPrevious(createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onFastForward(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchFastForward(
-                        createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onRewind(String packageName, int pid, int uid,
-                ControllerCallbackLink caller) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchRewind(createRemoteUserInfo(packageName, pid, uid));
-            }
-        }
-
-        @Override
-        public void onSeekTo(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, long pos) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchSeekTo(
-                        createRemoteUserInfo(packageName, pid, uid), pos);
-            }
-        }
-
-        @Override
-        public void onRate(String packageName, int pid, int uid, ControllerCallbackLink caller,
-                Rating rating) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchRate(
-                        createRemoteUserInfo(packageName, pid, uid), rating);
-            }
-        }
-
-        @Override
-        public void onCustomAction(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, String action, Bundle args) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchCustomAction(
-                        createRemoteUserInfo(packageName, pid, uid), action, args);
-            }
-        }
-
-        @Override
-        public void onAdjustVolume(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, int direction) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchAdjustVolume(
-                        createRemoteUserInfo(packageName, pid, uid), direction);
-            }
-        }
-
-        @Override
-        public void onSetVolumeTo(String packageName, int pid, int uid,
-                ControllerCallbackLink caller, int value) {
-            MediaSessionEngine sessionImpl = mSessionImpl.get();
-            if (sessionImpl != null) {
-                sessionImpl.dispatchSetVolumeTo(
-                        createRemoteUserInfo(packageName, pid, uid), value);
-            }
-        }
-
-        void setSessionImpl(MediaSessionEngine sessionImpl) {
-            mSessionImpl = new WeakReference<>(sessionImpl);
-        }
-    }
-
-    /**
+     /**
      * A single item that is part of the play queue. It contains a description
      * of the item and its id in the queue.
      */

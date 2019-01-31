@@ -3675,7 +3675,7 @@ package android.media.session {
   }
 
   public final class MediaSessionEngine implements java.lang.AutoCloseable {
-    ctor public MediaSessionEngine(@NonNull android.content.Context, @NonNull android.media.session.SessionLink, @NonNull android.media.session.SessionCallbackLink, @NonNull android.media.session.MediaSessionEngine.CallbackStub);
+    ctor public MediaSessionEngine(@NonNull android.content.Context, @NonNull android.media.session.SessionLink, @NonNull android.media.session.SessionCallbackLink);
     method public void close();
     method public String getCallingPackage();
     method @NonNull public android.media.session.MediaController getController();
@@ -3698,33 +3698,6 @@ package android.media.session {
     method public void setQueueTitle(@Nullable CharSequence);
     method public void setRatingType(int);
     method public void setSessionActivity(@Nullable android.app.PendingIntent);
-  }
-
-  public static final class MediaSessionEngine.CallbackStub {
-    ctor public MediaSessionEngine.CallbackStub();
-    method public void onAdjustVolume(String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void onCommand(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle, android.os.ResultReceiver);
-    method public void onCustomAction(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onFastForward(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onMediaButton(String, int, int, android.content.Intent, int, android.os.ResultReceiver);
-    method public void onMediaButtonFromController(String, int, int, android.media.session.ControllerCallbackLink, android.content.Intent);
-    method public void onNext(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPause(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPlay(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPlayFromMediaId(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPlayFromSearch(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPlayFromUri(String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void onPrepare(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onPrepareFromMediaId(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPrepareFromSearch(String, int, int, android.media.session.ControllerCallbackLink, String, android.os.Bundle);
-    method public void onPrepareFromUri(String, int, int, android.media.session.ControllerCallbackLink, android.net.Uri, android.os.Bundle);
-    method public void onPrevious(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onRate(String, int, int, android.media.session.ControllerCallbackLink, android.media.Rating);
-    method public void onRewind(String, int, int, android.media.session.ControllerCallbackLink);
-    method public void onSeekTo(String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void onSetVolumeTo(String, int, int, android.media.session.ControllerCallbackLink, int);
-    method public void onSkipToTrack(String, int, int, android.media.session.ControllerCallbackLink, long);
-    method public void onStop(String, int, int, android.media.session.ControllerCallbackLink);
   }
 
   public static interface MediaSessionEngine.MediaButtonEventDelegate {
