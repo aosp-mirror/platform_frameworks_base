@@ -74,6 +74,7 @@ final class BroadcastRecord extends Binder {
     long dispatchClockTime; // the clock time the dispatch started
     long receiverTime;      // when current receiver started for timeouts.
     long finishTime;        // when we finished the broadcast.
+    boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
     int resultCode;         // current result code value.
     String resultData;      // current result data value.
     Bundle resultExtras;    // current result extra data values.
@@ -236,7 +237,7 @@ final class BroadcastRecord extends Binder {
             String[] _requiredPermissions, int _appOp, BroadcastOptions _options, List _receivers,
             IIntentReceiver _resultTo, int _resultCode, String _resultData, Bundle _resultExtras,
             boolean _serialized, boolean _sticky, boolean _initialSticky, int _userId,
-            boolean _allowBackgroundActivityStarts) {
+            boolean _allowBackgroundActivityStarts, boolean _timeoutExempt) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
@@ -266,6 +267,7 @@ final class BroadcastRecord extends Binder {
         nextReceiver = 0;
         state = IDLE;
         allowBackgroundActivityStarts = _allowBackgroundActivityStarts;
+        timeoutExempt = _timeoutExempt;
     }
 
     /**
@@ -310,6 +312,7 @@ final class BroadcastRecord extends Binder {
         manifestSkipCount = from.manifestSkipCount;
         queue = from.queue;
         allowBackgroundActivityStarts = from.allowBackgroundActivityStarts;
+        timeoutExempt = from.timeoutExempt;
     }
 
     /**
@@ -345,7 +348,7 @@ final class BroadcastRecord extends Binder {
                 callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                 requiredPermissions, appOp, options, splitReceivers, resultTo, resultCode,
                 resultData, resultExtras, ordered, sticky, initialSticky, userId,
-                allowBackgroundActivityStarts);
+                allowBackgroundActivityStarts, timeoutExempt);
 
         return split;
     }
