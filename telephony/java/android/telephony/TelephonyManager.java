@@ -6212,23 +6212,282 @@ public class TelephonyManager {
         }
     }
 
+    /** @hide */
+    @IntDef(prefix = { "NETWORK_MODE_" }, value = {
+            NETWORK_MODE_WCDMA_PREF,
+            NETWORK_MODE_GSM_ONLY,
+            NETWORK_MODE_WCDMA_ONLY,
+            NETWORK_MODE_GSM_UMTS,
+            NETWORK_MODE_CDMA_EVDO,
+            NETWORK_MODE_CDMA_NO_EVDO,
+            NETWORK_MODE_EVDO_NO_CDMA,
+            NETWORK_MODE_GLOBAL,
+            NETWORK_MODE_LTE_CDMA_EVDO,
+            NETWORK_MODE_LTE_GSM_WCDMA,
+            NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA,
+            NETWORK_MODE_LTE_ONLY,
+            NETWORK_MODE_LTE_WCDMA,
+            NETWORK_MODE_TDSCDMA_ONLY,
+            NETWORK_MODE_TDSCDMA_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA,
+            NETWORK_MODE_TDSCDMA_GSM,
+            NETWORK_MODE_LTE_TDSCDMA_GSM,
+            NETWORK_MODE_TDSCDMA_GSM_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA,
+            NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA,
+            NETWORK_MODE_NR_ONLY,
+            NETWORK_MODE_NR_LTE,
+            NETWORK_MODE_NR_LTE_CDMA_EVDO,
+            NETWORK_MODE_NR_LTE_GSM_WCDMA,
+            NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA,
+            NETWORK_MODE_NR_LTE_WCDMA,
+            NETWORK_MODE_NR_LTE_TDSCDMA,
+            NETWORK_MODE_NR_LTE_TDSCDMA_GSM,
+            NETWORK_MODE_NR_LTE_TDSCDMA_WCDMA,
+            NETWORK_MODE_NR_LTE_TDSCDMA_GSM_WCDMA,
+            NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrefNetworkMode{}
+
+    /**
+     * Preferred network mode is GSM/WCDMA (WCDMA preferred).
+     * @hide
+     */
+    public static final int NETWORK_MODE_WCDMA_PREF = RILConstants.NETWORK_MODE_WCDMA_PREF;
+
+    /**
+     * Preferred network mode is GSM only.
+     * @hide
+     */
+    public static final int NETWORK_MODE_GSM_ONLY = RILConstants.NETWORK_MODE_GSM_ONLY;
+
+    /**
+     * Preferred network mode is WCDMA only.
+     * @hide
+     */
+    public static final int NETWORK_MODE_WCDMA_ONLY = RILConstants.NETWORK_MODE_WCDMA_ONLY;
+
+    /**
+     * Preferred network mode is GSM/WCDMA (auto mode, according to PRL).
+     * @hide
+     */
+    public static final int NETWORK_MODE_GSM_UMTS = RILConstants.NETWORK_MODE_GSM_UMTS;
+
+    /**
+     * Preferred network mode is CDMA and EvDo (auto mode, according to PRL).
+     * @hide
+     */
+    public static final int NETWORK_MODE_CDMA_EVDO = RILConstants.NETWORK_MODE_CDMA;
+
+    /**
+     * Preferred network mode is CDMA only.
+     * @hide
+     */
+    public static final int NETWORK_MODE_CDMA_NO_EVDO = RILConstants.NETWORK_MODE_CDMA_NO_EVDO;
+
+    /**
+     * Preferred network mode is EvDo only.
+     * @hide
+     */
+    public static final int NETWORK_MODE_EVDO_NO_CDMA = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
+
+    /**
+     * Preferred network mode is GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL).
+     * @hide
+     */
+    public static final int NETWORK_MODE_GLOBAL = RILConstants.NETWORK_MODE_GLOBAL;
+
+    /**
+     * Preferred network mode is LTE, CDMA and EvDo.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_CDMA_EVDO = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO;
+
+    /**
+     * Preferred network mode is LTE, GSM/WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_GSM_WCDMA = RILConstants.NETWORK_MODE_LTE_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is LTE, CDMA, EvDo, GSM/WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is LTE Only.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_ONLY = RILConstants.NETWORK_MODE_LTE_ONLY;
+
+    /**
+     * Preferred network mode is LTE/WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_WCDMA = RILConstants.NETWORK_MODE_LTE_WCDMA;
+
+    /**
+     * Preferred network mode is TD-SCDMA only.
+     * @hide
+     */
+    public static final int NETWORK_MODE_TDSCDMA_ONLY = RILConstants.NETWORK_MODE_TDSCDMA_ONLY;
+
+    /**
+     * Preferred network mode is TD-SCDMA and WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_TDSCDMA_WCDMA = RILConstants.NETWORK_MODE_TDSCDMA_WCDMA;
+
+    /**
+     * Preferred network mode is TD-SCDMA and LTE.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_TDSCDMA = RILConstants.NETWORK_MODE_LTE_TDSCDMA;
+
+    /**
+     * Preferred network mode is TD-SCDMA and GSM.
+     * @hide
+     */
+    public static final int NETWORK_MODE_TDSCDMA_GSM = RILConstants.NETWORK_MODE_TDSCDMA_GSM;
+
+    /**
+     * Preferred network mode is TD-SCDMA,GSM and LTE.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_TDSCDMA_GSM =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM;
+
+    /**
+     * Preferred network mode is TD-SCDMA, GSM/WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_TDSCDMA_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is TD-SCDMA, WCDMA and LTE.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_TDSCDMA_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA;
+
+    /**
+     * Preferred network mode is TD-SCDMA, GSM/WCDMA and LTE.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is TD-SCDMA,EvDo,CDMA,GSM/WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
+    /**
+     * Preferred network mode is TD-SCDMA/LTE/GSM/WCDMA, CDMA, and EvDo.
+     * @hide
+     */
+    public static final int NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is NR 5G only.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_ONLY = RILConstants.NETWORK_MODE_NR_ONLY;
+
+    /**
+     * Preferred network mode is NR 5G, LTE.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE = RILConstants.NETWORK_MODE_NR_LTE;
+
+    /**
+     * Preferred network mode is NR 5G, LTE, CDMA and EvDo.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_CDMA_EVDO =
+            RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO;
+
+    /**
+     * Preferred network mode is NR 5G, LTE, GSM and WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_NR_LTE_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is NR 5G, LTE, CDMA, EvDo, GSM and WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is NR 5G, LTE and WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_WCDMA = RILConstants.NETWORK_MODE_NR_LTE_WCDMA;
+
+    /**
+     * Preferred network mode is NR 5G, LTE and TDSCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_TDSCDMA = RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA;
+
+    /**
+     * Preferred network mode is NR 5G, LTE, TD-SCDMA and GSM.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_TDSCDMA_GSM =
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_GSM;
+
+    /**
+     * Preferred network mode is NR 5G, LTE, TD-SCDMA, WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_TDSCDMA_WCDMA =
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_WCDMA;
+
+    /**
+     * Preferred network mode is NR 5G, LTE, TD-SCDMA, GSM and WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_TDSCDMA_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_GSM_WCDMA;
+
+    /**
+     * Preferred network mode is NR 5G, LTE, TD-SCDMA, CDMA, EVDO, GSM and WCDMA.
+     * @hide
+     */
+    public static final int NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
+
     /**
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
      * <p>Requires Permission:
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return the preferred network type, defined in RILConstants.java.
      * @hide
      */
+    @RequiresPermission((android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE))
     @UnsupportedAppUsage
-    public int getPreferredNetworkType(int subId) {
+    public @PrefNetworkMode int getPreferredNetworkType(int subId) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony != null)
+            if (telephony != null) {
                 return telephony.getPreferredNetworkType(subId);
+            }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPreferredNetworkType RemoteException", ex);
         } catch (NullPointerException ex) {
