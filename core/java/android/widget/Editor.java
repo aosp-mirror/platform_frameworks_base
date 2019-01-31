@@ -4489,6 +4489,13 @@ public class Editor {
         // when selecting text when the handles jump to the end / start of words which may be on
         // a different line.
         protected int mPreviousLineTouched = UNSET_LINE;
+        // The raw x coordinate of the motion down event which started the current dragging session.
+        // Only used and stored when magnifier is used.
+        private float mCurrentDragInitialTouchRawX = UNSET_X_VALUE;
+        // The scale transform applied by containers to the TextView. Only used and computed
+        // when magnifier is used.
+        private float mTextViewScaleX;
+        private float mTextViewScaleY;
 
         private HandleView(Drawable drawableLtr, Drawable drawableRtl, final int id) {
             super(mTextView.getContext());
@@ -4808,25 +4815,44 @@ public class Editor {
                             / mMagnifierAnimator.mMagnifier.getZoom());
             final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
             final float glyphHeight = fontMetrics.descent - fontMetrics.ascent;
-            return glyphHeight > magnifierContentHeight;
+            return glyphHeight * mTextViewScaleY > magnifierContentHeight;
         }
 
-        private boolean viewIsMatrixTransformed() {
+        /**
+         * Traverses the hierarchy above the text view, and computes the total scale applied
+         * to it. If a rotation is encountered, the method returns {@code false}, indicating
+         * that the magnifier should not be shown anyways. It would be nice to keep these two
+         * pieces of logic separate (the rotation check and the total scale calculation),
+         * but for efficiency we can do them in a single go.
+         * @return whether the text view is rotated
+         */
+        private boolean checkForTransforms() {
             if (mMagnifierAnimator.mMagnifierIsShowing) {
                 // Do not check again when the magnifier is currently showing.
-                return false;
-            }
-            if (!mTextView.hasIdentityMatrix()) {
                 return true;
             }
+
+            if (mTextView.getRotation() != 0f || mTextView.getRotationX() != 0f
+                    || mTextView.getRotationY() != 0f) {
+                return false;
+            }
+            mTextViewScaleX = mTextView.getScaleX();
+            mTextViewScaleY = mTextView.getScaleY();
+
             ViewParent viewParent = mTextView.getParent();
             while (viewParent != null) {
-                if (viewParent instanceof View && !((View) viewParent).hasIdentityMatrix()) {
-                    return true;
+                if (viewParent instanceof View) {
+                    final View view = (View) viewParent;
+                    if (view.getRotation() != 0f || view.getRotationX() != 0f
+                            || view.getRotationY() != 0f) {
+                        return false;
+                    }
+                    mTextViewScaleX *= view.getScaleX();
+                    mTextViewScaleY *= view.getScaleY();
                 }
                 viewParent = viewParent.getParent();
             }
-            return false;
+            return true;
         }
 
         /**
@@ -4864,6 +4890,12 @@ public class Editor {
                 return false;
             }
 
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                mCurrentDragInitialTouchRawX = event.getRawX();
+            } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                mCurrentDragInitialTouchRawX = UNSET_X_VALUE;
+            }
+
             final Layout layout = mTextView.getLayout();
             final int lineNumber = layout.getLineForOffset(offset);
             // Compute whether the selection handles are currently on the same line, and,
@@ -4891,6 +4923,8 @@ public class Editor {
             } else {
                 rightBound += mTextView.getLayout().getLineRight(lineNumber);
             }
+            leftBound *= mTextViewScaleX;
+            rightBound *= mTextViewScaleX;
             final float contentWidth = Math.round(mMagnifierAnimator.mMagnifier.getWidth()
                     / mMagnifierAnimator.mMagnifier.getZoom());
             if (touchXInView < leftBound - contentWidth / 2
@@ -4898,13 +4932,27 @@ public class Editor {
                 // The touch is too far from the current line / selection, so hide the magnifier.
                 return false;
             }
-            showPosInView.x = Math.max(leftBound, Math.min(rightBound, touchXInView));
+
+            final float scaledTouchXInView;
+            if (mTextViewScaleX == 1f) {
+                // In the common case, do not use mCurrentDragInitialTouchRawX to compute this
+                // coordinate, although the formula on the else branch should be equivalent.
+                // Since the formula relies on mCurrentDragInitialTouchRawX being set on
+                // MotionEvent.ACTION_DOWN, this makes us more defensive against cases when
+                // the sequence of events might not look as expected: for example, a sequence of
+                // ACTION_MOVE not preceded by ACTION_DOWN.
+                scaledTouchXInView = touchXInView;
+            } else {
+                scaledTouchXInView = (event.getRawX() - mCurrentDragInitialTouchRawX)
+                        * mTextViewScaleX + mCurrentDragInitialTouchRawX
+                        - textViewLocationOnScreen[0];
+            }
+            showPosInView.x = Math.max(leftBound, Math.min(rightBound, scaledTouchXInView));
 
             // Vertically snap to middle of current line.
-            showPosInView.y = (mTextView.getLayout().getLineTop(lineNumber)
+            showPosInView.y = ((mTextView.getLayout().getLineTop(lineNumber)
                     + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
-                    + mTextView.getTotalPaddingTop() - mTextView.getScrollY();
-
+                    + mTextView.getTotalPaddingTop() - mTextView.getScrollY()) * mTextViewScaleY;
             return true;
         }
 
@@ -4956,8 +5004,8 @@ public class Editor {
             }
 
             final PointF showPosInView = new PointF();
-            final boolean shouldShow = !tooLargeTextForMagnifier()
-                    && !viewIsMatrixTransformed()
+            final boolean shouldShow = checkForTransforms() /*check not rotated and compute scale*/
+                    && !tooLargeTextForMagnifier()
                     && obtainMagnifierShowCoordinates(event, showPosInView);
             if (shouldShow) {
                 // Make the cursor visible and stop blinking.
