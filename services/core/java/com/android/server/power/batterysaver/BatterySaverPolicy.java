@@ -104,7 +104,6 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_AOD_DISABLED = "aod_disabled";
     // Go into deep Doze as soon as the screen turns off.
     private static final String KEY_QUICK_DOZE_ENABLED = "quick_doze_enabled";
-    private static final String KEY_SEND_TRON_LOG = "send_tron_log";
 
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
@@ -129,8 +128,7 @@ public class BatterySaverPolicy extends ContentObserver {
             new ArrayMap<>(), /* filesForNoninteractive */
             false, /* forceAllAppsStandby */
             false, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_NO_CHANGE, /* gpsMode */
-            false  /* sendTronLog */
+            PowerManager.LOCATION_MODE_NO_CHANGE /* gpsMode */
     );
 
     private static final Policy DEFAULT_ADAPTIVE_POLICY = OFF_POLICY;
@@ -154,8 +152,7 @@ public class BatterySaverPolicy extends ContentObserver {
             new ArrayMap<>(), /* filesForNoninteractive */
             true, /* forceAllAppsStandby */
             true, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF, /* gpsMode */
-            false /* sendTronLog */
+            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF /* gpsMode */
     );
 
     private final Object mLock;
@@ -418,13 +415,10 @@ public class BatterySaverPolicy extends ContentObserver {
         if (currPolicy.disableOptionalSensors) sb.append("S");
         if (currPolicy.disableAod) sb.append("o");
         if (currPolicy.enableQuickDoze) sb.append("q");
-        if (currPolicy.sendTronLog) sb.append("t");
 
         sb.append(currPolicy.gpsMode);
 
         mEventLogKeys = sb.toString();
-
-        mBatterySavingStats.setSendTronLog(currPolicy.sendTronLog);
     }
 
     static class Policy {
@@ -567,11 +561,6 @@ public class BatterySaverPolicy extends ContentObserver {
          */
         public final int gpsMode;
 
-        /**
-         * Whether BatterySavingStats should send tron events.
-         */
-        public final boolean sendTronLog;
-
         private final int mHashCode;
 
         Policy(
@@ -593,8 +582,7 @@ public class BatterySaverPolicy extends ContentObserver {
                 ArrayMap<String, String> filesForNoninteractive,
                 boolean forceAllAppsStandby,
                 boolean forceBackgroundCheck,
-                int gpsMode,
-                boolean sendTronLog) {
+                int gpsMode) {
 
             this.adjustBrightnessFactor = adjustBrightnessFactor;
             this.advertiseIsEnabled = advertiseIsEnabled;
@@ -615,7 +603,6 @@ public class BatterySaverPolicy extends ContentObserver {
             this.forceAllAppsStandby = forceAllAppsStandby;
             this.forceBackgroundCheck = forceBackgroundCheck;
             this.gpsMode = gpsMode;
-            this.sendTronLog = sendTronLog;
 
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,
@@ -636,8 +623,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     filesForNoninteractive,
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    gpsMode,
-                    sendTronLog);
+                    gpsMode);
         }
 
         static Policy fromConfig(BatterySaverPolicyConfig config) {
@@ -674,8 +660,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     config.getForceAllAppsStandby(),
                     config.getForceBackgroundCheck(),
-                    config.getGpsMode(),
-                    OFF_POLICY.sendTronLog
+                    config.getGpsMode()
             );
         }
 
@@ -737,7 +722,6 @@ public class BatterySaverPolicy extends ContentObserver {
             boolean forceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK,
                     defaultPolicy.forceBackgroundCheck);
             int gpsMode = parser.getInt(KEY_GPS_MODE, defaultPolicy.gpsMode);
-            boolean sendTronLog = parser.getBoolean(KEY_SEND_TRON_LOG, defaultPolicy.sendTronLog);
 
             return new Policy(
                     adjustBrightnessFactor,
@@ -761,8 +745,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    gpsMode,
-                    sendTronLog
+                    gpsMode
             );
         }
 
@@ -788,7 +771,6 @@ public class BatterySaverPolicy extends ContentObserver {
                     && forceAllAppsStandby == other.forceAllAppsStandby
                     && forceBackgroundCheck == other.forceBackgroundCheck
                     && gpsMode == other.gpsMode
-                    && sendTronLog == other.sendTronLog
                     && filesForInteractive.equals(other.filesForInteractive)
                     && filesForNoninteractive.equals(other.filesForNoninteractive);
         }
@@ -1026,9 +1008,6 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.println("  " + KEY_SOUNDTRIGGER_DISABLED + "=" + p.disableSoundTrigger);
         pw.print(indent);
         pw.println("  " + KEY_QUICK_DOZE_ENABLED + "=" + p.enableQuickDoze);
-        pw.print(indent);
-        pw.println("  " + KEY_SEND_TRON_LOG + "=" + p.sendTronLog);
-        pw.println();
 
         pw.print("    Interactive File values:\n");
         dumpMap(pw, "      ", p.filesForInteractive);
