@@ -75,7 +75,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    public void testRenderVisibility() {
+    public void testRenderVisibility() throws InterruptedException {
         mLayout.setController(mTestableController);
         addOneMoreThanRenderLimitBubbles();
 
@@ -87,7 +87,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    public void testHierarchyChanges() {
+    public void testHierarchyChanges() throws InterruptedException {
         mLayout.setController(mTestableController);
         addOneMoreThanRenderLimitBubbles();
 
@@ -242,26 +242,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    public void testPrecedingNonRemovedIndex() {
-        mLayout.setController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
-
-        // Call removeView at index 4, but don't actually remove it yet (as if we're animating it
-        // out). The preceding, non-removed view index to 3 should initially be 4, but then 5 since
-        // 4 is on its way out.
-        assertEquals(4, mLayout.getPrecedingNonRemovedViewIndex(3));
-        mLayout.removeView(mViews.get(4));
-        assertEquals(5, mLayout.getPrecedingNonRemovedViewIndex(3));
-
-        // Call removeView at index 1, and actually remove it immediately. With the old view at 1
-        // instantly gone, the preceding view to 0 should be 1 in both cases.
-        assertEquals(1, mLayout.getPrecedingNonRemovedViewIndex(0));
-        mTestableController.setRemoveImmediately(true);
-        mLayout.removeView(mViews.get(1));
-        assertEquals(1, mLayout.getPrecedingNonRemovedViewIndex(0));
-    }
-
-    @Test
     public void testSetController() throws InterruptedException {
         // Add the bubbles, then set the controller, to make sure that a controller added to an
         // already-initialized view works correctly.
@@ -359,8 +339,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
                 1000);
 
         mLayout.cancelAllAnimations();
-
-        waitForLayoutMessageQueue();
 
         // Animations should be somewhere before their end point.
         assertTrue(mViews.get(0).getTranslationX() < 1000);
