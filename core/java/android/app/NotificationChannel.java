@@ -85,7 +85,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
-    private static final String ATT_ALLOW_BUBBLE = "allow_bubble";
+    private static final String ATT_ALLOW_BUBBLE = "can_bubble";
     private static final String DELIMITER = ",";
 
     /**
@@ -611,14 +611,6 @@ public final class NotificationChannel implements Parcelable {
      * shade, in a floating window on top of other apps.
      */
     public boolean canBubble() {
-        return isBubbleAllowed() && getImportance() >= IMPORTANCE_HIGH;
-    }
-
-    /**
-     * Like {@link #canBubble()}, but only checks the permission, not the importance.
-     * @hide
-     */
-    public boolean isBubbleAllowed() {
         return mAllowBubbles;
     }
 

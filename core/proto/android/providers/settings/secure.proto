@@ -321,6 +321,7 @@ message SecureSettingsProto {
         optional SettingProto badging = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto show_note_about_notification_hiding = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto in_call_notification_enabled = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto bubbles = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 41;
 

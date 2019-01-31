@@ -41,13 +41,14 @@ public class NotificationRankingUpdate implements Parcelable {
     private final Bundle mSmartReplies;
     private final Bundle mLastAudiblyAlerted;
     private final Bundle mNoisy;
+    private final boolean[] mCanBubble;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
             Bundle visibilityOverrides, Bundle suppressedVisualEffects,
             int[] importance, Bundle explanation, Bundle overrideGroupKeys,
             Bundle channels, Bundle overridePeople, Bundle snoozeCriteria,
             Bundle showBadge, Bundle userSentiment, Bundle hidden, Bundle smartActions,
-            Bundle smartReplies, Bundle lastAudiblyAlerted, Bundle noisy) {
+            Bundle smartReplies, Bundle lastAudiblyAlerted, Bundle noisy, boolean[] canBubble) {
         mKeys = keys;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
@@ -65,6 +66,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mSmartReplies = smartReplies;
         mLastAudiblyAlerted = lastAudiblyAlerted;
         mNoisy = noisy;
+        mCanBubble = canBubble;
     }
 
     public NotificationRankingUpdate(Parcel in) {
@@ -86,6 +88,8 @@ public class NotificationRankingUpdate implements Parcelable {
         mSmartReplies = in.readBundle();
         mLastAudiblyAlerted = in.readBundle();
         mNoisy = in.readBundle();
+        mCanBubble = new boolean[mKeys.length];
+        in.readBooleanArray(mCanBubble);
     }
 
     @Override
@@ -112,6 +116,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeBundle(mSmartReplies);
         out.writeBundle(mLastAudiblyAlerted);
         out.writeBundle(mNoisy);
+        out.writeBooleanArray(mCanBubble);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -191,5 +196,9 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public Bundle getNoisy() {
         return mNoisy;
+    }
+
+    public boolean[] getCanBubble() {
+        return mCanBubble;
     }
 }

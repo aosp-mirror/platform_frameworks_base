@@ -54,7 +54,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class NotificationListenerServiceTest extends UiServiceTestCase {
 
-    private String[] mKeys = new String[] { "key", "key1", "key2", "key3"};
+    private String[] mKeys = new String[] { "key", "key1", "key2", "key3", "key4"};
 
     @Test
     public void testGetActiveNotifications_notNull() throws Exception {
@@ -70,7 +70,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testRanking() throws Exception {
+    public void testRanking() {
         TestListenerService service = new TestListenerService();
         service.applyUpdateLocked(generateUpdate());
         for (int i = 0; i < mKeys.length; i++) {
@@ -92,6 +92,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(lastAudiblyAlerted(i), ranking.getLastAudiblyAlertedMillis());
             assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
             assertEquals(getSmartReplies(key, i), ranking.getSmartReplies());
+            assertEquals(canBubble(i), ranking.canBubble());
         }
     }
 
@@ -112,6 +113,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         Bundle smartReplies = new Bundle();
         Bundle lastAudiblyAlerted = new Bundle();
         Bundle noisy = new Bundle();
+        boolean[] canBubble = new boolean[mKeys.length];
 
         for (int i = 0; i < mKeys.length; i++) {
             String key = mKeys[i];
@@ -133,12 +135,13 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             smartReplies.putCharSequenceArrayList(key, getSmartReplies(key, i));
             lastAudiblyAlerted.putLong(key, lastAudiblyAlerted(i));
             noisy.putBoolean(key, getNoisy(i));
+            canBubble[i] = canBubble(i);
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden,
-                smartActions, smartReplies, lastAudiblyAlerted, noisy);
+                smartActions, smartReplies, lastAudiblyAlerted, noisy, canBubble);
         return update;
     }
 
@@ -233,6 +236,10 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             choices.add("choice_" + key + "_" + i);
         }
         return choices;
+    }
+
+    private boolean canBubble(int index) {
+        return index % 4 == 0;
     }
 
     private void assertActionsEqual(
