@@ -1186,22 +1186,22 @@ public final class MediaDrm implements AutoCloseable {
     public static final int OFFLINE_LICENSE_STATE_UNKNOWN = 0;
 
     /**
-     * Offline license state is usable, the keys may be used for decryption.
+     * Offline license is usable, the keys may be used for decryption.
      */
-    public static final int OFFLINE_LICENSE_USABLE = 1;
+    public static final int OFFLINE_LICENSE_STATE_USABLE = 1;
 
     /**
-     * Offline license state is inactive, the keys have been marked for
-     * release using {@link #getKeyRequest} with KEY_TYPE_RELEASE but the
-     * key response has not been received.
+     * Offline license is released, the keys have been marked for
+     * release using {@link #getKeyRequest} with KEY_TYPE_RELEASE but
+     * the key response has not been received.
      */
-    public static final int OFFLINE_LICENSE_INACTIVE = 2;
+    public static final int OFFLINE_LICENSE_STATE_RELEASED = 2;
 
     /** @hide */
     @IntDef({
         OFFLINE_LICENSE_STATE_UNKNOWN,
-        OFFLINE_LICENSE_USABLE,
-        OFFLINE_LICENSE_INACTIVE,
+        OFFLINE_LICENSE_STATE_USABLE,
+        OFFLINE_LICENSE_STATE_RELEASED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OfflineLicenseState {}
