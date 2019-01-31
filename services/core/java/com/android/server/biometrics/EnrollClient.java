@@ -56,6 +56,7 @@ public abstract class EnrollClient extends ClientMonitor {
         if (remaining == 0) {
             mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
         }
+        notifyUserActivity();
         return sendEnrollResult(identifier, remaining);
     }
 
