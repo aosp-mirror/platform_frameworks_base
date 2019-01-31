@@ -1334,15 +1334,20 @@ public class NotificationContentView extends FrameLayout {
     static SmartRepliesAndActions chooseSmartRepliesAndActions(
             SmartReplyConstants smartReplyConstants,
             final NotificationEntry entry) {
-        boolean enableAppGeneratedSmartReplies = (smartReplyConstants.isEnabled()
-                && (!smartReplyConstants.requiresTargetingP()
-                || entry.targetSdk >= Build.VERSION_CODES.P));
-
         Notification notification = entry.notification.getNotification();
         Pair<RemoteInput, Notification.Action> remoteInputActionPair =
                 notification.findRemoteInputActionPair(false /* freeform */);
         Pair<RemoteInput, Notification.Action> freeformRemoteInputActionPair =
                 notification.findRemoteInputActionPair(true /* freeform */);
+
+        if (!smartReplyConstants.isEnabled()) {
+            return new SmartRepliesAndActions(null, null, freeformRemoteInputActionPair != null);
+        }
+        // Only use smart replies from the app if they target P or above. We have this check because
+        // the smart reply API has been used for other things (Wearables) in the past. The API to
+        // add smart actions is new in Q so it doesn't require a target-sdk check.
+        boolean enableAppGeneratedSmartReplies = (!smartReplyConstants.requiresTargetingP()
+                || entry.targetSdk >= Build.VERSION_CODES.P);
 
         boolean appGeneratedSmartRepliesExist =
                 enableAppGeneratedSmartReplies
