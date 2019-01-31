@@ -31,11 +31,14 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InsetsState.TYPE_IME;
+import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -170,6 +173,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -892,9 +896,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
-                .setOpaque(true)
-                .setContainerLayer();
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession).setOpaque(true);
         mWindowingLayer = b.setName("Display Root").build();
         mOverlayLayer = b.setName("Display Overlays").build();
 
@@ -4598,7 +4600,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     SurfaceControl.Builder makeChildSurface(WindowContainer child) {
         SurfaceSession s = child != null ? child.getSession() : getSession();
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(s).setContainerLayer();
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(s);
         if (child == null) {
             return b;
         }
