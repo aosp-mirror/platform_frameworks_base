@@ -102,7 +102,9 @@ public final class NotificationEntry {
     /** Smart Actions provided by the NotificationAssistantService. */
     @NonNull
     public List<Notification.Action> systemGeneratedSmartActions = Collections.emptyList();
-    public CharSequence[] smartReplies = new CharSequence[0];
+    /** Smart replies provided by the NotificationAssistantService. */
+    @NonNull
+    public CharSequence[] systemGeneratedSmartReplies = new CharSequence[0];
     @VisibleForTesting
     public int suppressedVisualEffects;
     public boolean suspended;
@@ -182,7 +184,7 @@ public final class NotificationEntry {
         userSentiment = ranking.getUserSentiment();
         systemGeneratedSmartActions = ranking.getSmartActions() == null
                 ? Collections.emptyList() : ranking.getSmartActions();
-        smartReplies = ranking.getSmartReplies() == null
+        systemGeneratedSmartReplies = ranking.getSmartReplies() == null
                 ? new CharSequence[0]
                 : ranking.getSmartReplies().toArray(new CharSequence[0]);
         suppressedVisualEffects = ranking.getSuppressedVisualEffects();
