@@ -3643,6 +3643,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mTethering.stopTethering(type);
     }
 
+    /**
+     * Get the latest value of the tethering entitlement check.
+     *
+     * Note: Allow privileged apps who have TETHER_PRIVILEGED permission to access. If it turns
+     * out some such apps are observed to abuse this API, change to per-UID limits on this API
+     * if it's really needed.
+     */
+    @Override
+    public void getLatestTetheringEntitlementValue(int type, ResultReceiver receiver,
+            boolean showEntitlementUi, String callerPkg) {
+        ConnectivityManager.enforceTetherChangePermission(mContext, callerPkg);
+        mTethering.getLatestTetheringEntitlementValue(type, receiver, showEntitlementUi);
+    }
+
     // Called when we lose the default network and have no replacement yet.
     // This will automatically be cleared after X seconds or a new default network
     // becomes CONNECTED, whichever happens first.  The timer is started by the
