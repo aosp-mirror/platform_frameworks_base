@@ -4305,6 +4305,7 @@ package android.os {
   }
 
   public final class UserHandle implements android.os.Parcelable {
+    method public static int getAppId(int);
     method public int getIdentifier();
     method @Deprecated public boolean isOwner();
     method public boolean isSystem();
