@@ -1,0 +1,188 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.os;
+
+import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
+import android.content.Context;
+import android.gsi.GsiProgress;
+
+/**
+ * The DynamicAndroidManager offers a mechanism to use a new Android image temporarily. After the
+ * installation, the device can reboot into this image with a new created /data. This image will
+ * last until the next reboot and then the device will go back to the original image. However the
+ * installed image and the new created /data are not deleted but disabled. Thus the application can
+ * either re-enable the installed image by calling {@link #toggle} or use the {@link #remove} to
+ * delete it completely. In other words, there are three device states: no installation, installed
+ * and running. The procedure to install a DynamicAndroid starts with a {@link #startInstallation},
+ * followed by a series of {@link #write} and ends with a {@link commit}. Once the installation is
+ * complete, the device state changes from no installation to the installed state and a followed
+ * reboot will change its state to running. Note one instance of dynamic android can exist on a
+ * given device thus the {@link #startInstallation} will fail if the device is currently running a
+ * DynamicAndroid.
+ *
+ * @hide
+ */
+@SystemService(Context.DYNAMIC_ANDROID_SERVICE)
+public class DynamicAndroidManager {
+    private static final String TAG = "DynamicAndroidManager";
+
+    private final IDynamicAndroidService mService;
+
+    /** {@hide} */
+    public DynamicAndroidManager(IDynamicAndroidService service) {
+        mService = service;
+    }
+
+    /** The DynamicAndroidManager.Session represents a started session for the installation. */
+    public class Session {
+        private Session() {}
+        /**
+         * Write a chunk of the DynamicAndroid system image
+         *
+         * @return {@code true} if the call succeeds. {@code false} if there is any native runtime
+         *     error.
+         */
+        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+        public boolean write(byte[] buf) {
+            try {
+                return mService.write(buf);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e.toString());
+            }
+        }
+
+        /**
+         * Finish write and make device to boot into the it after reboot.
+         *
+         * @return {@code true} if the call succeeds. {@code false} if there is any native runtime
+         *     error.
+         */
+        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+        public boolean commit() {
+            try {
+                return mService.commit();
+            } catch (RemoteException e) {
+                throw new RuntimeException(e.toString());
+            }
+        }
+    }
+    /**
+     * Start DynamicAndroid installation. This call may take an unbounded amount of time. The caller
+     * may use another thread to call the getStartProgress() to get the progress.
+     *
+     * @param systemSize system size in bytes
+     * @param userdataSize userdata size in bytes
+     * @return {@code true} if the call succeeds. {@code false} either the device does not contain
+     *     enough space or a DynamicAndroid is currently in use where the {@link #isInUse} would be
+     *     true.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    public Session startInstallation(long systemSize, long userdataSize) {
+        try {
+            if (mService.startInstallation(systemSize, userdataSize)) {
+                return new Session();
+            } else {
+                return null;
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /**
+     * Query the progress of the current installation operation. This can be called while the
+     * installation is in progress.
+     *
+     * @return GsiProgress GsiProgress { int status; long bytes_processed; long total_bytes; } The
+     *     status field can be IGsiService.STATUS_NO_OPERATION, IGsiService.STATUS_WORKING or
+     *     IGsiService.STATUS_COMPLETE.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    public GsiProgress getInstallationProgress() {
+        try {
+            return mService.getInstallationProgress();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /**
+     * Abort the installation process. Note this method must be called in a thread other than the
+     * one calling the startInstallation method as the startInstallation method will not return
+     * until it is finished.
+     *
+     * @return {@code true} if the call succeeds. {@code false} if there is no installation
+     *     currently.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    public boolean abort() {
+        try {
+            return mService.abort();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /** @return {@code true} if the device is running a dynamic android */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    public boolean isInUse() {
+        try {
+            return mService.isInUse();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /** @return {@code true} if the device has a dynamic android installed */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    public boolean isInstalled() {
+        try {
+            return mService.isInstalled();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /**
+     * Remove DynamicAndroid installation if present
+     *
+     * @return {@code true} if the call succeeds. {@code false} if there is no installed image.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    public boolean remove() {
+        try {
+            return mService.remove();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /**
+     * Enable DynamicAndroid when it's not enabled, otherwise, disable it.
+     *
+     * @return {@code true} if the call succeeds. {@code false} if there is no installed image.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    public boolean toggle() {
+        try {
+            return mService.toggle();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+}
