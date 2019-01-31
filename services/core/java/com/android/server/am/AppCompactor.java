@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_1;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_2;
+import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_STATSD_SAMPLE_RATE;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_1;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_2;
 import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_3;
@@ -45,6 +46,7 @@ import com.android.server.ServiceThread;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Random;
 
 public final class AppCompactor {
 
@@ -65,6 +67,8 @@ public final class AppCompactor {
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_2 = 10_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_4 = 10_000;
+    // The sampling rate to push app compaction events into statsd for upload.
+    @VisibleForTesting static final float DEFAULT_STATSD_SAMPLE_RATE = 0.1f;
 
     @VisibleForTesting
     interface PropertyChangedCallbackForTest {
@@ -104,6 +108,8 @@ public final class AppCompactor {
                                 || KEY_COMPACT_THROTTLE_3.equals(name)
                                 || KEY_COMPACT_THROTTLE_4.equals(name)) {
                             updateCompactionThrottles();
+                        } else if (KEY_COMPACT_STATSD_SAMPLE_RATE.equals(name)) {
+                            updateStatsdSampleRate();
                         }
                     }
                     if (mTestCallback != null) {
@@ -116,21 +122,25 @@ public final class AppCompactor {
 
     // Configured by phenotype. Updates from the server take effect immediately.
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting String mCompactActionSome =
+    @VisibleForTesting volatile String mCompactActionSome =
             compactActionIntToString(DEFAULT_COMPACT_ACTION_1);
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting String mCompactActionFull =
+    @VisibleForTesting volatile String mCompactActionFull =
             compactActionIntToString(DEFAULT_COMPACT_ACTION_2);
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting long mCompactThrottleSomeSome = DEFAULT_COMPACT_THROTTLE_1;
+    @VisibleForTesting volatile long mCompactThrottleSomeSome = DEFAULT_COMPACT_THROTTLE_1;
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting long mCompactThrottleSomeFull = DEFAULT_COMPACT_THROTTLE_2;
+    @VisibleForTesting volatile long mCompactThrottleSomeFull = DEFAULT_COMPACT_THROTTLE_2;
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting long mCompactThrottleFullSome = DEFAULT_COMPACT_THROTTLE_3;
+    @VisibleForTesting volatile long mCompactThrottleFullSome = DEFAULT_COMPACT_THROTTLE_3;
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting long mCompactThrottleFullFull = DEFAULT_COMPACT_THROTTLE_4;
+    @VisibleForTesting volatile long mCompactThrottleFullFull = DEFAULT_COMPACT_THROTTLE_4;
     @GuardedBy("mPhenotypeFlagLock")
-    private boolean mUseCompaction = DEFAULT_USE_COMPACTION;
+    private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
+
+    private final Random mRandom = new Random();
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting volatile float mStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
 
     // Handler on which compaction runs.
     private Handler mCompactionHandler;
@@ -158,6 +168,7 @@ public final class AppCompactor {
             updateUseCompaction();
             updateCompactionActions();
             updateCompactionThrottles();
+            updateStatsdSampleRate();
         }
     }
 
@@ -181,6 +192,7 @@ public final class AppCompactor {
             pw.println("  " + KEY_COMPACT_THROTTLE_2 + "=" + mCompactThrottleSomeFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_3 + "=" + mCompactThrottleFullSome);
             pw.println("  " + KEY_COMPACT_THROTTLE_4 + "=" + mCompactThrottleFullFull);
+            pw.println("  " + KEY_COMPACT_STATSD_SAMPLE_RATE + "=" + mStatsdSampleRate);
         }
     }
 
@@ -289,6 +301,19 @@ public final class AppCompactor {
         }
     }
 
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateStatsdSampleRate() {
+        String sampleRateFlag = DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                KEY_COMPACT_STATSD_SAMPLE_RATE);
+        try {
+            mStatsdSampleRate = TextUtils.isEmpty(sampleRateFlag)
+                    ? DEFAULT_STATSD_SAMPLE_RATE : Float.parseFloat(sampleRateFlag);
+        } catch (NumberFormatException e) {
+            mStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
+        }
+        mStatsdSampleRate = Math.min(1.0f, Math.max(0.0f, mStatsdSampleRate));
+    }
+
     @VisibleForTesting
     static String compactActionIntToString(int action) {
         switch(action) {
@@ -385,11 +410,16 @@ public final class AppCompactor {
                                 rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
                                 rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
                                 lastCompactAction, lastCompactTime, msg.arg1, msg.arg2);
-                        StatsLog.write(StatsLog.APP_COMPACTED, pid, name, pendingAction,
-                                rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
-                                rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
-                                lastCompactAction, lastCompactTime, msg.arg1,
-                                ActivityManager.processStateAmToProto(msg.arg2));
+                        // Note that as above not taking mPhenoTypeFlagLock here to avoid locking
+                        // on every single compaction for a flag that will seldom change and the
+                        // impact of reading the wrong value here is low.
+                        if (mRandom.nextFloat() < mStatsdSampleRate) {
+                            StatsLog.write(StatsLog.APP_COMPACTED, pid, name, pendingAction,
+                                    rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
+                                    rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
+                                    lastCompactAction, lastCompactTime, msg.arg1,
+                                    ActivityManager.processStateAmToProto(msg.arg2));
+                        }
                         synchronized (mAm) {
                             proc.lastCompactTime = end;
                             proc.lastCompactAction = pendingAction;

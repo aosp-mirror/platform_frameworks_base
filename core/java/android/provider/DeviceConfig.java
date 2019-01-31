@@ -261,6 +261,7 @@ public final class DeviceConfig {
         String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
         String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
         String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+        String KEY_COMPACT_STATSD_SAMPLE_RATE = "compact_statsd_sample_rate";
 
         /**
          * Maximum number of cached processes. See
