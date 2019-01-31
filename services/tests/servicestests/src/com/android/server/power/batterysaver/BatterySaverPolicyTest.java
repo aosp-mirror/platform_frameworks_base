@@ -21,8 +21,6 @@ import static com.android.server.power.batterysaver.BatterySaverPolicy.POLICY_LE
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.mock;
-
 import android.content.Context;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
@@ -34,10 +32,8 @@ import android.util.ArrayMap;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.server.power.batterysaver.BatterySaverPolicy.Policy;
 
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -87,9 +83,6 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         }
     }
 
-    @Mock
-    MetricsLogger mMetricsLogger = mock(MetricsLogger.class);
-
     private BatterySaverPolicyForTest mBatterySaverPolicy;
 
     private final ArrayMap<String, String> mMockGlobalSettings = new ArrayMap<>();
@@ -100,7 +93,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         MockitoAnnotations.initMocks(this);
         final Object lock = new Object();
         mBatterySaverPolicy = new BatterySaverPolicyForTest(lock, getContext(),
-                new BatterySavingStats(lock, mMetricsLogger));
+                new BatterySavingStats(lock));
         mBatterySaverPolicy.systemReady();
 
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
