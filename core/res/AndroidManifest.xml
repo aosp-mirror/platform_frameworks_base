@@ -1730,7 +1730,7 @@
     <permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows a system application to access hardware packet offload capabilities.
+    <!-- @SystemApi Allows a system application to access hardware packet offload capabilities.
          @hide -->
     <permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD"
         android:protectionLevel="signature|privileged" />
