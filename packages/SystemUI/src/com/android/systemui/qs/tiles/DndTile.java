@@ -235,7 +235,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.label = getTileLabel();
         state.secondaryLabel = TextUtils.emptyIfNull(ZenModeConfig.getDescription(mContext,
                 zen != Global.ZEN_MODE_OFF, mController.getConfig(), false));
-        state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
+        state.icon = ResourceIcon.get(R.drawable.ic_dnd);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
