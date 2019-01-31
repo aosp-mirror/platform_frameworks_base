@@ -1829,4 +1829,15 @@ interface ITelephony {
      * @hide
      */
     boolean isMultisimCarrierRestricted();
+    
+    /**
+     * Switch configs to enable multi-sim or switch back to single-sim
+     * @hide
+     */
+    void switchMultiSimConfig(int numOfSims);
+    /**
+     * Get how many modems have been activated on the phone
+     * @hide
+     */
+    int getNumOfActiveSims();
 }
