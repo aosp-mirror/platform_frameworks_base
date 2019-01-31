@@ -220,13 +220,17 @@ public final class DeviceConfig {
     public interface Telephony {
         String NAMESPACE = "telephony";
         /**
-         * Whether to apply ramping ringer on incoming phone calls.
-         */
-        String PROPERTY_ENABLE_RAMPING_RINGER = "enable_ramping_ringer";
-        /**
          * Ringer ramping time in milliseconds.
          */
-        String PROPERTY_RAMPING_RINGER_DURATION = "ramping_duration";
+        String RAMPING_RINGER_DURATION = "ramping_ringer_duration";
+        /**
+         * Whether to apply ramping ringer on incoming phone calls.
+         */
+        String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
+        /**
+         * Vibration time in milliseconds before ramping ringer starts.
+         */
+        String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
     }
 
     /**
