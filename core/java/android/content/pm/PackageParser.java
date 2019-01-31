@@ -3907,6 +3907,9 @@ public class PackageParser {
             outError[0] = "Invalid class loader name: " + ai.classLoaderName;
         }
 
+        ai.zygotePreloadName = sa.getString(
+                com.android.internal.R.styleable.AndroidManifestApplication_zygotePreloadName);
+
         sa.recycle();
 
         if (outError[0] != null) {

@@ -1192,6 +1192,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean hiddenUntilInstalled;
 
+    /** @hide */
+    public String zygotePreloadName;
+
     /**
      * Represents the default policy. The actual policy used will depend on other properties of
      * the application, e.g. the target SDK version.
@@ -1533,6 +1536,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         compileSdkVersionCodename = orig.compileSdkVersionCodename;
         mHiddenApiPolicy = orig.mHiddenApiPolicy;
         hiddenUntilInstalled = orig.hiddenUntilInstalled;
+        zygotePreloadName = orig.zygotePreloadName;
     }
 
     public String toString() {
@@ -1609,6 +1613,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(appComponentFactory);
         dest.writeInt(mHiddenApiPolicy);
         dest.writeInt(hiddenUntilInstalled ? 1 : 0);
+        dest.writeString(zygotePreloadName);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1682,6 +1687,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         appComponentFactory = source.readString();
         mHiddenApiPolicy = source.readInt();
         hiddenUntilInstalled = source.readInt() != 0;
+        zygotePreloadName = source.readString();
     }
 
     /**

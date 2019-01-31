@@ -17,13 +17,15 @@
 package com.android.internal.os;
 
 import android.app.LoadedApk;
+import android.app.ZygotePreload;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.net.LocalSocket;
 import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 /**
@@ -76,20 +78,29 @@ class AppZygoteInit {
 
             Zygote.allowAppFilesAcrossFork(appInfo);
 
-            Class<?> cl;
-            Method m;
-            try {
-                cl = Class.forName(appInfo.packageName + ".ZygotePreload", true, loader);
-                m = cl.getMethod("doPreload");
-                m.setAccessible(true);
-                m.invoke(null);
-            } catch (ClassNotFoundException e) {
-                // Don't treat this as an error since an app may not want to do any preloads
-                Log.w(TAG, "No ZygotePreload class found for " + appInfo.packageName);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                Log.e(TAG, "AppZygote application preload failed for "
-                        + appInfo.packageName, e);
+            if (appInfo.zygotePreloadName != null) {
+                Class<?> cl;
+                Method m;
+                try {
+                    ComponentName preloadName = ComponentName.createRelative(appInfo.packageName,
+                            appInfo.zygotePreloadName);
+                    cl = Class.forName(preloadName.getClassName(), true, loader);
+                    if (!ZygotePreload.class.isAssignableFrom(cl)) {
+                        Log.e(TAG, preloadName.getClassName() + " does not implement "
+                                + ZygotePreload.class.getName());
+                    } else {
+                        Constructor<?> ctor = cl.getConstructor();
+                        ZygotePreload preloadObject = (ZygotePreload) ctor.newInstance();
+                        preloadObject.doPreload(appInfo);
+                    }
+                } catch (ReflectiveOperationException e) {
+                    Log.e(TAG, "AppZygote application preload failed for "
+                            + appInfo.zygotePreloadName, e);
+                }
+            } else {
+                Log.i(TAG, "No zygotePreloadName attribute specified.");
             }
+
             try {
                 DataOutputStream socketOut = getSocketOutputStream();
                 socketOut.writeInt(loader != null ? 1 : 0);
