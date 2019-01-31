@@ -121,6 +121,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.apex.ApexInfo;
+import android.apex.ApexSessionInfo;
 import android.apex.IApexService;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -20783,6 +20784,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    -h: print this help");
                 pw.println("    --all-components: include all component names in package dump");
                 pw.println("  cmd may be one of:");
+                pw.println("    apex: list active APEXes and APEX session state");
                 pw.println("    l[ibraries]: list known shared libraries");
                 pw.println("    f[eatures]: list device features");
                 pw.println("    k[eysets]: print known keysets");
@@ -21310,6 +21312,54 @@ public class PackageManagerService extends IPackageManager.Stub
             // the given package is involved with.
             if (dumpState.onTitlePrinted()) pw.println();
             mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
+        }
+
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
+            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+            ipw.println();
+            ipw.println("Active APEX packages:");
+            ipw.increaseIndent();
+            final IApexService apex = IApexService.Stub.asInterface(
+                    ServiceManager.getService("apexservice"));
+            try {
+                final ApexInfo[] activeApexes = apex.getActivePackages();
+                for (ApexInfo ai : activeApexes) {
+                    if (packageName != null && !packageName.equals(ai.packageName)) {
+                        continue;
+                    }
+                    ipw.println(ai.packageName);
+                    ipw.increaseIndent();
+                    ipw.println("Version: " + Long.toString(ai.versionCode));
+                    ipw.println("Path: " + ai.packagePath);
+                    ipw.decreaseIndent();
+                }
+                ipw.decreaseIndent();
+                ipw.println();
+                ipw.println("APEX session state:");
+                ipw.increaseIndent();
+                final ApexSessionInfo[] sessions = apex.getSessions();
+                for (ApexSessionInfo si : sessions) {
+                    ipw.println("Session ID: " + Integer.toString(si.sessionId));
+                    ipw.increaseIndent();
+                    if (si.isUnknown) {
+                        ipw.println("State: UNKNOWN");
+                    } else if (si.isVerified) {
+                        ipw.println("State: VERIFIED");
+                    } else if (si.isStaged) {
+                        ipw.println("State: STAGED");
+                    } else if (si.isActivated) {
+                        ipw.println("State: ACTIVATED");
+                    } else if (si.isActivationPendingRetry) {
+                        ipw.println("State: ACTIVATION PENDING RETRY");
+                    } else if (si.isActivationFailed) {
+                        ipw.println("State: ACTIVATION FAILED");
+                    }
+                    ipw.decreaseIndent();
+                }
+                ipw.decreaseIndent();
+            } catch (RemoteException e) {
+                ipw.println("Couldn't communicate with apexd.");
+            }
         }
     }
 
