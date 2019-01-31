@@ -354,6 +354,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected StatusBarWindowController mStatusBarWindowController;
     protected UnlockMethodCache mUnlockMethodCache;
     @VisibleForTesting
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @VisibleForTesting
     DozeServiceHost mDozeServiceHost = new DozeServiceHost();
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
@@ -674,7 +676,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-
+        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
@@ -761,7 +763,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mUnlockMethodCache.addListener(this);
         startKeyguard();
 
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
+        mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
         putComponent(DozeHost.class, mDozeServiceHost);
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
@@ -1206,7 +1208,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mBiometricUnlockController = new BiometricUnlockController(mContext,
                 mDozeScrimController, keyguardViewMediator,
-                mScrimController, this, UnlockMethodCache.getInstance(mContext));
+                mScrimController, this, UnlockMethodCache.getInstance(mContext),
+                new Handler(), mKeyguardUpdateMonitor, mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_wakeUpDelayDoze));
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController);
         mKeyguardIndicationController
@@ -2357,8 +2361,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLightBarController.dump(fd, pw, args);
         }
 
-        if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
-            KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
+        if (mKeyguardUpdateMonitor != null) {
+            mKeyguardUpdateMonitor.dump(fd, pw, args);
         }
 
         FalsingManager.getInstance(mContext).dump(pw);
@@ -3889,6 +3893,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mPowerManager.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:NODOZE");
                 startAssist(new Bundle());
                 return;
+            }
+
+            if (mKeyguardUpdateMonitor != null
+                    && reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+                mKeyguardUpdateMonitor.onAuthInterruptDetected();
             }
 
             // Set the state to pulsing, so ScrimController will know what to do once we ask it to
