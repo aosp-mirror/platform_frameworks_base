@@ -162,21 +162,6 @@ public class Shader {
     protected void verifyNativeInstance() {
     }
 
-    /**
-     * @hide
-     */
-    protected Shader copy() {
-        final Shader copy = new Shader();
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
-    /**
-     * @hide
-     */
-    protected void copyLocalMatrix(Shader dest) {
-        dest.mLocalMatrix.set(mLocalMatrix);
-    }
 
     /**
      * @hide
