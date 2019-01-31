@@ -19,6 +19,7 @@ package com.android.systemui.bubbles;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
 import android.text.TextUtils;
@@ -68,9 +69,15 @@ public class BubbleExpandedViewContainer extends LinearLayout {
         mPointerView = findViewById(R.id.pointer_view);
         int width = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         int height = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
+
+        TypedArray ta = getContext().obtainStyledAttributes(
+                new int[] {android.R.attr.colorBackgroundFloating});
+        int bgColor = ta.getColor(0, Color.WHITE);
+        ta.recycle();
+
         ShapeDrawable triangleDrawable = new ShapeDrawable(
                 TriangleShape.create(width, height, true /* pointUp */));
-        triangleDrawable.setTint(Color.WHITE); // TODO: dark mode
+        triangleDrawable.setTint(bgColor);
         mPointerView.setBackground(triangleDrawable);
         mHeaderView = findViewById(R.id.bubble_content_header);
     }
