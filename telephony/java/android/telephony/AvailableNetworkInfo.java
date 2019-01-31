@@ -114,7 +114,7 @@ public final class AvailableNetworkInfo implements Parcelable {
         in.readStringList(mMccMncs);
     }
 
-    public AvailableNetworkInfo(int subId, int priority, ArrayList<String> mccMncs) {
+    public AvailableNetworkInfo(int subId, int priority, List<String> mccMncs) {
         mSubId = subId;
         mPriority = priority;
         mMccMncs = new ArrayList<String>(mccMncs);
