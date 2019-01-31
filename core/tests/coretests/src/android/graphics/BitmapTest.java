@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.hardware.HardwareBuffer;
+
 import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
@@ -233,14 +235,31 @@ public class BitmapTest extends TestCase {
     }
 
     @SmallTest
-    public void testCreateHardwareBitmapFromGraphicBuffer() {
+    public void testWrapHardwareBufferWithSrgbColorSpace() {
         GraphicBuffer buffer = GraphicBuffer.create(10, 10, PixelFormat.RGBA_8888,
                 GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_SOFTWARE_MASK);
         Canvas canvas = buffer.lockCanvas();
         canvas.drawColor(Color.YELLOW);
         buffer.unlockCanvasAndPost(canvas);
-        Bitmap hardwareBitmap = Bitmap.createHardwareBitmap(buffer);
+        Bitmap hardwareBitmap =
+                Bitmap.wrapHardwareBuffer(HardwareBuffer.createFromGraphicBuffer(buffer), null);
         assertTrue(hardwareBitmap.isPremultiplied());
         assertFalse(hardwareBitmap.isMutable());
+        assertEquals(ColorSpace.get(ColorSpace.Named.SRGB), hardwareBitmap.getColorSpace());
+    }
+
+    @SmallTest
+    public void testWrapHardwareBufferWithDisplayP3ColorSpace() {
+        GraphicBuffer buffer = GraphicBuffer.create(10, 10, PixelFormat.RGBA_8888,
+                GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_SOFTWARE_MASK);
+        Canvas canvas = buffer.lockCanvas();
+        canvas.drawColor(Color.YELLOW);
+        buffer.unlockCanvasAndPost(canvas);
+        Bitmap hardwareBitmap = Bitmap.wrapHardwareBuffer(
+                HardwareBuffer.createFromGraphicBuffer(buffer),
+                ColorSpace.get(ColorSpace.Named.DISPLAY_P3));
+        assertTrue(hardwareBitmap.isPremultiplied());
+        assertFalse(hardwareBitmap.isMutable());
+        assertEquals(ColorSpace.get(ColorSpace.Named.DISPLAY_P3), hardwareBitmap.getColorSpace());
     }
 }

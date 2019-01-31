@@ -33,6 +33,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
@@ -916,7 +917,8 @@ public class ActivityOptions {
                 // Unpackage the GraphicBuffer from the parceled thumbnail
                 final GraphicBuffer buffer = opts.getParcelable(KEY_ANIM_THUMBNAIL);
                 if (buffer != null) {
-                    mThumbnail = Bitmap.createHardwareBitmap(buffer);
+                    mThumbnail = Bitmap.wrapHardwareBuffer(
+                            HardwareBuffer.createFromGraphicBuffer(buffer), null);
                 }
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);

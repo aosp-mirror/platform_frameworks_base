@@ -23,6 +23,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.transition.TransitionUtils;
@@ -234,7 +235,8 @@ public abstract class SharedElementCallback {
                 return null;
             }
             if (bitmap == null) {
-                bitmap = Bitmap.createHardwareBitmap(buffer);
+                bitmap = Bitmap.wrapHardwareBuffer(HardwareBuffer.createFromGraphicBuffer(buffer),
+                                                   null);
             }
             ImageView imageView = new ImageView(context);
             view = imageView;
