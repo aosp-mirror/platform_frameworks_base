@@ -521,6 +521,16 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(extender2).setShouldManageLifetime(mEntry, false);
     }
 
+    /**
+     * Ensure that calling NotificationEntryManager.performRemoveNotification() doesn't crash when
+     * given a notification that has already been removed from NotificationData.
+     */
+    @Test
+    public void testPerformRemoveNotification_removedEntry() {
+        mEntryManager.getNotificationData().remove(mSbn.getKey(), null /* ranking */);
+        mEntryManager.performRemoveNotification(mSbn);
+    }
+
     private Notification.Action createAction() {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
