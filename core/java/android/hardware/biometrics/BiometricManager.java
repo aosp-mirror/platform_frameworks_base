@@ -21,6 +21,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
@@ -29,6 +30,7 @@ import android.util.Slog;
 /**
  * A class that contains biometric utilities. For authentication, see {@link BiometricPrompt}.
  */
+@SystemService(Context.BIOMETRIC_SERVICE)
 public class BiometricManager {
 
     private static final String TAG = "BiometricManager";
