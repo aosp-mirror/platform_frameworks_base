@@ -11428,6 +11428,9 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
+         * advertise_is_enabled              (boolean)
+         * datasaver_disabled                (boolean)
+         * launch_boost_disabled             (boolean)
          * vibration_disabled                (boolean)
          * animation_disabled                (boolean)
          * soundtrigger_disabled             (boolean)
@@ -11451,12 +11454,38 @@ public final class Settings {
         /**
          * Battery Saver device specific settings
          * This is encoded as a key=value list, separated by commas.
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         *     cpufreq-i (list of "core-number:frequency" pairs concatenated with /)
+         *     cpufreq-n (list of "core-number:frequency" pairs concatenated with /)
+         * </pre>
+         *
          * See {@link com.android.server.power.batterysaver.BatterySaverPolicy} for the details.
          *
          * @hide
          */
         public static final String BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS =
                 "battery_saver_device_specific_constants";
+
+        /**
+         * Settings for adaptive Battery Saver mode. Uses the same flags as
+         * {@link #BATTERY_SAVER_CONSTANTS}.
+         *
+         * @hide
+         */
+        public static final String BATTERY_SAVER_ADAPTIVE_CONSTANTS =
+                "battery_saver_adaptive_constants";
+
+        /**
+         * Device specific settings for adaptive Battery Saver mode. Uses the same flags as
+         * {@link #BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS}.
+         *
+         * @hide
+         */
+        public static final String BATTERY_SAVER_ADAPTIVE_DEVICE_SPECIFIC_CONSTANTS =
+                "battery_saver_adaptive_device_specific_constants";
 
         /**
          * Battery tip specific settings

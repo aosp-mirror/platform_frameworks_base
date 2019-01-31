@@ -17,8 +17,9 @@
 
 package android.os;
 
-import android.os.WorkSource;
+import android.os.BatterySaverPolicyConfig;
 import android.os.PowerSaveState;
+import android.os.WorkSource;
 
 /** @hide */
 
@@ -49,6 +50,8 @@ interface IPowerManager
     PowerSaveState getPowerSaveState(int serviceType);
     boolean setPowerSaveMode(boolean mode);
     boolean setDynamicPowerSavings(boolean dynamicPowerSavingsEnabled, int disableThreshold);
+    boolean setAdaptivePowerSavePolicy(in BatterySaverPolicyConfig config);
+    boolean setAdaptivePowerSaveEnabled(boolean enabled);
     int getPowerSaveMode();
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();

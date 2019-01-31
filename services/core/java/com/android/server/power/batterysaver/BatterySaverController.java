@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.BatteryManager;
+import android.os.BatterySaverPolicyConfig;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -42,6 +43,7 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.batterysaver.BatterySaverPolicy.BatterySaverPolicyListener;
+import com.android.server.power.batterysaver.BatterySaverPolicy.Policy;
 import com.android.server.power.batterysaver.BatterySavingStats.BatterySaverState;
 import com.android.server.power.batterysaver.BatterySavingStats.DozeState;
 import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState;
@@ -74,16 +76,25 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     private final ArrayList<LowPowerModeListener> mListeners = new ArrayList<>();
 
     @GuardedBy("mLock")
-    private boolean mEnabled;
+    private boolean mFullEnabled;
+
+    @GuardedBy("mLock")
+    private boolean mAdaptiveEnabled;
 
     @GuardedBy("mLock")
     private boolean mIsPluggedIn;
 
     /**
-     * Previously enabled or not; only for the event logging. Only use it from
+     * Whether full was previously enabled or not; only for the event logging. Only use it from
      * {@link #handleBatterySaverStateChanged}.
      */
-    private boolean mPreviouslyEnabled;
+    private boolean mFullPreviouslyEnabled;
+
+    /**
+     * Whether adaptive was previously enabled or not; only for the event logging. Only use it from
+     * {@link #handleBatterySaverStateChanged}.
+     */
+    private boolean mAdaptivePreviouslyEnabled;
 
     @GuardedBy("mLock")
     private boolean mIsInteractive;
@@ -104,7 +115,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     public static final int REASON_SETTING_CHANGED = 8;
     public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON = 9;
     public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF = 10;
-    public static final int REASON_STICKY_RESTORE_OFF = 13;
+    public static final int REASON_STICKY_RESTORE_OFF = 11;
+    public static final int REASON_ADAPTIVE_DYNAMIC_POWER_SAVINGS_CHANGED = 12;
+    public static final int REASON_TIMEOUT = 13;
 
     /**
      * Plugin interface. All methods are guaranteed to be called on the same (handler) thread.
@@ -124,7 +137,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_ON:
                 case Intent.ACTION_SCREEN_OFF:
-                    if (!isEnabled()) {
+                    if (!isPolicyEnabled()) {
                         updateBatterySavingStats();
                         return; // No need to send it if not enabled.
                     }
@@ -199,7 +212,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
     @Override
     public void onBatterySaverPolicyChanged(BatterySaverPolicy policy) {
-        if (!isEnabled()) {
+        if (!isPolicyEnabled()) {
             return; // No need to send it if not enabled.
         }
         mHandler.postStateChanged(/*sendBroadcast=*/ true, REASON_POLICY_CHANGED);
@@ -248,20 +261,96 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     @VisibleForTesting
     public void enableBatterySaver(boolean enable, int reason) {
         synchronized (mLock) {
-            if (mEnabled == enable) {
+            if (mFullEnabled == enable) {
                 return;
             }
-            mEnabled = enable;
+            mFullEnabled = enable;
 
-            mHandler.postStateChanged(/*sendBroadcast=*/ true, reason);
+            if (updatePolicyLevelLocked()) {
+                mHandler.postStateChanged(/*sendBroadcast=*/ true, reason);
+            }
         }
     }
 
-    /** @return whether battery saver is enabled or not. */
+    private boolean updatePolicyLevelLocked() {
+        if (mFullEnabled) {
+            return mBatterySaverPolicy.setPolicyLevel(BatterySaverPolicy.POLICY_LEVEL_FULL);
+        } else if (mAdaptiveEnabled) {
+            return mBatterySaverPolicy.setPolicyLevel(BatterySaverPolicy.POLICY_LEVEL_ADAPTIVE);
+        } else {
+            return mBatterySaverPolicy.setPolicyLevel(BatterySaverPolicy.POLICY_LEVEL_OFF);
+        }
+    }
+
+    /**
+     * @return whether battery saver is enabled or not. This takes into
+     * account whether a policy says to advertise isEnabled so this can be propagated externally.
+     */
     public boolean isEnabled() {
         synchronized (mLock) {
-            return mEnabled;
+            return mFullEnabled
+                    || (mAdaptiveEnabled && mBatterySaverPolicy.shouldAdvertiseIsEnabled());
         }
+    }
+
+    /**
+     * @return whether battery saver policy is enabled or not. This does not take into account
+     * whether a policy says to advertise isEnabled, so this shouldn't be propagated externally.
+     */
+    private boolean isPolicyEnabled() {
+        synchronized (mLock) {
+            return mFullEnabled || mAdaptiveEnabled;
+        }
+    }
+
+    boolean isFullEnabled() {
+        synchronized (mLock) {
+            return mFullEnabled;
+        }
+    }
+
+    boolean isAdaptiveEnabled() {
+        synchronized (mLock) {
+            return mAdaptiveEnabled;
+        }
+    }
+
+    boolean setAdaptivePolicyLocked(String settings, String deviceSpecificSettings, int reason) {
+        return setAdaptivePolicyLocked(
+                BatterySaverPolicy.Policy.fromSettings(settings, deviceSpecificSettings),
+                reason);
+    }
+
+    boolean setAdaptivePolicyLocked(BatterySaverPolicyConfig config, int reason) {
+        return setAdaptivePolicyLocked(BatterySaverPolicy.Policy.fromConfig(config), reason);
+    }
+
+    boolean setAdaptivePolicyLocked(Policy policy, int reason) {
+        if (mBatterySaverPolicy.setAdaptivePolicyLocked(policy)) {
+            mHandler.postStateChanged(/*sendBroadcast=*/ true, reason);
+            return true;
+        }
+        return false;
+    }
+
+    boolean resetAdaptivePolicyLocked(int reason) {
+        if (mBatterySaverPolicy.resetAdaptivePolicyLocked()) {
+            mHandler.postStateChanged(/*sendBroadcast=*/ true, reason);
+            return true;
+        }
+        return false;
+    }
+
+    boolean setAdaptivePolicyEnabledLocked(boolean enabled, int reason) {
+        if (mAdaptiveEnabled == enabled) {
+            return false;
+        }
+        mAdaptiveEnabled = enabled;
+        if (updatePolicyLevelLocked()) {
+            mHandler.postStateChanged(/*sendBroadcast=*/ true, reason);
+            return true;
+        }
+        return false;
     }
 
     /** @return whether device is in interactive state. */
@@ -280,7 +369,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
      * @return true if launch boost should currently be disabled.
      */
     public boolean isLaunchBoostDisabled() {
-        return isEnabled() && mBatterySaverPolicy.isLaunchBoostDisabled();
+        return isPolicyEnabled() && mBatterySaverPolicy.isLaunchBoostDisabled();
     }
 
     /**
@@ -293,6 +382,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
      * - When battery saver becomes deactivated.
      * - When battery saver is on and the interactive state changes.
      * - When battery saver is on and the battery saver policy changes.
+     * - When adaptive battery saver becomes activated.
+     * - When adaptive battery saver becomes deactivated.
+     * - When adaptive battery saver policy changes.
      */
     void handleBatterySaverStateChanged(boolean sendBroadcast, int reason) {
         final LowPowerModeListener[] listeners;
@@ -302,17 +394,22 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         final ArrayMap<String, String> fileValues;
 
         synchronized (mLock) {
+            enabled = mFullEnabled || mAdaptiveEnabled;
+
             EventLogTags.writeBatterySaverMode(
-                    mPreviouslyEnabled ? 1 : 0, // Previously off or on.
-                    mEnabled ? 1 : 0, // Now off or on.
+                    mFullPreviouslyEnabled ? 1 : 0, // Previously off or on.
+                    mAdaptivePreviouslyEnabled ? 1 : 0, // Previously off or on.
+                    mFullEnabled ? 1 : 0, // Now off or on.
+                    mAdaptiveEnabled ? 1 : 0, // Now off or on.
                     isInteractive ?  1 : 0, // Device interactive state.
-                    mEnabled ? mBatterySaverPolicy.toEventLogString() : "",
+                    enabled ? mBatterySaverPolicy.toEventLogString() : "",
                     reason);
-            mPreviouslyEnabled = mEnabled;
+
+            mFullPreviouslyEnabled = mFullEnabled;
+            mAdaptivePreviouslyEnabled = mAdaptiveEnabled;
 
             listeners = mListeners.toArray(new LowPowerModeListener[0]);
 
-            enabled = mEnabled;
             mIsInteractive = isInteractive;
 
             if (enabled) {
@@ -324,7 +421,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
         if (pmi != null) {
-            pmi.powerHint(PowerHint.LOW_POWER, enabled ? 1 : 0);
+            pmi.powerHint(PowerHint.LOW_POWER, isEnabled() ? 1 : 0);
         }
 
         updateBatterySavingStats();
@@ -342,13 +439,13 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         if (sendBroadcast) {
 
             if (DEBUG) {
-                Slog.i(TAG, "Sending broadcasts for mode: " + enabled);
+                Slog.i(TAG, "Sending broadcasts for mode: " + isEnabled());
             }
 
             // Send the broadcasts and notify the listeners. We only do this when the battery saver
             // mode changes, but not when only the screen state changes.
             Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)
-                    .putExtra(PowerManager.EXTRA_POWER_SAVE_MODE, enabled)
+                    .putExtra(PowerManager.EXTRA_POWER_SAVE_MODE, isEnabled())
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
@@ -364,8 +461,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
             for (LowPowerModeListener listener : listeners) {
                 final PowerSaveState result =
-                        mBatterySaverPolicy.getBatterySaverPolicy(
-                                listener.getServiceType(), enabled);
+                        mBatterySaverPolicy.getBatterySaverPolicy(listener.getServiceType());
                 listener.onLowPowerModeChanged(result);
             }
         }
@@ -389,7 +485,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                 return;
             }
             mBatterySavingStats.transitionState(
-                    mEnabled ? BatterySaverState.ON : BatterySaverState.OFF,
+                    mFullEnabled ? BatterySaverState.ON :
+                            (mAdaptiveEnabled ? BatterySaverState.ADAPTIVE : BatterySaverState.OFF),
                     isInteractive ? InteractiveState.INTERACTIVE : InteractiveState.NON_INTERACTIVE,
                     dozeMode);
         }
