@@ -267,7 +267,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mStagedSessionFailed;
     @GuardedBy("mLock")
-    private int mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+    private int mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
     @GuardedBy("mLock")
     private String mStagedSessionErrorMessage;
 
@@ -2004,7 +2004,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionReady = true;
             mStagedSessionApplied = false;
             mStagedSessionFailed = false;
-            mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+            mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
             mStagedSessionErrorMessage = "";
         }
         mCallback.onStagedSessionChanged(this);
@@ -2030,7 +2030,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionReady = false;
             mStagedSessionApplied = true;
             mStagedSessionFailed = false;
-            mStagedSessionErrorCode = SessionInfo.NO_ERROR;
+            mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
             mStagedSessionErrorMessage = "";
         }
         mCallback.onStagedSessionChanged(this);
@@ -2298,7 +2298,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isFailed = readBooleanAttribute(in, ATTR_IS_FAILED);
         final boolean isApplied = readBooleanAttribute(in, ATTR_IS_APPLIED);
         final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE,
-                SessionInfo.NO_ERROR);
+                SessionInfo.STAGED_SESSION_NO_ERROR);
         final String stagedSessionErrorMessage = readStringAttribute(in,
                 ATTR_STAGED_SESSION_ERROR_MESSAGE);
 

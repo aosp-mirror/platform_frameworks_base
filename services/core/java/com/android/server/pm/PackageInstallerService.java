@@ -567,8 +567,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId,
                 installerPackageName, callingUid, params, createdMillis, stageDir, stageCid, false,
-                false, null, SessionInfo.INVALID_ID, false, false, false, SessionInfo.NO_ERROR,
-                "");
+                false, null, SessionInfo.INVALID_ID, false, false, false,
+                SessionInfo.STAGED_SESSION_NO_ERROR, "");
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);

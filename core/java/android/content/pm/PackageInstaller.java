@@ -1625,26 +1625,35 @@ public class PackageInstaller {
         private static final int[] NO_SESSIONS = {};
 
         /** @hide */
-        @IntDef(value = {NO_ERROR, VERIFICATION_FAILED, ACTIVATION_FAILED})
+        @IntDef(prefix = { "STAGED_SESSION_" }, value = {
+                STAGED_SESSION_NO_ERROR,
+                STAGED_SESSION_VERIFICATION_FAILED,
+                STAGED_SESSION_ACTIVATION_FAILED,
+                STAGED_SESSION_UNKNOWN})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StagedSessionErrorCode{}
         /**
          * Constant indicating that no error occurred during the preparation or the activation of
          * this staged session.
          */
-        public static final int NO_ERROR = 0;
+        public static final int STAGED_SESSION_NO_ERROR = 0;
 
         /**
          * Constant indicating that an error occurred during the verification phase (pre-reboot) of
          * this staged session.
          */
-        public static final int VERIFICATION_FAILED = 1;
+        public static final int STAGED_SESSION_VERIFICATION_FAILED = 1;
 
         /**
          * Constant indicating that an error occurred during the activation phase (post-reboot) of
          * this staged session.
          */
-        public static final int ACTIVATION_FAILED = 2;
+        public static final int STAGED_SESSION_ACTIVATION_FAILED = 2;
+
+        /**
+         * Constant indicating that an unknown error occurred while processing this staged session.
+         */
+        public static final int STAGED_SESSION_UNKNOWN = 3;
 
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)

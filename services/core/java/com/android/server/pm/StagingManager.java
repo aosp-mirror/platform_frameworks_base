@@ -215,7 +215,7 @@ public class StagingManager {
 
         if (!success) {
             session.setStagedSessionFailed(
-                    SessionInfo.VERIFICATION_FAILED,
+                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "APEX staging failed, check logcat messages from apexd for more details.");
         }
 
@@ -227,7 +227,7 @@ public class StagingManager {
             for (ApexInfo apexPackage : apexInfoList.apexInfos) {
                 if (!validateApexSignature(apexPackage.packagePath,
                         apexPackage.packageName)) {
-                    session.setStagedSessionFailed(SessionInfo.VERIFICATION_FAILED,
+                    session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "APK-container signature verification failed for package "
                                     + apexPackage.packageName + ". Signature of file "
                                     + apexPackage.packagePath + " does not match the signature of "
@@ -240,7 +240,7 @@ public class StagingManager {
 
         session.setStagedSessionReady();
         if (!sendMarkStagedSessionReadyRequest(session.sessionId)) {
-            session.setStagedSessionFailed(SessionInfo.VERIFICATION_FAILED,
+            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "APEX staging failed, check logcat messages from apexd for more "
                             + "details.");
         }
@@ -276,7 +276,7 @@ public class StagingManager {
                 return;
             }
             if (apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown) {
-                session.setStagedSessionFailed(SessionInfo.ACTIVATION_FAILED,
+                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "APEX activation failed. Check logcat messages from apexd for "
                                 + "more information.");
                 return;
@@ -301,8 +301,9 @@ public class StagingManager {
         }
         // The APEX part of the session is activated, proceed with the installation of APKs.
         if (!installApksInSession(session)) {
-            session.setStagedSessionFailed(SessionInfo.ACTIVATION_FAILED,
-                    "APK installation for staged session " + session.sessionId + " failed.");
+            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                    "APEX activation failed. Check logcat messages from apexd for "
+                            + "more information.");
             return;
         }
         session.setStagedSessionApplied();
