@@ -86,7 +86,7 @@ public abstract class GnssNavigationMessageProvider
     }
 
     public void onNavigationMessageAvailable(final GnssNavigationMessage event) {
-        foreach((IGnssNavigationMessageListener listener, int uid, String packageName) -> {
+        foreach((IGnssNavigationMessageListener listener, CallerIdentity callerIdentity) -> {
                     listener.onGnssNavigationMessageReceived(event);
                 }
         );
@@ -136,7 +136,7 @@ public abstract class GnssNavigationMessageProvider
 
         @Override
         public void execute(IGnssNavigationMessageListener listener,
-                int uid, String packageName) throws RemoteException {
+                CallerIdentity callerIdentity) throws RemoteException {
             listener.onStatusChanged(mStatus);
         }
     }
