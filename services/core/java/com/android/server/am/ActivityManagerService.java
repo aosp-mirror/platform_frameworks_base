@@ -549,6 +549,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     boolean mUseFifoUiScheduling = false;
 
+    // Use an offload queue for long broadcasts, e.g. BOOT_COMPLETED.
+    // For simplicity, since we statically declare the size of the array of BroadcastQueues,
+    // we still create this new offload queue, but never ever put anything on it.
+    boolean mEnableOffloadQueue;
+
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
     BroadcastQueue mOffloadBroadcastQueue;
@@ -2282,6 +2287,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         offloadConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
         // by default, no "slow" policy in this queue
         offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
+
+        mEnableOffloadQueue = SystemProperties.getBoolean(
+                "persist.device_config.activity_manager_native_boot.offload_queue_enabled", false);
 
         mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "foreground", foreConstants, false);
@@ -18389,6 +18397,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isOnOffloadQueue(int flags) {
-        return ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0);
+        return (mEnableOffloadQueue && ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0));
     }
 }
