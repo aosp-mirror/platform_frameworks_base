@@ -54,13 +54,13 @@ public final class Font {
      * A builder class for creating new Font.
      */
     public static final class Builder {
-        private static final NativeAllocationRegistry sAssetByteBufferRegistroy =
-                new NativeAllocationRegistry(ByteBuffer.class.getClassLoader(),
-                    nGetReleaseNativeAssetFunc(), 64);
+        private static final NativeAllocationRegistry sAssetByteBufferRegistry =
+                NativeAllocationRegistry.createMalloced(ByteBuffer.class.getClassLoader(),
+                    nGetReleaseNativeAssetFunc());
 
-        private static final NativeAllocationRegistry sFontRegistory =
-                new NativeAllocationRegistry(Font.class.getClassLoader(),
-                    nGetReleaseNativeFont(), 64);
+        private static final NativeAllocationRegistry sFontRegistry =
+                NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
+                    nGetReleaseNativeFont());
 
         private @Nullable ByteBuffer mBuffer;
         private @Nullable File mFile;
@@ -171,7 +171,7 @@ public final class Font {
                 return;
             }
             final ByteBuffer b = nGetAssetBuffer(nativeAsset);
-            sAssetByteBufferRegistroy.registerNativeAllocation(b, nativeAsset);
+            sAssetByteBufferRegistry.registerNativeAllocation(b, nativeAsset);
             if (b == null) {
                 mException = new FileNotFoundException(path + " not found");
                 return;
@@ -206,7 +206,7 @@ public final class Font {
                 return;
             }
             final ByteBuffer b = nGetAssetBuffer(nativeAsset);
-            sAssetByteBufferRegistroy.registerNativeAllocation(b, nativeAsset);
+            sAssetByteBufferRegistry.registerNativeAllocation(b, nativeAsset);
             if (b == null) {
                 mException = new FileNotFoundException(str + " not found");
                 return;
@@ -395,7 +395,7 @@ public final class Font {
                     mTtcIndex);
             final Font font = new Font(ptr, readonlyBuffer, mFile,
                     new FontStyle(mWeight, slant), mTtcIndex, mAxes, mLocaleList);
-            sFontRegistory.registerNativeAllocation(font, ptr);
+            sFontRegistry.registerNativeAllocation(font, ptr);
             return font;
         }
 

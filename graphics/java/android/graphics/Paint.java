@@ -58,13 +58,11 @@ public class Paint {
     private long mNativeShader;
     private long mNativeColorFilter;
 
-    // The approximate size of a native paint object.
-    private static final long NATIVE_PAINT_SIZE = 98;
-
     // Use a Holder to allow static initialization of Paint in the boot image.
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Paint.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Paint.class.getClassLoader(), nGetNativeFinalizer());
     }
 
     @ColorLong private long mColor;

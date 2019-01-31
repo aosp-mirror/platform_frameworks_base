@@ -198,8 +198,9 @@ public final class RenderNode {
 
     // Use a Holder to allow static initialization in the boot image.
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                RenderNode.class.getClassLoader(), nGetNativeFinalizer(), 1024);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                RenderNode.class.getClassLoader(), nGetNativeFinalizer());
     }
 
     /**

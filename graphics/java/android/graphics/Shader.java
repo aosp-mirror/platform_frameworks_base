@@ -33,8 +33,9 @@ import libcore.util.NativeAllocationRegistry;
 public class Shader {
 
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Shader.class.getClassLoader(), nativeGetFinalizer(), 50);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Shader.class.getClassLoader(), nativeGetFinalizer());
     }
 
     /**

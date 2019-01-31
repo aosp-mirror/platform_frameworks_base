@@ -169,8 +169,9 @@ public class MeasuredText {
      * Note: The appendStyle and appendReplacementRun should be called to cover the text length.
      */
     public static final class Builder {
-        private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                MeasuredText.class.getClassLoader(), nGetReleaseFunc(), 1024);
+        private static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                MeasuredText.class.getClassLoader(), nGetReleaseFunc());
 
         private long mNativePtr;
 

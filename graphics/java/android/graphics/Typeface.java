@@ -74,8 +74,9 @@ public class Typeface {
 
     private static String TAG = "Typeface";
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-            Typeface.class.getClassLoader(), nativeGetReleaseFunc(), 64);
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(
+            Typeface.class.getClassLoader(), nativeGetReleaseFunc());
 
     /** The default NORMAL typeface object */
     public static final Typeface DEFAULT;

@@ -63,8 +63,8 @@ public final class FontFamily {
      */
     public static final class Builder {
         private static final NativeAllocationRegistry sFamilyRegistory =
-                new NativeAllocationRegistry(FontFamily.class.getClassLoader(),
-                    nGetReleaseNativeFamily(), 64);
+                NativeAllocationRegistry.createMalloced(FontFamily.class.getClassLoader(),
+                    nGetReleaseNativeFamily());
 
         private final ArrayList<Font> mFonts = new ArrayList<>();
         private final HashSet<Integer> mStyleHashSet = new HashSet<>();
