@@ -360,13 +360,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
             decodeColorType, alphaType, decodeColorSpace);
 
-    // For wide gamut images, we will leave the color space on the SkBitmap.  Otherwise,
-    // use the default.
     SkImageInfo bitmapInfo = decodeInfo;
-    if (decodeInfo.colorSpace() && decodeInfo.colorSpace()->isSRGB()) {
-        bitmapInfo = bitmapInfo.makeColorSpace(decodeInfo.refColorSpace());
-    }
-
     if (decodeColorType == kGray_8_SkColorType) {
         // The legacy implementation of BitmapFactory used kAlpha8 for
         // grayscale images (before kGray8 existed).  While the codec
