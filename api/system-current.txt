@@ -4035,6 +4035,10 @@ package android.net {
     field public static final String EXTRA_PACKAGE_NAME = "packageName";
   }
 
+  public class NetworkStack {
+    field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
+  }
+
   public final class RouteInfo implements android.os.Parcelable {
     ctor public RouteInfo(android.net.IpPrefix, java.net.InetAddress, String, int);
     method public int getType();
