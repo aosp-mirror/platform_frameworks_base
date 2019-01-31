@@ -106,7 +106,7 @@ static std::vector<SkColor4f> convertColorLongs(JNIEnv* env, jlongArray colorArr
 
 static jlong LinearGradient_create(JNIEnv* env, jobject, jlong matrixPtr,
         jfloat x0, jfloat y0, jfloat x1, jfloat y1, jlongArray colorArray,
-        jfloatArray posArray, jint tileMode, long colorSpaceHandle) {
+        jfloatArray posArray, jint tileMode, jlong colorSpaceHandle) {
     SkPoint pts[2];
     pts[0].set(x0, y0);
     pts[1].set(x1, y1);
