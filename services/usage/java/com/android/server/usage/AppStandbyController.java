@@ -30,18 +30,19 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_NOTIFICATION_SEEN;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED_PRIV;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYNC_ADAPTER;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_UPDATE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
-import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED;
-import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED_PRIV;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
@@ -340,14 +341,21 @@ public class AppStandbyController {
     }
 
     void setAppIdleEnabled(boolean enabled) {
-        mAppIdleEnabled = enabled;
+        synchronized (mAppIdleLock) {
+            if (mAppIdleEnabled != enabled) {
+                final boolean oldParoleState = isParoledOrCharging();
+                mAppIdleEnabled = enabled;
+                if (isParoledOrCharging() != oldParoleState) {
+                    postParoleStateChanged();
+                }
+            }
+        }
     }
 
     public void onBootPhase(int phase) {
         mInjector.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             Slog.d(TAG, "Setting app idle enabled state");
-            setAppIdleEnabled(mInjector.isAppIdleEnabled());
             // Observe changes to the threshold
             SettingsObserver settingsObserver = new SettingsObserver(mHandler);
             settingsObserver.registerObserver();
@@ -1807,8 +1815,6 @@ public class AppStandbyController {
                         mContext.getContentResolver(),
                         Global.APP_IDLE_CONSTANTS));
             }
-            // Check if app_idle_enabled has changed
-            setAppIdleEnabled(mInjector.isAppIdleEnabled());
 
             // Look at global settings for this.
             // TODO: Maybe apply different thresholds for different users.
@@ -1880,6 +1886,10 @@ public class AppStandbyController {
                         (KEY_STABLE_CHARGING_THRESHOLD,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_STABLE_CHARGING_THRESHOLD);
             }
+
+            // Check if app_idle_enabled has changed. Do this after getting the rest of the settings
+            // in case we need to change something based on the new values.
+            setAppIdleEnabled(mInjector.isAppIdleEnabled());
         }
 
         long[] parseLongArray(String values, long[] defaults) {
