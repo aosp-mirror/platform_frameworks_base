@@ -1444,6 +1444,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         return new StatusBar.H();
     }
 
+    @Override
     public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
             int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, flags);
