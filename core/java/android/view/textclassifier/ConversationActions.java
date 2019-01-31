@@ -393,9 +393,10 @@ public final class ConversationActions implements Parcelable {
         }
 
         /**
-         * Return the maximal number of suggestions the caller wants, value 0 means no restriction.
+         * Return the maximal number of suggestions the caller wants, value -1 means no restriction
+         * and this is the default.
          */
-        @IntRange(from = 0)
+        @IntRange(from = -1)
         public int getMaxSuggestions() {
             return mMaxSuggestions;
         }
@@ -443,7 +444,7 @@ public final class ConversationActions implements Parcelable {
             private List<Message> mConversation;
             @Nullable
             private TextClassifier.EntityConfig mTypeConfig;
-            private int mMaxSuggestions;
+            private int mMaxSuggestions = -1;
             @Nullable
             private String mConversationId;
             @Nullable
@@ -477,12 +478,11 @@ public final class ConversationActions implements Parcelable {
             }
 
             /**
-             * Sets the maximum number of suggestions you want.
-             * <p>
-             * Value 0 means no restriction.
+             * Sets the maximum number of suggestions you want. Value -1 means no restriction and
+             * this is the default.
              */
             @NonNull
-            public Builder setMaxSuggestions(@IntRange(from = 0) int maxSuggestions) {
+            public Builder setMaxSuggestions(@IntRange(from = -1) int maxSuggestions) {
                 mMaxSuggestions = Preconditions.checkArgumentNonnegative(maxSuggestions);
                 return this;
             }

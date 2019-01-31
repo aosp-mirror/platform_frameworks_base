@@ -17,7 +17,6 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,64 +24,29 @@ import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.Preconditions;
 
-import com.google.android.textclassifier.AnnotatorModel;
 import com.google.android.textclassifier.NamedVariant;
 import com.google.android.textclassifier.RemoteActionTemplate;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Creates intents based on {@link RemoteActionTemplate} objects.
+ *
  * @hide
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public final class TemplateIntentFactory implements IntentFactory {
+public final class TemplateIntentFactory {
     private static final String TAG = TextClassifier.DEFAULT_LOG_TAG;
-    private final IntentFactory mFallback;
 
-    public TemplateIntentFactory(IntentFactory fallback) {
-        mFallback = Preconditions.checkNotNull(fallback);
-    }
-
-    /**
-     * Returns a list of {@link android.view.textclassifier.TextClassifierImpl.LabeledIntent}
-     * that are constructed from the classification result.
-     */
     @NonNull
-    @Override
     public List<TextClassifierImpl.LabeledIntent> create(
-            Context context,
-            String text,
-            boolean foreignText,
-            @Nullable Instant referenceTime,
-            @Nullable AnnotatorModel.ClassificationResult classification) {
-        if (classification == null) {
+            @Nullable RemoteActionTemplate[] remoteActionTemplates) {
+        if (ArrayUtils.isEmpty(remoteActionTemplates)) {
             return Collections.emptyList();
         }
-        RemoteActionTemplate[] remoteActionTemplates = classification.getRemoteActionTemplates();
-        if (ArrayUtils.isEmpty(remoteActionTemplates)) {
-            // RemoteActionTemplate is missing, fallback.
-            Log.w(TAG, "RemoteActionTemplate is missing, fallback to LegacyIntentFactory.");
-            return mFallback.create(context, text, foreignText, referenceTime, classification);
-        }
-        final List<TextClassifierImpl.LabeledIntent> labeledIntents =
-                new ArrayList<>(createFromRemoteActionTemplates(remoteActionTemplates));
-        if (foreignText) {
-            IntentFactory.insertTranslateAction(labeledIntents, context, text.trim());
-        }
-        labeledIntents.forEach(
-                action -> action.getIntent()
-                        .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
-        return labeledIntents;
-    }
-
-    private static List<TextClassifierImpl.LabeledIntent> createFromRemoteActionTemplates(
-            RemoteActionTemplate[] remoteActionTemplates) {
         final List<TextClassifierImpl.LabeledIntent> labeledIntents = new ArrayList<>();
         for (RemoteActionTemplate remoteActionTemplate : remoteActionTemplates) {
             Intent intent = createIntent(remoteActionTemplate);
@@ -100,6 +64,9 @@ public final class TemplateIntentFactory implements IntentFactory {
             );
             labeledIntents.add(labeledIntent);
         }
+        labeledIntents.forEach(
+                action -> action.getIntent()
+                        .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
         return labeledIntents;
     }
 
