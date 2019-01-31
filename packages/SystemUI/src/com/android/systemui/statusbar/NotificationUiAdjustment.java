@@ -54,7 +54,7 @@ public class NotificationUiAdjustment {
     public static NotificationUiAdjustment extractFromNotificationEntry(
             NotificationEntry entry) {
         return new NotificationUiAdjustment(
-                entry.key, entry.systemGeneratedSmartActions, entry.smartReplies);
+                entry.key, entry.systemGeneratedSmartActions, entry.systemGeneratedSmartReplies);
     }
 
     public static boolean needReinflate(
