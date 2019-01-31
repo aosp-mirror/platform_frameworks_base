@@ -26,6 +26,4 @@
     <color name="car_user_switcher_add_user_background_color">@color/car_dark_blue_grey_600</color>
     <color name="car_user_switcher_add_user_add_sign_color">@color/car_body1_light</color>
 
-    <!-- colors for volume dialog tint -->
-    <color name="car_volume_dialog_tint">@color/car_tint</color>
 </resources>
