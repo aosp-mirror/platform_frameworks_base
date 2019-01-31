@@ -83,7 +83,7 @@ class TaskPositioningController {
         final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
         if (mInputSurface == null) {
             mInputSurface = mService.makeSurfaceBuilder(dc.getSession())
-                    .setContainerLayer()
+                    .setContainerLayer(true)
                     .setName("Drag and Drop Input Consumer").build();
         }
 
