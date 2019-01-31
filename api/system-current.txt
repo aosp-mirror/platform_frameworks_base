@@ -1127,6 +1127,7 @@ package android.app.usage {
     method public String getNotificationChannelId();
     method @Nullable public String getTaskRootClassName();
     method @Nullable public String getTaskRootPackageName();
+    method public boolean isInstantApp();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
     field public static final int SLICE_PINNED = 14; // 0xe

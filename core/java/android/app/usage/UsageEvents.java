@@ -405,6 +405,16 @@ public final class UsageEvents implements Parcelable {
         }
 
         /**
+         * Indicates whether it is an instant app.
+         * STOPSHIP b/111407095: Add GTS tests for the newly added API method.
+         * @hide
+         */
+        @SystemApi
+        public boolean isInstantApp() {
+            return (mFlags & FLAG_IS_PACKAGE_INSTANT_APP) == FLAG_IS_PACKAGE_INSTANT_APP;
+        }
+
+        /**
          * The class name of the source of this event. This may be null for
          * certain events.
          */
@@ -530,7 +540,7 @@ public final class UsageEvents implements Parcelable {
 
         /** @hide */
         public Event getObfuscatedIfInstantApp() {
-            if ((mFlags & FLAG_IS_PACKAGE_INSTANT_APP) == 0) {
+            if (!isInstantApp()) {
                 return this;
             }
             final Event ret = new Event(this);
@@ -735,6 +745,7 @@ public final class UsageEvents implements Parcelable {
                 p.writeString(event.mNotificationChannelId);
                 break;
         }
+        p.writeInt(event.mFlags);
     }
 
     /**
@@ -802,6 +813,7 @@ public final class UsageEvents implements Parcelable {
                 eventOut.mNotificationChannelId = p.readString();
                 break;
         }
+        eventOut.mFlags = p.readInt();
     }
 
     @Override
