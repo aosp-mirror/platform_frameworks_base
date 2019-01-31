@@ -13538,9 +13538,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setServiceForeground(ComponentName className, IBinder token,
-            int id, Notification notification, int flags) {
+            int id, Notification notification, int flags, int foregroundServiceType) {
         synchronized(this) {
-            mServices.setServiceForegroundLocked(className, token, id, notification, flags);
+            mServices.setServiceForegroundLocked(className, token, id, notification, flags,
+                    foregroundServiceType);
         }
     }
 

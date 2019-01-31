@@ -1447,26 +1447,20 @@
 
     <attr name="usesNonSdkApi" format="boolean" />
 
-    <!-- Specify the type of foreground service. Apps targeting API
-     {@link android.os.Build.VERSION_CODES#Q} or later must specify foreground service type,
-     otherwise a SecurityException is thrown when
-     {@link android.app.Service#startForeground(int, Notification)} on this service is called.
-    -->
+    <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
+         together. -->
     <attr name="foregroundServiceType">
         <!-- Data (photo, file, account) upload/download, backup/restore, import/export, fetch,
         transfer over network between device and cloud.  -->
-        <enum name="sync" value="1" />
+        <flag name="dataSync" value="0x01" />
         <!-- Music, video, news or other media play. -->
-        <enum name="mediaPlay" value="2" />
+        <flag name="mediaPlayback" value="0x02" />
         <!-- Ongoing phone call or video conference. -->
-        <enum name="phoneCall" value="3" />
+        <flag name="phoneCall" value="0x04" />
         <!-- GPS, map, navigation location update. -->
-        <enum name="location" value="4" />
+        <flag name="location" value="0x08" />
         <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction. -->
-        <enum name="deviceCompanion" value="5" />
-        <!-- Process that should not be interrupted, including installation, setup, photo
-        compression etc. -->
-        <enum name="ongoingProcess" value="6" />
+        <flag name="connectedDevice" value="0x10" />
     </attr>
 
 
