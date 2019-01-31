@@ -20,7 +20,7 @@ import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_PROBE_SPEC;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.LoadedApk;
+import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,8 +37,9 @@ import android.net.captiveportal.CaptivePortalProbeSpec;
 import android.net.http.SslCertificate;
 import android.net.http.SslError;
 import android.net.wifi.WifiInfo;
-import android.os.Build;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.SystemProperties;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -95,6 +96,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private CaptivePortal mCaptivePortal;
     private NetworkCallback mNetworkCallback;
     private ConnectivityManager mCm;
+    private WifiManager mWifiManager;
     private boolean mLaunchBrowser = false;
     private MyWebViewClient mWebViewClient;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -108,7 +110,8 @@ public class CaptivePortalLoginActivity extends Activity {
         mCaptivePortal = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
         logMetricsEvent(MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_ACTIVITY);
 
-        mCm = ConnectivityManager.from(this);
+        mCm = getSystemService(ConnectivityManager.class);
+        mWifiManager = getSystemService(WifiManager.class);
         mNetwork = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_NETWORK);
         mUserAgent =
                 getIntent().getStringExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT);
@@ -150,7 +153,6 @@ public class CaptivePortalLoginActivity extends Activity {
         // Also initializes proxy system properties.
         mNetwork = mNetwork.getPrivateDnsBypassingCopy();
         mCm.bindProcessToNetwork(mNetwork);
-        mCm.setProcessDefaultNetworkForHostResolution(mNetwork);
 
         // Proxy system properties must be initialized before setContentView is called because
         // setContentView initializes the WebView logic which in turn reads the system properties.
@@ -189,9 +191,12 @@ public class CaptivePortalLoginActivity extends Activity {
 
     // Find WebView's proxy BroadcastReceiver and prompt it to read proxy system properties.
     private void setWebViewProxy() {
-        LoadedApk loadedApk = getApplication().mLoadedApk;
+        // TODO: migrate to androidx WebView proxy setting API as soon as it is finalized
         try {
-            Field receiversField = LoadedApk.class.getDeclaredField("mReceivers");
+            final Field loadedApkField = Application.class.getDeclaredField("mLoadedApk");
+            final Class<?> loadedApkClass = loadedApkField.getType();
+            final Object loadedApk = loadedApkField.get(getApplication());
+            Field receiversField = loadedApkClass.getDeclaredField("mReceivers");
             receiversField.setAccessible(true);
             ArrayMap receivers = (ArrayMap) receiversField.get(loadedApk);
             for (Object receiverMap : receivers.values()) {
@@ -332,7 +337,11 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private static String sanitizeURL(URL url) {
         // In non-Debug build, only show host to avoid leaking private info.
-        return Build.IS_DEBUGGABLE ? Objects.toString(url) : host(url);
+        return isDebuggable() ? Objects.toString(url) : host(url);
+    }
+
+    private static boolean isDebuggable() {
+        return SystemProperties.getInt("ro.debuggable", 0) == 1;
     }
 
     private void testForCaptivePortal() {
@@ -585,19 +594,18 @@ public class CaptivePortalLoginActivity extends Activity {
         }
 
         private void setViewSecurityCertificate(LinearLayout certificateLayout, SslError error) {
+            ((TextView) certificateLayout.findViewById(R.id.ssl_error_msg))
+                    .setText(sslErrorMessage(error));
             SslCertificate cert = error.getCertificate();
-
-            View certificateView = cert.inflateCertificateView(CaptivePortalLoginActivity.this);
-            final LinearLayout placeholder = (LinearLayout) certificateView
-                    .findViewById(com.android.internal.R.id.placeholder);
-            LayoutInflater factory = LayoutInflater.from(CaptivePortalLoginActivity.this);
-
-            TextView textView = (TextView) factory.inflate(
-                    R.layout.ssl_error_msg, placeholder, false);
-            textView.setText(sslErrorMessage(error));
-            placeholder.addView(textView);
-
-            certificateLayout.addView(certificateView);
+            // TODO: call the method directly once inflateCertificateView is @SystemApi
+            try {
+                final View certificateView = (View) SslCertificate.class.getMethod(
+                        "inflateCertificateView", Context.class)
+                        .invoke(cert, CaptivePortalLoginActivity.this);
+                certificateLayout.addView(certificateView);
+            } catch (ReflectiveOperationException | SecurityException e) {
+                Log.e(TAG, "Could not create certificate view", e);
+            }
         }
     }
 
@@ -618,11 +626,30 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private String getHeaderTitle() {
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mNetwork);
-        if (nc == null || TextUtils.isEmpty(nc.getSSID())
-            || !nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+        final String ssid = getSsid();
+        if (TextUtils.isEmpty(ssid)
+                || nc == null || !nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             return getString(R.string.action_bar_label);
         }
-        return getString(R.string.action_bar_title, WifiInfo.removeDoubleQuotes(nc.getSSID()));
+        return getString(R.string.action_bar_title, ssid);
+    }
+
+    // TODO: remove once SSID is obtained from NetworkCapabilities
+    private String getSsid() {
+        if (mWifiManager == null) {
+            return null;
+        }
+        final WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+        return removeDoubleQuotes(wifiInfo.getSSID());
+    }
+
+    private static String removeDoubleQuotes(String string) {
+        if (string == null) return null;
+        final int length = string.length();
+        if ((length > 1) && (string.charAt(0) == '"') && (string.charAt(length - 1) == '"')) {
+            return string.substring(1, length - 1);
+        }
+        return string;
     }
 
     private String getHeaderSubtitle(URL url) {
