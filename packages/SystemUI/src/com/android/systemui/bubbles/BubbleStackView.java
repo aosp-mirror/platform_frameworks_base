@@ -296,19 +296,22 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     public void removeBubble(BubbleView bubbleView) {
         int removedIndex = mBubbleContainer.indexOfChild(bubbleView);
         mBubbleContainer.removeView(bubbleView);
-        boolean wasExpanded = mIsExpanded;
         int bubbleCount = mBubbleContainer.getChildCount();
-        if (mIsExpanded && bubbleView.equals(mExpandedBubble) && bubbleCount > 0) {
+        if (bubbleCount == 0) {
+            // If no bubbles remain, collapse the entire stack.
+            collapseStack();
+            return;
+        } else if (bubbleView.equals(mExpandedBubble)) {
+            // Was the current bubble just removed?
             // If we have other bubbles and are expanded go to the next one or previous
             // if the bubble removed was last
             int nextIndex = bubbleCount > removedIndex ? removedIndex : bubbleCount - 1;
             BubbleView expandedBubble = (BubbleView) mBubbleContainer.getChildAt(nextIndex);
-            setExpandedBubble(expandedBubble);
-            requestUpdate();
-        }
-        mIsExpanded = wasExpanded && mBubbleContainer.getChildCount() > 0;
-        if (wasExpanded != mIsExpanded) {
-            notifyExpansionChanged(mExpandedBubble, mIsExpanded);
+            if (mIsExpanded) {
+                setExpandedBubble(expandedBubble);
+            } else {
+                mExpandedBubble = null;
+            }
         }
         logBubbleEvent(bubbleView, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
     }
