@@ -173,7 +173,7 @@ public class AutomationUtils {
             BySelector splitscreenButtonSelector = By.text("Split screen");
             UiObject2 splitscreenButton = device.wait(Until.findObject(splitscreenButtonSelector),
                     FIND_TIMEOUT);
-            assertNotNull("Unable to find Split screen button in Overview", overviewIcon);
+            assertNotNull("Unable to find Split screen button in Overview", splitscreenButton);
             splitscreenButton.click();
         } else {
             // Classic long press recents
