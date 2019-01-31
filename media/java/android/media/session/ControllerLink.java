@@ -18,7 +18,6 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.media.MediaMetadata;
 import android.media.MediaParceledListSlice;
@@ -40,7 +39,6 @@ import java.util.Objects;
  * Handles incoming commands from {@link MediaController}.
  * @hide
  */
-@SystemApi
 public final class ControllerLink implements Parcelable {
     public static final Parcelable.Creator<ControllerLink> CREATOR =
             new Parcelable.Creator<ControllerLink>() {

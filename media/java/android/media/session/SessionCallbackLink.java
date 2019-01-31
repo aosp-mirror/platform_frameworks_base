@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -42,7 +41,6 @@ import java.lang.ref.WeakReference;
  * Handles incoming commands to {@link MediaSession.Callback}.
  * @hide
  */
-@SystemApi
 public final class SessionCallbackLink implements Parcelable {
     final Context mContext;
     final ISessionCallback mISessionCallback;
