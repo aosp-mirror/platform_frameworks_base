@@ -682,13 +682,9 @@ android_media_MediaPlayer_native_getMetrics(JNIEnv *env, jobject thiz)
         return (jobject) NULL;
     }
 
-    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
     item->readFromParcel(p);
-    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
-
-    // housekeeping
-    delete item;
-    item = NULL;
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 
     return mybundle;
 }
