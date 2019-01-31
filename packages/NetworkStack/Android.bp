@@ -41,4 +41,5 @@ android_app {
         "NetworkStackLib"
     ],
     manifest: "AndroidManifest.xml",
+    required: ["NetworkStackPermissionStub"],
 }
