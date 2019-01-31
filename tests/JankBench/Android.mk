@@ -19,7 +19,7 @@ LOCAL_RESOURCE_DIR := \
 
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    androidx.design_design \
+    com.google.android.material_material \
     androidx.legacy_legacy-support-v4 \
     androidx.appcompat_appcompat \
     androidx.cardview_cardview \
