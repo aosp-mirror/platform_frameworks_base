@@ -221,6 +221,7 @@ java_defaults {
         "core/java/android/os/ICancellationSignal.aidl",
         "core/java/android/os/IDeviceIdentifiersPolicyService.aidl",
         "core/java/android/os/IDeviceIdleController.aidl",
+        "core/java/android/os/IDynamicAndroidService.aidl",
         "core/java/android/os/IHardwarePropertiesManager.aidl",
         ":libincident_aidl",
         "core/java/android/os/IMaintenanceActivityListener.aidl",
@@ -601,6 +602,7 @@ java_defaults {
 
         ":storaged_aidl",
         ":vold_aidl",
+        ":gsiservice_aidl",
         ":installd_aidl",
         ":dumpstate_aidl",
 
@@ -657,6 +659,7 @@ java_defaults {
             "frameworks/native/aidl/gui",
             "system/core/storaged/binder",
             "system/vold/binder",
+            "system/gsid/aidl",
             "system/bt/binder",
             "system/security/keystore/binder",
         ],
