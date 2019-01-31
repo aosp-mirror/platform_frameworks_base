@@ -1556,30 +1556,24 @@ message HardwareFailed {
     }
     optional HardwareType hardware_type = 1;
 
-    /* hardware_location allows vendors to differentiate between multiple instances of
+   /**
+    * hardware_location allows vendors to differentiate between multiple instances of
     * the same hardware_type.  The specific locations are vendor defined integers,
     * referring to board-specific numbering schemes.
     */
     optional int32 hardware_location = 2;
 
-    /* failure_code is specific to the HardwareType of the failed hardware.
-     * It should use the enum values defined below.
+    /**
+     * failure_code is specific to the HardwareType of the failed hardware.
+     * It should use one of the enum values defined below.
      */
-    enum MicrophoneFailureCode {
-        MICROPHONE_FAILURE_COMPLETE = 0;
-    }
-    enum CodecFailureCode {
-        CODEC_FAILURE_COMPLETE = 0;
-    }
-    enum SpeakerFailureCode {
-        SPEAKER_FAILURE_COMPLETE = 0;
-        SPEAKER_FAILURE_HIGH_Z = 1;
-        SPEAKER_FAILURE_SHORT = 2;
-    }
-    enum FingerprintFailureCode {
-        FINGERPRINT_FAILURE_COMPLETE = 0;
-        FINGERPRINT_SENSOR_BROKEN = 1;
-        FINGERPRINT_TOO_MANY_DEAD_PIXELS = 2;
+    enum HardwareErrorCode {
+        UNKNOWN = 0;
+        COMPLETE = 1;
+        SPEAKER_HIGH_Z = 2;
+        SPEAKER_SHORT = 3;
+        FINGERPRINT_SENSOR_BROKEN = 4;
+        FINGERPRINT_TOO_MANY_DEAD_PIXELS = 5;
     }
     optional int32 failure_code = 3;
 }
