@@ -14099,7 +14099,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, -1, -1, false, null, null, OP_NONE, null, receivers,
-                            null, 0, null, null, false, true, true, -1, false);
+                            null, 0, null, null, false, true, true, -1, false,
+                            false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
@@ -14484,6 +14485,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        boolean timeoutExempt = false;
+
         if (action != null) {
             if (getBackgroundLaunchBroadcasts().contains(action)) {
                 if (DEBUG_BACKGROUND_CHECK) {
@@ -14709,6 +14712,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Log.w(TAG, "Broadcast " + action
                             + " no longer supported. It will not be delivered.");
                     return ActivityManager.BROADCAST_SUCCESS;
+                case Intent.ACTION_PRE_BOOT_COMPLETED:
+                    timeoutExempt = true;
+                    break;
             }
 
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
@@ -14851,7 +14857,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, appOp, brOptions, registeredReceivers, resultTo,
                     resultCode, resultData, resultExtras, ordered, sticky, false, userId,
-                    allowBackgroundActivityStarts);
+                    allowBackgroundActivityStarts, timeoutExempt);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending
                     && (queue.replaceParallelBroadcastLocked(r) != null);
@@ -14948,7 +14954,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, appOp, brOptions, receivers, resultTo, resultCode,
                     resultData, resultExtras, ordered, sticky, false, userId,
-                    allowBackgroundActivityStarts);
+                    allowBackgroundActivityStarts, timeoutExempt);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
 
