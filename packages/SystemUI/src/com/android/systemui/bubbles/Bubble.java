@@ -50,6 +50,6 @@ class Bubble {
     public void setEntry(NotificationEntry entry) {
         key = entry.key;
         iconView.update(entry);
-        // TODO: should also update the expanded view here (e.g. height change)
+        expandedView.update(entry);
     }
 }

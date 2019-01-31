@@ -203,8 +203,8 @@ public class ExpandedAnimationController
     }
 
     /** The Y value of the row of expanded bubbles. */
-    private float getExpandedY() {
-        final WindowInsets insets = mLayout.getRootWindowInsets();
+    public float getExpandedY() {
+        final WindowInsets insets = mLayout != null ? mLayout.getRootWindowInsets() : null;
         if (insets != null) {
             return mBubblePaddingPx + Math.max(
                     mStatusBarHeight,
