@@ -194,6 +194,13 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_MULTI_SIM_CONFIG = "persist.radio.multisim.config";
 
+     /**
+     * Property to indicate if reboot is required when changing modems configurations
+     * Type:  String(true, false) default is false; most devices don't need reboot
+     */
+    String PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE =
+             "persist.radio.reboot_on_modem_change";
+
     /**
      * Property to store default subscription.
      */
