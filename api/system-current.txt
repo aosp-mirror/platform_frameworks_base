@@ -3484,15 +3484,6 @@ package android.media {
     method @NonNull public android.media.TimedMetaData.Builder setTimedMetaData(long, @NonNull byte[]);
   }
 
-  public abstract class VolumeProvider {
-    method public void setCallback(android.media.VolumeProvider.Callback);
-  }
-
-  public abstract static class VolumeProvider.Callback {
-    ctor public VolumeProvider.Callback();
-    method public abstract void onVolumeChanged(android.media.VolumeProvider);
-  }
-
 }
 
 package android.media.audiopolicy {

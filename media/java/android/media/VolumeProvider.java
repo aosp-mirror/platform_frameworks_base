@@ -16,7 +16,6 @@
 package android.media;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.media.session.MediaSession;
 
 import java.lang.annotation.Retention;
@@ -148,7 +147,6 @@ public abstract class VolumeProvider {
      * Sets a callback to receive volume changes.
      * @hide
      */
-    @SystemApi
     public void setCallback(Callback callback) {
         mCallback = callback;
     }
@@ -157,7 +155,6 @@ public abstract class VolumeProvider {
      * Listens for changes to the volume.
      * @hide
      */
-    @SystemApi
     public abstract static class Callback {
         /**
          * Called when volume changed.
