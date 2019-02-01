@@ -20,10 +20,10 @@ import static android.media.MediaConstants.KEY_ALLOWED_COMMANDS;
 import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
 import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
-import static android.media.MediaConstants.KEY_SESSION2_LINK;
-import static android.media.MediaConstants.KEY_SESSION2_TOKEN;
+import static android.media.MediaConstants.KEY_SESSION2LINK;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
+import static android.media.Session2Token.TYPE_SESSION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +34,7 @@ import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -107,10 +108,8 @@ public class MediaSession2 implements AutoCloseable {
         mCallbackExecutor = callbackExecutor;
         mCallback = callback;
         mSessionStub = new Session2Link(this);
-
-        Bundle extras = new Bundle();
-        extras.putParcelable(KEY_SESSION2_LINK, mSessionStub);
-        mSessionToken = new Session2Token(context, id, extras);
+        mSessionToken = new Session2Token(Process.myUid(), TYPE_SESSION, context.getPackageName(),
+                mSessionStub);
         mSessionManager = (MediaSessionManager) mContext.getSystemService(
                 Context.MEDIA_SESSION_SERVICE);
         // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
@@ -142,8 +141,6 @@ public class MediaSession2 implements AutoCloseable {
             for (ControllerInfo info : controllerInfos) {
                 info.notifyDisconnected();
             }
-            mSessionToken.destroy();
-            mSessionManager.notifySession2Destroyed(mSessionToken);
         } catch (Exception e) {
             // Should not be here.
         }
@@ -331,7 +328,7 @@ public class MediaSession2 implements AutoCloseable {
                 // It's needed because we cannot call synchronous calls between
                 // session/controller.
                 Bundle connectionResult = new Bundle();
-                connectionResult.putParcelable(KEY_SESSION2_TOKEN, mSessionToken);
+                connectionResult.putParcelable(KEY_SESSION2LINK, mSessionStub);
                 connectionResult.putParcelable(KEY_ALLOWED_COMMANDS,
                         controllerInfo.mAllowedCommands);
                 connectionResult.putBoolean(KEY_PLAYBACK_ACTIVE, isPlaybackActive());

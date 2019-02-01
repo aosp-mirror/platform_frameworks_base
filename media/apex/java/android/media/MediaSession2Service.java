@@ -48,7 +48,7 @@ public abstract class MediaSession2Service extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
-    public static final String SERVICE_INTERFACE = Session2Token.SESSION_SERVICE_INTERFACE;
+    public static final String SERVICE_INTERFACE = "android.media.MediaSession2Service";
 
     private static final String TAG = "MediaSession2Service";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
