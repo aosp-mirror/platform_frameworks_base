@@ -1245,6 +1245,9 @@ public abstract class Drawable {
 
             return ImageDecoder.decodeDrawable(source, (decoder, info, src) -> {
                 decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+                decoder.setOnPartialImageListener((e) -> {
+                    return e.getError() == ImageDecoder.DecodeException.SOURCE_INCOMPLETE;
+                });
             });
         } catch (IOException e) {
             /*  do nothing.
