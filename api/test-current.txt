@@ -660,7 +660,9 @@ package android.hardware.display {
     field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessChangeEvent> CREATOR;
     field public final float batteryLevel;
     field public final float brightness;
+    field public final long colorSampleDuration;
     field public final int colorTemperature;
+    field @Nullable public final long[] colorValueBuckets;
     field public final boolean isDefaultBrightnessConfig;
     field public final boolean isUserSetBrightness;
     field public final float lastBrightness;
