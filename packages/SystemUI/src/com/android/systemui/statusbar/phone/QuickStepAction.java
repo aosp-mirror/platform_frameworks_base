@@ -47,10 +47,6 @@ public class QuickStepAction extends NavigationGestureAction {
         return mNavigationBarView.isQuickStepSwipeUpEnabled();
     }
 
-    protected boolean requiresStableTaskList() {
-        return true;
-    }
-
     @Override
     public void onGestureStart(MotionEvent event) {
         try {
