@@ -980,6 +980,10 @@ class ActivityStarter {
         if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
             return false;
         }
+        // don't abort if the callingPackage is a device owner
+        if (mService.getDevicePolicyManager().isDeviceOwnerApp(callingPackage)) {
+            return false;
+        }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
