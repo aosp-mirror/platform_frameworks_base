@@ -36,10 +36,19 @@ public class LayoutCompilerTest {
     }
 
     @Test
-    public void loadAndInflaterLayout1() throws Exception {
+    public void loadAndInflateLayout1() throws Exception {
         ClassLoader dex_file = loadDexFile("layout1.dex");
         Class compiled_view = dex_file.loadClass("android.startop.test.CompiledView");
         Method layout1 = compiled_view.getMethod("layout1", Context.class, int.class);
+        Context context = InstrumentationRegistry.getTargetContext();
+        layout1.invoke(null, context, R.layout.layout1);
+    }
+
+    @Test
+    public void loadAndInflateLayout2() throws Exception {
+        ClassLoader dex_file = loadDexFile("layout2.dex");
+        Class compiled_view = dex_file.loadClass("android.startop.test.CompiledView");
+        Method layout1 = compiled_view.getMethod("layout2", Context.class, int.class);
         Context context = InstrumentationRegistry.getTargetContext();
         layout1.invoke(null, context, R.layout.layout1);
     }
