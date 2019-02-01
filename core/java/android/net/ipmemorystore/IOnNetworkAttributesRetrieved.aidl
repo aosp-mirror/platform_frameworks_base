@@ -25,6 +25,6 @@ oneway interface IOnNetworkAttributesRetrieved {
      * Network attributes were fetched for the specified L2 key. While the L2 key will never
      * be null, the attributes may be if no data is stored about this L2 key.
      */
-     void onL2KeyResponse(in StatusParcelable status, in String l2Key,
+     void onNetworkAttributesRetrieved(in StatusParcelable status, in String l2Key,
              in NetworkAttributesParcelable attributes);
 }

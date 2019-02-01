@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
@@ -46,7 +45,6 @@ import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvStreamConfig;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -56,7 +54,6 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.view.KeyEvent;
 import android.view.Surface;
 
 import com.android.internal.util.DumpUtils;
@@ -943,7 +940,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         sinkChannelMask = sinkConfig.channelMask();
                     }
                     if (sinkFormat == AudioFormat.ENCODING_DEFAULT) {
-                        sinkChannelMask = sinkConfig.format();
+                        sinkFormat = sinkConfig.format();
                     }
                 }
 

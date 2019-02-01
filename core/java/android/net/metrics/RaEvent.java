@@ -16,7 +16,8 @@
 
 package android.net.metrics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,19 +25,28 @@ import android.os.Parcelable;
  * An event logged when the APF packet socket receives an RA packet.
  * {@hide}
  */
-public final class RaEvent implements Parcelable {
+@SystemApi
+@TestApi
+public final class RaEvent implements IpConnectivityLog.Event {
 
-    public static final long NO_LIFETIME = -1L;
+    private static final long NO_LIFETIME = -1L;
 
     // Lifetime in seconds of options found in a single RA packet.
     // When an option is not set, the value of the associated field is -1;
+    /** @hide */
     public final long routerLifetime;
+    /** @hide */
     public final long prefixValidLifetime;
+    /** @hide */
     public final long prefixPreferredLifetime;
+    /** @hide */
     public final long routeInfoLifetime;
+    /** @hide */
     public final long rdnssLifetime;
+    /** @hide */
     public final long dnsslLifetime;
 
+    /** @hide */
     public RaEvent(long routerLifetime, long prefixValidLifetime, long prefixPreferredLifetime,
             long routeInfoLifetime, long rdnssLifetime, long dnsslLifetime) {
         this.routerLifetime = routerLifetime;
@@ -47,6 +57,7 @@ public final class RaEvent implements Parcelable {
         this.dnsslLifetime = dnsslLifetime;
     }
 
+    /** @hide */
     private RaEvent(Parcel in) {
         routerLifetime          = in.readLong();
         prefixValidLifetime     = in.readLong();
@@ -56,6 +67,7 @@ public final class RaEvent implements Parcelable {
         dnsslLifetime           = in.readLong();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(routerLifetime);
@@ -66,6 +78,7 @@ public final class RaEvent implements Parcelable {
         out.writeLong(dnsslLifetime);
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
@@ -83,6 +96,7 @@ public final class RaEvent implements Parcelable {
                 .toString();
     }
 
+    /** @hide */
     public static final Parcelable.Creator<RaEvent> CREATOR = new Parcelable.Creator<RaEvent>() {
         public RaEvent createFromParcel(Parcel in) {
             return new RaEvent(in);
@@ -102,47 +116,39 @@ public final class RaEvent implements Parcelable {
         long rdnssLifetime           = NO_LIFETIME;
         long dnsslLifetime           = NO_LIFETIME;
 
-        @UnsupportedAppUsage
         public Builder() {
         }
 
-        @UnsupportedAppUsage
         public RaEvent build() {
             return new RaEvent(routerLifetime, prefixValidLifetime, prefixPreferredLifetime,
                     routeInfoLifetime, rdnssLifetime, dnsslLifetime);
         }
 
-        @UnsupportedAppUsage
         public Builder updateRouterLifetime(long lifetime) {
             routerLifetime = updateLifetime(routerLifetime, lifetime);
             return this;
         }
 
-        @UnsupportedAppUsage
         public Builder updatePrefixValidLifetime(long lifetime) {
             prefixValidLifetime = updateLifetime(prefixValidLifetime, lifetime);
             return this;
         }
 
-        @UnsupportedAppUsage
         public Builder updatePrefixPreferredLifetime(long lifetime) {
             prefixPreferredLifetime = updateLifetime(prefixPreferredLifetime, lifetime);
             return this;
         }
 
-        @UnsupportedAppUsage
         public Builder updateRouteInfoLifetime(long lifetime) {
             routeInfoLifetime = updateLifetime(routeInfoLifetime, lifetime);
             return this;
         }
 
-        @UnsupportedAppUsage
         public Builder updateRdnssLifetime(long lifetime) {
             rdnssLifetime = updateLifetime(rdnssLifetime, lifetime);
             return this;
         }
 
-        @UnsupportedAppUsage
         public Builder updateDnsslLifetime(long lifetime) {
             dnsslLifetime = updateLifetime(dnsslLifetime, lifetime);
             return this;

@@ -1,44 +1,45 @@
+// Signature format: 2.0
 package com.android.nfc_extras {
 
   public class EeAlreadyOpenException extends com.android.nfc_extras.EeIOException {
     ctor public EeAlreadyOpenException();
-    ctor public EeAlreadyOpenException(java.lang.String);
+    ctor public EeAlreadyOpenException(String);
   }
 
   public class EeExternalFieldException extends com.android.nfc_extras.EeIOException {
     ctor public EeExternalFieldException();
-    ctor public EeExternalFieldException(java.lang.String);
+    ctor public EeExternalFieldException(String);
   }
 
   public class EeIOException extends java.io.IOException {
     ctor public EeIOException();
-    ctor public EeIOException(java.lang.String);
+    ctor public EeIOException(String);
   }
 
   public class EeInitializationException extends com.android.nfc_extras.EeIOException {
     ctor public EeInitializationException();
-    ctor public EeInitializationException(java.lang.String);
+    ctor public EeInitializationException(String);
   }
 
   public class EeListenModeException extends com.android.nfc_extras.EeIOException {
     ctor public EeListenModeException();
-    ctor public EeListenModeException(java.lang.String);
+    ctor public EeListenModeException(String);
   }
 
   public class EeNfcDisabledException extends com.android.nfc_extras.EeIOException {
     ctor public EeNfcDisabledException();
-    ctor public EeNfcDisabledException(java.lang.String);
+    ctor public EeNfcDisabledException(String);
   }
 
   public final class NfcAdapterExtras {
     method public void authenticate(byte[]);
     method public static com.android.nfc_extras.NfcAdapterExtras get(android.nfc.NfcAdapter);
     method public com.android.nfc_extras.NfcAdapterExtras.CardEmulationRoute getCardEmulationRoute();
-    method public java.lang.String getDriverName();
+    method public String getDriverName();
     method public com.android.nfc_extras.NfcExecutionEnvironment getEmbeddedExecutionEnvironment();
     method public void setCardEmulationRoute(com.android.nfc_extras.NfcAdapterExtras.CardEmulationRoute);
-    field public static final java.lang.String ACTION_RF_FIELD_OFF_DETECTED = "com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED";
-    field public static final java.lang.String ACTION_RF_FIELD_ON_DETECTED = "com.android.nfc_extras.action.RF_FIELD_ON_DETECTED";
+    field public static final String ACTION_RF_FIELD_OFF_DETECTED = "com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED";
+    field public static final String ACTION_RF_FIELD_ON_DETECTED = "com.android.nfc_extras.action.RF_FIELD_ON_DETECTED";
   }
 
   public static final class NfcAdapterExtras.CardEmulationRoute {
@@ -53,7 +54,7 @@ package com.android.nfc_extras {
     method public void close() throws java.io.IOException;
     method public void open() throws com.android.nfc_extras.EeIOException;
     method public byte[] transceive(byte[]) throws java.io.IOException;
-    field public static final java.lang.String ACTION_AID_SELECTED = "com.android.nfc_extras.action.AID_SELECTED";
+    field public static final String ACTION_AID_SELECTED = "com.android.nfc_extras.action.AID_SELECTED";
   }
 
 }

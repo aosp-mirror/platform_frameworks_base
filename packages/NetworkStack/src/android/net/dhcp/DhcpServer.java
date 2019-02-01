@@ -16,8 +16,6 @@
 
 package android.net.dhcp;
 
-import static android.net.NetworkUtils.getBroadcastAddress;
-import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
 import static android.net.TrafficStats.TAG_SYSTEM_DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
 import static android.net.dhcp.DhcpPacket.DHCP_HOST_NAME;
@@ -25,15 +23,19 @@ import static android.net.dhcp.DhcpPacket.DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
 import static android.net.dhcp.IDhcpServer.STATUS_INVALID_ARGUMENT;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
+import static android.net.shared.Inet4AddressUtils.getBroadcastAddress;
+import static android.net.shared.Inet4AddressUtils.getPrefixMaskAsInet4Address;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOCK_NONBLOCK;
 import static android.system.OsConstants.SOL_SOCKET;
-import static android.system.OsConstants.SO_BINDTODEVICE;
 import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_REUSEADDR;
 
 import static com.android.server.util.NetworkStackConstants.INFINITE_LEASE;
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ALL;
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
 import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
 
 import static java.lang.Integer.toUnsignedLong;
@@ -42,9 +44,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.INetworkStackStatusCallback;
 import android.net.MacAddress;
-import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.SharedLog;
+import android.net.util.SocketUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -205,7 +207,7 @@ public class DhcpServer extends IDhcpServer.Stub {
         @Override
         public void addArpEntry(@NonNull Inet4Address ipv4Addr, @NonNull MacAddress ethAddr,
                 @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException {
-            NetworkUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
+            SocketUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
         }
 
         @Override
@@ -434,7 +436,7 @@ public class DhcpServer extends IDhcpServer.Stub {
         if (!isEmpty(request.mRelayIp)) {
             return request.mRelayIp;
         } else if (broadcastFlag) {
-            return (Inet4Address) Inet4Address.ALL;
+            return IPV4_ADDR_ALL;
         } else if (!isEmpty(request.mClientIp)) {
             return request.mClientIp;
         } else {
@@ -517,7 +519,7 @@ public class DhcpServer extends IDhcpServer.Stub {
                 request.mRelayIp, request.mClientMac, true /* broadcast */, message);
 
         final Inet4Address dst = isEmpty(request.mRelayIp)
-                ? (Inet4Address) Inet4Address.ALL
+                ? IPV4_ADDR_ALL
                 : request.mRelayIp;
         return transmitPacket(nakPacket, DhcpNakPacket.class.getSimpleName(), dst);
     }
@@ -598,7 +600,7 @@ public class DhcpServer extends IDhcpServer.Stub {
     }
 
     private static boolean isEmpty(@Nullable Inet4Address address) {
-        return address == null || Inet4Address.ANY.equals(address);
+        return address == null || IPV4_ADDR_ANY.equals(address);
     }
 
     private class PacketListener extends DhcpPacketListener {
@@ -628,15 +630,11 @@ public class DhcpServer extends IDhcpServer.Stub {
             // TODO: have and use an API to set a socket tag without going through the thread tag
             final int oldTag = TrafficStats.getAndSetThreadStatsTag(TAG_SYSTEM_DHCP_SERVER);
             try {
-                mSocket = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                mSocket = Os.socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
+                SocketUtils.bindSocketToInterface(mSocket, mIfName);
                 Os.setsockoptInt(mSocket, SOL_SOCKET, SO_REUSEADDR, 1);
-                // SO_BINDTODEVICE actually takes a string. This works because the first member
-                // of struct ifreq is a NULL-terminated interface name.
-                // TODO: add a setsockoptString()
-                Os.setsockoptIfreq(mSocket, SOL_SOCKET, SO_BINDTODEVICE, mIfName);
                 Os.setsockoptInt(mSocket, SOL_SOCKET, SO_BROADCAST, 1);
-                Os.bind(mSocket, Inet4Address.ANY, DHCP_SERVER);
-                NetworkUtils.protectFromVpn(mSocket);
+                Os.bind(mSocket, IPV4_ADDR_ANY, DHCP_SERVER);
 
                 return mSocket;
             } catch (IOException | ErrnoException e) {

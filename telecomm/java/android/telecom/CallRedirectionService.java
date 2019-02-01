@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
@@ -27,8 +28,8 @@ import android.os.Message;
 import android.os.RemoteException;
 
 import com.android.internal.os.SomeArgs;
-import com.android.internal.telecom.ICallRedirectionService;
 import com.android.internal.telecom.ICallRedirectionAdapter;
+import com.android.internal.telecom.ICallRedirectionService;
 
 /**
  * This service can be implemented to interact between Telecom and its implementor
@@ -62,22 +63,35 @@ public abstract class CallRedirectionService extends Service {
 
     /**
      * Telecom calls this method to inform the implemented {@link CallRedirectionService} of
-     * a new outgoing call which is being placed.
+     * a new outgoing call which is being placed. Telecom does not request to redirect emergency
+     * calls and does not request to redirect calls with gateway information.
      *
-     * The implemented {@link CallRedirectionService} can call {@link #placeCallUnmodified()},
-     * {@link #redirectCall(Uri, PhoneAccountHandle)}, and {@link #cancelCall()} only from here.
+     * <p>Telecom will cancel the call if Telecom does not receive a response in 5 seconds from
+     * the implemented {@link CallRedirectionService} set by users.
      *
-     * @param handle the phone number dialed by the user
-     * @param targetPhoneAccount the {@link PhoneAccountHandle} on which the call will be placed.
+     * <p>The implemented {@link CallRedirectionService} can call {@link #placeCallUnmodified()},
+     * {@link #redirectCall(Uri, PhoneAccountHandle, boolean)}, and {@link #cancelCall()} only
+     * from here.
+     *
+     * @param handle the phone number dialed by the user, represented in E.164 format if possible
+     * @param initialPhoneAccount the {@link PhoneAccountHandle} on which the call will be placed.
+     * @param allowInteractiveResponse a boolean to tell if the implemented
+     *                                 {@link CallRedirectionService} should allow interactive
+     *                                 responses with users. Will be {@code false} if, for example
+     *                                 the device is in car mode and the user would not be able to
+     *                                 interact with their device.
      */
-    public abstract void onPlaceCall(Uri handle, PhoneAccountHandle targetPhoneAccount);
+    public abstract void onPlaceCall(@NonNull Uri handle,
+                                     @NonNull PhoneAccountHandle initialPhoneAccount,
+                                     boolean allowInteractiveResponse);
 
     /**
      * The implemented {@link CallRedirectionService} calls this method to response a request
-     * received via {@link #onPlaceCall(Uri, PhoneAccountHandle)} to inform Telecom that no changes
-     * are required to the outgoing call, and that the call should be placed as-is.
+     * received via {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)} to inform Telecom that
+     * no changes are required to the outgoing call, and that the call should be placed as-is.
      *
-     * This can only be called from implemented {@link #onPlaceCall(Uri, PhoneAccountHandle)}.
+     * <p>This can only be called from implemented
+     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
      *
      */
     public final void placeCallUnmodified() {
@@ -89,29 +103,39 @@ public abstract class CallRedirectionService extends Service {
 
     /**
      * The implemented {@link CallRedirectionService} calls this method to response a request
-     * received via {@link #onPlaceCall(Uri, PhoneAccountHandle)} to inform Telecom that changes
-     * are required to the phone number or/and {@link PhoneAccountHandle} for the outgoing call.
+     * received via {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)} to inform Telecom that
+     * changes are required to the phone number or/and {@link PhoneAccountHandle} for the outgoing
+     * call. Telecom will cancel the call if the implemented {@link CallRedirectionService}
+     * replies Telecom a handle for an emergency number.
      *
-     * This can only be called from implemented {@link #onPlaceCall(Uri, PhoneAccountHandle)}.
+     * <p>This can only be called from implemented
+     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
      *
      * @param handle the new phone number to dial
      * @param targetPhoneAccount the {@link PhoneAccountHandle} to use when placing the call.
      *                           If {@code null}, no change will be made to the
      *                           {@link PhoneAccountHandle} used to place the call.
+     * @param confirmFirst Telecom will ask users to confirm the redirection via a yes/no dialog
+     *                     if the confirmFirst is true, and if the redirection request of this
+     *                     response was sent with a true flag of allowInteractiveResponse via
+     *                     {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}
      */
-    public final void redirectCall(Uri handle, PhoneAccountHandle targetPhoneAccount) {
+    public final void redirectCall(@NonNull Uri handle,
+                                   @NonNull PhoneAccountHandle targetPhoneAccount,
+                                   boolean confirmFirst) {
         try {
-            mCallRedirectionAdapter.redirectCall(handle, targetPhoneAccount);
+            mCallRedirectionAdapter.redirectCall(handle, targetPhoneAccount, confirmFirst);
         } catch (RemoteException e) {
         }
     }
 
     /**
      * The implemented {@link CallRedirectionService} calls this method to response a request
-     * received via {@link #onPlaceCall(Uri, PhoneAccountHandle)} to inform Telecom that an outgoing
-     * call should be canceled entirely.
+     * received via {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)} to inform Telecom that
+     * an outgoing call should be canceled entirely.
      *
-     * This can only be called from implemented {@link #onPlaceCall(Uri, PhoneAccountHandle)}.
+     * <p>This can only be called from implemented
+     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
      *
      */
     public final void cancelCall() {
@@ -137,7 +161,8 @@ public abstract class CallRedirectionService extends Service {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         mCallRedirectionAdapter = (ICallRedirectionAdapter) args.arg1;
-                        onPlaceCall((Uri) args.arg2, (PhoneAccountHandle) args.arg3);
+                        onPlaceCall((Uri) args.arg2, (PhoneAccountHandle) args.arg3,
+                                (boolean) args.arg4);
                     } finally {
                         args.recycle();
                     }
@@ -152,15 +177,20 @@ public abstract class CallRedirectionService extends Service {
          * Telecom calls this method to inform the CallRedirectionService of a new outgoing call
          * which is about to be placed.
          * @param handle the phone number dialed by the user
-         * @param targetPhoneAccount the URI of the number the user dialed
+         * @param initialPhoneAccount the URI of the number the user dialed
+         * @param allowInteractiveResponse a boolean to tell if the implemented
+         *                                 {@link CallRedirectionService} should allow interactive
+         *                                 responses with users.
          */
         @Override
-        public void placeCall(ICallRedirectionAdapter adapter, Uri handle,
-                              PhoneAccountHandle targetPhoneAccount) {
+        public void placeCall(@NonNull ICallRedirectionAdapter adapter, @NonNull Uri handle,
+                              @NonNull PhoneAccountHandle initialPhoneAccount,
+                              boolean allowInteractiveResponse) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = adapter;
             args.arg2 = handle;
-            args.arg3 = targetPhoneAccount;
+            args.arg3 = initialPhoneAccount;
+            args.arg4 = allowInteractiveResponse;
             mHandler.obtainMessage(MSG_PLACE_CALL, args).sendToTarget();
         }
     }

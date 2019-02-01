@@ -52,6 +52,8 @@ public final class MacAddress implements Parcelable {
 
     /**
      * The MacAddress zero MAC address.
+     *
+     * <p>Not publicly exposed or treated specially since the OUI 00:00:00 is registered.
      * @hide
      */
     @UnsupportedAppUsage

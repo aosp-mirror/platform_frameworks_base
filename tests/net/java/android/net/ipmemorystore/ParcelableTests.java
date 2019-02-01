@@ -27,6 +27,7 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Modifier;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -60,6 +61,12 @@ public class ParcelableTests {
         builder.setMtu(null);
         in = builder.build();
         assertEquals(in, new NetworkAttributes(parcelingRoundTrip(in.toParcelable())));
+
+        // Verify that this test does not miss any new field added later.
+        // If any field is added to NetworkAttributes it must be tested here for parceling
+        // roundtrip.
+        assertEquals(4, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
+                .filter(f -> !Modifier.isStatic(f.getModifiers())).count());
     }
 
     @Test

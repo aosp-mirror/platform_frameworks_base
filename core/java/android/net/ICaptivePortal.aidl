@@ -20,7 +20,7 @@ package android.net;
  * Interface to inform NetworkMonitor of decisions of app handling captive portal.
  * @hide
  */
-interface ICaptivePortal
-{
-    oneway void appResponse(int response);
+oneway interface ICaptivePortal {
+    void appResponse(int response);
+    void logEvent(int eventId, String packageName);
 }

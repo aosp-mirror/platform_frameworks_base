@@ -803,13 +803,14 @@ public class TetheringTest {
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, TEST_WLAN_IFNAME, IFACE_IP_MODE_TETHERED);
         mLooper.dispatchAll();
 
-        // We verify get/set called thrice here: once for setup and twice during
-        // teardown because all events happen over the course of the single
+        // We verify get/set called thrice here: twice for setup (on NMService) and once during
+        // teardown (on Netd) because all events happen over the course of the single
         // dispatchAll() above. Note that once the IpServer IPv4 address config
         // code is refactored the two calls during shutdown will revert to one.
         verify(mNMService, times(2)).getInterfaceConfig(TEST_WLAN_IFNAME);
-        verify(mNMService, times(3))
+        verify(mNMService, times(2))
                 .setInterfaceConfig(eq(TEST_WLAN_IFNAME), any(InterfaceConfiguration.class));
+        verify(mNetd, times(1)).interfaceSetCfg(argThat(p -> TEST_WLAN_IFNAME.equals(p.ifName)));
         verify(mNMService, times(1)).tetherInterface(TEST_WLAN_IFNAME);
         verify(mWifiManager).updateInterfaceIpState(
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_TETHERED);

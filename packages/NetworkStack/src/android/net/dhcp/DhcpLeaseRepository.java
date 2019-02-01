@@ -16,12 +16,13 @@
 
 package android.net.dhcp;
 
-import static android.net.NetworkUtils.inet4AddressToIntHTH;
-import static android.net.NetworkUtils.intToInet4AddressHTH;
-import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTH;
 import static android.net.dhcp.DhcpLease.EXPIRATION_NEVER;
 import static android.net.dhcp.DhcpLease.inet4AddrToString;
+import static android.net.shared.Inet4AddressUtils.inet4AddressToIntHTH;
+import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
+import static android.net.shared.Inet4AddressUtils.prefixLengthToV4NetmaskIntHTH;
 
+import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
 import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_BITS;
 
 import static java.lang.Math.min;
@@ -201,7 +202,7 @@ class DhcpLeaseRepository {
 
     private static boolean isIpAddrOutsidePrefix(@NonNull IpPrefix prefix,
             @Nullable Inet4Address addr) {
-        return addr != null && !addr.equals(Inet4Address.ANY) && !prefix.contains(addr);
+        return addr != null && !addr.equals(IPV4_ADDR_ANY) && !prefix.contains(addr);
     }
 
     @Nullable

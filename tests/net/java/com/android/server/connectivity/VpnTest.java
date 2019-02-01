@@ -57,7 +57,6 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
-import android.net.IConnectivityManager;
 import android.net.IpPrefix;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -97,7 +96,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -170,6 +168,8 @@ public class VpnTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.targetSdkVersion = VERSION_CODES.CUR_DEVELOPMENT;
         when(mContext.getApplicationInfo()).thenReturn(applicationInfo);
+        when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
 
         doNothing().when(mNetService).registerObserver(any());
     }
@@ -240,6 +240,30 @@ public class VpnTest {
     }
 
     @Test
+    public void testGetAlwaysAndOnGetLockDown() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+
+        // Default state.
+        assertFalse(vpn.getAlwaysOn());
+        assertFalse(vpn.getLockdown());
+
+        // Set always-on without lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false, Collections.emptyList()));
+        assertTrue(vpn.getAlwaysOn());
+        assertFalse(vpn.getLockdown());
+
+        // Set always-on with lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, Collections.emptyList()));
+        assertTrue(vpn.getAlwaysOn());
+        assertTrue(vpn.getLockdown());
+
+        // Remove always-on configuration.
+        assertTrue(vpn.setAlwaysOnPackage(null, false, Collections.emptyList()));
+        assertFalse(vpn.getAlwaysOn());
+        assertFalse(vpn.getLockdown());
+    }
+
+    @Test
     public void testLockdownChangingPackage() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
@@ -248,11 +272,11 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
 
         // Set always-on without lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false, null));
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
 
         // Set always-on with lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, null));
         verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
             new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
             new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
@@ -261,7 +285,7 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[1]);
 
         // Switch to another app.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true, null));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
             new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
             new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
@@ -272,6 +296,87 @@ public class VpnTest {
         }));
         assertBlocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2]);
         assertUnblocked(vpn, user.start + PKG_UIDS[3]);
+    }
+
+    @Test
+    public void testLockdownWhitelist() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+        final UidRange user = UidRange.createForUser(primaryUser.id);
+
+        // Set always-on with lockdown and whitelist app PKGS[2] from lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, Collections.singletonList(PKGS[2])));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+                new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
+                new UidRange(user.start + PKG_UIDS[2] + 1, user.stop)
+        }));
+        assertBlocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[3]);
+        assertUnblocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[2]);
+
+        // Change whitelisted app to PKGS[3].
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, Collections.singletonList(PKGS[3])));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
+                new UidRange(user.start + PKG_UIDS[2] + 1, user.stop)
+        }));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+                new UidRange(user.start + PKG_UIDS[1] + 1, user.start + PKG_UIDS[3] - 1),
+                new UidRange(user.start + PKG_UIDS[3] + 1, user.stop)
+        }));
+        assertBlocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[2]);
+        assertUnblocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[3]);
+
+        // Change the VPN app.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, Collections.singletonList(PKGS[3])));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
+                new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
+                new UidRange(user.start + PKG_UIDS[1] + 1, user.start + PKG_UIDS[3] - 1)
+        }));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+                new UidRange(user.start, user.start + PKG_UIDS[0] - 1),
+                new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[3] - 1)
+        }));
+        assertBlocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[2]);
+        assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[3]);
+
+        // Remove the whitelist.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, null));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
+                new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[3] - 1),
+                new UidRange(user.start + PKG_UIDS[3] + 1, user.stop)
+        }));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+                new UidRange(user.start + PKG_UIDS[0] + 1, user.stop),
+        }));
+        assertBlocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[2],
+                user.start + PKG_UIDS[3]);
+        assertUnblocked(vpn, user.start + PKG_UIDS[0]);
+
+        // Add the whitelist.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, Collections.singletonList(PKGS[1])));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
+                new UidRange(user.start + PKG_UIDS[0] + 1, user.stop)
+        }));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+                new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[1] - 1),
+                new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
+        }));
+        assertBlocked(vpn, user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
+        assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1]);
+
+        // Try whitelisting a package with a comma, should be rejected.
+        assertFalse(vpn.setAlwaysOnPackage(PKGS[0], true, Collections.singletonList("a.b,c.d")));
+
+        // Pass a non-existent packages in the whitelist, they (and only they) should be ignored.
+        // Whitelisted package should change from PGKS[1] to PKGS[2].
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true,
+                Arrays.asList("com.foo.app", PKGS[2], "com.bar.app")));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[]{
+                new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[1] - 1),
+                new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
+        }));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[]{
+                new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[2] - 1),
+                new UidRange(user.start + PKG_UIDS[2] + 1, user.stop)
+        }));
     }
 
     @Test
@@ -288,7 +393,7 @@ public class VpnTest {
         final UidRange profile = UidRange.createForUser(tempProfile.id);
 
         // Set lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true, null));
         verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
             new UidRange(user.start, user.start + PKG_UIDS[3] - 1),
             new UidRange(user.start + PKG_UIDS[3] + 1, user.stop)
@@ -414,7 +519,7 @@ public class VpnTest {
                 .cancelAsUser(anyString(), anyInt(), eq(userHandle));
 
         // Start showing a notification for disconnected once always-on.
-        vpn.setAlwaysOnPackage(PKGS[0], false);
+        vpn.setAlwaysOnPackage(PKGS[0], false, null);
         order.verify(mNotificationManager)
                 .notifyAsUser(anyString(), anyInt(), any(), eq(userHandle));
 
@@ -428,7 +533,7 @@ public class VpnTest {
                 .notifyAsUser(anyString(), anyInt(), any(), eq(userHandle));
 
         // Notification should be cleared after unsetting always-on package.
-        vpn.setAlwaysOnPackage(null, false);
+        vpn.setAlwaysOnPackage(null, false, null);
         order.verify(mNotificationManager).cancelAsUser(anyString(), anyInt(), eq(userHandle));
     }
 
@@ -441,23 +546,28 @@ public class VpnTest {
         final Network wifi = new Network(2);
 
         final Map<Network, NetworkCapabilities> networks = new HashMap<>();
-        networks.put(mobile, new NetworkCapabilities()
-                .addTransportType(TRANSPORT_CELLULAR)
-                .addCapability(NET_CAPABILITY_INTERNET)
-                .addCapability(NET_CAPABILITY_NOT_METERED)
-                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
-                .setLinkDownstreamBandwidthKbps(10));
-        networks.put(wifi, new NetworkCapabilities()
-                .addTransportType(TRANSPORT_WIFI)
-                .addCapability(NET_CAPABILITY_INTERNET)
-                .addCapability(NET_CAPABILITY_NOT_ROAMING)
-                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
-                .setLinkUpstreamBandwidthKbps(20));
+        networks.put(
+                mobile,
+                new NetworkCapabilities()
+                        .addTransportType(TRANSPORT_CELLULAR)
+                        .addCapability(NET_CAPABILITY_INTERNET)
+                        .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                        .setLinkDownstreamBandwidthKbps(10));
+        networks.put(
+                wifi,
+                new NetworkCapabilities()
+                        .addTransportType(TRANSPORT_WIFI)
+                        .addCapability(NET_CAPABILITY_INTERNET)
+                        .addCapability(NET_CAPABILITY_NOT_METERED)
+                        .addCapability(NET_CAPABILITY_NOT_ROAMING)
+                        .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                        .setLinkUpstreamBandwidthKbps(20));
         setMockedNetworks(networks);
 
         final NetworkCapabilities caps = new NetworkCapabilities();
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { }, caps);
+        Vpn.updateCapabilities(
+                mConnectivityManager, new Network[] {}, caps, false /* isAlwaysMetered */);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(caps.hasTransport(TRANSPORT_WIFI));
@@ -467,17 +577,33 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile }, caps);
+        Vpn.updateCapabilities(
+                mConnectivityManager,
+                new Network[] {mobile},
+                caps,
+                false /* isAlwaysMetered */);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(caps.hasTransport(TRANSPORT_WIFI));
         assertEquals(10, caps.getLinkDownstreamBandwidthKbps());
         assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { wifi }, caps);
+        Vpn.updateCapabilities(
+                mConnectivityManager, new Network[] {wifi}, caps, false /* isAlwaysMetered */);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+
+        Vpn.updateCapabilities(
+                mConnectivityManager, new Network[] {wifi}, caps, true /* isAlwaysMetered */);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(caps.hasTransport(TRANSPORT_WIFI));
@@ -487,7 +613,11 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile, wifi }, caps);
+        Vpn.updateCapabilities(
+                mConnectivityManager,
+                new Network[] {mobile, wifi},
+                caps,
+                false /* isAlwaysMetered */);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(caps.hasTransport(TRANSPORT_WIFI));
@@ -561,7 +691,9 @@ public class VpnTest {
             doAnswer(invocation -> {
                 final String appName = (String) invocation.getArguments()[0];
                 final int userId = (int) invocation.getArguments()[1];
-                return UserHandle.getUid(userId, packages.get(appName));
+                Integer appId = packages.get(appName);
+                if (appId == null) throw new PackageManager.NameNotFoundException(appName);
+                return UserHandle.getUid(userId, appId);
             }).when(mPackageManager).getPackageUidAsUser(anyString(), anyInt());
         } catch (Exception e) {
         }

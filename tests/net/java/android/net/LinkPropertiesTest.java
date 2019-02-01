@@ -849,6 +849,18 @@ public class LinkPropertiesTest {
         assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
     }
 
+    private void assertParcelingIsLossless(LinkProperties source) {
+        Parcel p = Parcel.obtain();
+        source.writeToParcel(p, /* flags */ 0);
+        p.setDataPosition(0);
+        final byte[] marshalled = p.marshall();
+        p = Parcel.obtain();
+        p.unmarshall(marshalled, 0, marshalled.length);
+        p.setDataPosition(0);
+        LinkProperties dest = LinkProperties.CREATOR.createFromParcel(p);
+        assertEquals(source, dest);
+    }
+
     @Test
     public void testLinkPropertiesParcelable() throws Exception {
         LinkProperties source = new LinkProperties();
@@ -870,15 +882,12 @@ public class LinkPropertiesTest {
 
         source.setNat64Prefix(new IpPrefix("2001:db8:1:2:64:64::/96"));
 
-        Parcel p = Parcel.obtain();
-        source.writeToParcel(p, /* flags */ 0);
-        p.setDataPosition(0);
-        final byte[] marshalled = p.marshall();
-        p = Parcel.obtain();
-        p.unmarshall(marshalled, 0, marshalled.length);
-        p.setDataPosition(0);
-        LinkProperties dest = LinkProperties.CREATOR.createFromParcel(p);
+        assertParcelingIsLossless(source);
+    }
 
-        assertEquals(source, dest);
+    @Test
+    public void testParcelUninitialized() throws Exception {
+        LinkProperties empty = new LinkProperties();
+        assertParcelingIsLossless(empty);
     }
 }

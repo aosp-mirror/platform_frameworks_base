@@ -250,8 +250,8 @@ public final class CallIdentification implements Parcelable {
         mDetails = details;
         mPhoto = photo;
         mNuisanceConfidence = nuisanceConfidence;
-        mCallScreeningAppName = callScreeningPackageName;
-        mCallScreeningPackageName = callScreeningAppName;
+        mCallScreeningAppName = callScreeningAppName;
+        mCallScreeningPackageName = callScreeningPackageName;
     }
 
     private String mName;
@@ -429,5 +429,23 @@ public final class CallIdentification implements Parcelable {
     public int hashCode() {
         return Objects.hash(mName, mDescription, mDetails, mPhoto, mNuisanceConfidence,
                 mCallScreeningAppName, mCallScreeningPackageName);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[CallId mName=");
+        sb.append(Log.pii(mName));
+        sb.append(", mDesc=");
+        sb.append(mDescription);
+        sb.append(", mDet=");
+        sb.append(mDetails);
+        sb.append(", conf=");
+        sb.append(mNuisanceConfidence);
+        sb.append(", appName=");
+        sb.append(mCallScreeningAppName);
+        sb.append(", pkgName=");
+        sb.append(mCallScreeningPackageName);
+        return sb.toString();
     }
 }

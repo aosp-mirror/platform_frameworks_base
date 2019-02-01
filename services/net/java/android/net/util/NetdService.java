@@ -16,10 +16,10 @@
 
 package android.net.util;
 
+import android.content.Context;
 import android.net.INetd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -29,7 +29,6 @@ import android.util.Log;
  */
 public class NetdService {
     private static final String TAG = NetdService.class.getSimpleName();
-    private static final String NETD_SERVICE_NAME = "netd";
     private static final long BASE_TIMEOUT_MS = 100;
     private static final long MAX_TIMEOUT_MS = 1000;
 
@@ -49,7 +48,7 @@ public class NetdService {
         // NOTE: ServiceManager does no caching for the netd service,
         // because netd is not one of the defined common services.
         final INetd netdInstance = INetd.Stub.asInterface(
-                ServiceManager.getService(NETD_SERVICE_NAME));
+                ServiceManager.getService(Context.NETD_SERVICE));
         if (netdInstance == null) {
             Log.w(TAG, "WARNING: returning null INetd instance.");
         }

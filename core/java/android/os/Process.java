@@ -30,23 +30,12 @@ public class Process {
     private static final String LOG_TAG = "Process";
 
     /**
-     * @hide for internal use only.
-     */
-    public static final String ZYGOTE_SOCKET = "zygote";
-
-    /**
-     * @hide for internal use only.
-     */
-    public static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
-
-    /**
      * An invalid UID value.
      */
     public static final int INVALID_UID = -1;
 
     /**
      * Defines the root UID.
-     * @hide
      */
     public static final int ROOT_UID = 0;
 
@@ -62,7 +51,6 @@ public class Process {
 
     /**
      * Defines the UID/GID for the user shell.
-     * @hide
      */
     public static final int SHELL_UID = 2000;
 
@@ -116,7 +104,6 @@ public class Process {
 
     /**
      * Defines the UID/GID for the Bluetooth service process.
-     * @hide
      */
     public static final int BLUETOOTH_UID = 1002;
 
@@ -457,8 +444,7 @@ public class Process {
      * State associated with the zygote process.
      * @hide
      */
-    public static final ZygoteProcess zygoteProcess =
-            new ZygoteProcess(ZYGOTE_SOCKET, SECONDARY_ZYGOTE_SOCKET);
+    public static final ZygoteProcess ZYGOTE_PROCESS = new ZygoteProcess();
 
     /**
      * Start a new process.
@@ -510,9 +496,10 @@ public class Process {
                                   String appDataDir,
                                   String invokeWith,
                                   String[] zygoteArgs) {
-        return zygoteProcess.start(processClass, niceName, uid, gid, gids,
+        return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
+                    abi, instructionSet, appDataDir, invokeWith,
+                    /*useBlastulaPool=*/ true, zygoteArgs);
     }
 
     /** @hide */
@@ -529,7 +516,8 @@ public class Process {
                                   String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
+                    abi, instructionSet, appDataDir, invokeWith,
+                    /*useBlastulaPool=*/ false, zygoteArgs);
     }
 
     /**

@@ -16,6 +16,11 @@
 
 package android.net.shared;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
+
 import android.content.Context;
 import android.net.NetworkCapabilities;
 import android.provider.Settings;
@@ -58,9 +63,12 @@ public class NetworkMonitorUtils {
      * @param dfltNetCap Default requested network capabilities.
      * @param nc Network capabilities of the network to test.
      */
-    public static boolean isValidationRequired(
-            NetworkCapabilities dfltNetCap, NetworkCapabilities nc) {
+    public static boolean isValidationRequired(NetworkCapabilities nc) {
         // TODO: Consider requiring validation for DUN networks.
-        return dfltNetCap.satisfiedByNetworkCapabilities(nc);
+        return nc != null
+                && nc.hasCapability(NET_CAPABILITY_INTERNET)
+                && nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                && nc.hasCapability(NET_CAPABILITY_TRUSTED)
+                && nc.hasCapability(NET_CAPABILITY_NOT_VPN);
     }
 }

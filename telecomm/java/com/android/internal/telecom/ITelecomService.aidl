@@ -45,7 +45,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getUserSelectedOutgoingPhoneAccount
      */
-    PhoneAccountHandle getUserSelectedOutgoingPhoneAccount();
+    PhoneAccountHandle getUserSelectedOutgoingPhoneAccount(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#setUserSelectedOutgoingPhoneAccount

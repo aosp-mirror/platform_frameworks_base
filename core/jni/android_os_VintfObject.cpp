@@ -96,7 +96,7 @@ static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass)
     return toJavaStringArray(env, cStrings);
 }
 
-static jint verify(JNIEnv* env, jobjectArray packageInfo, android::vintf::CheckFlags::Type checks) {
+static jint android_os_VintfObject_verify(JNIEnv* env, jclass, jobjectArray packageInfo) {
     std::vector<std::string> cPackageInfo;
     if (packageInfo) {
         size_t count = env->GetArrayLength(packageInfo);
@@ -109,18 +109,19 @@ static jint verify(JNIEnv* env, jobjectArray packageInfo, android::vintf::CheckF
         }
     }
     std::string error;
-    int32_t status = VintfObject::CheckCompatibility(cPackageInfo, &error, checks);
+    int32_t status = VintfObject::CheckCompatibility(cPackageInfo, &error);
     if (status)
         LOG(WARNING) << "VintfObject.verify() returns " << status << ": " << error;
     return status;
 }
 
-static jint android_os_VintfObject_verify(JNIEnv* env, jclass, jobjectArray packageInfo) {
-    return verify(env, packageInfo, ::android::vintf::CheckFlags::ENABLE_ALL_CHECKS);
-}
-
 static jint android_os_VintfObject_verifyWithoutAvb(JNIEnv* env, jclass) {
-    return verify(env, nullptr, ::android::vintf::CheckFlags::DISABLE_AVB_CHECK);
+    std::string error;
+    int32_t status = VintfObject::CheckCompatibility({}, &error,
+            ::android::vintf::CheckFlags::DISABLE_AVB_CHECK);
+    if (status)
+        LOG(WARNING) << "VintfObject.verifyWithoutAvb() returns " << status << ": " << error;
+    return status;
 }
 
 static jobjectArray android_os_VintfObject_getHalNamesAndVersions(JNIEnv* env, jclass) {

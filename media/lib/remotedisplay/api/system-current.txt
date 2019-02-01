@@ -1,17 +1,18 @@
+// Signature format: 2.0
 package com.android.media.remotedisplay {
 
   public class RemoteDisplay {
-    ctor public RemoteDisplay(java.lang.String, java.lang.String);
-    method public java.lang.String getDescription();
-    method public java.lang.String getId();
-    method public java.lang.String getName();
+    ctor public RemoteDisplay(String, String);
+    method public String getDescription();
+    method public String getId();
+    method public String getName();
     method public int getPresentationDisplayId();
     method public int getStatus();
     method public int getVolume();
     method public int getVolumeHandling();
     method public int getVolumeMax();
-    method public void setDescription(java.lang.String);
-    method public void setName(java.lang.String);
+    method public void setDescription(String);
+    method public void setName(String);
     method public void setPresentationDisplayId(int);
     method public void setStatus(int);
     method public void setVolume(int);
@@ -29,7 +30,7 @@ package com.android.media.remotedisplay {
   public abstract class RemoteDisplayProvider {
     ctor public RemoteDisplayProvider(android.content.Context);
     method public void addDisplay(com.android.media.remotedisplay.RemoteDisplay);
-    method public com.android.media.remotedisplay.RemoteDisplay findRemoteDisplay(java.lang.String);
+    method public com.android.media.remotedisplay.RemoteDisplay findRemoteDisplay(String);
     method public android.os.IBinder getBinder();
     method public final android.content.Context getContext();
     method public int getDiscoveryMode();
@@ -45,7 +46,7 @@ package com.android.media.remotedisplay {
     field public static final int DISCOVERY_MODE_ACTIVE = 2; // 0x2
     field public static final int DISCOVERY_MODE_NONE = 0; // 0x0
     field public static final int DISCOVERY_MODE_PASSIVE = 1; // 0x1
-    field public static final java.lang.String SERVICE_INTERFACE = "com.android.media.remotedisplay.RemoteDisplayProvider";
+    field public static final String SERVICE_INTERFACE = "com.android.media.remotedisplay.RemoteDisplayProvider";
   }
 
 }

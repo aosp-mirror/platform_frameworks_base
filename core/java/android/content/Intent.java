@@ -2990,7 +2990,18 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
+     *
+     * <p class="note">If the user has chosen a {@link android.telecom.CallRedirectionService} to
+     * handle redirection of outgoing calls, this intent will NOT be sent as an ordered broadcast.
+     * This means that attempts to re-write the outgoing call by other apps using this intent will
+     * be ignored.
+     * </p>
+     *
+     * @deprecated Apps that redirect outgoing calls should use the
+     * {@link android.telecom.CallRedirectionService} API.  Apps that perform call screening
+     * should use the {@link android.telecom.CallScreeningService} API.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NEW_OUTGOING_CALL =
             "android.intent.action.NEW_OUTGOING_CALL";

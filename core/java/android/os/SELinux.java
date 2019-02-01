@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.Slog;
 
 import java.io.File;
@@ -69,6 +70,7 @@ public class SELinux {
      * @param path the pathname of the file object.
      * @return a security context given as a String.
      */
+    @UnsupportedAppUsage
     public static final native String getFileContext(String path);
 
     /**

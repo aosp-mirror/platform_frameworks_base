@@ -63,6 +63,14 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
         mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
     }
 
+    /** @hide */
+    public CellInfoGsm(android.hardware.radio.V1_4.CellInfo ci) {
+        super(ci);
+        final android.hardware.radio.V1_2.CellInfoGsm cig = ci.info.gsm();
+        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
+        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
+    }
+
     @Override
     public CellIdentityGsm getCellIdentity() {
         return mCellIdentityGsm;

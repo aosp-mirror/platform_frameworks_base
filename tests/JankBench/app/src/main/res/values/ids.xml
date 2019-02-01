@@ -23,6 +23,7 @@
     <item name="benchmark_text_low_hitrate" type="id" />
     <item name="benchmark_edit_text_input" type="id" />
     <item name="benchmark_overdraw" type="id" />
+    <item name="benchmark_bitmap_upload" type="id" />
     <item name="benchmark_memory_bandwidth" type="id" />
     <item name="benchmark_memory_latency" type="id" />
     <item name="benchmark_power_management" type="id" />

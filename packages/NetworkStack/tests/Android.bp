@@ -16,9 +16,12 @@
 
 android_test {
     name: "NetworkStackTests",
+    certificate: "platform",
     srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
     static_libs: [
         "android-support-test",
+        "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "NetworkStackLib",
         "testables",
@@ -26,10 +29,70 @@ android_test {
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
     jni_libs: [
         // For mockito extended
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
-    ]
+        // For ApfTest
+        "libartbase",
+        "libbacktrace",
+        "libbase",
+        "libbinder",
+        "libbinderthreadstate",
+        "libc++",
+        "libcrypto",
+        "libcutils",
+        "libdexfile",
+        "libhidl-gen-utils",
+        "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
+        "liblog",
+        "liblzma",
+        "libnativehelper",
+        "libnetworkstacktestsjni",
+        "libpackagelistparser",
+        "libpcre2",
+        "libprocessgroup",
+        "libselinux",
+        "libui",
+        "libutils",
+        "libvintf",
+        "libvndksupport",
+        "libtinyxml2",
+        "libunwindstack",
+        "libutilscallstack",
+        "libziparchive",
+        "libz",
+        "netd_aidl_interface-cpp",
+    ],
+}
+
+cc_library_shared {
+    name: "libnetworkstacktestsjni",
+    srcs: [
+        "jni/**/*.cpp"
+    ],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+    include_dirs: [
+        "hardware/google/apf",
+    ],
+    shared_libs: [
+        "libbinder",
+        "liblog",
+        "libcutils",
+        "libnativehelper",
+        "netd_aidl_interface-cpp",
+    ],
+    static_libs: [
+        "libapf",
+        "libpcap",
+    ],
+
 }

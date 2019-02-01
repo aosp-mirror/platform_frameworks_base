@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -112,13 +113,13 @@ public abstract class NetworkService extends Service {
                     mSlotId, 0, null).sendToTarget();
         }
 
-        private void registerForStateChanged(INetworkServiceCallback callback) {
+        private void registerForStateChanged(@NonNull INetworkServiceCallback callback) {
             synchronized (mNetworkRegistrationStateChangedCallbacks) {
                 mNetworkRegistrationStateChangedCallbacks.add(callback);
             }
         }
 
-        private void unregisterForStateChanged(INetworkServiceCallback callback) {
+        private void unregisterForStateChanged(@NonNull INetworkServiceCallback callback) {
             synchronized (mNetworkRegistrationStateChangedCallbacks) {
                 mNetworkRegistrationStateChangedCallbacks.remove(callback);
             }

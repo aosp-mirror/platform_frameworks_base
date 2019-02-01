@@ -26,12 +26,12 @@ import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Objects;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -203,7 +203,7 @@ public class StaticIpConfigurationTest {
         try {
             s.writeToParcel(p, 0);
             p.setDataPosition(0);
-            s2 = StaticIpConfiguration.CREATOR.createFromParcel(p);
+            s2 = StaticIpConfiguration.readFromParcel(p);
         } finally {
             p.recycle();
         }

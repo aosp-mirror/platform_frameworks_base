@@ -1554,7 +1554,7 @@
     <permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows a system application to access hardware packet offload capabilities.
+    <!-- @SystemApi Allows a system application to access hardware packet offload capabilities.
          @hide -->
     <permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD"
         android:protectionLevel="signature|privileged" />
@@ -1679,6 +1679,10 @@
          @hide
     -->
     <permission android:name="android.permission.HARDWARE_TEST"
+        android:protectionLevel="signature" />
+
+    <!-- @hide Allows an application to manage DynamicAndroid image -->
+    <permission android:name="android.permission.MANAGE_DYNAMIC_ANDROID"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows access to Broadcast Radio
@@ -3230,6 +3234,12 @@
     <permission android:name="android.permission.CONTROL_VPN"
         android:protectionLevel="signature|privileged" />
     <uses-permission android:name="android.permission.CONTROL_VPN" />
+
+    <!-- Allows an application to access and modify always-on VPN configuration.
+         <p>Not for use by third-party or privileged applications.
+         @hide -->
+    <permission android:name="android.permission.CONTROL_ALWAYS_ON_VPN"
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to capture audio output.
          <p>Not for use by third-party applications.</p> -->

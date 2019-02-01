@@ -26,6 +26,7 @@ import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -117,7 +118,8 @@ public class LinkAddress implements Parcelable {
      * @return true if the address is IPv6.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
+    @SystemApi
     public boolean isIPv6() {
         return address instanceof Inet6Address;
     }
@@ -126,6 +128,8 @@ public class LinkAddress implements Parcelable {
      * @return true if the address is IPv4 or is a mapped IPv4 address.
      * @hide
      */
+    @TestApi
+    @SystemApi
     public boolean isIPv4() {
         return address instanceof Inet4Address;
     }
@@ -158,6 +162,8 @@ public class LinkAddress implements Parcelable {
      *              {@link OsConstants#RT_SCOPE_LINK} or {@link OsConstants#RT_SCOPE_SITE}).
      * @hide
      */
+    @SystemApi
+    @TestApi
     public LinkAddress(InetAddress address, int prefixLength, int flags, int scope) {
         init(address, prefixLength, flags, scope);
     }
@@ -170,6 +176,7 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public LinkAddress(InetAddress address, int prefixLength) {
         this(address, prefixLength, 0, 0);
         this.scope = scopeForUnicastAddress(address);
@@ -193,6 +200,7 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public LinkAddress(String address) {
         this(address, 0, 0);
         this.scope = scopeForUnicastAddress(this.address);
@@ -206,6 +214,8 @@ public class LinkAddress implements Parcelable {
      * @param scope The address scope.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public LinkAddress(String address, int flags, int scope) {
         // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
         // TODO: consider rejecting mapped IPv4 addresses such as "::ffff:192.0.2.5/24".
@@ -263,7 +273,8 @@ public class LinkAddress implements Parcelable {
      * otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
+    @SystemApi
     public boolean isSameAddressAs(LinkAddress other) {
         return address.equals(other.address) && prefixLength == other.prefixLength;
     }
@@ -310,6 +321,8 @@ public class LinkAddress implements Parcelable {
      * Returns true if this {@code LinkAddress} is global scope and preferred.
      * @hide
      */
+    @TestApi
+    @SystemApi
     public boolean isGlobalPreferred() {
         /**
          * Note that addresses flagged as IFA_F_OPTIMISTIC are

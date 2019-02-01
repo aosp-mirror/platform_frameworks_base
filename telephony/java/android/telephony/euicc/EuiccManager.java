@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.euicc.IEuiccController;
 
@@ -40,7 +41,11 @@ import java.lang.annotation.RetentionPolicy;
  * EuiccManager is the application interface to eUICCs, or eSIMs/embedded SIMs.
  *
  * <p>You do not instantiate this class directly; instead, you retrieve an instance through
- * {@link Context#getSystemService(String)} and {@link Context#EUICC_SERVICE}.
+ * {@link Context#getSystemService(String)} and {@link Context#EUICC_SERVICE}. This instance will be
+ * created using the default eUICC.
+ *
+ * <p>On a device with multiple eUICCs, you may want to create multiple EuiccManagers. To do this
+ * you can call {@link #createForCardId}.
  *
  * <p>See {@link #isEnabled} before attempting to use these APIs.
  */
@@ -248,10 +253,29 @@ public class EuiccManager {
     public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5;
 
     private final Context mContext;
+    private int mCardId;
 
     /** @hide */
     public EuiccManager(Context context) {
         mContext = context;
+        TelephonyManager tm = (TelephonyManager)
+                context.getSystemService(Context.TELEPHONY_SERVICE);
+        mCardId = tm.getCardIdForDefaultEuicc();
+    }
+
+    /** @hide */
+    private EuiccManager(Context context, int cardId) {
+        mContext = context;
+        mCardId = cardId;
+    }
+
+    /**
+     * Create a new EuiccManager object pinned to the given card ID.
+     *
+     * @return an EuiccManager that uses the given card ID for all calls.
+     */
+    public EuiccManager createForCardId(int cardId) {
+        return new EuiccManager(mContext, cardId);
     }
 
     /**
@@ -274,17 +298,18 @@ public class EuiccManager {
      * Returns the EID identifying the eUICC hardware.
      *
      * <p>Requires that the calling app has carrier privileges on the active subscription on the
-     * eUICC.
+     * current eUICC. A calling app with carrier privileges for one eUICC may not necessarily have
+     * access to the EID of another eUICC.
      *
-     * @return the EID. May be null if {@link #isEnabled()} is false or the eUICC is not ready.
+     * @return the EID. May be null if the eUICC is not ready.
      */
     @Nullable
     public String getEid() {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             return null;
         }
         try {
-            return getIEuiccController().getEid();
+            return getIEuiccController().getEid(mCardId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -295,19 +320,19 @@ public class EuiccManager {
      *
      * <p>Requires the {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
-     * @return the status of eUICC OTA. If {@link #isEnabled()} is false or the eUICC is not ready,
-     *     {@link OtaStatus#EUICC_OTA_STATUS_UNAVAILABLE} will be returned.
+     * @return the status of eUICC OTA. If the eUICC is not ready,
+     *         {@link OtaStatus#EUICC_OTA_STATUS_UNAVAILABLE} will be returned.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public int getOtaStatus() {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             return EUICC_OTA_STATUS_UNAVAILABLE;
         }
         try {
-            return getIEuiccController().getOtaStatus();
+            return getIEuiccController().getOtaStatus(mCardId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -317,10 +342,19 @@ public class EuiccManager {
      * Attempt to download the given {@link DownloadableSubscription}.
      *
      * <p>Requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
-     * or the calling app must be authorized to manage both the currently-active subscription and
-     * the subscription to be downloaded according to the subscription metadata. Without the former,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
-     * intent to prompt the user to accept the download.
+     * or the calling app must be authorized to manage both the currently-active subscription on the
+     * current eUICC and the subscription to be downloaded according to the subscription metadata.
+     * Without the former, an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be
+     * returned in the callback intent to prompt the user to accept the download.
+     *
+     * <p>On a multi-active SIM device, requires the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission, or a calling app
+     * only if the targeted eUICC does not currently have an active subscription or the calling app
+     * is authorized to manage the active subscription on the target eUICC, and the calling app is
+     * authorized to manage any active subscription on any SIM. Without it, an
+     * {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
+     * intent to prompt the user to accept the download. The caller should also be authorized to
+     * manage the subscription to be downloaded.
      *
      * @param subscription the subscription to download.
      * @param switchAfterDownload if true, the profile will be activated upon successful download.
@@ -329,12 +363,12 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void downloadSubscription(DownloadableSubscription subscription,
             boolean switchAfterDownload, PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().downloadSubscription(subscription, switchAfterDownload,
+            getIEuiccController().downloadSubscription(mCardId, subscription, switchAfterDownload,
                     mContext.getOpPackageName(), null /* resolvedBundle */, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -391,7 +425,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             PendingIntent callbackIntent =
                     resolutionIntent.getParcelableExtra(
                             EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
@@ -401,7 +435,7 @@ public class EuiccManager {
             return;
         }
         try {
-            getIEuiccController().continueOperation(resolutionIntent, resolutionExtras);
+            getIEuiccController().continueOperation(mCardId, resolutionIntent, resolutionExtras);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -428,13 +462,13 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDownloadableSubscriptionMetadata(
             DownloadableSubscription subscription, PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().getDownloadableSubscriptionMetadata(
-                    subscription, mContext.getOpPackageName(), callbackIntent);
+            getIEuiccController().getDownloadableSubscriptionMetadata(mCardId, subscription,
+                    mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -458,12 +492,12 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDefaultDownloadableSubscriptionList(PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().getDefaultDownloadableSubscriptionList(
+            getIEuiccController().getDefaultDownloadableSubscriptionList(mCardId,
                     mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -473,16 +507,15 @@ public class EuiccManager {
     /**
      * Returns information about the eUICC chip/device.
      *
-     * @return the {@link EuiccInfo}. May be null if {@link #isEnabled()} is false or the eUICC is
-     *     not ready.
+     * @return the {@link EuiccInfo}. May be null if the eUICC is not ready.
      */
     @Nullable
     public EuiccInfo getEuiccInfo() {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             return null;
         }
         try {
-            return getIEuiccController().getEuiccInfo();
+            return getIEuiccController().getEuiccInfo(mCardId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -503,12 +536,12 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().deleteSubscription(
+            getIEuiccController().deleteSubscription(mCardId,
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -524,19 +557,31 @@ public class EuiccManager {
      * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
      * intent to prompt the user to accept the download.
      *
+     * <p>On a multi-active SIM device, requires the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission, or a calling app
+     *  only if the targeted eUICC does not currently have an active subscription or the calling app
+     * is authorized to manage the active subscription on the target eUICC, and the calling app is
+     * authorized to manage any active subscription on any SIM. Without it, an
+     * {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
+     * intent to prompt the user to accept the download. The caller should also be authorized to
+     * manage the subscription to be enabled.
+     *
      * @param subscriptionId the ID of the subscription to enable. May be
      *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
-     *     current profile without activating another profile to replace it.
+     *     current profile without activating another profile to replace it. If it's a disable
+     *     operation, requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS}
+     *     permission, or the calling app must be authorized to manage the active subscription on
+     *     the target eUICC.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().switchToSubscription(
+            getIEuiccController().switchToSubscription(mCardId,
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -546,25 +591,24 @@ public class EuiccManager {
     /**
      * Update the nickname for the given subscription.
      *
-     * <p>Requires that the calling app has the
-     * {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission. This is for
-     * internal system use only.
+     * <p>Requires that the calling app has carrier privileges according to the metadata of the
+     * profile to be updated, or the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
      * @param subscriptionId the ID of the subscription to update.
      * @param nickname the new nickname to apply.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
-     * @hide
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
             int subscriptionId, String nickname, PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().updateSubscriptionNickname(
-                    subscriptionId, nickname, callbackIntent);
+            getIEuiccController().updateSubscriptionNickname(mCardId,
+                    subscriptionId, nickname, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -582,12 +626,12 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void eraseSubscriptions(PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().eraseSubscriptions(callbackIntent);
+            getIEuiccController().eraseSubscriptions(mCardId, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -612,15 +656,28 @@ public class EuiccManager {
      * @hide
      */
     public void retainSubscriptionsForFactoryReset(PendingIntent callbackIntent) {
-        if (!isEnabled()) {
+        if (!refreshCardIdIfInvalid()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            getIEuiccController().retainSubscriptionsForFactoryReset(callbackIntent);
+            getIEuiccController().retainSubscriptionsForFactoryReset(mCardId, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private boolean refreshCardIdIfInvalid() {
+        if (!isEnabled()) {
+            return false;
+        }
+        // Refresh mCardId if it's invalid.
+        if (mCardId == TelephonyManager.INVALID_CARD_ID) {
+            TelephonyManager tm = (TelephonyManager)
+                    mContext.getSystemService(Context.TELEPHONY_SERVICE);
+            mCardId = tm.getCardIdForDefaultEuicc();
+        }
+        return true;
     }
 
     private static void sendUnavailableError(PendingIntent callbackIntent) {

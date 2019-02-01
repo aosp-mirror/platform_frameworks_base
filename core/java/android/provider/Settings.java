@@ -5671,6 +5671,16 @@ public final class Settings {
         public static final String ALWAYS_ON_VPN_LOCKDOWN = "always_on_vpn_lockdown";
 
         /**
+         * Comma separated list of packages that are allowed to access the network when VPN is in
+         * lockdown mode but not running.
+         * @see #ALWAYS_ON_VPN_LOCKDOWN
+         *
+         * @hide
+         */
+        public static final String ALWAYS_ON_VPN_LOCKDOWN_WHITELIST =
+                "always_on_vpn_lockdown_whitelist";
+
+        /**
          * Whether applications can be installed for this user via the system's
          * {@link Intent#ACTION_INSTALL_PACKAGE} mechanism.
          *
@@ -10329,6 +10339,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0;
 
         /**
@@ -10337,6 +10349,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1;
 
         /**
@@ -10345,6 +10359,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_AVOID = 2;
 
         /**
@@ -10354,6 +10370,8 @@ public final class Settings {
          * The default for this setting is CAPTIVE_PORTAL_MODE_PROMPT.
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
 
         /**
@@ -10382,6 +10400,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
 
         /**
@@ -10390,6 +10410,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
 
         /**
@@ -10398,6 +10420,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
 
         /**
@@ -10406,6 +10430,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS =
                 "captive_portal_other_fallback_urls";
 
@@ -10415,6 +10441,8 @@ public final class Settings {
          * by "@@,@@".
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS =
                 "captive_portal_fallback_probe_specs";
 
@@ -10425,6 +10453,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
 
         /**
@@ -10433,6 +10463,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
 
         /**
@@ -10442,6 +10474,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD =
                 "data_stall_consecutive_dns_timeout_threshold";
 
@@ -10450,6 +10484,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String DATA_STALL_MIN_EVALUATE_INTERVAL =
                 "data_stall_min_evaluate_interval";
 
@@ -10459,6 +10495,8 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD =
                 "data_stall_valid_dns_time_threshold";
 
@@ -10468,8 +10506,25 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
+        @TestApi
         public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
 
+        /**
+         * Whether to try cellular data recovery when a bad network is reported.
+         *
+         * @hide
+         */
+        public static final String DATA_STALL_RECOVERY_ON_BAD_NETWORK =
+                "data_stall_recovery_on_bad_network";
+
+        /**
+         * Minumim duration in millisecodns between cellular data recovery attempts
+         *
+         * @hide
+         */
+        public static final String MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS =
+                "min_duration_between_recovery_steps";
         /**
          * Whether network service discovery is enabled.
          *

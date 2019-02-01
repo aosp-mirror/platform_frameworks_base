@@ -27,8 +27,10 @@ import android.telephony.Rlog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -175,6 +177,12 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * Bit-field which indicates the number is from the platform-maintained database.
      */
     public static final int EMERGENCY_NUMBER_SOURCE_DATABASE =  1 << 4;
+    /**
+     * Bit-field which indicates the number is from test mode.
+     *
+     * @hide
+     */
+    public static final int EMERGENCY_NUMBER_SOURCE_TEST =  1 << 5;
     /** Bit-field which indicates the number is from the modem config. */
     public static final int EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG =
             EmergencyNumberSource.MODEM_CONFIG;
@@ -198,21 +206,56 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         EMERGENCY_NUMBER_SOURCE_SET.add(EMERGENCY_NUMBER_SOURCE_DEFAULT);
     }
 
+    /**
+     * Indicated the framework does not know whether an emergency call should be placed using
+     * emergency or normal call routing. This means the underlying radio or IMS implementation is
+     * free to determine for itself how to route the call.
+     */
+    public static final int EMERGENCY_CALL_ROUTING_UNKNOWN = 0;
+    /**
+     * Indicates the radio or IMS implementation must handle the call through emergency routing.
+     */
+    public static final int EMERGENCY_CALL_ROUTING_EMERGENCY = 1;
+    /**
+     * Indicates the radio or IMS implementation must handle the call through normal call routing.
+     */
+    public static final int EMERGENCY_CALL_ROUTING_NORMAL = 2;
+
+    /**
+     * The routing to tell how to handle the call for the corresponding emergency number.
+     *
+     * @hide
+     */
+    @IntDef(flag = false, prefix = { "EMERGENCY_CALL_ROUTING_" }, value = {
+            EMERGENCY_CALL_ROUTING_UNKNOWN,
+            EMERGENCY_CALL_ROUTING_EMERGENCY,
+            EMERGENCY_CALL_ROUTING_NORMAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EmergencyCallRouting {}
+
+
     private final String mNumber;
     private final String mCountryIso;
     private final String mMnc;
     private final int mEmergencyServiceCategoryBitmask;
+    private final List<String> mEmergencyUrns;
     private final int mEmergencyNumberSourceBitmask;
+    private final int mEmergencyCallRouting;
 
     /** @hide */
-    public EmergencyNumber(@NonNull String number, @NonNull String countryIso,
-                           @NonNull String mnc, int emergencyServiceCategories,
-                           int emergencyNumberSources) {
+    public EmergencyNumber(@NonNull String number, @NonNull String countryIso, @NonNull String mnc,
+                           @EmergencyServiceCategories int emergencyServiceCategories,
+                           @NonNull List<String> emergencyUrns,
+                           @EmergencyNumberSources int emergencyNumberSources,
+                           @EmergencyCallRouting int emergencyCallRouting) {
         this.mNumber = number;
         this.mCountryIso = countryIso;
         this.mMnc = mnc;
         this.mEmergencyServiceCategoryBitmask = emergencyServiceCategories;
+        this.mEmergencyUrns = emergencyUrns;
         this.mEmergencyNumberSourceBitmask = emergencyNumberSources;
+        this.mEmergencyCallRouting = emergencyCallRouting;
     }
 
     /** @hide */
@@ -221,8 +264,35 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         mCountryIso = source.readString();
         mMnc = source.readString();
         mEmergencyServiceCategoryBitmask = source.readInt();
+        mEmergencyUrns = source.createStringArrayList();
         mEmergencyNumberSourceBitmask = source.readInt();
+        mEmergencyCallRouting = source.readInt();
     }
+
+    @Override
+    /** @hide */
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mNumber);
+        dest.writeString(mCountryIso);
+        dest.writeString(mMnc);
+        dest.writeInt(mEmergencyServiceCategoryBitmask);
+        dest.writeStringList(mEmergencyUrns);
+        dest.writeInt(mEmergencyNumberSourceBitmask);
+        dest.writeInt(mEmergencyCallRouting);
+    }
+
+    public static final Parcelable.Creator<EmergencyNumber> CREATOR =
+            new Parcelable.Creator<EmergencyNumber>() {
+                @Override
+                public EmergencyNumber createFromParcel(Parcel in) {
+                    return new EmergencyNumber(in);
+                }
+
+                @Override
+                public EmergencyNumber[] newArray(int size) {
+                    return new EmergencyNumber[size];
+                }
+            };
 
     /**
      * Get the dialing number of the emergency number.
@@ -264,6 +334,21 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     }
 
     /**
+     * Returns the bitmask of emergency service categories of the emergency number for
+     * internal dialing.
+     *
+     * @return bitmask of the emergency service categories
+     *
+     * @hide
+     */
+    public @EmergencyServiceCategories int getEmergencyServiceCategoryBitmaskInternalDial() {
+        if (mEmergencyNumberSourceBitmask == EMERGENCY_NUMBER_SOURCE_DATABASE) {
+            return EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
+        }
+        return mEmergencyServiceCategoryBitmask;
+    }
+
+    /**
      * Returns the emergency service categories of the emergency number.
      *
      * Note: if the emergency number is in {@link #EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED}, only
@@ -284,6 +369,22 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
             }
         }
         return categories;
+    }
+
+    /**
+     * Returns the list of emergency Uniform Resources Names (URN) of the emergency number.
+     *
+     * For example, {@code urn:service:sos} is the generic URN for contacting emergency services
+     * of all type.
+     *
+     * Reference: 3gpp 24.503, Section 5.1.6.8.1 - General;
+     *            RFC 5031
+     *
+     * @return list of emergency Uniform Resources Names (URN) or an empty list if the emergency
+     *         number does not have a specified emergency Uniform Resource Name.
+     */
+    public @NonNull List<String> getEmergencyUrns() {
+        return mEmergencyUrns;
     }
 
     /**
@@ -352,14 +453,17 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         return (mEmergencyNumberSourceBitmask & sources) == sources;
     }
 
-    @Override
-    /** @hide */
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mNumber);
-        dest.writeString(mCountryIso);
-        dest.writeString(mMnc);
-        dest.writeInt(mEmergencyServiceCategoryBitmask);
-        dest.writeInt(mEmergencyNumberSourceBitmask);
+    /**
+     * Returns the emergency call routing information.
+     *
+     * <p>Some regions require some emergency numbers which are not routed using typical emergency
+     * call processing, but are instead placed as regular phone calls. The emergency call routing
+     * field provides information about how an emergency call will be routed when it is placed.
+     *
+     * @return the emergency call routing requirement
+     */
+    public @EmergencyCallRouting int getEmergencyCallRouting() {
+        return mEmergencyCallRouting;
     }
 
     @Override
@@ -373,7 +477,9 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         return "EmergencyNumber:" + "Number-" + mNumber + "|CountryIso-" + mCountryIso
                 + "|Mnc-" + mMnc
                 + "|ServiceCategories-" + Integer.toBinaryString(mEmergencyServiceCategoryBitmask)
-                + "|Sources-" + Integer.toBinaryString(mEmergencyNumberSourceBitmask);
+                + "|Urns-" + mEmergencyUrns
+                + "|Sources-" + Integer.toBinaryString(mEmergencyNumberSourceBitmask)
+                + "|Routing-" + Integer.toBinaryString(mEmergencyCallRouting);
     }
 
     @Override
@@ -381,7 +487,20 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         if (!EmergencyNumber.class.isInstance(o)) {
             return false;
         }
-        return (o == this || toString().equals(o.toString()));
+        EmergencyNumber other = (EmergencyNumber) o;
+        return mNumber.equals(other.mNumber)
+                && mCountryIso.equals(other.mCountryIso)
+                && mMnc.equals(other.mMnc)
+                && mEmergencyServiceCategoryBitmask == other.mEmergencyServiceCategoryBitmask
+                && mEmergencyUrns.equals(other.mEmergencyUrns)
+                && mEmergencyNumberSourceBitmask == other.mEmergencyNumberSourceBitmask
+                && mEmergencyCallRouting == other.mEmergencyCallRouting;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mNumber, mCountryIso, mMnc, mEmergencyServiceCategoryBitmask,
+                mEmergencyUrns, mEmergencyNumberSourceBitmask, mEmergencyCallRouting);
     }
 
     /**
@@ -462,12 +581,12 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 continue;
             }
             for (int j = i + 1; j < emergencyNumberList.size(); j++) {
-                if (isSameEmergencyNumber(
+                if (areSameEmergencyNumbers(
                         emergencyNumberList.get(i), emergencyNumberList.get(j))) {
                     Rlog.e(LOG_TAG, "Found unexpected duplicate numbers: "
                             + emergencyNumberList.get(i) + " vs " + emergencyNumberList.get(j));
                     // Set the merged emergency number in the current position
-                    emergencyNumberList.set(i, mergeNumbers(
+                    emergencyNumberList.set(i, mergeSameEmergencyNumbers(
                             emergencyNumberList.get(i), emergencyNumberList.get(j)));
                     // Mark the emergency number has been merged
                     mergedEmergencyNumber.add(emergencyNumberList.get(j));
@@ -480,14 +599,15 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 emergencyNumberList.remove(i--);
             }
         }
+        Collections.sort(emergencyNumberList);
     }
 
     /**
      * Check if two emergency numbers are the same.
      *
      * A unique EmergencyNumber has a unique combination of ‘number’, ‘mcc’, 'mnc' and
-     * 'categories' fields. Multiple Emergency Number Sources should be merged into one bitfield
-     * for the same EmergencyNumber.
+     * 'categories', and 'routing' fields. Multiple Emergency Number Sources should be
+     * merged into one bitfield for the same EmergencyNumber.
      *
      * @param first first EmergencyNumber to compare
      * @param second second EmergencyNumber to compare
@@ -495,8 +615,8 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @hide
      */
-    public static boolean isSameEmergencyNumber(@NonNull EmergencyNumber first,
-                                                @NonNull EmergencyNumber second) {
+    public static boolean areSameEmergencyNumbers(@NonNull EmergencyNumber first,
+                                                  @NonNull EmergencyNumber second) {
         if (!first.getNumber().equals(second.getNumber())) {
             return false;
         }
@@ -510,11 +630,24 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 != second.getEmergencyServiceCategoryBitmask()) {
             return false;
         }
+        if (first.getEmergencyUrns().equals(second.getEmergencyUrns())) {
+            return false;
+        }
+        if (first.getEmergencyCallRouting() != second.getEmergencyCallRouting()) {
+            return false;
+        }
+        // Never merge two numbers if one of them is from test mode but the other one is not;
+        // This supports to remove a number from the test mode.
+        if (first.isFromSources(EMERGENCY_NUMBER_SOURCE_TEST)
+                ^ second.isFromSources(EMERGENCY_NUMBER_SOURCE_TEST)) {
+            return false;
+        }
         return true;
     }
 
     /**
-     * Get a merged EmergencyNumber for two numbers if they are the same.
+     * Get a merged EmergencyNumber from two same emergency numbers. Two emergency numbers are
+     * the same if {@link #areSameEmergencyNumbers} returns {@code true}.
      *
      * @param first first EmergencyNumber to compare
      * @param second second EmergencyNumber to compare
@@ -522,27 +655,25 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @hide
      */
-    public static EmergencyNumber mergeNumbers(@NonNull EmergencyNumber first,
-                                         @NonNull EmergencyNumber second) {
-        if (isSameEmergencyNumber(first, second)) {
+    public static EmergencyNumber mergeSameEmergencyNumbers(@NonNull EmergencyNumber first,
+                                                            @NonNull EmergencyNumber second) {
+        if (areSameEmergencyNumbers(first, second)) {
             return new EmergencyNumber(first.getNumber(), first.getCountryIso(), first.getMnc(),
                     first.getEmergencyServiceCategoryBitmask(),
+                    first.getEmergencyUrns(),
                     first.getEmergencyNumberSourceBitmask()
-                            | second.getEmergencyNumberSourceBitmask());
+                            | second.getEmergencyNumberSourceBitmask(),
+                    first.getEmergencyCallRouting());
         }
         return null;
     }
 
-    public static final Parcelable.Creator<EmergencyNumber> CREATOR =
-            new Parcelable.Creator<EmergencyNumber>() {
-        @Override
-        public EmergencyNumber createFromParcel(Parcel in) {
-            return new EmergencyNumber(in);
-        }
-
-        @Override
-        public EmergencyNumber[] newArray(int size) {
-            return new EmergencyNumber[size];
-        }
-    };
+    /**
+     * Validate Emergency Number address that only allows '0'-'9', '*', or '#'
+     *
+     * @hide
+     */
+    public static boolean validateEmergencyNumberAddress(String address) {
+        return address.matches("[0-9*#]+");
+    }
 }

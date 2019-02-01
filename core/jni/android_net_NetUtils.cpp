@@ -16,8 +16,11 @@
 
 #define LOG_TAG "NetUtils"
 
+#include <vector>
+
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include "NetdClient.h"
 #include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -54,6 +57,31 @@ static const uint32_t kICMPv6TypeOffset = kIPv6PayloadStart + offsetof(icmp6_hdr
 static const uint32_t kUDPSrcPortIndirectOffset = kEtherHeaderLen + offsetof(udphdr, source);
 static const uint32_t kUDPDstPortIndirectOffset = kEtherHeaderLen + offsetof(udphdr, dest);
 static const uint16_t kDhcpClientPort = 68;
+
+constexpr int MAXPACKETSIZE = 8 * 1024;
+// FrameworkListener limits the size of commands to 1024 bytes. TODO: fix this.
+constexpr int MAXCMDSIZE = 1024;
+
+static void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
+    ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
+    if (detailMessage.get() == NULL) {
+        // Not really much we can do here. We're probably dead in the water,
+        // but let's try to stumble on...
+        env->ExceptionClear();
+    }
+    static jclass errnoExceptionClass =
+            MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/system/ErrnoException"));
+
+    static jmethodID errnoExceptionCtor =
+            GetMethodIDOrDie(env, errnoExceptionClass,
+            "<init>", "(Ljava/lang/String;I)V");
+
+    jobject exception = env->NewObject(errnoExceptionClass,
+                                       errnoExceptionCtor,
+                                       detailMessage.get(),
+                                       error);
+    env->Throw(reinterpret_cast<jthrowable>(exception));
+}
 
 static void android_net_utils_attachDhcpFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
@@ -372,6 +400,63 @@ static void android_net_utils_addArpEntry(JNIEnv *env, jobject thiz, jbyteArray 
     }
 }
 
+static jobject android_net_utils_resNetworkQuery(JNIEnv *env, jobject thiz, jint netId,
+        jstring dname, jint ns_class, jint ns_type, jint flags) {
+    const jsize javaCharsCount = env->GetStringLength(dname);
+    const jsize byteCountUTF8 = env->GetStringUTFLength(dname);
+
+    // Only allow dname which could be simply formatted to UTF8.
+    // In native layer, res_mkquery would re-format the input char array to packet.
+    std::vector<char> queryname(byteCountUTF8 + 1, 0);
+
+    env->GetStringUTFRegion(dname, 0, javaCharsCount, queryname.data());
+    int fd = resNetworkQuery(netId, queryname.data(), ns_class, ns_type, flags);
+
+    if (fd < 0) {
+        throwErrnoException(env, "resNetworkQuery", -fd);
+        return nullptr;
+    }
+
+    return jniCreateFileDescriptor(env, fd);
+}
+
+static jobject android_net_utils_resNetworkSend(JNIEnv *env, jobject thiz, jint netId,
+        jbyteArray msg, jint msgLen, jint flags) {
+    uint8_t data[MAXCMDSIZE];
+
+    checkLenAndCopy(env, msg, msgLen, data);
+    int fd = resNetworkSend(netId, data, msgLen, flags);
+
+    if (fd < 0) {
+        throwErrnoException(env, "resNetworkSend", -fd);
+        return nullptr;
+    }
+
+    return jniCreateFileDescriptor(env, fd);
+}
+
+static jbyteArray android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, jobject javaFd) {
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    int rcode;
+    std::vector<uint8_t> buf(MAXPACKETSIZE, 0);
+
+    int res = resNetworkResult(fd, &rcode, buf.data(), MAXPACKETSIZE);
+    if (res < 0) {
+        throwErrnoException(env, "resNetworkResult", -res);
+        return nullptr;
+    }
+
+    jbyteArray answer = env->NewByteArray(res);
+    if (answer == nullptr) {
+        throwErrnoException(env, "resNetworkResult", ENOMEM);
+        return nullptr;
+    } else {
+        env->SetByteArrayRegion(answer, 0, res,
+                reinterpret_cast<jbyte*>(buf.data()));
+    }
+
+    return answer;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -391,6 +476,9 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "attachRaFilter", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_attachRaFilter },
     { "attachControlPacketFilter", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_attachControlPacketFilter },
     { "setupRaSocket", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_setupRaSocket },
+    { "resNetworkSend", "(I[BII)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkSend },
+    { "resNetworkQuery", "(ILjava/lang/String;III)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkQuery },
+    { "resNetworkResult", "(Ljava/io/FileDescriptor;)[B", (void*) android_net_utils_resNetworkResult },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)

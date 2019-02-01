@@ -25,12 +25,6 @@ import com.android.internal.annotations.VisibleForTesting;
  * Updates a package to ensure that if it targets < P that the org.apache.http.legacy library is
  * included by default.
  *
- * <p>This is separated out so that it can be conditionally included at build time depending on
- * whether org.apache.http.legacy is on the bootclasspath or not. In order to include this at
- * build time, and remove org.apache.http.legacy from the bootclasspath pass
- * REMOVE_OAHL_FROM_BCP=true on the build command line, otherwise this class will not be included
- * and the
- *
  * @hide
  */
 @VisibleForTesting

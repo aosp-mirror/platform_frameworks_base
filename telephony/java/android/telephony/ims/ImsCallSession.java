@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.CallQuality;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.util.Log;
 
@@ -448,6 +449,13 @@ public class ImsCallSession {
          * While in call, there has been a change in RTT audio indicator.
          */
         public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
+            // no-op
+        }
+
+        /**
+         * Called when the IMS service reports a change to the call quality.
+         */
+        public void callQualityChanged(CallQuality callQuality) {
             // no-op
         }
     }
@@ -1412,6 +1420,16 @@ public class ImsCallSession {
         public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
             if (mListener != null) {
                 mListener.callSessionRttAudioIndicatorChanged(profile);
+            }
+        }
+
+        /**
+         * Call quality updated
+         */
+        @Override
+        public void callQualityChanged(CallQuality callQuality) {
+            if (mListener != null) {
+                mListener.callQualityChanged(callQuality);
             }
         }
     }

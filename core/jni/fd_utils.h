@@ -30,6 +30,9 @@
 
 class FileDescriptorInfo;
 
+// This type is duplicated in com_android_internal_os_Zygote.cpp
+typedef const std::function<void(std::string)>& fail_fn_t;
+
 // Whitelist of open paths that the zygote is allowed to keep open.
 //
 // In addition to the paths listed in kPathWhitelist in file_utils.cpp, and
@@ -76,19 +79,19 @@ class FileDescriptorTable {
   // /proc/self/fd for the list of open file descriptors and collects
   // information about them. Returns NULL if an error occurs.
   static FileDescriptorTable* Create(const std::vector<int>& fds_to_ignore,
-                                     std::string* error_msg);
+                                     fail_fn_t fail_fn);
 
-  bool Restat(const std::vector<int>& fds_to_ignore, std::string* error_msg);
+  void Restat(const std::vector<int>& fds_to_ignore, fail_fn_t fail_fn);
 
   // Reopens all file descriptors that are contained in the table. Returns true
   // if all descriptors were successfully re-opened or detached, and false if an
   // error occurred.
-  bool ReopenOrDetach(std::string* error_msg);
+  void ReopenOrDetach(fail_fn_t fail_fn);
 
  private:
   explicit FileDescriptorTable(const std::unordered_map<int, FileDescriptorInfo*>& map);
 
-  bool RestatInternal(std::set<int>& open_fds, std::string* error_msg);
+  void RestatInternal(std::set<int>& open_fds, fail_fn_t fail_fn);
 
   static int ParseFd(dirent* e, int dir_fd);
 

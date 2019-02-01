@@ -93,6 +93,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
@@ -226,10 +227,9 @@ public class TelephonyManager {
     public static final int SRVCC_STATE_HANDOVER_CANCELED  = 3;
 
     /**
-     * An invalid card identifier.
-     * @hide
+     * An invalid UICC card identifier. See {@link #getCardIdForDefaultEuicc()} and
+     * {@link UiccCardInfo#getCardId()}.
      */
-    @SystemApi
     public static final int INVALID_CARD_ID = -1;
 
     /** @hide */
@@ -349,41 +349,30 @@ public class TelephonyManager {
      * Returns 0 if none of voice, sms, data is not supported
      * Returns 1 for Single standby mode (Single SIM functionality)
      * Returns 2 for Dual standby mode.(Dual SIM functionality)
+     * Returns 3 for Tri standby mode.(Tri SIM functionality)
      */
     public int getPhoneCount() {
-        int phoneCount = 1;
-        switch (getMultiSimConfiguration()) {
-            case UNKNOWN:
-                // if voice or sms or data is supported, return 1 otherwise 0
-                if (isVoiceCapable() || isSmsCapable()) {
-                    phoneCount = 1;
-                } else {
-                    // todo: try to clean this up further by getting rid of the nested conditions
-                    if (mContext == null) {
-                        phoneCount = 1;
-                    } else {
-                        // check for data support
-                        ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
-                                Context.CONNECTIVITY_SERVICE);
-                        if (cm == null) {
-                            phoneCount = 1;
-                        } else {
-                            if (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                                phoneCount = 1;
-                            } else {
-                                phoneCount = 0;
-                            }
-                        }
-                    }
+        int phoneCount = 0;
+
+        // check for voice and data support, 0 if not supported
+        if (!isVoiceCapable() && !isSmsCapable()) {
+            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                if (!cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
+                    return phoneCount;
                 }
-                break;
-            case DSDS:
-            case DSDA:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
-                break;
-            case TSTS:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_TRI_SIM;
-                break;
+            }
+        }
+
+        phoneCount = 1;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                phoneCount = telephony.getNumOfActiveSims();
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getNumOfActiveSims RemoteException", ex);
         }
         return phoneCount;
     }
@@ -835,6 +824,7 @@ public class TelephonyManager {
      * @see TelephonyManager#NETWORK_TYPE_LTE
      * @see TelephonyManager#NETWORK_TYPE_EHRPD
      * @see TelephonyManager#NETWORK_TYPE_HSPAP
+     * @see TelephonyManager#NETWORK_TYPE_NR
      *
      * <p class="note">
      * Retrieve with
@@ -2306,6 +2296,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_LTE
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
+     * @see #NETWORK_TYPE_NR
      *
      * @hide
      */
@@ -2357,6 +2348,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_LTE
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
+     * @see #NETWORK_TYPE_NR
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
@@ -2543,6 +2535,8 @@ public class TelephonyManager {
                 return "IWLAN";
             case NETWORK_TYPE_LTE_CA:
                 return "LTE_CA";
+            case NETWORK_TYPE_NR:
+                return "NR";
             default:
                 return "UNKNOWN";
         }
@@ -3112,14 +3106,8 @@ public class TelephonyManager {
      * unique to a device, and always refer to the same UICC or eUICC card unless the device goes
      * through a factory reset.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     *
      * @return card ID of the default eUICC card.
-     * @hide
      */
-    @SystemApi
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getCardIdForDefaultEuicc() {
         try {
             ITelephony telephony = getITelephony();
@@ -3133,25 +3121,37 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets information about currently inserted UICCs and eUICCs. See {@link UiccCardInfo} for more
-     * details on the kind of information available.
+     * Gets information about currently inserted UICCs and enabled eUICCs.
+     * <p>
+     * Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * If the caller has carrier priviliges on any active subscription, then they have permission to
+     * get simple information like the card ID ({@link UiccCardInfo#getCardId()}), whether the card
+     * is an eUICC ({@link UiccCardInfo#isEuicc()}), and the slot index where the card is inserted
+     * ({@link UiccCardInfo#getSlotIndex()}).
+     * <p>
+     * To get private information such as the EID ({@link UiccCardInfo#getEid()}) or ICCID
+     * ({@link UiccCardInfo#getIccId()}), the caller must have carrier priviliges on that specific
+     * UICC or eUICC card.
+     * <p>
+     * See {@link UiccCardInfo} for more details on the kind of information available.
      *
-     * @return UiccCardInfo an array of UiccCardInfo objects, representing information on the
-     * currently inserted UICCs and eUICCs.
-     *
-     * @hide
+     * @return a list of UiccCardInfo objects, representing information on the currently inserted
+     * UICCs and eUICCs. Each UiccCardInfo in the list will have private information filtered out if
+     * the caller does not have adequate permissions for that card.
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public UiccCardInfo[] getUiccCardsInfo() {
+    public List<UiccCardInfo> getUiccCardsInfo() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null) {
-                return null;
+                Log.e(TAG, "Error in getUiccCardsInfo: unable to connect to Telephony service.");
+                return new ArrayList<UiccCardInfo>();
             }
-            return telephony.getUiccCardsInfo();
+            return telephony.getUiccCardsInfo(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            return null;
+            Log.e(TAG, "Error in getUiccCardsInfo: " + e);
+            return new ArrayList<UiccCardInfo>();
         }
     }
 
@@ -5877,9 +5877,14 @@ public class TelephonyManager {
 
     /**
      * Returns the IMS Service Table (IST) that was loaded from the ISIM.
+     *
+     * See 3GPP TS 31.103 (Section 4.2.7) for the definition and more information on this table.
+     *
      * @return IMS Service Table or null if not present or not loaded
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimIst() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -6729,8 +6734,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getCarrierPrivilegeStatus(subId) ==
-                    CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+                return telephony.getCarrierPrivilegeStatus(subId)
+                        == CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasCarrierPrivileges RemoteException", ex);
@@ -8430,17 +8435,46 @@ public class TelephonyManager {
     }
 
 
-    /** @hide */
-    public String getLocaleFromDefaultSim() {
+    /**
+     * Returns a well-formed IETF BCP 47 language tag representing the locale from the SIM, e.g,
+     * en-US. Returns {@code null} if no locale could be derived from subscriptions.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @see Locale#toLanguageTag()
+     * @see Locale#forLanguageTag(String)
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable public String getSimLocale() {
         try {
             final ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getLocaleFromDefaultSim();
+                return telephony.getSimLocaleForSubscriber(getSubId());
             }
         } catch (RemoteException ex) {
         }
         return null;
     }
+
+    /**
+     * TODO delete after SuW migrates to new API.
+     * @hide
+     */
+    public String getLocaleFromDefaultSim() {
+        try {
+            final ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getSimLocaleForSubscriber(getSubId());
+            }
+        } catch (RemoteException ex) {
+        }
+        return null;
+    }
+
 
     /**
      * Requests the modem activity info. The recipient will place the result
@@ -8900,6 +8934,8 @@ public class TelephonyManager {
      * <p>This method works only on devices with {@link
      * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
      *
+     * @deprecated use setCarrierRestrictionRules instead
+     *
      * @return The number of carriers set successfully. Should be length of
      * carrierList on success; -1 if carrierList null or on error.
      * @hide
@@ -8907,44 +8943,149 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
+        if (carriers == null || !SubscriptionManager.isValidPhoneId(slotIndex)) {
+            return -1;
+        }
+        // Execute the method setCarrierRestrictionRules with an empty excluded list and
+        // indicating priority for the allowed list.
+        CarrierRestrictionRules carrierRestrictionRules = CarrierRestrictionRules.newBuilder()
+                .setAllowedCarriers(carriers)
+                .setDefaultCarrierRestriction(
+                    CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED)
+                .build();
+
+        int result = setCarrierRestrictionRules(carrierRestrictionRules);
+
+        // Convert result into int, as required by this method.
+        if (result == SET_CARRIER_RESTRICTION_SUCCESS) {
+            return carriers.size();
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * The carrier restrictions were successfully set.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_CARRIER_RESTRICTION_SUCCESS = 0;
+
+    /**
+     * The carrier restrictions were not set due to lack of support in the modem. This can happen
+     * if the modem does not support setting the carrier restrictions or if the configuration
+     * passed in the {@code setCarrierRestrictionRules} is not supported by the modem.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_CARRIER_RESTRICTION_NOT_SUPPORTED = 1;
+
+    /**
+     * The setting of carrier restrictions failed.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_CARRIER_RESTRICTION_ERROR = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SET_CARRIER_RESTRICTION_"},
+            value = {
+                    SET_CARRIER_RESTRICTION_SUCCESS,
+                    SET_CARRIER_RESTRICTION_NOT_SUPPORTED,
+                    SET_CARRIER_RESTRICTION_ERROR
+            })
+    public @interface SetCarrierRestrictionResult {}
+
+    /**
+     * Set the allowed carrier list and the excluded carrier list indicating the priority between
+     * the two lists.
+     * Requires system privileges.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     *
+     * <p>This method works only on devices with {@link
+     * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
+     *
+     * @return {@link #SET_CARRIER_RESTRICTION_SUCCESS} in case of success.
+     * {@link #SET_CARRIER_RESTRICTION_NOT_SUPPORTED} if the modem does not support the
+     * configuration. {@link #SET_CARRIER_RESTRICTION_ERROR} in all other error cases.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SetCarrierRestrictionResult
+    public int setCarrierRestrictionRules(@NonNull CarrierRestrictionRules rules) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.setAllowedCarriers(slotIndex, carriers);
+                return service.setAllowedCarriers(rules);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setAllowedCarriers", e);
         } catch (NullPointerException e) {
             Log.e(TAG, "Error calling ITelephony#setAllowedCarriers", e);
         }
-        return -1;
+        return SET_CARRIER_RESTRICTION_ERROR;
     }
 
     /**
      * Get the allowed carrier list for slotIndex.
-     * Require system privileges. In the future we may add this to carrier APIs.
+     * Requires system privileges.
      *
      * <p>This method returns valid data on devices with {@link
      * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
+     *
+     * @deprecated Apps should use {@link getCarriersRestrictionRules} to retrieve the list of
+     * allowed and excliuded carriers, as the result of this API is valid only when the excluded
+     * list is empty. This API could return an empty list, even if some restrictions are present.
      *
      * @return List of {@link android.telephony.CarrierIdentifier}; empty list
      * means all carriers are allowed.
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<CarrierIdentifier> getAllowedCarriers(int slotIndex) {
+        if (SubscriptionManager.isValidPhoneId(slotIndex)) {
+            CarrierRestrictionRules carrierRestrictionRule = getCarrierRestrictionRules();
+            if (carrierRestrictionRule != null) {
+                return carrierRestrictionRule.getAllowedCarriers();
+            }
+        }
+        return new ArrayList<CarrierIdentifier>(0);
+    }
+
+    /**
+     * Get the allowed carrier list and the excluded carrier list indicating the priority between
+     * the two lists.
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * <p>This method returns valid data on devices with {@link
+     * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
+     *
+     * @return {@link CarrierRestrictionRules} which contains the allowed carrier list and the
+     * excluded carrier list with the priority between the two lists. Returns {@code null}
+     * in case of error.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
+    public CarrierRestrictionRules getCarrierRestrictionRules() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getAllowedCarriers(slotIndex);
+                return service.getAllowedCarriers();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
         } catch (NullPointerException e) {
             Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
         }
-        return new ArrayList<CarrierIdentifier>(0);
+        return null;
     }
 
     /**
@@ -9791,7 +9932,7 @@ public class TelephonyManager {
         boolean ret = false;
         try {
             IOns iOpportunisticNetworkService = getIOns();
-            if (iOpportunisticNetworkService != null) {
+            if (iOpportunisticNetworkService != null && availableNetworks != null) {
                 ret = iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks,
                         pkgForDebug);
             }
@@ -9799,5 +9940,150 @@ public class TelephonyManager {
             Rlog.e(TAG, "updateAvailableNetworks RemoteException", ex);
         }
         return ret;
+    }
+
+    /**
+     * Enable or disable a logical modem stack. When a logical modem is disabled, the corresponding
+     * SIM will still be visible to the user but its mapping modem will not have any radio activity.
+     * For example, we will disable a modem when user or system believes the corresponding SIM
+     * is temporarily not needed (e.g. out of coverage), and will enable it back on when needed.
+     *
+     * Requires that the calling app has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     * @param slotIndex which corresponding modem will operate on.
+     * @param enable whether to enable or disable the modem stack.
+     * @return whether the operation is successful.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean enableModemForSlot(int slotIndex, boolean enable) {
+        boolean ret = false;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ret = telephony.enableModemForSlot(slotIndex, enable);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "enableModem RemoteException", ex);
+        }
+        return ret;
+    }
+
+    /**
+     * Indicate if the user is allowed to use multiple SIM cards at the same time to register
+     * on the network (e.g. Dual Standby or Dual Active) when the device supports it, or if the
+     * usage is restricted. This API is used to prevent usage of multiple SIM card, based on
+     * policies of the carrier.
+     * <p>Note: the API does not prevent access to the SIM cards for operations that don't require
+     * access to the network.
+     *
+     * @param isMultisimCarrierRestricted true if usage of multiple SIMs is restricted, false
+     * otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.setMultisimCarrierRestriction(isMultisimCarrierRestricted);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "setMultisimCarrierRestriction RemoteException", e);
+        }
+    }
+
+    /**
+     * Returns if the usage of multiple SIM cards at the same time to register on the network
+     * (e.g. Dual Standby or Dual Active) is restricted.
+     *
+     * @return true if usage of multiple SIMs is restricted, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isMultisimCarrierRestricted() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isMultisimCarrierRestricted();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "isMultisimCarrierRestricted RemoteException", e);
+        }
+        return true;
+    }
+
+    /**
+     * Broadcast intent action for network country code changes.
+     *
+     * <p>
+     * The {@link #EXTRA_NETWORK_COUNTRY} extra indicates the country code of the current
+     * network returned by {@link #getNetworkCountryIso()}.
+     *
+     * @see #EXTRA_NETWORK_COUNTRY
+     * @see #getNetworkCountryIso()
+     */
+    public static final String ACTION_NETWORK_COUNTRY_CHANGED =
+            "android.telephony.action.NETWORK_COUNTRY_CHANGED";
+
+    /**
+     * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
+     * the country code in ISO 3166 format.
+     * <p class="note">
+     * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     */
+    public static final String EXTRA_NETWORK_COUNTRY =
+            "android.telephony.extra.NETWORK_COUNTRY";
+    /**
+     * Switch configs to enable multi-sim or switch back to single-sim
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * @param numOfSims number of live SIMs we want to switch to
+     * @throws android.os.RemoteException
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void switchMultiSimConfig(int numOfSims) {
+        //only proceed if multi-sim is not restricted
+        if (isMultisimCarrierRestricted()) {
+            Rlog.e(TAG, "switchMultiSimConfig not possible. It is restricted.");
+            return;
+        }
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.switchMultiSimConfig(numOfSims);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "switchMultiSimConfig RemoteException", ex);
+        }
+    }
+
+    /**
+     * Get whether reboot is required or not after making changes to modem configurations.
+     * @Return {@code True} if reboot is required after making changes to modem configurations,
+     * otherwise return {@code False}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isRebootRequiredForModemConfigChange() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isRebootRequiredForModemConfigChange();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "isRebootRequiredForModemConfigChange RemoteException", e);
+        }
+        return false;
     }
 }

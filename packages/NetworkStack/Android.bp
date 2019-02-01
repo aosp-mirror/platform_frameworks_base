@@ -18,24 +18,28 @@
 // system server on devices that run the stack there
 java_library {
     name: "NetworkStackLib",
+    sdk_version: "system_current",
     installable: true,
     srcs: [
         "src/**/*.java",
+        ":framework-networkstack-shared-srcs",
         ":services-networkstack-shared-srcs",
     ],
     static_libs: [
-        "dhcp-packet-lib",
+        "netd_aidl_interface-java",
+        "networkstack-aidl-interfaces-java",
     ]
 }
 
 // Updatable network stack packaged as an application
 android_app {
     name: "NetworkStack",
-    platform_apis: true,
+    sdk_version: "system_current",
     certificate: "platform",
     privileged: true,
     static_libs: [
         "NetworkStackLib"
     ],
     manifest: "AndroidManifest.xml",
+    required: ["NetworkStackPermissionStub"],
 }

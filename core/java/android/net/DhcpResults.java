@@ -17,22 +17,38 @@
 package android.net;
 
 import android.annotation.UnsupportedAppUsage;
-import android.net.NetworkUtils;
+import android.net.shared.InetAddressUtils;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
 import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * A simple object for retrieving the results of a DHCP request.
  * Optimized (attempted) for that jni interface
- * TODO - remove when DhcpInfo is deprecated.  Move the remaining api to LinkProperties.
+ * TODO: remove this class and replace with other existing constructs
  * @hide
  */
-public class DhcpResults extends StaticIpConfiguration {
+public final class DhcpResults implements Parcelable {
     private static final String TAG = "DhcpResults";
+
+    @UnsupportedAppUsage
+    public LinkAddress ipAddress;
+
+    @UnsupportedAppUsage
+    public InetAddress gateway;
+
+    @UnsupportedAppUsage
+    public final ArrayList<InetAddress> dnsServers = new ArrayList<>();
+
+    @UnsupportedAppUsage
+    public String domains;
 
     @UnsupportedAppUsage
     public Inet4Address serverAddress;
@@ -48,28 +64,51 @@ public class DhcpResults extends StaticIpConfiguration {
     @UnsupportedAppUsage
     public int mtu;
 
-    @UnsupportedAppUsage
     public DhcpResults() {
         super();
     }
 
-    @UnsupportedAppUsage
+    /**
+     * Create a {@link StaticIpConfiguration} based on the DhcpResults.
+     */
+    public StaticIpConfiguration toStaticIpConfiguration() {
+        final StaticIpConfiguration s = new StaticIpConfiguration();
+        // All these except dnsServers are immutable, so no need to make copies.
+        s.setIpAddress(ipAddress);
+        s.setGateway(gateway);
+        for (InetAddress addr : dnsServers) {
+            s.addDnsServer(addr);
+        }
+        s.setDomains(domains);
+        return s;
+    }
+
     public DhcpResults(StaticIpConfiguration source) {
-        super(source);
+        if (source != null) {
+            ipAddress = source.getIpAddress();
+            gateway = source.getGateway();
+            dnsServers.addAll(source.getDnsServers());
+            domains = source.getDomains();
+        }
     }
 
     /** copy constructor */
-    @UnsupportedAppUsage
     public DhcpResults(DhcpResults source) {
-        super(source);
-
+        this(source == null ? null : source.toStaticIpConfiguration());
         if (source != null) {
-            // All these are immutable, so no need to make copies.
             serverAddress = source.serverAddress;
             vendorInfo = source.vendorInfo;
             leaseDuration = source.leaseDuration;
             mtu = source.mtu;
         }
+    }
+
+    /**
+     * @see StaticIpConfiguration#getRoutes(String)
+     * @hide
+     */
+    public List<RouteInfo> getRoutes(String iface) {
+        return toStaticIpConfiguration().getRoutes(iface);
     }
 
     /**
@@ -85,7 +124,11 @@ public class DhcpResults extends StaticIpConfiguration {
     }
 
     public void clear() {
-        super.clear();
+        ipAddress = null;
+        gateway = null;
+        dnsServers.clear();
+        domains = null;
+        serverAddress = null;
         vendorInfo = null;
         leaseDuration = 0;
         mtu = 0;
@@ -111,20 +154,20 @@ public class DhcpResults extends StaticIpConfiguration {
 
         DhcpResults target = (DhcpResults)obj;
 
-        return super.equals((StaticIpConfiguration) obj) &&
-                Objects.equals(serverAddress, target.serverAddress) &&
-                Objects.equals(vendorInfo, target.vendorInfo) &&
-                leaseDuration == target.leaseDuration &&
-                mtu == target.mtu;
+        return toStaticIpConfiguration().equals(target.toStaticIpConfiguration())
+                && Objects.equals(serverAddress, target.serverAddress)
+                && Objects.equals(vendorInfo, target.vendorInfo)
+                && leaseDuration == target.leaseDuration
+                && mtu == target.mtu;
     }
 
-    /** Implement the Parcelable interface */
+    /**
+     * Implement the Parcelable interface
+     */
     public static final Creator<DhcpResults> CREATOR =
         new Creator<DhcpResults>() {
             public DhcpResults createFromParcel(Parcel in) {
-                DhcpResults dhcpResults = new DhcpResults();
-                readFromParcel(dhcpResults, in);
-                return dhcpResults;
+                return readFromParcel(in);
             }
 
             public DhcpResults[] newArray(int size) {
@@ -134,26 +177,33 @@ public class DhcpResults extends StaticIpConfiguration {
 
     /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        toStaticIpConfiguration().writeToParcel(dest, flags);
         dest.writeInt(leaseDuration);
         dest.writeInt(mtu);
-        NetworkUtils.parcelInetAddress(dest, serverAddress, flags);
+        InetAddressUtils.parcelInetAddress(dest, serverAddress, flags);
         dest.writeString(vendorInfo);
     }
 
-    private static void readFromParcel(DhcpResults dhcpResults, Parcel in) {
-        StaticIpConfiguration.readFromParcel(dhcpResults, in);
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    private static DhcpResults readFromParcel(Parcel in) {
+        final StaticIpConfiguration s = StaticIpConfiguration.CREATOR.createFromParcel(in);
+        final DhcpResults dhcpResults = new DhcpResults(s);
         dhcpResults.leaseDuration = in.readInt();
         dhcpResults.mtu = in.readInt();
-        dhcpResults.serverAddress = (Inet4Address) NetworkUtils.unparcelInetAddress(in);
+        dhcpResults.serverAddress = (Inet4Address) InetAddressUtils.unparcelInetAddress(in);
         dhcpResults.vendorInfo = in.readString();
+        return dhcpResults;
     }
 
     // Utils for jni population - false on success
     // Not part of the superclass because they're only used by the JNI iterface to the DHCP daemon.
     public boolean setIpAddress(String addrString, int prefixLength) {
         try {
-            Inet4Address addr = (Inet4Address) NetworkUtils.numericToInetAddress(addrString);
+            Inet4Address addr = (Inet4Address) InetAddresses.parseNumericAddress(addrString);
             ipAddress = new LinkAddress(addr, prefixLength);
         } catch (IllegalArgumentException|ClassCastException e) {
             Log.e(TAG, "setIpAddress failed with addrString " + addrString + "/" + prefixLength);
@@ -164,7 +214,7 @@ public class DhcpResults extends StaticIpConfiguration {
 
     public boolean setGateway(String addrString) {
         try {
-            gateway = NetworkUtils.numericToInetAddress(addrString);
+            gateway = InetAddresses.parseNumericAddress(addrString);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "setGateway failed with addrString " + addrString);
             return true;
@@ -175,7 +225,7 @@ public class DhcpResults extends StaticIpConfiguration {
     public boolean addDns(String addrString) {
         if (TextUtils.isEmpty(addrString) == false) {
             try {
-                dnsServers.add(NetworkUtils.numericToInetAddress(addrString));
+                dnsServers.add(InetAddresses.parseNumericAddress(addrString));
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "addDns failed with addrString " + addrString);
                 return true;
@@ -184,25 +234,70 @@ public class DhcpResults extends StaticIpConfiguration {
         return false;
     }
 
-    public boolean setServerAddress(String addrString) {
-        try {
-            serverAddress = (Inet4Address) NetworkUtils.numericToInetAddress(addrString);
-        } catch (IllegalArgumentException|ClassCastException e) {
-            Log.e(TAG, "setServerAddress failed with addrString " + addrString);
-            return true;
-        }
-        return false;
+    public LinkAddress getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(LinkAddress ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public InetAddress getGateway() {
+        return gateway;
+    }
+
+    public void setGateway(InetAddress gateway) {
+        this.gateway = gateway;
+    }
+
+    public List<InetAddress> getDnsServers() {
+        return dnsServers;
+    }
+
+    /**
+     * Add a DNS server to this configuration.
+     */
+    public void addDnsServer(InetAddress server) {
+        dnsServers.add(server);
+    }
+
+    public String getDomains() {
+        return domains;
+    }
+
+    public void setDomains(String domains) {
+        this.domains = domains;
+    }
+
+    public Inet4Address getServerAddress() {
+        return serverAddress;
+    }
+
+    public void setServerAddress(Inet4Address addr) {
+        serverAddress = addr;
+    }
+
+    public int getLeaseDuration() {
+        return leaseDuration;
     }
 
     public void setLeaseDuration(int duration) {
         leaseDuration = duration;
     }
 
+    public String getVendorInfo() {
+        return vendorInfo;
+    }
+
     public void setVendorInfo(String info) {
         vendorInfo = info;
     }
 
-    public void setDomains(String newDomains) {
-        domains = newDomains;
+    public int getMtu() {
+        return mtu;
+    }
+
+    public void setMtu(int mtu) {
+        this.mtu = mtu;
     }
 }

@@ -16,7 +16,8 @@
 
 package android.net.metrics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -28,7 +29,9 @@ import com.android.internal.util.MessageUtils;
  * a neighbor probe result.
  * {@hide}
  */
-public final class IpReachabilityEvent implements Parcelable {
+@SystemApi
+@TestApi
+public final class IpReachabilityEvent implements IpConnectivityLog.Event {
 
     // Event types.
     /** A probe forced by IpReachabilityMonitor. */
@@ -47,9 +50,9 @@ public final class IpReachabilityEvent implements Parcelable {
     // byte 1: unused
     // byte 2: type of event: PROBE, NUD_FAILED, PROVISIONING_LOST
     // byte 3: when byte 2 == PROBE, errno code from RTNetlink or IpReachabilityMonitor.
+    /** @hide */
     public final int eventType;
 
-    @UnsupportedAppUsage
     public IpReachabilityEvent(int eventType) {
         this.eventType = eventType;
     }
@@ -58,16 +61,19 @@ public final class IpReachabilityEvent implements Parcelable {
         this.eventType = in.readInt();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(eventType);
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /** @hide */
     public static final Parcelable.Creator<IpReachabilityEvent> CREATOR
         = new Parcelable.Creator<IpReachabilityEvent>() {
         public IpReachabilityEvent createFromParcel(Parcel in) {
@@ -78,18 +84,6 @@ public final class IpReachabilityEvent implements Parcelable {
             return new IpReachabilityEvent[size];
         }
     };
-
-    /**
-     * Returns the NUD failure event type code corresponding to the given conditions.
-     */
-    @UnsupportedAppUsage
-    public static int nudFailureEventType(boolean isFromProbe, boolean isProvisioningLost) {
-        if (isFromProbe) {
-            return isProvisioningLost ? PROVISIONING_LOST : NUD_FAILED;
-        } else {
-            return isProvisioningLost ? PROVISIONING_LOST_ORGANIC : NUD_FAILED_ORGANIC;
-        }
-    }
 
     @Override
     public String toString() {

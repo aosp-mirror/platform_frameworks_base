@@ -19,6 +19,7 @@ package com.android.server.util;
 import static android.os.Binder.getCallingUid;
 
 import android.os.Process;
+import android.os.UserHandle;
 
 /**
  * Utility class to check calling permissions on the network stack.
@@ -31,8 +32,21 @@ public final class PermissionUtil {
      */
     public static void checkNetworkStackCallingPermission() {
         // TODO: check that the calling PID is the system server.
-        if (getCallingUid() != Process.SYSTEM_UID && getCallingUid() != Process.ROOT_UID) {
-            throw new SecurityException("Invalid caller: " + getCallingUid());
+        final int caller = getCallingUid();
+        if (caller != Process.SYSTEM_UID && UserHandle.getAppId(caller) != Process.BLUETOOTH_UID) {
+            throw new SecurityException("Invalid caller: " + caller);
+        }
+    }
+
+    /**
+     * Check that the caller is allowed to dump the network stack, e.g. dumpsys.
+     * @throws SecurityException The caller is not allowed to dump the network stack.
+     */
+    public static void checkDumpPermission() {
+        final int caller = getCallingUid();
+        if (caller != Process.SYSTEM_UID && caller != Process.ROOT_UID
+                && caller != Process.SHELL_UID) {
+            throw new SecurityException("No dump permissions for caller: " + caller);
         }
     }
 

@@ -16,8 +16,8 @@
 
 package android.net.dhcp;
 
-import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
-import static android.net.NetworkUtils.intToInet4AddressHTH;
+import static android.net.shared.Inet4AddressUtils.getPrefixMaskAsInet4Address;
+import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 
 import static com.android.server.util.NetworkStackConstants.INFINITE_LEASE;
 import static com.android.server.util.NetworkStackConstants.IPV4_MAX_MTU;
@@ -29,11 +29,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
-import android.net.NetworkUtils;
-
-import com.google.android.collect.Sets;
+import android.net.shared.Inet4AddressUtils;
+import android.util.ArraySet;
 
 import java.net.Inet4Address;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -164,7 +164,8 @@ public class DhcpServingParams {
      */
     @NonNull
     public Inet4Address getBroadcastAddress() {
-        return NetworkUtils.getBroadcastAddress(getServerInet4Addr(), serverAddr.getPrefixLength());
+        return Inet4AddressUtils.getBroadcastAddress(
+                getServerInet4Addr(), serverAddr.getPrefixLength());
     }
 
     /**
@@ -208,7 +209,7 @@ public class DhcpServingParams {
          * but it must always be set explicitly before building the {@link DhcpServingParams}.
          */
         public Builder setDefaultRouters(@NonNull Inet4Address... defaultRouters) {
-            return setDefaultRouters(Sets.newArraySet(defaultRouters));
+            return setDefaultRouters(makeArraySet(defaultRouters));
         }
 
         /**
@@ -238,7 +239,7 @@ public class DhcpServingParams {
          * building the {@link DhcpServingParams}.
          */
         public Builder setDnsServers(@NonNull Inet4Address... dnsServers) {
-            return setDnsServers(Sets.newArraySet(dnsServers));
+            return setDnsServers(makeArraySet(dnsServers));
         }
 
         /**
@@ -268,7 +269,7 @@ public class DhcpServingParams {
          * and do not need to be set here.
          */
         public Builder setExcludedAddrs(@NonNull Inet4Address... excludedAddrs) {
-            return setExcludedAddrs(Sets.newArraySet(excludedAddrs));
+            return setExcludedAddrs(makeArraySet(excludedAddrs));
         }
 
         /**
@@ -366,5 +367,11 @@ public class DhcpServingParams {
     @NonNull
     static IpPrefix makeIpPrefix(@NonNull LinkAddress addr) {
         return new IpPrefix(addr.getAddress(), addr.getPrefixLength());
+    }
+
+    private static <T> ArraySet<T> makeArraySet(T[] elements) {
+        final ArraySet<T> set = new ArraySet<>(elements.length);
+        set.addAll(Arrays.asList(elements));
+        return set;
     }
 }

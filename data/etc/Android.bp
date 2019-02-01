@@ -39,9 +39,6 @@ prebuilt_etc {
     name: "privapp-permissions-platform.xml",
     sub_dir: "permissions",
     src: "privapp-permissions-platform.xml",
-    required: [
-        "privapp_whitelist_com.android.settings.intelligence",
-    ],
 }
 
 prebuilt_etc {
@@ -86,6 +83,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.settings.intelligence",
+    product_specific: true,
     sub_dir: "permissions",
     src: "com.android.settings.intelligence.xml",
     filename_from_src: true,

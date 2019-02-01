@@ -1,12 +1,13 @@
+// Signature format: 2.0
 package com.android.future.usb {
 
   public class UsbAccessory {
-    method public java.lang.String getDescription();
-    method public java.lang.String getManufacturer();
-    method public java.lang.String getModel();
-    method public java.lang.String getSerial();
-    method public java.lang.String getUri();
-    method public java.lang.String getVersion();
+    method public String getDescription();
+    method public String getManufacturer();
+    method public String getModel();
+    method public String getSerial();
+    method public String getUri();
+    method public String getVersion();
   }
 
   public class UsbManager {
@@ -16,9 +17,9 @@ package com.android.future.usb {
     method public boolean hasPermission(com.android.future.usb.UsbAccessory);
     method public android.os.ParcelFileDescriptor openAccessory(com.android.future.usb.UsbAccessory);
     method public void requestPermission(com.android.future.usb.UsbAccessory, android.app.PendingIntent);
-    field public static final java.lang.String ACTION_USB_ACCESSORY_ATTACHED = "android.hardware.usb.action.USB_ACCESSORY_ATTACHED";
-    field public static final java.lang.String ACTION_USB_ACCESSORY_DETACHED = "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
-    field public static final java.lang.String EXTRA_PERMISSION_GRANTED = "permission";
+    field public static final String ACTION_USB_ACCESSORY_ATTACHED = "android.hardware.usb.action.USB_ACCESSORY_ATTACHED";
+    field public static final String ACTION_USB_ACCESSORY_DETACHED = "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
+    field public static final String EXTRA_PERMISSION_GRANTED = "permission";
   }
 
 }

@@ -66,7 +66,8 @@ public class DctConstants {
     public static final int EVENT_DATA_CONNECTION_DETACHED = BASE + 9;
     public static final int EVENT_ROAMING_ON = BASE + 11;
     public static final int EVENT_ROAMING_OFF = BASE + 12;
-    public static final int EVENT_ENABLE_NEW_APN = BASE + 13;
+    public static final int EVENT_ENABLE_APN = BASE + 13;
+    public static final int EVENT_DISABLE_APN = BASE + 14;
     public static final int EVENT_DISCONNECT_DONE = BASE + 15;
     public static final int EVENT_DATA_CONNECTION_ATTACHED = BASE + 16;
     public static final int EVENT_DATA_STALL_ALARM = BASE + 17;
@@ -86,12 +87,13 @@ public class DctConstants {
     public static final int CMD_NET_STAT_POLL = BASE + 40;
     public static final int EVENT_DATA_RAT_CHANGED = BASE + 41;
     public static final int CMD_CLEAR_PROVISIONING_SPINNER = BASE + 42;
-    public static final int EVENT_REDIRECTION_DETECTED = BASE + 44;
+    public static final int EVENT_NETWORK_STATUS_CHANGED = BASE + 44;
     public static final int EVENT_PCO_DATA_RECEIVED = BASE + 45;
     public static final int EVENT_DATA_ENABLED_CHANGED = BASE + 46;
     public static final int EVENT_DATA_RECONNECT = BASE + 47;
     public static final int EVENT_ROAMING_SETTING_CHANGE = BASE + 48;
     public static final int EVENT_DATA_SERVICE_BINDING_CHANGED = BASE + 49;
+    public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 50;
 
     /***** Constants *****/
 

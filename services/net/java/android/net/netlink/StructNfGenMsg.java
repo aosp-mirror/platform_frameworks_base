@@ -16,8 +16,6 @@
 
 package android.net.netlink;
 
-import libcore.io.SizeOf;
-
 import java.nio.ByteBuffer;
 
 
@@ -29,7 +27,7 @@ import java.nio.ByteBuffer;
  * @hide
  */
 public class StructNfGenMsg {
-    public static final int STRUCT_SIZE = 2 + SizeOf.SHORT;
+    public static final int STRUCT_SIZE = 2 + Short.BYTES;
 
     public static final int NFNETLINK_V0 = 0;
 

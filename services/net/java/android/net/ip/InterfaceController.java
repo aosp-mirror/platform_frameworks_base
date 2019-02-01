@@ -17,15 +17,14 @@
 package android.net.ip;
 
 import android.net.INetd;
-import android.net.InterfaceConfiguration;
+import android.net.InterfaceConfigurationParcel;
 import android.net.LinkAddress;
-import android.net.util.NetdService;
 import android.net.util.SharedLog;
-import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.system.OsConstants;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 
 
@@ -40,76 +39,96 @@ public class InterfaceController {
     private final static boolean DBG = false;
 
     private final String mIfName;
-    private final INetworkManagementService mNMS;
     private final INetd mNetd;
     private final SharedLog mLog;
 
-    public InterfaceController(String ifname, INetworkManagementService nms, INetd netd,
-            SharedLog log) {
+    public InterfaceController(String ifname, INetd netd, SharedLog log) {
         mIfName = ifname;
-        mNMS = nms;
         mNetd = netd;
         mLog = log;
     }
 
+    private boolean setInterfaceAddress(LinkAddress addr) {
+        final InterfaceConfigurationParcel ifConfig = new InterfaceConfigurationParcel();
+        ifConfig.ifName = mIfName;
+        ifConfig.ipv4Addr = addr.getAddress().getHostAddress();
+        ifConfig.prefixLength = addr.getPrefixLength();
+        ifConfig.hwAddr = "";
+        ifConfig.flags = new String[0];
+        try {
+            mNetd.interfaceSetCfg(ifConfig);
+        } catch (RemoteException | ServiceSpecificException e) {
+            logError("Setting IPv4 address to %s/%d failed: %s",
+                    ifConfig.ipv4Addr, ifConfig.prefixLength, e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Set the IPv4 address of the interface.
+     */
     public boolean setIPv4Address(LinkAddress address) {
-        final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-        ifcg.setLinkAddress(address);
-        try {
-            mNMS.setInterfaceConfig(mIfName, ifcg);
-            if (DBG) mLog.log("IPv4 configuration succeeded");
-        } catch (IllegalStateException | RemoteException e) {
-            logError("IPv4 configuration failed: %s", e);
+        if (!(address.getAddress() instanceof Inet4Address)) {
             return false;
         }
-        return true;
+        return setInterfaceAddress(address);
     }
 
+    /**
+     * Clear the IPv4Address of the interface.
+     */
     public boolean clearIPv4Address() {
+        return setInterfaceAddress(new LinkAddress("0.0.0.0/0"));
+    }
+
+    private boolean setEnableIPv6(boolean enabled) {
         try {
-            final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-            ifcg.setLinkAddress(new LinkAddress("0.0.0.0/0"));
-            mNMS.setInterfaceConfig(mIfName, ifcg);
-        } catch (IllegalStateException | RemoteException e) {
-            logError("Failed to clear IPv4 address on interface %s: %s", mIfName, e);
+            mNetd.interfaceSetEnableIPv6(mIfName, enabled);
+        } catch (RemoteException | ServiceSpecificException e) {
+            logError("%s IPv6 failed: %s", (enabled ? "enabling" : "disabling"), e);
             return false;
         }
         return true;
     }
 
+    /**
+     * Enable IPv6 on the interface.
+     */
     public boolean enableIPv6() {
-        try {
-            mNMS.enableIpv6(mIfName);
-        } catch (IllegalStateException | RemoteException e) {
-            logError("enabling IPv6 failed: %s", e);
-            return false;
-        }
-        return true;
+        return setEnableIPv6(true);
     }
 
+    /**
+     * Disable IPv6 on the interface.
+     */
     public boolean disableIPv6() {
-        try {
-            mNMS.disableIpv6(mIfName);
-        } catch (IllegalStateException | RemoteException e) {
-            logError("disabling IPv6 failed: %s", e);
-            return false;
-        }
-        return true;
+        return setEnableIPv6(false);
     }
 
+    /**
+     * Enable or disable IPv6 privacy extensions on the interface.
+     * @param enabled Whether the extensions should be enabled.
+     */
     public boolean setIPv6PrivacyExtensions(boolean enabled) {
         try {
-            mNMS.setInterfaceIpv6PrivacyExtensions(mIfName, enabled);
-        } catch (IllegalStateException | RemoteException e) {
-            logError("error setting IPv6 privacy extensions: %s", e);
+            mNetd.interfaceSetIPv6PrivacyExtensions(mIfName, enabled);
+        } catch (RemoteException | ServiceSpecificException e) {
+            logError("error %s IPv6 privacy extensions: %s",
+                    (enabled ? "enabling" : "disabling"), e);
             return false;
         }
         return true;
     }
 
+    /**
+     * Set IPv6 address generation mode on the interface.
+     *
+     * <p>IPv6 should be disabled before changing the mode.
+     */
     public boolean setIPv6AddrGenModeIfSupported(int mode) {
         try {
-            mNMS.setIPv6AddrGenMode(mIfName, mode);
+            mNetd.setIPv6AddrGenMode(mIfName, mode);
         } catch (RemoteException e) {
             logError("Unable to set IPv6 addrgen mode: %s", e);
             return false;
@@ -122,10 +141,16 @@ public class InterfaceController {
         return true;
     }
 
+    /**
+     * Add an address to the interface.
+     */
     public boolean addAddress(LinkAddress addr) {
         return addAddress(addr.getAddress(), addr.getPrefixLength());
     }
 
+    /**
+     * Add an address to the interface.
+     */
     public boolean addAddress(InetAddress ip, int prefixLen) {
         try {
             mNetd.interfaceAddAddress(mIfName, ip.getHostAddress(), prefixLen);
@@ -136,6 +161,9 @@ public class InterfaceController {
         return true;
     }
 
+    /**
+     * Remove an address from the interface.
+     */
     public boolean removeAddress(InetAddress ip, int prefixLen) {
         try {
             mNetd.interfaceDelAddress(mIfName, ip.getHostAddress(), prefixLen);
@@ -146,9 +174,12 @@ public class InterfaceController {
         return true;
     }
 
+    /**
+     * Remove all addresses from the interface.
+     */
     public boolean clearAllAddresses() {
         try {
-            mNMS.clearInterfaceAddresses(mIfName);
+            mNetd.interfaceClearAddrs(mIfName);
         } catch (Exception e) {
             logError("Failed to clear addresses: %s", e);
             return false;

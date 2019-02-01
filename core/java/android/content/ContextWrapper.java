@@ -386,7 +386,6 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    @UnsupportedAppUsage
     public void startActivityAsUser(Intent intent, UserHandle user) {
         mBase.startActivityAsUser(intent, user);
     }
