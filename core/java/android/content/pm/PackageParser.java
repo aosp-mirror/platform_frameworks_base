@@ -4423,7 +4423,7 @@ public class PackageParser {
         a.owner = owner;
         a.setPackageName(owner.packageName);
 
-        a.info.theme = 0;
+        a.info.theme = android.R.style.Theme_NoDisplay;
         a.info.exported = true;
         a.info.name = AppDetailsActivity.class.getName();
         a.info.processName = owner.applicationInfo.processName;
