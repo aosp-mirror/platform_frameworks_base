@@ -23,7 +23,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -59,7 +58,6 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
     private int mEndPoint;
     private boolean mEdgeBleed;
     private boolean mRoundedDivider;
-    private int mRotation = ROTATION_NONE;
     private boolean mRotatedBackground;
     private boolean mSwapOrientation = true;
 
@@ -89,7 +87,7 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
     }
 
     @Override
-    public ViewGroup getParentView(boolean separated, int index) {
+    public ViewGroup getParentView(boolean separated, int index, boolean reverse) {
         if (separated) {
             return getSeparatedView();
         } else {
@@ -174,7 +172,6 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
                 mSeparatedView.setBackground(mSeparatedViewBackground);
                 updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
                 mOldHeight = mList.getMeasuredHeight();
-                updateRotation();
             } else {
                 return;
             }
@@ -188,25 +185,13 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
         post(() -> updatePosition());
     }
 
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateRotation();
-    }
-
     public void setSwapOrientation(boolean swapOrientation) {
         mSwapOrientation = swapOrientation;
     }
 
-    private void updateRotation() {
-        int rotation = RotationUtils.getRotation(getContext());
-        if (rotation != mRotation) {
-            rotate(mRotation, rotation);
-            mRotation = rotation;
-        }
-    }
-
-    private void rotate(int from, int to) {
+    @Override
+    protected void rotate(int from, int to) {
+        super.rotate(from, to);
         if (from != ROTATION_NONE && to != ROTATION_NONE) {
             // Rather than handling this confusing case, just do 2 rotations.
             rotate(from, ROTATION_NONE);
