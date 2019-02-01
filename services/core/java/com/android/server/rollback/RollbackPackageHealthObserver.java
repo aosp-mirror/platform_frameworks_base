@@ -57,7 +57,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public int onHealthCheckFailed(String packageName, long versionCode) {
+    public int onHealthCheckFailed(VersionedPackage failedPackage) {
         VersionedPackage moduleMetadataPackage = getModuleMetadataPackage();
         if (moduleMetadataPackage == null) {
             // Ignore failure, no mainline update available
@@ -66,7 +66,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
         RollbackInfo rollback =
                 getAvailableMainlineRollback(mContext.getSystemService(RollbackManager.class),
-                    packageName, versionCode, moduleMetadataPackage);
+                        failedPackage, moduleMetadataPackage);
         if (rollback == null) {
             // Don't handle the notification, no rollbacks available for the package
             return PackageHealthObserverImpact.USER_IMPACT_NONE;
@@ -76,7 +76,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean execute(String packageName, long versionCode) {
+    public boolean execute(VersionedPackage failedPackage) {
         VersionedPackage moduleMetadataPackage = getModuleMetadataPackage();
         if (moduleMetadataPackage == null) {
             // Ignore failure, no mainline update available
@@ -85,10 +85,11 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         RollbackInfo rollback = getAvailableMainlineRollback(rollbackManager,
-                packageName, versionCode, moduleMetadataPackage);
+                failedPackage, moduleMetadataPackage);
         if (rollback == null) {
-            Slog.w(TAG, "Expected rollback but no rollback found for package: [ "
-                    + packageName + "] with versionCode: [" + versionCode + "]");
+            Slog.w(TAG, "Expected rollback but no mainline rollback found for package: [ "
+                    + failedPackage.getPackageName() + "] with versionCode: ["
+                    + failedPackage.getVersionCode() + "]");
             return false;
         }
 
@@ -114,7 +115,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
         mHandler.post(() ->
                 rollbackManager.commitRollback(rollback.getRollbackId(),
-                    Collections.singletonList(new VersionedPackage(packageName, versionCode)),
+                    Collections.singletonList(moduleMetadataPackage),
                     rollbackReceiver.getIntentSender()));
         // Assume rollback executed successfully
         return true;
@@ -134,7 +135,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     private RollbackInfo getAvailableMainlineRollback(RollbackManager rollbackManager,
-            String packageName, long versionCode, VersionedPackage moduleMetadataPackage) {
+            VersionedPackage failedPackage, VersionedPackage moduleMetadataPackage) {
         for (RollbackInfo rollback : rollbackManager.getAvailableRollbacks()) {
             // We only rollback mainline packages, so check if rollback contains the
             // module metadata provider, if it does, the rollback is a mainline rollback
@@ -142,10 +143,11 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             boolean hasFailedPackage = false;
             for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
                 hasModuleMetadataPackage |= packageRollback.getPackageName().equals(
-                                moduleMetadataPackage.getPackageName());
-                hasFailedPackage |= packageRollback.getPackageName().equals(packageName)
+                        moduleMetadataPackage.getPackageName());
+                hasFailedPackage |= packageRollback.getPackageName().equals(
+                        failedPackage.getPackageName())
                         && packageRollback.getVersionRolledBackFrom().getVersionCode()
-                        == versionCode;
+                        == failedPackage.getVersionCode();
             }
             if (hasModuleMetadataPackage && hasFailedPackage) {
                 return rollback;
