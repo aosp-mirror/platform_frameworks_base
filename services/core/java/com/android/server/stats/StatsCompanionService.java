@@ -98,6 +98,7 @@ import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuThreadReader;
+import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
@@ -203,7 +204,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             "zygote64",
     };
 
-    private static final int CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES = 8;
+    private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
 
     static final class CompanionHandler extends Handler {
         CompanionHandler(Looper looper) {
@@ -332,7 +333,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         handlerThread.start();
         mHandler = new CompanionHandler(handlerThread.getLooper());
 
-        mKernelCpuThreadReader = KernelCpuThreadReader.create();
+        mKernelCpuThreadReader =
+                KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
     }
 
     @Override
@@ -1678,8 +1680,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             return;
         }
         int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
-        if (cpuFrequencies.length != CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES) {
-            Slog.w(TAG, "Expected " + CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES
+        if (cpuFrequencies.length > CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES) {
+            Slog.w(TAG, "Expected maximum " + CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES
                     + " frequencies, but got " + cpuFrequencies.length);
             return;
         }
@@ -1703,9 +1705,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 e.writeInt(threadCpuUsage.threadId);
                 e.writeString(processCpuUsage.processName);
                 e.writeString(threadCpuUsage.threadName);
-                for (int k = 0; k < CPU_TIME_PER_THREAD_FREQ_NUM_FREQUENCIES; k++) {
-                    e.writeInt(cpuFrequencies[k]);
-                    e.writeInt(threadCpuUsage.usageTimesMillis[k]);
+                for (int k = 0; k < CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES; k++) {
+                    if (k < cpuFrequencies.length) {
+                        e.writeInt(cpuFrequencies[k]);
+                        e.writeInt(threadCpuUsage.usageTimesMillis[k]);
+                    } else {
+                        // If we have no more frequencies to write, we still must write empty data.
+                        // We know that this data is empty (and not just zero) because all
+                        // frequencies are expected to be greater than zero
+                        e.writeInt(0);
+                        e.writeInt(0);
+                    }
                 }
                 pulledData.add(e);
             }
