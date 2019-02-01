@@ -57,7 +57,6 @@ import java.util.Arrays;
  */
 @SmallTest
 @Presubmit
-@FlakyTest(detail="promote once confirmed non-flaky")
 public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     private ActivityMetricsLogger mActivityMetricsLogger;
     private ActivityMetricsLaunchObserver mLaunchObserver;

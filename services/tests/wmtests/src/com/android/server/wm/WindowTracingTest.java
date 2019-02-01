@@ -60,7 +60,6 @@ import java.nio.charset.StandardCharsets;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:WindowTracingTest
  */
-@FlakyTest(bugId = 74078662)
 @SmallTest
 @Presubmit
 public class WindowTracingTest {

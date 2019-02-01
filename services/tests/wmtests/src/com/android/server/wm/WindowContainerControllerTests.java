@@ -37,7 +37,6 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:WindowContainerControllerTests
  */
-@FlakyTest(bugId = 74078662)
 @SmallTest
 @Presubmit
 public class WindowContainerControllerTests extends WindowTestsBase {
