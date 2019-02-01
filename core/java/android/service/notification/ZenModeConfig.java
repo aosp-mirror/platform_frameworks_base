@@ -958,13 +958,15 @@ public class ZenModeConfig implements Parcelable {
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_MESSAGES,
                 isPriorityCategoryEnabled(Policy.PRIORITY_CATEGORY_MESSAGES, defaultPolicy))) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_MESSAGES;
-            messageSenders = getNotificationPolicySenders(zenPolicy.getPriorityMessageSenders());
+            messageSenders = getNotificationPolicySenders(zenPolicy.getPriorityMessageSenders(),
+                    messageSenders);
         }
 
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_CALLS,
                 isPriorityCategoryEnabled(Policy.PRIORITY_CATEGORY_CALLS, defaultPolicy))) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
-            callSenders = getNotificationPolicySenders(zenPolicy.getPriorityCallSenders());
+            callSenders = getNotificationPolicySenders(zenPolicy.getPriorityCallSenders(),
+                    callSenders);
         }
 
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_REPEAT_CALLERS,
@@ -1056,16 +1058,17 @@ public class ZenModeConfig implements Parcelable {
         return (policy.suppressedVisualEffects & visualEffect) == 0;
     }
 
-    private int getNotificationPolicySenders(@ZenPolicy.PeopleType int senders) {
+    private int getNotificationPolicySenders(@ZenPolicy.PeopleType int senders,
+            int defaultPolicySender) {
         switch (senders) {
             case ZenPolicy.PEOPLE_TYPE_ANYONE:
                 return Policy.PRIORITY_SENDERS_ANY;
             case ZenPolicy.PEOPLE_TYPE_CONTACTS:
-
                 return Policy.PRIORITY_SENDERS_CONTACTS;
             case ZenPolicy.PEOPLE_TYPE_STARRED:
-            default:
                 return Policy.PRIORITY_SENDERS_STARRED;
+            default:
+                return defaultPolicySender;
         }
     }
 
