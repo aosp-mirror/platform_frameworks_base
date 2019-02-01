@@ -2852,10 +2852,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // to check super here.
         final boolean reallyAnimating = super.isSelfAnimating();
         final boolean show = !isHidden() || reallyAnimating;
-        if (show && !mLastSurfaceShowing) {
-            mPendingTransaction.show(mSurfaceControl);
-        } else if (!show && mLastSurfaceShowing) {
-            mPendingTransaction.hide(mSurfaceControl);
+
+        if (mSurfaceControl != null) {
+            if (show && !mLastSurfaceShowing) {
+                mPendingTransaction.show(mSurfaceControl);
+            } else if (!show && mLastSurfaceShowing) {
+                mPendingTransaction.hide(mSurfaceControl);
+            }
         }
         if (mThumbnail != null) {
             mThumbnail.setShowing(mPendingTransaction, show);
