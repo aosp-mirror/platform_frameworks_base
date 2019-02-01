@@ -304,7 +304,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         }
 
         @Override
-        public boolean shouldAutoBubble(Context c, NotificationEntry entry) {
+        public boolean shouldAutoBubbleForFlags(Context c, NotificationEntry entry) {
             return entry.notification.getNotification().getBubbleMetadata() != null;
         }
     }
