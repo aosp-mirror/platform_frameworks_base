@@ -28,7 +28,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.AppOpsManager;
-import android.app.role.RoleManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
@@ -226,17 +225,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         @Override
         public Cursor query(String callingPkg, Uri uri, @Nullable String[] projection,
                 @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal) {
-            if (uri.toString().startsWith("content://sms")) {
-                RoleManager rm = getContext().getSystemService(RoleManager.class);
-                if (!rm.isRoleHeld(RoleManager.ROLE_SMS)
-                        && !rm.isRoleHeld(RoleManager.ROLE_DIALER)
-                        && !rm.isRoleHeld(RoleManager.ROLE_ASSISTANT)) {
-                    // STOPSHIP: log it to westworld instead
-                    Log.wtf(TAG, "Sms access attempted by " + callingPkg
-                            + " despite not holding an appropriate role");
-                }
-            }
-
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
