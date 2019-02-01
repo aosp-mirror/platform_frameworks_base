@@ -532,7 +532,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     /**
      * Must be called when new parent for the container was set.
      */
-    protected void onParentChanged() {
+    void onParentChanged() {
         final ConfigurationContainer parent = getParent();
         // Removing parent usually means that we've detached this entity to destroy it or to attach
         // to another parent. In both cases we don't need to update the configuration now.

@@ -4389,8 +4389,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        void onParentSet() {
-            super.onParentSet();
+        void onParentChanged() {
+            super.onParentChanged();
             if (getParent() != null) {
                 mAppAnimationLayer = makeChildSurface(null)
                         .setName("animationLayer")
@@ -4645,10 +4645,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
-    void onParentSet() {
+    void onParentChanged() {
         // Since we are the top of the SurfaceControl hierarchy here
         // we create the root surfaces explicitly rather than chaining
-        // up as the default implementation in onParentSet does. So we
+        // up as the default implementation in onParentChanged does. So we
         // explicitly do NOT call super here.
     }
 

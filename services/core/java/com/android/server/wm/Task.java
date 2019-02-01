@@ -252,8 +252,8 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     }
 
     @Override
-    void onParentSet() {
-        super.onParentSet();
+    void onParentChanged() {
+        super.onParentChanged();
 
         // Update task bounds if needed.
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());

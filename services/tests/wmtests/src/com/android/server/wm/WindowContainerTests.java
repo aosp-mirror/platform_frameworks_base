@@ -103,13 +103,13 @@ public class WindowContainerTests extends WindowTestsBase {
         assertEquals(secondLayer1, root.getChildAt(5));
         assertEquals(layer2, root.getChildAt(6));
 
-        assertTrue(layer1.mOnParentSetCalled);
-        assertTrue(secondLayer1.mOnParentSetCalled);
-        assertTrue(layer2.mOnParentSetCalled);
-        assertTrue(layerNeg1.mOnParentSetCalled);
-        assertTrue(layerNeg2.mOnParentSetCalled);
-        assertTrue(secondLayerNeg1.mOnParentSetCalled);
-        assertTrue(layer0.mOnParentSetCalled);
+        assertTrue(layer1.mOnParentChangedCalled);
+        assertTrue(secondLayer1.mOnParentChangedCalled);
+        assertTrue(layer2.mOnParentChangedCalled);
+        assertTrue(layerNeg1.mOnParentChangedCalled);
+        assertTrue(layerNeg2.mOnParentChangedCalled);
+        assertTrue(secondLayerNeg1.mOnParentChangedCalled);
+        assertTrue(layer0.mOnParentChangedCalled);
     }
 
     @Test
@@ -747,7 +747,7 @@ public class WindowContainerTests extends WindowTestsBase {
         private boolean mFillsParent;
         private Integer mOrientation;
 
-        private boolean mOnParentSetCalled;
+        private boolean mOnParentChangedCalled;
         private boolean mOnDescendantOverrideCalled;
 
         /**
@@ -801,8 +801,8 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         @Override
-        void onParentSet() {
-            mOnParentSetCalled = true;
+        void onParentChanged() {
+            mOnParentChangedCalled = true;
         }
 
         @Override
