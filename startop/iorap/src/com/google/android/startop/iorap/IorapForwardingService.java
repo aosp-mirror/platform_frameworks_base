@@ -19,6 +19,10 @@ package com.google.android.startop.iorap;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
+import android.app.job.JobService;
+import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,13 +46,16 @@ import com.android.server.wm.ActivityMetricsLaunchObserver.Temperature;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+
 /**
  * System-server-local proxy into the {@code IIorap} native service.
  */
 public class IorapForwardingService extends SystemService {
 
     public static final String TAG = "IorapForwardingService";
-    /** $> adb shell 'setprop log.tag.IorapdForwardingService VERBOSE' */
+    /** $> adb shell 'setprop log.tag.IorapForwardingService VERBOSE' */
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     /** $> adb shell 'setprop iorapd.enable true' */
     private static boolean IS_ENABLED = SystemProperties.getBoolean("iorapd.enable", true);
@@ -56,11 +63,19 @@ public class IorapForwardingService extends SystemService {
     private static boolean WTF_CRASH = SystemProperties.getBoolean(
             "iorapd.forwarding_service.wtf_crash", false);
 
+    // "Unique" job ID from the service name. Also equal to 283673059.
+    public static final int JOB_ID_IORAPD = encodeEnglishAlphabetStringIntoInt("iorapd");
+    // Run every 24 hours.
+    public static final long JOB_INTERVAL_MS = TimeUnit.HOURS.toMillis(24);
+
     private IIorap mIorapRemote;
     private final Object mLock = new Object();
     /** Handle onBinderDeath by periodically trying to reconnect. */
     private final Handler mHandler =
             new BinderConnectionHandler(IoThread.getHandler().getLooper());
+
+    private volatile IorapdJobService mJobService;  // Write-once (null -> non-null forever).
+    private volatile static IorapForwardingService sSelfService;  // Write once (null -> non-null).
 
     /**
      * Initializes the system service.
@@ -73,6 +88,15 @@ public class IorapForwardingService extends SystemService {
      */
     public IorapForwardingService(Context context) {
         super(context);
+
+        if (DEBUG) {
+            Log.v(TAG, "IorapForwardingService (Context=" + context.toString() + ")");
+        }
+
+        if (sSelfService != null) {
+            throw new AssertionError("only one service instance allowed");
+        }
+        sSelfService = this;
     }
 
     //<editor-fold desc="Providers">
@@ -117,6 +141,10 @@ public class IorapForwardingService extends SystemService {
             public void binderDied() {
                 Log.w(TAG, "iorapd has died");
                 retryConnectToRemoteAndConfigure(/*attempts*/0);
+
+                if (mJobService != null) {
+                    mJobService.onIorapdDisconnected();
+                }
             }
         };
     }
@@ -137,6 +165,24 @@ public class IorapForwardingService extends SystemService {
         }
 
         retryConnectToRemoteAndConfigure(/*attempts*/0);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            if (DEBUG) {
+                Log.v(TAG, "onBootPhase(PHASE_BOOT_COMPLETED)");
+            }
+
+            if (isIorapEnabled()) {
+                // Set up a recurring background job. This has to be done in a later phase since it
+                // has a dependency the job scheduler.
+                //
+                // Doing this too early can result in a ServiceNotFoundException for 'jobservice'
+                // or a null reference for #getSystemService(JobScheduler.class)
+                mJobService = new IorapdJobService(getContext());
+            }
+        }
     }
 
     private class BinderConnectionHandler extends Handler {
@@ -336,6 +382,227 @@ public class IorapForwardingService extends SystemService {
         }
     }
 
+    /**
+     * Debugging:
+     *
+     * $> adb shell dumpsys jobscheduler
+     *
+     * Search for 'IorapdJobServiceProxy'.
+     *
+     *   JOB #1000/283673059: 6e54ed android/com.google.android.startop.iorap.IorapForwardingService$IorapdJobServiceProxy
+     *   ^    ^                      ^
+     *   (uid, job id)               ComponentName(package/class)
+     *
+     * Forcing the job to be run, ignoring constraints:
+     *
+     * $> adb shell cmd jobscheduler run -f android 283673059
+     *                                      ^        ^
+     *                                      package  job_id
+     *
+     * ------------------------------------------------------------
+     *
+     * This class is instantiated newly by the JobService every time
+     * it wants to run a new job.
+     *
+     * We need to forward invocations to the current running instance of
+     * IorapForwardingService#IorapdJobService.
+     *
+     * Visibility: Must be accessible from android.app.AppComponentFactory
+     */
+    public static class IorapdJobServiceProxy extends JobService {
+
+        public IorapdJobServiceProxy() {
+            getActualIorapdJobService().bindProxy(this);
+        }
+
+
+        @NonNull
+        private IorapdJobService getActualIorapdJobService() {
+            // Can't ever be null, because the guarantee is that the
+            // IorapForwardingService is always running.
+            // We are in the same process as Job Service.
+            return sSelfService.mJobService;
+        }
+
+        // Called by system to start the job.
+        @Override
+        public boolean onStartJob(JobParameters params) {
+            return getActualIorapdJobService().onStartJob(params);
+        }
+
+        // Called by system to prematurely stop the job.
+        @Override
+        public boolean onStopJob(JobParameters params) {
+            return getActualIorapdJobService().onStopJob(params);
+        }
+    }
+
+    private class IorapdJobService extends JobService {
+        private final ComponentName IORAPD_COMPONENT_NAME;
+
+        private final Object mLock = new Object();
+        // Jobs currently running remotely on iorapd.
+        // They were started by the JobScheduler and need to be finished.
+        private final HashMap<RequestId, JobParameters> mRunningJobs = new HashMap<>();
+
+        private final JobInfo IORAPD_JOB_INFO;
+
+        private volatile IorapdJobServiceProxy mProxy;
+
+        public void bindProxy(IorapdJobServiceProxy proxy) {
+            mProxy = proxy;
+        }
+
+        // Create a new job service which immediately schedules a 24-hour idle maintenance mode
+        // background job to execute.
+        public IorapdJobService(Context context) {
+            if (DEBUG) {
+                Log.v(TAG, "IorapdJobService (Context=" + context.toString() + ")");
+            }
+
+            // Schedule the proxy class to be instantiated by the JobScheduler
+            // when it is time to invoke background jobs for IorapForwardingService.
+
+
+            // This also needs a BIND_JOB_SERVICE permission in
+            // frameworks/base/core/res/AndroidManifest.xml
+            IORAPD_COMPONENT_NAME = new ComponentName(context, IorapdJobServiceProxy.class);
+
+            JobInfo.Builder builder = new JobInfo.Builder(JOB_ID_IORAPD, IORAPD_COMPONENT_NAME);
+            builder.setPeriodic(JOB_INTERVAL_MS);
+            builder.setPrefetch(true);
+
+            builder.setRequiresCharging(true);
+            builder.setRequiresDeviceIdle(true);
+
+            builder.setRequiresStorageNotLow(true);
+
+            IORAPD_JOB_INFO = builder.build();
+
+            JobScheduler js = context.getSystemService(JobScheduler.class);
+            js.schedule(IORAPD_JOB_INFO);
+            Log.d(TAG,
+                    "BgJob Scheduled (jobId=" + JOB_ID_IORAPD
+                            + ", interval: " + JOB_INTERVAL_MS + "ms)");
+        }
+
+        // Called by system to start the job.
+        @Override
+        public boolean onStartJob(JobParameters params) {
+            // Tell iorapd to start a background job.
+            Log.d(TAG, "Starting background job: " + params.toString());
+
+            // We wait until that job's sequence ID returns to us with 'Completed',
+            RequestId request;
+            synchronized (mLock) {
+                // TODO: would be cleaner if we got the request from the 'invokeRemote' function.
+                // Better yet, consider a Pair<RequestId, Future<TaskResult>> or similar.
+                request = RequestId.nextValueForSequence();
+                mRunningJobs.put(request, params);
+            }
+
+            if (!invokeRemote( () ->
+                    mIorapRemote.onJobScheduledEvent(request,
+                            JobScheduledEvent.createIdleMaintenance(
+                                    JobScheduledEvent.TYPE_START_JOB,
+                                    params))
+            )) {
+                synchronized (mLock) {
+                    mRunningJobs.remove(request); // Avoid memory leaks.
+                }
+
+                // Something went wrong on the remote side. Treat the job as being
+                // 'already finished' (i.e. immediately release wake lock).
+                return false;
+            }
+
+            // True -> keep the wakelock acquired until #jobFinished is called.
+            return true;
+        }
+
+        // Called by system to prematurely stop the job.
+        @Override
+        public boolean onStopJob(JobParameters params) {
+            // As this is unexpected behavior, print a warning.
+            Log.w(TAG, "onStopJob(params=" + params.toString() + ")");
+
+            // No longer track this job (avoids a memory leak).
+            boolean wasTracking = false;
+            synchronized (mLock) {
+                for (HashMap.Entry<RequestId, JobParameters> entry : mRunningJobs.entrySet()) {
+                   if (entry.getValue().getJobId() == params.getJobId()) {
+                       mRunningJobs.remove(entry.getKey());
+                       wasTracking = true;
+                   }
+                }
+            }
+
+            // Notify iorapd to stop (abort) the job.
+            if (wasTracking) {
+                invokeRemote(() ->
+                        mIorapRemote.onJobScheduledEvent(RequestId.nextValueForSequence(),
+                                JobScheduledEvent.createIdleMaintenance(
+                                        JobScheduledEvent.TYPE_STOP_JOB,
+                                        params))
+                );
+            } else {
+                // Even weirder. This could only be considered "correct" if iorapd reported success
+                // concurrently to the JobService requesting an onStopJob.
+                Log.e(TAG, "Untracked onStopJob request");  // see above Log.w for the params.
+            }
+
+
+            // Yes, retry the job at a later time no matter what.
+            return true;
+        }
+
+        // Listen to *all* task completes for all requests.
+        // The majority of these might be unrelated to background jobs.
+        public void onIorapdTaskCompleted(RequestId requestId) {
+            JobParameters jobParameters;
+            synchronized (mLock) {
+                jobParameters = mRunningJobs.remove(requestId);
+            }
+
+            // Typical case: This was a task callback unrelated to our jobs.
+            if (jobParameters == null) {
+                return;
+            }
+
+            if (DEBUG) {
+                Log.v(TAG,
+                        String.format("IorapdJobService#onIorapdTaskCompleted(%s), found params=%s",
+                                requestId, jobParameters));
+            }
+
+            Log.d(TAG, "Finished background job: " + jobParameters.toString());
+
+            // Job is successful and periodic. Do not 'reschedule' according to the back-off
+            // criteria.
+            //
+            // This releases the wakelock that was acquired in #onStartJob.
+
+            IorapdJobServiceProxy proxy = mProxy;
+            if (proxy != null) {
+                proxy.jobFinished(jobParameters, /*reschedule*/false);
+            }
+            // Cannot call 'jobFinished' on 'this' because it was not constructed
+            // from the JobService, so it would get an NPE when calling mEngine.
+        }
+
+        public void onIorapdDisconnected() {
+            synchronized (mLock) {
+                mRunningJobs.clear();
+            }
+
+            if (DEBUG) {
+                Log.v(TAG, String.format("IorapdJobService#onIorapdDisconnected"));
+            }
+
+            // TODO: should we try to resubmit all incomplete jobs after it's reconnected?
+        }
+    }
+
     private class RemoteTaskListener extends ITaskListener.Stub {
         @Override
         public void onProgress(RequestId requestId, TaskResult result) throws RemoteException {
@@ -354,18 +621,24 @@ public class IorapForwardingService extends SystemService {
                         String.format("RemoteTaskListener#onComplete(%s, %s)", requestId, result));
             }
 
+            if (mJobService != null) {
+                mJobService.onIorapdTaskCompleted(requestId);
+            }
+
             // TODO: implement rest.
         }
     }
 
     /** Allow passing lambdas to #invokeRemote */
     private interface RemoteRunnable {
+        // TODO: run(RequestId) ?
         void run() throws RemoteException;
     }
 
-    private static void invokeRemote(RemoteRunnable r) {
+    private static boolean invokeRemote(RemoteRunnable r) {
        try {
            r.run();
+           return true;
        } catch (RemoteException e) {
            // This could be a logic error (remote side returning error), which we need to fix.
            //
@@ -377,6 +650,7 @@ public class IorapForwardingService extends SystemService {
            //
            // DeadObjectExceptions are recovered from using DeathRecipient and #linkToDeath.
            handleRemoteError(e);
+           return false;
        }
     }
 
@@ -388,5 +662,44 @@ public class IorapForwardingService extends SystemService {
             // Log to wtf which gets sent to dropbox, and in system_server this does not crash.
             Log.wtf(TAG, t);
         }
+    }
+
+    // Encode A-Z bitstring into bits. Every character is bits.
+    // Characters outside of the range [a,z] are considered out of range.
+    //
+    // The least significant bits hold the last character.
+    // First 2 bits are left as 0.
+    private static int encodeEnglishAlphabetStringIntoInt(String name) {
+        int value = 0;
+
+        final int CHARS_PER_INT = 6;
+        final int BITS_PER_CHAR = 5;
+        // Note: 2 top bits are unused, this also means our values are non-negative.
+        final char CHAR_LOWER = 'a';
+        final char CHAR_UPPER = 'z';
+
+        if (name.length() > CHARS_PER_INT) {
+            throw new IllegalArgumentException(
+                    "String too long. Cannot encode more than 6 chars: " + name);
+        }
+
+        for (int i = 0; i < name.length(); ++i) {
+           char c = name.charAt(i);
+
+           if (c < CHAR_LOWER || c > CHAR_UPPER) {
+               throw new IllegalArgumentException("String has out-of-range [a-z] chars: " + name);
+           }
+
+           // Avoid sign extension during promotion.
+           int cur_value = (c & 0xFFFF) - (CHAR_LOWER & 0xFFFF);
+           if (cur_value >= (1 << BITS_PER_CHAR)) {
+               throw new AssertionError("wtf? i=" + i + ", name=" + name);
+           }
+
+           value = value << BITS_PER_CHAR;
+           value = value | cur_value;
+        }
+
+        return value;
     }
 }
