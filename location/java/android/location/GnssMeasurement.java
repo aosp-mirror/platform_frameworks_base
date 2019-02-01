@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -49,6 +50,7 @@ public final class GnssMeasurement implements Parcelable {
     private double mSnrInDb;
     private double mAutomaticGainControlLevelInDb;
     private int mCodeType;
+    private String mOtherCodeTypeName;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -209,8 +211,8 @@ public final class GnssMeasurement implements Parcelable {
      */
     @IntDef(prefix = { "CODE_TYPE_" }, value = {
             CODE_TYPE_UNKNOWN, CODE_TYPE_A, CODE_TYPE_B, CODE_TYPE_C, CODE_TYPE_I, CODE_TYPE_L,
-            CODE_TYPE_M, CODE_TYPE_P, CODE_TYPE_Q, CODE_TYPE_S, CODE_TYPE_W, CODE_TYPE_X,
-            CODE_TYPE_Y, CODE_TYPE_Z, CODE_TYPE_CODELESS
+            CODE_TYPE_M, CODE_TYPE_N, CODE_TYPE_P, CODE_TYPE_Q, CODE_TYPE_S, CODE_TYPE_W,
+            CODE_TYPE_X, CODE_TYPE_Y, CODE_TYPE_Z, CODE_TYPE_OTHER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CodeType {}
@@ -299,7 +301,16 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * The GNSS Measurement's code type is one of the following: GPS L1 codeless, GPS L2 codeless.
      */
-    public static final int CODE_TYPE_CODELESS = 13;
+    public static final int CODE_TYPE_N = 13;
+
+    /**
+     * Other code type that does not belong to any of the above code types.
+     *
+     * This code type is used in the case that the code type being tracked in this measurement, as
+     * classified by RINEX standards, does not fit into one of the existing enumerated values. When
+     * this code type is set, the field otherCodeTypeName must specify the new code type.
+     */
+    public static final int CODE_TYPE_OTHER = 255;
 
     /**
      * All the 'Accumulated Delta Range' flags.
@@ -349,6 +360,7 @@ public final class GnssMeasurement implements Parcelable {
         mSnrInDb = measurement.mSnrInDb;
         mAutomaticGainControlLevelInDb = measurement.mAutomaticGainControlLevelInDb;
         mCodeType = measurement.mCodeType;
+        mOtherCodeTypeName = measurement.mOtherCodeTypeName;
     }
 
     /**
@@ -1175,8 +1187,8 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the GNSS measurement's code type.
      *
-     * <p>Similar to the Attribute field described in Rinex 3.03, e.g., in Tables 4-10, and Table
-     * A2 at the Rinex 3.03 Update 1 Document.
+     * <p>Similar to the Attribute field described in RINEX 3.03, e.g., in Tables 4-10, and Table
+     * A2 at the RINEX 3.03 Update 1 Document.
      */
     @CodeType
     public int getCodeType() {
@@ -1206,6 +1218,29 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
+     * Gets the GNSS measurement's code type name when the code type is {@link #CODE_TYPE_OTHER}.
+     *
+     * <p>This is used to specify the observation descriptor defined in GNSS Observation Data File
+     * Header Section Description in the RINEX standard (Version 3.XX), in cases where the code type
+     * does not align with an existing Android enumerated value. For example, if a code type "G" is
+     * added, this string shall be set to "G".
+     */
+    @NonNull
+    public String getOtherCodeTypeName() {
+        return mOtherCodeTypeName;
+    }
+
+    /**
+     * Sets the GNSS measurement's code type name when the code type is {@link #CODE_TYPE_OTHER}.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setOtherCodeTypeName(@NonNull String otherCodeTypeName) {
+        mOtherCodeTypeName = otherCodeTypeName;
+    }
+
+    /**
      * Gets a string representation of the 'code type'.
      *
      * <p>For internal and logging use only.
@@ -1226,6 +1261,8 @@ public final class GnssMeasurement implements Parcelable {
                 return "CODE_TYPE_L";
             case CODE_TYPE_M:
                 return "CODE_TYPE_M";
+            case CODE_TYPE_N:
+                return "CODE_TYPE_N";
             case CODE_TYPE_P:
                 return "CODE_TYPE_P";
             case CODE_TYPE_Q:
@@ -1240,8 +1277,8 @@ public final class GnssMeasurement implements Parcelable {
                 return "CODE_TYPE_Y";
             case CODE_TYPE_Z:
                 return "CODE_TYPE_Z";
-            case CODE_TYPE_CODELESS:
-                return "CODE_TYPE_CODELESS";
+            case CODE_TYPE_OTHER:
+                return "CODE_TYPE_OTHER";
             default:
                 return "<Invalid: " + mCodeType + ">";
         }
@@ -1273,6 +1310,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mSnrInDb = parcel.readDouble();
             gnssMeasurement.mAutomaticGainControlLevelInDb = parcel.readDouble();
             gnssMeasurement.mCodeType = parcel.readInt();
+            gnssMeasurement.mOtherCodeTypeName = parcel.readString();
 
             return gnssMeasurement;
         }
@@ -1306,6 +1344,7 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mSnrInDb);
         parcel.writeDouble(mAutomaticGainControlLevelInDb);
         parcel.writeInt(mCodeType);
+        parcel.writeString(mOtherCodeTypeName);
     }
 
     @Override
@@ -1384,6 +1423,9 @@ public final class GnssMeasurement implements Parcelable {
                 format,
                 "CodeType",
                 hasCodeType() ? getCodeTypeString() : null));
+        builder.append(String.format(
+                format,
+                "OtherCodeTypeName", mOtherCodeTypeName));
 
         return builder.toString();
     }
@@ -1409,6 +1451,7 @@ public final class GnssMeasurement implements Parcelable {
         resetSnrInDb();
         resetAutomaticGainControlLevel();
         resetCodeType();
+        setOtherCodeTypeName("");
     }
 
     private void setFlag(int flag) {
