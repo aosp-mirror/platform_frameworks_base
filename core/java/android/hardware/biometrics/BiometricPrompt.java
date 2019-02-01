@@ -202,6 +202,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * Required: Set the text for the negative button. This would typically be used as a
          * "Cancel" button, but may be also used to show an alternative method for authentication,
          * such as screen that asks for a backup password.
+         *
+         * Note that this should not be set if {@link #setEnableFallback(boolean)} is set to true.
+         *
          * @param text
          * @return
          */
@@ -248,6 +251,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         /**
          * The user will first be prompted to authenticate with biometrics, but also given the
          * option to authenticate with their device PIN, pattern, or password.
+         *
+         * Note that {@link #setNegativeButton(CharSequence, Executor,
+         * DialogInterface.OnClickListener)} should not be set if this is set to true.
+         *
          * @param enable When true, the prompt will fall back to ask for the user's device
          *               credentials (PIN, pattern, or password).
          * @return
