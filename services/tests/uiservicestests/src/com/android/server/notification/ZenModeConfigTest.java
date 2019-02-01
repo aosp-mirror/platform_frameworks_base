@@ -67,7 +67,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
     @Test
     public void testZenPolicyNothingSetToNotificationPolicy() {
-        ZenModeConfig config = getMutedAllConfig();
+        ZenModeConfig config = getCustomConfig();
         ZenPolicy zenPolicy = new ZenPolicy.Builder().build();
         assertEquals(config.toNotificationPolicy(), config.toNotificationPolicy(zenPolicy));
     }
@@ -216,6 +216,25 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         config.suppressedVisualEffects = 0;
 
+        return config;
+    }
+
+    private ZenModeConfig getCustomConfig() {
+        ZenModeConfig config = new ZenModeConfig();
+        // Some sounds allowed
+        config.allowAlarms = true;
+        config.allowMedia = false;
+        config.allowSystem = false;
+        config.allowCalls = true;
+        config.allowRepeatCallers = true;
+        config.allowMessages = false;
+        config.allowReminders = false;
+        config.allowEvents = false;
+        config.areChannelsBypassingDnd = false;
+        config.allowCallsFrom = ZenModeConfig.SOURCE_ANYONE;
+        config.allowMessagesFrom = ZenModeConfig.SOURCE_ANYONE;
+
+        config.suppressedVisualEffects = 0;
         return config;
     }
 
