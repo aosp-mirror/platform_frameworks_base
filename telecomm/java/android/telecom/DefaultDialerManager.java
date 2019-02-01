@@ -28,11 +28,15 @@ import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Class for managing the default dialer application that will receive incoming calls, and be
@@ -71,19 +75,15 @@ public class DefaultDialerManager {
             int user) {
         long identity = Binder.clearCallingIdentity();
         try {
+            RoleManagerCallback.Future cb = new RoleManagerCallback.Future();
             context.getSystemService(RoleManager.class).addRoleHolderAsUser(
                     RoleManager.ROLE_DIALER, packageName, UserHandle.of(user),
-                    AsyncTask.THREAD_POOL_EXECUTOR, new RoleManagerCallback() {
-                        @Override
-                        public void onSuccess() {}
-
-                        @Override
-                        public void onFailure() {
-                            Log.w(TAG, "Failed to set default dialer to %s for user %s",
-                                    packageName, user);
-                        }
-                    });
+                    AsyncTask.THREAD_POOL_EXECUTOR, cb);
+            cb.get(5, TimeUnit.SECONDS);
             return true;
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            Slog.e(TAG, "Failed to set default dialer to " + packageName + " for user " + user, e);
+            return false;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
