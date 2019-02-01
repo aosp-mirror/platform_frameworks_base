@@ -33,8 +33,8 @@ import android.net.IIpMemoryStore;
 import android.net.ipmemorystore.Blob;
 import android.net.ipmemorystore.IOnBlobRetrievedListener;
 import android.net.ipmemorystore.IOnL2KeyResponseListener;
-import android.net.ipmemorystore.IOnNetworkAttributesRetrieved;
-import android.net.ipmemorystore.IOnSameNetworkResponseListener;
+import android.net.ipmemorystore.IOnNetworkAttributesRetrievedListener;
+import android.net.ipmemorystore.IOnSameL3NetworkResponseListener;
 import android.net.ipmemorystore.IOnStatusListener;
 import android.net.ipmemorystore.NetworkAttributes;
 import android.net.ipmemorystore.NetworkAttributesParcelable;
@@ -297,16 +297,16 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      */
     @Override
     public void isSameNetwork(@Nullable final String l2Key1, @Nullable final String l2Key2,
-            @Nullable final IOnSameNetworkResponseListener listener) {
+            @Nullable final IOnSameL3NetworkResponseListener listener) {
         if (null == listener) return;
         mExecutor.execute(() -> {
             try {
                 if (null == l2Key1 || null == l2Key2) {
-                    listener.onSameNetworkResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    listener.onSameL3NetworkResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
                     return;
                 }
                 if (null == mDb) {
-                    listener.onSameNetworkResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    listener.onSameL3NetworkResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
                     return;
                 }
                 try {
@@ -315,16 +315,16 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
                     final NetworkAttributes attr2 =
                             IpMemoryStoreDatabase.retrieveNetworkAttributes(mDb, l2Key2);
                     if (null == attr1 || null == attr2) {
-                        listener.onSameNetworkResponse(makeStatus(SUCCESS),
+                        listener.onSameL3NetworkResponse(makeStatus(SUCCESS),
                                 new SameL3NetworkResponse(l2Key1, l2Key2,
                                         -1f /* never connected */).toParcelable());
                         return;
                     }
                     final float confidence = attr1.getNetworkGroupSamenessConfidence(attr2);
-                    listener.onSameNetworkResponse(makeStatus(SUCCESS),
+                    listener.onSameL3NetworkResponse(makeStatus(SUCCESS),
                             new SameL3NetworkResponse(l2Key1, l2Key2, confidence).toParcelable());
                 } catch (Exception e) {
-                    listener.onSameNetworkResponse(makeStatus(ERROR_GENERIC), null);
+                    listener.onSameL3NetworkResponse(makeStatus(ERROR_GENERIC), null);
                 }
             } catch (final RemoteException e) {
                 // Client at the other end died
@@ -343,7 +343,7 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      */
     @Override
     public void retrieveNetworkAttributes(@Nullable final String l2Key,
-            @Nullable final IOnNetworkAttributesRetrieved listener) {
+            @Nullable final IOnNetworkAttributesRetrievedListener listener) {
         if (null == listener) return;
         mExecutor.execute(() -> {
             try {
