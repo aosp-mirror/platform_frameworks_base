@@ -1694,6 +1694,8 @@ package android.permission {
 
   public final class PermissionControllerManager {
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
+    field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
+    field public static final int COUNT_WHEN_SYSTEM = 2; // 0x2
     field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2
     field public static final int REASON_MALWARE = 1; // 0x1
   }
