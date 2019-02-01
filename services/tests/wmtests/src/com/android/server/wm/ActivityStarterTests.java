@@ -672,7 +672,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // caller is temp whitelisted
         callerApp.setAllowBackgroundActivityStarts(callerIsTempWhitelisted);
         // caller is instrumenting with background activity starts privileges
-        callerApp.setInstrumentingWithBackgroundActivityStartPrivileges(
+        callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);
 
         final ActivityOptions options = spy(ActivityOptions.makeBasic());

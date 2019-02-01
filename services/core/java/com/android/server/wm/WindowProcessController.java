@@ -364,21 +364,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mAllowBackgroundActivityStarts;
     }
 
-    public void setInstrumenting(boolean instrumenting) {
+    public void setInstrumenting(boolean instrumenting,
+            boolean hasBackgroundActivityStartPrivileges) {
         mInstrumenting = instrumenting;
+        mInstrumentingWithBackgroundActivityStartPrivileges = hasBackgroundActivityStartPrivileges;
     }
 
     boolean isInstrumenting() {
         return mInstrumenting;
-    }
-
-    /**
-     * {@see isInstrumentingWithBackgroundActivityStartPrivileges}
-     */
-    public void setInstrumentingWithBackgroundActivityStartPrivileges(
-            boolean instrumentingWithBackgroundActivityStartPrivileges) {
-        mInstrumentingWithBackgroundActivityStartPrivileges =
-                instrumentingWithBackgroundActivityStartPrivileges;
     }
 
     /**
