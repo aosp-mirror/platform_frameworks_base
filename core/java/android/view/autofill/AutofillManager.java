@@ -79,7 +79,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 //TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
@@ -1769,45 +1768,6 @@ public final class AutofillManager {
     }
 
     /**
-     * Defines whether augmented autofill should be triggered for activities with such
-     * {@link android.content.ComponentName}.
-     *
-     * <p>Useful to blacklist a particular activity.
-     *
-     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
-     * service, and it's ignored if the caller isn't it.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-    //in the same package as the test, and that module is compiled with SDK=test_current
-    public void setActivityAugmentedAutofillEnabled(@NonNull ComponentName activity,
-            boolean enabled) {
-        // TODO(b/123100824): implement
-    }
-
-    /**
-     * Defines whether augmented autofill should be triggered for activities of the app with such
-     * {@code packageName}.
-     *
-     * <p>Useful to blacklist any activity from a particular app.
-     *
-     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
-     * service, and it's ignored if the caller isn't it.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-    //in the same package as the test, and that module is compiled with SDK=test_current
-    public void setPackageAugmentedAutofillEnabled(@NonNull String packageName, boolean enabled) {
-        // TODO(b/123100824): implement
-    }
-
-    /**
      * Explicitly limits augmented autofill to the given packages and activities.
      *
      * <p>When the whitelist is set, it overrides the values passed to
@@ -1836,38 +1796,6 @@ public final class AutofillManager {
     public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> activities) {
         // TODO(b/123100824): implement
-    }
-
-    /**
-     * Gets the activities where augmented autofill was disabled by
-     * {@link #setActivityAugmentedAutofillEnabled(ComponentName, boolean)}.
-     *
-     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
-     * service, and it's ignored if the caller isn't it.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @NonNull
-    public Set<ComponentName> getAugmentedAutofillDisabledActivities() {
-        return null; // TODO(b/123100824): implement
-    }
-
-    /**
-     * Gets the apps where content capture was disabled by
-     * {@link #setPackageAugmentedAutofillEnabled(String, boolean)}.
-     *
-     * <p><b>Note:</b> This method should only be called by the app providing the augmented autofill
-     * service, and it's ignored if the caller isn't it.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @NonNull
-    public Set<String> getAugmentedAutofillDisabledPackages() {
-        return null; // TODO(b/123100824): implement
     }
 
     private void requestShowFillUi(int sessionId, AutofillId id, int width, int height,
