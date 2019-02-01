@@ -58,7 +58,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
-import android.net.Uri;
 import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
@@ -1480,6 +1479,9 @@ public final class ProcessList {
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 ||
                     mService.mSafeMode == true) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
+            }
+            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0) {
+                runtimeFlags |= Zygote.PROFILE_FROM_SHELL;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
