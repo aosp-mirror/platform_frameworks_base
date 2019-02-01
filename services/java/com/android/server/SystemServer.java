@@ -56,6 +56,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
+import android.provider.Settings;
 import android.sysprop.VoldProperties;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -757,6 +758,7 @@ public final class SystemServer {
     private void startOtherServices() {
         final Context context = mSystemContext;
         VibratorService vibrator = null;
+        DynamicAndroidService dynamicAndroid = null;
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
         IpSecService ipSecService = null;
@@ -802,7 +804,7 @@ public final class SystemServer {
                     TimingsTraceLog traceLog = new TimingsTraceLog(
                             SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
                     traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
-                    if (!Process.zygoteProcess.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
+                    if (!Process.ZYGOTE_PROCESS.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
                         Slog.e(TAG, "Unable to preload default resources");
                     }
                     traceLog.traceEnd();
@@ -864,6 +866,11 @@ public final class SystemServer {
             traceBeginAndSlog("StartVibratorService");
             vibrator = new VibratorService(context);
             ServiceManager.addService("vibrator", vibrator);
+            traceEnd();
+
+            traceBeginAndSlog("StartDynamicAndroidService");
+            dynamicAndroid = new DynamicAndroidService(context);
+            ServiceManager.addService("dynamic_android", dynamicAndroid);
             traceEnd();
 
             if (!isWatch) {
@@ -964,6 +971,18 @@ public final class SystemServer {
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
+        }
+
+        // Before things start rolling, be sure we have decided whether
+        // we are in safe mode.
+        final boolean safeMode = wm.detectSafeMode();
+        if (safeMode) {
+            // If yes, immediately turn on the global setting for airplane mode.
+            // Note that this does not send broadcasts at this stage because
+            // subsystems are not yet up. We will send broadcasts later to ensure
+            // all listeners have the chance to react with special handling.
+            Settings.Global.putInt(context.getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 1);
         }
 
         StatusBarManagerService statusBar = null;
@@ -1672,9 +1691,6 @@ public final class SystemServer {
         mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
         traceEnd();
 
-        // Before things start rolling, be sure we have decided whether
-        // we are in safe mode.
-        final boolean safeMode = wm.detectSafeMode();
         if (safeMode) {
             traceBeginAndSlog("EnterSafeModeAndDisableJitCompilation");
             mActivityManagerService.enterSafeMode();
@@ -1862,6 +1878,20 @@ public final class SystemServer {
                 reportWtf("starting System UI", e);
             }
             traceEnd();
+            // Enable airplane mode in safe mode. setAirplaneMode() cannot be called
+            // earlier as it sends broadcasts to other services.
+            // TODO: This may actually be too late if radio firmware already started leaking
+            // RF before the respective services start. However, fixing this requires changes
+            // to radio firmware and interfaces.
+            if (safeMode) {
+                traceBeginAndSlog("EnableAirplaneModeInSafeMode");
+                try {
+                    connectivityF.setAirplaneMode(true);
+                } catch (Throwable e) {
+                    reportWtf("enabling Airplane Mode during Safe Mode bootup", e);
+                }
+                traceEnd();
+            }
             traceBeginAndSlog("MakeNetworkManagementServiceReady");
             try {
                 if (networkManagementF != null) networkManagementF.systemReady();

@@ -20,7 +20,9 @@ import android.content.Intent;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.telephony.CallQuality;
 import android.telephony.CellInfo;
+import android.telephony.ims.ImsReasonInfo;
 import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.ServiceState;
@@ -65,7 +67,7 @@ interface ITelephonyRegistry {
     void notifyPhysicalChannelConfigurationForSubscriber(in int subId,
             in List<PhysicalChannelConfig> configs);
     void notifyPreciseCallState(int ringingCallState, int foregroundCallState,
-            int backgroundCallState);
+            int backgroundCallState, int phoneId);
     void notifyDisconnectCause(int disconnectCause, int preciseDisconnectCause);
     void notifyPreciseDataConnectionFailed(String apnType, String apn,
             int failCause);
@@ -82,4 +84,6 @@ interface ITelephonyRegistry {
     void notifyPreferredDataSubIdChanged(int preferredSubId);
     void notifyRadioPowerStateChanged(in int state);
     void notifyEmergencyNumberList();
+    void notifyCallQualityChanged(in CallQuality callQuality, int phoneId);
+    void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
 }

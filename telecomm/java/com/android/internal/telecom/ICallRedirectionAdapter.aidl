@@ -31,5 +31,6 @@ oneway interface ICallRedirectionAdapter {
 
     void placeCallUnmodified();
 
-    void redirectCall(in Uri handle, in PhoneAccountHandle targetPhoneAccount);
+    void redirectCall(in Uri handle, in PhoneAccountHandle targetPhoneAccount,
+            boolean confirmFirst);
 }

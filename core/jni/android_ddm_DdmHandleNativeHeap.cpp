@@ -54,7 +54,7 @@ struct Header {
 namespace android {
 
 static void ReadFile(const char* path, String8& s) {
-    int fd = open(path, O_RDONLY);
+    int fd = open(path, O_RDONLY | O_CLOEXEC);
     if (fd != -1) {
         char bytes[1024];
         ssize_t byteCount;

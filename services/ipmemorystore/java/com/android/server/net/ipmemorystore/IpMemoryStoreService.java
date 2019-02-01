@@ -16,9 +16,18 @@
 
 package com.android.server.net.ipmemorystore;
 
+import static android.net.ipmemorystore.Status.ERROR_DATABASE_CANNOT_BE_OPENED;
+import static android.net.ipmemorystore.Status.ERROR_GENERIC;
+import static android.net.ipmemorystore.Status.ERROR_ILLEGAL_ARGUMENT;
+import static android.net.ipmemorystore.Status.SUCCESS;
+
+import static com.android.server.net.ipmemorystore.IpMemoryStoreDatabase.EXPIRY_ERROR;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.IIpMemoryStore;
 import android.net.ipmemorystore.Blob;
 import android.net.ipmemorystore.IOnBlobRetrievedListener;
@@ -26,7 +35,17 @@ import android.net.ipmemorystore.IOnL2KeyResponseListener;
 import android.net.ipmemorystore.IOnNetworkAttributesRetrieved;
 import android.net.ipmemorystore.IOnSameNetworkResponseListener;
 import android.net.ipmemorystore.IOnStatusListener;
+import android.net.ipmemorystore.NetworkAttributes;
 import android.net.ipmemorystore.NetworkAttributesParcelable;
+import android.net.ipmemorystore.SameL3NetworkResponse;
+import android.net.ipmemorystore.Status;
+import android.net.ipmemorystore.StatusParcelable;
+import android.net.ipmemorystore.Utils;
+import android.os.RemoteException;
+import android.util.Log;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Implementation for the IP memory store.
@@ -37,10 +56,81 @@ import android.net.ipmemorystore.NetworkAttributesParcelable;
  * @hide
  */
 public class IpMemoryStoreService extends IIpMemoryStore.Stub {
-    final Context mContext;
+    private static final String TAG = IpMemoryStoreService.class.getSimpleName();
+    private static final int MAX_CONCURRENT_THREADS = 4;
+    private static final boolean DBG = true;
 
+    @NonNull
+    final Context mContext;
+    @Nullable
+    final SQLiteDatabase mDb;
+    @NonNull
+    final ExecutorService mExecutor;
+
+    /**
+     * Construct an IpMemoryStoreService object.
+     * This constructor will block on disk access to open the database.
+     * @param context the context to access storage with.
+     */
     public IpMemoryStoreService(@NonNull final Context context) {
+        // Note that constructing the service will access the disk and block
+        // for some time, but it should make no difference to the clients. Because
+        // the interface is one-way, clients fire and forget requests, and the callback
+        // will get called eventually in any case, and the framework will wait for the
+        // service to be created to deliver subsequent requests.
+        // Avoiding this would mean the mDb member can't be final, which means the service would
+        // have to test for nullity, care for failure, and allow for a wait at every single access,
+        // which would make the code a lot more complex and require all methods to possibly block.
         mContext = context;
+        SQLiteDatabase db;
+        final IpMemoryStoreDatabase.DbHelper helper = new IpMemoryStoreDatabase.DbHelper(context);
+        try {
+            db = helper.getWritableDatabase();
+            if (null == db) Log.e(TAG, "Unexpected null return of getWriteableDatabase");
+        } catch (final SQLException e) {
+            Log.e(TAG, "Can't open the Ip Memory Store database", e);
+            db = null;
+        } catch (final Exception e) {
+            Log.wtf(TAG, "Impossible exception Ip Memory Store database", e);
+            db = null;
+        }
+        mDb = db;
+        // The work-stealing thread pool executor will spawn threads as needed up to
+        // the max only when there is no free thread available. This generally behaves
+        // exactly like one would expect it intuitively :
+        // - When work arrives, it will spawn a new thread iff there are no available threads
+        // - When there is no work to do it will shutdown threads after a while (the while
+        //   being equal to 2 seconds (not configurable) when max threads are spun up and
+        //   twice as much for every one less thread)
+        // - When all threads are busy the work is enqueued and waits for any worker
+        //   to become available.
+        // Because the stealing pool is made for very heavily parallel execution of
+        // small tasks that spawn others, it creates a queue per thread that in this
+        // case is overhead. However, the three behaviors above make it a superior
+        // choice to cached or fixedThreadPoolExecutor, neither of which can actually
+        // enqueue a task waiting for a thread to be free. This can probably be solved
+        // with judicious subclassing of ThreadPoolExecutor, but that's a lot of dangerous
+        // complexity for little benefit in this case.
+        mExecutor = Executors.newWorkStealingPool(MAX_CONCURRENT_THREADS);
+    }
+
+    /**
+     * Shutdown the memory store service, cancelling running tasks and dropping queued tasks.
+     *
+     * This is provided to give a way to clean up, and is meant to be available in case of an
+     * emergency shutdown.
+     */
+    public void shutdown() {
+        // By contrast with ExecutorService#shutdown, ExecutorService#shutdownNow tries
+        // to cancel the existing tasks, and does not wait for completion. It does not
+        // guarantee the threads can be terminated in any given amount of time.
+        mExecutor.shutdownNow();
+        if (mDb != null) mDb.close();
+    }
+
+    /** Helper function to make a status object */
+    private StatusParcelable makeStatus(final int code) {
+        return new Status(code).toParcelable();
     }
 
     /**
@@ -57,11 +147,27 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      * Through the listener, returns the L2 key. This is useful if the L2 key was not specified.
      * If the call failed, the L2 key will be null.
      */
+    // Note that while l2Key and attributes are non-null in spirit, they are received from
+    // another process. If the remote process decides to ignore everything and send null, this
+    // process should still not crash.
     @Override
-    public void storeNetworkAttributes(@NonNull final String l2Key,
-            @NonNull final NetworkAttributesParcelable attributes,
+    public void storeNetworkAttributes(@Nullable final String l2Key,
+            @Nullable final NetworkAttributesParcelable attributes,
             @Nullable final IOnStatusListener listener) {
-        // TODO : implement this
+        // Because the parcelable is 100% mutable, the thread may not see its members initialized.
+        // Therefore either an immutable object is created on this same thread before it's passed
+        // to the executor, or there need to be a write barrier here and a read barrier in the
+        // remote thread.
+        final NetworkAttributes na = null == attributes ? null : new NetworkAttributes(attributes);
+        mExecutor.execute(() -> {
+            try {
+                final int code = storeNetworkAttributesAndBlobSync(l2Key, na,
+                        null /* clientId */, null /* name */, null /* data */);
+                if (null != listener) listener.onComplete(makeStatus(code));
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 
     /**
@@ -70,16 +176,63 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      * @param l2Key The L2 key for this network.
      * @param clientId The ID of the client.
      * @param name The name of this data.
-     * @param data The data to store.
+     * @param blob The data to store.
      * @param listener The listener that will be invoked to return the answer, or null if the
      *        is not interested in learning about success/failure.
      * Through the listener, returns a status to indicate success or failure.
      */
     @Override
-    public void storeBlob(@NonNull final String l2Key, @NonNull final String clientId,
-            @NonNull final String name, @NonNull final Blob data,
+    public void storeBlob(@Nullable final String l2Key, @Nullable final String clientId,
+            @Nullable final String name, @Nullable final Blob blob,
             @Nullable final IOnStatusListener listener) {
-        // TODO : implement this
+        final byte[] data = null == blob ? null : blob.data;
+        mExecutor.execute(() -> {
+            try {
+                final int code = storeNetworkAttributesAndBlobSync(l2Key,
+                        null /* NetworkAttributes */, clientId, name, data);
+                if (null != listener) listener.onComplete(makeStatus(code));
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
+    }
+
+    /**
+     * Helper method for storeNetworkAttributes and storeBlob.
+     *
+     * Either attributes or none of clientId, name and data may be null. This will write the
+     * passed data if non-null, and will write attributes if non-null, but in any case it will
+     * bump the relevance up.
+     * Returns a success code from Status.
+     */
+    private int storeNetworkAttributesAndBlobSync(@Nullable final String l2Key,
+            @Nullable final NetworkAttributes attributes,
+            @Nullable final String clientId,
+            @Nullable final String name, @Nullable final byte[] data) {
+        if (null == l2Key) return ERROR_ILLEGAL_ARGUMENT;
+        if (null == attributes && null == data) return ERROR_ILLEGAL_ARGUMENT;
+        if (null != data && (null == clientId || null == name)) return ERROR_ILLEGAL_ARGUMENT;
+        if (null == mDb) return ERROR_DATABASE_CANNOT_BE_OPENED;
+        try {
+            final long oldExpiry = IpMemoryStoreDatabase.getExpiry(mDb, l2Key);
+            final long newExpiry = RelevanceUtils.bumpExpiryDate(
+                    oldExpiry == EXPIRY_ERROR ? System.currentTimeMillis() : oldExpiry);
+            final int errorCode =
+                    IpMemoryStoreDatabase.storeNetworkAttributes(mDb, l2Key, newExpiry, attributes);
+            // If no blob to store, the client is interested in the result of storing the attributes
+            if (null == data) return errorCode;
+            // Otherwise it's interested in the result of storing the blob
+            return IpMemoryStoreDatabase.storeBlob(mDb, l2Key, clientId, name, data);
+        } catch (Exception e) {
+            if (DBG) {
+                Log.e(TAG, "Exception while storing for key {" + l2Key
+                        + "} ; NetworkAttributes {" + (null == attributes ? "null" : attributes)
+                        + "} ; clientId {" + (null == clientId ? "null" : clientId)
+                        + "} ; name {" + (null == name ? "null" : name)
+                        + "} ; data {" + Utils.byteArrayToString(data) + "}", e);
+            }
+        }
+        return ERROR_GENERIC;
     }
 
     /**
@@ -97,9 +250,26 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      * Through the listener, returns the L2 key if one matched, or null.
      */
     @Override
-    public void findL2Key(@NonNull final NetworkAttributesParcelable attributes,
-            @NonNull final IOnL2KeyResponseListener listener) {
-        // TODO : implement this
+    public void findL2Key(@Nullable final NetworkAttributesParcelable attributes,
+            @Nullable final IOnL2KeyResponseListener listener) {
+        if (null == listener) return;
+        mExecutor.execute(() -> {
+            try {
+                if (null == attributes) {
+                    listener.onL2KeyResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    return;
+                }
+                if (null == mDb) {
+                    listener.onL2KeyResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    return;
+                }
+                final String key = IpMemoryStoreDatabase.findClosestAttributes(mDb,
+                        new NetworkAttributes(attributes));
+                listener.onL2KeyResponse(makeStatus(SUCCESS), key);
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 
     /**
@@ -112,9 +282,40 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      * Through the listener, a SameL3NetworkResponse containing the answer and confidence.
      */
     @Override
-    public void isSameNetwork(@NonNull final String l2Key1, @NonNull final String l2Key2,
-            @NonNull final IOnSameNetworkResponseListener listener) {
-        // TODO : implement this
+    public void isSameNetwork(@Nullable final String l2Key1, @Nullable final String l2Key2,
+            @Nullable final IOnSameNetworkResponseListener listener) {
+        if (null == listener) return;
+        mExecutor.execute(() -> {
+            try {
+                if (null == l2Key1 || null == l2Key2) {
+                    listener.onSameNetworkResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    return;
+                }
+                if (null == mDb) {
+                    listener.onSameNetworkResponse(makeStatus(ERROR_ILLEGAL_ARGUMENT), null);
+                    return;
+                }
+                try {
+                    final NetworkAttributes attr1 =
+                            IpMemoryStoreDatabase.retrieveNetworkAttributes(mDb, l2Key1);
+                    final NetworkAttributes attr2 =
+                            IpMemoryStoreDatabase.retrieveNetworkAttributes(mDb, l2Key2);
+                    if (null == attr1 || null == attr2) {
+                        listener.onSameNetworkResponse(makeStatus(SUCCESS),
+                                new SameL3NetworkResponse(l2Key1, l2Key2,
+                                        -1f /* never connected */).toParcelable());
+                        return;
+                    }
+                    final float confidence = attr1.getNetworkGroupSamenessConfidence(attr2);
+                    listener.onSameNetworkResponse(makeStatus(SUCCESS),
+                            new SameL3NetworkResponse(l2Key1, l2Key2, confidence).toParcelable());
+                } catch (Exception e) {
+                    listener.onSameNetworkResponse(makeStatus(ERROR_GENERIC), null);
+                }
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 
     /**
@@ -127,9 +328,33 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
      *         the query.
      */
     @Override
-    public void retrieveNetworkAttributes(@NonNull final String l2Key,
-            @NonNull final IOnNetworkAttributesRetrieved listener) {
-        // TODO : implement this.
+    public void retrieveNetworkAttributes(@Nullable final String l2Key,
+            @Nullable final IOnNetworkAttributesRetrieved listener) {
+        if (null == listener) return;
+        mExecutor.execute(() -> {
+            try {
+                if (null == l2Key) {
+                    listener.onNetworkAttributesRetrieved(
+                            makeStatus(ERROR_ILLEGAL_ARGUMENT), l2Key, null);
+                    return;
+                }
+                if (null == mDb) {
+                    listener.onNetworkAttributesRetrieved(
+                            makeStatus(ERROR_DATABASE_CANNOT_BE_OPENED), l2Key, null);
+                    return;
+                }
+                try {
+                    final NetworkAttributes attributes =
+                            IpMemoryStoreDatabase.retrieveNetworkAttributes(mDb, l2Key);
+                    listener.onNetworkAttributesRetrieved(makeStatus(SUCCESS), l2Key,
+                            null == attributes ? null : attributes.toParcelable());
+                } catch (final Exception e) {
+                    listener.onNetworkAttributesRetrieved(makeStatus(ERROR_GENERIC), l2Key, null);
+                }
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 
     /**
@@ -146,6 +371,28 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     @Override
     public void retrieveBlob(@NonNull final String l2Key, @NonNull final String clientId,
             @NonNull final String name, @NonNull final IOnBlobRetrievedListener listener) {
-        // TODO : implement this.
+        if (null == listener) return;
+        mExecutor.execute(() -> {
+            try {
+                if (null == l2Key) {
+                    listener.onBlobRetrieved(makeStatus(ERROR_ILLEGAL_ARGUMENT), l2Key, name, null);
+                    return;
+                }
+                if (null == mDb) {
+                    listener.onBlobRetrieved(makeStatus(ERROR_DATABASE_CANNOT_BE_OPENED), l2Key,
+                            name, null);
+                    return;
+                }
+                try {
+                    final Blob b = new Blob();
+                    b.data = IpMemoryStoreDatabase.retrieveBlob(mDb, l2Key, clientId, name);
+                    listener.onBlobRetrieved(makeStatus(SUCCESS), l2Key, name, b);
+                } catch (final Exception e) {
+                    listener.onBlobRetrieved(makeStatus(ERROR_GENERIC), l2Key, name, null);
+                }
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
     }
 }

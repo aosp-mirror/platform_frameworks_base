@@ -1711,7 +1711,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-    @UnsupportedAppUsage
+    @SystemApi
     public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -3506,6 +3506,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.INetd} for communicating with the network stack
+     * @hide
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String NETD_SERVICE = "netd";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link NetworkStack} for communicating with the network stack
      * @hide
      * @see #getSystemService(String)
@@ -4293,6 +4303,14 @@ public abstract class Context {
      * @hide
      */
     public static final String TELEPHONY_RCS_SERVICE = "ircs";
+
+     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.DynamicAndroidManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String DYNAMIC_ANDROID_SERVICE = "dynamic_android";
 
     /**
      * Determine whether the given permission is allowed for a particular

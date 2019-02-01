@@ -653,4 +653,22 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Sets whether a conference is treated as a conference or a single party call.
+     * See {@link Conference#setConferenceState(boolean)} for more information.
+     *
+     * @param callId The ID of the telecom call.
+     * @param isConference {@code true} if this call should be treated as a conference,
+     * {@code false} otherwise.
+     */
+    void setConferenceState(String callId, boolean isConference) {
+        Log.v(this, "setConferenceState: %s %b", callId, isConference);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setConferenceState(callId, isConference, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }

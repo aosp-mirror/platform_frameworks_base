@@ -185,7 +185,6 @@ public interface BluetoothProfile {
     /**
      * Hearing Aid Device
      *
-     * @hide
      */
     int HEARING_AID = 21;
 

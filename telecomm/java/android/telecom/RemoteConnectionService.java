@@ -471,6 +471,12 @@ final class RemoteConnectionService {
         public void resetConnectionTime(String callId, Session.Info sessionInfo) {
             // Do nothing
         }
+
+        @Override
+        public void setConferenceState(String callId, boolean isConference,
+                Session.Info sessionInfo) {
+            // Do nothing
+        }
     };
 
     private final ConnectionServiceAdapterServant mServant =

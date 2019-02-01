@@ -24,12 +24,14 @@ import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.metrics.ValidationProbeEvent.DNS_FAILURE;
 import static android.net.metrics.ValidationProbeEvent.DNS_SUCCESS;
 import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
 import static android.net.metrics.ValidationProbeEvent.PROBE_PRIVDNS;
+import static android.net.util.NetworkStackUtils.isEmpty;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -45,7 +47,6 @@ import android.net.INetworkMonitorCallbacks;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
@@ -79,8 +80,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.Protocol;
 import com.android.internal.util.RingBufferIndices;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -93,6 +92,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -109,6 +109,8 @@ public class NetworkMonitor extends StateMachine {
     private static final boolean DBG  = true;
     private static final boolean VDBG = false;
     private static final boolean VDBG_STALL = Log.isLoggable(TAG, Log.DEBUG);
+    // TODO: use another permission for CaptivePortalLoginActivity once it has its own certificate
+    private static final String PERMISSION_NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     // Default configuration values for captive portal detection probes.
     // TODO: append a random length parameter to the default HTTPS url.
     // TODO: randomize browser version ids in the default User-Agent String.
@@ -150,29 +152,28 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
-    private static final int BASE = Protocol.BASE_NETWORK_MONITOR;
     /**
      * ConnectivityService has sent a notification to indicate that network has connected.
      * Initiates Network Validation.
      */
-    private static final int CMD_NETWORK_CONNECTED = BASE + 1;
+    private static final int CMD_NETWORK_CONNECTED = 1;
 
     /**
      * Message to self indicating it's time to evaluate a network's connectivity.
      * arg1 = Token to ignore old messages.
      */
-    private static final int CMD_REEVALUATE = BASE + 6;
+    private static final int CMD_REEVALUATE = 6;
 
     /**
      * ConnectivityService has sent a notification to indicate that network has disconnected.
      */
-    private static final int CMD_NETWORK_DISCONNECTED = BASE + 7;
+    private static final int CMD_NETWORK_DISCONNECTED = 7;
 
     /**
      * Force evaluation even if it has succeeded in the past.
      * arg1 = UID responsible for requesting this reeval.  Will be billed for data.
      */
-    private static final int CMD_FORCE_REEVALUATION = BASE + 8;
+    private static final int CMD_FORCE_REEVALUATION = 8;
 
     /**
      * Message to self indicating captive portal app finished.
@@ -181,7 +182,7 @@ public class NetworkMonitor extends StateMachine {
      *                APP_RETURN_WANTED_AS_IS
      * obj = mCaptivePortalLoggedInResponseToken as String
      */
-    private static final int CMD_CAPTIVE_PORTAL_APP_FINISHED = BASE + 9;
+    private static final int CMD_CAPTIVE_PORTAL_APP_FINISHED = 9;
 
     /**
      * Message indicating sign-in app should be launched.
@@ -190,14 +191,14 @@ public class NetworkMonitor extends StateMachine {
      * ConnectivityService when the user touches the "sign into
      * network" button in the wifi access point detail page.
      */
-    private static final int CMD_LAUNCH_CAPTIVE_PORTAL_APP = BASE + 11;
+    private static final int CMD_LAUNCH_CAPTIVE_PORTAL_APP = 11;
 
     /**
      * Retest network to see if captive portal is still in place.
      * arg1 = UID responsible for requesting this reeval.  Will be billed for data.
      *        0 indicates self-initiated, so nobody to blame.
      */
-    private static final int CMD_CAPTIVE_PORTAL_RECHECK = BASE + 12;
+    private static final int CMD_CAPTIVE_PORTAL_RECHECK = 12;
 
     /**
      * ConnectivityService notifies NetworkMonitor of settings changes to
@@ -210,20 +211,20 @@ public class NetworkMonitor extends StateMachine {
      * states, including being ignored until after an ongoing captive portal
      * validation phase is completed.
      */
-    private static final int CMD_PRIVATE_DNS_SETTINGS_CHANGED = BASE + 13;
-    private static final int CMD_EVALUATE_PRIVATE_DNS = BASE + 15;
+    private static final int CMD_PRIVATE_DNS_SETTINGS_CHANGED = 13;
+    private static final int CMD_EVALUATE_PRIVATE_DNS = 15;
 
     /**
      * Message to self indicating captive portal detection is completed.
      * obj = CaptivePortalProbeResult for detection result;
      */
-    public static final int CMD_PROBE_COMPLETE = BASE + 16;
+    public static final int CMD_PROBE_COMPLETE = 16;
 
     /**
      * ConnectivityService notifies NetworkMonitor of DNS query responses event.
      * arg1 = returncode in OnDnsEvent which indicates the response code for the DNS query.
      */
-    public static final int EVENT_DNS_NOTIFICATION = BASE + 17;
+    public static final int EVENT_DNS_NOTIFICATION = 17;
 
     // Start mReevaluateDelayMs at this value and double.
     private static final int INITIAL_REEVALUATE_DELAY_MS = 1000;
@@ -245,11 +246,9 @@ public class NetworkMonitor extends StateMachine {
     private final INetworkMonitorCallbacks mCallback;
     private final Network mNetwork;
     private final Network mNonPrivateDnsBypassNetwork;
-    private final int mNetId;
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
     private final ConnectivityManager mCm;
-    private final NetworkRequest mDefaultRequest;
     private final IpConnectivityLog mMetricsLog;
     private final Dependencies mDependencies;
 
@@ -312,17 +311,17 @@ public class NetworkMonitor extends StateMachine {
     private long mLastProbeTime;
 
     public NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
-            NetworkRequest defaultRequest, SharedLog validationLog) {
-        this(context, cb, network, defaultRequest, new IpConnectivityLog(), validationLog,
+            SharedLog validationLog) {
+        this(context, cb, network, new IpConnectivityLog(), validationLog,
                 Dependencies.DEFAULT);
     }
 
     @VisibleForTesting
     protected NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
-            NetworkRequest defaultRequest, IpConnectivityLog logger, SharedLog validationLogs,
+            IpConnectivityLog logger, SharedLog validationLogs,
             Dependencies deps) {
         // Add suffix indicating which NetworkMonitor we're talking about.
-        super(TAG + "/" + network.netId);
+        super(TAG + "/" + network.toString());
 
         // Logs with a tag of the form given just above, e.g.
         //     <timestamp>   862  2402 D NetworkMonitor/NetworkAgentInfo [WIFI () - 100]: ...
@@ -335,11 +334,9 @@ public class NetworkMonitor extends StateMachine {
         mDependencies = deps;
         mNonPrivateDnsBypassNetwork = network;
         mNetwork = deps.getPrivateDnsBypassNetwork(network);
-        mNetId = mNetwork.netId;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mCm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mDefaultRequest = defaultRequest;
 
         // CHECKSTYLE:OFF IndentationCheck
         addState(mDefaultState);
@@ -373,8 +370,7 @@ public class NetworkMonitor extends StateMachine {
         // we can ever fetch them.
         // TODO: Delete ASAP.
         mLinkProperties = new LinkProperties();
-        mNetworkCapabilities = new NetworkCapabilities();
-        mNetworkCapabilities.clearAll();
+        mNetworkCapabilities = new NetworkCapabilities(null);
     }
 
     /**
@@ -471,7 +467,7 @@ public class NetworkMonitor extends StateMachine {
 
     @Override
     protected void log(String s) {
-        if (DBG) Log.d(TAG + "/" + mNetwork.netId, s);
+        if (DBG) Log.d(TAG + "/" + mNetwork.toString(), s);
     }
 
     private void validationLog(int probeType, Object url, String msg) {
@@ -489,8 +485,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private boolean isValidationRequired() {
-        return NetworkMonitorUtils.isValidationRequired(
-                mDefaultRequest.networkCapabilities, mNetworkCapabilities);
+        return NetworkMonitorUtils.isValidationRequired(mNetworkCapabilities);
     }
 
 
@@ -689,10 +684,19 @@ public class NetworkMonitor extends StateMachine {
                                 public void appResponse(int response) {
                                     if (response == APP_RETURN_WANTED_AS_IS) {
                                         mContext.enforceCallingPermission(
-                                                android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                                                PERMISSION_NETWORK_SETTINGS,
                                                 "CaptivePortal");
                                     }
                                     sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
+                                }
+
+                                @Override
+                                public void logEvent(int eventId, String packageName)
+                                        throws RemoteException {
+                                    mContext.enforceCallingPermission(
+                                            PERMISSION_NETWORK_SETTINGS,
+                                            "CaptivePortal");
+                                    mCallback.logCaptivePortalLoginEvent(eventId, packageName);
                                 }
                             }));
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
@@ -795,7 +799,7 @@ public class NetworkMonitor extends StateMachine {
         CustomIntentReceiver(String action, int token, int what) {
             mToken = token;
             mWhat = what;
-            mAction = action + "_" + mNetId + "_" + token;
+            mAction = action + "_" + mNetwork.getNetworkHandle() + "_" + token;
             mContext.registerReceiver(this, new IntentFilter(mAction));
         }
         public PendingIntent getPendingIntent() {
@@ -1088,11 +1092,6 @@ public class NetworkMonitor extends StateMachine {
         return mDependencies.getSetting(mContext, Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
     }
 
-    private boolean getWifiScansAlwaysAvailableDisabled() {
-        return mDependencies.getSetting(
-                mContext, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0;
-    }
-
     private String getCaptivePortalServerHttpsUrl() {
         return mDependencies.getSetting(mContext,
                 Settings.Global.CAPTIVE_PORTAL_HTTPS_URL, DEFAULT_HTTPS_URL);
@@ -1157,7 +1156,10 @@ public class NetworkMonitor extends StateMachine {
                 return null;
             }
 
-            return CaptivePortalProbeSpec.parseCaptivePortalProbeSpecs(settingsValue);
+            final Collection<CaptivePortalProbeSpec> specs =
+                    CaptivePortalProbeSpec.parseCaptivePortalProbeSpecs(settingsValue);
+            final CaptivePortalProbeSpec[] specsArray = new CaptivePortalProbeSpec[specs.size()];
+            return specs.toArray(specsArray);
         } catch (Exception e) {
             // Don't let a misconfiguration bootloop the system.
             Log.e(TAG, "Error parsing configured fallback probe specs", e);
@@ -1180,7 +1182,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private CaptivePortalProbeSpec nextFallbackSpec() {
-        if (ArrayUtils.isEmpty(mCaptivePortalFallbackSpecs)) {
+        if (isEmpty(mCaptivePortalFallbackSpecs)) {
             return null;
         }
         // Randomly change spec without memory. Also randomize the first attempt.
@@ -1484,7 +1486,7 @@ public class NetworkMonitor extends StateMachine {
      */
     private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
             long requestTimestampMs, long responseTimestampMs) {
-        if (getWifiScansAlwaysAvailableDisabled()) {
+        if (!mWifiManager.isScanAlwaysAvailable()) {
             return;
         }
 
@@ -1568,7 +1570,7 @@ public class NetworkMonitor extends StateMachine {
 
     private void logNetworkEvent(int evtype) {
         int[] transports = mNetworkCapabilities.getTransportTypes();
-        mMetricsLog.log(mNetId, transports, new NetworkEvent(evtype));
+        mMetricsLog.log(mNetwork, transports, new NetworkEvent(evtype));
     }
 
     private int networkEventType(ValidationStage s, EvaluationResult r) {
@@ -1590,7 +1592,8 @@ public class NetworkMonitor extends StateMachine {
     private void maybeLogEvaluationResult(int evtype) {
         if (mEvaluationTimer.isRunning()) {
             int[] transports = mNetworkCapabilities.getTransportTypes();
-            mMetricsLog.log(mNetId, transports, new NetworkEvent(evtype, mEvaluationTimer.stop()));
+            mMetricsLog.log(mNetwork, transports,
+                    new NetworkEvent(evtype, mEvaluationTimer.stop()));
             mEvaluationTimer.reset();
         }
     }
@@ -1598,11 +1601,12 @@ public class NetworkMonitor extends StateMachine {
     private void logValidationProbe(long durationMs, int probeType, int probeResult) {
         int[] transports = mNetworkCapabilities.getTransportTypes();
         boolean isFirstValidation = validationStage().mIsFirstValidation;
-        ValidationProbeEvent ev = new ValidationProbeEvent();
-        ev.probeType = ValidationProbeEvent.makeProbeType(probeType, isFirstValidation);
-        ev.returnCode = probeResult;
-        ev.durationMs = durationMs;
-        mMetricsLog.log(mNetId, transports, ev);
+        ValidationProbeEvent ev = new ValidationProbeEvent.Builder()
+                .setProbeType(probeType, isFirstValidation)
+                .setReturnCode(probeResult)
+                .setDurationMs(durationMs)
+                .build();
+        mMetricsLog.log(mNetwork, transports, ev);
     }
 
     @VisibleForTesting
@@ -1742,7 +1746,7 @@ public class NetworkMonitor extends StateMachine {
         boolean result = false;
         // Reevaluation will generate traffic. Thus, set a minimal reevaluation timer to limit the
         // possible traffic cost in metered network.
-        if (mNetworkCapabilities.isMetered()
+        if (!mNetworkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && (SystemClock.elapsedRealtime() - getLastProbeTime()
                 < mDataStallMinEvaluateTime)) {
             return false;

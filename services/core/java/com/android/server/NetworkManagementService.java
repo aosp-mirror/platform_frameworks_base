@@ -17,13 +17,11 @@
 package com.android.server;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
-import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.SHUTDOWN;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_NONE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NONE;
@@ -40,26 +38,19 @@ import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
-import static com.android.server.NetworkManagementService.NetdResponseCode.ClatdStatusResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceGetCfgResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.IpFwdStatusResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetherDnsFwdTgtListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetherInterfaceListResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetherStatusResult;
-import static com.android.server.NetworkManagementService.NetdResponseCode.TetheringStatsListResult;
+
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetd;
-import android.net.TetherStatsParcel;
+import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
 import android.net.ITetheringStatsProvider;
+import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
 import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
@@ -69,18 +60,15 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.TetherStatsParcel;
 import android.net.UidRange;
-import android.net.UidRangeParcel;
 import android.net.util.NetdService;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkActivityListener;
 import android.os.INetworkManagementService;
-import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -91,12 +79,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
-import android.telephony.PhoneStateListener;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -109,13 +92,11 @@ import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
-import com.android.server.NativeDaemonConnector.Command;
-import com.android.server.NativeDaemonConnector.SensitiveArg;
+
 import com.google.android.collect.Maps;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -123,15 +104,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -228,6 +205,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private final SystemServices mServices;
 
     private INetd mNetdService;
+
+    private final NetdUnsolicitedEventListener mNetdUnsolicitedEventListener;
 
     private IBatteryStats mBatteryStats;
 
@@ -346,6 +325,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
+        mNetdUnsolicitedEventListener = new NetdUnsolicitedEventListener();
+
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
@@ -364,6 +345,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mFgHandler = null;
         mThread = null;
         mServices = null;
+        mNetdUnsolicitedEventListener = null;
     }
 
     static NetworkManagementService create(Context context, String socket, SystemServices services)
@@ -470,7 +452,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // our sanity-checking state.
         mActiveAlerts.remove(iface);
         mActiveQuotas.remove(iface);
-
         invokeForAllObservers(o -> o.interfaceRemoved(iface));
     }
 
@@ -484,9 +465,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a change in the data activity state of the interface
      */
-    private void notifyInterfaceClassActivity(int type, int powerState, long tsNanos,
+    private void notifyInterfaceClassActivity(int type, boolean isActive, long tsNanos,
             int uid, boolean fromRadio) {
         final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
+        int powerState = isActive
+                ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         if (isMobile) {
             if (!fromRadio) {
                 if (mMobileActivityFromRadio) {
@@ -516,9 +500,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
             }
         }
-
-        boolean isActive = powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
-                || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
 
         if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
             // Report the change in data activity.  We don't do this if this is a change
@@ -572,7 +553,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return;
             }
             // No current code examines the interface parameter in a global alert. Just pass null.
-            notifyLimitReached(LIMIT_GLOBAL_ALERT, null);
+            mDaemonHandler.post(() -> notifyLimitReached(LIMIT_GLOBAL_ALERT, null));
         }
     }
 
@@ -603,6 +584,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private void connectNativeNetdService() {
         mNetdService = mServices.getNetd();
+        try {
+            mNetdService.registerUnsolicitedEventListener(mNetdUnsolicitedEventListener);
+            if (DBG) Slog.d(TAG, "Register unsolicited event listener");
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Failed to set Netd unsolicited event listener " + e);
+        }
     }
 
     /**
@@ -729,11 +716,91 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /**
      * Notify our observers of a route change.
      */
-    private void notifyRouteChange(String action, RouteInfo route) {
-        if (action.equals("updated")) {
+    private void notifyRouteChange(boolean updated, RouteInfo route) {
+        if (updated) {
             invokeForAllObservers(o -> o.routeUpdated(route));
         } else {
             invokeForAllObservers(o -> o.routeRemoved(route));
+        }
+    }
+
+    private class NetdUnsolicitedEventListener extends INetdUnsolicitedEventListener.Stub {
+        @Override
+        public void onInterfaceClassActivityChanged(boolean isActive,
+                int label, long timestamp, int uid) throws RemoteException {
+            final long timestampNanos;
+            if (timestamp <= 0) {
+                timestampNanos = SystemClock.elapsedRealtimeNanos();
+            } else {
+                timestampNanos = timestamp;
+            }
+            mDaemonHandler.post(() ->
+                    notifyInterfaceClassActivity(label, isActive, timestampNanos, uid, false));
+        }
+
+        @Override
+        public void onQuotaLimitReached(String alertName, String ifName)
+                throws RemoteException {
+            mDaemonHandler.post(() -> notifyLimitReached(alertName, ifName));
+        }
+
+        @Override
+        public void onInterfaceDnsServerInfo(String ifName,
+                long lifetime, String[] servers) throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceDnsServerInfo(ifName, lifetime, servers));
+        }
+
+        @Override
+        public void onInterfaceAddressUpdated(String addr,
+                String ifName, int flags, int scope) throws RemoteException {
+            final LinkAddress address = new LinkAddress(addr, flags, scope);
+            mDaemonHandler.post(() -> notifyAddressUpdated(ifName, address));
+        }
+
+        @Override
+        public void onInterfaceAddressRemoved(String addr,
+                String ifName, int flags, int scope) throws RemoteException {
+            final LinkAddress address = new LinkAddress(addr, flags, scope);
+            mDaemonHandler.post(() -> notifyAddressRemoved(ifName, address));
+        }
+
+        @Override
+        public void onInterfaceAdded(String ifName) throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceAdded(ifName));
+        }
+
+        @Override
+        public void onInterfaceRemoved(String ifName) throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceRemoved(ifName));
+        }
+
+        @Override
+        public void onInterfaceChanged(String ifName, boolean up)
+                throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceStatusChanged(ifName, up));
+        }
+
+        @Override
+        public void onInterfaceLinkStateChanged(String ifName, boolean up)
+                throws RemoteException {
+            mDaemonHandler.post(() -> notifyInterfaceLinkStateChanged(ifName, up));
+        }
+
+        @Override
+        public void onRouteChanged(boolean updated,
+                String route, String gateway, String ifName) throws RemoteException {
+            final RouteInfo processRoute = new RouteInfo(new IpPrefix(route),
+                    ("".equals(gateway)) ? null : InetAddresses.parseNumericAddress(gateway),
+                    ifName);
+            mDaemonHandler.post(() -> notifyRouteChange(updated, processRoute));
+        }
+
+        @Override
+        public void onStrictCleartextDetected(int uid, String hex) throws RemoteException {
+            // Don't need to post to mDaemonHandler because the only thing
+            // that notifyCleartextNetwork does is post to a handler
+            ActivityManager.getService().notifyCleartextNetwork(uid,
+                    HexDump.hexStringToByteArray(hex));
         }
     }
 
@@ -835,9 +902,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     }
                     boolean isActive = cooked[2].equals("active");
                     notifyInterfaceClassActivity(Integer.parseInt(cooked[3]),
-                            isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
-                            : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                            timestampNanos, processUid, false);
+                            isActive, timestampNanos, processUid, false);
                     return true;
                     // break;
             case NetdResponseCode.InterfaceAddressChange:
@@ -924,7 +989,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                             InetAddress gateway = null;
                             if (via != null) gateway = InetAddress.parseNumericAddress(via);
                             RouteInfo route = new RouteInfo(new IpPrefix(cooked[3]), gateway, dev);
-                            notifyRouteChange(cooked[2], route);
+                            notifyRouteChange(cooked[2].equals("updated"), route);
                             return true;
                         } catch (IllegalArgumentException e) {}
                     }
@@ -1387,13 +1452,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (ConnectivityManager.isNetworkTypeMobile(type)) {
                 mNetworkActive = false;
             }
-            mDaemonHandler.post(new Runnable() {
-                @Override public void run() {
-                    notifyInterfaceClassActivity(type,
-                            DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
-                            SystemClock.elapsedRealtimeNanos(), -1, false);
-                }
-            });
+            mDaemonHandler.post(() -> notifyInterfaceClassActivity(type, true,
+                    SystemClock.elapsedRealtimeNanos(), -1, false));
         }
     }
 
@@ -1416,13 +1476,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 throw new IllegalStateException(e);
             }
             mActiveIdleTimers.remove(iface);
-            mDaemonHandler.post(new Runnable() {
-                @Override public void run() {
-                    notifyInterfaceClassActivity(params.type,
-                            DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                            SystemClock.elapsedRealtimeNanos(), -1, false);
-                }
-            });
+            mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type, false,
+                    SystemClock.elapsedRealtimeNanos(), -1, false));
         }
     }
 
@@ -2143,28 +2198,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         final int uid = Binder.getCallingUid();
         if (uid != Process.SYSTEM_UID) {
             throw new SecurityException("Only available to AID_SYSTEM");
-        }
-    }
-
-    @Override
-    public void startClatd(String interfaceName) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.clatdStart(interfaceName);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void stopClatd(String interfaceName) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.clatdStop(interfaceName);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
         }
     }
 

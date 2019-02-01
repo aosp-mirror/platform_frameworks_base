@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.annotation.SystemApi;
 import android.os.RemoteException;
+import android.telephony.CallQuality;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 
@@ -608,6 +609,19 @@ public class ImsCallSessionListener {
     public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
         try {
             mListener.callSessionRttAudioIndicatorChanged(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * The call quality has changed.
+     *
+     * @param callQuality The new call quality
+     */
+    public void callQualityChanged(CallQuality callQuality) {
+        try {
+            mListener.callQualityChanged(callQuality);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

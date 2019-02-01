@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.NetworkRegistrationState.Domain;
+import android.telephony.NetworkRegistrationState.NRStatus;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
@@ -169,7 +170,8 @@ public class ServiceState implements Parcelable {
                     RIL_RADIO_TECHNOLOGY_GSM,
                     RIL_RADIO_TECHNOLOGY_TD_SCDMA,
                     RIL_RADIO_TECHNOLOGY_IWLAN,
-                    RIL_RADIO_TECHNOLOGY_LTE_CA})
+                    RIL_RADIO_TECHNOLOGY_LTE_CA,
+                    RIL_RADIO_TECHNOLOGY_NR})
     public @interface RilRadioTechnology {}
     /**
      * Available radio technologies for GSM, UMTS and CDMA.
@@ -538,7 +540,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public int getDataRegState() {
         return mDataRegState;
     }
@@ -1358,6 +1360,18 @@ public class ServiceState implements Parcelable {
     }
 
     /**
+     * Get the NR 5G status of the mobile data network.
+     * @return the NR 5G status.
+     * @hide
+     */
+    public @NRStatus int getNrStatus() {
+        final NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState == null) return NetworkRegistrationState.NR_STATUS_NONE;
+        return regState.getNrStatus();
+    }
+
+    /**
      * @param nrFrequencyRange the frequency range of 5G NR.
      * @hide
      */
@@ -1410,47 +1424,49 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public static int rilRadioTechnologyToNetworkType(@RilRadioTechnology int rt) {
-        switch(rt) {
-        case ServiceState.RIL_RADIO_TECHNOLOGY_GPRS:
-            return TelephonyManager.NETWORK_TYPE_GPRS;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_EDGE:
-            return TelephonyManager.NETWORK_TYPE_EDGE;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_UMTS:
-            return TelephonyManager.NETWORK_TYPE_UMTS;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA:
-            return TelephonyManager.NETWORK_TYPE_HSDPA;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA:
-            return TelephonyManager.NETWORK_TYPE_HSUPA;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_HSPA:
-            return TelephonyManager.NETWORK_TYPE_HSPA;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_IS95A:
-        case ServiceState.RIL_RADIO_TECHNOLOGY_IS95B:
-            return TelephonyManager.NETWORK_TYPE_CDMA;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT:
-            return TelephonyManager.NETWORK_TYPE_1xRTT;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0:
-            return TelephonyManager.NETWORK_TYPE_EVDO_0;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A:
-            return TelephonyManager.NETWORK_TYPE_EVDO_A;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B:
-            return TelephonyManager.NETWORK_TYPE_EVDO_B;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD:
-            return TelephonyManager.NETWORK_TYPE_EHRPD;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_LTE:
-            return TelephonyManager.NETWORK_TYPE_LTE;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP:
-            return TelephonyManager.NETWORK_TYPE_HSPAP;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_GSM:
-            return TelephonyManager.NETWORK_TYPE_GSM;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA:
-            return TelephonyManager.NETWORK_TYPE_TD_SCDMA;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN:
-            return TelephonyManager.NETWORK_TYPE_IWLAN;
-        case ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA:
-            return TelephonyManager.NETWORK_TYPE_LTE_CA;
-        default:
-            return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    public static int rilRadioTechnologyToNetworkType(@RilRadioTechnology int rat) {
+        switch(rat) {
+            case ServiceState.RIL_RADIO_TECHNOLOGY_GPRS:
+                return TelephonyManager.NETWORK_TYPE_GPRS;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_EDGE:
+                return TelephonyManager.NETWORK_TYPE_EDGE;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_UMTS:
+                return TelephonyManager.NETWORK_TYPE_UMTS;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA:
+                return TelephonyManager.NETWORK_TYPE_HSDPA;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA:
+                return TelephonyManager.NETWORK_TYPE_HSUPA;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_HSPA:
+                return TelephonyManager.NETWORK_TYPE_HSPA;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_IS95A:
+            case ServiceState.RIL_RADIO_TECHNOLOGY_IS95B:
+                return TelephonyManager.NETWORK_TYPE_CDMA;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT:
+                return TelephonyManager.NETWORK_TYPE_1xRTT;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0:
+                return TelephonyManager.NETWORK_TYPE_EVDO_0;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A:
+                return TelephonyManager.NETWORK_TYPE_EVDO_A;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B:
+                return TelephonyManager.NETWORK_TYPE_EVDO_B;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD:
+                return TelephonyManager.NETWORK_TYPE_EHRPD;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_LTE:
+                return TelephonyManager.NETWORK_TYPE_LTE;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP:
+                return TelephonyManager.NETWORK_TYPE_HSPAP;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_GSM:
+                return TelephonyManager.NETWORK_TYPE_GSM;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA:
+                return TelephonyManager.NETWORK_TYPE_TD_SCDMA;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN:
+                return TelephonyManager.NETWORK_TYPE_IWLAN;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA:
+                return TelephonyManager.NETWORK_TYPE_LTE_CA;
+            case ServiceState.RIL_RADIO_TECHNOLOGY_NR:
+                return TelephonyManager.NETWORK_TYPE_NR;
+            default:
+                return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
     }
 
@@ -1530,7 +1546,6 @@ public class ServiceState implements Parcelable {
                 return ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN;
         }
     }
-
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -1616,8 +1631,9 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public static boolean bearerBitmapHasCdma(int radioTechnologyBitmap) {
-        return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK & radioTechnologyBitmap) != 0;
+    public static boolean bearerBitmapHasCdma(int networkTypeBitmask) {
+        return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK
+                & convertNetworkTypeBitmaskToBearerBitmask(networkTypeBitmask)) != 0;
     }
 
     /** @hide */

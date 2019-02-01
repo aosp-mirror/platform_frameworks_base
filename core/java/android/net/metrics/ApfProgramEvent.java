@@ -17,6 +17,8 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,11 +38,15 @@ import java.util.List;
  * the APF program in place with a new APF program.
  * {@hide}
  */
-public final class ApfProgramEvent implements Parcelable {
+@TestApi
+@SystemApi
+public final class ApfProgramEvent implements IpConnectivityLog.Event {
 
     // Bitflag constants describing what an Apf program filters.
     // Bits are indexeds from LSB to MSB, starting at index 0.
+    /** @hide */
     public static final int FLAG_MULTICAST_FILTER_ON = 0;
+    /** @hide */
     public static final int FLAG_HAS_IPV4_ADDRESS    = 1;
 
     /** {@hide} */
@@ -48,21 +54,33 @@ public final class ApfProgramEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
 
+    /** @hide */
     @UnsupportedAppUsage
-    public long lifetime;       // Maximum computed lifetime of the program in seconds
+    public final long lifetime;       // Maximum computed lifetime of the program in seconds
+    /** @hide */
     @UnsupportedAppUsage
-    public long actualLifetime; // Effective program lifetime in seconds
+    public final long actualLifetime; // Effective program lifetime in seconds
+    /** @hide */
     @UnsupportedAppUsage
-    public int filteredRas;     // Number of RAs filtered by the APF program
+    public final int filteredRas;     // Number of RAs filtered by the APF program
+    /** @hide */
     @UnsupportedAppUsage
-    public int currentRas;      // Total number of current RAs at generation time
+    public final int currentRas;      // Total number of current RAs at generation time
+    /** @hide */
     @UnsupportedAppUsage
-    public int programLength;   // Length of the APF program in bytes
+    public final int programLength;   // Length of the APF program in bytes
+    /** @hide */
     @UnsupportedAppUsage
-    public int flags;           // Bitfield compound of FLAG_* constants
+    public final int flags;           // Bitfield compound of FLAG_* constants
 
-    @UnsupportedAppUsage
-    public ApfProgramEvent() {
+    private ApfProgramEvent(long lifetime, long actualLifetime, int filteredRas, int currentRas,
+            int programLength, int flags) {
+        this.lifetime = lifetime;
+        this.actualLifetime = actualLifetime;
+        this.filteredRas = filteredRas;
+        this.currentRas = currentRas;
+        this.programLength = programLength;
+        this.flags = flags;
     }
 
     private ApfProgramEvent(Parcel in) {
@@ -74,6 +92,75 @@ public final class ApfProgramEvent implements Parcelable {
         this.flags = in.readInt();
     }
 
+    /**
+     * Utility to create an instance of {@link ApfProgramEvent}.
+     */
+    public static class Builder {
+        private long mLifetime;
+        private long mActualLifetime;
+        private int mFilteredRas;
+        private int mCurrentRas;
+        private int mProgramLength;
+        private int mFlags;
+
+        /**
+         * Set the maximum computed lifetime of the program in seconds.
+         */
+        public Builder setLifetime(long lifetime) {
+            mLifetime = lifetime;
+            return this;
+        }
+
+        /**
+         * Set the effective program lifetime in seconds.
+         */
+        public Builder setActualLifetime(long lifetime) {
+            mActualLifetime = lifetime;
+            return this;
+        }
+
+        /**
+         * Set the number of RAs filtered by the APF program.
+         */
+        public Builder setFilteredRas(int filteredRas) {
+            mFilteredRas = filteredRas;
+            return this;
+        }
+
+        /**
+         * Set the total number of current RAs at generation time.
+         */
+        public Builder setCurrentRas(int currentRas) {
+            mCurrentRas = currentRas;
+            return this;
+        }
+
+        /**
+         * Set the length of the APF program in bytes.
+         */
+        public Builder setProgramLength(int programLength) {
+            mProgramLength = programLength;
+            return this;
+        }
+
+        /**
+         * Set the flags describing what an Apf program filters.
+         */
+        public Builder setFlags(boolean hasIPv4, boolean multicastFilterOn) {
+            mFlags = flagsFor(hasIPv4, multicastFilterOn);
+            return this;
+        }
+
+        /**
+         * Build a new {@link ApfProgramEvent}.
+         */
+        public ApfProgramEvent build() {
+            return new ApfProgramEvent(mLifetime, mActualLifetime, mFilteredRas, mCurrentRas,
+                    mProgramLength, mFlags);
+        }
+    }
+
+    /** @hide */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(lifetime);
@@ -84,6 +171,7 @@ public final class ApfProgramEvent implements Parcelable {
         out.writeInt(flags);
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
@@ -96,6 +184,7 @@ public final class ApfProgramEvent implements Parcelable {
                 programLength, actualLifetime, lifetimeString, namesOf(flags));
     }
 
+    /** @hide */
     public static final Parcelable.Creator<ApfProgramEvent> CREATOR
             = new Parcelable.Creator<ApfProgramEvent>() {
         public ApfProgramEvent createFromParcel(Parcel in) {
@@ -107,6 +196,7 @@ public final class ApfProgramEvent implements Parcelable {
         }
     };
 
+    /** @hide */
     @UnsupportedAppUsage
     public static @Flags int flagsFor(boolean hasIPv4, boolean multicastFilterOn) {
         int bitfield = 0;

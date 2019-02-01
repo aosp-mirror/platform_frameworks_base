@@ -110,6 +110,7 @@ public final class AvailableNetworkInfo implements Parcelable {
     private AvailableNetworkInfo(Parcel in) {
         mSubId = in.readInt();
         mPriority = in.readInt();
+        mMccMncs = new ArrayList<>();
         in.readStringList(mMccMncs);
     }
 

@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.net.LinkAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.data.ApnSetting.ProtocolType;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public final class DataCallResponse implements Parcelable {
     private final int mSuggestedRetryTime;
     private final int mCid;
     private final int mActive;
-    private final String mType;
+    private final int mProtocolType;
     private final String mIfname;
     private final List<LinkAddress> mAddresses;
     private final List<InetAddress> mDnses;
@@ -52,10 +53,9 @@ public final class DataCallResponse implements Parcelable {
      * @param status Data call fail cause. 0 indicates no error.
      * @param suggestedRetryTime The suggested data retry time in milliseconds.
      * @param cid The unique id of the data connection.
-     * @param active Data connection active status. 0 = inactive, 1 = active/physical link down,
-     *               2 = active/physical link up.
-     * @param type The connection protocol, should be one of the PDP_type values in TS 27.007
-     *             section 10.1.1. For example, "IP", "IPV6", "IPV4V6", or "PPP".
+     * @param active Data connection active status. 0 = inactive, 1 = dormant, 2 = active.
+     * @param protocolType The connection protocol, should be one of the PDP_type values in 3GPP
+     *                     TS 27.007 section 10.1.1. For example, "IP", "IPV6", "IPV4V6", or "PPP".
      * @param ifname The network interface name.
      * @param addresses A list of addresses with optional "/" prefix length, e.g.,
      *                  "192.0.1.3" or "192.0.1.11/16 2001:db8::1/64". Typically 1 IPv4 or 1 IPv6 or
@@ -72,7 +72,7 @@ public final class DataCallResponse implements Parcelable {
      *            either not sent a value or sent an invalid value.
      */
     public DataCallResponse(int status, int suggestedRetryTime, int cid, int active,
-                            @Nullable String type, @Nullable String ifname,
+                            @ProtocolType int protocolType, @Nullable String ifname,
                             @Nullable List<LinkAddress> addresses,
                             @Nullable List<InetAddress> dnses,
                             @Nullable List<InetAddress> gateways,
@@ -81,7 +81,7 @@ public final class DataCallResponse implements Parcelable {
         mSuggestedRetryTime = suggestedRetryTime;
         mCid = cid;
         mActive = active;
-        mType = (type == null) ? "" : type;
+        mProtocolType = protocolType;
         mIfname = (ifname == null) ? "" : ifname;
         mAddresses = (addresses == null) ? new ArrayList<>() : addresses;
         mDnses = (dnses == null) ? new ArrayList<>() : dnses;
@@ -95,7 +95,7 @@ public final class DataCallResponse implements Parcelable {
         mSuggestedRetryTime = source.readInt();
         mCid = source.readInt();
         mActive = source.readInt();
-        mType = source.readString();
+        mProtocolType = source.readInt();
         mIfname = source.readString();
         mAddresses = new ArrayList<>();
         source.readList(mAddresses, LinkAddress.class.getClassLoader());
@@ -124,16 +124,15 @@ public final class DataCallResponse implements Parcelable {
     public int getCallId() { return mCid; }
 
     /**
-     * @return 0 = inactive, 1 = active/physical link down, 2 = active/physical link up.
+     * @return 0 = inactive, 1 = dormant, 2 = active.
      */
     public int getActive() { return mActive; }
 
     /**
-     * @return The connection protocol, should be one of the PDP_type values in TS 27.007 section
-     * 10.1.1. For example, "IP", "IPV6", "IPV4V6", or "PPP".
+     * @return The connection protocol type.
      */
-    @NonNull
-    public String getType() { return mType; }
+    @ProtocolType
+    public int getProtocolType() { return mProtocolType; }
 
     /**
      * @return The network interface name.
@@ -182,7 +181,7 @@ public final class DataCallResponse implements Parcelable {
            .append(" retry=").append(mSuggestedRetryTime)
            .append(" cid=").append(mCid)
            .append(" active=").append(mActive)
-           .append(" type=").append(mType)
+           .append(" protocolType=").append(mProtocolType)
            .append(" ifname=").append(mIfname)
            .append(" addresses=").append(mAddresses)
            .append(" dnses=").append(mDnses)
@@ -206,7 +205,7 @@ public final class DataCallResponse implements Parcelable {
                 && this.mSuggestedRetryTime == other.mSuggestedRetryTime
                 && this.mCid == other.mCid
                 && this.mActive == other.mActive
-                && this.mType.equals(other.mType)
+                && this.mProtocolType == other.mProtocolType
                 && this.mIfname.equals(other.mIfname)
                 && mAddresses.size() == other.mAddresses.size()
                 && mAddresses.containsAll(other.mAddresses)
@@ -221,8 +220,8 @@ public final class DataCallResponse implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus, mSuggestedRetryTime, mCid, mActive, mType, mIfname, mAddresses,
-                mDnses, mGateways, mPcscfs, mMtu);
+        return Objects.hash(mStatus, mSuggestedRetryTime, mCid, mActive, mProtocolType, mIfname,
+                mAddresses, mDnses, mGateways, mPcscfs, mMtu);
     }
 
     @Override
@@ -236,7 +235,7 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mSuggestedRetryTime);
         dest.writeInt(mCid);
         dest.writeInt(mActive);
-        dest.writeString(mType);
+        dest.writeInt(mProtocolType);
         dest.writeString(mIfname);
         dest.writeList(mAddresses);
         dest.writeList(mDnses);

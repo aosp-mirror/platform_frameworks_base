@@ -78,20 +78,21 @@ checkbuild: doc-comment-check-docs
 update-api: doc-comment-check-docs
 
 # ==== hiddenapi lists =======================================
+ifneq ($(UNSAFE_DISABLE_HIDDENAPI_FLAGS),true)
 .KATI_RESTAT: $(INTERNAL_PLATFORM_HIDDENAPI_FLAGS)
+$(INTERNAL_PLATFORM_HIDDENAPI_FLAGS): \
+    PRIVATE_FLAGS_INPUTS := $(PRIVATE_FLAGS_INPUTS) $(SOONG_HIDDENAPI_FLAGS)
 $(INTERNAL_PLATFORM_HIDDENAPI_FLAGS): \
     frameworks/base/tools/hiddenapi/generate_hiddenapi_lists.py \
     frameworks/base/config/hiddenapi-greylist.txt \
     frameworks/base/config/hiddenapi-greylist-max-p.txt \
     frameworks/base/config/hiddenapi-greylist-max-o.txt \
     frameworks/base/config/hiddenapi-force-blacklist.txt \
-    $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
-    $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
-    $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
+    $(INTERNAL_PLATFORM_HIDDENAPI_STUB_FLAGS) \
+    $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
+    $(SOONG_HIDDENAPI_FLAGS)
 	frameworks/base/tools/hiddenapi/generate_hiddenapi_lists.py \
-	    --public $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
-	    --private $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
-	    --csv $(PRIVATE_FLAGS_INPUTS) \
+	    --csv $(INTERNAL_PLATFORM_HIDDENAPI_STUB_FLAGS) $(PRIVATE_FLAGS_INPUTS) \
 	    --greylist frameworks/base/config/hiddenapi-greylist.txt \
 	    --greylist-ignore-conflicts $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
 	    --greylist-max-p frameworks/base/config/hiddenapi-greylist-max-p.txt \
@@ -108,6 +109,7 @@ $(INTERNAL_PLATFORM_HIDDENAPI_GREYLIST_METADATA): \
 
 $(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_FLAGS))
 $(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_GREYLIST_METADATA))
+endif  # UNSAFE_DISABLE_HIDDENAPI_FLAGS
 
 # Include subdirectory makefiles
 # ============================================================

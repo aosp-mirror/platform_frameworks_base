@@ -17,7 +17,8 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -28,11 +29,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * An event recorded by IpManager when IP provisioning completes for a network or
+ * An event recorded by IpClient when IP provisioning completes for a network or
  * when a network disconnects.
  * {@hide}
  */
-public final class IpManagerEvent implements Parcelable {
+@SystemApi
+@TestApi
+public final class IpManagerEvent implements IpConnectivityLog.Event {
 
     public static final int PROVISIONING_OK                       = 1;
     public static final int PROVISIONING_FAIL                     = 2;
@@ -43,6 +46,7 @@ public final class IpManagerEvent implements Parcelable {
     public static final int ERROR_INVALID_PROVISIONING            = 7;
     public static final int ERROR_INTERFACE_NOT_FOUND             = 8;
 
+    /** @hide */
     @IntDef(value = {
             PROVISIONING_OK, PROVISIONING_FAIL, COMPLETE_LIFECYCLE,
             ERROR_STARTING_IPV4, ERROR_STARTING_IPV6, ERROR_STARTING_IPREACHABILITYMONITOR,
@@ -51,10 +55,11 @@ public final class IpManagerEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
 
+    /** @hide */
     public final @EventType int eventType;
+    /** @hide */
     public final long durationMs;
 
-    @UnsupportedAppUsage
     public IpManagerEvent(@EventType int eventType, long duration) {
         this.eventType = eventType;
         this.durationMs = duration;
@@ -65,17 +70,20 @@ public final class IpManagerEvent implements Parcelable {
         this.durationMs = in.readLong();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(eventType);
         out.writeLong(durationMs);
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /** @hide */
     public static final Parcelable.Creator<IpManagerEvent> CREATOR
         = new Parcelable.Creator<IpManagerEvent>() {
         public IpManagerEvent createFromParcel(Parcel in) {

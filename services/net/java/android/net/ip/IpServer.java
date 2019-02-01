@@ -226,7 +226,7 @@ public class IpServer extends StateMachine {
         mNetd = deps.getNetdService();
         mStatsService = statsService;
         mCallback = callback;
-        mInterfaceCtrl = new InterfaceController(ifaceName, nMService, mNetd, mLog);
+        mInterfaceCtrl = new InterfaceController(ifaceName, mNetd, mLog);
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
         mLinkProperties = new LinkProperties();

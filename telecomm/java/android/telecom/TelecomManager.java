@@ -788,15 +788,17 @@ public class TelecomManager {
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
      * exists no user-chosen default {@code PhoneAccount}.
+     * <p>
+     * The default dialer has access to use this method.
      *
      * @return The user outgoing phone account selected by the user.
-     * @hide
      */
-    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public PhoneAccountHandle getUserSelectedOutgoingPhoneAccount() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getUserSelectedOutgoingPhoneAccount();
+                return getTelecomService().getUserSelectedOutgoingPhoneAccount(
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getUserSelectedOutgoingPhoneAccount", e);
@@ -805,10 +807,14 @@ public class TelecomManager {
     }
 
     /**
-     * Sets the user-chosen default for making outgoing phone calls.
+     * Sets the user-chosen default {@link PhoneAccountHandle} for making outgoing phone calls.
+     *
+     * @param accountHandle The {@link PhoneAccountHandle} which will be used by default for making
+     *                      outgoing voice calls.
      * @hide
      */
-    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public void setUserSelectedOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -1391,8 +1397,14 @@ public class TelecomManager {
      *
      * @return {@code true} if there is a call which will be rejected or terminated, {@code false}
      * otherwise.
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * instead.  Apps performing call screening should use the {@link CallScreeningService} API
+     * instead.
      */
+
+
     @RequiresPermission(Manifest.permission.ANSWER_PHONE_CALLS)
+    @Deprecated
     public boolean endCall() {
         try {
             if (isServiceConnected()) {
@@ -1413,11 +1425,15 @@ public class TelecomManager {
      *
      * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
      * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
+     *
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * instead.
      */
     //TODO: L-release - need to convert all invocation of ITelecmmService#answerRingingCall to use
     // this method (clockwork & gearhead).
     @RequiresPermission(anyOf =
             {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
+    @Deprecated
     public void acceptRingingCall() {
         try {
             if (isServiceConnected()) {
@@ -1436,9 +1452,12 @@ public class TelecomManager {
      * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
      *
      * @param videoState The desired video state to answer the call with.
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * instead.
      */
     @RequiresPermission(anyOf =
             {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
+    @Deprecated
     public void acceptRingingCall(int videoState) {
         try {
             if (isServiceConnected()) {

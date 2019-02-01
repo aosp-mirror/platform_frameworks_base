@@ -125,8 +125,11 @@ interface IConnectivityManager
 
     boolean updateLockdownVpn();
     boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
-    boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown);
+    boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown,
+            in List<String> lockdownWhitelist);
     String getAlwaysOnVpnPackage(int userId);
+    boolean isVpnLockdownEnabled(int userId);
+    List<String> getVpnLockdownWhitelist(int userId);
 
     int checkMobileProvisioning(int suggestedTimeOutMs);
 
@@ -165,6 +168,7 @@ interface IConnectivityManager
     void setAvoidUnvalidated(in Network network);
     void startCaptivePortalApp(in Network network);
 
+    boolean getAvoidBadWifi();
     int getMultipathPreference(in Network Network);
 
     NetworkRequest getDefaultRequest();
@@ -180,6 +184,10 @@ interface IConnectivityManager
     void startNattKeepalive(in Network network, int intervalSeconds, in Messenger messenger,
             in IBinder binder, String srcAddr, int srcPort, String dstAddr);
 
+    void startNattKeepaliveWithFd(in Network network, in FileDescriptor fd, int resourceId,
+            int intervalSeconds, in Messenger messenger, in IBinder binder, String srcAddr,
+            String dstAddr);
+
     void stopKeepalive(in Network network, int slot);
 
     String getCaptivePortalServerUrl();
@@ -187,4 +195,9 @@ interface IConnectivityManager
     byte[] getNetworkWatchlistConfigHash();
 
     int getConnectionOwnerUid(in ConnectionInfo connectionInfo);
+    boolean isCallerCurrentAlwaysOnVpnApp();
+    boolean isCallerCurrentAlwaysOnVpnLockdownApp();
+
+    void getLatestTetheringEntitlementValue(int type, in ResultReceiver receiver,
+            boolean showEntitlementUi, String callerPkg);
 }

@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.telecom.Connection.VideoProvider;
@@ -64,6 +65,10 @@ public abstract class Conference extends Conferenceable {
         public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {}
         public void onExtrasChanged(Conference c, Bundle extras) {}
         public void onExtrasRemoved(Conference c, List<String> keys) {}
+        public void onConferenceStateChanged(Conference c, boolean isConference) {}
+        public void onAddressChanged(Conference c, Uri newAddress, int presentation) {}
+        public void onCallerDisplayNameChanged(
+                Conference c, String callerDisplayName, int presentation) {}
     }
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -944,6 +949,62 @@ public abstract class Conference extends Conferenceable {
      * @param extras The new extras bundle.
      */
     public void onExtrasChanged(Bundle extras) {}
+
+    /**
+     * Set whether Telecom should treat this {@link Conference} as a conference call or if it
+     * should treat it as a single-party call.
+     * This method is used as part of a workaround regarding IMS conference calls and user
+     * expectation.  In IMS, once a conference is formed, the UE is connected to an IMS conference
+     * server.  If all participants of the conference drop out of the conference except for one, the
+     * UE is still connected to the IMS conference server.  At this point, the user logically
+     * assumes they're no longer in a conference, yet the underlying network actually is.
+     * To help provide a better user experiece, IMS conference calls can pretend to actually be a
+     * single-party call when the participant count drops to 1.  Although the dialer/phone app
+     * could perform this trickery, it makes sense to do this in Telephony since a fix there will
+     * ensure that bluetooth head units, auto and wearable apps all behave consistently.
+     *
+     * @param isConference {@code true} if this {@link Conference} should be treated like a
+     *      conference call, {@code false} if it should be treated like a single-party call.
+     * @hide
+     */
+    public void setConferenceState(boolean isConference) {
+        for (Listener l : mListeners) {
+            l.onConferenceStateChanged(this, isConference);
+        }
+    }
+
+    /**
+     * Sets the address of this {@link Conference}.  Used when {@link #setConferenceState(boolean)}
+     * is called to mark a conference temporarily as NOT a conference.
+     *
+     * @param address The new address.
+     * @param presentation The presentation requirements for the address.
+     *        See {@link TelecomManager} for valid values.
+     * @hide
+     */
+    public final void setAddress(Uri address, int presentation) {
+        Log.d(this, "setAddress %s", address);
+        for (Listener l : mListeners) {
+            l.onAddressChanged(this, address, presentation);
+        }
+    }
+
+    /**
+     * Sets the caller display name (CNAP) of this {@link Conference}.  Used when
+     * {@link #setConferenceState(boolean)} is called to mark a conference temporarily as NOT a
+     * conference.
+     *
+     * @param callerDisplayName The new display name.
+     * @param presentation The presentation requirements for the handle.
+     *        See {@link TelecomManager} for valid values.
+     * @hide
+     */
+    public final void setCallerDisplayName(String callerDisplayName, int presentation) {
+        Log.d(this, "setCallerDisplayName %s", callerDisplayName);
+        for (Listener l : mListeners) {
+            l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
+        }
+    }
 
     /**
      * Handles a change to extras received from Telecom.

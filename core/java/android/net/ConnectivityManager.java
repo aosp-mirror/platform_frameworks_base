@@ -15,6 +15,9 @@
  */
 package android.net;
 
+import static android.net.IpSecManager.INVALID_RESOURCE_ID;
+
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,10 +26,13 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.IpSecManager.UdpEncapsulationSocket;
+import android.net.SocketKeepalive.Callback;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -57,6 +63,7 @@ import com.android.internal.util.Protocol;
 
 import libcore.net.event.NetworkEventDispatcher;
 
+import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
@@ -65,6 +72,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Class that answers queries about the state of network connectivity. It also
@@ -255,6 +263,8 @@ public class ConnectivityManager {
      * portal login activity.
      * {@hide}
      */
+    @SystemApi
+    @TestApi
     public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC =
             "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
 
@@ -262,6 +272,8 @@ public class ConnectivityManager {
      * Key for passing a user agent string to the captive portal login activity.
      * {@hide}
      */
+    @SystemApi
+    @TestApi
     public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT =
             "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
 
@@ -1002,20 +1014,26 @@ public class ConnectivityManager {
      *                   to remove an existing always-on VPN configuration.
      * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
      *        {@code false} otherwise.
+     * @param lockdownWhitelist The list of packages that are allowed to access network directly
+     *         when VPN is in lockdown mode but is not running. Non-existent packages are ignored so
+     *         this method must be called when a package that should be whitelisted is installed or
+     *         uninstalled.
      * @return {@code true} if the package is set as always-on VPN controller;
      *         {@code false} otherwise.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
     public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
-            boolean lockdownEnabled) {
+            boolean lockdownEnabled, @Nullable List<String> lockdownWhitelist) {
         try {
-            return mService.setAlwaysOnVpnPackage(userId, vpnPackage, lockdownEnabled);
+            return mService.setAlwaysOnVpnPackage(
+                    userId, vpnPackage, lockdownEnabled, lockdownWhitelist);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    /**
+   /**
      * Returns the package name of the currently set always-on VPN application.
      * If there is no always-on VPN set, or the VPN is provided by the system instead
      * of by an app, {@code null} will be returned.
@@ -1024,9 +1042,40 @@ public class ConnectivityManager {
      *         or {@code null} if none is set.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
     public String getAlwaysOnVpnPackageForUser(int userId) {
         try {
             return mService.getAlwaysOnVpnPackage(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return whether always-on VPN is in lockdown mode.
+     *
+     * @hide
+     **/
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    public boolean isVpnLockdownEnabled(int userId) {
+        try {
+            return mService.isVpnLockdownEnabled(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+    }
+
+    /**
+     * @return the list of packages that are allowed to access network when always-on VPN is in
+     * lockdown mode but not connected. Returns {@code null} when VPN lockdown is not active.
+     *
+     * @hide
+     **/
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    public List<String> getVpnLockdownWhitelist(int userId) {
+        try {
+            return mService.getVpnLockdownWhitelist(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1694,6 +1743,8 @@ public class ConnectivityManager {
      * {@link PacketKeepaliveCallback#onStopped} if the operation was successful or
      * {@link PacketKeepaliveCallback#onError} if an error occurred.
      *
+     * @deprecated Use {@link SocketKeepalive} instead.
+     *
      * @hide
      */
     public class PacketKeepalive {
@@ -1797,6 +1848,8 @@ public class ConnectivityManager {
     /**
      * Starts an IPsec NAT-T keepalive packet with the specified parameters.
      *
+     * @deprecated Use {@link #createSocketKeepalive} instead.
+     *
      * @hide
      */
     @UnsupportedAppUsage
@@ -1813,6 +1866,62 @@ public class ConnectivityManager {
             return null;
         }
         return k;
+    }
+
+    /**
+     * Request that keepalives be started on a IPsec NAT-T socket.
+     *
+     * @param network The {@link Network} the socket is on.
+     * @param socket The socket that needs to be kept alive.
+     * @param source The source address of the {@link UdpEncapsulationSocket}.
+     * @param destination The destination address of the {@link UdpEncapsulationSocket}.
+     * @param executor The executor on which callback will be invoked. The provided {@link Executor}
+     *                 must run callback sequentially, otherwise the order of callbacks cannot be
+     *                 guaranteed.
+     * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
+     *        changes. Must be extended by applications that use this API.
+     *
+     * @return A {@link SocketKeepalive} object, which can be used to control this keepalive object.
+     **/
+    public SocketKeepalive createSocketKeepalive(@NonNull Network network,
+            @NonNull UdpEncapsulationSocket socket,
+            @NonNull InetAddress source,
+            @NonNull InetAddress destination,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Callback callback) {
+        return new NattSocketKeepalive(mService, network, socket.getFileDescriptor(),
+            socket.getResourceId(), source, destination, executor, callback);
+    }
+
+    /**
+     * Request that keepalives be started on a IPsec NAT-T socket file descriptor. Directly called
+     * by system apps which don't use IpSecService to create {@link UdpEncapsulationSocket}.
+     *
+     * @param network The {@link Network} the socket is on.
+     * @param fd The {@link FileDescriptor} that needs to be kept alive. The provided
+     *        {@link FileDescriptor} must be bound to a port and the keepalives will be sent from
+     *        that port.
+     * @param source The source address of the {@link UdpEncapsulationSocket}.
+     * @param destination The destination address of the {@link UdpEncapsulationSocket}. The
+     *        keepalive packets will always be sent to port 4500 of the given {@code destination}.
+     * @param executor The executor on which callback will be invoked. The provided {@link Executor}
+     *                 must run callback sequentially, otherwise the order of callbacks cannot be
+     *                 guaranteed.
+     * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
+     *        changes. Must be extended by applications that use this API.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD)
+    public SocketKeepalive createNattKeepalive(@NonNull Network network,
+            @NonNull FileDescriptor fd,
+            @NonNull InetAddress source,
+            @NonNull InetAddress destination,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Callback callback) {
+        return new NattSocketKeepalive(mService, network, fd, INVALID_RESOURCE_ID /* Unused */,
+                source, destination, executor, callback);
     }
 
     /**
@@ -2472,6 +2581,7 @@ public class ConnectivityManager {
     }
 
     /** {@hide} */
+    @SystemApi
     public static final int TETHER_ERROR_NO_ERROR           = 0;
     /** {@hide} */
     public static final int TETHER_ERROR_UNKNOWN_IFACE      = 1;
@@ -2494,9 +2604,13 @@ public class ConnectivityManager {
     /** {@hide} */
     public static final int TETHER_ERROR_IFACE_CFG_ERROR      = 10;
     /** {@hide} */
+    @SystemApi
     public static final int TETHER_ERROR_PROVISION_FAILED     = 11;
     /** {@hide} */
     public static final int TETHER_ERROR_DHCPSERVER_ERROR     = 12;
+    /** {@hide} */
+    @SystemApi
+    public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN  = 13;
 
     /**
      * Get a more detailed error code after a Tethering or Untethering
@@ -2513,6 +2627,65 @@ public class ConnectivityManager {
     public int getLastTetherError(String iface) {
         try {
             return mService.getLastTetherError(iface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callback for use with {@link #getLatestTetheringEntitlementValue} to find out whether
+     * entitlement succeeded.
+     * @hide
+     */
+    @SystemApi
+    public abstract static class TetheringEntitlementValueListener  {
+        /**
+         * Called to notify entitlement result.
+         *
+         * @param resultCode a int value of entitlement result. It may be one of
+         *         {@link #TETHER_ERROR_NO_ERROR},
+         *         {@link #TETHER_ERROR_PROVISION_FAILED}, or
+         *         {@link #TETHER_ERROR_ENTITLEMENT_UNKONWN}.
+         */
+        public void onEntitlementResult(int resultCode) {}
+    }
+
+    /**
+     * Get the last value of the entitlement check on this downstream. If the cached value is
+     * {@link #TETHER_ERROR_NO_ERROR} or showEntitlementUi argument is false, it just return the
+     * cached value. Otherwise, a UI-based entitlement check would be performed. It is not
+     * guaranteed that the UI-based entitlement check will complete in any specific time period
+     * and may in fact never complete. Any successful entitlement check the platform performs for
+     * any reason will update the cached value.
+     *
+     * @param type the downstream type of tethering. Must be one of
+     *         {@link #TETHERING_WIFI},
+     *         {@link #TETHERING_USB}, or
+     *         {@link #TETHERING_BLUETOOTH}.
+     * @param showEntitlementUi a boolean indicating whether to run UI-based entitlement check.
+     * @param listener an {@link TetheringEntitlementValueListener} which will be called to notify
+     *         the caller of the result of entitlement check. The listener may be called zero or
+     *         one time.
+     * @param handler {@link Handler} to specify the thread upon which the listener will be invoked.
+     * {@hide}
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void getLatestTetheringEntitlementValue(int type, boolean showEntitlementUi,
+            @NonNull final TetheringEntitlementValueListener listener, @Nullable Handler handler) {
+        Preconditions.checkNotNull(listener, "TetheringEntitlementValueListener cannot be null.");
+        ResultReceiver wrappedListener = new ResultReceiver(handler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                listener.onEntitlementResult(resultCode);
+            }
+        };
+
+        try {
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "getLatestTetheringEntitlementValue:" + pkgName);
+            mService.getLatestTetheringEntitlementValue(type, wrappedListener,
+                    showEntitlementUi, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3694,6 +3867,19 @@ public class ConnectivityManager {
     }
 
     /**
+     * Determine whether the device is configured to avoid bad wifi.
+     * @hide
+     */
+    @SystemApi
+    public boolean getAvoidBadWifi() {
+        try {
+            return mService.getAvoidBadWifi();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * It is acceptable to briefly use multipath data to provide seamless connectivity for
      * time-sensitive user-facing operations when the system default network is temporarily
      * unresponsive. The amount of data should be limited (less than one megabyte for every call to
@@ -3820,10 +4006,17 @@ public class ConnectivityManager {
     @Deprecated
     public static boolean setProcessDefaultNetwork(@Nullable Network network) {
         int netId = (network == null) ? NETID_UNSET : network.netId;
-        if (netId == NetworkUtils.getBoundNetworkForProcess()) {
-            return true;
+        boolean isSameNetId = (netId == NetworkUtils.getBoundNetworkForProcess());
+
+        if (netId != NETID_UNSET) {
+            netId = network.getNetIdForResolv();
         }
-        if (NetworkUtils.bindProcessToNetwork(netId)) {
+
+        if (!NetworkUtils.bindProcessToNetwork(netId)) {
+            return false;
+        }
+
+        if (!isSameNetId) {
             // Set HTTP proxy system properties to match network.
             // TODO: Deprecate this static method and replace it with a non-static version.
             try {
@@ -3837,10 +4030,9 @@ public class ConnectivityManager {
             // Must flush socket pool as idle sockets will be bound to previous network and may
             // cause subsequent fetches to be performed on old network.
             NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();
-            return true;
-        } else {
-            return false;
         }
+
+        return true;
     }
 
     /**

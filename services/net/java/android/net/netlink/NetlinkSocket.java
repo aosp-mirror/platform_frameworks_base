@@ -16,26 +16,25 @@
 
 package android.net.netlink;
 
+import static android.net.util.SocketUtils.makeNetlinkSocketAddress;
 import static android.system.OsConstants.AF_NETLINK;
 import static android.system.OsConstants.EIO;
 import static android.system.OsConstants.EPROTO;
 import static android.system.OsConstants.ETIMEDOUT;
+import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_RCVBUF;
 import static android.system.OsConstants.SO_RCVTIMEO;
 import static android.system.OsConstants.SO_SNDTIMEO;
-import static android.system.OsConstants.SOCK_DGRAM;
-import static android.system.OsConstants.SOL_SOCKET;
 
+import android.net.util.SocketUtils;
 import android.system.ErrnoException;
-import android.system.NetlinkSocketAddress;
 import android.system.Os;
-import android.system.StructTimeval;
 import android.util.Log;
-import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -95,7 +94,11 @@ public class NetlinkSocket {
             Log.e(TAG, errPrefix, e);
             throw new ErrnoException(errPrefix, EIO, e);
         } finally {
-            IoUtils.closeQuietly(fd);
+            try {
+                SocketUtils.closeSocket(fd);
+            } catch (IOException e) {
+                // Nothing we can do here
+            }
         }
     }
 
@@ -106,7 +109,7 @@ public class NetlinkSocket {
     }
 
     public static void connectToKernel(FileDescriptor fd) throws ErrnoException, SocketException {
-        Os.connect(fd, (SocketAddress) (new NetlinkSocketAddress(0, 0)));
+        SocketUtils.connectSocket(fd, makeNetlinkSocketAddress(0, 0));
     }
 
     private static void checkTimeout(long timeoutMs) {
@@ -125,7 +128,7 @@ public class NetlinkSocket {
             throws ErrnoException, IllegalArgumentException, InterruptedIOException {
         checkTimeout(timeoutMs);
 
-        Os.setsockoptTimeval(fd, SOL_SOCKET, SO_RCVTIMEO, StructTimeval.fromMillis(timeoutMs));
+        SocketUtils.setSocketTimeValueOption(fd, SOL_SOCKET, SO_RCVTIMEO, timeoutMs);
 
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufsize);
         int length = Os.read(fd, byteBuffer);
@@ -148,7 +151,7 @@ public class NetlinkSocket {
             FileDescriptor fd, byte[] bytes, int offset, int count, long timeoutMs)
             throws ErrnoException, IllegalArgumentException, InterruptedIOException {
         checkTimeout(timeoutMs);
-        Os.setsockoptTimeval(fd, SOL_SOCKET, SO_SNDTIMEO, StructTimeval.fromMillis(timeoutMs));
+        SocketUtils.setSocketTimeValueOption(fd, SOL_SOCKET, SO_SNDTIMEO, timeoutMs);
         return Os.write(fd, bytes, offset, count);
     }
 }

@@ -22,17 +22,18 @@ import static android.net.ConnectivityManager.TETHERING_WIFI;
 import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
-import static android.net.NetworkUtils.intToInet4AddressHTH;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.ip.IpServer.STATE_AVAILABLE;
 import static android.net.ip.IpServer.STATE_TETHERED;
 import static android.net.ip.IpServer.STATE_UNAVAILABLE;
+import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.net.INetd;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
@@ -92,6 +94,7 @@ public class IpServerTest {
     private static final int MAKE_DHCPSERVER_TIMEOUT_MS = 1000;
 
     @Mock private INetworkManagementService mNMService;
+    @Mock private INetd mNetd;
     @Mock private INetworkStatsService mStatsService;
     @Mock private IpServer.Callback mCallback;
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
@@ -112,16 +115,6 @@ public class IpServerTest {
     }
 
     private void initStateMachine(int interfaceType, boolean usingLegacyDhcp) throws Exception {
-        mIpServer = new IpServer(
-                IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog,
-                mNMService, mStatsService, mCallback, usingLegacyDhcp, mDependencies);
-        mIpServer.start();
-        // Starting the state machine always puts us in a consistent state and notifies
-        // the rest of the world that we've changed from an unknown to available state.
-        mLooper.dispatchAll();
-        reset(mNMService, mStatsService, mCallback);
-        when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
-
         doAnswer(inv -> {
             final IDhcpServerCallbacks cb = inv.getArgument(2);
             new Thread(() -> {
@@ -135,6 +128,17 @@ public class IpServerTest {
         }).when(mDependencies).makeDhcpServer(any(), mDhcpParamsCaptor.capture(), any());
         when(mDependencies.getRouterAdvertisementDaemon(any())).thenReturn(mRaDaemon);
         when(mDependencies.getInterfaceParams(IFACE_NAME)).thenReturn(TEST_IFACE_PARAMS);
+        when(mDependencies.getNetdService()).thenReturn(mNetd);
+
+        mIpServer = new IpServer(
+                IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog,
+                mNMService, mStatsService, mCallback, usingLegacyDhcp, mDependencies);
+        mIpServer.start();
+        // Starting the state machine always puts us in a consistent state and notifies
+        // the rest of the world that we've changed from an unknown to available state.
+        mLooper.dispatchAll();
+        reset(mNMService, mStatsService, mCallback);
+        when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
 
         when(mRaDaemon.start()).thenReturn(true);
     }
@@ -223,9 +227,9 @@ public class IpServerTest {
         initTetheredStateMachine(TETHERING_BLUETOOTH, null);
 
         dispatchCommand(IpServer.CMD_TETHER_UNREQUESTED);
-        InOrder inOrder = inOrder(mNMService, mStatsService, mCallback);
+        InOrder inOrder = inOrder(mNMService, mNetd, mStatsService, mCallback);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
-        inOrder.verify(mNMService).setInterfaceConfig(eq(IFACE_NAME), any());
+        inOrder.verify(mNetd).interfaceSetCfg(argThat(cfg -> IFACE_NAME.equals(cfg.ifName)));
         inOrder.verify(mCallback).updateInterfaceState(
                 mIpServer, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
         inOrder.verify(mCallback).updateLinkProperties(
@@ -318,12 +322,12 @@ public class IpServerTest {
         initTetheredStateMachine(TETHERING_BLUETOOTH, UPSTREAM_IFACE);
 
         dispatchCommand(IpServer.CMD_TETHER_UNREQUESTED);
-        InOrder inOrder = inOrder(mNMService, mStatsService, mCallback);
+        InOrder inOrder = inOrder(mNMService, mNetd, mStatsService, mCallback);
         inOrder.verify(mStatsService).forceUpdate();
         inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
-        inOrder.verify(mNMService).setInterfaceConfig(eq(IFACE_NAME), any());
+        inOrder.verify(mNetd).interfaceSetCfg(argThat(cfg -> IFACE_NAME.equals(cfg.ifName)));
         inOrder.verify(mCallback).updateInterfaceState(
                 mIpServer, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
         inOrder.verify(mCallback).updateLinkProperties(

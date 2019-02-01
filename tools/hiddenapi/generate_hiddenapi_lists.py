@@ -17,6 +17,7 @@
 Generate API lists for non-SDK API enforcement.
 """
 import argparse
+from collections import defaultdict
 import os
 import sys
 import re
@@ -27,16 +28,20 @@ FLAG_GREYLIST = "greylist"
 FLAG_BLACKLIST = "blacklist"
 FLAG_GREYLIST_MAX_O = "greylist-max-o"
 FLAG_GREYLIST_MAX_P = "greylist-max-p"
+FLAG_CORE_PLATFORM_API = "core-platform-api"
 
 # List of all known flags.
-FLAGS = [
+FLAGS_API_LIST = [
     FLAG_WHITELIST,
     FLAG_GREYLIST,
     FLAG_BLACKLIST,
     FLAG_GREYLIST_MAX_O,
     FLAG_GREYLIST_MAX_P,
 ]
-FLAGS_SET = set(FLAGS)
+ALL_FLAGS = FLAGS_API_LIST + [ FLAG_CORE_PLATFORM_API ]
+
+FLAGS_API_LIST_SET = set(FLAGS_API_LIST)
+ALL_FLAGS_SET = set(ALL_FLAGS)
 
 # Suffix used in command line args to express that only known and
 # otherwise unassigned entries should be assign the given flag.
@@ -62,7 +67,7 @@ SERIALIZATION_PATTERNS = [
 SERIALIZATION_REGEX = re.compile(r'.*->(' + '|'.join(SERIALIZATION_PATTERNS) + r')$')
 
 # Predicates to be used with filter_apis.
-IS_UNASSIGNED = lambda api, flags: not flags
+HAS_NO_API_LIST_ASSIGNED = lambda api, flags: not FLAGS_API_LIST_SET.intersection(flags)
 IS_SERIALIZATION = lambda api, flags: SERIALIZATION_REGEX.match(api)
 
 def get_args():
@@ -73,12 +78,10 @@ def get_args():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', required=True)
-    parser.add_argument('--public', required=True, help='list of all public entries')
-    parser.add_argument('--private', required=True, help='list of all private entries')
     parser.add_argument('--csv', nargs='*', default=[], metavar='CSV_FILE',
         help='CSV files to be merged into output')
 
-    for flag in FLAGS:
+    for flag in ALL_FLAGS:
         ignore_conflicts_flag = flag + FLAG_IGNORE_CONFLICTS_SUFFIX
         parser.add_argument('--' + flag, dest=flag, nargs='*', default=[], metavar='TXT_FILE',
             help='lists of entries with flag "' + flag + '"')
@@ -118,26 +121,9 @@ def write_lines(filename, lines):
         f.writelines(lines)
 
 class FlagsDict:
-    def __init__(self, public_api, private_api):
-        # Bootstrap the entries dictionary.
-
-        # Check that the two sets do not overlap.
-        public_api_set = set(public_api)
-        private_api_set = set(private_api)
-        assert public_api_set.isdisjoint(private_api_set), (
-            "Lists of public and private API overlap. " +
-            "This suggests an issue with the `hiddenapi` build tool.")
-
-        # Compute the whole key set
-        self._dict_keyset = public_api_set.union(private_api_set)
-
-        # Create a dict that creates entries for both public and private API,
-        # and assigns public API to the whitelist.
-        self._dict = {}
-        for api in public_api:
-            self._dict[api] = set([ FLAG_WHITELIST ])
-        for api in private_api:
-            self._dict[api] = set()
+    def __init__(self):
+        self._dict_keyset = set()
+        self._dict = defaultdict(set)
 
     def _check_entries_set(self, keys_subset, source):
         assert isinstance(keys_subset, set)
@@ -150,12 +136,12 @@ class FlagsDict:
 
     def _check_flags_set(self, flags_subset, source):
         assert isinstance(flags_subset, set)
-        assert flags_subset.issubset(FLAGS_SET), (
+        assert flags_subset.issubset(ALL_FLAGS_SET), (
             "Error processing: {}\n"
             "The following flags were not recognized: \n"
             "{}\n"
             "Please visit go/hiddenapi for more information.").format(
-                source, "\n".join(flags_subset - FLAGS_SET))
+                source, "\n".join(flags_subset - ALL_FLAGS_SET))
 
     def filter_apis(self, filter_fn):
         """Returns APIs which match a given predicate.
@@ -173,7 +159,7 @@ class FlagsDict:
 
     def get_valid_subset_of_unassigned_apis(self, api_subset):
         """Sanitizes a key set input to only include keys which exist in the dictionary
-        and have not been assigned any flags.
+        and have not been assigned any API list flags.
 
         Args:
             entries_subset (set/list): Key set to be sanitized.
@@ -182,7 +168,7 @@ class FlagsDict:
             Sanitized key set.
         """
         assert isinstance(api_subset, set)
-        return api_subset.intersection(self.filter_apis(IS_UNASSIGNED))
+        return api_subset.intersection(self.filter_apis(HAS_NO_API_LIST_ASSIGNED))
 
     def generate_csv(self):
         """Constructs CSV entries from a dictionary.
@@ -203,14 +189,13 @@ class FlagsDict:
             source (string): Origin of `csv_lines`. Will be printed in error messages.
 
         Throws:
-            AssertionError if parsed API signatures of flags are invalid.
+            AssertionError if parsed flags are invalid.
         """
         # Split CSV lines into arrays of values.
         csv_values = [ line.split(',') for line in csv_lines ]
 
-        # Check that all entries exist in the dict.
-        csv_keys = set([ csv[0] for csv in csv_values ])
-        self._check_entries_set(csv_keys, source)
+        # Update the full set of API signatures.
+        self._dict_keyset.update([ csv[0] for csv in csv_values ])
 
         # Check that all flags are known.
         csv_flags = set(reduce(lambda x, y: set(x).union(y), [ csv[1:] for csv in csv_values ], []))
@@ -224,7 +209,7 @@ class FlagsDict:
         """Assigns a flag to given subset of entries.
 
         Args:
-            flag (string): One of FLAGS.
+            flag (string): One of ALL_FLAGS.
             apis (set): Subset of APIs to recieve the flag.
             source (string): Origin of `entries_subset`. Will be printed in error messages.
 
@@ -245,18 +230,23 @@ def main(argv):
     # Parse arguments.
     args = vars(get_args())
 
-    flags = FlagsDict(read_lines(args["public"]), read_lines(args["private"]))
+    # Initialize API->flags dictionary.
+    flags = FlagsDict()
+
+    # Merge input CSV files into the dictionary.
+    # Do this first because CSV files produced by parsing API stubs will
+    # contain the full set of APIs. Subsequent additions from text files
+    # will be able to detect invalid entries, and/or filter all as-yet
+    # unassigned entries.
+    for filename in args["csv"]:
+        flags.parse_and_merge_csv(read_lines(filename), filename)
 
     # Combine inputs which do not require any particular order.
     # (1) Assign serialization API to whitelist.
     flags.assign_flag(FLAG_WHITELIST, flags.filter_apis(IS_SERIALIZATION))
 
-    # (2) Merge input CSV files into the dictionary.
-    for filename in args["csv"]:
-        flags.parse_and_merge_csv(read_lines(filename), filename)
-
-    # (3) Merge text files with a known flag into the dictionary.
-    for flag in FLAGS:
+    # (2) Merge text files with a known flag into the dictionary.
+    for flag in ALL_FLAGS:
         for filename in args[flag]:
             flags.assign_flag(flag, read_lines(filename), filename)
 
@@ -265,13 +255,13 @@ def main(argv):
     # (a) the entry exists, and
     # (b) it has not been assigned any other flag.
     # Because of (b), this must run after all strict assignments have been performed.
-    for flag in FLAGS:
+    for flag in ALL_FLAGS:
         for filename in args[flag + FLAG_IGNORE_CONFLICTS_SUFFIX]:
             valid_entries = flags.get_valid_subset_of_unassigned_apis(read_lines(filename))
             flags.assign_flag(flag, valid_entries, filename)
 
     # Assign all remaining entries to the blacklist.
-    flags.assign_flag(FLAG_BLACKLIST, flags.filter_apis(IS_UNASSIGNED))
+    flags.assign_flag(FLAG_BLACKLIST, flags.filter_apis(HAS_NO_API_LIST_ASSIGNED))
 
     # Write output.
     write_lines(args["output"], flags.generate_csv())

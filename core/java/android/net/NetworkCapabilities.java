@@ -712,6 +712,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     @TestApi
+    @SystemApi
     public @Transport int[] getTransportTypes() {
         return BitUtils.unpackBits(mTransportTypes);
     }
@@ -1312,6 +1313,8 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @hide
      */
+    @TestApi
+    @SystemApi
     public boolean satisfiedByNetworkCapabilities(NetworkCapabilities nc) {
         return satisfiedByNetworkCapabilities(nc, false);
     }

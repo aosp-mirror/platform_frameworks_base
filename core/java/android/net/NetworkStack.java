@@ -20,13 +20,16 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
+import android.net.ip.IIpClientCallbacks;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -45,10 +48,25 @@ import java.util.ArrayList;
  * @hide
  */
 @SystemService(Context.NETWORK_STACK_SERVICE)
+@SystemApi
+@TestApi
 public class NetworkStack {
     private static final String TAG = NetworkStack.class.getSimpleName();
 
+    /**
+     * Permission granted only to the NetworkStack APK, defined in NetworkStackStub with signature
+     * protection level.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String PERMISSION_MAINLINE_NETWORK_STACK =
+            "android.permission.MAINLINE_NETWORK_STACK";
+
+    /** @hide */
     public static final String NETWORKSTACK_PACKAGE_NAME = "com.android.mainline.networkstack";
+
+    private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
 
     @NonNull
     @GuardedBy("mPendingNetStackRequests")
@@ -57,16 +75,20 @@ public class NetworkStack {
     @GuardedBy("mPendingNetStackRequests")
     private INetworkStackConnector mConnector;
 
+    private volatile boolean mNetworkStackStartRequested = false;
+
     private interface NetworkStackCallback {
         void onNetworkStackConnected(INetworkStackConnector connector);
     }
 
+    /** @hide */
     public NetworkStack() { }
 
     /**
      * Create a DHCP server according to the specified parameters.
      *
      * <p>The server will be returned asynchronously through the provided callbacks.
+     * @hide
      */
     public void makeDhcpServer(final String ifName, final DhcpServingParamsParcel params,
             final IDhcpServerCallbacks cb) {
@@ -80,14 +102,32 @@ public class NetworkStack {
     }
 
     /**
+     * Create an IpClient on the specified interface.
+     *
+     * <p>The IpClient will be returned asynchronously through the provided callbacks.
+     * @hide
+     */
+    public void makeIpClient(String ifName, IIpClientCallbacks cb) {
+        requestConnector(connector -> {
+            try {
+                connector.makeIpClient(ifName, cb);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        });
+    }
+
+    /**
      * Create a NetworkMonitor.
      *
      * <p>The INetworkMonitor will be returned asynchronously through the provided callbacks.
+     * @hide
      */
-    public void makeNetworkMonitor(Network network, String name, INetworkMonitorCallbacks cb) {
+    public void makeNetworkMonitor(
+            NetworkParcelable network, String name, INetworkMonitorCallbacks cb) {
         requestConnector(connector -> {
             try {
-                connector.makeNetworkMonitor(network.netId, name, cb);
+                connector.makeNetworkMonitor(network, name, cb);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
@@ -132,8 +172,10 @@ public class NetworkStack {
      * the system server on devices that do not support the network stack module. The network stack
      * connector will then be delivered asynchronously to clients that requested it before it was
      * started.
+     * @hide
      */
     public void start(Context context) {
+        mNetworkStackStartRequested = true;
         // Try to bind in-process if the library is available
         IBinder connector = null;
         try {
@@ -170,13 +212,52 @@ public class NetworkStack {
         }
     }
 
-    // TODO: use this method to obtain the connector when implementing network stack operations
+    /**
+     * For non-system server clients, get the connector registered by the system server.
+     */
+    private INetworkStackConnector getRemoteConnector() {
+        // Block until the NetworkStack connector is registered in ServiceManager.
+        // <p>This is only useful for non-system processes that do not have a way to be notified of
+        // registration completion. Adding a callback system would be too heavy weight considering
+        // that the connector is registered on boot, so it is unlikely that a client would request
+        // it before it is registered.
+        // TODO: consider blocking boot on registration and simplify much of the logic in this class
+        IBinder connector;
+        try {
+            final long before = System.currentTimeMillis();
+            while ((connector = ServiceManager.getService(Context.NETWORK_STACK_SERVICE)) == null) {
+                Thread.sleep(20);
+                if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
+                    Slog.e(TAG, "Timeout waiting for NetworkStack connector");
+                    return null;
+                }
+            }
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Error waiting for NetworkStack connector", e);
+            return null;
+        }
+
+        return INetworkStackConnector.Stub.asInterface(connector);
+    }
+
     private void requestConnector(@NonNull NetworkStackCallback request) {
         // TODO: PID check.
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+        final int caller = Binder.getCallingUid();
+        if (caller != Process.SYSTEM_UID && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)) {
             // Don't even attempt to obtain the connector and give a nice error message
             throw new SecurityException(
                     "Only the system server should try to bind to the network stack.");
+        }
+
+        if (!mNetworkStackStartRequested) {
+            // The network stack is not being started in this process, e.g. this process is not
+            // the system server. Get a remote connector registered by the system server.
+            final INetworkStackConnector connector = getRemoteConnector();
+            synchronized (mPendingNetStackRequests) {
+                mConnector = connector;
+            }
+            request.onNetworkStackConnected(connector);
+            return;
         }
 
         final INetworkStackConnector connector;

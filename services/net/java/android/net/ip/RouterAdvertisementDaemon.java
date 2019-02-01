@@ -18,11 +18,15 @@ package android.net.ip;
 
 import static android.net.util.NetworkConstants.IPV6_MIN_MTU;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
-import static android.system.OsConstants.*;
+import static android.system.OsConstants.AF_INET6;
+import static android.system.OsConstants.IPPROTO_ICMPV6;
+import static android.system.OsConstants.SOCK_RAW;
+import static android.system.OsConstants.SOL_SOCKET;
+import static android.system.OsConstants.SO_BINDTODEVICE;
+import static android.system.OsConstants.SO_SNDTIMEO;
 
 import android.net.IpPrefix;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.InterfaceParams;
@@ -34,10 +38,8 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import libcore.io.IoBridge;
-import libcore.util.HexEncoding;
 
 import java.io.FileDescriptor;
-import java.io.InterruptedIOException;
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -47,7 +49,6 @@ import java.net.UnknownHostException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;

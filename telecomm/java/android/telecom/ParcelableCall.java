@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.telecom.Call.Details.CallDirection;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +65,7 @@ public final class ParcelableCall implements Parcelable {
     private final Bundle mExtras;
     private final long mCreationTimeMillis;
     private final CallIdentification mCallIdentification;
+    private final int mCallDirection;
 
     public ParcelableCall(
             String id,
@@ -92,7 +94,8 @@ public final class ParcelableCall implements Parcelable {
             Bundle intentExtras,
             Bundle extras,
             long creationTimeMillis,
-            CallIdentification callIdentification) {
+            CallIdentification callIdentification,
+            int callDirection) {
         mId = id;
         mState = state;
         mDisconnectCause = disconnectCause;
@@ -120,6 +123,7 @@ public final class ParcelableCall implements Parcelable {
         mExtras = extras;
         mCreationTimeMillis = creationTimeMillis;
         mCallIdentification = callIdentification;
+        mCallDirection = callDirection;
     }
 
     /** The unique ID of the call. */
@@ -318,6 +322,13 @@ public final class ParcelableCall implements Parcelable {
         return mCallIdentification;
     }
 
+    /**
+     * Indicates whether the call is an incoming or outgoing call.
+     */
+    public @CallDirection int getCallDirection() {
+        return mCallDirection;
+    }
+
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final Parcelable.Creator<ParcelableCall> CREATOR =
@@ -356,6 +367,7 @@ public final class ParcelableCall implements Parcelable {
             ParcelableRttCall rttCall = source.readParcelable(classLoader);
             long creationTimeMillis = source.readLong();
             CallIdentification callIdentification = source.readParcelable(classLoader);
+            int callDirection = source.readInt();
             return new ParcelableCall(
                     id,
                     state,
@@ -383,7 +395,8 @@ public final class ParcelableCall implements Parcelable {
                     intentExtras,
                     extras,
                     creationTimeMillis,
-                    callIdentification);
+                    callIdentification,
+                    callDirection);
         }
 
         @Override
@@ -429,6 +442,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeParcelable(mRttCall, 0);
         destination.writeLong(mCreationTimeMillis);
         destination.writeParcelable(mCallIdentification, 0);
+        destination.writeInt(mCallDirection);
     }
 
     @Override

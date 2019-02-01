@@ -150,7 +150,7 @@ public class WebViewZygote {
         }
 
         try {
-            sZygote = Process.zygoteProcess.startChildZygote(
+            sZygote = Process.ZYGOTE_PROCESS.startChildZygote(
                     "com.android.internal.os.WebViewZygoteInit",
                     "webview_zygote",
                     Process.WEBVIEW_ZYGOTE_UID,

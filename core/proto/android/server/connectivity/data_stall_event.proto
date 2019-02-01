@@ -1,0 +1,89 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.server.connectivity;
+option java_multiple_files = true;
+option java_outer_classname = "DataStallEventProto";
+
+enum ProbeResult {
+    UNKNOWN = 0;
+    VALID = 1;
+    INVALID = 2;
+    PORTAL = 3;
+}
+
+enum ApBand {
+    AP_BAND_UNKNOWN = 0;
+    AP_BAND_2GHZ = 1;
+    AP_BAND_5GHZ = 2;
+}
+
+// Refer to definition in ServiceState.java.
+enum RadioTech {
+  RADIO_TECHNOLOGY_UNKNOWN = 0;
+  RADIO_TECHNOLOGY_GPRS = 1;
+  RADIO_TECHNOLOGY_EDGE = 2;
+  RADIO_TECHNOLOGY_UMTS = 3;
+  RADIO_TECHNOLOGY_IS95A = 4;
+  RADIO_TECHNOLOGY_IS95B = 5;
+  RADIO_TECHNOLOGY_1XRTT = 6;
+  RADIO_TECHNOLOGY_EVDO_0 = 7;
+  RADIO_TECHNOLOGY_EVDO_A = 8;
+  RADIO_TECHNOLOGY_HSDPA = 9;
+  RADIO_TECHNOLOGY_HSUPA = 10;
+  RADIO_TECHNOLOGY_HSPA = 11;
+  RADIO_TECHNOLOGY_EVDO_B = 12;
+  RADIO_TECHNOLOGY_EHRPD = 13;
+  RADIO_TECHNOLOGY_LTE = 14;
+  RADIO_TECHNOLOGY_HSPAP = 15;
+  RADIO_TECHNOLOGY_GSM = 16;
+  RADIO_TECHNOLOGY_TD_SCDMA = 17;
+  RADIO_TECHNOLOGY_IWLAN = 18;
+  RADIO_TECHNOLOGY_LTE_CA = 19;
+  RADIO_TECHNOLOGY_NR = 20;
+}
+
+// Cellular specific information.
+message CellularData {
+    // Indicate the radio technology at the time of data stall suspected.
+    optional RadioTech rat_type = 1;
+    // True if device is in roaming network at the time of data stall suspected.
+    optional bool is_roaming = 2;
+    // Registered network MccMnc when data stall happen
+    optional string network_mccmnc = 3;
+    // Indicate the SIM card carrier.
+    optional string sim_mccmnc = 4;
+    // Signal strength level at the time of data stall suspected.
+    optional int32 signal_strength = 5;
+}
+
+// Wifi specific information.
+message WifiData {
+    // Signal strength at the time of data stall suspected.
+    // RSSI range is between -55 to -110.
+    optional int32 signal_strength = 1;
+    // AP band.
+    optional ApBand wifi_band = 2;
+}
+
+message DnsEvent {
+    // The dns return code.
+    repeated int32 dns_return_code = 1;
+    // Indicate the timestamp of the dns event.
+    repeated int64 dns_time = 2;
+}

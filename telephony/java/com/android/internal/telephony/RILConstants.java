@@ -192,30 +192,10 @@ public interface RILConstants {
     int LTE_ON_CDMA_FALSE = 0;
     int LTE_ON_CDMA_TRUE = 1;
 
-    int CDM_TTY_MODE_DISABLED = 0;
-    int CDM_TTY_MODE_ENABLED = 1;
-
-    int CDM_TTY_FULL_MODE = 1;
-    int CDM_TTY_HCO_MODE = 2;
-    int CDM_TTY_VCO_MODE = 3;
-
-    /* Setup a packet data connection. See ril.h RIL_REQUEST_SETUP_DATA_CALL */
-    int SETUP_DATA_TECH_CDMA      = 0;
-    int SETUP_DATA_TECH_GSM       = 1;
-
     int SETUP_DATA_AUTH_NONE      = 0;
     int SETUP_DATA_AUTH_PAP       = 1;
     int SETUP_DATA_AUTH_CHAP      = 2;
     int SETUP_DATA_AUTH_PAP_CHAP  = 3;
-
-    String SETUP_DATA_PROTOCOL_IP     = "IP";
-    String SETUP_DATA_PROTOCOL_IPV6   = "IPV6";
-    String SETUP_DATA_PROTOCOL_IPV4V6 = "IPV4V6";
-
-    /* NV config radio reset types. */
-    int NV_CONFIG_RELOAD_RESET = 1;
-    int NV_CONFIG_ERASE_RESET = 2;
-    int NV_CONFIG_FACTORY_RESET = 3;
 
     /* LCE service related constants. */
     int LCE_NOT_AVAILABLE = -1;
@@ -413,6 +393,7 @@ public interface RILConstants {
     int RIL_REQUEST_STOP_NETWORK_SCAN = 143;
     int RIL_REQUEST_START_KEEPALIVE = 144;
     int RIL_REQUEST_STOP_KEEPALIVE = 145;
+    int RIL_REQUEST_ENABLE_MODEM = 146;
 
     /* The following requests are not defined in RIL.h */
     int RIL_REQUEST_HAL_NON_RIL_BASE = 200;
@@ -422,6 +403,8 @@ public interface RILConstants {
     int RIL_REQUEST_SET_LINK_CAPACITY_REPORTING_CRITERIA = 203;
     int RIL_REQUEST_SET_PREFERRED_DATA_MODEM = 204;
     int RIL_REQUEST_EMERGENCY_DIAL = 205;
+    int RIL_REQUEST_GET_PHONE_CAPABILITY = 206;
+    int RIL_REQUEST_SWITCH_DUAL_SIM_CONFIG = 207;
 
     /* Responses begin */
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;

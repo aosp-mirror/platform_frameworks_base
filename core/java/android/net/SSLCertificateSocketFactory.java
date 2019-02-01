@@ -86,7 +86,16 @@ import javax.net.ssl.X509TrustManager;
  * <p>On development devices, "setprop socket.relaxsslcheck yes" bypasses all
  * SSL certificate and hostname checks for testing purposes.  This setting
  * requires root access.
+ *
+ * @deprecated This class has less error-prone replacements using standard APIs.  To create an
+ * {@code SSLSocket}, obtain an {@link SSLSocketFactory} from {@link SSLSocketFactory#getDefault()}
+ * or {@link javax.net.ssl.SSLContext#getSocketFactory()}.  To verify hostnames, pass
+ * {@code "HTTPS"} to
+ * {@link javax.net.ssl.SSLParameters#setEndpointIdentificationAlgorithm(String)}.  To enable ALPN,
+ * use {@link javax.net.ssl.SSLParameters#setApplicationProtocols(String[])}.  To enable SNI,
+ * use {@link javax.net.ssl.SSLParameters#setServerNames(java.util.List)}.
  */
+@Deprecated
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static final String TAG = "SSLCertificateSocketFactory";

@@ -16,13 +16,16 @@
 
 package android.net.metrics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.Network;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
 
@@ -30,18 +33,29 @@ import com.android.internal.util.BitUtils;
  * Class for logging IpConnectvity events with IpConnectivityMetrics
  * {@hide}
  */
+@SystemApi
+@TestApi
 public class IpConnectivityLog {
     private static final String TAG = IpConnectivityLog.class.getSimpleName();
     private static final boolean DBG = false;
 
+    /** @hide */
     public static final String SERVICE_NAME = "connmetrics";
 
     private IIpConnectivityMetrics mService;
 
-    @UnsupportedAppUsage
+    /**
+     * An event to be logged.
+     */
+    public interface Event extends Parcelable {}
+
+    /** @hide */
+    @SystemApi
+    @TestApi
     public IpConnectivityLog() {
     }
 
+    /** @hide */
     @VisibleForTesting
     public IpConnectivityLog(IIpConnectivityMetrics service) {
         mService = service;
@@ -67,6 +81,7 @@ public class IpConnectivityLog {
      * @param ev the event to log. If the event timestamp is 0,
      * the timestamp is set to the current time in milliseconds.
      * @return true if the event was successfully logged.
+     * @hide
      */
     public boolean log(ConnectivityMetricsEvent ev) {
         if (!checkLoggerService()) {
@@ -94,7 +109,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(long timestamp, Parcelable data) {
+    public boolean log(long timestamp, Event data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.timestamp = timestamp;
         return log(ev);
@@ -106,11 +121,22 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    @UnsupportedAppUsage
-    public boolean log(String ifname, Parcelable data) {
+    public boolean log(String ifname, Event data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.ifname = ifname;
         return log(ev);
+    }
+
+    /**
+     * Log an IpConnectivity event.
+     * @param network the network associated with the event.
+     * @param transports the current transports of the network associated with the event, as defined
+     * in NetworkCapabilities.
+     * @param data is a Parcelable instance representing the event.
+     * @return true if the event was successfully logged.
+     */
+    public boolean log(Network network, int[] transports, Event data) {
+        return log(network.netId, transports, data);
     }
 
     /**
@@ -121,7 +147,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(int netid, int[] transports, Parcelable data) {
+    public boolean log(int netid, int[] transports, Event data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.netId = netid;
         ev.transports = BitUtils.packBits(transports);
@@ -133,12 +159,11 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    @UnsupportedAppUsage
-    public boolean log(Parcelable data) {
+    public boolean log(Event data) {
         return log(makeEv(data));
     }
 
-    private static ConnectivityMetricsEvent makeEv(Parcelable data) {
+    private static ConnectivityMetricsEvent makeEv(Event data) {
         ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
         ev.data = data;
         return ev;

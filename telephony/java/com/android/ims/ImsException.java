@@ -21,8 +21,10 @@ import android.telephony.ims.ImsReasonInfo;
 /**
  * This class defines a general IMS-related exception.
  *
+ * @deprecated Use {@link android.telephony.ims.ImsException} instead.
  * @hide
  */
+@Deprecated
 public class ImsException extends Exception {
 
     /**

@@ -39,37 +39,7 @@ using Type       = ::android::hardware::light::V2_0::Type;
 template<typename T>
 using Return     = ::android::hardware::Return<T>;
 
-class LightHal {
-private:
-    static sp<ILight> sLight;
-    static bool sLightInit;
-
-    LightHal() {}
-
-public:
-    static void disassociate() {
-        sLightInit = false;
-        sLight = nullptr;
-    }
-
-    static sp<ILight> associate() {
-        if ((sLight == nullptr && !sLightInit) ||
-                (sLight != nullptr && !sLight->ping().isOk())) {
-            // will return the hal if it exists the first time.
-            sLight = ILight::getService();
-            sLightInit = true;
-
-            if (sLight == nullptr) {
-                ALOGE("Unable to get ILight interface.");
-            }
-        }
-
-        return sLight;
-    }
-};
-
-sp<ILight> LightHal::sLight = nullptr;
-bool LightHal::sLightInit = false;
+static bool sLightSupported = true;
 
 static bool validate(jint light, jint flash, jint brightness) {
     bool valid = true;
@@ -134,7 +104,6 @@ static void processReturn(
         const LightState &state) {
     if (!ret.isOk()) {
         ALOGE("Failed to issue set light command.");
-        LightHal::disassociate();
         return;
     }
 
@@ -164,13 +133,11 @@ static void setLight_native(
         jint offMS,
         jint brightnessMode) {
 
-    if (!validate(light, flashMode, brightnessMode)) {
+    if (!sLightSupported) {
         return;
     }
 
-    sp<ILight> hal = LightHal::associate();
-
-    if (hal == nullptr) {
+    if (!validate(light, flashMode, brightnessMode)) {
         return;
     }
 
@@ -180,6 +147,11 @@ static void setLight_native(
 
     {
         android::base::Timer t;
+        sp<ILight> hal = ILight::getService();
+        if (hal == nullptr) {
+            sLightSupported = false;
+            return;
+        }
         Return<Status> ret = hal->setLight(type, state);
         processReturn(ret, type, state);
         if (t.duration() > 50ms) ALOGD("Excessive delay setting light");

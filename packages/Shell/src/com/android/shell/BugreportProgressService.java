@@ -1953,8 +1953,7 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void onProgress(int progress) throws RemoteException {
-            // TODO(b/111441001): change max argument?
-            updateProgressInfo(progress, CAPPED_MAX);
+            updateProgressInfo(progress, 100 /* progress is already a percentage; so max = 100 */);
         }
 
         @Override
@@ -1963,8 +1962,7 @@ public class BugreportProgressService extends Service {
         }
 
         @Override
-        public void onFinished(long durationMs, String title, String description)
-                throws RemoteException {
+        public void onFinished() throws RemoteException {
             // TODO(b/111441001): implement
         }
 

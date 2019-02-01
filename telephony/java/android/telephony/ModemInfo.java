@@ -32,6 +32,11 @@ public class ModemInfo implements Parcelable {
     public final boolean isVoiceSupported;
     public final boolean isDataSupported;
 
+    // TODO b/121394331: Clean up this class after V1_1.PhoneCapability cleanup.
+    public ModemInfo(int modemId) {
+        this(modemId, 0, true, true);
+    }
+
     public ModemInfo(int modemId, int rat, boolean isVoiceSupported, boolean isDataSupported) {
         this.modemId = modemId;
         this.rat = rat;

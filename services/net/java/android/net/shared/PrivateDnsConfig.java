@@ -16,7 +16,9 @@
 
 package android.net.shared;
 
-import android.net.InetAddresses;
+import static android.net.shared.ParcelableUtil.fromParcelableArray;
+import static android.net.shared.ParcelableUtil.toParcelableArray;
+
 import android.net.PrivateDnsConfigParcel;
 import android.text.TextUtils;
 
@@ -70,12 +72,8 @@ public class PrivateDnsConfig {
     public PrivateDnsConfigParcel toParcel() {
         final PrivateDnsConfigParcel parcel = new PrivateDnsConfigParcel();
         parcel.hostname = hostname;
-
-        final String[] parceledIps = new String[ips.length];
-        for (int i = 0; i < ips.length; i++) {
-            parceledIps[i] = ips[i].getHostAddress();
-        }
-        parcel.ips = parceledIps;
+        parcel.ips = toParcelableArray(
+                Arrays.asList(ips), IpConfigurationParcelableUtil::parcelAddress, String.class);
 
         return parcel;
     }
@@ -84,11 +82,9 @@ public class PrivateDnsConfig {
      * Build a configuration from a stable AIDL-compatible parcel.
      */
     public static PrivateDnsConfig fromParcel(PrivateDnsConfigParcel parcel) {
-        final InetAddress[] ips = new InetAddress[parcel.ips.length];
-        for (int i = 0; i < ips.length; i++) {
-            ips[i] = InetAddresses.parseNumericAddress(parcel.ips[i]);
-        }
-
+        InetAddress[] ips = new InetAddress[parcel.ips.length];
+        ips = fromParcelableArray(parcel.ips, IpConfigurationParcelableUtil::unparcelAddress)
+                .toArray(ips);
         return new PrivateDnsConfig(parcel.hostname, ips);
     }
 }

@@ -282,6 +282,7 @@ public class PacManager {
     private void setCurrentProxyScript(String script) {
         if (mProxyService == null) {
             Log.e(TAG, "setCurrentProxyScript: no proxy service");
+            return;
         }
         try {
             mProxyService.setPacFile(script);

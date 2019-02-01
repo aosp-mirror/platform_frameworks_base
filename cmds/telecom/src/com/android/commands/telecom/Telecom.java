@@ -23,8 +23,10 @@ import android.os.IUserManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.telecom.Log;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.text.TextUtils;
 
 import com.android.internal.os.BaseCommand;
 import com.android.internal.telecom.ITelecomService;
@@ -45,6 +47,8 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_SET_PHONE_ACCOUNT_ENABLED = "set-phone-account-enabled";
     private static final String COMMAND_SET_PHONE_ACCOUNT_DISABLED = "set-phone-account-disabled";
     private static final String COMMAND_REGISTER_PHONE_ACCOUNT = "register-phone-account";
+    private static final String COMMAND_SET_USER_SELECTED_OUTGOING_PHONE_ACCOUNT =
+            "set-user-selected-outgoing-phone-account";
     private static final String COMMAND_REGISTER_SIM_PHONE_ACCOUNT = "register-sim-phone-account";
     private static final String COMMAND_SET_TEST_CALL_REDIRECTION_APP = "set-test-call-redirection-app";
     private static final String COMMAND_SET_TEST_CALL_SCREENING_APP = "set-test-call-screening-app";
@@ -70,6 +74,8 @@ public final class Telecom extends BaseCommand {
                 + "usage: telecom set-phone-account-enabled <COMPONENT> <ID> <USER_SN>\n"
                 + "usage: telecom set-phone-account-disabled <COMPONENT> <ID> <USER_SN>\n"
                 + "usage: telecom register-phone-account <COMPONENT> <ID> <USER_SN> <LABEL>\n"
+                + "usage: telecom set-user-selected-outgoing-phone-account <COMPONENT> <ID> "
+                + "<USER_SN>\n"
                 + "usage: telecom set-test-call-redirection-app <PACKAGE>\n"
                 + "usage: telecom set-test-call-screening-app <PACKAGE>\n"
                 + "usage: telecom set-test-auto-mode-app <PACKAGE>\n"
@@ -104,16 +110,18 @@ public final class Telecom extends BaseCommand {
         mTelecomService = ITelecomService.Stub.asInterface(
                 ServiceManager.getService(Context.TELECOM_SERVICE));
         if (mTelecomService == null) {
+            Log.w(this, "onRun: Can't access telecom manager.");
             showError("Error: Could not access the Telecom Manager. Is the system running?");
             return;
         }
         mUserManager = IUserManager.Stub
                 .asInterface(ServiceManager.getService(Context.USER_SERVICE));
         if (mUserManager == null) {
+            Log.w(this, "onRun: Can't access user manager.");
             showError("Error: Could not access the User Manager. Is the system running?");
             return;
         }
-
+        Log.i(this, "onRun: parsing command.");
         String command = nextArgRequired();
         switch (command) {
             case COMMAND_SET_PHONE_ACCOUNT_ENABLED:
@@ -143,6 +151,9 @@ public final class Telecom extends BaseCommand {
             case COMMAND_REGISTER_SIM_PHONE_ACCOUNT:
                 runRegisterSimPhoneAccount();
                 break;
+            case COMMAND_SET_USER_SELECTED_OUTGOING_PHONE_ACCOUNT:
+                runSetUserSelectedOutgoingPhoneAccount();
+                break;
             case COMMAND_UNREGISTER_PHONE_ACCOUNT:
                 runUnregisterPhoneAccount();
                 break;
@@ -159,6 +170,7 @@ public final class Telecom extends BaseCommand {
                 runWaitOnHandler();
                 break;
             default:
+                Log.w(this, "onRun: unknown command: %s", command);
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
         }
     }
@@ -227,6 +239,13 @@ public final class Telecom extends BaseCommand {
         mTelecomService.setTestPhoneAcctSuggestionComponent(componentName);
     }
 
+    private void runSetUserSelectedOutgoingPhoneAccount() throws RemoteException {
+        Log.i(this, "runSetUserSelectedOutgoingPhoneAccount");
+        final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
+        mTelecomService.setUserSelectedOutgoingPhoneAccount(handle);
+        System.out.println("Success - " + handle + " set as default outgoing account.");
+    }
+
     private void runUnregisterPhoneAccount() throws RemoteException {
         final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
         mTelecomService.unregisterPhoneAccount(handle);
@@ -256,7 +275,10 @@ public final class Telecom extends BaseCommand {
 
     }
 
-    private PhoneAccountHandle getPhoneAccountHandleFromArgs() throws RemoteException{
+    private PhoneAccountHandle getPhoneAccountHandleFromArgs() throws RemoteException {
+        if (TextUtils.isEmpty(mArgs.peekNextArg())) {
+            return null;
+        }
         final ComponentName component = parseComponentName(nextArgRequired());
         final String accountId = nextArgRequired();
         final String userSnInStr = nextArgRequired();
@@ -265,6 +287,7 @@ public final class Telecom extends BaseCommand {
             final int userSn = Integer.parseInt(userSnInStr);
             userHandle = UserHandle.of(mUserManager.getUserHandle(userSn));
         } catch (NumberFormatException ex) {
+            Log.w(this, "getPhoneAccountHandleFromArgs - invalid user %s", userSnInStr);
             throw new IllegalArgumentException ("Invalid user serial number " + userSnInStr);
         }
         return new PhoneAccountHandle(component, accountId, userHandle);

@@ -18,7 +18,7 @@ package android.net.dhcp;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.util.FdEventsReader;
+import android.net.shared.FdEventsReader;
 import android.os.Handler;
 import android.system.Os;
 
@@ -64,7 +64,7 @@ abstract class DhcpPacketListener extends FdEventsReader<DhcpPacketListener.Payl
     @Override
     protected int readPacket(@NonNull FileDescriptor fd, @NonNull Payload packetBuffer)
             throws Exception {
-        final InetSocketAddress addr = new InetSocketAddress();
+        final InetSocketAddress addr = new InetSocketAddress(0);
         final int read = Os.recvfrom(
                 fd, packetBuffer.mBytes, 0, packetBuffer.mBytes.length, 0 /* flags */, addr);
 

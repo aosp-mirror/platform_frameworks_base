@@ -25,7 +25,7 @@ LOCAL_SHARED_LIBRARIES:= \
     liblog
 
 LOCAL_MODULE:= invoke_mock_media_player
-LOCAL_MODULE_TAGS := tests eng
+LOCAL_MODULE_TAGS := tests
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 

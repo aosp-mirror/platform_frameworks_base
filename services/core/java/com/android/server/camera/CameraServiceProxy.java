@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
+import android.media.AudioManager;
 import android.metrics.LogMaker;
 import android.nfc.INfcAdapter;
 import android.os.Binder;
@@ -393,6 +394,19 @@ public class CameraServiceProxy extends SystemService
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
             switch (newCameraState) {
                 case ICameraServiceProxy.CAMERA_STATE_OPEN:
+                    // Notify the audio subsystem about the facing of the most-recently opened
+                    // camera This can be used to select the best audio tuning in case video
+                    // recording with that camera will happen.  Since only open events are used, if
+                    // multiple cameras are opened at once, the one opened last will be used to
+                    // select audio tuning.
+                    AudioManager audioManager = getContext().getSystemService(AudioManager.class);
+                    if (audioManager != null) {
+                        // Map external to front for audio tuning purposes
+                        String facingStr = (facing == ICameraServiceProxy.CAMERA_FACING_BACK) ?
+                                "back" : "front";
+                        String facingParameter = "cameraFacing=" + facingStr;
+                        audioManager.setParameters(facingParameter);
+                    }
                     break;
                 case ICameraServiceProxy.CAMERA_STATE_ACTIVE:
                     CameraUsageEvent newEvent = new CameraUsageEvent(facing, clientName, apiLevel);

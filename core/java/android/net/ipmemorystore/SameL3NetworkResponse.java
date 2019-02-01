@@ -91,7 +91,8 @@ public class SameL3NetworkResponse {
         return confidence > 0.5 ? NETWORK_SAME : NETWORK_DIFFERENT;
     }
 
-    SameL3NetworkResponse(@NonNull final String l2Key1, @NonNull final String l2Key2,
+    /** @hide */
+    public SameL3NetworkResponse(@NonNull final String l2Key1, @NonNull final String l2Key2,
             final float confidence) {
         this.l2Key1 = l2Key1;
         this.l2Key2 = l2Key2;
@@ -127,5 +128,20 @@ public class SameL3NetworkResponse {
     @Override
     public int hashCode() {
         return Objects.hash(l2Key1, l2Key2, confidence);
+    }
+
+    @Override
+    /** Pretty print */
+    public String toString() {
+        switch (getNetworkSameness()) {
+            case NETWORK_SAME:
+                return "\"" + l2Key1 + "\" same L3 network as \"" + l2Key2 + "\"";
+            case NETWORK_DIFFERENT:
+                return "\"" + l2Key1 + "\" different L3 network from \"" + l2Key2 + "\"";
+            case NETWORK_NEVER_CONNECTED:
+                return "\"" + l2Key1 + "\" can't be tested against \"" + l2Key2 + "\"";
+            default:
+                return "Buggy sameness value ? \"" + l2Key1 + "\", \"" + l2Key2 + "\"";
+        }
     }
 }

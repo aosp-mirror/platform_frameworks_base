@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
@@ -83,6 +85,8 @@ public final class IpPrefix implements Parcelable {
      * @param prefixLength the prefix length. Must be &gt;= 0 and &lt;= (32 or 128) (IPv4 or IPv6).
      * @hide
      */
+    @SystemApi
+    @TestApi
     public IpPrefix(InetAddress address, int prefixLength) {
         // We don't reuse the (byte[], int) constructor because it calls clone() on the byte array,
         // which is unnecessary because getAddress() already returns a clone.
@@ -100,6 +104,8 @@ public final class IpPrefix implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
     public IpPrefix(String prefix) {
         // We don't reuse the (InetAddress, int) constructor because "error: call to this must be
         // first statement in constructor". We could factor out setting the member variables to an

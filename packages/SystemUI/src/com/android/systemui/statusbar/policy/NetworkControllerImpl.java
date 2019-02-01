@@ -527,7 +527,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     void doUpdateMobileControllers() {
-        List<SubscriptionInfo> subscriptions = mSubscriptionManager.getActiveSubscriptionInfoList();
+        List<SubscriptionInfo> subscriptions = mSubscriptionManager
+                .getActiveSubscriptionInfoList(true);
         if (subscriptions == null) {
             subscriptions = Collections.emptyList();
         }

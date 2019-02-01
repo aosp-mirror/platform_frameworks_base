@@ -86,11 +86,6 @@ public class SignalStrength implements Parcelable {
     CellSignalStrengthTdscdma mTdscdma;
     CellSignalStrengthLte mLte;
 
-    /** Parameters from the framework */
-    @UnsupportedAppUsage
-    private int mLteRsrpBoost; // offset to be reduced from the rsrp threshold while calculating
-                                // signal strength level
-
     /**
      * Create a new SignalStrength from a intent notifier Bundle
      *
@@ -140,7 +135,6 @@ public class SignalStrength implements Parcelable {
         mWcdma = wcdma;
         mTdscdma = tdscdma;
         mLte = lte;
-        mLteRsrpBoost = 0;
     }
 
     /**
@@ -211,7 +205,6 @@ public class SignalStrength implements Parcelable {
 
     /** @hide */
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        mLteRsrpBoost = ss.getLteEarfcnRsrpBoost();
         mCdma.updateLevel(cc, ss);
         mGsm.updateLevel(cc, ss);
         mWcdma.updateLevel(cc, ss);
@@ -241,7 +234,6 @@ public class SignalStrength implements Parcelable {
         mWcdma = new CellSignalStrengthWcdma(s.mWcdma);
         mTdscdma = new CellSignalStrengthTdscdma(s.mTdscdma);
         mLte = new CellSignalStrengthLte(s.mLte);
-        mLteRsrpBoost = s.mLteRsrpBoost;
     }
 
     /**
@@ -258,7 +250,6 @@ public class SignalStrength implements Parcelable {
         mWcdma = in.readParcelable(CellSignalStrengthWcdma.class.getClassLoader());
         mTdscdma = in.readParcelable(CellSignalStrengthTdscdma.class.getClassLoader());
         mLte = in.readParcelable(CellSignalStrengthLte.class.getClassLoader());
-        mLteRsrpBoost = in.readInt();
     }
 
     /**
@@ -270,8 +261,6 @@ public class SignalStrength implements Parcelable {
         out.writeParcelable(mWcdma, flags);
         out.writeParcelable(mTdscdma, flags);
         out.writeParcelable(mLte, flags);
-
-        out.writeInt(mLteRsrpBoost);
     }
 
     /**
@@ -303,14 +292,27 @@ public class SignalStrength implements Parcelable {
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
      * @return RSSI in ASU 0..31, 99, or UNAVAILABLE
+     *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthGsm#getAsuLevel}.
+     * @see android.telephony#CellSignalStrengthGsm
+     * @see android.telephony.SignalStrength#getCellSignalStrengths
      */
+    @Deprecated
     public int getGsmSignalStrength() {
         return mGsm.getAsuLevel();
     }
 
     /**
      * Get the GSM bit error rate (0-7, 99) as defined in TS 27.007 8.5
+     *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthGsm#getBitErrorRate}.
+     *
+     * @see android.telephony#CellSignalStrengthGsm
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      */
+    @Deprecated
     public int getGsmBitErrorRate() {
         return mGsm.getBitErrorRate();
     }
@@ -319,14 +321,28 @@ public class SignalStrength implements Parcelable {
      * Get the CDMA RSSI value in dBm
      *
      * @return the CDMA RSSI value or {@link #INVALID} if invalid
+     *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getCdmaDbm}.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      */
+    @Deprecated
     public int getCdmaDbm() {
         return mCdma.getCdmaDbm();
     }
 
     /**
      * Get the CDMA Ec/Io value in dB*10
+     *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getCdmaEcio}.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      */
+    @Deprecated
     public int getCdmaEcio() {
         return mCdma.getCdmaEcio();
     }
@@ -335,58 +351,114 @@ public class SignalStrength implements Parcelable {
      * Get the EVDO RSSI value in dBm
      *
      * @return the EVDO RSSI value or {@link #INVALID} if invalid
+     *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getEvdoDbm}.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      */
+    @Deprecated
     public int getEvdoDbm() {
         return mCdma.getEvdoDbm();
     }
 
     /**
      * Get the EVDO Ec/Io value in dB*10
+     *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getEvdoEcio}.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      */
+    @Deprecated
     public int getEvdoEcio() {
         return mCdma.getEvdoEcio();
     }
 
     /**
      * Get the signal to noise ratio. Valid values are 0-8. 8 is the highest.
+     *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getEvdoSnr}.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      */
+    @Deprecated
     public int getEvdoSnr() {
         return mCdma.getEvdoSnr();
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getRssi}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteSignalStrength() {
         return mLte.getRssi();
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getRsrp}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteRsrp() {
         return mLte.getRsrp();
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getRsrq}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteRsrq() {
         return mLte.getRsrq();
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getRssnr}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteRssnr() {
         return mLte.getRssnr();
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getCqi}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteCqi() {
         return mLte.getCqi();
-    }
-
-    /** @hide */
-    public int getLteRsrpBoost() {
-        return mLteRsrpBoost;
     }
 
     /**
@@ -407,11 +479,17 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * Get the signal level as an asu value between 0..31, 99 is unknown
+     * Get the signal level as an asu value with a range dependent on the underlying technology.
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrength#getAsuLevel}. Because the levels vary by technology,
+     *             this method is misleading and should not be used.
+     * @see android.telephony#CellSignalStrength
+     * @see android.telephony.SignalStrength#getCellSignalStrengths
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getAsuLevel() {
         return getPrimary().getAsuLevel();
     }
@@ -419,9 +497,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get the signal strength as dBm
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrength#getDbm()}. Because the levels vary by technology,
+     *             this method is misleading and should not be used.
+     * @see android.telephony#CellSignalStrength
+     * @see android.telephony.SignalStrength#getCellSignalStrengths
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getDbm() {
         return getPrimary().getDbm();
     }
@@ -429,9 +513,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get Gsm signal strength as dBm
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthGsm#getDbm}.
+     *
+     * @see android.telephony#CellSignalStrengthGsm
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getGsmDbm() {
         return mGsm.getDbm();
     }
@@ -439,9 +529,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get gsm as level 0..4
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthGsm#getLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthGsm
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getGsmLevel() {
         return mGsm.getLevel();
     }
@@ -449,9 +545,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get the gsm signal level as an asu value between 0..31, 99 is unknown
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthGsm#getAsuLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthGsm
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getGsmAsuLevel() {
         return mGsm.getAsuLevel();
     }
@@ -459,9 +561,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get cdma as level 0..4
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getCdmaLevel() {
         return mCdma.getLevel();
     }
@@ -469,9 +577,17 @@ public class SignalStrength implements Parcelable {
     /**
      * Get the cdma signal level as an asu value between 0..31, 99 is unknown
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getAsuLevel}. Since there is no definition of
+     *             ASU for CDMA, the resultant value is Android-specific and is not recommended
+     *             for use.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getCdmaAsuLevel() {
         return mCdma.getAsuLevel();
     }
@@ -479,9 +595,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get Evdo as level 0..4
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getEvdoLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getEvdoLevel() {
         return mCdma.getEvdoLevel();
     }
@@ -489,9 +611,17 @@ public class SignalStrength implements Parcelable {
     /**
      * Get the evdo signal level as an asu value between 0..31, 99 is unknown
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthCdma#getEvdoAsuLevel}. Since there is no definition of
+     *             ASU for EvDO, the resultant value is Android-specific and is not recommended
+     *             for use.
+     *
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getEvdoAsuLevel() {
         return mCdma.getEvdoAsuLevel();
     }
@@ -499,9 +629,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get LTE as dBm
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getDbm}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteDbm() {
         return mLte.getRsrp();
     }
@@ -509,9 +645,15 @@ public class SignalStrength implements Parcelable {
     /**
      * Get LTE as level 0..4
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteLevel() {
         return mLte.getLevel();
     }
@@ -520,26 +662,46 @@ public class SignalStrength implements Parcelable {
      * Get the LTE signal level as an asu value between 0..97, 99 is unknown
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthLte#getAsuLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getLteAsuLevel() {
         return mLte.getAsuLevel();
     }
 
     /**
      * @return true if this is for GSM
+     *
+     * @deprecated This method returns true if there are any 3gpp type SignalStrength elements in
+     *             this SignalStrength report or if the report contains no valid SignalStrength
+     *             information. Instead callers should use
+     *             {@link android.telephony.SignalStrength#getCellSignalStrengths
+     *             getCellSignalStrengths()} to determine which types of information are contained
+     *             in the SignalStrength report.
      */
+    @Deprecated
     public boolean isGsm() {
         return !(getPrimary() instanceof CellSignalStrengthCdma);
     }
 
     /**
-     * @return get TD_SCDMA dbm
+     * @return get TD-SCDMA dBm
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthTdscdma#getDbm}.
+     *
+     * @see android.telephony#CellSignalStrengthTdscdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getTdScdmaDbm() {
         return mTdscdma.getRscp();
     }
@@ -550,9 +712,15 @@ public class SignalStrength implements Parcelable {
      * INT_MAX: 0x7FFFFFFF denotes invalid value
      * Reference: 3GPP TS 25.123, section 9.1.1.1
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthTdscdma#getLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthTdscdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getTdScdmaLevel() {
         return mTdscdma.getLevel();
      }
@@ -560,18 +728,30 @@ public class SignalStrength implements Parcelable {
     /**
      * Get the TD-SCDMA signal level as an asu value.
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthTdscdma#getAsuLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthTdscdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getTdScdmaAsuLevel() {
         return mTdscdma.getAsuLevel();
     }
 
     /**
-     * Gets WCDMA RSCP as a dbm value between -120 and -24, as defined in TS 27.007 8.69.
+     * Gets WCDMA RSCP as a dBm value between -120 and -24, as defined in TS 27.007 8.69.
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthWcdma#getRscp}.
+     *
+     * @see android.telephony#CellSignalStrengthWcdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
+    @Deprecated
     public int getWcdmaRscp() {
         return mWcdma.getRscp();
     }
@@ -579,8 +759,14 @@ public class SignalStrength implements Parcelable {
     /**
      * Get the WCDMA signal level as an ASU value between 0-96, 255 is unknown
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthWcdma#getAsuLevel}.
+     *
+     * @see android.telephony#CellSignalStrengthWcdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
+    @Deprecated
     public int getWcdmaAsuLevel() {
         /*
          * 3GPP 27.007 (Ver 10.3.0) Sec 8.69
@@ -594,10 +780,16 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * Gets WCDMA signal strength as a dbm value between -120 and -24, as defined in TS 27.007 8.69.
+     * Gets WCDMA signal strength as a dBm value between -120 and -24, as defined in TS 27.007 8.69.
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthWcdma#getDbm}.
+     *
+     * @see android.telephony#CellSignalStrengthWcdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
+    @Deprecated
     public int getWcdmaDbm() {
         return mWcdma.getDbm();
     }
@@ -605,18 +797,24 @@ public class SignalStrength implements Parcelable {
     /**
      * Get WCDMA as level 0..4
      *
+     * @deprecated this information should be retrieved from
+     *             {@link CellSignalStrengthWcdma#getDbm}.
+     *
+     * @see android.telephony#CellSignalStrengthWcdma
+     * @see android.telephony.SignalStrength#getCellSignalStrengths()
      * @hide
      */
+    @Deprecated
     public int getWcdmaLevel() {
         return mWcdma.getLevel();
     }
 
-   /**
+    /**
      * @return hash code
      */
     @Override
     public int hashCode() {
-        return Objects.hash(mCdma, mGsm, mWcdma, mTdscdma, mLte, mLteRsrpBoost);
+        return Objects.hash(mCdma, mGsm, mWcdma, mTdscdma, mLte);
     }
 
     /**
@@ -632,8 +830,7 @@ public class SignalStrength implements Parcelable {
             && mGsm.equals(s.mGsm)
             && mWcdma.equals(s.mWcdma)
             && mTdscdma.equals(s.mTdscdma)
-            && mLte.equals(s.mLte)
-            && mLteRsrpBoost == s.mLteRsrpBoost;
+            && mLte.equals(s.mLte);
     }
 
     /**
@@ -647,7 +844,6 @@ public class SignalStrength implements Parcelable {
             .append(",mWcdma=").append(mWcdma)
             .append(",mTdscdma=").append(mTdscdma)
             .append(",mLte=").append(mLte)
-            .append(",mLteRsrpBoost=").append(mLteRsrpBoost)
             .append(",primary=").append(getPrimary().getClass().getSimpleName())
             .append("}")
             .toString();
@@ -657,34 +853,38 @@ public class SignalStrength implements Parcelable {
      * Set SignalStrength based on intent notifier map
      *
      * @param m intent notifier map
+     *
+     * @deprecated this method relies on non-stable implementation details, and full access to
+     *             internal storage is available via {@link getCellSignalStrengths()}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private void setFromNotifierBundle(Bundle m) {
         mCdma = m.getParcelable("Cdma");
         mGsm = m.getParcelable("Gsm");
         mWcdma = m.getParcelable("Wcdma");
         mTdscdma = m.getParcelable("Tdscdma");
         mLte = m.getParcelable("Lte");
-
-        mLteRsrpBoost = m.getInt("LteRsrpBoost");
     }
 
     /**
      * Set intent notifier Bundle based on SignalStrength
      *
      * @param m intent notifier Bundle
+     *
+     * @deprecated this method relies on non-stable implementation details, and full access to
+     *             internal storage is available via {@link getCellSignalStrengths()}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void fillInNotifierBundle(Bundle m) {
         m.putParcelable("Cdma", mCdma);
         m.putParcelable("Gsm", mGsm);
         m.putParcelable("Wcdma", mWcdma);
         m.putParcelable("Tdscdma", mTdscdma);
         m.putParcelable("Lte", mLte);
-
-        m.putInt("LteRsrpBoost", mLteRsrpBoost);
     }
 
     /**

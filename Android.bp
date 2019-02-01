@@ -187,7 +187,6 @@ java_defaults {
         "core/java/android/hardware/radio/ITunerCallback.aidl",
         "core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl",
         "core/java/android/hardware/usb/IUsbManager.aidl",
-        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/IConnectivityManager.aidl",
         "core/java/android/net/IIpConnectivityMetrics.aidl",
         "core/java/android/net/IEthernetManager.aidl",
@@ -222,6 +221,7 @@ java_defaults {
         "core/java/android/os/ICancellationSignal.aidl",
         "core/java/android/os/IDeviceIdentifiersPolicyService.aidl",
         "core/java/android/os/IDeviceIdleController.aidl",
+        "core/java/android/os/IDynamicAndroidService.aidl",
         "core/java/android/os/IHardwarePropertiesManager.aidl",
         ":libincident_aidl",
         "core/java/android/os/IMaintenanceActivityListener.aidl",
@@ -602,6 +602,7 @@ java_defaults {
 
         ":storaged_aidl",
         ":vold_aidl",
+        ":gsiservice_aidl",
         ":installd_aidl",
         ":dumpstate_aidl",
 
@@ -658,6 +659,7 @@ java_defaults {
             "frameworks/native/aidl/gui",
             "system/core/storaged/binder",
             "system/vold/binder",
+            "system/gsid/aidl",
             "system/bt/binder",
             "system/security/keystore/binder",
         ],
@@ -668,14 +670,14 @@ java_defaults {
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
-        // See comment on framework-oahl-backward-compatibility module below
-        "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
     ],
 
     no_framework_libs: true,
     libs: [
         "ext",
     ],
+
+    jarjar_rules: "jarjar_rules_hidl.txt",
 
     static_libs: [
         "apex_aidl_interface-java",
@@ -685,18 +687,24 @@ java_defaults {
         "android.hardware.cas-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.0-java",
+        "android.hardware.radio-V1.1-java",
+        "android.hardware.radio-V1.2-java",
+        "android.hardware.radio-V1.3-java",
+        "android.hardware.radio-V1.4-java",
+        "android.hardware.radio.config-V1.0-java",
+        "android.hardware.radio.config-V1.1-java",
+        "android.hardware.radio.config-V1.2-java",
+        "android.hardware.radio.deprecated-V1.0-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.wifi-V1.0-java-constants",
-        "android.hardware.radio-V1.0-java",
-        "android.hardware.radio-V1.3-java",
-        "android.hardware.radio-V1.4-java",
-        "android.hardware.usb.gadget-V1.0-java",
         "networkstack-aidl-interfaces-java",
         "netd_aidl_interface-java",
     ],
@@ -704,7 +712,6 @@ java_defaults {
     required: [
         // TODO: remove gps_debug when the build system propagates "required" properly.
         "gps_debug.conf",
-        "libtextclassifier",
         // Loaded with System.loadLibrary by android.view.textclassifier
         "libmedia2_jni",
     ],
@@ -742,11 +749,7 @@ java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
     // Use UsedByApps annotation processor
-    annotation_processors: ["unsupportedappusage-annotation-processor"],
-    // b/25860419: annotation processors must be explicitly specified for grok
-    annotation_processor_classes: [
-        "android.processor.unsupportedappusage.UsedByAppsProcessor",
-    ],
+    plugins: ["unsupportedappusage-annotation-processor"],
 }
 
 // A host library including just UnsupportedAppUsage.java so that the annotation
@@ -756,19 +759,6 @@ java_library_host {
     srcs: [
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
-    ],
-}
-
-// A temporary build target that is conditionally included on the bootclasspath if
-// org.apache.http.legacy library has been removed and which provides support for
-// maintaining backwards compatibility for APKs that target pre-P and depend on
-// org.apache.http.legacy classes. This is used iff REMOVE_OAHL_FROM_BCP=true is
-// specified on the build command line.
-java_library {
-    name: "framework-oahl-backward-compatibility",
-    installable: true,
-    srcs: [
-        "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
     ],
 }
 
@@ -825,18 +815,58 @@ aidl_interface {
     name: "networkstack-aidl-interfaces",
     local_include_dir: "core/java",
     srcs: [
+        "core/java/android/net/ApfCapabilitiesParcelable.aidl",
+        "core/java/android/net/DhcpResultsParcelable.aidl",
+        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/INetworkMonitor.aidl",
         "core/java/android/net/INetworkMonitorCallbacks.aidl",
         "core/java/android/net/IIpMemoryStore.aidl",
         "core/java/android/net/INetworkStackConnector.aidl",
         "core/java/android/net/INetworkStackStatusCallback.aidl",
+        "core/java/android/net/InitialConfigurationParcelable.aidl",
+        "core/java/android/net/IpPrefixParcelable.aidl",
+        "core/java/android/net/LinkAddressParcelable.aidl",
+        "core/java/android/net/LinkPropertiesParcelable.aidl",
+        "core/java/android/net/NetworkParcelable.aidl",
         "core/java/android/net/PrivateDnsConfigParcel.aidl",
+        "core/java/android/net/ProvisioningConfigurationParcelable.aidl",
+        "core/java/android/net/ProxyInfoParcelable.aidl",
+        "core/java/android/net/RouteInfoParcelable.aidl",
+        "core/java/android/net/StaticIpConfigurationParcelable.aidl",
         "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
         "core/java/android/net/dhcp/IDhcpServer.aidl",
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
+        "core/java/android/net/ip/IIpClient.aidl",
+        "core/java/android/net/ip/IIpClientCallbacks.aidl",
         "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
+}
+
+filegroup {
+    name: "framework-networkstack-shared-srcs",
+    srcs: [
+        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/android/net/DhcpResults.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/annotations/GuardedBy.java",
+        "core/java/com/android/internal/annotations/VisibleForTesting.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/MessageUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/RingBufferIndices.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
+        "core/java/android/net/shared/*.java",
+    ]
 }
 
 // Build ext.jar
@@ -850,6 +880,10 @@ java_library {
         "nist-sip",
         "tagsoup",
         "rappor",
+        "libtextclassifier-java",
+    ],
+    required: [
+        "libtextclassifier",
     ],
     dxflags: ["--core-library"],
 }
@@ -1256,7 +1290,6 @@ stubs_defaults {
         "ext",
         "framework",
         "voip-common",
-        "android.test.mock.impl",
     ],
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
