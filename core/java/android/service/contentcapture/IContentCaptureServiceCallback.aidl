@@ -28,8 +28,4 @@ import java.util.List;
  */
 oneway interface IContentCaptureServiceCallback {
     void setContentCaptureWhitelist(in List<String> packages, in List<ComponentName> activities);
-    void setActivityContentCaptureEnabled(in ComponentName activity, boolean enabled);
-    void setPackageContentCaptureEnabled(in String packageName, boolean enabled);
-    void getContentCaptureDisabledActivities(in IResultReceiver receiver);
-    void getContentCaptureDisabledPackages(in IResultReceiver receiver);
 }

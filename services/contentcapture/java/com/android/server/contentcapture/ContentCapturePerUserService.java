@@ -406,36 +406,5 @@ final class ContentCapturePerUserService
             // TODO(b/122595322): implement
             // TODO(b/119613670): log metrics
         }
-
-        @Override
-        public void setActivityContentCaptureEnabled(ComponentName activity, boolean enabled) {
-            if (mMaster.verbose) {
-                Log.v(TAG, "setActivityContentCaptureEnabled(activity=" + activity + ", enabled="
-                        + enabled + ")");
-            }
-            // TODO(b/122595322): implement
-            // TODO(b/119613670): log metrics
-        }
-
-        @Override
-        public void setPackageContentCaptureEnabled(String packageName, boolean enabled) {
-            if (mMaster.verbose) {
-                Log.v(TAG,
-                        "setPackageContentCaptureEnabled(packageName=" + packageName + ", enabled="
-                                + enabled + ")");
-            }
-            // TODO(b/122595322): implement
-            // TODO(b/119613670): log metrics
-        }
-
-        @Override
-        public void getContentCaptureDisabledActivities(IResultReceiver receiver) {
-            // TODO(b/122595322): implement
-        }
-
-        @Override
-        public void getContentCaptureDisabledPackages(IResultReceiver receiver) {
-            // TODO(b/122595322): implement
-        }
     }
 }

@@ -6275,8 +6275,6 @@ package android.service.contentcapture {
 
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
-    method @NonNull public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
-    method @NonNull public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
@@ -6285,9 +6283,7 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
-    method public final void setActivityContentCaptureEnabled(@NonNull android.content.ComponentName, boolean);
     method public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
-    method public final void setPackageContentCaptureEnabled(@NonNull String, boolean);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
   }
 
