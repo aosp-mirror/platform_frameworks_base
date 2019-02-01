@@ -538,6 +538,9 @@ public final class PowerManagerService extends SystemService
     // True if we are currently in VR Mode.
     private boolean mIsVrModeEnabled;
 
+    // True if we in the process of performing a forceSuspend
+    private boolean mForceSuspendActive;
+
     private final class ForegroundProfileObserver extends SynchronousUserSwitchObserver {
         @Override
         public void onUserSwitching(int newUserId) throws RemoteException {}
@@ -684,6 +687,11 @@ public final class PowerManagerService extends SystemService
         public void nativeSetFeature(int featureId, int data) {
             PowerManagerService.nativeSetFeature(featureId, data);
         }
+
+        /** Wrapper for PowerManager.nativeForceSuspend */
+        public boolean nativeForceSuspend() {
+            return PowerManagerService.nativeForceSuspend();
+        }
     }
 
     @VisibleForTesting
@@ -718,6 +726,7 @@ public final class PowerManagerService extends SystemService
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeSendPowerHint(int hintId, int data);
     private static native void nativeSetFeature(int featureId, int data);
+    private static native boolean nativeForceSuspend();
 
     public PowerManagerService(Context context) {
         this(context, new Injector());
@@ -1427,7 +1436,7 @@ public final class PowerManagerService extends SystemService
         }
 
         if (eventTime < mLastSleepTime || mWakefulness == WAKEFULNESS_AWAKE
-                || !mBootCompleted || !mSystemReady) {
+                || !mBootCompleted || !mSystemReady || mForceSuspendActive) {
             return false;
         }
 
@@ -1463,8 +1472,13 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    // This method is called goToSleep for historical reasons but we actually start
-    // dozing before really going to sleep.
+    /**
+     * Puts the system in doze.
+     *
+     * This method is called goToSleep for historical reasons but actually attempts to DOZE,
+     * and only tucks itself in to SLEEP if requested with the flag
+     * {@link PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE}.
+     */
     @SuppressWarnings("deprecation")
     private boolean goToSleepNoUpdateLocked(long eventTime, int reason, int flags, int uid) {
         if (DEBUG_SPEW) {
@@ -1481,35 +1495,10 @@ public final class PowerManagerService extends SystemService
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "goToSleep");
         try {
-            switch (reason) {
-                case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
-                    Slog.i(TAG, "Going to sleep due to device administration policy "
-                            + "(uid " + uid +")...");
-                    break;
-                case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
-                    Slog.i(TAG, "Going to sleep due to screen timeout (uid " + uid +")...");
-                    break;
-                case PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH:
-                    Slog.i(TAG, "Going to sleep due to lid switch (uid " + uid +")...");
-                    break;
-                case PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON:
-                    Slog.i(TAG, "Going to sleep due to power button (uid " + uid +")...");
-                    break;
-                case PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON:
-                    Slog.i(TAG, "Going to sleep due to sleep button (uid " + uid +")...");
-                    break;
-                case PowerManager.GO_TO_SLEEP_REASON_HDMI:
-                    Slog.i(TAG, "Going to sleep due to HDMI standby (uid " + uid +")...");
-                    break;
-                case PowerManager.GO_TO_SLEEP_REASON_ACCESSIBILITY:
-                    Slog.i(TAG, "Going to sleep by an accessibility service request (uid "
-                            + uid +")...");
-                    break;
-                default:
-                    Slog.i(TAG, "Going to sleep by application request (uid " + uid +")...");
-                    reason = PowerManager.GO_TO_SLEEP_REASON_APPLICATION;
-                    break;
-            }
+            reason = Math.min(PowerManager.GO_TO_SLEEP_REASON_MAX,
+                    Math.max(reason, PowerManager.GO_TO_SLEEP_REASON_MIN));
+            Slog.i(TAG, "Going to sleep due to " + PowerManager.sleepReasonToString(reason)
+                    + " (uid " + uid + ")...");
 
             mLastSleepTime = eventTime;
             mLastSleepReason = reason;
@@ -3063,10 +3052,10 @@ public final class PowerManagerService extends SystemService
             if (appid >= Process.FIRST_APPLICATION_UID) {
                 // Cached inactive processes are never allowed to hold wake locks.
                 if (mConstants.NO_CACHED_WAKE_LOCKS) {
-                    disabled = !wakeLock.mUidState.mActive &&
-                            wakeLock.mUidState.mProcState
+                    disabled = mForceSuspendActive
+                            || (!wakeLock.mUidState.mActive && wakeLock.mUidState.mProcState
                                     != ActivityManager.PROCESS_STATE_NONEXISTENT &&
-                            wakeLock.mUidState.mProcState > ActivityManager.PROCESS_STATE_RECEIVER;
+                            wakeLock.mUidState.mProcState > ActivityManager.PROCESS_STATE_RECEIVER);
                 }
                 if (mDeviceIdleMode) {
                     // If we are in idle mode, we will also ignore all partial wake locks that are
@@ -3238,6 +3227,34 @@ public final class PowerManagerService extends SystemService
     void onUserActivity() {
         synchronized (mLock) {
             mLastUserActivityTime = SystemClock.uptimeMillis();
+        }
+    }
+
+    private boolean forceSuspendInternal(int uid) {
+        try {
+            synchronized (mLock) {
+                mForceSuspendActive = true;
+                // Place the system in an non-interactive state
+                goToSleepInternal(SystemClock.uptimeMillis(),
+                        PowerManager.GO_TO_SLEEP_REASON_FORCE_SUSPEND,
+                        PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, uid);
+
+                // Disable all the partial wake locks as well
+                updateWakeLockDisabledStatesLocked();
+            }
+
+            Slog.i(TAG, "Force-Suspending (uid " + uid + ")...");
+            boolean success = mNativeWrapper.nativeForceSuspend();
+            if (!success) {
+                Slog.i(TAG, "Force-Suspending failed in native.");
+            }
+            return success;
+        } finally {
+            synchronized (mLock) {
+                mForceSuspendActive = false;
+                // Re-enable wake locks once again.
+                updateWakeLockDisabledStatesLocked();
+            }
         }
     }
 
@@ -4738,6 +4755,20 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 return isScreenBrightnessBoostedInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // binder call
+        public boolean forceSuspend() {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return forceSuspendInternal(uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

@@ -21,15 +21,21 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
+import android.attention.AttentionManagerInternal;
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.BatteryManagerInternal;
+import android.os.Binder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
@@ -53,6 +59,9 @@ import org.junit.Rule;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Tests for {@link com.android.server.power.PowerManagerService}
  */
@@ -67,6 +76,7 @@ public class PowerManagerServiceTest extends AndroidTestCase {
     private @Mock DisplayManagerInternal mDisplayManagerInternalMock;
     private @Mock BatteryManagerInternal mBatteryManagerInternalMock;
     private @Mock ActivityManagerInternal mActivityManagerInternalMock;
+    private @Mock AttentionManagerInternal mAttentionManagerInternalMock;
     private @Mock PowerManagerService.NativeWrapper mNativeWrapperMock;
     private @Mock Notifier mNotifierMock;
     private PowerManagerService mService;
@@ -93,6 +103,7 @@ public class PowerManagerServiceTest extends AndroidTestCase {
         addLocalServiceMock(DisplayManagerInternal.class, mDisplayManagerInternalMock);
         addLocalServiceMock(BatteryManagerInternal.class, mBatteryManagerInternalMock);
         addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
+        addLocalServiceMock(AttentionManagerInternal.class, mAttentionManagerInternalMock);
 
         mService = new PowerManagerService(getContext(), new Injector() {
             Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
@@ -209,5 +220,81 @@ public class PowerManagerServiceTest extends AndroidTestCase {
         int interval = 1000;
         mService.onUserActivity();
         assertThat(mService.wasDeviceIdleForInternal(interval)).isFalse();
+    }
+
+    @SmallTest
+    public void testForceSuspend_putsDeviceToSleep() {
+        mService.systemReady(null);
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // Verify that we start awake
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab the wakefulness value when PowerManager finally calls into the
+        // native component to actually perform the suspend.
+        when(mNativeWrapperMock.nativeForceSuspend()).then(inv -> {
+            assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+            return true;
+        });
+
+        boolean retval = mService.getBinderServiceInstance().forceSuspend();
+        assertThat(retval).isTrue();
+
+        // Still asleep when the function returns.
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @SmallTest
+    public void testForceSuspend_pakeLocksDisabled() {
+        final String tag = "TestWakelockTag_098213";
+        final int flags = PowerManager.PARTIAL_WAKE_LOCK;
+        final String pkg = getContext().getOpPackageName();
+
+        // Set up the Notification mock to keep track of the wakelocks that are currently
+        // active or disabled. We'll use this to verify that wakelocks are disabled when
+        // they should be.
+        final Map<String, Integer> wakelockMap = new HashMap<>(1);
+        doAnswer(inv -> {
+            wakelockMap.put((String) inv.getArguments()[1], (int) inv.getArguments()[0]);
+            return null;
+        }).when(mNotifierMock).onWakeLockAcquired(anyInt(), anyString(), anyString(), anyInt(),
+                anyInt(), any(), any());
+        doAnswer(inv -> {
+            wakelockMap.remove((String) inv.getArguments()[1]);
+            return null;
+        }).when(mNotifierMock).onWakeLockReleased(anyInt(), anyString(), anyString(), anyInt(),
+                anyInt(), any(), any());
+
+        //
+        // TEST STARTS HERE
+        //
+        mService.systemReady(null);
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // Verify that we start awake
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Create a wakelock
+        mService.getBinderServiceInstance().acquireWakeLock(new Binder(), flags, tag, pkg,
+                null /* workSource */, null /* historyTag */);
+        assertThat(wakelockMap.get(tag)).isEqualTo(flags);  // Verify wakelock is active.
+
+        // Confirm that the wakelocks have been disabled when the forceSuspend is in flight.
+        when(mNativeWrapperMock.nativeForceSuspend()).then(inv -> {
+            // Verify that the wakelock is disabled by the time we get to the native force
+            // suspend call.
+            assertThat(wakelockMap.containsKey(tag)).isFalse();
+            return true;
+        });
+
+        assertThat(mService.getBinderServiceInstance().forceSuspend()).isTrue();
+        assertThat(wakelockMap.get(tag)).isEqualTo(flags);
+
+    }
+
+    @SmallTest
+    public void testForceSuspend_forceSuspendFailurePropogated() {
+        when(mNativeWrapperMock.nativeForceSuspend()).thenReturn(false);
+        assertThat(mService.getBinderServiceInstance().forceSuspend()).isFalse();
     }
 }
