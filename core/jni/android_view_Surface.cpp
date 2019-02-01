@@ -415,18 +415,23 @@ static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
 }
 
 static jlong nativeGetFromSurfaceControl(JNIEnv* env, jclass clazz,
+        jlong nativeObject,
         jlong surfaceControlNativeObj) {
-    /*
-     * This is used by the WindowManagerService just after constructing
-     * a Surface and is necessary for returning the Surface reference to
-     * the caller. At this point, we should only have a SurfaceControl.
-     */
-
+    Surface* self(reinterpret_cast<Surface *>(nativeObject));
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
+
+    // If the underlying IGBP's are the same, we don't need to do anything.
+    if (self != nullptr &&
+            IInterface::asBinder(self->getIGraphicBufferProducer()) ==
+            IInterface::asBinder(ctrl->getIGraphicBufferProducer())) {
+        return nativeObject;
+    }
+
     sp<Surface> surface(ctrl->getSurface());
     if (surface != NULL) {
         surface->incStrong(&sRefBaseOwner);
     }
+
     return reinterpret_cast<jlong>(surface.get());
 }
 
@@ -614,7 +619,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeAllocateBuffers },
     {"nativeCreateFromSurfaceControl", "(J)J",
             (void*)nativeCreateFromSurfaceControl },
-    {"nativeGetFromSurfaceControl", "(J)J",
+    {"nativeGetFromSurfaceControl", "(JJ)J",
             (void*)nativeGetFromSurfaceControl },
     {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
