@@ -289,20 +289,23 @@ public final class StatsManager {
      * @param pendingIntent the PendingIntent to use when broadcasting info to the subscriber
      *                      associated with the given subscriberId. May be null, in which case
      *                      it removes any associated pending intent for this client.
+     * @return A list of configs that are currently active for this client. If the pendingIntent is
+     *         null, this will be an empty list.
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
-    public void setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
+    public long[] setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
             throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (pendingIntent == null) {
                     service.removeActiveConfigsChangedOperation(mContext.getOpPackageName());
+                    return new long[0];
                 } else {
                     // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
                     IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    service.setActiveConfigsChangedOperation(intentSender,
+                    return service.setActiveConfigsChangedOperation(intentSender,
                             mContext.getOpPackageName());
                 }
 
