@@ -63,6 +63,8 @@ import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -408,6 +410,7 @@ public class MediaPlayer2 implements AutoCloseable
         synchronized (mDrmEventCallbackLock) {
             mDrmEventCallback = null;
         }
+        clearMediaDrmObjects();
 
         native_release();
 
@@ -416,6 +419,16 @@ public class MediaPlayer2 implements AutoCloseable
         }
 
         mReleased = true;
+    }
+
+    void clearMediaDrmObjects() {
+        Collection<MediaDrm> drmObjs = mDrmObjs.values();
+        synchronized (mDrmObjs) {
+            for (MediaDrm drmObj : drmObjs) {
+                drmObj.close();
+            }
+            mDrmObjs.clear();
+        }
     }
 
     private native void native_release();
@@ -442,6 +455,7 @@ public class MediaPlayer2 implements AutoCloseable
     // This is a synchronous call.
     public void reset() {
         clearSourceInfos();
+        clearMediaDrmObjects();
 
         stayAwake(false);
         native_reset();
@@ -4504,7 +4518,7 @@ public class MediaPlayer2 implements AutoCloseable
     };
 
     // Modular DRM
-    private final Map<UUID, MediaDrm> mDrmObjs = new HashMap<>();
+    private final Map<UUID, MediaDrm> mDrmObjs = Collections.synchronizedMap(new HashMap<>());
     private class DrmHandle {
 
         static final int PROVISION_TIMEOUT_MS = 60000;
@@ -4890,10 +4904,6 @@ public class MediaPlayer2 implements AutoCloseable
             if (mDrmSessionId != null)    {
                 mDrmObj.closeSession(mDrmSessionId);
                 mDrmSessionId = null;
-            }
-            if (mDrmObj != null) {
-                mDrmObj.close();
-                mDrmObj = null;
             }
         }
 
