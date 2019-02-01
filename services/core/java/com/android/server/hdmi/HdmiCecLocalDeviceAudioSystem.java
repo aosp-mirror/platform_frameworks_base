@@ -458,9 +458,19 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected boolean handleGiveSystemAudioModeStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        // If the audio system is initiating the system audio mode on and TV asks the sam status at
+        // the same time, respond with true. Since we know TV supports sam in this situation.
+        // If the query comes from STB, we should respond with the current sam status and the STB
+        // should listen to the <Set System Audio Mode> broadcasting.
+        boolean isSystemAudioModeOnOrTurningOn = isSystemAudioActivated();
+        if (!isSystemAudioModeOnOrTurningOn
+                && message.getSource() == Constants.ADDR_TV
+                && hasAction(SystemAudioInitiationActionFromAvr.class)) {
+            isSystemAudioModeOnOrTurningOn = true;
+        }
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                        mAddress, message.getSource(), mSystemAudioActivated));
+                        mAddress, message.getSource(), isSystemAudioModeOnOrTurningOn));
         return true;
     }
 
