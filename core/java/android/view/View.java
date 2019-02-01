@@ -3986,15 +3986,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SCROLL_AXIS_VERTICAL = 1 << 1;
 
     /**
-     * If a MotionEvent has CLASSIFICATION_AMBIGUOUS_GESTURE set, then certain the default
-     * long press action will be inhibited. However, to account for the possibility of incorrect
-     * classification, the default long press timeout will instead be increased for some situations
-     * by the following factor.
-     * Likewise, the touch slop for allowing long press will be increased when gesture is uncertain.
-     */
-    private static final int AMBIGUOUS_GESTURE_MULTIPLIER = 2;
-
-    /**
      * Controls the over-scroll mode for this view.
      * See {@link #overScrollBy(int, int, int, int, int, int, int, int, boolean)},
      * {@link #OVER_SCROLL_ALWAYS}, {@link #OVER_SCROLL_IF_CONTENT_SCROLLS},
@@ -14807,18 +14798,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             motionClassification == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE;
                     int touchSlop = mTouchSlop;
                     if (ambiguousGesture && hasPendingLongPressCallback()) {
+                        final float ambiguousMultiplier =
+                                ViewConfiguration.getAmbiguousGestureMultiplier();
                         if (!pointInView(x, y, touchSlop)) {
                             // The default action here is to cancel long press. But instead, we
                             // just extend the timeout here, in case the classification
                             // stays ambiguous.
                             removeLongPressCallback();
-                            long delay = ViewConfiguration.getLongPressTimeout()
-                                    * AMBIGUOUS_GESTURE_MULTIPLIER;
+                            long delay = (long) (ViewConfiguration.getLongPressTimeout()
+                                    * ambiguousMultiplier);
                             // Subtract the time already spent
                             delay -= event.getEventTime() - event.getDownTime();
                             checkForLongClick(delay, x, y);
                         }
-                        touchSlop *= AMBIGUOUS_GESTURE_MULTIPLIER;
+                        touchSlop *= ambiguousMultiplier;
                     }
 
                     // Be lenient about moving outside of buttons

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.FloatRange;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.AppGlobals;
@@ -285,6 +286,11 @@ public class ViewConfiguration {
     private static final int HAS_PERMANENT_MENU_KEY_AUTODETECT = 0;
     private static final int HAS_PERMANENT_MENU_KEY_TRUE = 1;
     private static final int HAS_PERMANENT_MENU_KEY_FALSE = 2;
+
+    /**
+     * The multiplication factor for inhibiting default gestures.
+     */
+    private static final float AMBIGUOUS_GESTURE_MULTIPLIER = 2f;
 
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
@@ -908,6 +914,22 @@ public class ViewConfiguration {
      */
     public static long getDefaultActionModeHideDuration() {
         return ACTION_MODE_HIDE_DURATION_DEFAULT;
+    }
+
+    /**
+     * If a MotionEvent has CLASSIFICATION_AMBIGUOUS_GESTURE set, then certain actions, such as
+     * scrolling, will be inhibited.
+     * However, to account for the possibility of incorrect classification,
+     * the default scrolling will only be inhibited if the pointer travels less than
+     * (getScaledTouchSlop() * this factor).
+     * Likewise, the default long press timeout will be increased by this factor for some situations
+     * where the default behaviour is to cancel it.
+     *
+     * @return The multiplication factor for inhibiting default gestures.
+     */
+    @FloatRange(from = 1.0)
+    public static float getAmbiguousGestureMultiplier() {
+        return AMBIGUOUS_GESTURE_MULTIPLIER;
     }
 
     /**
