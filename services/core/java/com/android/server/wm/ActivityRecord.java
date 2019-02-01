@@ -2065,7 +2065,8 @@ final class ActivityRecord extends ConfigurationContainer {
      * - should be either the topmost in task, or right below the top activity that is finishing
      * If all of these conditions are not met at the same time, the activity cannot be made active.
      */
-    private boolean shouldMakeActive(ActivityRecord activeActivity) {
+    @VisibleForTesting
+    boolean shouldMakeActive(ActivityRecord activeActivity) {
         // If the activity is stopped, stopping, cycle to an active state. We avoid doing
         // this when there is an activity waiting to become translucent as the extra binder
         // calls will lead to noticeable jank. A later call to
@@ -2077,6 +2078,11 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         if (this == activeActivity) {
+            return false;
+        }
+
+        if (!mStackSupervisor.readyToResume()) {
+            // Making active is currently deferred (e.g. because an activity launch is in progress).
             return false;
         }
 
