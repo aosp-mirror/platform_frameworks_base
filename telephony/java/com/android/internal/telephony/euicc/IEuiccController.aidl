@@ -31,7 +31,7 @@ interface IEuiccController {
         String callingPackage, in PendingIntent callbackIntent);
     oneway void getDefaultDownloadableSubscriptionList(int cardId,
         String callingPackage, in PendingIntent callbackIntent);
-    String getEid(int cardId);
+    String getEid(int cardId, String callingPackage);
     int getOtaStatus(int cardId);
     oneway void downloadSubscription(int cardId, in DownloadableSubscription subscription,
         boolean switchAfterDownload, String callingPackage, in Bundle resolvedBundle,
