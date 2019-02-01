@@ -70,18 +70,19 @@ StatsdConfig MakeValueMetricConfig(int64_t minTime) {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
 
-    auto temperatureAtomMatcher = CreateTemperatureAtomMatcher();
-    *config.add_atom_matcher() = temperatureAtomMatcher;
+    auto pulledAtomMatcher =
+            CreateSimpleAtomMatcher("TestMatcher", android::util::SUBSYSTEM_SLEEP_STATE);
+    *config.add_atom_matcher() = pulledAtomMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
 
     auto valueMetric = config.add_value_metric();
     valueMetric->set_id(123456);
-    valueMetric->set_what(temperatureAtomMatcher.id());
+    valueMetric->set_what(pulledAtomMatcher.id());
     *valueMetric->mutable_value_field() =
-            CreateDimensions(android::util::TEMPERATURE, {3 /* temperature degree field */});
+            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
     *valueMetric->mutable_dimensions_in_what() =
-            CreateDimensions(android::util::TEMPERATURE, {2 /* sensor name field */});
+            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {1 /* subsystem name */});
     valueMetric->set_bucket(FIVE_MINUTES);
     valueMetric->set_min_bucket_size_nanos(minTime);
     valueMetric->set_use_absolute_value_on_reset(true);
@@ -92,17 +93,18 @@ StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
 
-    auto temperatureAtomMatcher = CreateTemperatureAtomMatcher();
-    *config.add_atom_matcher() = temperatureAtomMatcher;
+    auto pulledAtomMatcher =
+                CreateSimpleAtomMatcher("TestMatcher", android::util::SUBSYSTEM_SLEEP_STATE);
+    *config.add_atom_matcher() = pulledAtomMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
 
     auto gaugeMetric = config.add_gauge_metric();
     gaugeMetric->set_id(123456);
-    gaugeMetric->set_what(temperatureAtomMatcher.id());
+    gaugeMetric->set_what(pulledAtomMatcher.id());
     gaugeMetric->mutable_gauge_fields_filter()->set_include_all(true);
     *gaugeMetric->mutable_dimensions_in_what() =
-            CreateDimensions(android::util::TEMPERATURE, {2 /* sensor name field */});
+            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {1 /* subsystem name */});
     gaugeMetric->set_bucket(FIVE_MINUTES);
     gaugeMetric->set_min_bucket_size_nanos(minTime);
     return config;
