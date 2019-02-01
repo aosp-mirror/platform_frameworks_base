@@ -17,22 +17,23 @@
 package com.android.server.role;
 
 import android.annotation.NonNull;
-import android.os.UserHandle;
+import android.annotation.UserIdInt;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 /**
- * Internal calls into {@link RoleManagerService}
+ * Internal calls into {@link RoleManagerService}.
  */
-public abstract class RoleManagerServiceInternal {
+public abstract class RoleManagerInternal {
+
     /**
-     * Get all roles and packages hold them.
+     * Get all roles and their holders.
      *
-     * @param user The user to query to roles for
+     * @param userId The user to query to roles for
      *
      * @return The roles and their holders
      */
     @NonNull
-    public abstract ArrayMap<String, ArraySet<String>> getRoleHoldersAsUser(
-            @NonNull UserHandle user);
+    public abstract ArrayMap<String, ArraySet<String>> getRolesAndHolders(
+            @UserIdInt int userId);
 }
