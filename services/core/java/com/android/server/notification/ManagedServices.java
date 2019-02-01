@@ -306,18 +306,21 @@ abstract public class ManagedServices {
         }
     }
 
-    public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
+    public void writeXml(XmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, getConfig().xmlTag);
 
         out.attribute(null, ATT_VERSION, String.valueOf(DB_VERSION));
 
         if (forBackup) {
-            trimApprovedListsAccordingToInstalledServices();
+            trimApprovedListsAccordingToInstalledServices(userId);
         }
 
         final int N = mApproved.size();
         for (int i = 0 ; i < N; i++) {
-            final int userId = mApproved.keyAt(i);
+            final int approvedUserId = mApproved.keyAt(i);
+            if (forBackup && approvedUserId != userId) {
+                continue;
+            }
             final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
             if (approvedByType != null) {
                 final int M = approvedByType.size();
@@ -328,14 +331,14 @@ abstract public class ManagedServices {
                         String allowedItems = String.join(ENABLED_SERVICES_SEPARATOR, approved);
                         out.startTag(null, TAG_MANAGED_SERVICES);
                         out.attribute(null, ATT_APPROVED_LIST, allowedItems);
-                        out.attribute(null, ATT_USER_ID, Integer.toString(userId));
+                        out.attribute(null, ATT_USER_ID, Integer.toString(approvedUserId));
                         out.attribute(null, ATT_IS_PRIMARY, Boolean.toString(isPrimary));
                         out.endTag(null, TAG_MANAGED_SERVICES);
 
                         if (!forBackup && isPrimary) {
                             // Also write values to settings, for observers who haven't migrated yet
                             Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                    getConfig().secureSettingName, allowedItems, userId);
+                                    getConfig().secureSettingName, allowedItems, approvedUserId);
                         }
 
                     }
@@ -350,15 +353,12 @@ abstract public class ManagedServices {
         loadAllowedComponentsFromSettings();
     }
 
-    public void readXml(XmlPullParser parser, Predicate<String> allowedManagedServicePackages)
+    public void readXml(
+            XmlPullParser parser,
+            Predicate<String> allowedManagedServicePackages,
+            boolean forRestore,
+            int userId)
             throws XmlPullParserException, IOException {
-        // upgrade xml
-        int xmlVersion = XmlUtils.readIntAttribute(parser, ATT_VERSION, 0);
-        final List<UserInfo> activeUsers = mUm.getUsers(true);
-        for (UserInfo userInfo : activeUsers) {
-            upgradeXml(xmlVersion, userInfo.getUserHandle().getIdentifier());
-        }
-
         // read grants
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -372,14 +372,16 @@ abstract public class ManagedServices {
                     Slog.i(TAG, "Read " + mConfig.caption + " permissions from xml");
 
                     final String approved = XmlUtils.readStringAttribute(parser, ATT_APPROVED_LIST);
-                    final int userId = XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
+                    // Ignore parser's user id for restore.
+                    final int resolvedUserId = forRestore
+                            ? userId : XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
                     final boolean isPrimary =
                             XmlUtils.readBooleanAttribute(parser, ATT_IS_PRIMARY, true);
 
                     if (allowedManagedServicePackages == null ||
                             allowedManagedServicePackages.test(getPackageName(approved))) {
-                        if (mUm.getUserInfo(userId) != null) {
-                            addApprovedList(approved, userId, isPrimary);
+                        if (mUm.getUserInfo(resolvedUserId) != null) {
+                            addApprovedList(approved, resolvedUserId, isPrimary);
                         }
                         mUseXml = true;
                     }
@@ -388,8 +390,6 @@ abstract public class ManagedServices {
         }
         rebindServices(false, USER_ALL);
     }
-
-    protected void upgradeXml(final int xmlVersion, final int userId) {}
 
     private void loadAllowedComponentsFromSettings() {
         for (UserInfo user : mUm.getUsers()) {
@@ -784,26 +784,23 @@ abstract public class ManagedServices {
         return allowedPackages;
     }
 
-    private void trimApprovedListsAccordingToInstalledServices() {
-        int N = mApproved.size();
-        for (int i = 0 ; i < N; i++) {
-            final int userId = mApproved.keyAt(i);
-            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
-            int M = approvedByType.size();
-            for (int j = 0; j < M; j++) {
-                final ArraySet<String> approved = approvedByType.valueAt(j);
-                int P = approved.size();
-                for (int k = P - 1; k >= 0; k--) {
-                    final String approvedPackageOrComponent = approved.valueAt(k);
-                    if (!isValidEntry(approvedPackageOrComponent, userId)){
-                        approved.removeAt(k);
-                        Slog.v(TAG, "Removing " + approvedPackageOrComponent
-                                + " from approved list; no matching services found");
-                    } else {
-                        if (DEBUG) {
-                            Slog.v(TAG, "Keeping " + approvedPackageOrComponent
-                                    + " on approved list; matching services found");
-                        }
+    private void trimApprovedListsAccordingToInstalledServices(int userId) {
+        final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+        if (approvedByType == null) {
+            return;
+        }
+        for (int i = 0; i < approvedByType.size(); i++) {
+            final ArraySet<String> approved = approvedByType.valueAt(i);
+            for (int j = approved.size() - 1; j >= 0; j--) {
+                final String approvedPackageOrComponent = approved.valueAt(j);
+                if (!isValidEntry(approvedPackageOrComponent, userId)){
+                    approved.removeAt(j);
+                    Slog.v(TAG, "Removing " + approvedPackageOrComponent
+                            + " from approved list; no matching services found");
+                } else {
+                    if (DEBUG) {
+                        Slog.v(TAG, "Keeping " + approvedPackageOrComponent
+                                + " on approved list; matching services found");
                     }
                 }
             }
