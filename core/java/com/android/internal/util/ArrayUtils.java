@@ -691,6 +691,15 @@ public class ArrayUtils {
         return result;
     }
 
+    public static boolean startsWith(byte[] cur, byte[] val) {
+        if (cur == null || val == null) return false;
+        if (cur.length < val.length) return false;
+        for (int i = 0; i < val.length; i++) {
+            if (cur[i] != val[i]) return false;
+        }
+        return true;
+    }
+
     /**
      * Returns the first element from the array for which
      * condition {@code predicate} is true, or null if there is no such element
