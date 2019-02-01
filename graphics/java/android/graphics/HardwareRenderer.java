@@ -154,6 +154,7 @@ public class HardwareRenderer {
     private boolean mOpaque = true;
     private boolean mForceDark = false;
     private FrameInfo mScratchInfo;
+    private boolean mIsWideGamut = false;
 
     /**
      * Creates a new instance of a HardwareRenderer. The HardwareRenderer will default
@@ -498,6 +499,7 @@ public class HardwareRenderer {
      * @hide
      */
     public void setWideGamut(boolean wideGamut) {
+        mIsWideGamut = wideGamut;
         nSetWideGamut(mNativeProxy, wideGamut);
     }
 
@@ -671,6 +673,11 @@ public class HardwareRenderer {
     /** @hide */
     public void setPictureCaptureCallback(@Nullable PictureCapturedCallback callback) {
         nSetPictureCaptureCallback(mNativeProxy, callback);
+    }
+
+    /** @hide */
+    public boolean isWideGamut() {
+        return mIsWideGamut;
     }
 
     /** called by native */
