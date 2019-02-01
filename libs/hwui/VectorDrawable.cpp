@@ -606,12 +606,7 @@ void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {
 
 bool Tree::allocateBitmapIfNeeded(Cache& cache, int width, int height) {
     if (!canReuseBitmap(cache.bitmap.get(), width, height)) {
-#ifndef ANDROID_ENABLE_LINEAR_BLENDING
-        sk_sp<SkColorSpace> colorSpace = nullptr;
-#else
-        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-#endif
-        SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
+        SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType);
         cache.bitmap = Bitmap::allocateHeapBitmap(info);
         return true;
     }

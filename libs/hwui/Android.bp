@@ -28,10 +28,6 @@ cc_defaults {
 
         // clang's warning is broken, see: https://llvm.org/bugs/show_bug.cgi?id=21629
         "-Wno-missing-braces",
-
-        // TODO: Linear blending should be enabled by default, but we are
-        // TODO: making it an opt-in while it's a work in progress
-        //"-DANDROID_ENABLE_LINEAR_BLENDING",
     ],
 
     include_dirs: [
