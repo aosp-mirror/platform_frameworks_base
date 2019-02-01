@@ -108,24 +108,23 @@ public class AttentionManagerService extends SystemService {
                 AttentionService.ATTENTION_FAILURE_UNKNOWN);
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        super.onBootPhase(phase);
-        if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+    /** Resolves and sets up the attention service if it had not been done yet. */
+    private boolean isServiceAvailable() {
+        if (mComponentName == null) {
             mComponentName = resolveAttentionService(mContext);
-            if (isAttentionServiceSupported()) {
-                // If the service is supported we want to keep receiving the screen off events.
+            if (mComponentName != null) {
                 mContext.registerReceiver(new ScreenStateReceiver(),
                         new IntentFilter(Intent.ACTION_SCREEN_OFF));
             }
         }
+        return mComponentName != null;
     }
 
     /**
      * Returns {@code true} if attention service is supported on this device.
      */
     public boolean isAttentionServiceSupported() {
-        return mComponentName != null && isServiceEnabled();
+        return isServiceEnabled() && isServiceAvailable();
     }
 
     private boolean isServiceEnabled() {
@@ -258,7 +257,7 @@ public class AttentionManagerService extends SystemService {
     private UserState getOrCreateUserStateLocked(int userId) {
         UserState result = mUserStates.get(userId);
         if (result == null) {
-            result = new UserState(userId, mContext, mLock);
+            result = new UserState(userId, mContext, mLock, mComponentName);
             mUserStates.put(userId, result);
         }
         return result;
@@ -397,6 +396,7 @@ public class AttentionManagerService extends SystemService {
     }
 
     private static final class UserState {
+        final ComponentName mComponentName;
         final AttentionServiceConnection mConnection = new AttentionServiceConnection();
 
         @GuardedBy("mLock")
@@ -416,10 +416,11 @@ public class AttentionManagerService extends SystemService {
         final Context mContext;
         final Object mLock;
 
-        private UserState(int userId, Context context, Object lock) {
+        private UserState(int userId, Context context, Object lock, ComponentName componentName) {
             mUserId = userId;
             mContext = Preconditions.checkNotNull(context);
             mLock = Preconditions.checkNotNull(lock);
+            mComponentName = Preconditions.checkNotNull(componentName);
         }
 
 
@@ -443,15 +444,9 @@ public class AttentionManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
 
             try {
-                final ComponentName componentName =
-                        resolveAttentionService(mContext);
-                if (componentName == null) {
-                    // Might happen if the storage is encrypted and the user is not unlocked
-                    return false;
-                }
                 final Intent mServiceIntent = new Intent(
                         AttentionService.SERVICE_INTERFACE).setComponent(
-                        componentName);
+                        mComponentName);
                 willBind = mContext.bindServiceAsUser(mServiceIntent, mConnection,
                         Context.BIND_AUTO_CREATE, UserHandle.CURRENT);
                 mBinding = willBind;
