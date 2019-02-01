@@ -967,7 +967,7 @@
     <!-- Height and width of App Opp icons in Ongoing App Ops dialog -->
     <dimen name="ongoing_appops_dialog_icon_size">24dp</dimen>
     <!-- Left margin of App Opp icons in Ongoing App Ops dialog -->
-    <dimen name="ongoing_appops_dialog_icon_margin">8dp</dimen>
+    <dimen name="ongoing_appops_dialog_icon_margin">12dp</dimen>
     <!-- Height and width of Application icons in Ongoing App Ops dialog -->
     <dimen name="ongoing_appops_dialog_app_icon_size">32dp</dimen>
     <!-- Height and width of Plus sign in Ongoing App Ops dialog -->
@@ -988,12 +988,14 @@
     <dimen name="ongoing_appops_chip_side_padding">6dp</dimen>
     <!-- Padding between background of Ongoing App Ops chip and content -->
     <dimen name="ongoing_appops_chip_bg_padding">0dp</dimen>
-    <!-- Margin between icons of Ongoing App Ops chip -->
-    <dimen name="ongoing_appops_chip_icon_margin">4dp</dimen>
+    <!-- Margin between icons of Ongoing App Ops chip when QQS-->
+    <dimen name="ongoing_appops_chip_icon_margin_collapsed">0dp</dimen>
+    <!-- Margin between icons of Ongoing App Ops chip when QS-->
+    <dimen name="ongoing_appops_chip_icon_margin_expanded">8dp</dimen>
     <!-- Icon size of Ongoing App Ops chip -->
     <dimen name="ongoing_appops_chip_icon_size">18dp</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
-    <dimen name="ongoing_appops_chip_bg_corner_radius">12dp</dimen>
+    <dimen name="ongoing_appops_chip_bg_corner_radius">4dp</dimen>
     <!-- Text size for Ongoing App Ops dialog title -->
     <dimen name="ongoing_appops_dialog_title_size">20sp</dimen>
     <!-- Text size for Ongoing App Ops dialog items -->

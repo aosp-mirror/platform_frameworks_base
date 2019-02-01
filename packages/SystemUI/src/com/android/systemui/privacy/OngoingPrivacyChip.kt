@@ -16,6 +16,7 @@ package com.android.systemui.privacy
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -29,14 +30,25 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttrs, defStyleRes) {
 
-    private val iconMargin =
-            context.resources.getDimensionPixelSize(R.dimen.ongoing_appops_chip_icon_margin)
+    private val iconMarginExpanded = context.resources.getDimensionPixelSize(
+                    R.dimen.ongoing_appops_chip_icon_margin_expanded)
+    private val iconMarginCollapsed = context.resources.getDimensionPixelSize(
+                    R.dimen.ongoing_appops_chip_icon_margin_collapsed)
     private val iconSize =
             context.resources.getDimensionPixelSize(R.dimen.ongoing_appops_chip_icon_size)
-    val iconColor = context.resources.getColor(
+    private val iconColor = context.resources.getColor(
             R.color.status_bar_clock_color, context.theme)
+    private val backgroundDrawable = context.getDrawable(R.drawable.privacy_chip_bg)
     private lateinit var text: TextView
     private lateinit var iconsContainer: LinearLayout
+    private lateinit var inUseText: TextView
+    var expanded = false
+        set(value) {
+            if (value != field) {
+                field = value
+                updateView()
+            }
+        }
     var builder = PrivacyDialogBuilder(context, emptyList<PrivacyItem>())
     var privacyList = emptyList<PrivacyItem>()
         set(value) {
@@ -48,15 +60,18 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
 
+        inUseText = findViewById(R.id.in_use_text)
         text = findViewById(R.id.text_container)
         iconsContainer = findViewById(R.id.icons_container)
     }
 
     // Should only be called if the builder icons or app changed
     private fun updateView() {
+        inUseText.visibility = if (expanded) View.GONE else View.VISIBLE
+        background = if (expanded) backgroundDrawable else null
         fun setIcons(dialogBuilder: PrivacyDialogBuilder, iconsContainer: ViewGroup) {
             iconsContainer.removeAllViews()
-            dialogBuilder.generateIcons().forEach {
+            dialogBuilder.generateIcons().forEachIndexed { i, it ->
                 it.mutate()
                 it.setTint(iconColor)
                 val image = ImageView(context).apply {
@@ -64,17 +79,19 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                     scaleType = ImageView.ScaleType.CENTER_INSIDE
                 }
                 iconsContainer.addView(image, iconSize, iconSize)
-                val lp = image.layoutParams as MarginLayoutParams
-                lp.marginStart = iconMargin
-                image.layoutParams = lp
+                if (i != 0) {
+                    val lp = image.layoutParams as MarginLayoutParams
+                    lp.marginStart = if (expanded) iconMarginExpanded else iconMarginCollapsed
+                    image.layoutParams = lp
+                }
             }
         }
 
         if (!privacyList.isEmpty()) {
             generateContentDescription()
             setIcons(builder, iconsContainer)
-            text.visibility = if (builder.types.size == 1) VISIBLE else GONE
-            if (builder.types.size == 1) {
+            text.visibility = if (builder.types.size == 1 && expanded) VISIBLE else GONE
+            if (builder.types.size == 1 && expanded) {
                 if (builder.app != null) {
                     text.setText(builder.app?.applicationName)
                 } else {
