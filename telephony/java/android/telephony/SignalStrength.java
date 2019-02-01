@@ -85,6 +85,7 @@ public class SignalStrength implements Parcelable {
     CellSignalStrengthWcdma mWcdma;
     CellSignalStrengthTdscdma mTdscdma;
     CellSignalStrengthLte mLte;
+    CellSignalStrengthNr mNr;
 
     /**
      * Create a new SignalStrength from a intent notifier Bundle
@@ -116,7 +117,7 @@ public class SignalStrength implements Parcelable {
     public SignalStrength() {
         this(new CellSignalStrengthCdma(), new CellSignalStrengthGsm(),
                 new CellSignalStrengthWcdma(), new CellSignalStrengthTdscdma(),
-                new CellSignalStrengthLte());
+                new CellSignalStrengthLte(), new CellSignalStrengthNr());
     }
 
     /**
@@ -129,12 +130,14 @@ public class SignalStrength implements Parcelable {
             @NonNull CellSignalStrengthGsm gsm,
             @NonNull CellSignalStrengthWcdma wcdma,
             @NonNull CellSignalStrengthTdscdma tdscdma,
-            @NonNull CellSignalStrengthLte lte) {
+            @NonNull CellSignalStrengthLte lte,
+            @NonNull CellSignalStrengthNr nr) {
         mCdma = cdma;
         mGsm = gsm;
         mWcdma = wcdma;
         mTdscdma = tdscdma;
         mLte = lte;
+        mNr = nr;
     }
 
     /**
@@ -147,7 +150,8 @@ public class SignalStrength implements Parcelable {
                 new CellSignalStrengthGsm(signalStrength.gw),
                 new CellSignalStrengthWcdma(),
                 new CellSignalStrengthTdscdma(signalStrength.tdScdma),
-                new CellSignalStrengthLte(signalStrength.lte));
+                new CellSignalStrengthLte(signalStrength.lte),
+                new CellSignalStrengthNr());
     }
 
     /**
@@ -160,7 +164,23 @@ public class SignalStrength implements Parcelable {
                 new CellSignalStrengthGsm(signalStrength.gsm),
                 new CellSignalStrengthWcdma(signalStrength.wcdma),
                 new CellSignalStrengthTdscdma(signalStrength.tdScdma),
-                new CellSignalStrengthLte(signalStrength.lte));
+                new CellSignalStrengthLte(signalStrength.lte),
+                new CellSignalStrengthNr());
+    }
+
+    /**
+     * Constructor for Radio HAL V1.4.
+     *
+     * @param signalStrength signal strength reported from modem.
+     * @hide
+     */
+    public SignalStrength(android.hardware.radio.V1_4.SignalStrength signalStrength) {
+        this(new CellSignalStrengthCdma(signalStrength.cdma, signalStrength.evdo),
+                new CellSignalStrengthGsm(signalStrength.gsm),
+                new CellSignalStrengthWcdma(signalStrength.wcdma),
+                new CellSignalStrengthTdscdma(signalStrength.tdscdma),
+                new CellSignalStrengthLte(signalStrength.lte),
+                new CellSignalStrengthNr(signalStrength.nr));
     }
 
     private CellSignalStrength getPrimary() {
@@ -171,6 +191,7 @@ public class SignalStrength implements Parcelable {
         if (mTdscdma.isValid()) return mTdscdma;
         if (mWcdma.isValid()) return mWcdma;
         if (mGsm.isValid()) return mGsm;
+        if (mNr.isValid()) return mNr;
         return mLte;
     }
 
@@ -200,6 +221,7 @@ public class SignalStrength implements Parcelable {
         if (mTdscdma.isValid()) cssList.add(mTdscdma);
         if (mWcdma.isValid()) cssList.add(mWcdma);
         if (mGsm.isValid()) cssList.add(mGsm);
+        if (mNr.isValid()) cssList.add(mNr);
         return cssList;
     }
 
@@ -210,6 +232,7 @@ public class SignalStrength implements Parcelable {
         mWcdma.updateLevel(cc, ss);
         mTdscdma.updateLevel(cc, ss);
         mLte.updateLevel(cc, ss);
+        mNr.updateLevel(cc, ss);
     }
 
     /**
@@ -234,6 +257,7 @@ public class SignalStrength implements Parcelable {
         mWcdma = new CellSignalStrengthWcdma(s.mWcdma);
         mTdscdma = new CellSignalStrengthTdscdma(s.mTdscdma);
         mLte = new CellSignalStrengthLte(s.mLte);
+        mNr = new CellSignalStrengthNr(s.mNr);
     }
 
     /**
@@ -250,6 +274,7 @@ public class SignalStrength implements Parcelable {
         mWcdma = in.readParcelable(CellSignalStrengthWcdma.class.getClassLoader());
         mTdscdma = in.readParcelable(CellSignalStrengthTdscdma.class.getClassLoader());
         mLte = in.readParcelable(CellSignalStrengthLte.class.getClassLoader());
+        mNr = in.readParcelable(CellSignalStrengthLte.class.getClassLoader());
     }
 
     /**
@@ -261,6 +286,7 @@ public class SignalStrength implements Parcelable {
         out.writeParcelable(mWcdma, flags);
         out.writeParcelable(mTdscdma, flags);
         out.writeParcelable(mLte, flags);
+        out.writeParcelable(mNr, flags);
     }
 
     /**
@@ -814,7 +840,7 @@ public class SignalStrength implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(mCdma, mGsm, mWcdma, mTdscdma, mLte);
+        return Objects.hash(mCdma, mGsm, mWcdma, mTdscdma, mLte, mNr);
     }
 
     /**
@@ -830,7 +856,8 @@ public class SignalStrength implements Parcelable {
             && mGsm.equals(s.mGsm)
             && mWcdma.equals(s.mWcdma)
             && mTdscdma.equals(s.mTdscdma)
-            && mLte.equals(s.mLte);
+            && mLte.equals(s.mLte)
+            && mNr.equals(s.mNr);
     }
 
     /**
@@ -844,6 +871,7 @@ public class SignalStrength implements Parcelable {
             .append(",mWcdma=").append(mWcdma)
             .append(",mTdscdma=").append(mTdscdma)
             .append(",mLte=").append(mLte)
+            .append(",mNr=").append(mNr)
             .append(",primary=").append(getPrimary().getClass().getSimpleName())
             .append("}")
             .toString();
@@ -866,6 +894,7 @@ public class SignalStrength implements Parcelable {
         mWcdma = m.getParcelable("Wcdma");
         mTdscdma = m.getParcelable("Tdscdma");
         mLte = m.getParcelable("Lte");
+        mNr = m.getParcelable("Nr");
     }
 
     /**
@@ -885,6 +914,7 @@ public class SignalStrength implements Parcelable {
         m.putParcelable("Wcdma", mWcdma);
         m.putParcelable("Tdscdma", mTdscdma);
         m.putParcelable("Lte", mLte);
+        m.putParcelable("Nr", mNr);
     }
 
     /**
