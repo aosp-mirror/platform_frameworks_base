@@ -32,7 +32,8 @@ import com.google.common.io.Files;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -60,6 +61,7 @@ public class TestDrive {
     };
     private static final Logger LOGGER = Logger.getLogger(TestDrive.class.getName());
 
+    private String mAdditionalAllowedPackage;
     private final Set<Long> mTrackedMetrics = new HashSet<>();
 
     public static void main(String[] args) {
@@ -69,11 +71,16 @@ public class TestDrive {
         String remoteConfigPath = null;
 
         if (args.length < 1) {
-            LOGGER.log(Level.SEVERE, "Usage: ./test_drive <atomId1> <atomId2> ... <atomIdN>");
+            LOGGER.log(Level.SEVERE, "Usage: ./test_drive [-p additional_allowed_package] "
+                    + "<atomId1> <atomId2> ... <atomIdN>");
             return;
         }
 
-        for (int i = 0; i < args.length; i++) {
+        if (args.length >= 3 && args[0].equals("-p")) {
+            testDrive.mAdditionalAllowedPackage = args[1];
+        }
+
+        for (int i = testDrive.mAdditionalAllowedPackage == null ? 0 : 2; i < args.length; i++) {
             try {
                 int atomId = Integer.valueOf(args[i]);
                 if (Atom.getDescriptor().findFieldByNumber(atomId) == null) {
@@ -137,9 +144,15 @@ public class TestDrive {
         long metricId = METRIC_ID_BASE;
         long atomMatcherId = ATOM_MATCHER_ID_BASE;
 
+        ArrayList<String> allowedSources = new ArrayList<>();
+        Collections.addAll(allowedSources, ALLOWED_LOG_SOURCES);
+        if (mAdditionalAllowedPackage != null) {
+            allowedSources.add(mAdditionalAllowedPackage);
+        }
+
         StatsdConfig.Builder builder = StatsdConfig.newBuilder();
         builder
-            .addAllAllowedLogSource(Arrays.asList(ALLOWED_LOG_SOURCES))
+            .addAllAllowedLogSource(allowedSources)
             .setHashStringsInMetricReport(false);
 
         for (int atomId : atomIds) {

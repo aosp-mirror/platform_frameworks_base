@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.NonNull;
 import android.os.IStatsManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -112,5 +113,19 @@ public final class StatsLog extends StatsLogInternal {
         }
         sService = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
         return sService;
+    }
+
+    /**
+     * Add a log to the stats log.
+     *
+     * @param id The id of the atom
+     * @param params The parameters of the atom's message.
+     */
+    public static void write(int id, @NonNull Object... params) {
+        switch (id) {
+            case PERMISSION_GRANT_REQUEST_RESULT_REPORTED:
+                write(id, (long) params[0], (int) params[1], (String) params[2], (String) params[3],
+                        (boolean) params[4], (int) params[5]);
+        }
     }
 }

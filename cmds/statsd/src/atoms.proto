@@ -236,6 +236,7 @@ message Atom {
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
         ScreenTimeoutExtensionReported screen_timeout_extension_reported = 168;
         ProcessStartTime process_start_time = 169;
+        PermissionGrantRequestResultReported permission_grant_request_result_reported = 170;
     }
 
     // Pulled events will start at field 10000.
@@ -5094,6 +5095,48 @@ message SeStateChanged {
     optional string state_change_reason = 2;
     // SIMx or eSEx.
     optional string terminal = 3;
+}
+
+/**
+ * Information about a permission grant request
+ */
+message PermissionGrantRequestResultReported {
+    // unique value identifying an API call. A API call might result in multiple of these atoms
+    optional int64 request_id = 1;
+
+    // UID of package requesting the permission grant
+    optional int32 requesting_uid = 2 [(is_uid) = true];
+
+    // Name of package requesting the permission grant
+    optional string requesting_package_name = 3;
+
+    // The permission to be granted
+    optional string permission_name = 4;
+
+    // If the permission was explicitly requested via the API or added by the system
+    optional bool is_implicit = 5;
+
+    enum Result {
+        UNDEFINED = 0;
+        // permission request was ignored
+        IGNORED = 1;
+        // permission request was ignored because it was user fixed
+        IGNORED_USER_FIXED = 2;
+        // permission request was ignored because it was policy fixed
+        IGNORED_POLICY_FIXED = 3;
+        // permission was granted by user action
+        USER_GRANTED = 4;
+        // permission was automatically granted
+        AUTO_GRANTED = 5;
+        // permission was denied by user action
+        USER_DENIED = 6;
+        // permission was denied with prejudice by the user
+        USER_DENIED_WITH_PREJUDICE = 7;
+        // permission was automatically denied
+        AUTO_DENIED = 8;
+    }
+    // The result of the permission grant
+    optional Result result = 6;
 }
 
 /**
