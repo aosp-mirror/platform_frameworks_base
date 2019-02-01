@@ -462,13 +462,6 @@ public class KeyguardAffordanceView extends ImageView {
         }
     }
 
-    public void setRestingAlpha(float alpha) {
-        mRestingAlpha = alpha;
-
-        // TODO: Handle the case an animation is playing.
-        setImageAlpha(alpha, false);
-    }
-
     public float getRestingAlpha() {
         return mRestingAlpha;
     }
