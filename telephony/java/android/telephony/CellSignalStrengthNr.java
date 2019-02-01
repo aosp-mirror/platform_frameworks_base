@@ -77,6 +77,14 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
+     * @hide
+     * @param ss signal strength from modem.
+     */
+    public CellSignalStrengthNr(android.hardware.radio.V1_4.NrSignalStrength ss) {
+        this(ss.csiRsrp, ss.csiRsrq, ss.csiSinr, ss.ssRsrp, ss.ssRsrq, ss.ssSinr);
+    }
+
+    /**
      * Reference: 3GPP TS 38.215.
      * Range: -140 dBm to -44 dBm.
      * @return SS reference signal received power, {@link CellInfo#UNAVAILABLE} means unreported
