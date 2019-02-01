@@ -47,6 +47,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.DisplayMetrics;
 import android.util.Xml;
 import android.view.DisplayInfo;
 
@@ -164,6 +165,44 @@ public class TaskRecordTests extends ActivityTestsBase {
         insetBounds.inset(5, 5, 5, 5);
         testStackBoundsConfiguration(
                 WINDOWING_MODE_FREEFORM, mParentBounds, insetBounds, insetBounds);
+    }
+
+    @Test
+    public void testFitWithinBounds() {
+        final Rect parentBounds = new Rect(10, 10, 200, 200);
+        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        ActivityStack stack = display.createStack(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+        TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Configuration parentConfig = stack.getConfiguration();
+        parentConfig.windowConfiguration.setBounds(parentBounds);
+        parentConfig.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
+
+        // check top and left
+        Rect reqBounds = new Rect(-190, -190, 0, 0);
+        task.setBounds(reqBounds);
+        // Make sure part of it is exposed
+        assertTrue(task.getBounds().right > parentBounds.left);
+        assertTrue(task.getBounds().bottom > parentBounds.top);
+        // Should still be more-or-less in that corner
+        assertTrue(task.getBounds().left <= parentBounds.left);
+        assertTrue(task.getBounds().top <= parentBounds.top);
+
+        assertEquals(reqBounds.width(), task.getBounds().width());
+        assertEquals(reqBounds.height(), task.getBounds().height());
+
+        // check bottom and right
+        reqBounds = new Rect(210, 210, 400, 400);
+        task.setBounds(reqBounds);
+        // Make sure part of it is exposed
+        assertTrue(task.getBounds().left < parentBounds.right);
+        assertTrue(task.getBounds().top < parentBounds.bottom);
+        // Should still be more-or-less in that corner
+        assertTrue(task.getBounds().right >= parentBounds.right);
+        assertTrue(task.getBounds().bottom >= parentBounds.bottom);
+
+        assertEquals(reqBounds.width(), task.getBounds().width());
+        assertEquals(reqBounds.height(), task.getBounds().height());
     }
 
     /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
