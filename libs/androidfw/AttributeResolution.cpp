@@ -286,7 +286,7 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
     value.dataType = Res_value::TYPE_NULL;
     value.data = Res_value::DATA_NULL_UNDEFINED;
     config.density = 0;
-    uint32_t source_style_resid = 0;
+    uint32_t value_source_resid = 0;
 
     // Try to find a value for this attribute...  we prioritize values
     // coming from, first XML attributes, then XML style, then default
@@ -300,6 +300,7 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
       if (kDebugStyles) {
         ALOGI("-> From XML: type=0x%x, data=0x%08x", value.dataType, value.data);
       }
+      value_source_resid = xml_parser->getSourceResourceId();
     }
 
     if (value.dataType == Res_value::TYPE_NULL && value.data != Res_value::DATA_NULL_EMPTY) {
@@ -310,7 +311,7 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
         cookie = entry->cookie;
         type_set_flags = style_flags;
         value = entry->value;
-        source_style_resid = entry->style;
+        value_source_resid = entry->style;
         if (kDebugStyles) {
           ALOGI("-> From style: type=0x%x, data=0x%08x, style=0x%08x", value.dataType, value.data,
               entry->style);
@@ -330,7 +331,7 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
           ALOGI("-> From def style: type=0x%x, data=0x%08x, style=0x%08x", value.dataType, value.data,
               entry->style);
         }
-        source_style_resid = entry->style;
+        value_source_resid = entry->style;
       }
     }
 
@@ -349,6 +350,7 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
     } else if (value.data != Res_value::DATA_NULL_EMPTY) {
       // If we still don't have a value for this attribute, try to find it in the theme!
       ApkAssetsCookie new_cookie = theme->GetAttribute(cur_ident, &value, &type_set_flags);
+      // TODO: set value_source_resid for the style in the theme that was used.
       if (new_cookie != kInvalidCookie) {
         if (kDebugStyles) {
           ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
@@ -386,7 +388,7 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
     out_values[STYLE_RESOURCE_ID] = resid;
     out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
     out_values[STYLE_DENSITY] = config.density;
-    out_values[SYTLE_SOURCE_STYLE] = source_style_resid;
+    out_values[SYTLE_SOURCE_RESOURCE_ID] = value_source_resid;
 
     if (value.dataType != Res_value::TYPE_NULL || value.data == Res_value::DATA_NULL_EMPTY) {
       indices_idx++;

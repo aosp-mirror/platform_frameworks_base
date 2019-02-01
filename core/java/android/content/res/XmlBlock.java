@@ -82,23 +82,22 @@ final class XmlBlock implements AutoCloseable {
     public XmlResourceParser newParser(@AnyRes int resId) {
         synchronized (this) {
             if (mNative != 0) {
-                return new Parser(nativeCreateParseState(mNative), this, resId);
+                return new Parser(nativeCreateParseState(mNative, resId), this);
             }
             return null;
         }
     }
 
     /*package*/ final class Parser implements XmlResourceParser {
-        Parser(long parseState, XmlBlock block, @AnyRes int sourceResId) {
+        Parser(long parseState, XmlBlock block) {
             mParseState = parseState;
             mBlock = block;
             block.mOpenCount++;
-            mSourceResId = sourceResId;
         }
 
         @AnyRes
         public int getSourceResId() {
-            return mSourceResId;
+            return nativeGetSourceResId(mParseState);
         }
 
         public void setFeature(String name, boolean state) throws XmlPullParserException {
@@ -486,7 +485,6 @@ final class XmlBlock implements AutoCloseable {
         private boolean mDecNextDepth = false;
         private int mDepth = 0;
         private int mEventType = START_DOCUMENT;
-        private @AnyRes int mSourceResId;
     }
 
     protected void finalize() throws Throwable {
@@ -515,7 +513,7 @@ final class XmlBlock implements AutoCloseable {
                                                  int offset,
                                                  int size);
     private static final native long nativeGetStringBlock(long obj);
-    private static final native long nativeCreateParseState(long obj);
+    private static final native long nativeCreateParseState(long obj, int resId);
     private static final native void nativeDestroyParseState(long state);
     private static final native void nativeDestroy(long obj);
 
@@ -553,4 +551,6 @@ final class XmlBlock implements AutoCloseable {
     private static final native int nativeGetStyleAttribute(long state);
     @FastNative
     private static final native int nativeGetAttributeIndex(long state, String namespace, String name);
+    @FastNative
+    private static final native int nativeGetSourceResId(long state);
 }
