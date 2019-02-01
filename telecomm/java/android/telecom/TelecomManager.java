@@ -1397,8 +1397,14 @@ public class TelecomManager {
      *
      * @return {@code true} if there is a call which will be rejected or terminated, {@code false}
      * otherwise.
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * instead.  Apps performing call screening should use the {@link CallScreeningService} API
+     * instead.
      */
+
+
     @RequiresPermission(Manifest.permission.ANSWER_PHONE_CALLS)
+    @Deprecated
     public boolean endCall() {
         try {
             if (isServiceConnected()) {
@@ -1419,11 +1425,15 @@ public class TelecomManager {
      *
      * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
      * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
+     *
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * instead.
      */
     //TODO: L-release - need to convert all invocation of ITelecmmService#answerRingingCall to use
     // this method (clockwork & gearhead).
     @RequiresPermission(anyOf =
             {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
+    @Deprecated
     public void acceptRingingCall() {
         try {
             if (isServiceConnected()) {
@@ -1442,9 +1452,12 @@ public class TelecomManager {
      * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
      *
      * @param videoState The desired video state to answer the call with.
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * instead.
      */
     @RequiresPermission(anyOf =
             {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
+    @Deprecated
     public void acceptRingingCall(int videoState) {
         try {
             if (isServiceConnected()) {
