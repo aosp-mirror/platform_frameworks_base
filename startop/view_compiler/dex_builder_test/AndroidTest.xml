@@ -26,6 +26,7 @@
         <option name="push" value="trivial.dex->/data/local/tmp/dex-builder-test/trivial.dex" />
         <option name="push" value="simple.dex->/data/local/tmp/dex-builder-test/simple.dex" />
         <option name="push" value="layout1.dex->/data/local/tmp/dex-builder-test/layout1.dex" />
+        <option name="push" value="layout2.dex->/data/local/tmp/dex-builder-test/layout2.dex" />
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
