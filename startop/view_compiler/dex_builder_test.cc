@@ -140,3 +140,41 @@ TEST(DexBuilderTest, VerifyDexCallStringLength) {
 
   EXPECT_TRUE(EncodeAndVerify(&dex_file));
 }
+
+// Write out and verify a DEX file that corresponds to:
+//
+// package dextest;
+// public class DexTest {
+//     public static int foo(String s) { return s.length(); }
+// }
+TEST(DexBuilderTest, VerifyDexCallManyRegisters) {
+  DexBuilder dex_file;
+
+  auto cbuilder{dex_file.MakeClass("dextest.DexTest")};
+
+  MethodBuilder method{cbuilder.CreateMethod(
+      "foo", Prototype{TypeDescriptor::Int()})};
+
+  Value result = method.MakeRegister();
+
+  // Make a bunch of registers
+  for (size_t i = 0; i < 25; ++i) {
+    method.MakeRegister();
+  }
+
+  // Now load a string literal into a register
+  Value string_val = method.MakeRegister();
+  method.BuildConstString(string_val, "foo");
+
+  MethodDeclData string_length =
+      dex_file.GetOrDeclareMethod(TypeDescriptor::FromClassname("java.lang.String"),
+                                  "length",
+                                  Prototype{TypeDescriptor::Int()});
+
+  method.AddInstruction(Instruction::InvokeVirtual(string_length.id, result, string_val));
+  method.BuildReturn(result);
+
+  method.Encode();
+
+  EXPECT_TRUE(EncodeAndVerify(&dex_file));
+}

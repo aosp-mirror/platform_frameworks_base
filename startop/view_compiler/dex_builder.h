@@ -16,6 +16,7 @@
 #ifndef DEX_BUILDER_H_
 #define DEX_BUILDER_H_
 
+#include <array>
 #include <forward_list>
 #include <map>
 #include <optional>
@@ -70,6 +71,8 @@ class TypeDescriptor {
   // Return the shorty descriptor, such as I or L
   std::string short_descriptor() const { return descriptor().substr(0, 1); }
 
+  bool is_object() const { return short_descriptor() == "L"; }
+
   bool operator<(const TypeDescriptor& rhs) const { return descriptor_ < rhs.descriptor_; }
 
  private:
@@ -91,6 +94,8 @@ class Prototype {
 
   // Get the shorty descriptor, such as VII for (Int, Int) -> Void
   std::string Shorty() const;
+
+  const TypeDescriptor& ArgType(size_t index) const;
 
   bool operator<(const Prototype& rhs) const {
     return std::make_tuple(return_type_, param_types_) <
@@ -124,11 +129,13 @@ class Value {
 
   size_t value() const { return value_; }
 
- private:
-  enum class Kind { kLocalRegister, kParameter, kImmediate, kString, kLabel, kType };
+  constexpr Value() : value_{0}, kind_{Kind::kInvalid} {}
 
-  const size_t value_;
-  const Kind kind_;
+ private:
+  enum class Kind { kInvalid, kLocalRegister, kParameter, kImmediate, kString, kLabel, kType };
+
+  size_t value_;
+  Kind kind_;
 
   constexpr Value(size_t value, Kind kind) : value_{value}, kind_{kind} {}
 };
@@ -151,6 +158,7 @@ class Instruction {
     kInvokeStatic,
     kInvokeVirtual,
     kMove,
+    kMoveObject,
     kNew,
     kReturn,
     kReturnObject,
@@ -172,7 +180,7 @@ class Instruction {
 
   // A cast instruction. Basically, `(type)val`
   static inline Instruction Cast(Value val, Value type) {
-    DCHECK(type.is_type());
+    CHECK(type.is_type());
     return OpWithArgs(Op::kCheckCast, val, type);
   }
 
@@ -343,19 +351,46 @@ class MethodBuilder {
     buffer_.push_back(b);
   }
 
+  inline void Encode32x(art::Instruction::Code opcode, uint16_t a, uint16_t b) {
+    buffer_.push_back(opcode);
+    buffer_.push_back(a);
+    buffer_.push_back(b);
+  }
+
   inline void Encode35c(art::Instruction::Code opcode, size_t a, uint16_t b, uint8_t c, uint8_t d,
                         uint8_t e, uint8_t f, uint8_t g) {
     // a|g|op|bbbb|f|e|d|c
 
     CHECK_LE(a, 5);
-    CHECK_LT(c, 16);
-    CHECK_LT(d, 16);
-    CHECK_LT(e, 16);
-    CHECK_LT(f, 16);
-    CHECK_LT(g, 16);
+    CHECK(IsShortRegister(c));
+    CHECK(IsShortRegister(d));
+    CHECK(IsShortRegister(e));
+    CHECK(IsShortRegister(f));
+    CHECK(IsShortRegister(g));
     buffer_.push_back((a << 12) | (g << 8) | opcode);
     buffer_.push_back(b);
     buffer_.push_back((f << 12) | (e << 8) | (d << 4) | c);
+  }
+
+  inline void Encode3rc(art::Instruction::Code opcode, size_t a, uint16_t b, uint16_t c) {
+    CHECK_LE(a, 255);
+    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back(b);
+    buffer_.push_back(c);
+  }
+
+  static constexpr bool IsShortRegister(size_t register_value) { return register_value < 16; }
+
+  // Returns an array of num_regs scratch registers. These are guaranteed to be
+  // contiguous, so they are suitable for the invoke-*/range instructions.
+  template <int num_regs>
+  std::array<Value, num_regs> GetScratchRegisters() const {
+    static_assert(num_regs <= kMaxScratchRegisters);
+    std::array<Value, num_regs> regs;
+    for (size_t i = 0; i < num_regs; ++i) {
+      regs[i] = std::move(Value::Local(num_registers_ + i));
+    }
+    return regs;
   }
 
   // Converts a register or parameter to its DEX register number.
@@ -378,6 +413,10 @@ class MethodBuilder {
 
   // A buffer to hold instructions that have been encoded.
   std::vector<::dex::u2> buffer_;
+
+  // We create some scratch registers for when we have to shuffle registers
+  // around to make legal DEX code.
+  static constexpr size_t kMaxScratchRegisters = 5;
 
   // How many registers we've allocated
   size_t num_registers_{0};
@@ -446,6 +485,8 @@ class DexBuilder {
   // Returns the method id for the method, creating it if it has not been created yet.
   const MethodDeclData& GetOrDeclareMethod(TypeDescriptor type, const std::string& name,
                                            Prototype prototype);
+
+  std::optional<const Prototype> GetPrototypeByMethodId(size_t method_id) const;
 
  private:
   // Looks up the ir::Proto* corresponding to this given prototype, or creates one if it does not
