@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothCodecConfig;
 import android.content.Context;
@@ -932,6 +933,13 @@ public class AudioSystem
     public static native boolean getMasterMono();
     /** @hide enables or disables the master mono mode. */
     public static native int setMasterMono(boolean mono);
+
+    /** @hide returns master balance value in range -1.f -> 1.f, where 0.f is dead center. */
+    @TestApi
+    public static native float getMasterBalance();
+    /** @hide changes the audio balance of the device. */
+    @TestApi
+    public static native int setMasterBalance(float balance);
 
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 112561552)

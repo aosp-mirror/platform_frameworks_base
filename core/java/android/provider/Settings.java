@@ -3536,6 +3536,16 @@ public final class Settings {
         private static final Validator MASTER_MONO_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Master balance (float -1.f = 100% left, 0.f = dead center, 1.f = 100% right).
+         *
+         * @hide
+         */
+        public static final String MASTER_BALANCE = "master_balance";
+
+        private static final Validator MASTER_BALANCE_VALIDATOR =
+                new SettingsValidators.InclusiveFloatRangeValidator(-1.f, 1.f);
+
+        /**
          * Whether the notifications should use the ring volume (value of 1) or
          * a separate notification volume (value of 0). In most cases, users
          * will have this enabled so the notification and ringer volumes will be
@@ -4288,6 +4298,7 @@ public final class Settings {
             HEARING_AID,
             TTY_MODE,
             MASTER_MONO,
+            MASTER_BALANCE,
             SOUND_EFFECTS_ENABLED,
             HAPTIC_FEEDBACK_ENABLED,
             POWER_SOUNDS_ENABLED,       // moved to global
@@ -4395,6 +4406,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(VIBRATE_INPUT_DEVICES);
             PRIVATE_SETTINGS.add(VOLUME_MASTER);
             PRIVATE_SETTINGS.add(MASTER_MONO);
+            PRIVATE_SETTINGS.add(MASTER_BALANCE);
             PRIVATE_SETTINGS.add(NOTIFICATIONS_USE_RING_VOLUME);
             PRIVATE_SETTINGS.add(VIBRATE_IN_SILENT);
             PRIVATE_SETTINGS.add(MEDIA_BUTTON_RECEIVER);
@@ -4488,6 +4500,7 @@ public final class Settings {
             VALIDATORS.put(SCREEN_AUTO_BRIGHTNESS_ADJ, SCREEN_AUTO_BRIGHTNESS_ADJ_VALIDATOR);
             VALIDATORS.put(VIBRATE_INPUT_DEVICES, VIBRATE_INPUT_DEVICES_VALIDATOR);
             VALIDATORS.put(MASTER_MONO, MASTER_MONO_VALIDATOR);
+            VALIDATORS.put(MASTER_BALANCE, MASTER_BALANCE_VALIDATOR);
             VALIDATORS.put(NOTIFICATIONS_USE_RING_VOLUME, NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR);
             VALIDATORS.put(VIBRATE_IN_SILENT, VIBRATE_IN_SILENT_VALIDATOR);
             VALIDATORS.put(MEDIA_BUTTON_RECEIVER, MEDIA_BUTTON_RECEIVER_VALIDATOR);

@@ -232,6 +232,8 @@ message SystemSettingsProto {
         // Which streams are affected by mute. The stream type's bit should be set
         // to 1 if it should be muted when a mute request is received.
         optional SettingProto mute_streams_affected = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Master balance (float -1.f = 100% left, 0.f = dead center, 1.f = 100% right).
+        optional SettingProto master_balance = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Volume volume = 33;
 
