@@ -138,7 +138,7 @@ public class ModuleInfoProvider {
                 // to dealing with this as we'll now have to listen to all config changes and
                 // regenerate the data if required. Also, is this the right way to parse a resource
                 // reference out of an XML file ?
-                final String moduleName = packageResources.getString(
+                final CharSequence moduleName = packageResources.getText(
                         Integer.parseInt(parser.getAttributeValue(null, "name").substring(1)));
                 final String modulePackageName = XmlUtils.readStringAttribute(parser,
                         "packageName");
