@@ -96,7 +96,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
 
         view.setPendingIntent(pendingIntent);
-        view.setRemoteInput(new RemoteInput[]{input}, input);
+        view.setRemoteInput(new RemoteInput[]{input}, input, null /* editedSuggestionInfo */);
     }
 
     @Test

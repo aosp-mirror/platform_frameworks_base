@@ -1280,12 +1280,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void onNotificationSmartSuggestionsAdded(String key, int smartReplyCount,
-            int smartActionCount, boolean generatedByAssistant) {
+            int smartActionCount, boolean generatedByAssistant, boolean editBeforeSending) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationSmartSuggestionsAdded(key, smartReplyCount,
-                    smartActionCount, generatedByAssistant);
+                    smartActionCount, generatedByAssistant, editBeforeSending);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1293,13 +1293,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void onNotificationSmartReplySent(
-            String key, int replyIndex, CharSequence reply, boolean generatedByAssistant,
-            int notificationLocation) throws RemoteException {
+            String key, int replyIndex, CharSequence reply, int notificationLocation,
+            boolean modifiedBeforeSending) throws RemoteException {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationSmartReplySent(key, replyIndex, reply,
-                    generatedByAssistant, notificationLocation);
+                    notificationLocation, modifiedBeforeSending);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

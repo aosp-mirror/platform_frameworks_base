@@ -178,6 +178,7 @@ public final class NotificationRecord {
     private int mNumberOfSmartRepliesAdded;
     private int mNumberOfSmartActionsAdded;
     private boolean mSuggestionsGeneratedByAssistant;
+    private boolean mEditChoicesBeforeSending;
     private boolean mHasSeenSmartReplies;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
@@ -1134,6 +1135,14 @@ public final class NotificationRecord {
 
     public boolean getSuggestionsGeneratedByAssistant() {
         return mSuggestionsGeneratedByAssistant;
+    }
+
+    public boolean getEditChoicesBeforeSending() {
+        return mEditChoicesBeforeSending;
+    }
+
+    public void setEditChoicesBeforeSending(boolean editChoicesBeforeSending) {
+        mEditChoicesBeforeSending = editChoicesBeforeSending;
     }
 
     public boolean hasSeenSmartReplies() {

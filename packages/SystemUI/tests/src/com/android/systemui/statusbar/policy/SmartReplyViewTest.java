@@ -191,15 +191,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         setSmartReplies(TEST_CHOICES);
         mView.getChildAt(2).performClick();
         verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2],
-                false /* generatedByAsssitant */, MetricsEvent.LOCATION_UNKNOWN);
-    }
-
-    @Test
-    public void testSendSmartReply_controllerCalled_generatedByAssistant() {
-        setSmartReplies(TEST_CHOICES, true);
-        mView.getChildAt(2).performClick();
-        verify(mLogger).smartReplySent(mEntry, 2, TEST_CHOICES[2],
-                true /* generatedByAsssitant */, MetricsEvent.LOCATION_UNKNOWN);
+                MetricsEvent.LOCATION_UNKNOWN, false /* modifiedBeforeSending */);
     }
 
     @Test
