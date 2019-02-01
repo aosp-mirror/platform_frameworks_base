@@ -30,8 +30,7 @@ class PrivacyDialogBuilder(val context: Context, itemsList: List<PrivacyItem>) {
         appsAndTypes = itemsList.groupBy({ it.application }, { it.privacyType })
                 .toList()
                 .sortedWith(compareBy({ -it.second.size }, // Sort by number of AppOps
-                        { it.second.min() }, // Sort by "smallest" AppOpp (Location is largest)
-                        { it.first })) // Sort alphabetically bt App Name
+                        { it.second.min() })) // Sort by "smallest" AppOpp (Location is largest)
         types = itemsList.map { it.privacyType }.distinct().sorted()
         val singleApp = appsAndTypes.size == 1
         app = if (singleApp) appsAndTypes[0].first else null
