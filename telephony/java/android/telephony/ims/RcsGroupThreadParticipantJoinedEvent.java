@@ -42,7 +42,7 @@ public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEv
     public RcsGroupThreadParticipantJoinedEvent(long timestamp,
             @NonNull RcsGroupThread rcsGroupThread, @NonNull RcsParticipant originatingParticipant,
             @NonNull RcsParticipant joinedParticipant) {
-        super(timestamp, rcsGroupThread.getThreadId(), originatingParticipant.getId());
+        super(timestamp, rcsGroupThread, originatingParticipant);
         mJoinedParticipantId = joinedParticipant;
     }
 
@@ -59,8 +59,8 @@ public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEv
      * @hide - not meant for public use.
      */
     @Override
-    public void persist() throws RcsMessageStoreException {
-        RcsControllerCall.call(
+    void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException {
+        rcsControllerCall.call(
                 iRcs -> iRcs.createGroupThreadParticipantJoinedEvent(getTimestamp(),
                         getRcsGroupThread().getThreadId(), getOriginatingParticipant().getId(),
                         getJoinedParticipant().getId()));
