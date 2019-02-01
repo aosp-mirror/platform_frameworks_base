@@ -33,8 +33,8 @@ public class Rcs1To1Thread extends RcsThread {
      *
      * @hide
      */
-    public Rcs1To1Thread(int threadId) {
-        super(threadId);
+    public Rcs1To1Thread(RcsControllerCall rcsControllerCall, int threadId) {
+        super(rcsControllerCall, threadId);
         mThreadId = threadId;
     }
 
@@ -56,7 +56,7 @@ public class Rcs1To1Thread extends RcsThread {
      */
     @WorkerThread
     public long getFallbackThreadId() throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.get1To1ThreadFallbackThreadId(mThreadId));
+        return mRcsControllerCall.call(iRcs -> iRcs.get1To1ThreadFallbackThreadId(mThreadId));
     }
 
     /**
@@ -69,7 +69,7 @@ public class Rcs1To1Thread extends RcsThread {
      */
     @WorkerThread
     public void setFallbackThreadId(long fallbackThreadId) throws RcsMessageStoreException {
-        RcsControllerCall.callWithNoReturn(
+        mRcsControllerCall.callWithNoReturn(
                 iRcs -> iRcs.set1To1ThreadFallbackThreadId(mThreadId, fallbackThreadId));
     }
 
@@ -81,6 +81,7 @@ public class Rcs1To1Thread extends RcsThread {
     @WorkerThread
     public RcsParticipant getRecipient() throws RcsMessageStoreException {
         return new RcsParticipant(
-                RcsControllerCall.call(iRcs -> iRcs.get1To1ThreadOtherParticipantId(mThreadId)));
+                mRcsControllerCall,
+                mRcsControllerCall.call(iRcs -> iRcs.get1To1ThreadOtherParticipantId(mThreadId)));
     }
 }

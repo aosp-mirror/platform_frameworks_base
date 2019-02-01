@@ -41,7 +41,7 @@ public final class RcsGroupThreadNameChangedEvent extends RcsGroupThreadEvent {
      */
     public RcsGroupThreadNameChangedEvent(long timestamp, @NonNull RcsGroupThread rcsGroupThread,
             @NonNull RcsParticipant originatingParticipant, @Nullable String newName) {
-        super(timestamp, rcsGroupThread.getThreadId(), originatingParticipant.getId());
+        super(timestamp, rcsGroupThread, originatingParticipant);
         mNewName = newName;
     }
 
@@ -60,8 +60,8 @@ public final class RcsGroupThreadNameChangedEvent extends RcsGroupThreadEvent {
      * @hide - not meant for public use.
      */
     @Override
-    public void persist() throws RcsMessageStoreException {
-        RcsControllerCall.call(iRcs -> iRcs.createGroupThreadNameChangedEvent(
+    void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException {
+        rcsControllerCall.call(iRcs -> iRcs.createGroupThreadNameChangedEvent(
                 getTimestamp(), getRcsGroupThread().getThreadId(),
                 getOriginatingParticipant().getId(), mNewName));
     }
