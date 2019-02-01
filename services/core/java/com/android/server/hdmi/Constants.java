@@ -393,15 +393,6 @@ final class Constants {
             "persist.sys.hdmi.property_sytem_audio_mode_audio_port";
 
     /**
-     * Property to indicate if a CEC audio device should forward volume keys when system audio mode
-     * is off.
-     *
-     * <p>Default is false.
-     */
-    static final String PROPERTY_CEC_AUDIO_DEVICE_FORWARD_VOLUME_KEYS_SYSTEM_AUDIO_MODE_OFF =
-            "persist.sys.hdmi.property_cec_audio_device_forward_volume_keys_system_audio_mode_off";
-
-    /**
      * Property to strip local audio of amplifier and use local speaker
      * when TV does not support system audio mode.
      *
