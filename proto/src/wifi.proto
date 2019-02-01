@@ -1424,6 +1424,9 @@ message WifiPowerStats {
 
   // Amount of time wifi is scanning (ms)
   optional int64 scan_time_ms = 12;
+
+  // Actual monitored rail energy consumed by wifi (mAh)
+  optional double monitored_rail_energy_consumed_mah = 13;
 }
 
 // Metrics for Wifi Wake
