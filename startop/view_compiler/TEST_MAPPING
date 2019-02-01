@@ -4,6 +4,14 @@
       "name": "dex-builder-test"
     },
     {
+      "name": "CtsViewTestCases",
+      "options": [
+        {
+          "include-filter": "android.view.cts.PrecompiledLayoutTest"
+        }
+      ]
+    },
+    {
       "name": "view-compiler-tests",
       "host": true
     }
