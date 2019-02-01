@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.KeyStore;
@@ -71,6 +72,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
         stop(false /* initiatedByClient */);
     }
 
+    @Override
+    protected int statsAction() {
+        return BiometricsProtoEnums.ACTION_AUTHENTICATE;
+    }
+
     public boolean isBiometricPrompt() {
         return getCookie() != 0;
     }
@@ -80,8 +86,16 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
+    protected boolean isCryptoOperation() {
+        return mOpId != 0;
+    }
+
+    @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
+        super.logOnAuthenticated(authenticated, mRequireConfirmation, getTargetUserId(),
+                isBiometricPrompt());
+
         final BiometricServiceBase.ServiceListener listener = getListener();
 
         mMetricsLogger.action(mMetrics.actionBiometricAuth(), authenticated);
@@ -142,10 +156,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     final int errorCode = lockoutMode == LOCKOUT_TIMED
                             ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                             : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-                    if (listener != null) {
-                        listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */,
-                                getCookie());
-                    }
+                    onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
                 } else {
                     // Don't send onAuthenticationFailed if we're in lockout, it causes a
                     // janky UI on Keyguard/BiometricPrompt since "authentication failed"

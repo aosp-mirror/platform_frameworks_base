@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
@@ -90,6 +91,11 @@ public class FaceService extends BiometricServiceBase {
             super(context, daemon, halDeviceId, token, listener, targetUserId, groupId, opId,
                     restricted, owner, cookie, requireConfirmation);
         }
+
+        @Override
+        protected int statsModality() {
+            return FaceService.this.statsModality();
+        }
     }
 
     /**
@@ -125,6 +131,11 @@ public class FaceService extends BiometricServiceBase {
                 @Override
                 public boolean shouldVibrate() {
                     return false;
+                }
+
+                @Override
+                protected int statsModality() {
+                    return FaceService.this.statsModality();
                 }
             };
 
@@ -206,7 +217,12 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final RemovalClientImpl client = new RemovalClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), faceId, 0 /* groupId */,
-                    userId, restricted, token.toString());
+                    userId, restricted, token.toString()) {
+                @Override
+                protected int statsModality() {
+                    return FaceService.this.statsModality();
+                }
+            };
             client.setShouldNotifyUserActivity(true);
             removeInternal(client);
         }
@@ -219,7 +235,12 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final EnumerateClientImpl client = new EnumerateClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), userId, userId,
-                    restricted, getContext().getOpPackageName());
+                    restricted, getContext().getOpPackageName()) {
+                @Override
+                protected int statsModality() {
+                    return FaceService.this.statsModality();
+                }
+            };
             enumerateInternal(client);
         }
 
@@ -768,6 +789,11 @@ public class FaceService extends BiometricServiceBase {
     @Override
     protected void notifyClientActiveCallbacks(boolean isActive) {
         // noop for Face.
+    }
+
+    @Override
+    protected int statsModality() {
+        return BiometricsProtoEnums.MODALITY_FACE;
     }
 
     /** Gets the face daemon */

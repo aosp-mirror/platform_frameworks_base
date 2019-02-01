@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -48,6 +49,11 @@ public abstract class EnrollClient extends ClientMonitor {
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
+    }
+
+    @Override
+    protected int statsAction() {
+        return BiometricsProtoEnums.ACTION_ENROLL;
     }
 
     @Override
