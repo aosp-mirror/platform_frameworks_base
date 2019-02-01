@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+
 import java.util.ArrayDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -70,7 +71,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     protected Long doInBackground(URL... urls) {
  *         int count = urls.length;
  *         long totalSize = 0;
- *         for (int i = 0; i < count; i++) {
+ *         for (int i = 0; i &lt; count; i++) {
  *             totalSize += Downloader.downloadFile(urls[i]);
  *             publishProgress((int) ((i / (float) count) * 100));
  *             // Escape early if cancel() is called
@@ -158,13 +159,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </ul>
  *
  * <h2>Memory observability</h2>
- * <p>AsyncTask guarantees that all callback calls are synchronized in such a way that the following
- * operations are safe without explicit synchronizations.</p>
+ * <p>AsyncTask guarantees that all callback calls are synchronized to ensure the following
+ * without explicit synchronizations.</p>
  * <ul>
- *     <li>Set member fields in the constructor or {@link #onPreExecute}, and refer to them
- *     in {@link #doInBackground}.
- *     <li>Set member fields in {@link #doInBackground}, and refer to them in
- *     {@link #onProgressUpdate} and {@link #onPostExecute}.
+ *     <li>The memory effects of {@link #onPreExecute}, and anything else
+ *     executed before the call to {@link #execute}, including the construction
+ *     of the AsyncTask object, are visible to {@link #doInBackground}.
+ *     <li>The memory effects of {@link #doInBackground} are visible to
+ *     {@link #onPostExecute}.
+ *     <li>Any memory effects of {@link #doInBackground} preceding a call
+ *     to {@link #publishProgress} are visible to the corresponding
+ *     {@link #onProgressUpdate} call. (But {@link #doInBackground} continues to
+ *     run, and care needs to be taken that later updates in {@link #doInBackground}
+ *     do not interfere with an in-progress {@link #onProgressUpdate} call.)
+ *     <li>Any memory effects preceding a call to {@link #cancel} are visible
+ *     after a call to {@link #isCancelled} that returns true as a result, or
+ *     during and after a resulting call to {@link #onCancelled}.
  * </ul>
  *
  * <h2>Order of execution</h2>
@@ -388,6 +398,10 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * specified parameters are the parameters passed to {@link #execute}
      * by the caller of this task.
      *
+     * This will normally run on a background thread. But to better
+     * support testing frameworks, it is recommended that this also tolerates
+     * direct execution on the foreground thread, as part of the {@link #execute} call.
+     *
      * This method can call {@link #publishProgress} to publish updates
      * on the UI thread.
      *
@@ -404,6 +418,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /**
      * Runs on the UI thread before {@link #doInBackground}.
+     * Invoked directly by {@link #execute} or {@link #executeOnExecutor}.
+     * The default version does nothing.
      *
      * @see #onPostExecute
      * @see #doInBackground
@@ -414,7 +430,10 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /**
      * <p>Runs on the UI thread after {@link #doInBackground}. The
-     * specified result is the value returned by {@link #doInBackground}.</p>
+     * specified result is the value returned by {@link #doInBackground}.
+     * To better support testing frameworks, it is recommended that this be
+     * written to tolerate direct execution as part of the execute() call.
+     * The default version does nothing.</p>
      * 
      * <p>This method won't be invoked if the task was cancelled.</p>
      *
@@ -432,6 +451,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     /**
      * Runs on the UI thread after {@link #publishProgress} is invoked.
      * The specified values are the values passed to {@link #publishProgress}.
+     * The default version does nothing.
      *
      * @param values The values indicating progress.
      *
@@ -466,7 +486,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
     /**
      * <p>Applications should preferably override {@link #onCancelled(Object)}.
      * This method is invoked by the default implementation of
-     * {@link #onCancelled(Object)}.</p>
+     * {@link #onCancelled(Object)}.
+     * The default version does nothing.</p>
      * 
      * <p>Runs on the UI thread after {@link #cancel(boolean)} is invoked and
      * {@link #doInBackground(Object[])} has finished.</p>
@@ -504,12 +525,16 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * an attempt to stop the task.</p>
      * 
      * <p>Calling this method will result in {@link #onCancelled(Object)} being
-     * invoked on the UI thread after {@link #doInBackground(Object[])}
-     * returns. Calling this method guarantees that {@link #onPostExecute(Object)}
-     * is never invoked. After invoking this method, you should check the
-     * value returned by {@link #isCancelled()} periodically from
-     * {@link #doInBackground(Object[])} to finish the task as early as
-     * possible.</p>
+     * invoked on the UI thread after {@link #doInBackground(Object[])} returns.
+     * Calling this method guarantees that onPostExecute(Object) is never
+     * subsequently invoked, even if <tt>cancel</tt> returns false, but
+     * {@link #onPostExecute} has not yet run.  To finish the
+     * task as early as possible, check {@link #isCancelled()} periodically from
+     * {@link #doInBackground(Object[])}.</p>
+     *
+     * <p>This only requests cancellation. It never waits for a running
+     * background task to terminate, even if <tt>mayInterruptIfRunning</tt> is
+     * true.</p>
      *
      * @param mayInterruptIfRunning <tt>true</tt> if the thread executing this
      *        task should be interrupted; otherwise, in-progress tasks are allowed
