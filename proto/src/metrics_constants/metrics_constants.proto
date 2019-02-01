@@ -6949,6 +6949,32 @@ message MetricsEvent {
     // OS: Q
     NOTIFICATION_SMART_REPLY_MODIFIED_BEFORE_SENDING = 1648;
 
+    // CATEGORY: ACTION_ACTIVITY_CHOOSER_SHOWN
+    // Field to add the mimetype for a ChooserActivity
+    // OS:Q
+    FIELD_SHARESHEET_MIMETYPE = 1649;
+
+    // CATEGORY: ACTION_ACTIVITY_CHOOSER_SHOWN
+    // Sharesheet direct targets are ready to show.
+    // OS:Q
+    ACTION_ACTIVITY_CHOOSER_SHOWN_DIRECT_TARGET = 1650;
+
+    // CATEGORY: ACTION_SHARESHEET_SCROLL
+    // Sharesheet are either expanded, scrolling through them or compacted again.
+    // OS:Q
+    // Subtype 1 means collapsed, 0 expanded
+    ACTION_SHARESHEET_COLLAPSED_CHANGED = 1651;
+
+    // ACTION: Share with screenshot extra
+    // OS: Q
+    ACTION_SHARE_WITH_PREVIEW = 1652;
+
+    // CATEGORY: ACTION_ACTIVITY_CHOOSER_SHOWN
+    // OS:Q
+    // The time elapsed from triggering the share to displaying the app targets
+    // formerly: histogram system_cost_for_smart_sharing
+    FIELD_TIME_TO_APP_TARGETS = 1653;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

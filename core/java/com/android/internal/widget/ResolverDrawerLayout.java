@@ -17,15 +17,12 @@
 
 package com.android.internal.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -45,8 +42,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.OverScroller;
 
+import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 public class ResolverDrawerLayout extends ViewGroup {
     private static final String TAG = "ResolverDrawerLayout";
+    private MetricsLogger mMetricsLogger;
 
     /**
      * Max width of the whole drawer layout
@@ -496,6 +498,9 @@ public class ResolverDrawerLayout extends ViewGroup {
             final boolean isCollapsedNew = newPos != 0;
             if (isCollapsedOld != isCollapsedNew) {
                 onCollapsedChanged(isCollapsedNew);
+                getMetricsLogger().write(
+                        new LogMaker(MetricsEvent.ACTION_SHARESHEET_COLLAPSED_CHANGED)
+                        .setSubtype(isCollapsedNew ? 1 : 0));
             }
             postInvalidateOnAnimation();
             return dy;
@@ -1036,5 +1041,12 @@ public class ResolverDrawerLayout extends ViewGroup {
         public void run() {
             dispatchOnDismissed();
         }
+    }
+
+    private MetricsLogger getMetricsLogger() {
+        if (mMetricsLogger == null) {
+            mMetricsLogger = new MetricsLogger();
+        }
+        return mMetricsLogger;
     }
 }
