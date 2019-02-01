@@ -188,6 +188,7 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -843,7 +844,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
             synchronized (mGlobalLock) {
                 SurfaceControl.closeTransaction();
-                traceStateLocked(where);
+                mWindowTracing.logState(where);
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -967,7 +968,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
 
-        mWindowTracing = WindowTracing.createDefaultAndStartLooper(context);
+        mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
+                Choreographer.getInstance());
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
@@ -5763,17 +5765,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
         proto.write(ROTATION, defaultDisplayContent.getRotation());
         proto.write(LAST_ORIENTATION, defaultDisplayContent.getLastOrientation());
-    }
-
-    void traceStateLocked(String where) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "traceStateLocked");
-        try {
-            mWindowTracing.traceStateLocked(where, this);
-        } catch (Exception e) {
-            Log.wtf(TAG, "Exception while tracing state", e);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
