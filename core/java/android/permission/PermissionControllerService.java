@@ -56,7 +56,7 @@ import java.util.Map;
 /**
  * This service is meant to be implemented by the app controlling permissions.
  *
- * @see PermissionController
+ * @see PermissionControllerManager
  *
  * @hide
  */
@@ -98,10 +98,10 @@ public abstract class PermissionControllerService extends Service {
      * Create a backup of the runtime permissions.
      *
      * @param user The user to back up
-     * @param out The stream to write the backup to
+     * @param backup The stream to write the backup to
      */
     public abstract void onGetRuntimePermissionsBackup(@NonNull UserHandle user,
-            @NonNull OutputStream out);
+            @NonNull OutputStream backup);
 
     /**
      * Gets the runtime permissions for an app.
@@ -297,11 +297,11 @@ public abstract class PermissionControllerService extends Service {
     }
 
     private void getRuntimePermissionsBackup(@NonNull UserHandle user,
-            @NonNull ParcelFileDescriptor outFile) {
-        try (OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(outFile)) {
-            onGetRuntimePermissionsBackup(user, out);
+            @NonNull ParcelFileDescriptor backupFile) {
+        try (OutputStream backup = new ParcelFileDescriptor.AutoCloseOutputStream(backupFile)) {
+            onGetRuntimePermissionsBackup(user, backup);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Could not open pipe to write backup tp", e);
+            Log.e(LOG_TAG, "Could not open pipe to write backup to", e);
         }
     }
 

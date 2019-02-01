@@ -269,6 +269,7 @@ public final class PermissionControllerManager {
     public void getRuntimePermissionBackup(@NonNull UserHandle user,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnGetRuntimePermissionBackupCallback callback) {
+        checkNotNull(user);
         checkNotNull(executor);
         checkNotNull(callback);
 
