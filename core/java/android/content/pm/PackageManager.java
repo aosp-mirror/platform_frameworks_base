@@ -6725,6 +6725,16 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the system defined app predictor package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getAppPredictionServicePackageName() {
+        throw new UnsupportedOperationException(
+            "getAppPredictionServicePackageName not implemented in subclass");
+    }
+
+    /**
      * @return the system defined content capture service package name, or null if there's none.
      *
      * @hide

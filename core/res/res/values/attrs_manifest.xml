@@ -280,6 +280,9 @@
         <!-- Additional flag from base permission type: this permission designates the app
             that will approve the sharing of incident reports. -->
         <flag name="incidentReportApprover" value="0x100000" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to the system app predictor -->
+        <flag name="appPredictor" value="0x200000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
