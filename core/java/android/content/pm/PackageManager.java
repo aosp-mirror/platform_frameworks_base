@@ -715,7 +715,6 @@ public abstract class PackageManager {
             INSTALL_FORCE_PERMISSION_PROMPT,
             INSTALL_INSTANT_APP,
             INSTALL_DONT_KILL_APP,
-            INSTALL_FORCE_SDK,
             INSTALL_FULL_APP,
             INSTALL_ALLOCATE_AGGRESSIVE,
             INSTALL_VIRTUAL_PRELOAD,
@@ -814,15 +813,6 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_DONT_KILL_APP = 0x00001000;
-
-    /**
-     * Flag parameter for {@link #installPackage} to indicate that this package is an
-     * upgrade to a package that refers to the SDK via release letter or is targeting an SDK via
-     * release letter that the current build does not support.
-     *
-     * @hide
-     */
-    public static final int INSTALL_FORCE_SDK = 0x00002000;
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package is

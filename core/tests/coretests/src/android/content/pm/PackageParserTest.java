@@ -162,14 +162,13 @@ public class PackageParserTest {
     }
 
     private void verifyComputeTargetSdkVersion(int targetSdkVersion, String targetSdkCodename,
-            boolean isPlatformReleased, int expectedTargetSdk, boolean forceCurrentDev) {
+            boolean isPlatformReleased, int expectedTargetSdk) {
         final String[] outError = new String[1];
         final int result = PackageParser.computeTargetSdkVersion(
                 targetSdkVersion,
                 targetSdkCodename,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                outError,
-                forceCurrentDev);
+                outError);
 
         assertEquals(result, expectedTargetSdk);
 
@@ -185,28 +184,23 @@ public class PackageParserTest {
         // Do allow older release targetSdkVersion on pre-release platform.
         // APP: Released API 10
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, false, OLDER_VERSION,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, false, OLDER_VERSION);
 
         // Do allow same release targetSdkVersion on pre-release platform.
         // APP: Released API 20
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, false, PLATFORM_VERSION,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, false, PLATFORM_VERSION);
 
         // Do allow newer release targetSdkVersion on pre-release platform.
         // APP: Released API 30
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, false, NEWER_VERSION,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, false, NEWER_VERSION);
 
         // Don't allow older pre-release targetSdkVersion on pre-release platform.
         // APP: Pre-release API 10
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false, -1,
-                false /* forceCurrentDev */);
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false, -1,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false, -1);
 
 
         // Do allow same pre-release targetSdkVersion on pre-release platform,
@@ -214,27 +208,16 @@ public class PackageParserTest {
         // APP: Pre-release API 20
         // DEV: Pre-release API 20
         verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, false,
-                Build.VERSION_CODES.CUR_DEVELOPMENT, false /* forceCurrentDev */);
+                Build.VERSION_CODES.CUR_DEVELOPMENT);
         verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, false,
-                Build.VERSION_CODES.CUR_DEVELOPMENT, false /* forceCurrentDev */);
+                Build.VERSION_CODES.CUR_DEVELOPMENT);
 
 
         // Don't allow newer pre-release targetSdkVersion on pre-release platform.
         // APP: Pre-release API 30
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false, -1,
-                false /* forceCurrentDev */);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false, -1,
-                false /* forceCurrentDev */);
-
-
-        // Force newer pre-release targetSdkVersion to current pre-release platform.
-        // APP: Pre-release API 30
-        // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false,
-                Build.VERSION_CODES.CUR_DEVELOPMENT, true /* forceCurrentDev */);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false,
-                Build.VERSION_CODES.CUR_DEVELOPMENT, true /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false, -1);
     }
 
     @Test
@@ -242,45 +225,36 @@ public class PackageParserTest {
         // Do allow older release targetSdkVersion on released platform.
         // APP: Released API 10
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, true, OLDER_VERSION,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, true, OLDER_VERSION);
 
         // Do allow same release targetSdkVersion on released platform.
         // APP: Released API 20
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, true, PLATFORM_VERSION,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, true, PLATFORM_VERSION);
 
         // Do allow newer release targetSdkVersion on released platform.
         // APP: Released API 30
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, true, NEWER_VERSION,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, true, NEWER_VERSION);
 
         // Don't allow older pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 10
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, true, -1,
-                false /* forceCurrentDev */);
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, true, -1,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, true, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, true, -1);
 
         // Don't allow same pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 20
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, -1,
-                false /* forceCurrentDev */);
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, -1,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, -1);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, -1);
 
 
         // Don't allow newer pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 30
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, -1,
-                false /* forceCurrentDev */);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true, -1,
-                false /* forceCurrentDev */);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true, -1);
     }
 
     /**

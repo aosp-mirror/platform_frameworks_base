@@ -16342,7 +16342,6 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean onExternal = args.volumeUuid != null;
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
         final boolean fullApp = ((installFlags & PackageManager.INSTALL_FULL_APP) != 0);
-        final boolean forceSdk = ((installFlags & PackageManager.INSTALL_FORCE_SDK) != 0);
         final boolean virtualPreload =
                 ((installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
         @ScanFlags int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
@@ -16374,8 +16373,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Retrieve PackageSettings and parse package
         @ParseFlags final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | PackageParser.PARSE_ENFORCE_CODE
-                | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0)
-                | (forceSdk ? PackageParser.PARSE_FORCE_SDK : 0);
+                | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
 
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
@@ -16794,19 +16792,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG,
                                 "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
-                    }
-
-                    // don't allow upgrade to target a release SDK from a pre-release SDK
-                    final boolean oldTargetsPreRelease = oldPackage.applicationInfo.targetSdkVersion
-                            == Build.VERSION_CODES.CUR_DEVELOPMENT;
-                    final boolean newTargetsPreRelease = pkg.applicationInfo.targetSdkVersion
-                            == Build.VERSION_CODES.CUR_DEVELOPMENT;
-                    if (oldTargetsPreRelease
-                            && !newTargetsPreRelease
-                            && ((parseFlags & PackageParser.PARSE_FORCE_SDK) == 0)) {
-                        Slog.w(TAG, "Can't install package targeting released sdk");
-                        throw new PrepareFailure(
-                                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
                     }
 
                     ps = mSettings.mPackages.get(pkgName11);
