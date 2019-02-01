@@ -28,6 +28,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
@@ -37,6 +39,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -346,6 +349,48 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
             assertInsetBy(mWindow.getContentFrameLw(),
                     DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
             assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+        }
+    }
+
+    @Test
+    public void layoutWindowLw_withForwardInset_SoftInputAdjustResize() {
+        synchronized (mWm.mGlobalLock) {
+            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
+            addWindow(mWindow);
+
+            final int forwardedInsetBottom = 50;
+            mDisplayPolicy.setForwardedInsets(Insets.of(0, 0, 0, forwardedInsetBottom));
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+            assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
+            assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(),
+                    STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT + forwardedInsetBottom);
+            assertInsetByTopBottom(mWindow.getVisibleFrameLw(),
+                    STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT + forwardedInsetBottom);
+            assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+            assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
+        }
+    }
+
+    @Test
+    public void layoutWindowLw_withForwardInset_SoftInputAdjustNothing() {
+        synchronized (mWm.mGlobalLock) {
+            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_NOTHING;
+            addWindow(mWindow);
+
+            final int forwardedInsetBottom = 50;
+            mDisplayPolicy.setForwardedInsets(Insets.of(0, 0, 0, forwardedInsetBottom));
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+            assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
+            assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+            assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+            assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
         }
     }
 

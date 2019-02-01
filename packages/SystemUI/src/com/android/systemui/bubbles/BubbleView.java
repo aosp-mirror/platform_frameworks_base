@@ -22,6 +22,8 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -32,6 +34,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -266,6 +269,24 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
                     }
                 }
             });
+            mActivityView.setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
+                ActivityView activityView = (ActivityView) view;
+                // Here we assume that the position of the ActivityView on the screen
+                // remains regardless of IME status. When we move ActivityView, the
+                // forwardedInsets should be computed not against the current location
+                // and size, but against the post-moved location and size.
+                Point displaySize = new Point();
+                view.getContext().getDisplay().getSize(displaySize);
+                int[] windowLocation = view.getLocationOnScreen();
+                final int windowBottom = windowLocation[1] + view.getHeight();
+                final int keyboardHeight = insets.getSystemWindowInsetBottom()
+                        - insets.getStableInsetBottom();
+                final int insetsBottom = Math.max(0,
+                        windowBottom + keyboardHeight - displaySize.y);
+                activityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
+                return view.onApplyWindowInsets(insets);
+            });
+
         }
         return mActivityView;
     }

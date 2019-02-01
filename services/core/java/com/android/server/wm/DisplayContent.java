@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -139,6 +138,7 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -4945,5 +4945,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         portalWindowHandle.ownerUid = Process.myUid();
         portalWindowHandle.portalToDisplayId = mDisplayId;
         return portalWindowHandle;
+    }
+
+    /**
+     * @see IWindowManager#setForwardedInsets
+     */
+    public void setForwardedInsets(Insets insets) {
+        if (insets == null) {
+            insets = Insets.NONE;
+        }
+        if (mDisplayPolicy.getForwardedInsets().equals(insets)) {
+            return;
+        }
+        mDisplayPolicy.setForwardedInsets(insets);
+        setLayoutNeeded();
+        mWmService.mWindowPlacerLocked.requestTraversal();
     }
 }
