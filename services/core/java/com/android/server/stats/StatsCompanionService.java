@@ -15,6 +15,8 @@
  */
 package com.android.server.stats;
 
+import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
+import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.os.Process.getPidsForCommands;
 import static android.os.Process.getUidForPid;
 
@@ -41,6 +43,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.ConnectivityManager;
@@ -1793,6 +1796,65 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
+    private void pullDangerousPermissionState(long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            PackageManager pm = mContext.getPackageManager();
+
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                UserHandle user = users.get(userNum).getUserHandle();
+
+                List<PackageInfo> pkgs = pm.getInstalledPackagesAsUser(
+                        PackageManager.GET_PERMISSIONS, user.getIdentifier());
+
+                int numPkgs = pkgs.size();
+                for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                    PackageInfo pkg = pkgs.get(pkgNum);
+
+                    if (pkg.requestedPermissions == null) {
+                        continue;
+                    }
+
+                    int numPerms = pkg.requestedPermissions.length;
+                    for (int permNum  = 0; permNum < numPerms; permNum++) {
+                        String permName = pkg.requestedPermissions[permNum];
+
+                        PermissionInfo permissionInfo;
+                        try {
+                            permissionInfo = pm.getPermissionInfo(permName, 0);
+                        } catch (PackageManager.NameNotFoundException ignored) {
+                            continue;
+                        }
+
+                        if (permissionInfo.getProtection() != PROTECTION_DANGEROUS) {
+                            continue;
+                        }
+
+                        StatsLogEventWrapper e = new StatsLogEventWrapper(
+                                StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos, wallClockNanos);
+
+                        e.writeString(permName);
+                        e.writeInt(pkg.applicationInfo.uid);
+                        e.writeString(pkg.packageName);
+
+                        e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
+                                & REQUESTED_PERMISSION_GRANTED) != 0);
+
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not read permissions", t);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     /**
      * Add a RoleHolder atom for each package that holds a role.
      *
@@ -2023,6 +2085,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.ROLE_HOLDER: {
                 pullRoleHolders(elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DANGEROUS_PERMISSION_STATE: {
+                pullDangerousPermissionState(elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
