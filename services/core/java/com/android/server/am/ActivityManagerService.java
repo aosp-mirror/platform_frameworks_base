@@ -3585,6 +3585,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (tracesFile == null) {
             return null;
         }
+        if (DEBUG_ANR) {
+            Slog.d(TAG, "Dumping to " + tracesFile.getAbsolutePath());
+        }
 
         dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
         return tracesFile;
