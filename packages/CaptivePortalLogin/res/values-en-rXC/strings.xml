@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="5934709770924185752">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‎‏‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‎‏‏‏‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎‎‎‎CaptivePortalLogin‎‏‎‎‏‎"</string>
-    <string name="action_use_network" msgid="6076184727448466030">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‎‎‎‎‏‏‎‏‎‎‏‏‏‎‎‎‎‎‏‏‎‎‏‎‎‏‏‎‏‏‏‎‎Use this network as is‎‏‎‎‏‎"</string>
-    <string name="action_do_not_use_network" msgid="4577366536956516683">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‎‎‏‎‏‎‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎‏‏‎‏‏‎‎‏‏‎‎‏‎‏‎‎‏‎‏‏‎Do not use this network‎‏‎‎‏‎"</string>
-    <string name="action_bar_label" msgid="917235635415966620">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‎‎‎‎‏‎‎‏‏‎‎‎‏‏‎‎‎‏‏‏‎‎‏‏‏‎‎‎Sign in to network‎‏‎‎‏‎"</string>
-    <string name="action_bar_title" msgid="5645564790486983117">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‏‎‎‎‎‏‏‏‎‎‏‏‎‏‎Sign in to %1$s‎‏‎‎‏‎"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‏‎‎‏‏‏‎‎‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‏‏‎‎‎‎The network you’re trying to join has security issues.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‎‎‏‎‎‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‎‎‎‏‏‏‎‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎For example, the login page may not belong to the organization shown.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎‏‏‎‎‎‎‎‎‎‎‏‏‏‎‏‏‎‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‏‎‏‏‎‎Continue anyway via browser‎‏‎‎‏‎"</string>
-    <string name="ssl_error_untrusted" msgid="1496280318271264520">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‎‎‎‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‏‎‎‎‎‏‎‎‎‎This certificate isn\'t from a trusted authority.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_mismatch" msgid="3060364165934822383">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‎‏‏‎‎‎‏‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‏‎The name of the site doesn\'t match the name on the certificate.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_expired" msgid="1501588340716182495">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‎‏‎‎‎‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‏‏‏‏‎‏‏‏‏‏‎This certificate has expired.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‎‏‏‏‏‎‎‎‏‎‎‎‎‎‏‏‏‎‎‎‎‏‎‏‏‎‏‎‎‎‎‏‏‏‎‎‏‏‎‎‎This certificate isn\'t valid yet.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_date_invalid" msgid="88425990680059223">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‏‏‎This certificate has an invalid date.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_invalid" msgid="2540546515565633432">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‎‎‏‏‏‎‏‎‎‏‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎This certificate is invalid.‎‏‎‎‏‎"</string>
-    <string name="ssl_error_unknown" msgid="4405203446079465859">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‎‎‎‏‎‎‏‏‎‏‏‎‏‎‎‏‏‎‎‎‏‏‏‎‎‎‏‏‎‏‏‏‎‎‏‎‎‏‎‏‎‏‎‎‏‏‎‎‎‎‎‏‏‎Unknown certificate error.‎‏‎‎‏‎"</string>
-    <string name="ssl_security_warning_title" msgid="8768539813847504404">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‎‎‎‎‎‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‏‎‎‎Security warning‎‏‎‎‏‎"</string>
-    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‎‏‎‏‎‏‏‏‏‎‎‏‎‎‎‏‎‏‎‏‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎View certificate‎‏‎‎‏‎"</string>
-    <string name="ok" msgid="2817931639040794018">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‎‏‏‎‏‎‎‏‏‎‏‏‏‏‎‎‏‎‏‎‏‎‎‏‎‏‎‎‏‎‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‎‎‏‎‎OK‎‏‎‎‏‎"</string>
-    <string name="page_info_address" msgid="1261481517455692363">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‎‎‎‏‏‎‏‎‏‏‏‎‏‏‎‎‎‎‎‏‏‎‏‎‏‎‏‎‏‎‏‎‏‎‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‏‏‎Address:‎‏‎‎‏‎"</string>
-    <string name="page_info" msgid="4416941086705172545">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‏‏‎‎‎‎‏‎‎‎‎‎‏‎‎‎‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‏‎‎‎‎‎‎‎‏‎‎‎‎‎‏‎Page info‎‏‎‎‏‎"</string>
+    <string name="app_name" msgid="5934709770924185752">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‎‏‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‎‏‏‏‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎‎‎‎CaptivePortalLogin‎‏‎‎‏‎"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‎‎‎‎‏‏‎‏‎‎‏‏‏‎‎‎‎‎‏‏‎‎‏‎‎‏‏‎‏‏‏‎‎Use this network as is‎‏‎‎‏‎"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‎‎‏‎‏‎‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎‏‏‎‏‏‎‎‏‏‎‎‏‎‏‎‎‏‎‏‏‎Do not use this network‎‏‎‎‏‎"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‎‎‎‎‏‎‎‏‏‎‎‎‏‏‎‎‎‏‏‏‎‎‏‏‏‎‎‎Sign in to network‎‏‎‎‏‎"</string>
+    <string name="action_bar_title" msgid="5645564790486983117">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‏‎‎‎‎‏‏‏‎‎‏‏‎‏‎Sign in to %1$s‎‏‎‎‏‎"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‏‎‎‏‏‏‎‎‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‏‏‎‎‎‎The network you’re trying to join has security issues.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‎‎‏‎‎‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‎‎‎‏‏‏‎‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎For example, the login page may not belong to the organization shown.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎‏‏‎‎‎‎‎‎‎‎‏‏‏‎‏‏‎‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‏‎‏‏‎‎Continue anyway via browser‎‏‎‎‏‎"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‎‎‎‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‏‎‎‎‎‏‎‎‎‎This certificate isn\'t from a trusted authority.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‎‏‏‎‎‎‏‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‏‎The name of the site doesn\'t match the name on the certificate.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‎‏‎‎‎‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‏‏‏‏‎‏‏‏‏‏‎This certificate has expired.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‎‏‏‏‏‎‎‎‏‎‎‎‎‎‏‏‏‎‎‎‎‏‎‏‏‎‏‎‎‎‎‏‏‏‎‎‏‏‎‎‎This certificate isn\'t valid yet.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‏‏‎This certificate has an invalid date.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‎‎‏‏‏‎‏‎‎‏‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎This certificate is invalid.‎‏‎‎‏‎"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‎‎‎‏‎‎‏‏‎‏‏‎‏‎‎‏‏‎‎‎‏‏‏‎‎‎‏‏‎‏‏‏‎‎‏‎‎‏‎‏‎‏‎‎‏‏‎‎‎‎‎‏‏‎Unknown certificate error.‎‏‎‎‏‎"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‎‎‎‎‎‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‏‎‎‎Security warning‎‏‎‎‏‎"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‎‏‎‏‎‏‏‏‏‎‎‏‎‎‎‏‎‏‎‏‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎View certificate‎‏‎‎‏‎"</string>
+    <string name="ok" msgid="2817931639040794018">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‎‏‏‎‏‎‎‏‏‎‏‏‏‏‎‎‏‎‏‎‏‎‎‏‎‏‎‎‏‎‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‎‎‏‎‎OK‎‏‎‎‏‎"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‎‎‎‏‏‎‏‎‏‏‏‎‏‏‎‎‎‎‎‏‏‎‏‎‏‎‏‎‏‎‏‎‏‎‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‏‏‎Address:‎‏‎‎‏‎"</string>
+    <string name="page_info" msgid="4416941086705172545">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‏‏‎‎‎‎‏‎‎‎‎‎‏‎‎‎‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‏‎‎‎‎‎‎‎‏‎‎‎‎‎‏‎Page info‎‏‎‎‏‎"</string>
 </resources>
