@@ -38,50 +38,20 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"‏تم الاتصال تلقائيًا عبر %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"تم الاتصال تلقائيًا عبر مقدم خدمة تقييم الشبكة"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏تم الاتصال عبر %1$s"</string>
-    <string name="ssid_by_passpoint_provider" msgid="7898171424140673315">"<xliff:g id="SSID">%1$s</xliff:g> بواسطة <xliff:g id="PASSPOINTPROVIDER">%2$s</xliff:g>"</string>
+    <string name="connected_via_app" msgid="5571999941988929520">"تم الاتصال عبر <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏متوفرة عبر %1$s"</string>
-    <string name="tap_to_set_up" msgid="2468970825530423314">"انقر للإعداد."</string>
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"انقر للاشتراك."</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"متصلة ولكن بلا إنترنت"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"لا يتوفر اتصال إنترنت."</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"يلزم تسجيل الدخول"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"نقطة الدخول ممتلئة مؤقتًا"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"‏تم الاتصال عبر %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"‏متوفرة عبر %1$s"</string>
-    <string name="osu_failure_ap_connection" msgid="598977488344424542">"تعذّر الاتصال"</string>
-    <string name="osu_failure_server_url_invalid" msgid="2237477219243136714">"‏عنوان URL لخادم OSU غير صالح"</string>
-    <string name="osu_failure_server_connection" msgid="8192988165059982174">"‏تعذّر الاتصال بخادم OSU"</string>
-    <string name="osu_failure_server_validation" msgid="4631649978129606823">"‏تعذّر التحقق من خادم OSU"</string>
-    <string name="osu_failure_service_provider_verification" msgid="4854091521439785597">"‏شهادة خادم OSU غير صالحة"</string>
-    <string name="osu_failure_provisioning_aborted" msgid="424627208135320329">"تم إلغاء إدارة الحسابات"</string>
-    <string name="osu_failure_provisioning_not_available" msgid="3021783729256985432">"إدارة الحسابات غير متاحة"</string>
-    <string name="osu_failure_invalid_server_url" msgid="8548886196179435758">"‏عنوان URL لخادم OSU غير صالح"</string>
-    <string name="osu_failure_unexpected_command_type" msgid="8245921319866603904">"نوع الطلب غير متوقّع"</string>
-    <string name="osu_failure_unexpected_soap_message_type" msgid="2255897608510053065">"‏نوع رسالة SOAP غير متوقّع"</string>
-    <string name="osu_failure_soap_message_exchange" msgid="4357358438685987192">"‏تعذّر تبادل رسالة SOAP"</string>
-    <string name="osu_failure_start_redirect_listener" msgid="4292769407279548482">"تعذّر تشغيل إعادة توجيه المستمع"</string>
-    <string name="osu_failure_timed_out_redirect_listener" msgid="3168657820278807508">"انتهت مهلة انتظار إعادة التوجيه"</string>
-    <string name="osu_failure_no_osu_activity_found" msgid="4593038891437878675">"‏لم يتم العثور على نشاط OSU"</string>
-    <string name="osu_failure_unexpected_soap_message_status" msgid="6568467710235256675">"‏حالة رسالة SOAP غير متوقعة"</string>
-    <string name="osu_failure_no_pps_mo" msgid="850567403039076835">"‏تعذّر العثور على PPS-MO"</string>
-    <string name="osu_failure_no_aaa_server_trust_root_node" msgid="8961455873459838456">"‏تعذّر العثور على عقدة جذر الثقة لخادم AAA"</string>
-    <string name="osu_failure_no_remediation_server_trust_root_node" msgid="5041179688081545244">"تعذّر العثور على عقدة جذر الثقة لخادم المعالجة"</string>
-    <string name="osu_failure_no_policy_server_trust_root_node" msgid="6617290380940513539">"تعذّر العثور على عقدة جذر الثقة لخادم السياسة"</string>
-    <string name="osu_failure_retrieve_trust_root_certificates" msgid="1499136256195528265">"تعذّر استرداد شهادات جذر الثقة"</string>
-    <string name="osu_failure_no_aaa_trust_root_certificate" msgid="1904322497042226984">"‏تعذّر العثور على شهادة جذر ثقة لخادم AAA"</string>
-    <string name="osu_failure_add_passpoint_configuration" msgid="2173557755811446047">"‏تعذّرت إضافة ضبط PassPoint"</string>
-    <string name="osu_failure_osu_provider_not_found" msgid="6616172862116673082">"‏تعذّر العثور على مقدّم OSU"</string>
-    <string name="osu_status_ap_connecting" msgid="5296821043003441437">"جارٍ الاتصال"</string>
-    <string name="osu_status_ap_connected" msgid="3777289375683170728">"تم الاتصال"</string>
-    <string name="osu_status_server_connecting" msgid="8499785407540355867">"‏جارٍ الاتصال بخادم OSU"</string>
-    <string name="osu_status_server_validated" msgid="3158727184762596355">"‏تم التحقق من خادم OSU"</string>
-    <string name="osu_status_server_connected" msgid="8382024481520158168">"‏تم الاتصال بخادم OSU"</string>
-    <string name="osu_status_init_soap_exchange" msgid="8628063888912101981">"‏تبادل SOAP الأوّل"</string>
-    <string name="osu_status_waiting_for_redirect_response" msgid="2343016207837053197">"في انتظار رد إعادة التوجيه"</string>
-    <string name="osu_status_redirect_response_received" msgid="5323368411922609405">"تم تلقّي رد إعادة توجيه"</string>
-    <string name="osu_status_second_soap_exchange" msgid="7115332266758483909">"‏تبادل SOAP الثاني"</string>
-    <string name="osu_status_third_soap_exchange" msgid="8460901783597440766">"‏تبادل SOAP الثالث"</string>
-    <string name="osu_status_retrieving_trust_root_certs" msgid="1563445892926269689">"جارٍ استرداد شهادات جذر الثقة"</string>
-    <string name="osu_provisioning_complete" msgid="5120178802493970149">"اكتملت إدارة الحسابات"</string>
+    <string name="osu_opening_provider" msgid="5488997661548640424">"فتح <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"تعذّر الاتصال."</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"جارٍ إكمال الاشتراك…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"تعذّر إكمال الاشتراك. انقر للمحاولة مرة أخرى."</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"اكتمل الاشتراك. جارٍ الاتصال…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"بطيئة جدًا"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"بطيئة"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"موافق"</string>
@@ -234,8 +204,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"البقاء في الوضع النشط"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"تفعيل سجلّ تطفّل بواجهة وحدة تحكّم المضيف عبر بلوتوث"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"رَقمِن محتوى حزم بيانات البلوتوث. (تبديل البلوتوث بعد تغيير هذا الإعداد)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"إلغاء قفل المصنّع الأصلي للجهاز"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"‏السماح بإلغاء قفل برنامج bootloader"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"هل تريد السماح بإلغاء قفل المصنّع الأصلي للجهاز؟"</string>
@@ -246,7 +215,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"الشبكات"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏تفعيل تسجيل Wi‑Fi Verbose"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"‏اختيار عشوائي لعنوان MAC"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"عرض أجهزة البلوتوث بدون أسماء"</string>
@@ -273,7 +241,6 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"تعذّر الاتصال"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"‏اختيار عشوائي لعنوان MAC عند الاتصال بشبكات Wi‑Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>

@@ -38,50 +38,27 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"স্বয়ংক্রিয়ভাবে %1$s এর মাধ্যমে কানেক্ট হয়েছে"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"নেটওয়ার্কের রেটিং প্রদানকারীর মাধ্যমে অটোমেটিক কানেক্ট"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s মাধ্যমে কানেক্ট হয়েছে"</string>
-    <string name="ssid_by_passpoint_provider" msgid="7898171424140673315">"<xliff:g id="PASSPOINTPROVIDER">%2$s</xliff:g> এর <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <!-- no translation found for connected_via_app (5571999941988929520) -->
+    <skip />
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
-    <string name="tap_to_set_up" msgid="2468970825530423314">"সেট-আপ করতে ট্যাপ করুন"</string>
+    <!-- no translation found for tap_to_sign_up (6449724763052579434) -->
+    <skip />
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"কানেক্ট, ইন্টারনেট নেই"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"ইন্টারনেট কানেকশন নেই"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"সাইন-ইন করা দরকার"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s এর মাধ্যমে কানেক্ট হয়েছে"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
-    <string name="osu_failure_ap_connection" msgid="598977488344424542">"কানেক্ট করা যায়নি"</string>
-    <string name="osu_failure_server_url_invalid" msgid="2237477219243136714">"ভুল OSU সার্ভার ইউআরএল"</string>
-    <string name="osu_failure_server_connection" msgid="8192988165059982174">"OSU সার্ভারে কানেক্ট করা যায়নি"</string>
-    <string name="osu_failure_server_validation" msgid="4631649978129606823">"OSU সার্ভার যাচাই করা যায়নি"</string>
-    <string name="osu_failure_service_provider_verification" msgid="4854091521439785597">"ভুল OSU সার্ভার সার্টিফিকেট"</string>
-    <string name="osu_failure_provisioning_aborted" msgid="424627208135320329">"প্রভিশনিং বাতিল করা হয়েছে"</string>
-    <string name="osu_failure_provisioning_not_available" msgid="3021783729256985432">"প্রভিশনিং উপলভ্য নেই"</string>
-    <string name="osu_failure_invalid_server_url" msgid="8548886196179435758">"ভুল OSU সার্ভার ইউআরএল"</string>
-    <string name="osu_failure_unexpected_command_type" msgid="8245921319866603904">"অপ্রত্যাশিত কমান্ডের ধরন"</string>
-    <string name="osu_failure_unexpected_soap_message_type" msgid="2255897608510053065">"অপ্রত্যাশিত SOAP মেসেজের ধরন"</string>
-    <string name="osu_failure_soap_message_exchange" msgid="4357358438685987192">"SOAP মেসেজ এক্সচেঞ্জ করা যায়নি"</string>
-    <string name="osu_failure_start_redirect_listener" msgid="4292769407279548482">"রিডাইরেক্ট লিসনার শুরু হয়নি"</string>
-    <string name="osu_failure_timed_out_redirect_listener" msgid="3168657820278807508">"রিডাইরেক্টের জন্য অপেক্ষা করার সময় শেষ হয়েছে"</string>
-    <string name="osu_failure_no_osu_activity_found" msgid="4593038891437878675">"কোনও OSU অ্যাক্টিভিটি খুঁজে পাওয়া যায়নি"</string>
-    <string name="osu_failure_unexpected_soap_message_status" msgid="6568467710235256675">"অপ্রত্যাশিত SOAP মেসেজের স্ট্যাটাস"</string>
-    <string name="osu_failure_no_pps_mo" msgid="850567403039076835">"PPS-MO খুঁজে পাওয়া যায়নি"</string>
-    <string name="osu_failure_no_aaa_server_trust_root_node" msgid="8961455873459838456">"AAA সার্ভারের জন্য ট্রাস্ট রুট নোড খুঁজে পাওয়া যায়নি"</string>
-    <string name="osu_failure_no_remediation_server_trust_root_node" msgid="5041179688081545244">"রেমেডিয়েশন সার্ভারের জন্য ট্রাস্ট রুট নোড খুঁজে পাওয়া যায়নি"</string>
-    <string name="osu_failure_no_policy_server_trust_root_node" msgid="6617290380940513539">"নীতি সার্ভারের জন্য ট্রাস্ট রুট নোড খুঁজে পাওয়া যায়নি"</string>
-    <string name="osu_failure_retrieve_trust_root_certificates" msgid="1499136256195528265">"\'ট্রাস্ট রুট সার্টিফিকেট ফিরিয়ে আনা যায়নি"</string>
-    <string name="osu_failure_no_aaa_trust_root_certificate" msgid="1904322497042226984">"AAA সার্ভারের জন্য ট্রাস্ট রুট সার্টিফিকেট খুঁজে পাওয়া যায়নি"</string>
-    <string name="osu_failure_add_passpoint_configuration" msgid="2173557755811446047">"PassPoint কনফিগারেশন যোগ করা যায়নি"</string>
-    <string name="osu_failure_osu_provider_not_found" msgid="6616172862116673082">"OSU প্রদানকারী খুঁজে পাওয়া যায়নি"</string>
-    <string name="osu_status_ap_connecting" msgid="5296821043003441437">"কানেক্ট হচ্ছে"</string>
-    <string name="osu_status_ap_connected" msgid="3777289375683170728">"কানেক্ট করা হয়েছে"</string>
-    <string name="osu_status_server_connecting" msgid="8499785407540355867">"OSU সার্ভারের সাথে কানেক্ট করা হচ্ছে"</string>
-    <string name="osu_status_server_validated" msgid="3158727184762596355">"OSU সার্ভার যাচাই করা হয়েছে"</string>
-    <string name="osu_status_server_connected" msgid="8382024481520158168">"OSU সার্ভারের সাথে কানেক্ট করা আছে"</string>
-    <string name="osu_status_init_soap_exchange" msgid="8628063888912101981">"প্রারম্ভিক SOAP এক্সচেঞ্জ"</string>
-    <string name="osu_status_waiting_for_redirect_response" msgid="2343016207837053197">"রিডাইরেক্টের উত্তর পাওয়ার জন্য অপেক্ষা করা হচ্ছে"</string>
-    <string name="osu_status_redirect_response_received" msgid="5323368411922609405">"রিডাইরেক্টের উত্তর পাওয়া গেছে"</string>
-    <string name="osu_status_second_soap_exchange" msgid="7115332266758483909">"সেকেন্ড SOAP এক্সচেন্জ"</string>
-    <string name="osu_status_third_soap_exchange" msgid="8460901783597440766">"থার্ড SOAP এক্সচেন্জ"</string>
-    <string name="osu_status_retrieving_trust_root_certs" msgid="1563445892926269689">"ট্রাস্ট রুট সার্টিফিকেট ফিরিয়ে আনা হচ্ছে"</string>
-    <string name="osu_provisioning_complete" msgid="5120178802493970149">"প্রভিশনিং সম্পূর্ণ হয়েছে"</string>
+    <!-- no translation found for osu_opening_provider (5488997661548640424) -->
+    <skip />
+    <!-- no translation found for osu_connect_failed (2187750899158158934) -->
+    <skip />
+    <!-- no translation found for osu_completing_sign_up (9037638564719197082) -->
+    <skip />
+    <!-- no translation found for osu_sign_up_failed (7296159750352873260) -->
+    <skip />
+    <!-- no translation found for osu_sign_up_complete (8207626049093289203) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"খুব ধীরে"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ধীরে"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ঠিক আছে"</string>
@@ -234,8 +211,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"জাগিয়ে রাখুন"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"চার্জ হওয়ার স্ক্রিন কখনই নিদ্রা মোডে যাবে না"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ সক্ষম করুন"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"ব্লুটুথ প্যাকেট ক্যাপচার করুন। (এই সেটিং পরিবর্তন করার পরে ব্লুটুথ চালু অথবা বন্ধ করুন)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM আনলক করা হচ্ছে"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"বুট-লোডার আনলক করার অনুমতি দিন"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM আনলক করার অনুমতি দিতে চান?"</string>
@@ -246,7 +222,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"কানেক্ট MAC র‍্যান্ডমাইজেশন"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
@@ -273,7 +248,6 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"কানেক্ট করা যায়নি"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ওয়াই-ফাই নেটওয়ার্কে কানেক্ট করার সময় MAC অ্যাড্রেস র‍্যান্ডমাইজ করুন"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"পরিমাপ করা"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"পরিমাপ করা নয়"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>

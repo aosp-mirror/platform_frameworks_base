@@ -58,9 +58,11 @@
     <item msgid="3878793616631049349">"DRM ವಿಷಯಗಳಿಗೆ ಮಾತ್ರ HDCP ಪರೀಕ್ಷಿಸುವಿಕೆಯನ್ನು ಬಳಸು"</item>
     <item msgid="45075631231212732">"HDCP ಪರಿಶೀಲನೆಯನ್ನು ಯಾವಾಗಲೂ ಬಳಸು"</item>
   </string-array>
-    <!-- no translation found for bt_hci_snoop_log_entries:0 (3966341281672645384) -->
-    <!-- no translation found for bt_hci_snoop_log_entries:1 (1969681323976948639) -->
-    <!-- no translation found for bt_hci_snoop_log_entries:2 (8719029132154020716) -->
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</item>
+    <item msgid="1969681323976948639">"ಫಿಲ್ಟರ್ ಮಾಡುವುದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</item>
+    <item msgid="8719029132154020716">"ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (ಡಿಫಾಲ್ಟ್)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>

@@ -38,50 +38,20 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s арқылы автоматты қосылды"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Желі рейтингі провайдері арқылы автоматты түрде қосылған"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s арқылы қосылған"</string>
-    <string name="ssid_by_passpoint_provider" msgid="7898171424140673315">"<xliff:g id="PASSPOINTPROVIDER">%2$s</xliff:g> ұсынған <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="connected_via_app" msgid="5571999941988929520">"<xliff:g id="NAME">%1$s</xliff:g> арқылы жалғанған"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s арқылы қолжетімді"</string>
-    <string name="tap_to_set_up" msgid="2468970825530423314">"Реттеу үшін түртіңіз"</string>
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"Тіркелу үшін түртіңіз."</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Қосылған, интернет жоқ"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Интернетпен байланыс жоқ"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Есептік жазбаға кіру керек"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Кіру нүктесі уақытша бос емес"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s арқылы қосылды"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s арқылы қолжетімді"</string>
-    <string name="osu_failure_ap_connection" msgid="598977488344424542">"Байланыс орнатылмады"</string>
-    <string name="osu_failure_server_url_invalid" msgid="2237477219243136714">"OSU серверінің URL мекенжайы жарамсыз"</string>
-    <string name="osu_failure_server_connection" msgid="8192988165059982174">"OSU серверімен байланыс қатесі шықты"</string>
-    <string name="osu_failure_server_validation" msgid="4631649978129606823">"OSU сервері тексеруден өтпеді"</string>
-    <string name="osu_failure_service_provider_verification" msgid="4854091521439785597">"OSU серверінің сертификаты жарамсыз"</string>
-    <string name="osu_failure_provisioning_aborted" msgid="424627208135320329">"Дайындық процесі үзілді"</string>
-    <string name="osu_failure_provisioning_not_available" msgid="3021783729256985432">"Дайындықты жүзеге асыру мүмкін емес"</string>
-    <string name="osu_failure_invalid_server_url" msgid="8548886196179435758">"OSU серверінің URL мекенжайы жарамсыз"</string>
-    <string name="osu_failure_unexpected_command_type" msgid="8245921319866603904">"Күтпеген пәрмен түрі"</string>
-    <string name="osu_failure_unexpected_soap_message_type" msgid="2255897608510053065">"SOAP хабарының белгісіз түрі"</string>
-    <string name="osu_failure_soap_message_exchange" msgid="4357358438685987192">"SOAP хабарын алмасу мүмкін болмады"</string>
-    <string name="osu_failure_start_redirect_listener" msgid="4292769407279548482">"Тыңдаушының бағытын ауыстыру мүмкін болмады"</string>
-    <string name="osu_failure_timed_out_redirect_listener" msgid="3168657820278807508">"Бағыттың ауыстырылуын күту уақыты бітті"</string>
-    <string name="osu_failure_no_osu_activity_found" msgid="4593038891437878675">"Ешқандай OSU әрекеті табылмады"</string>
-    <string name="osu_failure_unexpected_soap_message_status" msgid="6568467710235256675">"SOAP хабарының белгісіз күйі"</string>
-    <string name="osu_failure_no_pps_mo" msgid="850567403039076835">"PPS-MO табылмады"</string>
-    <string name="osu_failure_no_aaa_server_trust_root_node" msgid="8961455873459838456">"AAA сервері үшін сенімді түбір табылмады"</string>
-    <string name="osu_failure_no_remediation_server_trust_root_node" msgid="5041179688081545244">"Жөндеулер сервері үшін сенімді түбір табылмады"</string>
-    <string name="osu_failure_no_policy_server_trust_root_node" msgid="6617290380940513539">"Саясат сервері үшін сенімді түбір табылмады"</string>
-    <string name="osu_failure_retrieve_trust_root_certificates" msgid="1499136256195528265">"Сенімді түбірлік сертификаттар алынбады"</string>
-    <string name="osu_failure_no_aaa_trust_root_certificate" msgid="1904322497042226984">"AAA сервері үшін сенімді түбірлік сертификатты табу мүмкін болмады"</string>
-    <string name="osu_failure_add_passpoint_configuration" msgid="2173557755811446047">"PassPoint конфигурациясы енгізілмеді"</string>
-    <string name="osu_failure_osu_provider_not_found" msgid="6616172862116673082">"OSU провайдері табылмады"</string>
-    <string name="osu_status_ap_connecting" msgid="5296821043003441437">"Жалғануда"</string>
-    <string name="osu_status_ap_connected" msgid="3777289375683170728">"Жалғанды"</string>
-    <string name="osu_status_server_connecting" msgid="8499785407540355867">"OSU серверіне жалғануда"</string>
-    <string name="osu_status_server_validated" msgid="3158727184762596355">"OSU сервері тексерілді"</string>
-    <string name="osu_status_server_connected" msgid="8382024481520158168">"OSU серверіне жалғанды"</string>
-    <string name="osu_status_init_soap_exchange" msgid="8628063888912101981">"Бастапқы SOAP алмасуы"</string>
-    <string name="osu_status_waiting_for_redirect_response" msgid="2343016207837053197">"Бағытты ауыстыру туралы жауап күтілуде"</string>
-    <string name="osu_status_redirect_response_received" msgid="5323368411922609405">"Бағытты ауыстыру туралы жауап алынды"</string>
-    <string name="osu_status_second_soap_exchange" msgid="7115332266758483909">"Екінші SOAP алмасуы"</string>
-    <string name="osu_status_third_soap_exchange" msgid="8460901783597440766">"Үшінші SOAP алмасуы"</string>
-    <string name="osu_status_retrieving_trust_root_certs" msgid="1563445892926269689">"Сенімді түбірлік сертификаттар алынуда"</string>
-    <string name="osu_provisioning_complete" msgid="5120178802493970149">"Дайындық аяқталды"</string>
+    <string name="osu_opening_provider" msgid="5488997661548640424">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> ашылуда"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"Жалғанбады"</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"Тіркелу процесі аяқталуда…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"Тіркелу процесі аяқталмады. Әрекетті қайталау үшін түртіңіз."</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"Тіркелу процесі аяқталды. Жалғануда…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Өте баяу"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Баяу"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Жарайды"</string>
@@ -234,8 +204,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Ояу тұру"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Зарядтау кезінде экран ұйықтамайды"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI snoop тіркелімін қосу"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Bluetooth пакеттерін алу (осы параметрді өзгерткен соң, Bluetooth-ды қосыңыз немесе өшіріңіз)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM бекітпесін ашу"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Жүктеуші бекітпесін ашуға рұқсат ету"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM бекітпесін ашуға рұқсат ету керек пе?"</string>
@@ -246,7 +215,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Желі орнату"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сымсыз дисплей сертификаты"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi егжей-тегжейлі журналы"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Қосылу кезінде MAC мекенжайларын еркін таңдау"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобильдік деректер әрқашан қосулы"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетерингтің аппараттық жеделдетуі"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth құрылғыларын атаусыз көрсету"</string>
@@ -273,7 +241,6 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Қосылмады"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Сымсыз дисплей сертификаты опцияларын көрсету"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi тіркеу деңгейін арттыру, Wi‑Fi таңдағанда әр SSID RSSI бойынша көрсету"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi желісіне қосылу кезінде MAC мекенжайларын еркін таңдау"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Шектелген"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Шектелмеген"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Журналға тіркеуші буферінің өлшемдері"</string>
