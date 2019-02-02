@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"ইউএছবি ডিবাগিংৰ অনুমতি দিবনে?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"এয়া হৈছে কম্পিউটাৰটোৰ RSA কী ফিংগাৰপ্ৰিণ্ট:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"এই কম্পিউটাৰটোৰ পৰা সদায় অনুমতি দিয়ক"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"অনুমতি দিয়ক"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"ইউএছবি ডিবাগিঙৰ অনুমতি নাই"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"এই ডিভাইচটোত বর্তমান ছাইন ইন হৈ থকা ব্যৱহাৰকাৰীজনে ইউএছবি ডিবাগিং অন কৰিব নোৱাৰে। এই সুবিধাটো ব্যৱহাৰ কৰিবলৈ হ\'লে মুখ্য ব্যৱহাৰকাৰী হিচাপে ছাইন ইন কৰক।"</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"ইউএছবি প’ৰ্ট অক্ষম কৰা হ’ল"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"আপোনাৰ ডিভাইচটো তৰল বা ধূলি-মাকতিৰ পৰা ৰক্ষা কৰিবলৈ ইউএছবি প’ৰ্টটো অক্ষম কৰি ৰখা হৈছে ফলত ই কোনো আনুষংগিক সামগ্ৰী ধৰা পেলাব নোৱাৰে।\n\nযেতিয়া ইউএছবি প’ৰ্টটো নিৰাপদভাৱে ব্যৱহাৰ কৰিব পৰা হ’ব তেতিয়া আপোনাক জনোৱা হ’ব।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"স্ক্ৰীণ পূর্ণ কৰিবলৈ জুম কৰক"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"স্ক্ৰীণ পূর্ণ কৰিবলৈ প্ৰসাৰিত কৰক"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"স্ক্ৰীণশ্বট"</string>
@@ -881,9 +878,9 @@
       <item quantity="one"><xliff:g id="NUM_APPS_4">%1$d</xliff:g>টা এপ্লিকেশ্বনে আপোনাৰ <xliff:g id="TYPE_5">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।</item>
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g>টা এপ্লিকেশ্বনে আপোনাৰ <xliff:g id="TYPE_5">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"বুজি পালোঁ"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"সবিশেষ চাওক"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"এপটোৱে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"এপসমূহে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"ছেন্সৰ অফ হৈ আছে"</string>
     <string name="device_services" msgid="1191212554435440592">"ডিভাইচ সেৱা"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"কোনো শিৰোনাম নাই"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

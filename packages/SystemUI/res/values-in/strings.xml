@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Izinkan debugging USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Sidik jari kunci RSA komputer adalah:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Selalu izinkan dari komputer ini"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Izinkan"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debug USB tidak diizinkan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Pengguna yang sedang login ke perangkat ini tidak dapat mengaktifkan proses debug USB. Beralihlah ke pengguna utama untuk menggunakan fitur ini."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"Port USB dinonaktifkan"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"Untuk melindungi perangkat dari cairan atau kotoran, port USB dinonaktifkan dan tidak akan mendeteksi aksesori apa pun.\n\nAnda akan diberi tahu jika sudah aman untuk menggunakan port USB kembali."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Perbesar utk mengisi layar"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rentangkn utk mngisi layar"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> aplikasi menggunakan <xliff:g id="TYPE_5">%2$s</xliff:g> Anda.</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> aplikasi menggunakan <xliff:g id="TYPE_1">%2$s</xliff:g> Anda.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Oke"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Lihat detail"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Aplikasi yang menggunakan <xliff:g id="TYPES_LIST">%s</xliff:g> Anda"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Aplikasi yang menggunakan <xliff:g id="TYPES_LIST">%s</xliff:g> Anda"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensor nonaktif"</string>
     <string name="device_services" msgid="1191212554435440592">"Layanan Perangkat"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Tanpa judul"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

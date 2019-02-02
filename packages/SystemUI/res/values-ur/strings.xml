@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"‏USB ڈیبگ کرنے کی اجازت دیں؟"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏کمپیوٹر کے RSA کا کلیدی فنگر پرنٹ ہے:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"اس کمپیوٹر سے ہمیشہ اجازت دیں"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"اجازت دیں"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏USB ڈیبگ کرنے کی اجازت نہیں ہے"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏اس آلہ پر فی الحال سائن ان کردہ صارف USB ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کیلئے، ابتدائی صارف پر سوئچ کریں۔"</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"‏USB پورٹ غیر فعال ہو گیا"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"‏آپ کے آلے کی سیال یا دھول سے حفاظت کرنے کیلئے، USB پورٹ کو غیر فعال کر دیا گیا ہے اور یہ کسی لوازم کا پتہ نہیں لگا پائے گا۔\n\nUSB پورٹ کا دوبارہ استعمال کرنا محفوظ ہونے پر آپ کو مطلع کیا جائے گا۔"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"پوری سکرین پر زوم کریں"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"پوری سکرین پر پھیلائیں"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"اسکرین شاٹ"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ایپلیکیشنز آپ کی <xliff:g id="TYPE_5">%2$s</xliff:g> کا استعمال کر رہی ہیں۔</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> ایپلیکیشن آپ کی <xliff:g id="TYPE_1">%2$s</xliff:g> کا استعمال کر رہی ہے۔</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"سمجھ آ گئی"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"تفصیلات دیکھیں"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"ایپ آپ کی <xliff:g id="TYPES_LIST">%s</xliff:g> کا استعمال کر رہی ہیں"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"ایپس آپ کی <xliff:g id="TYPES_LIST">%s</xliff:g> کا استعمال کر رہی ہیں"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">"، "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"سینسرز آف ہیں"</string>
     <string name="device_services" msgid="1191212554435440592">"آلہ کی سروس"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"کوئی عنوان نہیں ہے"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

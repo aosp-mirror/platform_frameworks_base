@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Povoliť ladenie USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitálny odtlačok RSA počítača je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povoliť z tohto počítača"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Povoliť"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladenie cez USB nie je povolené"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Používateľ, ktorý je práve prihlásený v tomto zariadení, nemôže zapnúť ladenie USB. Ak chcete použiť túto funkciu, prepnite na hlavného používateľa."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"Port USB je deaktivovaný"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"Port USB je deaktivovaný na zaistenie ochrany zariadenia pred tekutinami alebo nečistotami a nerozpoznáva príslušenstvo.\n\nKeď ho budete môcť znova bezpečne použiť, upozorníme vás."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Priblížiť na celú obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celú obrazovku"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snímka obrazovky"</string>
@@ -895,9 +892,9 @@
       <item quantity="other"><xliff:g id="TYPE_5">%2$s</xliff:g> používa <xliff:g id="NUM_APPS_4">%1$d</xliff:g> aplikácií</item>
       <item quantity="one"><xliff:g id="TYPE_1">%2$s</xliff:g> používa <xliff:g id="NUM_APPS_0">%1$d</xliff:g> aplikácia.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Dobre"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Podrobnosti"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Aplikácia používajúca <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Aplikácie používajúce <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -914,4 +911,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Senzory sú vypnuté"</string>
     <string name="device_services" msgid="1191212554435440592">"Služby zariadenia"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Bez názvu"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

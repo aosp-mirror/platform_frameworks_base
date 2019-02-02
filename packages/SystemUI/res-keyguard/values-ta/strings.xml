@@ -150,78 +150,81 @@
       <item quantity="other">சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு, PUK குறியீட்டை உள்ளிடவும். நீங்கள் <xliff:g id="_NUMBER_1">%d</xliff:g> முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.</item>
       <item quantity="one">சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு, PUK குறியீட்டை உள்ளிடவும். நீங்கள் <xliff:g id="_NUMBER_0">%d</xliff:g> முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (4786545441902447636) -->
-    <skip />
-    <!-- no translation found for type_clock_hours:0 (3543074812389379830) -->
-    <!-- no translation found for type_clock_hours:1 (7389464214252023751) -->
-    <!-- no translation found for type_clock_hours:2 (8803180377002008046) -->
-    <!-- no translation found for type_clock_hours:3 (8614897059944644719) -->
-    <!-- no translation found for type_clock_hours:4 (2293058674782619556) -->
-    <!-- no translation found for type_clock_hours:5 (4815402358455041664) -->
-    <!-- no translation found for type_clock_hours:6 (3325754778509665687) -->
-    <!-- no translation found for type_clock_hours:7 (5805551341866280575) -->
-    <!-- no translation found for type_clock_hours:8 (203334816668238610) -->
-    <!-- no translation found for type_clock_hours:9 (4828052671464488923) -->
-    <!-- no translation found for type_clock_hours:10 (2233497913571137419) -->
-    <!-- no translation found for type_clock_hours:11 (5621554266768657830) -->
-    <!-- no translation found for type_clock_minutes:0 (8322049385467207985) -->
-    <!-- no translation found for type_clock_minutes:1 (8837126587669001578) -->
-    <!-- no translation found for type_clock_minutes:2 (4294343372940455660) -->
-    <!-- no translation found for type_clock_minutes:3 (7129166637707421536) -->
-    <!-- no translation found for type_clock_minutes:4 (7579404865008788673) -->
-    <!-- no translation found for type_clock_minutes:5 (3873924689207380586) -->
-    <!-- no translation found for type_clock_minutes:6 (4849565597850069377) -->
-    <!-- no translation found for type_clock_minutes:7 (4404219424523572364) -->
-    <!-- no translation found for type_clock_minutes:8 (8740481214764087329) -->
-    <!-- no translation found for type_clock_minutes:9 (1713216865806811237) -->
-    <!-- no translation found for type_clock_minutes:10 (3508406095411245038) -->
-    <!-- no translation found for type_clock_minutes:11 (7161996337755311711) -->
-    <!-- no translation found for type_clock_minutes:12 (4044549963329624197) -->
-    <!-- no translation found for type_clock_minutes:13 (333373157917379088) -->
-    <!-- no translation found for type_clock_minutes:14 (2631202907124819385) -->
-    <!-- no translation found for type_clock_minutes:15 (6472396076858033453) -->
-    <!-- no translation found for type_clock_minutes:16 (8656981856181581643) -->
-    <!-- no translation found for type_clock_minutes:17 (7289026608562030619) -->
-    <!-- no translation found for type_clock_minutes:18 (3881477602692646573) -->
-    <!-- no translation found for type_clock_minutes:19 (3358129827772984226) -->
-    <!-- no translation found for type_clock_minutes:20 (3308575407402865807) -->
-    <!-- no translation found for type_clock_minutes:21 (5346560955382229629) -->
-    <!-- no translation found for type_clock_minutes:22 (226750304761473436) -->
-    <!-- no translation found for type_clock_minutes:23 (616811325336838734) -->
-    <!-- no translation found for type_clock_minutes:24 (616346116869053440) -->
-    <!-- no translation found for type_clock_minutes:25 (4642996410384042830) -->
-    <!-- no translation found for type_clock_minutes:26 (7506092849993571465) -->
-    <!-- no translation found for type_clock_minutes:27 (1915078191101042031) -->
-    <!-- no translation found for type_clock_minutes:28 (4292378641900520252) -->
-    <!-- no translation found for type_clock_minutes:29 (5339513901773103696) -->
-    <!-- no translation found for type_clock_minutes:30 (3574673250891657607) -->
-    <!-- no translation found for type_clock_minutes:31 (5796923836589110940) -->
-    <!-- no translation found for type_clock_minutes:32 (5859323597571702052) -->
-    <!-- no translation found for type_clock_minutes:33 (5133326723148876507) -->
-    <!-- no translation found for type_clock_minutes:34 (2693999494655663096) -->
-    <!-- no translation found for type_clock_minutes:35 (3316754944962836197) -->
-    <!-- no translation found for type_clock_minutes:36 (816891008836796723) -->
-    <!-- no translation found for type_clock_minutes:37 (9158890488666520078) -->
-    <!-- no translation found for type_clock_minutes:38 (1894769703213894011) -->
-    <!-- no translation found for type_clock_minutes:39 (5638820345598572399) -->
-    <!-- no translation found for type_clock_minutes:40 (8838304023017895439) -->
-    <!-- no translation found for type_clock_minutes:41 (1834742948932559597) -->
-    <!-- no translation found for type_clock_minutes:42 (6573707308847773944) -->
-    <!-- no translation found for type_clock_minutes:43 (2450149950652678001) -->
-    <!-- no translation found for type_clock_minutes:44 (2874667401318178036) -->
-    <!-- no translation found for type_clock_minutes:45 (3391101532763048862) -->
-    <!-- no translation found for type_clock_minutes:46 (1671489330863254362) -->
-    <!-- no translation found for type_clock_minutes:47 (5916017359554531038) -->
-    <!-- no translation found for type_clock_minutes:48 (8205413177993059967) -->
-    <!-- no translation found for type_clock_minutes:49 (6607867415142171302) -->
-    <!-- no translation found for type_clock_minutes:50 (8358850748472089162) -->
-    <!-- no translation found for type_clock_minutes:51 (3551313125255080234) -->
-    <!-- no translation found for type_clock_minutes:52 (1559678130725716542) -->
-    <!-- no translation found for type_clock_minutes:53 (431441994725492377) -->
-    <!-- no translation found for type_clock_minutes:54 (6345774640539623024) -->
-    <!-- no translation found for type_clock_minutes:55 (8018192990793931120) -->
-    <!-- no translation found for type_clock_minutes:56 (6187650843754604534) -->
-    <!-- no translation found for type_clock_minutes:57 (8727240174015993259) -->
-    <!-- no translation found for type_clock_minutes:58 (848339003778952950) -->
-    <!-- no translation found for type_clock_minutes:59 (5798985802835423618) -->
+    <string name="type_clock_header" msgid="4786545441902447636">"அதன்"</string>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"பன்னிரண்டு"</item>
+    <item msgid="7389464214252023751">"ஒன்று"</item>
+    <item msgid="8803180377002008046">"இரண்டு"</item>
+    <item msgid="8614897059944644719">"மூன்று"</item>
+    <item msgid="2293058674782619556">"நான்கு"</item>
+    <item msgid="4815402358455041664">"ஐந்து"</item>
+    <item msgid="3325754778509665687">"ஆறு"</item>
+    <item msgid="5805551341866280575">"ஏழு"</item>
+    <item msgid="203334816668238610">"எட்டு"</item>
+    <item msgid="4828052671464488923">"ஒன்பது"</item>
+    <item msgid="2233497913571137419">"பத்து"</item>
+    <item msgid="5621554266768657830">"பதினொன்று"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"மணி"</item>
+    <item msgid="8837126587669001578">"ஒன்று"</item>
+    <item msgid="4294343372940455660">"இரண்டு"</item>
+    <item msgid="7129166637707421536">"மூன்று"</item>
+    <item msgid="7579404865008788673">"நான்கு"</item>
+    <item msgid="3873924689207380586">"ஐந்து"</item>
+    <item msgid="4849565597850069377">"ஆறு"</item>
+    <item msgid="4404219424523572364">"ஏழு"</item>
+    <item msgid="8740481214764087329">"எட்டு"</item>
+    <item msgid="1713216865806811237">"ஒன்பது"</item>
+    <item msgid="3508406095411245038">"பத்து"</item>
+    <item msgid="7161996337755311711">"பதினொன்று"</item>
+    <item msgid="4044549963329624197">"பன்னிரண்டு"</item>
+    <item msgid="333373157917379088">"பதிமூன்று"</item>
+    <item msgid="2631202907124819385">"பதினான்கு"</item>
+    <item msgid="6472396076858033453">"பதினைந்து"</item>
+    <item msgid="8656981856181581643">"பதினாறு"</item>
+    <item msgid="7289026608562030619">"பதினேழு"</item>
+    <item msgid="3881477602692646573">"பதினெட்டு"</item>
+    <item msgid="3358129827772984226">"பத்தொன்பது"</item>
+    <item msgid="3308575407402865807">"இருபது"</item>
+    <item msgid="5346560955382229629">"இருபத்து\nஒன்று"</item>
+    <item msgid="226750304761473436">"இருபத்து\nஇரண்டு"</item>
+    <item msgid="616811325336838734">"இருபத்து\nமூன்று"</item>
+    <item msgid="616346116869053440">"இருபத்து\nநான்கு"</item>
+    <item msgid="4642996410384042830">"இருபத்து\nஐந்து"</item>
+    <item msgid="7506092849993571465">"இருபத்து\nஆறு"</item>
+    <item msgid="1915078191101042031">"இருபத்து\nஏழு"</item>
+    <item msgid="4292378641900520252">"இருபத்து\nஎட்டு"</item>
+    <item msgid="5339513901773103696">"இருபத்து\nஒன்பது"</item>
+    <item msgid="3574673250891657607">"முப்பது"</item>
+    <item msgid="5796923836589110940">"முப்பத்து\nஒன்று"</item>
+    <item msgid="5859323597571702052">"முப்பத்து\nஇரண்டு"</item>
+    <item msgid="5133326723148876507">"முப்பத்து\nமூன்று"</item>
+    <item msgid="2693999494655663096">"முப்பத்து\nநான்கு"</item>
+    <item msgid="3316754944962836197">"முப்பத்து\nஐந்து"</item>
+    <item msgid="816891008836796723">"முப்பத்து\nஆறு"</item>
+    <item msgid="9158890488666520078">"முப்பத்து\nஏழு"</item>
+    <item msgid="1894769703213894011">"முப்பத்து\nஎட்டு"</item>
+    <item msgid="5638820345598572399">"முப்பத்து\nஒன்பது"</item>
+    <item msgid="8838304023017895439">"நாற்பது"</item>
+    <item msgid="1834742948932559597">"நாற்பத்து\nஒன்று"</item>
+    <item msgid="6573707308847773944">"நாற்பத்து\nஇரண்டு"</item>
+    <item msgid="2450149950652678001">"நாற்பத்து\nமூன்று"</item>
+    <item msgid="2874667401318178036">"நாற்பத்து\nநான்கு"</item>
+    <item msgid="3391101532763048862">"நாற்பத்து\nஐந்து"</item>
+    <item msgid="1671489330863254362">"நாற்பத்து\nஆறு"</item>
+    <item msgid="5916017359554531038">"நாற்பத்து\nஏழு"</item>
+    <item msgid="8205413177993059967">"நாற்பத்து\nஎட்டு"</item>
+    <item msgid="6607867415142171302">"நாற்பத்து\nஒன்பது"</item>
+    <item msgid="8358850748472089162">"ஐம்பது"</item>
+    <item msgid="3551313125255080234">"ஐம்பத்து\nஒன்று"</item>
+    <item msgid="1559678130725716542">"ஐம்பத்து\nஇரண்டு"</item>
+    <item msgid="431441994725492377">"ஐம்பத்து\nமூன்று"</item>
+    <item msgid="6345774640539623024">"ஐம்பத்து\nநான்கு"</item>
+    <item msgid="8018192990793931120">"முப்பத்து\nஐந்து"</item>
+    <item msgid="6187650843754604534">"ஐம்பத்து\nஆறு"</item>
+    <item msgid="8727240174015993259">"ஐம்பத்து\nஏழு"</item>
+    <item msgid="848339003778952950">"ஐம்பத்து\nஎட்டு"</item>
+    <item msgid="5798985802835423618">"ஐம்பத்து\nஒன்பது"</item>
+  </string-array>
 </resources>
