@@ -150,6 +150,21 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for all runtime related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Runtime {
+        String NAMESPACE = "runtime";
+
+        /**
+         * Whether or not we use the precompiled layout.
+         */
+        String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
+    }
+
+    /**
      * Namespace for all runtime native related features.
      *
      * @hide
