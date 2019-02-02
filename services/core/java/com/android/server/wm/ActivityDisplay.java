@@ -1267,6 +1267,15 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         positionChildAt(stack, Math.max(0, insertIndex));
     }
 
+    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
+            boolean preserveWindows, boolean notifyClients) {
+        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = getChildAt(stackNdx);
+            stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
+                    notifyClients);
+        }
+    }
+
     void moveHomeStackToFront(String reason) {
         if (mHomeStack != null) {
             mHomeStack.moveToFront(reason);

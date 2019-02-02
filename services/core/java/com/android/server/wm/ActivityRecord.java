@@ -3401,6 +3401,16 @@ final class ActivityRecord extends ConfigurationContainer {
                 stack.checkKeyguardVisibility(this, true /* shouldBeVisible */, true /* isTop */);
     }
 
+    /**
+     * Check if this activity is able to resume. For pre-Q apps, only the topmost activities of each
+     * process are allowed to be resumed.
+     *
+     * @return true if this activity can be resumed.
+     */
+    boolean canResumeByCompat() {
+        return app == null || app.updateTopResumingActivityInProcessIfNeeded(this);
+    }
+
     boolean getTurnScreenOnFlag() {
         return mTurnScreenOn;
     }

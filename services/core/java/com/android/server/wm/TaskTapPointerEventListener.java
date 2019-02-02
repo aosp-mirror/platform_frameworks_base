@@ -22,6 +22,8 @@ import static android.view.PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 
+import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -86,6 +88,16 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 if (parent != null && parent.getTopChild() != mDisplayContent) {
                     parent.positionChildAt(WindowContainer.POSITION_TOP, mDisplayContent,
                             true /* includingParents */);
+                    // For compatibility, only the topmost activity is allowed to be resumed for
+                    // pre-Q app. Ensure the topmost activities are resumed whenever a display is
+                    // moved to top.
+                    // TODO(b/123761773): Investigate whether we can move this into
+                    // RootActivityContainer#updateTopResumedActivityIfNeeded(). Currently, it is
+                    // risky to do so because it seems possible to resume activities as part of a
+                    // larger transaction and it's too early to resume based on current order
+                    // when performing updateTopResumedActivityIfNeeded().
+                    mDisplayContent.mAcitvityDisplay.ensureActivitiesVisible(null /* starting */,
+                            0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
                 }
             }
         };
