@@ -3046,7 +3046,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
                         SharedLibraryInfo.VERSION_UNDEFINED);
-                mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
             } else {
                 mRequiredVerifierPackage = null;
                 mRequiredInstallerPackage = null;
@@ -3055,8 +3054,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 mIntentFilterVerifier = null;
                 mServicesSystemSharedLibraryPackageName = null;
                 mSharedSystemSharedLibraryPackageName = null;
-                mRequiredPermissionControllerPackage = null;
             }
+            // PermissionController hosts default permission granting and role management, so it's a
+            // critical part of the core system.
+            mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
 
             // Initialize InstantAppRegistry's Instant App list for all users.
             final int[] userIds = UserManagerService.getInstance().getUserIds();
