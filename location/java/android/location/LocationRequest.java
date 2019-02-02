@@ -19,6 +19,7 @@ package android.location;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -90,6 +91,7 @@ import android.util.TimeUtils;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class LocationRequest implements Parcelable {
     /**
      * Used with {@link #setQuality} to request the most accurate locations available.
