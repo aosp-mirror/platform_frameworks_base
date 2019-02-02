@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -200,34 +202,46 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         }
         Dependency.get(InitController.class).executePostInitTasks();
         log.traceEnd();
+        final Handler mainHandler = new Handler(Looper.getMainLooper());
         Dependency.get(PluginManager.class).addPluginListener(
                 new PluginListener<OverlayPlugin>() {
                     private ArraySet<OverlayPlugin> mOverlays;
 
                     @Override
                     public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
-                        StatusBar statusBar = getComponent(StatusBar.class);
-                        if (statusBar != null) {
-                            plugin.setup(statusBar.getStatusBarWindow(),
-                                    statusBar.getNavigationBarView());
-                        }
-                        // Lazy init.
-                        if (mOverlays == null) mOverlays = new ArraySet<>();
-                        if (plugin.holdStatusBarOpen()) {
-                            mOverlays.add(plugin);
-                            Dependency.get(StatusBarWindowController.class).setStateListener(b ->
-                                    mOverlays.forEach(o -> o.setCollapseDesired(b)));
-                            Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
-                                    mOverlays.size() != 0);
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                StatusBar statusBar = getComponent(StatusBar.class);
+                                if (statusBar != null) {
+                                    plugin.setup(statusBar.getStatusBarWindow(),
+                                            statusBar.getNavigationBarView());
+                                }
+                                // Lazy init.
+                                if (mOverlays == null) mOverlays = new ArraySet<>();
+                                if (plugin.holdStatusBarOpen()) {
+                                    mOverlays.add(plugin);
+                                    Dependency.get(StatusBarWindowController.class)
+                                            .setStateListener(b -> mOverlays.forEach(
+                                                    o -> o.setCollapseDesired(b)));
+                                    Dependency.get(StatusBarWindowController.class)
+                                            .setForcePluginOpen(mOverlays.size() != 0);
 
-                        }
+                                }
+                            }
+                        });
                     }
 
                     @Override
                     public void onPluginDisconnected(OverlayPlugin plugin) {
-                        mOverlays.remove(plugin);
-                        Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
-                                mOverlays.size() != 0);
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mOverlays.remove(plugin);
+                                Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
+                                        mOverlays.size() != 0);
+                            }
+                        });
                     }
                 }, OverlayPlugin.class, true /* Allow multiple plugins */);
 
