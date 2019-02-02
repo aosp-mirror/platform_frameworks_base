@@ -3531,8 +3531,8 @@ public class Editor {
         }
     }
 
-    @VisibleForTesting
-    public class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
+    private final class SuggestionsPopupWindow extends PinnedPopupWindow
+            implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
 
         // Key of intent extras for inserting new word into user dictionary.
@@ -3732,11 +3732,6 @@ public class Editor {
                 textView.setText(suggestionInfo.mText);
                 return textView;
             }
-        }
-
-        @VisibleForTesting
-        public ViewGroup getContentViewForTesting() {
-            return mContentView;
         }
 
         @Override
@@ -6458,11 +6453,6 @@ public class Editor {
      */
     private static boolean isValidRange(CharSequence text, int start, int end) {
         return 0 <= start && start <= end && end <= text.length();
-    }
-
-    @VisibleForTesting
-    public SuggestionsPopupWindow getSuggestionsPopupWindowForTesting() {
-        return mSuggestionsPopupWindow;
     }
 
     /**
