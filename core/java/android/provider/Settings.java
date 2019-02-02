@@ -12939,6 +12939,30 @@ public final class Settings {
                 "adb_allowed_connection_time";
 
         /**
+         * Whether or not to use aggressive device idle constants and ignore motion.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String AGGRESSIVE_IDLE_ENABLED = "aggressive_idle_enabled";
+
+        /**
+         * Whether or not to use aggressive app idle constants.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String AGGRESSIVE_STANDBY_ENABLED = "aggressive_standby_enabled";
+
+        /**
+         * Flag to automatically enable Aggressive Idle and Standby with battery saver.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String AGGRESSIVE_BATTERY_SAVER = "aggressive_battery_saver";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
