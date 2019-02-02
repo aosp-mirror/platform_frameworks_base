@@ -1681,7 +1681,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (mPidsSelfLocked) {
                     for (int i = 0; i < mPidsSelfLocked.size(); i++) {
                         final ProcessRecord p = mPidsSelfLocked.valueAt(i);
-                        if (p.uid == uid) {
+                        if (p.uid == uid && p.thread != null) {
                             try {
                                 p.thread.notifyCleartextNetwork(firstPacket);
                             } catch (RemoteException ignored) {
