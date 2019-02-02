@@ -22,8 +22,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Process;
 import android.os.SystemClock;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 
 import com.android.internal.os.KernelCpuThreadReader.ProcessCpuUsage;
 import com.android.internal.os.KernelCpuThreadReader.ThreadCpuUsage;

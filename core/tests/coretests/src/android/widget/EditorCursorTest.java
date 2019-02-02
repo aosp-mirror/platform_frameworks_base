@@ -16,10 +16,11 @@
 
 package android.widget;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerOnLeft;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerOnRight;
+
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
 
 import static junit.framework.Assert.fail;
 

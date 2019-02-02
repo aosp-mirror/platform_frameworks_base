@@ -27,11 +27,10 @@ public class ObjectAnimatorEventsTest extends EventsTest {
 
     @Override
     public void setUp() throws Exception {
-        final BasicAnimatorActivity activity = getActivity();
-        Button button = (Button) activity.findViewById(R.id.animatingButton);
+        final BasicAnimatorActivity activity = mActivityRule.getActivity();
+        Button button = activity.findViewById(R.id.animatingButton);
 
         mAnimator = ObjectAnimator.ofFloat(button, "translationX", 0, 100);
         super.setUp();
     }
-
 }
