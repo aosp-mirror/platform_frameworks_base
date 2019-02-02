@@ -890,9 +890,14 @@ public final class SQLiteDatabase extends SQLiteClosable {
         try {
             try {
                 openInner();
-            } catch (SQLiteDatabaseCorruptException ex) {
-                onCorruption();
-                openInner();
+            } catch (RuntimeException ex) {
+                if (SQLiteDatabaseCorruptException.isCorruptException(ex)) {
+                    Log.e(TAG, "Database corruption detected in open()", ex);
+                    onCorruption();
+                    openInner();
+                } else {
+                    throw ex;
+                }
             }
         } catch (SQLiteException ex) {
             Log.e(TAG, "Failed to open database '" + getLabel() + "'.", ex);
