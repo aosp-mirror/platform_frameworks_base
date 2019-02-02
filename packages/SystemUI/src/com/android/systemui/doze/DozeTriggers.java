@@ -142,7 +142,7 @@ public class DozeTriggers implements DozeMachine.Part {
         boolean wakeEvent = rawValues != null && rawValues.length > 0 && rawValues[0] != 0;
 
         if (isWakeDisplay) {
-            onWakeScreen(wakeEvent);
+            onWakeScreen(wakeEvent, mMachine.getState());
         } else if (isLongPress || isWakeLockScreen) {
             requestPulse(pulseReason, sensorPerformedProxCheck);
         } else {
@@ -195,9 +195,8 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    private void onWakeScreen(boolean wake) {
+    private void onWakeScreen(boolean wake, DozeMachine.State state) {
         DozeLog.traceWakeDisplay(wake);
-        DozeMachine.State state = mMachine.getState();
         boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
         boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
         sWakeDisplaySensorState = wake;
@@ -208,7 +207,7 @@ public class DozeTriggers implements DozeMachine.Part {
                     // In pocket, drop event.
                     return;
                 }
-                if (mMachine.getState() == DozeMachine.State.DOZE) {
+                if (state == DozeMachine.State.DOZE) {
                     mMachine.requestState(DozeMachine.State.DOZE_AOD);
                 }
             }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
@@ -236,7 +235,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 }
                 mDozeSensors.setListening(true);
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
-                    onWakeScreen(false);
+                    onWakeScreen(false, newState);
                 }
                 break;
             case DOZE_AOD_PAUSED:
