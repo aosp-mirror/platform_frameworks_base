@@ -1626,6 +1626,23 @@ public class LocationManager {
         setTestProviderStatus(provider, LocationProvider.AVAILABLE, null, 0L);
     }
 
+    /**
+     * Get the last list of {@link LocationRequest}s sent to the provider.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public List<LocationRequest> getTestProviderCurrentRequests(String providerName) {
+        checkProvider(providerName);
+        try {
+            return mService.getTestProviderCurrentRequests(providerName,
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     // --- GPS-specific support ---
 
     // This class is used to send Gnss status events to the client's specific thread.

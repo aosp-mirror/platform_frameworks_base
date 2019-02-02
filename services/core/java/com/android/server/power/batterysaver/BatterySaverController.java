@@ -384,7 +384,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
      * - When battery saver is on and the battery saver policy changes.
      * - When adaptive battery saver becomes activated.
      * - When adaptive battery saver becomes deactivated.
-     * - When adaptive battery saver policy changes.
+     * - When adaptive battery saver is active (and full is off) and the policy changes.
      */
     void handleBatterySaverStateChanged(boolean sendBroadcast, int reason) {
         final LowPowerModeListener[] listeners;

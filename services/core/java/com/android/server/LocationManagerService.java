@@ -22,6 +22,7 @@ import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static android.location.LocationProvider.AVAILABLE;
+import static android.os.PowerManager.locationPowerSaveModeToString;
 import static android.provider.Settings.Global.LOCATION_DISABLE_STATUS_CALLBACKS;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -69,6 +70,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -254,6 +257,10 @@ public class LocationManagerService extends ILocationManager.Stub {
     @GuardedBy("mLock")
     private boolean mGnssBatchingInProgress = false;
 
+    @GuardedBy("mLock")
+    @PowerManager.LocationPowerSaveMode
+    private int mBatterySaverMode;
+
     public LocationManagerService(Context context) {
         super();
         mContext = context;
@@ -376,6 +383,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                         }
                     }
                 }, UserHandle.USER_ALL);
+        PowerManagerInternal localPowerManager =
+                LocalServices.getService(PowerManagerInternal.class);
+        localPowerManager.registerLowPowerModeObserver(ServiceType.LOCATION,
+                state -> {
+                    synchronized (mLock) {
+                        onBatterySaverModeChangedLocked(state.locationMode);
+                    }
+                });
 
         new PackageMonitor() {
             @Override
@@ -390,17 +405,29 @@ public class LocationManagerService extends ILocationManager.Stub {
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (action == null) {
+                    return;
+                }
                 synchronized (mLock) {
-                    String action = intent.getAction();
-                    if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                        onUserChangedLocked(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                    } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)
-                            || Intent.ACTION_MANAGED_PROFILE_REMOVED.equals(action)) {
-                        onUserProfilesChangedLocked();
+                    switch (action) {
+                        case Intent.ACTION_USER_SWITCHED:
+                            onUserChangedLocked(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                            break;
+                        case Intent.ACTION_MANAGED_PROFILE_ADDED:
+                        case Intent.ACTION_MANAGED_PROFILE_REMOVED:
+                            onUserProfilesChangedLocked();
+                            break;
+                        case Intent.ACTION_SCREEN_ON:
+                        case Intent.ACTION_SCREEN_OFF:
+                            onScreenStateChangedLocked();
+                            break;
                     }
                 }
             }
@@ -415,6 +442,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // initialize in-memory settings values
         onBackgroundThrottleWhitelistChangedLocked();
         onIgnoreSettingsWhitelistChangedLocked();
+        onBatterySaverModeChangedLocked(mPowerManager.getLocationPowerSaveMode());
     }
 
     @GuardedBy("mLock")
@@ -431,6 +459,34 @@ public class LocationManagerService extends ILocationManager.Stub {
     private void onPermissionsChangedLocked() {
         for (LocationProvider p : mProviders) {
             applyRequirementsLocked(p);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void onBatterySaverModeChangedLocked(int newLocationMode) {
+        if (D) {
+            Slog.d(TAG,
+                    "Battery Saver location mode changed from "
+                            + locationPowerSaveModeToString(mBatterySaverMode) + " to "
+                            + locationPowerSaveModeToString(newLocationMode));
+        }
+
+        if (mBatterySaverMode == newLocationMode) {
+            return;
+        }
+
+        mBatterySaverMode = newLocationMode;
+        for (LocationProvider p : mProviders) {
+            applyRequirementsLocked(p);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void onScreenStateChangedLocked() {
+        if (mBatterySaverMode == PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF) {
+            for (LocationProvider p : mProviders) {
+                applyRequirementsLocked(p);
+            }
         }
     }
 
@@ -1174,6 +1230,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private class MockLocationProvider extends LocationProvider {
 
+        private ProviderRequest mCurrentRequest;
+
         private MockLocationProvider(String name) {
             super(name);
         }
@@ -1210,6 +1268,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
+        }
+
+        @Override
+        @GuardedBy("mLock")
+        public void setRequestLocked(ProviderRequest request, WorkSource workSource) {
+            super.setRequestLocked(request, workSource);
+            mCurrentRequest = request;
         }
 
         @GuardedBy("mLock")
@@ -2024,8 +2089,11 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             final boolean isForegroundOnlyMode =
-                    mPowerManager.getLocationPowerSaveMode()
-                            == PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
+                    mBatterySaverMode == PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
+            final boolean shouldThrottleRequests =
+                    mBatterySaverMode
+                            == PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF
+                            && !mPowerManager.isInteractive();
             // initialize the low power mode to true and set to false if any of the records requires
             providerRequest.lowPowerMode = true;
             for (UpdateRecord record : records) {
@@ -2040,8 +2108,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                         record.mReceiver.mAllowedResolutionLevel)) {
                     continue;
                 }
-                final boolean isBatterySaverDisablingLocation =
-                        isForegroundOnlyMode && !record.mIsForegroundUid;
+                final boolean isBatterySaverDisablingLocation = shouldThrottleRequests
+                        || (isForegroundOnlyMode && !record.mIsForegroundUid);
                 if (!provider.isUseableLocked() || isBatterySaverDisablingLocation) {
                     if (isSettingsExemptLocked(record)) {
                         providerRequest.locationSettingsIgnored = true;
@@ -3397,6 +3465,32 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
+    @NonNull
+    public List<LocationRequest> getTestProviderCurrentRequests(String providerName,
+            String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return Collections.emptyList();
+        }
+
+        synchronized (mLock) {
+            LocationProvider testProvider = getLocationProviderLocked(providerName);
+            if (testProvider == null || !testProvider.isMock()) {
+                throw new IllegalArgumentException("Provider \"" + providerName + "\" unknown");
+            }
+
+            MockLocationProvider provider = (MockLocationProvider) testProvider;
+            if (provider.mCurrentRequest == null) {
+                return Collections.emptyList();
+            }
+            List<LocationRequest> requests = new ArrayList<>();
+            for (LocationRequest request : provider.mCurrentRequest.locationRequests) {
+                requests.add(new LocationRequest(request));
+            }
+            return requests;
+        }
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
@@ -3411,6 +3505,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             pw.println("  Current user: " + mCurrentUserId + " " + Arrays.toString(
                     mCurrentUserProfiles));
             pw.println("  Location mode: " + isLocationEnabled());
+            pw.println("  Battery Saver Location Mode: "
+                    + locationPowerSaveModeToString(mBatterySaverMode));
             pw.println("  Location Listeners:");
             for (Receiver receiver : mReceivers.values()) {
                 pw.println("    " + receiver);
