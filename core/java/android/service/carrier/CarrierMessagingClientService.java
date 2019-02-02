@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app;
+package android.service.carrier;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
@@ -24,10 +25,11 @@ import android.os.IBinder;
  * it so that the process is always running, which allows the app to have a persistent connection
  * to the server.
  *
- * <p>The service must have an {@link android.telephony.TelephonyManager#ACTION_SMS_APP_SERVICE}
+ * <p>The service must have an
+ * {@link android.telephony.TelephonyManager#ACTION_CARRIER_MESSAGING_CLIENT_SERVICE}
  * action in the intent handler, and be protected with
- * {@link android.Manifest.permission#BIND_SMS_APP_SERVICE}. However the service does not have to
- * be exported.
+ * {@link android.Manifest.permission#BIND_CARRIER_MESSAGING_CLIENT_SERVICE}.
+ * However the service does not have to be exported.
  *
  * <p>The service must be associated with a non-main process, meaning it must have an
  * {@code android:process} tag in its manifest entry.
@@ -45,27 +47,27 @@ import android.os.IBinder;
  *
  * <p>Example: First, define a subclass in the application:
  * <pre>
- * public class MySmsAppService extends SmsAppService {
+ * public class MyCarrierMessagingClientService extends CarrierMessagingClientService {
  * }
  * </pre>
  * Then, declare it in its {@code AndroidManifest.xml}:
  * <pre>
  * &lt;service
- *    android:name=".MySmsAppService"
+ *    android:name=".MyCarrierMessagingClientService"
  *    android:exported="false"
  *    android:process=":persistent"
- *    android:permission="android.permission.BIND_SMS_APP_SERVICE"&gt;
+ *    android:permission="android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE"&gt;
  *    &lt;intent-filter&gt;
- *        &lt;action android:name="android.telephony.action.SMS_APP_SERVICE" /&gt;
+ *        &lt;action android:name="android.telephony.action.CARRIER_MESSAGING_CLIENT_SERVICE" /&gt;
  *    &lt;/intent-filter&gt;
  * &lt;/service&gt;
  * </pre>
  */
-public class SmsAppService extends Service {
-    private final ISmsAppService mImpl;
+public class CarrierMessagingClientService extends Service {
+    private final ICarrierMessagingClientServiceImpl mImpl;
 
-    public SmsAppService() {
-        mImpl = new ISmsAppServiceImpl();
+    public CarrierMessagingClientService() {
+        mImpl = new ICarrierMessagingClientServiceImpl();
     }
 
     @Override
@@ -73,6 +75,6 @@ public class SmsAppService extends Service {
         return mImpl.asBinder();
     }
 
-    private class ISmsAppServiceImpl extends ISmsAppService.Stub {
+    private class ICarrierMessagingClientServiceImpl extends ICarrierMessagingClientService.Stub {
     }
 }

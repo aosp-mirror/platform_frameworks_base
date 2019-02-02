@@ -47,7 +47,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.am.PersistentConnection;
 import com.android.server.appbinding.finders.AppServiceFinder;
-import com.android.server.appbinding.finders.SmsAppServiceFinder;
+import com.android.server.appbinding.finders.CarrierMessagingClientServiceFinder;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -147,7 +147,7 @@ public class AppBindingService extends Binder {
         mIPackageManager = injector.getIPackageManager();
 
         mHandler = BackgroundThread.getHandler();
-        mApps.add(new SmsAppServiceFinder(context, this::onAppChanged, mHandler));
+        mApps.add(new CarrierMessagingClientServiceFinder(context, this::onAppChanged, mHandler));
 
         // Initialize with the default value to make it non-null.
         mConstants = AppBindingConstants.initializeFromString("");
