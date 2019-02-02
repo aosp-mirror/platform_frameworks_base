@@ -24,8 +24,15 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.ParcelUuid;
 
+import com.android.internal.util.IndentingPrintWriter;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A Simple Surface for Telephony to notify a loosely-coupled debugger of particular issues.
@@ -46,6 +53,8 @@ public final class DebugEventReporter {
     private static final String TAG = "DebugEventReporter";
 
     private static Context sContext = null;
+
+    private static Map<UUID, Integer> sEvents = new ConcurrentHashMap<>();
 
     /*
      * Because this is only supporting system packages, once we find a package, it will be the
@@ -73,6 +82,12 @@ public final class DebugEventReporter {
             Rlog.w(TAG, "DebugEventReporter not yet initialized, dropping event=" + eventId);
             return;
         }
+
+        // If this event has already occurred, skip sending intents for it; regardless log its
+        // invocation here.
+        Integer count = sEvents.containsKey(eventId) ? sEvents.get(eventId) + 1 : 1;
+        sEvents.put(eventId, count);
+        if (count > 1) return;
 
         // Even if we are initialized, that doesn't mean that a package name has been found.
         // This is normal in many cases, such as when no debug package is installed on the system,
@@ -139,5 +154,21 @@ public final class DebugEventReporter {
             break;
         }
         // Initialization may only be performed once.
+    }
+
+    /** Dump the contents of the DebugEventReporter */
+    public static void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
+        if (sContext == null) return;
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
+        sContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, "Requires DUMP");
+        pw.println("Initialized=" + (sContext != null ? "Yes" : "No"));
+        pw.println("Debug Package=" + sDebugPackageName);
+        pw.println("Event Counts:");
+        pw.increaseIndent();
+        for (UUID event : sEvents.keySet()) {
+            pw.println(event + ": " + sEvents.get(event));
+        }
+        pw.decreaseIndent();
+        pw.flush();
     }
 }
