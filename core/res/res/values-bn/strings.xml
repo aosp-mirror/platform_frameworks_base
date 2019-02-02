@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"কখনই নয়"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"এই পৃষ্ঠাটি খোলার জন্য আপনার কাছে অনুমতি নেই৷"</string>
     <string name="text_copied" msgid="4985729524670131385">"ক্লিপবোর্ডে পাঠ্য অনুলিপি করা হয়েছে৷"</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"আরও"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"মেনু+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1132,7 +1134,8 @@
     <string name="whichEditApplication" msgid="144727838241402655">"এর মাধ্যমে সম্পাদনা করুন"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s দিয়ে সম্পাদনা করুন"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"সম্পাদনা করুন"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"এর সাথে শেয়ার করুন"</string>
+    <!-- no translation found for whichSendApplication (5803792421724377602) -->
+    <skip />
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s এর সাথে শেয়ার করুন"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"শেয়ার করুন"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"এটি ব্যবহার করে পাঠান"</string>
@@ -1245,10 +1248,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"সমস্ত নেটওয়ার্ক দেখতে ট্যাপ করুন"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"সংযুক্ত করুন"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"সব নেটওয়ার্ক"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g>-এর সাজেস্ট করা ওয়াই-ফাই নেটওয়ার্ক এখন উপলভ্য"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"আপনি কি <xliff:g id="NAME">%s</xliff:g>-এর সাজেস্ট করা নেটওয়ার্ক দিয়ে কানেক্ট করতে চান?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"হ্যাঁ"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"না"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ওয়াই-ফাই অটোমেটিক চালু হবে"</string>
@@ -1262,8 +1263,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ওয়াই-ফাই এ ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"বিকল্পগুলির জন্য আলতো চাপুন"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"কানেক্ট করা হয়েছে"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"আপনার হটস্পট সেটিংসে পরিবর্তনগুলি"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"আপনার হটস্পট ব্যান্ড পরিবর্তন করা হয়েছে।"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"এই ডিভাইসটি শুধুমাত্র 5GHz এর জন্য আপনার পছন্দ সমর্থন করে না। পরিবর্তে, এই ডিভাইসটি 5GHz ব্যান্ড ব্যবহার করবে।"</string>
@@ -1349,14 +1349,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ডিবাগিং সংযুক্ত হয়েছে"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"ইউএসবি ডিবাগিং বন্ধ করতে ট্যাপ করুন"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ডিবাগিং অক্ষম করতে বেছে নিন।"</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"ইউএসবি পোর্টে তরল পদার্থ অথবা ধুলো কণা"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"ইউএসবি পোর্ট নিজে থেকে বন্ধ করা হবে। আরও জানতে ট্যাপ করুন।"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"ইউএসবি পোর্ট এখন ব্যবহার করতে পারবেন"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ফোন আর তরল পদার্থ এবং ধুলো কণা শনাক্ত করবে না।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ত্রুটির প্রতিবেদন নেওয়া হচ্ছে..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ত্রুটির প্রতিবেদন শেয়ার করবেন?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ত্রুটির প্রতিবেদন শেয়ার করা হচ্ছে..."</string>
@@ -1395,6 +1391,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"সেট আপ করুন"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"বের করে নিন"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ঘুরে দেখুন"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> অনুপস্থিত"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ডিভাইসটি আবার ঢোকান"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> সরানো হচ্ছে"</string>

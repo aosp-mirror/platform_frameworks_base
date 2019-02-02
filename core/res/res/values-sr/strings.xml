@@ -950,6 +950,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Никад"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Немате дозволу да отворите ову страницу."</string>
     <string name="text_copied" msgid="4985729524670131385">"Текст је копиран у привремену меморију."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Још"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Мени+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1152,7 +1154,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Измените помоћу"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Измените помоћу апликације %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Измени"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Делите помоћу"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Дељење"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Делите помоћу апликације %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Дели"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Пошаљите помоћу:"</string>
@@ -1267,10 +1269,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Додирните да бисте видели све мреже"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Повежи"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Све мреже"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Wi‑Fi мрежа коју предлаже <xliff:g id="NAME">%s</xliff:g> је доступна"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Желите ли да се повежете на мреже које предлаже <xliff:g id="NAME">%s</xliff:g>?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ће се аутоматски укључити"</string>
@@ -1284,8 +1284,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi нема приступ интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Додирните за опције"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Повезано је"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промене подешавања за хотспот"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Опсег хотспота је промењен."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Овај уређај не подржава подешавање само за 5 GHz. Уређај ће користити опсег од 5 GHz када буде доступан."</string>
@@ -1370,14 +1369,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је омогућено"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Додирните да бисте искључили отклањање грешака са USB-а"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изаберите да бисте онемогућили отклањања грешака са USB-а."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Течност или нечистоћа у USB порту"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB порт је аутоматски искључен. Додирните да бисте сазнали више."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Коришћење USB порта је безбедно"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Телефон више не открива течност или нечистоћу."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Извештај о грешци се генерише…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Желите ли да поделите извештај о грешци?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Дели се извештај о грешци…"</string>
@@ -1416,6 +1411,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Активирај"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Избаци"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Истражи"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> недостаје"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Поново уметните уређај"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Преноси се <xliff:g id="NAME">%s</xliff:g>"</string>

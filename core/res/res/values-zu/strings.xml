@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Akusoze"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Awunayo imvume yokuvula leli khasi."</string>
     <string name="text_copied" msgid="4985729524670131385">"Umbhalo ukopishwe ebhodini lokunamathisela."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Okuningi"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Imenyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1132,7 +1134,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Hlela nge-"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Hlela nge-%1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Hlela"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Yabelana no-"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Yabelana"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Yabelana no-%1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Yabelana"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Thumela usebenzisa"</string>
@@ -1245,10 +1247,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Thepha ukuze ubone onke amanethiwekhi"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Xhuma"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Onke amanethiwekhi"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Inethiwekhi ye-Wi-Fi ephakanyiswe u-<xliff:g id="NAME">%s</xliff:g> iyatholakala"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Uyafuna ukuxhumeka kumanethiwekhi aphakanyiswe u-<xliff:g id="NAME">%s</xliff:g>?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yebo"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Cha"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"I-Wi-Fi izovuleka ngokuzenzakalela"</string>
@@ -1262,8 +1262,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"I-Wi-Fi ayinakho ukufinyelela kwe-inthanethi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Thepha ukuze uthole izinketho"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Kuxhunyiwe"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ushintsho kuzilungiselelo zakho ze-hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ibhendi yakho ye-hotspot ishintshile."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Le divayisi ayisekeli okuncamelayo kwe-5GHz kuphela. Kunalokho, le divayisi izosebenzisa ibhendi ye-5GHz uma itholakala."</string>
@@ -1348,14 +1347,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Thepha ukuze uvale ukulungisa amaphutha kwe-USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Khetha ukuvimbela ukulungisa iphutha le-USB."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Uketshezi noma ama-debris kumbobo ye-USB"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Imbobo ye-USB inqanyulwa ngokuzenzakalela. Thepha ukuze ufunde kabanzi."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Kuphephile ukusebenzisa imbobo ye-USB"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Ifoni ayisatholi uketshezi noma ama-debris."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Ithatha umbiko wesiphazamisi..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Yabelana ngombiko wesiphazamisi?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Yabelana ngombiko wesiphazamisi..."</string>
@@ -1394,6 +1389,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Setha"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Khipha"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Hlola"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> okulahlekile"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Faka idivayisi futhi"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Ihambisa i-<xliff:g id="NAME">%s</xliff:g>"</string>

@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"ಎಂದಿಗೂ ಬೇಡ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"ಈ ಪುಟವನ್ನು ತೆರೆಯಲು ನೀವು ಅನುಮತಿಯನ್ನು ಹೊಂದಿಲ್ಲ."</string>
     <string name="text_copied" msgid="4985729524670131385">"ಪಠ್ಯವನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"ಇನ್ನಷ್ಟು"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ಮೆನು+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1132,7 +1134,8 @@
     <string name="whichEditApplication" msgid="144727838241402655">"ಇವರ ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ಎಡಿಟ್"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for whichSendApplication (5803792421724377602) -->
+    <skip />
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
@@ -1245,10 +1248,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳು"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g> ಅವರು ಪ್ರಸ್ತಾಪಿಸಿದ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ ಲಭ್ಯವಿದೆ"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"<xliff:g id="NAME">%s</xliff:g> ಅವರು ಪ್ರಸ್ತಾಪಿಸಿದ ನೆಟ್ವರ್ಕ್‌ಗಳಿಗೆ ನೀವು ಸಂಪರ್ಕಿಸಲು ಬಯಸುವಿರಾ?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ಹೌದು"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ಇಲ್ಲ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ವೈ‑ಫೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಆಗುತ್ತದೆ"</string>
@@ -1262,8 +1263,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ವೈ ಫೈ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ಆಯ್ಕೆಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ನಿಮ್ಮ ಹಾಟ್‌ಸ್ಪಾಟ್‌ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಬದಲಾವಣೆಗಳು"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ನಿಮ್ಮ ಹಾಟ್‌ಸ್ಪಾಟ್‌ ಬ್ಯಾಂಡ್ ಬದಲಾಗಿದೆ."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ಈ ಸಾಧನವು 5GHz ಗೆ ಮಾತ್ರ ನಿಮ್ಮ ಆದ್ಯತೆಯನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ. ಬದಲಿಗೆ, ಈ ಸಾಧನವು 5GHz ಬ್ಯಾಂಡ್ ಅನ್ನು ಲಭ್ಯವಿರುವಾಗ ಬಳಸುತ್ತದೆ."</string>
@@ -1349,14 +1349,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕ"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ಪೋರ್ಟ್‌ನಲ್ಲಿ ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳಿವೆ"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ಪೋರ್ಟ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ಪೋರ್ಟ್ ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದೆ"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ಫೋನ್, ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳನ್ನು ಇನ್ನು ಮುಂದೆ ಪತ್ತೆಹಚ್ಚುವುದಿಲ್ಲ."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ದೋಷದ ವರದಿಯನ್ನು ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ಬಗ್ ವರದಿಯನ್ನು ಹಂಚುವುದೇ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ಬಗ್ ವರದಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ…"</string>
@@ -1395,6 +1391,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ಹೊಂದಿಸು"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಇಜೆಕ್ಟ್"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ಎಕ್ಸ್‌ಪ್ಲೋರ್‌‌"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ಕಾಣೆಯಾಗಿದೆ"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ಸಾಧನವನ್ನು ಪುನಃ ಸೇರಿಸಿ"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ಸರಿಸಲಾಗುತ್ತಿದೆ"</string>

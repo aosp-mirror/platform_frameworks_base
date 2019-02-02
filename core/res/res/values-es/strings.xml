@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nunca"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"No tienes permiso para abrir esta página."</string>
     <string name="text_copied" msgid="4985729524670131385">"Texto copiado al portapapeles."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Más"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"MENU+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1132,7 +1134,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Editar con"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Cambiar"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Compartir con"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Compartir"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Compartir"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Enviar con"</string>
@@ -1245,10 +1247,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toca para ver todas las redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectarse"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas las redes"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Hay disponible una red Wi‑Fi propuesta por <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"¿Quieres conectarte a las redes propuestas por <xliff:g id="NAME">%s</xliff:g>?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sí"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"La conexión Wi‑Fi se activará automáticamente"</string>
@@ -1262,8 +1262,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La red Wi-Fi no tiene acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca para ver opciones"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Conectado"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios en los ajustes de tu punto de acceso"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La banda de tu punto de acceso ha cambiado."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo no admite la opción de conectarse exclusivamente a bandas de 5 GHz, pero las usará cuando estén disponibles."</string>
@@ -1334,7 +1333,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"es posible que esto te cueste dinero"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Cargando este dispositivo por USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Cargando dispositivo por USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Cargando dispositivo conectado por USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Modo de transferencia de archivos por USB activado"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Modo PTP por USB activado"</string>
@@ -1346,16 +1345,12 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB habilitada"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toca para desactivar la depuración USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toca para desactivar la depuración USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Seleccionar para inhabilitar la depuración USB"</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Se ha detectado líquido o suciedad en el puerto USB"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"El puerto USB se ha inhabilitado automáticamente. Toca para obtener más información."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Ya puedes usar el puerto USB"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"El teléfono ya no detecta líquidos ni suciedad."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Creando informe de errores…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartiendo informe de errores…"</string>
@@ -1394,6 +1389,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurar"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Expulsar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Falta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Introduce el dispositivo"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Moviendo <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1466,8 +1463,8 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"Archivo no seleccionado"</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
-    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Se está utilizando la aplicación con el modo de conducción"</string>
-    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toca para salir de la aplicación del modo de conducción."</string>
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplicación de conducción en uso"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toca para salir de la aplicación de conducción."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Compartir conexión/Zona Wi-Fi activada"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toca para configurar."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"La conexión compartida está inhabilitada"</string>

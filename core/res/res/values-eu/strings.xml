@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Inoiz ez"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Ez duzu orri hau irekitzeko baimenik."</string>
     <string name="text_copied" msgid="4985729524670131385">"Testua arbelean kopiatu da."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Gehiago"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menua+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1132,7 +1134,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Editatu honekin:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editatu %1$s aplikazioarekin"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Editatu"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Partekatu hauen bidez:"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Partekatu"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partekatu %1$s aplikazioarekin"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Partekatu"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Bidali honen bidez:"</string>
@@ -1245,10 +1247,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Sakatu hau sare guztiak ikusteko"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Konektatu"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Sare guztiak"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g> aplikazioak iradokitako wifi sare bat erabil daiteke"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"<xliff:g id="NAME">%s</xliff:g> aplikazioak iradokitako sareetara konektatu nahi zara?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Bai"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ez"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi konexioa automatikoki aktibatuko da"</string>
@@ -1262,8 +1262,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Ezin da konektatu Internetera Wi-Fi bidez"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Sakatu aukerak ikusteko"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Konektatuta"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Aldaketak egin dira sare publikoaren ezarpenetan"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Aldatu da sare publikoaren banda."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Gailuak ez du onartzen 5 GHz-ko banda soilik erabiltzeko hobespena. Horren ordez, erabilgarri dagoen bakoitzean erabiliko da 5 GHz-ko banda."</string>
@@ -1349,14 +1348,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB arazketa konektatuta"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Sakatu USB arazketa desaktibatzeko"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Hautatu USB arazketa desgaitzeko."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Likidoa edo zikinkeriak daude USB atakan"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ataka automatikoki desgaitu da. Informazio gehiago lortzeko, sakatu hau."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Segurtasunez erabil daiteke USB ataka"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonoak ez du hautematen likidorik edo zikinkeriarik."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Akatsen txostena sortzen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Akatsen txostena partekatu nahi duzu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Akatsen txostena partekatzen…"</string>
@@ -1395,6 +1390,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfiguratu"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Atera"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Arakatu"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Ez dago <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Sartu gailua berriro"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> mugitzen"</string>
