@@ -151,7 +151,7 @@ private:
 
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
     // VkPhysicalDeviceFeatures struct.
-    bool setupDevice(GrVkExtensions&, VkPhysicalDeviceFeatures2&);
+    void setupDevice(GrVkExtensions&, VkPhysicalDeviceFeatures2&);
 
     void destroyBuffers(VulkanSurface* surface);
 

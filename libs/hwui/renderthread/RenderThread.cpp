@@ -203,11 +203,17 @@ void RenderThread::requireGlContext() {
 
 void RenderThread::destroyRenderingContext() {
     mFunctorManager.onContextDestroyed();
-    if (mEglManager->hasEglContext()) {
-        setGrContext(nullptr);
-        mEglManager->destroy();
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        if (mEglManager->hasEglContext()) {
+            setGrContext(nullptr);
+            mEglManager->destroy();
+        }
+    } else {
+        if (vulkanManager().hasVkContext()) {
+            setGrContext(nullptr);
+            vulkanManager().destroy();
+        }
     }
-    vulkanManager().destroy();
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {
