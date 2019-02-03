@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB-Debugging zulassen?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Der Fingerabdruck des RSA-Schlüssels für diesen Computer lautet: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Von diesem Computer immer zulassen"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Erlauben"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-Debugging nicht zulässig"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Der momentan auf diesem Gerät angemeldete Nutzer kann das USB-Debugging nicht aktivieren. Um diese Funktion verwenden zu können, wechsle zum primären Nutzer."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB-Port deaktiviert"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"Zum Schutz deines Geräts vor Flüssigkeiten oder Fremdkörpern ist der USB-Port deaktiviert und erkennt kein Zubehör.\n\nDu wirst benachrichtigt, wenn der USB-Port wieder sicher verwendet werden kann."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom auf Bildschirmgröße"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Auf Bildschirmgröße anpassen"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
@@ -885,9 +882,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> Apps verwenden gerade: <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> App verwendet gerade: <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Details ansehen"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App, die <xliff:g id="TYPES_LIST">%s</xliff:g> verwendet"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apps, die <xliff:g id="TYPES_LIST">%s</xliff:g> verwenden"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -902,4 +899,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensoren aus"</string>
     <string name="device_services" msgid="1191212554435440592">"Gerätedienste"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Kein Titel"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ડિબગિંગને મંજૂરી આપીએ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"કમ્પ્યુટરની RSA મુખ્ય ફિંગરપ્રિંટ આ છે:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"હંમેશા આ કમ્પ્યુટરથી મંજૂરી આપો"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"મંજૂરી આપો"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ડીબગિંગની મંજૂરી નથી"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"હાલમાં આ ઉપકરણમાં સાઇન ઇન થયેલ વપરાશકર્તા USB ડિબગીંગ ચાલુ કરી શકતા નથી. આ સુવિધાનો ઉપયોગ કરવા માટે પ્રાથમિક વપરાશકર્તા પર સ્વિચ કરો."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB પોર્ટ બંધ કરવામાં આવ્યો છે"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"પ્રવાહી અથવા ધૂળથી તમારા ડિવાઇસનું રક્ષણ કરવા માટે, USB પોર્ટ બંધ કરવામાં આવ્યો છે અને કોઈ ઍક્સેસરી શોધશે નહીં.\n\nફરી USB પોર્ટનો ઉપયોગ કરવાનું સુરક્ષિત હશે ત્યારે તમને નોટિફિકેશન આપવામાં આવશે."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"સ્ક્રીનશૉટ"</string>
@@ -881,9 +878,9 @@
       <item quantity="one"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ઍપ્લિકેશન તમારા <xliff:g id="TYPE_5">%2$s</xliff:g>નો ઉપયોગ કરી રહી છે.</item>
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ઍપ્લિકેશનો તમારા <xliff:g id="TYPE_5">%2$s</xliff:g>નો ઉપયોગ કરી રહી છે.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"સમજાઈ ગયું"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"વિગતો જુઓ"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"અ‍ૅપ તમારા <xliff:g id="TYPES_LIST">%s</xliff:g>નો ઉપયોગ કરી રહી છે"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"અ‍ૅપ તમારા <xliff:g id="TYPES_LIST">%s</xliff:g>નો ઉપયોગ કરી રહી છે"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"સેન્સર બંધ છે"</string>
     <string name="device_services" msgid="1191212554435440592">"ડિવાઇસ સેવાઓ"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"કોઈ શીર્ષક નથી"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

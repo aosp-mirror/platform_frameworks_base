@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"السماح دائمًا من هذا الكمبيوتر"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"سماح"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏لا يُسمح بتصحيح أخطاء USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"‏تمّ إيقاف منفذ USB"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"‏لحماية جهازك من السوائل أو الشوائب، سيتمّ إيقاف منفذ USB الذي لن يتمكَّن من اكتشاف أيّ ملحقات.\n\nوسيتمّ إعلامك عندما يتوفّر الأمان لاستخدام منفذ USB مرّةً أخرى."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"تكبير/تصغير لملء الشاشة"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"توسيع بملء الشاشة"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"لقطة شاشة"</string>
@@ -909,9 +906,9 @@
       <item quantity="other">هناك <xliff:g id="NUM_APPS_4">%1$d</xliff:g> تطبيق يستخدِم <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
       <item quantity="one">هناك تطبيق واحد (<xliff:g id="NUM_APPS_0">%1$d</xliff:g>) يستخدِم <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"حسنًا"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"عرض التفاصيل"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"التطبيق الذي يستخدِم <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"التطبيقات التي تستخدِم <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">"، "</string>
@@ -930,4 +927,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"إيقاف أجهزة الاستشعار"</string>
     <string name="device_services" msgid="1191212554435440592">"خدمات الأجهزة"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"بلا عنوان"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

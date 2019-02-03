@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"អនុញ្ញាត​ការ​កែ​កំហុសតាម USB ឬ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ស្នាម​ម្រាម​ដៃ​ RSA របស់​កុំព្យូទ័រ​គឺ៖ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"អនុញ្ញាត​ជា​និច្ច​សម្រាប់​កុំព្យូទ័រ​នេះ"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"អនុញ្ញាត"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"មិនអនុញ្ញាតការកែកំហុសតាម USB ទេ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"អ្នកប្រើ​ដែលបច្ចុប្បន្ន​បានចូលគណនី​នៅលើឧបករណ៍នេះ​មិនអាចបើកការកែកំហុស USB បានទេ។ ដើម្បីប្រើមុខងារនេះ សូមប្តូរទៅអ្នកប្រើចម្បង។"</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"បានបិទរន្ធ USB"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"ដើម្បី​ការពារ​ឧបករណ៍​របស់អ្នកកុំឱ្យ​ចូលទឹក ឬ​កម្ទេចផ្សេងៗ រន្ធ USB ត្រូវបានបិទ ហើយ​នឹង​មិនស្គាល់​គ្រឿង​បរិក្ខារ​នោះទេ។\n\nអ្នកនឹង​ទទួលបាន​ការជូនដំណឺង នៅពេល​ការប្រើប្រាស់​រន្ធ USB មាន​សុវត្ថិភាព​ម្ដងទៀត។"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"រូបថតអេក្រង់"</string>
@@ -881,9 +878,9 @@
       <item quantity="other">កម្មវិធី <xliff:g id="NUM_APPS_4">%1$d</xliff:g> កំពុងប្រើប្រាស់ <xliff:g id="TYPE_5">%2$s</xliff:g> របស់អ្នក។</item>
       <item quantity="one">កម្មវិធី <xliff:g id="NUM_APPS_0">%1$d</xliff:g> កំពុងប្រើប្រាស់ <xliff:g id="TYPE_1">%2$s</xliff:g> របស់អ្នក។</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"យល់​ហើយ"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"មើល​ព័ត៌មាន​លម្អិត"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"កម្មវិធី​កំពុង​ប្រើប្រាស់ <xliff:g id="TYPES_LIST">%s</xliff:g> របស់អ្នក"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"កម្មវិធី​កំពុង​ប្រើប្រាស់ <xliff:g id="TYPES_LIST">%s</xliff:g> របស់អ្នក"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"បិទឧបករណ៍​ចាប់សញ្ញា"</string>
     <string name="device_services" msgid="1191212554435440592">"សេវាកម្មឧបករណ៍"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"គ្មាន​ចំណងជើង"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Uvijek dozvoli sa ovog računara"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Dozvoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Otklanjanje grešaka putem uređaja spojenog na USB nije dozvoljeno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može uključiti opciju za otklanjanje grešaka koristeći USB. Da koristite tu funkciju, prebacite se na primarnog korisnika."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB priključak je onemogućen"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"USB priključak je onemogućen kako bi se vaš uređaj zaštitio od tečnosti i nečistoća i neće detektirati priključene uređaje.\n\nDobit ćete obavještenje kada ponovo bude sigurno koristiti USB priključak."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Uvećaj prikaz na ekran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Razvuci prikaz na ekran"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snimak ekrana"</string>
@@ -890,9 +887,9 @@
       <item quantity="few"><xliff:g id="NUM_APPS_2">%1$d</xliff:g> aplikacije koriste <xliff:g id="TYPE_3">%2$s</xliff:g>.</item>
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> aplikacija koristi <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Razumijem"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Prikaži detalje"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Aplikacija koristi odobrenja <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Aplikacije koriste odobrenja <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -908,4 +905,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Senzori su isključeni"</string>
     <string name="device_services" msgid="1191212554435440592">"Usluge uređaja"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Bez naslova"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

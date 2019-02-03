@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vil du tillade USB-fejlretning?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Fingeraftrykket for computerens RSA-nøgle er:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Tillad altid fra denne computer"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Tillad"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-fejlretning er ikke tilladt"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere USB-fejlretning. Skift til den primære bruger for at bruge denne funktion."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB-porten er deaktiveret"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"USB-porten er blevet deaktiveret for at beskytte din enhed mod væske og snavs. Den kan derfor ikke registrere noget tilbehør.\n\nDu får besked, når det er sikkert at bruge USB-porten igen."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom til fuld skærm"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stræk til fuld skærm"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
@@ -828,7 +825,7 @@
     <string name="tuner_right" msgid="6222734772467850156">"Højre"</string>
     <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Appen <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Notifikationer"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Underretninger"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"Batteri"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshots"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Generelle meddelelser"</string>
@@ -881,9 +878,9 @@
       <item quantity="one"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> app anvender din/dit <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> apps anvender din/dit <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Se info"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App, der anvender din/dit <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apps, der anvender din/dit <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Deaktiver sensorer"</string>
     <string name="device_services" msgid="1191212554435440592">"Enhedstjenester"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Ingen titel"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

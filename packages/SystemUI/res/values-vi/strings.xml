@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Cho phép gỡ lỗi USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Tệp tham chiếu khóa RSA của máy tính là:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Luôn cho phép từ máy tính này"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Cho phép"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Tính năng gỡ lỗi USB không được phép"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi USB. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"Đã tắt cổng USB"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"Để bảo vệ thiết bị của bạn khỏi chất lỏng hay mảnh vỡ, cổng USB sẽ tắt và không thể phát hiện được bất kỳ phụ kiện nào.\n\nBạn sẽ được thông báo khi có thể sử dụng lại cổng USB một cách an toàn."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"T.phóng để lấp đầy m.hình"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Giãn ra để lấp đầy m.hình"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Chụp ảnh màn hình"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ứng dụng đang dùng <xliff:g id="TYPE_5">%2$s</xliff:g> của bạn.</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> ứng dụng đang dùng <xliff:g id="TYPE_1">%2$s</xliff:g> của bạn.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Xem chi tiết"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Ứng dụng đang sử dụng <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Các ứng dụng đang sử dụng <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Tắt cảm biến"</string>
     <string name="device_services" msgid="1191212554435440592">"Dịch vụ cho thiết bị"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Không có tiêu đề"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

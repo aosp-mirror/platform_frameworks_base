@@ -150,78 +150,81 @@
       <item quantity="one">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостанува уште <xliff:g id="_NUMBER_1">%d</xliff:g> обид пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>
       <item quantity="other">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостануваат уште <xliff:g id="_NUMBER_1">%d</xliff:g> обиди пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (4786545441902447636) -->
-    <skip />
-    <!-- no translation found for type_clock_hours:0 (3543074812389379830) -->
-    <!-- no translation found for type_clock_hours:1 (7389464214252023751) -->
-    <!-- no translation found for type_clock_hours:2 (8803180377002008046) -->
-    <!-- no translation found for type_clock_hours:3 (8614897059944644719) -->
-    <!-- no translation found for type_clock_hours:4 (2293058674782619556) -->
-    <!-- no translation found for type_clock_hours:5 (4815402358455041664) -->
-    <!-- no translation found for type_clock_hours:6 (3325754778509665687) -->
-    <!-- no translation found for type_clock_hours:7 (5805551341866280575) -->
-    <!-- no translation found for type_clock_hours:8 (203334816668238610) -->
-    <!-- no translation found for type_clock_hours:9 (4828052671464488923) -->
-    <!-- no translation found for type_clock_hours:10 (2233497913571137419) -->
-    <!-- no translation found for type_clock_hours:11 (5621554266768657830) -->
-    <!-- no translation found for type_clock_minutes:0 (8322049385467207985) -->
-    <!-- no translation found for type_clock_minutes:1 (8837126587669001578) -->
-    <!-- no translation found for type_clock_minutes:2 (4294343372940455660) -->
-    <!-- no translation found for type_clock_minutes:3 (7129166637707421536) -->
-    <!-- no translation found for type_clock_minutes:4 (7579404865008788673) -->
-    <!-- no translation found for type_clock_minutes:5 (3873924689207380586) -->
-    <!-- no translation found for type_clock_minutes:6 (4849565597850069377) -->
-    <!-- no translation found for type_clock_minutes:7 (4404219424523572364) -->
-    <!-- no translation found for type_clock_minutes:8 (8740481214764087329) -->
-    <!-- no translation found for type_clock_minutes:9 (1713216865806811237) -->
-    <!-- no translation found for type_clock_minutes:10 (3508406095411245038) -->
-    <!-- no translation found for type_clock_minutes:11 (7161996337755311711) -->
-    <!-- no translation found for type_clock_minutes:12 (4044549963329624197) -->
-    <!-- no translation found for type_clock_minutes:13 (333373157917379088) -->
-    <!-- no translation found for type_clock_minutes:14 (2631202907124819385) -->
-    <!-- no translation found for type_clock_minutes:15 (6472396076858033453) -->
-    <!-- no translation found for type_clock_minutes:16 (8656981856181581643) -->
-    <!-- no translation found for type_clock_minutes:17 (7289026608562030619) -->
-    <!-- no translation found for type_clock_minutes:18 (3881477602692646573) -->
-    <!-- no translation found for type_clock_minutes:19 (3358129827772984226) -->
-    <!-- no translation found for type_clock_minutes:20 (3308575407402865807) -->
-    <!-- no translation found for type_clock_minutes:21 (5346560955382229629) -->
-    <!-- no translation found for type_clock_minutes:22 (226750304761473436) -->
-    <!-- no translation found for type_clock_minutes:23 (616811325336838734) -->
-    <!-- no translation found for type_clock_minutes:24 (616346116869053440) -->
-    <!-- no translation found for type_clock_minutes:25 (4642996410384042830) -->
-    <!-- no translation found for type_clock_minutes:26 (7506092849993571465) -->
-    <!-- no translation found for type_clock_minutes:27 (1915078191101042031) -->
-    <!-- no translation found for type_clock_minutes:28 (4292378641900520252) -->
-    <!-- no translation found for type_clock_minutes:29 (5339513901773103696) -->
-    <!-- no translation found for type_clock_minutes:30 (3574673250891657607) -->
-    <!-- no translation found for type_clock_minutes:31 (5796923836589110940) -->
-    <!-- no translation found for type_clock_minutes:32 (5859323597571702052) -->
-    <!-- no translation found for type_clock_minutes:33 (5133326723148876507) -->
-    <!-- no translation found for type_clock_minutes:34 (2693999494655663096) -->
-    <!-- no translation found for type_clock_minutes:35 (3316754944962836197) -->
-    <!-- no translation found for type_clock_minutes:36 (816891008836796723) -->
-    <!-- no translation found for type_clock_minutes:37 (9158890488666520078) -->
-    <!-- no translation found for type_clock_minutes:38 (1894769703213894011) -->
-    <!-- no translation found for type_clock_minutes:39 (5638820345598572399) -->
-    <!-- no translation found for type_clock_minutes:40 (8838304023017895439) -->
-    <!-- no translation found for type_clock_minutes:41 (1834742948932559597) -->
-    <!-- no translation found for type_clock_minutes:42 (6573707308847773944) -->
-    <!-- no translation found for type_clock_minutes:43 (2450149950652678001) -->
-    <!-- no translation found for type_clock_minutes:44 (2874667401318178036) -->
-    <!-- no translation found for type_clock_minutes:45 (3391101532763048862) -->
-    <!-- no translation found for type_clock_minutes:46 (1671489330863254362) -->
-    <!-- no translation found for type_clock_minutes:47 (5916017359554531038) -->
-    <!-- no translation found for type_clock_minutes:48 (8205413177993059967) -->
-    <!-- no translation found for type_clock_minutes:49 (6607867415142171302) -->
-    <!-- no translation found for type_clock_minutes:50 (8358850748472089162) -->
-    <!-- no translation found for type_clock_minutes:51 (3551313125255080234) -->
-    <!-- no translation found for type_clock_minutes:52 (1559678130725716542) -->
-    <!-- no translation found for type_clock_minutes:53 (431441994725492377) -->
-    <!-- no translation found for type_clock_minutes:54 (6345774640539623024) -->
-    <!-- no translation found for type_clock_minutes:55 (8018192990793931120) -->
-    <!-- no translation found for type_clock_minutes:56 (6187650843754604534) -->
-    <!-- no translation found for type_clock_minutes:57 (8727240174015993259) -->
-    <!-- no translation found for type_clock_minutes:58 (848339003778952950) -->
-    <!-- no translation found for type_clock_minutes:59 (5798985802835423618) -->
+    <string name="type_clock_header" msgid="4786545441902447636">"Сега е"</string>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Дванаесет"</item>
+    <item msgid="7389464214252023751">"Еден"</item>
+    <item msgid="8803180377002008046">"Два"</item>
+    <item msgid="8614897059944644719">"Три"</item>
+    <item msgid="2293058674782619556">"Четири"</item>
+    <item msgid="4815402358455041664">"Пет"</item>
+    <item msgid="3325754778509665687">"Шест"</item>
+    <item msgid="5805551341866280575">"Седум"</item>
+    <item msgid="203334816668238610">"Осум"</item>
+    <item msgid="4828052671464488923">"Девет"</item>
+    <item msgid="2233497913571137419">"Десет"</item>
+    <item msgid="5621554266768657830">"Единаесет"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"часот"</item>
+    <item msgid="8837126587669001578">"Еден по полноќ"</item>
+    <item msgid="4294343372940455660">"Два по полноќ"</item>
+    <item msgid="7129166637707421536">"Три по полноќ"</item>
+    <item msgid="7579404865008788673">"Четири по полноќ"</item>
+    <item msgid="3873924689207380586">"Пет по полноќ"</item>
+    <item msgid="4849565597850069377">"Шест по полноќ"</item>
+    <item msgid="4404219424523572364">"Седум по полноќ"</item>
+    <item msgid="8740481214764087329">"Осум по полноќ"</item>
+    <item msgid="1713216865806811237">"Девет по полноќ"</item>
+    <item msgid="3508406095411245038">"Десет"</item>
+    <item msgid="7161996337755311711">"Единаесет"</item>
+    <item msgid="4044549963329624197">"Дванаесет"</item>
+    <item msgid="333373157917379088">"Тринаесет"</item>
+    <item msgid="2631202907124819385">"Четиринаесет"</item>
+    <item msgid="6472396076858033453">"Петнаесет"</item>
+    <item msgid="8656981856181581643">"Шестнаесет"</item>
+    <item msgid="7289026608562030619">"Седумнаесет"</item>
+    <item msgid="3881477602692646573">"Осумнаесет"</item>
+    <item msgid="3358129827772984226">"Деветнаесет"</item>
+    <item msgid="3308575407402865807">"Дваесет"</item>
+    <item msgid="5346560955382229629">"Дваесет\nи еден"</item>
+    <item msgid="226750304761473436">"Дваесет\nи два"</item>
+    <item msgid="616811325336838734">"Дваесет\nи три"</item>
+    <item msgid="616346116869053440">"Дваесет\nи четири"</item>
+    <item msgid="4642996410384042830">"Дваесет\nи пет"</item>
+    <item msgid="7506092849993571465">"Дваесет\nи шест"</item>
+    <item msgid="1915078191101042031">"Дваесет\nи седум"</item>
+    <item msgid="4292378641900520252">"Дваесет\nи осум"</item>
+    <item msgid="5339513901773103696">"Дваесет\nи девет"</item>
+    <item msgid="3574673250891657607">"Триесет"</item>
+    <item msgid="5796923836589110940">"Триесет\nи еден"</item>
+    <item msgid="5859323597571702052">"Триесет\nи два"</item>
+    <item msgid="5133326723148876507">"Триесет\nи три"</item>
+    <item msgid="2693999494655663096">"Триесет\nи четири"</item>
+    <item msgid="3316754944962836197">"Триесет\nи пет"</item>
+    <item msgid="816891008836796723">"Триесет\nи шест"</item>
+    <item msgid="9158890488666520078">"Триесет\nи седум"</item>
+    <item msgid="1894769703213894011">"Триесет\nи осум"</item>
+    <item msgid="5638820345598572399">"Триесет\nи девет"</item>
+    <item msgid="8838304023017895439">"Четириесет"</item>
+    <item msgid="1834742948932559597">"Четириесет\nи еден"</item>
+    <item msgid="6573707308847773944">"Четириесет\nи два"</item>
+    <item msgid="2450149950652678001">"Четириесет\nи три"</item>
+    <item msgid="2874667401318178036">"Четириесет\nи четири"</item>
+    <item msgid="3391101532763048862">"Четириесет\nи пет"</item>
+    <item msgid="1671489330863254362">"Четириесет\nи шест"</item>
+    <item msgid="5916017359554531038">"Четириесет\nи седум"</item>
+    <item msgid="8205413177993059967">"Четириесет\nи осум"</item>
+    <item msgid="6607867415142171302">"Четириесет\nи девет"</item>
+    <item msgid="8358850748472089162">"Педесет"</item>
+    <item msgid="3551313125255080234">"Педесет\nи еден"</item>
+    <item msgid="1559678130725716542">"Педесет\nи два"</item>
+    <item msgid="431441994725492377">"Педесет\nи три"</item>
+    <item msgid="6345774640539623024">"Педесет\nи четири"</item>
+    <item msgid="8018192990793931120">"Педесет\nи пет"</item>
+    <item msgid="6187650843754604534">"Педесет\nи шест"</item>
+    <item msgid="8727240174015993259">"Педесет\nи седум"</item>
+    <item msgid="848339003778952950">"Педесет\nи осум"</item>
+    <item msgid="5798985802835423618">"Педесет\nи девет"</item>
+  </string-array>
 </resources>

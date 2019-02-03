@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB hata ayıklamasına izin verilsin mi?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Bilgisayarın RSA anahtarı parmak izi:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Bu bilgisayardan her zaman izin ver"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"İzin ver"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB hata ayıklama işlevine izin verilmiyor"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Bu cihazda geçerli olarak oturum açmış olan kullanıcı, USB hata ayıklama özelliğini açamaz. Bu özelliği kullanmak için birincil kullanıcıya geçin."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB bağlantı noktası devre dışı bırakıldı"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"Cihazınızı sıvılardan veya tozlardan korumak için USB bağlantı noktası devre dışı bırakıldı ve aksesuarları algılamayacak.\n\nUSB bağlantı noktasını tekrar güvenli bir şekilde kullanabileceğiniz zaman bilgilendirileceksiniz."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Yakınlaştır (ekranı kaplasın)"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Genişlet (ekran kapansın)"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Ekran görüntüsü"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> uygulama, cihazınızın <xliff:g id="TYPE_5">%2$s</xliff:g> özelliğini kullanıyor.</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> uygulama, cihazınızın <xliff:g id="TYPE_1">%2$s</xliff:g> özelliğini kullanıyor.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Anladım"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Ayrıntıları göster"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Uygulama cihazınızın <xliff:g id="TYPES_LIST">%s</xliff:g> özelliklerini kullanıyor"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Uygulamalar cihazınızın <xliff:g id="TYPES_LIST">%s</xliff:g> özelliklerini kullanıyor"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensörler kapalı"</string>
     <string name="device_services" msgid="1191212554435440592">"Cihaz Hizmetleri"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Başlıksız"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>
