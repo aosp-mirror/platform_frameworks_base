@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.DisplayCutout;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
@@ -93,7 +94,7 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
     }
 
     /** Add one extra bubble over the limit, so we can make sure it's gone/chains appropriately. */
-    void addOneMoreThanRenderLimitBubbles() {
+    void addOneMoreThanRenderLimitBubbles() throws InterruptedException {
         for (int i = 0; i < mMaxRenderedBubbles + 1; i++) {
             final View newView = new FrameLayout(mContext);
             mLayout.addView(newView, 0);
@@ -129,7 +130,7 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
     void waitForLayoutMessageQueue() throws InterruptedException {
         // Wait for layout, then the view should be actually removed.
         CountDownLatch layoutLatch = new CountDownLatch(1);
-        mLayout.post(layoutLatch::countDown);
+        mMainThreadHandler.post(layoutLatch::countDown);
         layoutLatch.await(1, TimeUnit.SECONDS);
     }
 
@@ -145,11 +146,7 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         @Override
         public void setController(PhysicsAnimationController controller) {
             mMainThreadHandler.post(() -> super.setController(controller));
-            try {
-                waitForLayoutMessageQueue();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            waitForMessageQueueAndIgnoreIfInterrupted();
         }
 
         @Override
@@ -167,6 +164,32 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         @Override
         public WindowInsets getRootWindowInsets() {
             return mWindowInsets;
+        }
+
+        @Override
+        public void removeView(View view) {
+            mMainThreadHandler.post(() ->
+                    super.removeView(view));
+            waitForMessageQueueAndIgnoreIfInterrupted();
+        }
+
+        @Override
+        public void addView(View child, int index, ViewGroup.LayoutParams params) {
+            mMainThreadHandler.post(() ->
+                    super.addView(child, index, params));
+            waitForMessageQueueAndIgnoreIfInterrupted();
+        }
+
+        /**
+         * Wait for the queue but just catch and print the exception if interrupted, since we can't
+         * just add the exception to the overridden methods' signatures.
+         */
+        private void waitForMessageQueueAndIgnoreIfInterrupted() {
+            try {
+                waitForLayoutMessageQueue();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         /**

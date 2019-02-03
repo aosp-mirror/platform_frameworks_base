@@ -1392,11 +1392,15 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        @Nullable
         public HdmiDeviceInfo getActiveSource() {
             enforceAccessPermission();
             HdmiCecLocalDeviceTv tv = tv();
             if (tv == null) {
-                Slog.w(TAG, "Local tv device not available");
+                if (isTvDevice()) {
+                    Slog.e(TAG, "Local tv device not available.");
+                    return null;
+                }
                 if (isPlaybackDevice()) {
                     // if playback device itself is the active source,
                     // return its own device info.
@@ -1457,7 +1461,10 @@ public class HdmiControlService extends SystemService {
                                     HdmiControlService.this, deviceId, callback));
                             return;
                         }
-                        Slog.w(TAG, "Local tv device not available");
+                        if (isTvDevice()) {
+                            Slog.e(TAG, "Local tv device not available");
+                            return;
+                        }
                         invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
                         return;
                     }

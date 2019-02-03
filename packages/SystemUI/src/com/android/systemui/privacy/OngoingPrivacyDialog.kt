@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.UserHandle
+import android.provider.Settings
 import android.util.IconDrawableFactory
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -51,6 +52,10 @@ class OngoingPrivacyDialog constructor(
     private val MAX_ITEMS = context.resources.getInteger(R.integer.ongoing_appops_dialog_max_apps)
     private val iconFactory = IconDrawableFactory.newInstance(context, true)
     private var dismissDialog: (() -> Unit)? = null
+    private val appsAndTypes = dialogBuilder.appsAndTypes
+            .sortedWith(compareBy({ -it.second.size }, // Sort by number of AppOps
+            { it.second.min() },
+            { it.first }))
 
     init {
         val a = context.theme.obtainStyledAttributes(
@@ -64,7 +69,7 @@ class OngoingPrivacyDialog constructor(
             setPositiveButton(R.string.ongoing_privacy_dialog_ok, null)
             setNeutralButton(R.string.ongoing_privacy_dialog_open_settings,
                     object : DialogInterface.OnClickListener {
-                        val intent = Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE).putExtra(
+                        val intent = Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS).putExtra(
                                 Intent.EXTRA_DURATION_MILLIS, TimeUnit.MINUTES.toMillis(1))
 
                         @Suppress("DEPRECATION")
@@ -89,10 +94,10 @@ class OngoingPrivacyDialog constructor(
 
         title.setText(dialogBuilder.getDialogTitle())
 
-        val numItems = dialogBuilder.appsAndTypes.size
+        val numItems = appsAndTypes.size
         for (i in 0..(numItems - 1)) {
             if (i >= MAX_ITEMS) break
-            val item = dialogBuilder.appsAndTypes[i]
+            val item = appsAndTypes[i]
             addAppItem(appsList, item.first, item.second, dialogBuilder.types.size > 1)
         }
 

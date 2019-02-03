@@ -158,17 +158,6 @@ public class LinearGradient extends Shader {
                 colorSpace().getNativeInstance());
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected Shader copy() {
-        final LinearGradient copy = new LinearGradient(mX0, mY0, mX1, mY1, mColorLongs,
-                mPositions, mTileMode, colorSpace());
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
     private native long nativeCreate(long matrix, float x0, float y0, float x1, float y1,
             long[] colors, float[] positions, int tileMode, long colorSpaceHandle);
 }

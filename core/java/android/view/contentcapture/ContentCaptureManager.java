@@ -67,9 +67,6 @@ public final class ContentCaptureManager {
 
     private final Object mLock = new Object();
 
-    @GuardedBy("mLock")
-    private boolean mDisabled;
-
     @NonNull
     private final Context mContext;
 
@@ -115,8 +112,7 @@ public final class ContentCaptureManager {
     public MainContentCaptureSession getMainContentCaptureSession() {
         synchronized (mLock) {
             if (mMainSession == null) {
-                mMainSession = new MainContentCaptureSession(mContext, mHandler, mService,
-                        mDisabled);
+                mMainSession = new MainContentCaptureSession(mContext, this, mHandler, mService);
                 if (VERBOSE) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
@@ -180,9 +176,17 @@ public final class ContentCaptureManager {
      * </ul>
      */
     public boolean isContentCaptureEnabled() {
+        if (mService == null) return false;
+
+        final MainContentCaptureSession mainSession;
         synchronized (mLock) {
-            return mService != null && !mDisabled;
+            mainSession = mMainSession;
         }
+        // The main session is only set when the activity starts, so we need to return true until
+        // then.
+        if (mainSession != null && mainSession.isDisabled()) return false;
+
+        return true;
     }
 
     /**
@@ -287,7 +291,8 @@ public final class ContentCaptureManager {
     public void dump(String prefix, PrintWriter pw) {
         synchronized (mLock) {
             pw.print(prefix); pw.println("ContentCaptureManager");
-            pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
+            pw.print(prefix); pw.print("isContentCaptureEnabled(): ");
+            pw.println(isContentCaptureEnabled());
             pw.print(prefix); pw.print("Context: "); pw.println(mContext);
             pw.print(prefix); pw.print("User: "); pw.println(mContext.getUserId());
             if (mService != null) {

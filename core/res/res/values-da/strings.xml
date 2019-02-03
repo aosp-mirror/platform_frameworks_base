@@ -87,7 +87,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prøv at skifte dit foretrukne netværk. Tryk for skifte."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Det er ikke muligt at foretage nødopkald"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Det er ikke muligt at foretage nødopkald via Wi‑Fi"</string>
-    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Notifikationer"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Underretninger"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Viderestilling af opkald"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Nødtilbagekaldstilstand"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status for mobildata"</string>
@@ -262,7 +262,7 @@
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Tilgængeligt netværk"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-status"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Enhedsadministration"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Notifikationer"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Underretninger"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo til udstilling i butik"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-forbindelse"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Appen kører"</string>
@@ -348,7 +348,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-meddelelser"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-meddelelser, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-meddelelser for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-underretninger, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-underretninger for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læse feeds, jeg abonnerer på"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillader, at appen kan hente oplysninger om de feeds, der synkroniseres."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"Send og se sms-beskeder"</string>
@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Aldrig"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Du har ikke tilladelse til at åbne denne side."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teksten er kopieret til udklipsholderen."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Mere"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1132,7 +1134,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Rediger med"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Rediger med %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Rediger"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Del med"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Del"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Del med %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Del"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Send via"</string>
@@ -1245,10 +1247,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tryk for at se alle netværk"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Opret forbindelse"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle netværk"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g> har foreslået et tilgængeligt Wi-Fi-netværk"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Vil du oprette forbindelse til netværk, som <xliff:g id="NAME">%s</xliff:g> foreslår?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nej"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi aktiveres automatisk"</string>
@@ -1262,8 +1262,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-netværket har ikke internetadgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryk for at se valgmuligheder"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Der er oprettet forbindelse"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ændringer af dine indstillinger for hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Dit hotspotbånd er ændret."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Denne enhed understøtter ikke din præference om kun 5 GHz. Denne enhed vil i stedet bruge 5 GHz-båndet, når det er muligt."</string>
@@ -1348,14 +1347,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Tryk for at deaktivere USB-fejlretning"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Vælg for at deaktivere USB-fejlretning."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Væske eller snavs i USB-porten"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-porten deaktiveres automatisk. Tryk for at få flere oplysninger."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Det er sikkert at bruge USB-porten"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonen registrerer ikke længere væske og snavs."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Opretter fejlrapport…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vil du dele fejlrapporten?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Deler fejlrapport…"</string>
@@ -1394,6 +1389,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfigurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Skub ud"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Udforsk"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> er ikke til stede"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Indsæt enheden igen"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Flytter <xliff:g id="NAME">%s</xliff:g>"</string>

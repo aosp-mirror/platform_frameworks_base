@@ -25,6 +25,7 @@ import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
 import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -80,11 +81,13 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -350,6 +353,50 @@ public class ChooserActivity extends ResolverActivity {
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
 
+        Button copyButton = findViewById(R.id.copy_button);
+        copyButton.setOnClickListener(view -> {
+            Intent targetIntent = getTargetIntent();
+            if (targetIntent == null) {
+                finish();
+            } else {
+                final String action = targetIntent.getAction();
+
+                ClipData clipData = null;
+                if (Intent.ACTION_SEND.equals(action)) {
+                    String extraText = targetIntent.getStringExtra(Intent.EXTRA_TEXT);
+                    Uri extraStream = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+                    if (extraText != null) {
+                        clipData = ClipData.newPlainText(null, extraText);
+                    } else if (extraStream != null) {
+                        clipData = ClipData.newUri(getContentResolver(), null, extraStream);
+                    } else {
+                        Log.w(TAG, "No data available to copy to clipboard");
+                        return;
+                    }
+                } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+                    final ArrayList<Uri> streams = targetIntent.getParcelableArrayListExtra(
+                            Intent.EXTRA_STREAM);
+                    clipData = ClipData.newUri(getContentResolver(), null, streams.get(0));
+                    for (int i = 1; i < streams.size(); i++) {
+                        clipData.addItem(getContentResolver(), new ClipData.Item(streams.get(i)));
+                    }
+                } else {
+                    // expected to only be visible with ACTION_SEND or ACTION_SEND_MULTIPLE
+                    // so warn about unexpected action
+                    Log.w(TAG, "Action (" + action + ") not supported for copying to clipboard");
+                    return;
+                }
+
+                ClipboardManager clipboardManager = (ClipboardManager) getSystemService(
+                        Context.CLIPBOARD_SERVICE);
+                clipboardManager.setPrimaryClip(clipData);
+                Toast.makeText(getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
+
+                finish();
+            }
+        });
+
         MetricsLogger.action(this, MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN);
 
         mChooserShownTime = System.currentTimeMillis();
@@ -414,39 +461,39 @@ public class ChooserActivity extends ResolverActivity {
     private void showDefaultContentPreview(final ViewGroup parentLayout,
             final Intent targetIntent) {
         CharSequence sharingText = targetIntent.getCharSequenceExtra(Intent.EXTRA_TEXT);
-        TextView previewTextView = findViewById(R.id.content_preview_text);
         if (sharingText == null) {
-            previewTextView.setVisibility(View.GONE);
+            findViewById(R.id.content_preview_text_layout).setVisibility(View.GONE);
         } else {
-            previewTextView.setText(sharingText);
+            TextView textView = findViewById(R.id.content_preview_text);
+            textView.setText(sharingText);
         }
 
         String previewTitle = targetIntent.getStringExtra(Intent.EXTRA_TITLE);
-        TextView previewTitleView = findViewById(R.id.content_preview_title);
-        if (previewTitle == null) {
-            previewTitleView.setVisibility(View.GONE);
+        if (previewTitle == null || previewTitle.trim().isEmpty()) {
+            findViewById(R.id.content_preview_title_layout).setVisibility(View.GONE);
         } else {
+            TextView previewTitleView = findViewById(R.id.content_preview_title);
             previewTitleView.setText(previewTitle);
-        }
 
-        ClipData previewData = targetIntent.getClipData();
-        Uri previewThumbnail = null;
-        if (previewData != null) {
-            if (previewData.getItemCount() > 0) {
-                ClipData.Item previewDataItem = previewData.getItemAt(0);
-                previewThumbnail = previewDataItem.getUri();
+            ClipData previewData = targetIntent.getClipData();
+            Uri previewThumbnail = null;
+            if (previewData != null) {
+                if (previewData.getItemCount() > 0) {
+                    ClipData.Item previewDataItem = previewData.getItemAt(0);
+                    previewThumbnail = previewDataItem.getUri();
+                }
             }
-        }
 
-        ImageView previewThumbnailView = findViewById(R.id.content_preview_thumbnail);
-        if (previewThumbnail == null) {
-            previewThumbnailView.setVisibility(View.GONE);
-        } else {
-            Bitmap bmp = loadThumbnail(previewThumbnail, new Size(200, 200));
-            if (bmp == null) {
+            ImageView previewThumbnailView = findViewById(R.id.content_preview_thumbnail);
+            if (previewThumbnail == null) {
                 previewThumbnailView.setVisibility(View.GONE);
             } else {
-                previewThumbnailView.setImageBitmap(bmp);
+                Bitmap bmp = loadThumbnail(previewThumbnail, new Size(100, 100));
+                if (bmp == null) {
+                    previewThumbnailView.setVisibility(View.GONE);
+                } else {
+                    previewThumbnailView.setImageBitmap(bmp);
+                }
             }
         }
     }
@@ -2020,8 +2067,8 @@ public class ChooserActivity extends ResolverActivity {
         private void updatePath(int width, int height) {
             mPath.reset();
 
-            int imageWidth = width - getPaddingLeft() - getPaddingRight();
-            int imageHeight = height - getPaddingTop() - getPaddingBottom();
+            int imageWidth = width - getPaddingRight();
+            int imageHeight = height - getPaddingBottom();
             mPath.addRoundRect(getPaddingLeft(), getPaddingTop(), imageWidth, imageHeight, mRadius,
                     mRadius, Path.Direction.CW);
         }

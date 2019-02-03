@@ -19,6 +19,7 @@ package com.android.server.contentcapture;
 import static android.service.contentcapture.ContentCaptureService.setClientState;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DUPLICATED_ID;
+import static android.view.contentcapture.ContentCaptureSession.STATE_INTERNAL_ERROR;
 import static android.view.contentcapture.ContentCaptureSession.STATE_NO_SERVICE;
 
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
@@ -33,6 +34,7 @@ import android.app.AppGlobals;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
+import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
@@ -171,10 +173,18 @@ final class ContentCapturePerUserService
     // TODO(b/119613670): log metrics
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
-            @NonNull ComponentName componentName, int taskId, int displayId,
+            @NonNull ActivityPresentationInfo activityPresentationInfo,
             @NonNull String sessionId, int uid, int flags,
             @NonNull IResultReceiver clientReceiver) {
-
+        if (activityPresentationInfo == null) {
+            Slog.w(TAG, "basic activity info is null");
+            setClientState(clientReceiver, STATE_DISABLED | STATE_INTERNAL_ERROR,
+                    /* binder= */ null);
+            return;
+        }
+        final int taskId = activityPresentationInfo.taskId;
+        final int displayId = activityPresentationInfo.displayId;
+        final ComponentName componentName = activityPresentationInfo.componentName;
         final ComponentName serviceComponentName = getServiceComponentName();
         final boolean enabled = isEnabledLocked();
         final String historyItem =

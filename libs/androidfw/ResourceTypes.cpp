@@ -1594,6 +1594,16 @@ void ResXMLParser::setPosition(const ResXMLParser::ResXMLPosition& pos)
     mCurExt = pos.curExt;
 }
 
+void ResXMLParser::setSourceResourceId(const uint32_t resId)
+{
+    mSourceResourceId = resId;
+}
+
+uint32_t ResXMLParser::getSourceResourceId() const
+{
+    return mSourceResourceId;
+}
+
 // --------------------------------------------------------------------
 
 static volatile int32_t gCount = 0;

@@ -46,8 +46,8 @@ void ImageConsumer::onReleaseBufferLocked(int buf) {
 }
 
 void ImageConsumer::ImageSlot::createIfNeeded(sp<GraphicBuffer> graphicBuffer,
-                                              android_dataspace dataspace) {
-    if (!mImage.get() || dataspace != mDataspace) {
+                                              android_dataspace dataspace, bool forceCreate) {
+    if (!mImage.get() || dataspace != mDataspace || forceCreate) {
         mImage = graphicBuffer.get()
                          ? SkImage::MakeFromAHardwareBuffer(
                                    reinterpret_cast<AHardwareBuffer*>(graphicBuffer.get()),
@@ -71,7 +71,7 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
             if (slot != BufferItem::INVALID_BUFFER_SLOT) {
                 *queueEmpty = true;
                 mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer,
-                        st.mCurrentDataSpace);
+                        st.mCurrentDataSpace, false);
                 return mImageSlots[slot].mImage;
             }
         }
@@ -150,7 +150,7 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
     st.computeCurrentTransformMatrixLocked();
 
     *queueEmpty = false;
-    mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer, item.mDataSpace);
+    mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer, item.mDataSpace, true);
     return mImageSlots[slot].mImage;
 }
 

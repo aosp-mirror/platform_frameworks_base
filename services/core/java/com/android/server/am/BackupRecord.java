@@ -28,14 +28,16 @@ final class BackupRecord {
     
     String stringName;                     // cached toString() output
     final ApplicationInfo appInfo;         // information about BackupAgent's app
+    final int userId;                      // user for which backup is performed
     final int backupMode;                  // full backup / incremental / restore
     ProcessRecord app;                     // where this agent is running or null
 
     // ----- Implementation -----
 
-    BackupRecord(ApplicationInfo _appInfo, int _backupMode) {
+    BackupRecord(ApplicationInfo _appInfo, int _backupMode, int _userId) {
         appInfo = _appInfo;
         backupMode = _backupMode;
+        userId = _userId;
     }
 
     public String toString() {

@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"ಅನುಮತಿಸಿ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ಬಳಕೆದಾರರು ಪ್ರಸ್ತುತ ಈ ಸಾಧನಕ್ಕೆ ಸೈನ್ ಇನ್ ಮಾಡಿದ್ದಾರೆ USB ಡೀಬಗ್ ಮಾಡುವುದನ್ನು ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು, ಪ್ರಾಥಮಿಕ ಬಳಕೆದಾರರಿಗೆ ಬದಲಾಯಿಸಿ."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB ಪೋರ್ಟ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳಿಂದ ನಿಮ್ಮ ಸಾಧನವನ್ನು ರಕ್ಷಿಸಲು, USB ಪೋರ್ಟ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು ಯಾವುದೇ ಪರಿಕರಗಳನ್ನು ಪತ್ತೆ ಮಾಡುವುದಿಲ್ಲ. \n\n USB ಪೋರ್ಟ್ ಅನ್ನು ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದ್ದಾಗ ಮತ್ತೆ ನಿಮಗೆ ಸೂಚಿಸಲಾಗುವುದು."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
@@ -881,9 +878,9 @@
       <item quantity="one"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ಆ್ಯಪ್‌ಗಳು ನಿಮ್ಮ <xliff:g id="TYPE_5">%2$s</xliff:g> ಅನ್ನು ಬಳಸುತ್ತಿವೆ.</item>
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ಆ್ಯಪ್‌ಗಳು ನಿಮ್ಮ <xliff:g id="TYPE_5">%2$s</xliff:g> ಅನ್ನು ಬಳಸುತ್ತಿವೆ.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"ಅರ್ಥವಾಯಿತು"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"ವಿವರಗಳನ್ನು ನೋಡಿ"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"ಆ್ಯಪ್ ನಿಮ್ಮ <xliff:g id="TYPES_LIST">%s</xliff:g> ಅನ್ನು ಬಳಸುತ್ತಿದೆ"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"ಆ್ಯಪ್‌ಗಳು ನಿಮ್ಮ <xliff:g id="TYPES_LIST">%s</xliff:g> ಅನ್ನು ಬಳಸುತ್ತಿವೆ"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"ಸೆನ್ಸರ್‌ಗಳು ಆಫ್"</string>
     <string name="device_services" msgid="1191212554435440592">"ಸಾಧನ ಸೇವೆಗಳು"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"ಯಾವುದೇ ಶೀರ್ಷಿಕೆಯಿಲ್ಲ"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

@@ -55,7 +55,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         mStack = createTaskStackOnDisplay(mDisplayContent);
         mTask = createTaskInStack(mStack, 0 /* userId */);
         mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        mToken.mSkipOnParentSet = false;
+        mToken.mSkipOnParentChanged = false;
 
         mTask.addChild(mToken, 0);
     }

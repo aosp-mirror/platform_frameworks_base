@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.content.res.Resources.ID_NULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
@@ -3985,15 +3986,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SCROLL_AXIS_VERTICAL = 1 << 1;
 
     /**
-     * If a MotionEvent has CLASSIFICATION_AMBIGUOUS_GESTURE set, then certain the default
-     * long press action will be inhibited. However, to account for the possibility of incorrect
-     * classification, the default long press timeout will instead be increased for some situations
-     * by the following factor.
-     * Likewise, the touch slop for allowing long press will be increased when gesture is uncertain.
-     */
-    private static final int AMBIGUOUS_GESTURE_MULTIPLIER = 2;
-
-    /**
      * Controls the over-scroll mode for this view.
      * See {@link #overScrollBy(int, int, int, int, int, int, int, int, boolean)},
      * {@link #OVER_SCROLL_ALWAYS}, {@link #OVER_SCROLL_IF_CONTENT_SCROLLS},
@@ -5052,6 +5044,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private WeakReference<ContentCaptureSession> mContentCaptureSession;
 
+    @LayoutRes
+    private int mSourceLayoutId = ID_NULL;
+
     /**
      * Simple constructor to use when creating a view from code.
      *
@@ -5216,6 +5211,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public View(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         this(context);
+
+        mSourceLayoutId = Resources.getAttributeSetSourceResId(attrs);
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
@@ -14801,18 +14798,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             motionClassification == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE;
                     int touchSlop = mTouchSlop;
                     if (ambiguousGesture && hasPendingLongPressCallback()) {
+                        final float ambiguousMultiplier =
+                                ViewConfiguration.getAmbiguousGestureMultiplier();
                         if (!pointInView(x, y, touchSlop)) {
                             // The default action here is to cancel long press. But instead, we
                             // just extend the timeout here, in case the classification
                             // stays ambiguous.
                             removeLongPressCallback();
-                            long delay = ViewConfiguration.getLongPressTimeout()
-                                    * AMBIGUOUS_GESTURE_MULTIPLIER;
+                            long delay = (long) (ViewConfiguration.getLongPressTimeout()
+                                    * ambiguousMultiplier);
                             // Subtract the time already spent
                             delay -= event.getEventTime() - event.getDownTime();
                             checkForLongClick(delay, x, y);
                         }
-                        touchSlop *= AMBIGUOUS_GESTURE_MULTIPLIER;
+                        touchSlop *= ambiguousMultiplier;
                     }
 
                     // Be lenient about moving outside of buttons
@@ -23250,6 +23249,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mUserPaddingRightInitial = end;
                 internalSetPadding(start, top, end, bottom);
         }
+    }
+
+    /**
+     * A {@link View} can be inflated from an XML layout. For such Views this method returns the
+     * resource ID of the source layout.
+     *
+     * @return The layout resource id if this view was inflated from XML, otherwise
+     * {@link Resources#ID_NULL}.
+     */
+    @LayoutRes
+    public int getSourceLayoutResId() {
+        return mSourceLayoutId;
     }
 
     /**

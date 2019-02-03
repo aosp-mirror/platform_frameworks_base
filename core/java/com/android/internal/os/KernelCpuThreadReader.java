@@ -37,9 +37,10 @@ import java.util.function.Predicate;
  * frequency band.
  *
  * <p>Frequencies are bucketed together to reduce the amount of data created. This means that we
- * return {@link #NUM_BUCKETS} frequencies instead of the full number. Frequencies are reported as
- * the lowest frequency in that range. Frequencies are spread as evenly as possible across the
- * buckets. The buckets do not cross over the little/big frequencies reported.
+ * return less frequencies than provided by {@link ProcTimeInStateReader}. The number of
+ * frequencies is configurable by {@link #setNumBuckets}. Frequencies are reported as the lowest
+ * frequency in that range. Frequencies are spread as evenly as possible across the buckets. The
+ * buckets do not cross over the little/big frequencies reported.
  *
  * <p>N.B.: In order to bucket across little/big frequencies correctly, we assume that the {@code
  * time_in_state} file contains every little core frequency in ascending order, followed by every
@@ -97,20 +98,15 @@ public class KernelCpuThreadReader {
             DEFAULT_PROC_PATH.resolve("self/time_in_state");
 
     /**
-     * Number of frequency buckets
-     */
-    private static final int NUM_BUCKETS = 8;
-
-    /**
-     * Default predicate for what UIDs to check for when getting processes. This filters to only
-     * select UID 1000 (the {@code system} user)
-     */
-    private static final Predicate<Integer> DEFAULT_UID_PREDICATE = uid -> uid == 1000;
-
-    /**
      * Value returned when there was an error getting an integer ID value (e.g. PID, UID)
      */
     private static final int ID_ERROR = -1;
+
+    /**
+     * When checking whether to report data for a thread, we check the UID of the thread's owner
+     * against this predicate
+     */
+    private Predicate<Integer> mUidPredicate;
 
     /**
      * Where the proc filesystem is mounted
@@ -121,7 +117,7 @@ public class KernelCpuThreadReader {
      * Frequencies read from the {@code time_in_state} file. Read from {@link
      * #mProcTimeInStateReader#getCpuFrequenciesKhz()} and cast to {@code int[]}
      */
-    private final int[] mFrequenciesKhz;
+    private int[] mFrequenciesKhz;
 
     /**
      * Used to read and parse {@code time_in_state} files
@@ -131,16 +127,9 @@ public class KernelCpuThreadReader {
     /**
      * Used to sort frequencies and usage times into buckets
      */
-    private final FrequencyBucketCreator mFrequencyBucketCreator;
+    private FrequencyBucketCreator mFrequencyBucketCreator;
 
     private final Injector mInjector;
-
-    private KernelCpuThreadReader() throws IOException {
-        this(
-                DEFAULT_PROC_PATH,
-                DEFAULT_INITIAL_TIME_IN_STATE_PATH,
-                new Injector());
-    }
 
     /**
      * Create with a path where `proc` is mounted. Used primarily for testing
@@ -151,17 +140,16 @@ public class KernelCpuThreadReader {
      */
     @VisibleForTesting
     public KernelCpuThreadReader(
+            int numBuckets,
+            Predicate<Integer> uidPredicate,
             Path procPath,
             Path initialTimeInStatePath,
             Injector injector) throws IOException {
+        mUidPredicate = uidPredicate;
         mProcPath = procPath;
         mProcTimeInStateReader = new ProcTimeInStateReader(initialTimeInStatePath);
         mInjector = injector;
-
-        // Copy mProcTimeInState's frequencies and initialize bucketing
-        final long[] frequenciesKhz = mProcTimeInStateReader.getFrequenciesKhz();
-        mFrequencyBucketCreator = new FrequencyBucketCreator(frequenciesKhz, NUM_BUCKETS);
-        mFrequenciesKhz = mFrequencyBucketCreator.getBucketMinFrequencies(frequenciesKhz);
+        setNumBuckets(numBuckets);
     }
 
     /**
@@ -170,21 +158,18 @@ public class KernelCpuThreadReader {
      * @return the reader, null if an exception was thrown during creation
      */
     @Nullable
-    public static KernelCpuThreadReader create() {
+    public static KernelCpuThreadReader create(int numBuckets, Predicate<Integer> uidPredicate) {
         try {
-            return new KernelCpuThreadReader();
+            return new KernelCpuThreadReader(
+                    numBuckets,
+                    uidPredicate,
+                    DEFAULT_PROC_PATH,
+                    DEFAULT_INITIAL_TIME_IN_STATE_PATH,
+                    new Injector());
         } catch (IOException e) {
             Slog.e(TAG, "Failed to initialize KernelCpuThreadReader", e);
             return null;
         }
-    }
-
-    /**
-     * Get the per-thread CPU usage of all processes belonging to UIDs between {@code [1000, 2000)}
-     */
-    @Nullable
-    public ArrayList<ProcessCpuUsage> getProcessCpuUsageByUids() {
-        return getProcessCpuUsageByUids(DEFAULT_UID_PREDICATE);
     }
 
     /**
@@ -195,10 +180,11 @@ public class KernelCpuThreadReader {
      * approximately 500ms on a Pixel 2. Therefore, this method can be computationally expensive,
      * and should not be called more than once an hour.
      *
-     * @param uidPredicate only get usage from processes owned by UIDs that match this predicate
+     * <p>Data is only collected for UIDs passing the predicate supplied in {@link
+     * #setUidPredicate}.
      */
     @Nullable
-    public ArrayList<ProcessCpuUsage> getProcessCpuUsageByUids(Predicate<Integer> uidPredicate) {
+    public ArrayList<ProcessCpuUsage> getProcessCpuUsageByUids() {
         if (DEBUG) {
             Slog.d(TAG, "Reading CPU thread usages for processes owned by UIDs");
         }
@@ -213,7 +199,7 @@ public class KernelCpuThreadReader {
                 if (uid == ID_ERROR || processId == ID_ERROR) {
                     continue;
                 }
-                if (!uidPredicate.test(uid)) {
+                if (!mUidPredicate.test(uid)) {
                     continue;
                 }
 
@@ -247,10 +233,7 @@ public class KernelCpuThreadReader {
      */
     @Nullable
     public ProcessCpuUsage getCurrentProcessCpuUsage() {
-        return getProcessCpuUsage(
-                mProcPath.resolve("self"),
-                mInjector.myPid(),
-                mInjector.myUid());
+        return getProcessCpuUsage(mProcPath.resolve("self"), mInjector.myPid(), mInjector.myUid());
     }
 
     /**
@@ -297,6 +280,31 @@ public class KernelCpuThreadReader {
                 getProcessName(processPath),
                 uid,
                 threadCpuUsages);
+    }
+
+    /**
+     * Set the number of frequency buckets to use
+     */
+    void setNumBuckets(int numBuckets) {
+        if (numBuckets < 1) {
+            Slog.w(TAG, "Number of buckets must be at least 1, but was " + numBuckets);
+            return;
+        }
+        // If `numBuckets` hasn't changed since the last set, do nothing
+        if (mFrequenciesKhz != null && mFrequenciesKhz.length == numBuckets) {
+            return;
+        }
+        mFrequencyBucketCreator = new FrequencyBucketCreator(
+                mProcTimeInStateReader.getFrequenciesKhz(), numBuckets);
+        mFrequenciesKhz = mFrequencyBucketCreator.getBucketMinFrequencies(
+                mProcTimeInStateReader.getFrequenciesKhz());
+    }
+
+    /**
+     * Set the UID predicate for {@link #getProcessCpuUsageByUids}
+     */
+    void setUidPredicate(Predicate<Integer> uidPredicate) {
+        mUidPredicate = uidPredicate;
     }
 
     /**

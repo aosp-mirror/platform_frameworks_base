@@ -953,6 +953,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nikoli"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Nimate dovoljenja za odpiranje te strani."</string>
     <string name="text_copied" msgid="4985729524670131385">"Besedilo, kopirano v odložišče."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Več"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Meni+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1172,7 +1174,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Urejanje z aplikacijo"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Urejanje z aplikacijo %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Urejanje"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Skupna raba z aplikacijo"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Deljenje z drugimi"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Skupna raba z aplikacijo %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Skupna raba"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Pošiljanje z aplikacijo"</string>
@@ -1289,10 +1291,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dotaknite se, če si želite ogledati vsa omrežja"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Vzpostavi povezavo"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Vsa omrežja"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Na voljo je omrežje Wi-Fi po predlogu aplikacije <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Želite vzpostaviti povezavo z omrežji, ki jih predlaga aplikacija <xliff:g id="NAME">%s</xliff:g>?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Povezava Wi‑Fi se bo samodejno vklopila"</string>
@@ -1306,8 +1306,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Omrežje Wi-Fi nima dostopa do interneta"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dotaknite se za možnosti"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Povezava je vzpostavljena"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Spremembe nastavitev dostopne točke"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pas dostopne točke je spremenjen."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ta naprava ne podpira prednostne nastavitve samo za 5-GHz pas. Namesto tega bo ta naprava uporabljala 5-GHz pas, ko bo na voljo."</string>
@@ -1392,14 +1391,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje napak prek USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Dotaknite se, če želite izklopiti odpravljanje napak prek USB-ja"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Izberite, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"V vratih USB je tekočina ali umazanija"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Vrata USB so samodejno onemogočena. Dotaknite se, če želite izvedeti več."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Vrata USB so varna za uporabo"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon ne zaznava več tekočine ali umazanije."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Zajemanje poročila o napakah …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite poslati poročilo o napakah?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Pošiljanje poročila o napakah …"</string>
@@ -1438,6 +1433,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Nastavi"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izvrzite"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Raziščite"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Ni shrambe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Znova vstavite napravo"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Premikanje aplikacije <xliff:g id="NAME">%s</xliff:g>"</string>

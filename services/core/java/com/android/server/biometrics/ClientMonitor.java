@@ -36,7 +36,7 @@ import java.util.NoSuchElementException;
  * the current client.  Subclasses are responsible for coordinating the interaction with
  * the biometric's HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
-public abstract class ClientMonitor implements IBinder.DeathRecipient {
+public abstract class ClientMonitor extends LoggableMonitor implements IBinder.DeathRecipient {
     protected static final int ERROR_ESRCH = 3; // Likely HAL is dead. See errno.h.
     protected static final boolean DEBUG = BiometricServiceBase.DEBUG;
     private static final AudioAttributes FINGERPRINT_SONFICATION_ATTRIBUTES =
@@ -157,6 +157,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      * @return true if client should be removed
      */
     public boolean onAcquired(int acquiredInfo, int vendorCode) {
+        super.logOnAcquired(acquiredInfo, vendorCode, getTargetUserId());
         try {
             if (mListener != null) {
                 mListener.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
@@ -180,6 +181,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      * @return true if client should be removed
      */
     public boolean onError(long deviceId, int error, int vendorCode) {
+        super.logOnError(error, vendorCode, getTargetUserId());
         try {
             if (mListener != null) {
                 mListener.onError(deviceId, error, vendorCode, getCookie());

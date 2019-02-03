@@ -20,7 +20,6 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.ActivityView;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Outline;
@@ -28,7 +27,9 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.StatsLog;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -54,6 +55,9 @@ import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
@@ -241,16 +245,20 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             // Previously expanded, notify that this bubble is no longer expanded
             notifyExpansionChanged(mExpandedBubble, false /* expanded */);
         }
+        BubbleView prevBubble = mExpandedBubble;
         mExpandedBubble = bubbleToExpand;
         if (!mIsExpanded) {
             // If we weren't previously expanded we should animate open.
             animateExpansion(true /* expand */);
+            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
         } else {
             // Otherwise just update the views
             // TODO: probably animate / page to expanded one
             updateExpandedBubble();
             updatePointerPosition();
             requestUpdate();
+            logBubbleEvent(prevBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
         }
         mExpandedBubble.getEntry().setShowInShadeWhenBubble(false);
         notifyExpansionChanged(mExpandedBubble, true /* expanded */);
@@ -279,6 +287,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         ViewClippingUtil.setClippingDeactivated(bubbleView, true, mClippingParameters);
         requestUpdate();
+        logBubbleEvent(bubbleView, StatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
     }
 
     /**
@@ -287,20 +296,24 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     public void removeBubble(BubbleView bubbleView) {
         int removedIndex = mBubbleContainer.indexOfChild(bubbleView);
         mBubbleContainer.removeView(bubbleView);
-        boolean wasExpanded = mIsExpanded;
         int bubbleCount = mBubbleContainer.getChildCount();
-        if (mIsExpanded && bubbleView.equals(mExpandedBubble) && bubbleCount > 0) {
+        if (bubbleCount == 0) {
+            // If no bubbles remain, collapse the entire stack.
+            collapseStack();
+            return;
+        } else if (bubbleView.equals(mExpandedBubble)) {
+            // Was the current bubble just removed?
             // If we have other bubbles and are expanded go to the next one or previous
             // if the bubble removed was last
             int nextIndex = bubbleCount > removedIndex ? removedIndex : bubbleCount - 1;
             BubbleView expandedBubble = (BubbleView) mBubbleContainer.getChildAt(nextIndex);
-            setExpandedBubble(expandedBubble);
-            requestUpdate();
+            if (mIsExpanded) {
+                setExpandedBubble(expandedBubble);
+            } else {
+                mExpandedBubble = null;
+            }
         }
-        mIsExpanded = wasExpanded && mBubbleContainer.getChildCount() > 0;
-        if (wasExpanded != mIsExpanded) {
-            notifyExpansionChanged(mExpandedBubble, mIsExpanded);
-        }
+        logBubbleEvent(bubbleView, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
     }
 
     /**
@@ -309,6 +322,8 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     public void stackDismissed() {
         collapseStack();
         mBubbleContainer.removeAllViews();
+        logBubbleEvent(null /* no bubble associated with bubble stack dismiss */,
+                StatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
     }
 
     /**
@@ -324,8 +339,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         if (updatePosition && !mIsExpanded) {
             // If alerting it gets promoted to top of the stack.
             if (mBubbleContainer.indexOfChild(bubbleView) != 0) {
-                mBubbleContainer.removeViewAndThen(bubbleView,
-                        () -> mBubbleContainer.addView(bubbleView, 0));
+                mBubbleContainer.moveViewTo(bubbleView, 0);
             }
             requestUpdate();
         }
@@ -333,6 +347,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             entry.setShowInShadeWhenBubble(false);
             requestUpdate();
         }
+        logBubbleEvent(bubbleView, StatsLog.BUBBLE_UICHANGED__ACTION__UPDATED);
     }
 
     /**
@@ -368,7 +383,14 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             // TODO: Save opened bubble & move it to top of stack
             animateExpansion(false /* shouldExpand */);
             notifyExpansionChanged(mExpandedBubble, mIsExpanded);
+            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
         }
+    }
+
+    void collapseStack(Runnable endRunnable) {
+        collapseStack();
+        // TODO - use the runnable at end of animation
+        endRunnable.run();
     }
 
     /**
@@ -378,6 +400,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         if (!mIsExpanded) {
             mExpandedBubble = getTopBubble();
             setExpandedBubble(mExpandedBubble);
+            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
         }
     }
 
@@ -570,6 +593,9 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
                         .setStiffness(SpringForce.STIFFNESS_LOW)
                         .setDampingRatio(SPRING_DAMPING_RATIO),
                 /* destination */ null);
+
+        logBubbleEvent(null /* no bubble associated with bubble stack move */,
+                StatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
     }
 
     /**
@@ -629,6 +655,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             return;
         }
 
+        mExpandedViewContainer.setEntry(mExpandedBubble.getEntry(), this);
         if (mExpandedBubble.hasAppOverlayIntent()) {
             // Bubble with activity view expanded state
             ActivityView expandedView = mExpandedBubble.getActivityView();
@@ -636,8 +663,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             expandedView.setLayoutParams(new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, mExpandedBubbleHeight));
 
-            final PendingIntent intent = mExpandedBubble.getAppOverlayIntent();
-            mExpandedViewContainer.setHeaderText(intent.getIntent().getComponent().toShortString());
             mExpandedViewContainer.setExpandedView(expandedView);
         } else {
             // Bubble with notification view expanded state
@@ -651,8 +676,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             } else {
                 mExpandedViewContainer.setExpandedView(null);
             }
-            // Bubble with notification as expanded state doesn't need a header / title
-            mExpandedViewContainer.setHeaderText(null);
         }
     }
 
@@ -731,5 +754,73 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         viewState.inShelf = true;
         viewState.headsUpIsVisible = false;
         viewState.applyToView(view);
+    }
+
+    /**
+     * @return the number of bubbles in the stack view.
+     */
+    private int getBubbleCount() {
+        return mBubbleContainer.getChildCount();
+    }
+
+    /**
+     * Finds the bubble index within the stack.
+     *
+     * @param bubbleView the view of the bubble.
+     * @return the index of the bubble view within the bubble stack. The range of the position
+     * is between 0 and the bubble count minus 1.
+     */
+    private int getBubbleIndex(BubbleView bubbleView) {
+        return mBubbleContainer.indexOfChild(bubbleView);
+    }
+
+    /**
+     * @return the normalized x-axis position of the bubble stack rounded to 4 decimal places.
+     */
+    private float getNormalizedXPosition() {
+        return new BigDecimal(getPosition().x / mDisplaySize.x)
+                .setScale(4, RoundingMode.CEILING.HALF_UP)
+                .floatValue();
+    }
+
+    /**
+     * @return the normalized y-axis position of the bubble stack rounded to 4 decimal places.
+     */
+    private float getNormalizedYPosition() {
+        return new BigDecimal(getPosition().y / mDisplaySize.y)
+                .setScale(4, RoundingMode.CEILING.HALF_UP)
+                .floatValue();
+    }
+
+    /**
+     * Logs the bubble UI event.
+     *
+     * @param bubble the bubble that is being interacted on. Null value indicates that
+     *               the user interaction is not specific to one bubble.
+     * @param action the user interaction enum.
+     */
+    private void logBubbleEvent(@Nullable BubbleView bubble, int action) {
+        if (bubble == null) {
+            StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
+                    null /* package name */,
+                    null /* notification channel */,
+                    0 /* notification ID */,
+                    0 /* bubble position */,
+                    getBubbleCount(),
+                    action,
+                    getNormalizedXPosition(),
+                    getNormalizedYPosition());
+        } else {
+            StatusBarNotification notification = bubble.getEntry().notification;
+            StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
+                    notification.getPackageName(),
+                    notification.getNotification().getChannelId(),
+                    notification.getId(),
+                    getBubbleIndex(bubble),
+                    getBubbleCount(),
+                    action,
+                    getNormalizedXPosition(),
+                    getNormalizedYPosition());
+        }
     }
 }

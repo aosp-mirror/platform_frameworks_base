@@ -161,23 +161,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     final protected void setParent(WindowContainer<WindowContainer> parent) {
         mParent = parent;
-        // Removing parent usually means that we've detached this entity to destroy it or to attach
-        // to another parent. In both cases we don't need to update the configuration now.
-        if (mParent != null) {
-            // Update full configuration of this container and all its children.
-            onConfigurationChanged(mParent.getConfiguration());
-            // Update merged override configuration of this container and all its children.
-            onMergedOverrideConfigurationChanged();
-        }
-
-        onParentSet();
+        onParentChanged();
     }
 
     /**
      * Callback that is triggered when @link WindowContainer#setParent(WindowContainer)} was called.
      * Supposed to be overridden and contain actions that should be executed after parent was set.
      */
-    void onParentSet() {
+    @Override
+    void onParentChanged() {
+        super.onParentChanged();
         if (mParent == null) {
             return;
         }

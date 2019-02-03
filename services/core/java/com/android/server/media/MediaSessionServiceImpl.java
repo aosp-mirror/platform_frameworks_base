@@ -42,6 +42,8 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
+import android.media.MediaController2;
+import android.media.Session2CommandGroup;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
@@ -57,6 +59,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
@@ -1011,50 +1014,17 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 if (DEBUG) {
                     Log.d(TAG, "Session2 is created " + sessionToken);
                 }
-                if (pid != sessionToken.getPid()) {
-                    throw new SecurityException("Unexpected Session2Token's PID, expected=" + pid
-                            + " but actually=" + sessionToken.getPid());
-                }
                 if (uid != sessionToken.getUid()) {
                     throw new SecurityException("Unexpected Session2Token's UID, expected=" + uid
                             + " but actually=" + sessionToken.getUid());
                 }
-                int userId = UserHandle.getUserId(uid);
-                List<Session2Token> session2Tokens = mSession2TokensPerUser.get(userId);
-                if (session2Tokens.contains(sessionToken)) {
-                    if (DEBUG) {
-                        Log.d(TAG, "notifySession2Created(): Ignoring already existing token "
-                                + sessionToken);
-                    }
-                    return;
-                }
-                session2Tokens.add(sessionToken);
-                pushSession2TokensChangedLocked(userId);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public void notifySession2Destroyed(Session2Token sessionToken) throws RemoteException {
-            final int pid = Binder.getCallingPid();
-            final int uid = Binder.getCallingUid();
-            final long token = Binder.clearCallingIdentity();
-            try {
-                if (DEBUG) {
-                    Log.d(TAG, "Session2 is destroyed " + sessionToken);
-                }
-                if (pid != sessionToken.getPid()) {
-                    throw new SecurityException("Unexpected Session2Token's PID, expected=" + pid
-                            + " but actually=" + sessionToken.getPid());
-                }
-                if (uid != sessionToken.getUid()) {
-                    throw new SecurityException("Unexpected Session2Token's UID, expected=" + uid
-                            + " but actually=" + sessionToken.getUid());
-                }
-                int userId = UserHandle.getUserId(uid);
-                mSession2TokensPerUser.get(userId).remove(sessionToken);
-                pushSession2TokensChangedLocked(userId);
+                Controller2Callback callback = new Controller2Callback(sessionToken);
+                // Note: It's safe not to keep controller here because it wouldn't be GC'ed until
+                //       it's closed.
+                // TODO: Keep controller as well for better readability
+                //       because the GC behavior isn't straightforward.
+                MediaController2 controller = new MediaController2(mContext, sessionToken,
+                        new HandlerExecutor(mHandler), callback);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2233,6 +2203,32 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             }
             removeMessages(MSG_SESSIONS_CHANGED, userIdInteger);
             obtainMessage(MSG_SESSIONS_CHANGED, userIdInteger).sendToTarget();
+        }
+    }
+
+    private class Controller2Callback extends MediaController2.ControllerCallback {
+        private final Session2Token mToken;
+
+        Controller2Callback(Session2Token token) {
+            mToken = token;
+        }
+
+        @Override
+        public void onConnected(MediaController2 controller, Session2CommandGroup allowedCommands) {
+            synchronized (mLock) {
+                int userId = UserHandle.getUserId(mToken.getUid());
+                mSession2TokensPerUser.get(userId).add(mToken);
+                pushSession2TokensChangedLocked(userId);
+            }
+        }
+
+        @Override
+        public void onDisconnected(MediaController2 controller) {
+            synchronized (mLock) {
+                int userId = UserHandle.getUserId(mToken.getUid());
+                mSession2TokensPerUser.get(userId).remove(mToken);
+                pushSession2TokensChangedLocked(userId);
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ class PrivacyDialogBuilderTest : SysuiTestCase() {
                 "Bar", TEST_UID, context))
         val bar3 = PrivacyItem(Privacy.TYPE_LOCATION, PrivacyApplication(
                 "Bar", TEST_UID, context))
-        val foo0 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
+        val foo0 = PrivacyItem(Privacy.TYPE_MICROPHONE, PrivacyApplication(
                 "Foo", TEST_UID, context))
         val baz1 = PrivacyItem(Privacy.TYPE_CAMERA, PrivacyApplication(
                 "Baz", TEST_UID, context))
@@ -50,10 +50,11 @@ class PrivacyDialogBuilderTest : SysuiTestCase() {
         assertEquals(3, list.size)
         val appsList = list.map { it.first }
         val typesList = list.map { it.second }
+        // List is sorted by number of types and then by types
         assertEquals(listOf("Bar", "Baz", "Foo"), appsList.map { it.packageName })
         assertEquals(listOf(Privacy.TYPE_CAMERA, Privacy.TYPE_LOCATION), typesList[0])
         assertEquals(listOf(Privacy.TYPE_CAMERA), typesList[1])
-        assertEquals(listOf(Privacy.TYPE_CAMERA), typesList[2])
+        assertEquals(listOf(Privacy.TYPE_MICROPHONE), typesList[2])
     }
 
     @Test

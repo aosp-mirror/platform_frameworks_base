@@ -1768,7 +1768,7 @@ public class Activity extends ContextThemeWrapper
     protected void onResume() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         dispatchActivityResumed();
-        mActivityTransitionState.onResume(this, isTopOfTask());
+        mActivityTransitionState.onResume(this);
         enableAutofillCompatibilityIfNeeded();
         if (mAutoFillResetNeeded) {
             if (!mAutoFillIgnoreFirstResumePause) {

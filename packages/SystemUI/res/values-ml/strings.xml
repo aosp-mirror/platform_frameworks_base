@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ഡീബഗ്ഗിംഗ് അനുവദിക്കണോ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ഈ കമ്പ്യൂട്ടറിന്റെ RSA കീ ഫിംഗർപ്രിന്റ് ഇതാണ്:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ഈ കമ്പ്യൂട്ടറിൽ നിന്ന് എല്ലായ്പ്പോഴും അനുവദിക്കുക"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"അനുവദിക്കുക"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ഡീബഗ്ഗിംഗ് അനുവദനീയമല്ല"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ഉപകരണത്തിൽ ഇപ്പോൾ സൈൻ ഇൻ ചെയ്‌തിരിക്കുന്ന ഉപയോക്താവിന് USB ഡീബഗ്ഗിംഗ് ഓണാക്കാനാകില്ല. ഈ ഫീച്ചർ ഉപയോഗിക്കാൻ പ്രാഥമിക ഉപയോക്താവിലേക്ക് മാറുക."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB പോർട്ട് പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"ദ്രാവകത്തിൽ നിന്നോ പൊടിയിൽ നിന്നോ നിങ്ങളുടെ ഉപകരണത്തെ പരിരക്ഷിക്കാനായി USB പോർട്ട് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നതിനാൽ അത് ആക്‌സസറികളൊന്നും തിരിച്ചറിയില്ല.\n\n USB പോർട്ട് സുരക്ഷിതമായി വീണ്ടും ഉപയോഗിക്കാനാകുമ്പോൾ നിങ്ങളെ അറിയിക്കും."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ സൂം ചെയ്യുക"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ വലിച്ചുനീട്ടുക"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"സ്‌ക്രീൻഷോട്ട്"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> ആപ്പുകൾ നിങ്ങളുടെ <xliff:g id="TYPE_5">%2$s</xliff:g> ഉപയോഗിക്കുന്നു.</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> ആപ്പ് നിങ്ങളുടെ <xliff:g id="TYPE_1">%2$s</xliff:g> ഉപയോഗിക്കുന്നു.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"മനസ്സിലായി"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"വിശദാംശങ്ങൾ കാണുക"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"നിങ്ങളുടെ <xliff:g id="TYPES_LIST">%s</xliff:g> ഉപയോഗിക്കുന്ന ആപ്പ്"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"നിങ്ങളുടെ <xliff:g id="TYPES_LIST">%s</xliff:g> ഉപയോഗിക്കുന്ന ആപ്പുകൾ"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"സെൻസറുകൾ ഓഫാണ്"</string>
     <string name="device_services" msgid="1191212554435440592">"ഉപകരണ സേവനങ്ങള്‍"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"പേരില്ല"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

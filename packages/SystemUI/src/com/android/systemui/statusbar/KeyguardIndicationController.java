@@ -486,7 +486,7 @@ public class KeyguardIndicationController implements StateListener {
             if (msg.what == MSG_HIDE_TRANSIENT) {
                 hideTransientIndication();
             } else if (msg.what == MSG_CLEAR_BIOMETRIC_MSG) {
-                mLockIcon.setTransientFpError(false);
+                mLockIcon.setTransientBiometricsError(false);
             }
         }
     };
@@ -579,7 +579,7 @@ public class KeyguardIndicationController implements StateListener {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         errorColorState);
             } else if (updateMonitor.isScreenOn()) {
-                mLockIcon.setTransientFpError(true);
+                mLockIcon.setTransientBiometricsError(true);
                 showTransientIndication(helpString, errorColorState);
                 hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
                 mHandler.removeMessages(MSG_CLEAR_BIOMETRIC_MSG);

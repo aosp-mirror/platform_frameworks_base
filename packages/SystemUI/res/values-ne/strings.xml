@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डिबग गर्नको लागि अनुमति दिने हो?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"कम्प्युटरको RSA कुञ्जी औंलाछाप:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"यो कम्प्युटरबाट सधैँ अनुमति दिनुहोस्"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डिबग गर्न अनुमति छैन"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"हाल यस यन्त्रमा साइन इन हुनुभएको प्रयोगकर्ताले USB डिबग सक्रिय गर्न सक्नुहुन्न। यो सुविधाको प्रयोग गर्न प्राथमिक प्रयोगकर्तामा बदल्नुहोस्‌।"</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB पोर्ट असक्षम पारियो"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"तपाईंको यन्त्रलाई तरल पदार्थ वा धुलोबाट जोगाउन यसको USB पोर्ट असक्षम पारिएको छ र यसले कुनै पनि सहायक उपकरणहरू पहिचान गर्ने छैन।\n\nउक्त USB पोर्ट प्रयोग गर्न सुरक्षित हुँदा तपाईंलाई यसबारे सूचित गरिने छ।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्क्रिन भर्न जुम गर्नुहोस्"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"स्क्रिनसट"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> अनुप्रयोगहरूले तपाईंको <xliff:g id="TYPE_5">%2$s</xliff:g> प्रयोग गरिरहेका छन्।</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> अनुप्रयोगले तपाईंको <xliff:g id="TYPE_1">%2$s</xliff:g> प्रयोग गरिरहेको छ।</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"बुझेँ"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"विवरणहरू हेर्नुहोस्"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"तपाईंको <xliff:g id="TYPES_LIST">%s</xliff:g> प्रयोग गरिरहेका अनुप्रयोग"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"तपाईंको <xliff:g id="TYPES_LIST">%s</xliff:g> प्रयोग गरिरहेका अनुप्रयोगहरू"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"सेन्सरहरू निष्क्रिय छन्"</string>
     <string name="device_services" msgid="1191212554435440592">"यन्त्रका सेवाहरू"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"शीर्षक छैन"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

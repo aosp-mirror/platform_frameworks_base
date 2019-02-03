@@ -21,6 +21,10 @@ import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.IApexService;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
@@ -29,7 +33,10 @@ import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -40,9 +47,13 @@ import android.util.apk.ApkSignatureVerifier;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -53,14 +64,16 @@ public class StagingManager {
 
     private static final String TAG = "StagingManager";
 
+    private final PackageInstallerService mPi;
     private final PackageManagerService mPm;
     private final Handler mBgHandler;
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
-    StagingManager(PackageManagerService pm) {
+    StagingManager(PackageManagerService pm, PackageInstallerService pi) {
         mPm = pm;
+        mPi = pi;
         mBgHandler = BackgroundThread.getHandler();
     }
 
@@ -85,7 +98,7 @@ public class StagingManager {
         return new ParceledListSlice<>(result);
     }
 
-    private static boolean validateApexSignatureLocked(String apexPath, String packageName) {
+    private static boolean validateApexSignature(String apexPath, String packageName) {
         final SigningDetails signingDetails;
         try {
             signingDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
@@ -173,6 +186,13 @@ public class StagingManager {
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
         boolean success = true;
 
+        if (!sessionContainsApex(session)) {
+            // TODO: Decide whether we want to fail fast by detecting signature mismatches for APKs,
+            // right away.
+            session.setStagedSessionReady();
+            return;
+        }
+
         final ApexInfoList apexInfoList = new ApexInfoList();
         // APEX checks. For single-package sessions, check if they contain an APEX. For
         // multi-package sessions, find all the child sessions that contain an APEX.
@@ -199,16 +219,13 @@ public class StagingManager {
                     "APEX staging failed, check logcat messages from apexd for more details.");
         }
 
-        if (apexInfoList.apexInfos.length > 0) {
+        if (apexInfoList.apexInfos != null && apexInfoList.apexInfos.length > 0) {
             // For APEXes, we validate the signature here before we mark the session as ready,
             // so we fail the session early if there is a signature mismatch. For APKs, the
             // signature verification will be done by the package manager at the point at which
             // it applies the staged install.
-            //
-            // TODO: Decide whether we want to fail fast by detecting signature mismatches for APKs,
-            // right away.
             for (ApexInfo apexPackage : apexInfoList.apexInfos) {
-                if (!validateApexSignatureLocked(apexPackage.packagePath,
+                if (!validateApexSignature(apexPackage.packagePath,
                         apexPackage.packageName)) {
                     session.setStagedSessionFailed(SessionInfo.VERIFICATION_FAILED,
                             "APK-container signature verification failed for package "
@@ -229,35 +246,182 @@ public class StagingManager {
         }
     }
 
+    private boolean sessionContainsApex(@NonNull PackageInstallerSession session) {
+        if (!session.isMultiPackage()) {
+            return isApexSession(session);
+        }
+        synchronized (mStagedSessions) {
+            return !(Arrays.stream(session.getChildSessionIds())
+                    // Retrieve cached sessions matching ids.
+                    .mapToObj(i -> mStagedSessions.get(i))
+                    // Filter only the ones containing APEX.
+                    .filter(childSession -> isApexSession(childSession))
+                    .collect(Collectors.toList())
+                    .isEmpty());
+        }
+    }
+
     private void resumeSession(@NonNull PackageInstallerSession session) {
-        // Check with apexservice whether the apex
-        // packages have been activated.
-        final IApexService apex = IApexService.Stub.asInterface(
-                ServiceManager.getService("apexservice"));
-        ApexSessionInfo apexSessionInfo;
-        try {
-            apexSessionInfo = apex.getStagedSessionInfo(session.sessionId);
-        } catch (RemoteException re) {
-            Slog.e(TAG, "Unable to contact apexservice", re);
-            // TODO should we retry here? Mark the session as failed?
+        if (sessionContainsApex(session)) {
+            // Check with apexservice whether the apex
+            // packages have been activated.
+            final IApexService apex = IApexService.Stub.asInterface(
+                    ServiceManager.getService("apexservice"));
+            ApexSessionInfo apexSessionInfo;
+            try {
+                apexSessionInfo = apex.getStagedSessionInfo(session.sessionId);
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to contact apexservice", re);
+                // TODO should we retry here? Mark the session as failed?
+                return;
+            }
+            if (apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown) {
+                session.setStagedSessionFailed(SessionInfo.ACTIVATION_FAILED,
+                        "APEX activation failed. Check logcat messages from apexd for "
+                                + "more information.");
+                return;
+            }
+            if (apexSessionInfo.isVerified) {
+                // Session has been previously submitted to apexd, but didn't complete all the
+                // pre-reboot verification, perhaps because the device rebooted in the meantime.
+                // Greedily re-trigger the pre-reboot verification.
+                Slog.d(TAG, "Found pending staged session " + session.sessionId + " still to be "
+                        + "verified, resuming pre-reboot verification");
+                mBgHandler.post(() -> preRebootVerification(session));
+                return;
+            }
+            if (!apexSessionInfo.isActivated) {
+                // In all the remaining cases apexd will try to apply the session again at next
+                // boot. Nothing to do here for now.
+                Slog.w(TAG, "Staged session " + session.sessionId + " scheduled to be applied "
+                        + "at boot didn't activate nor fail. This usually means that apexd will "
+                        + "retry at next reboot.");
+                return;
+            }
+        }
+        // The APEX part of the session is activated, proceed with the installation of APKs.
+        if (!installApksInSession(session)) {
+            session.setStagedSessionFailed(SessionInfo.ACTIVATION_FAILED,
+                    "APK installation for staged session " + session.sessionId + " failed.");
             return;
         }
-        if (apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown) {
-            session.setStagedSessionFailed(SessionInfo.ACTIVATION_FAILED,
-                    "APEX activation failed. Check logcat messages from apexd for "
-                                  + "more information.");
+        session.setStagedSessionApplied();
+    }
+
+    private String findFirstAPKInDir(File stageDir) {
+        if (stageDir != null && stageDir.exists()) {
+            for (File file : stageDir.listFiles()) {
+                if (file.getAbsolutePath().toLowerCase().endsWith(".apk")) {
+                    return file.getAbsolutePath();
+                }
+            }
         }
-        if (apexSessionInfo.isVerified) {
-            // Session has been previously submitted to apexd, but didn't complete all the
-            // pre-reboot verification, perhaps because the device rebooted in the meantime.
-            // Greedily re-trigger the pre-reboot verification.
-            mBgHandler.post(() -> preRebootVerification(session));
+        return null;
+    }
+
+    private PackageInstallerSession createAndWriteApkSession(
+            @NonNull PackageInstallerSession originalSession) {
+        // TODO(b/123629153): support split APKs.
+        if (originalSession.stageDir == null) {
+            Slog.wtf(TAG, "Attempting to install a staged APK session with no staging dir");
+            return null;
         }
-        if (apexSessionInfo.isActivated) {
-            session.setStagedSessionApplied();
-            // TODO(b/118865310) if multi-package proceed with the installation of APKs.
+        String apkFilePath = findFirstAPKInDir(originalSession.stageDir);
+        if (apkFilePath == null) {
+            Slog.w(TAG, "Can't find staged APK in " + originalSession.stageDir.getAbsolutePath());
+            return null;
         }
-        // In every other case apexd will retry to apply the session at next boot.
+        File apkFile = new File(apkFilePath);
+
+        PackageInstaller.SessionParams params = originalSession.params.copy();
+        params.isStaged = false;
+        int apkSessionId = mPi.createSession(
+                params, originalSession.getInstallerPackageName(), originalSession.userId);
+        PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
+
+        try {
+            apkSession.open();
+            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
+                    ParcelFileDescriptor.MODE_READ_ONLY);
+            long sizeBytes = pfd.getStatSize();
+            if (sizeBytes < 0) {
+                Slog.e(TAG, "Unable to get size of: " + apkFilePath);
+                return null;
+            }
+            apkSession.write(apkFile.getName(), 0, sizeBytes, pfd);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failure to install APK staged session " + originalSession.sessionId, e);
+            return null;
+        }
+        return apkSession;
+    }
+
+    private boolean commitApkSession(@NonNull PackageInstallerSession apkSession,
+                                     int originalSessionId) {
+        final LocalIntentReceiver receiver = new LocalIntentReceiver();
+        apkSession.commit(receiver.getIntentSender(), false);
+        final Intent result = receiver.getResult();
+        final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                PackageInstaller.STATUS_FAILURE);
+        if (status == PackageInstaller.STATUS_SUCCESS) {
+            return true;
+        }
+        Slog.e(TAG, "Failure to install APK staged session " + originalSessionId + " ["
+                + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
+        return false;
+    }
+
+    private boolean installApksInSession(@NonNull PackageInstallerSession session) {
+        if (!session.isMultiPackage() && !isApexSession(session)) {
+            // APK single-packaged staged session. Do a regular install.
+            PackageInstallerSession apkSession = createAndWriteApkSession(session);
+            if (apkSession == null) {
+                return false;
+            }
+            return commitApkSession(apkSession, session.sessionId);
+        } else if (session.isMultiPackage()) {
+            // For multi-package staged sessions containing APKs, we identify which child sessions
+            // contain an APK, and with those then create a new multi-package group of sessions,
+            // carrying over all the session parameters and unmarking them as staged. On commit the
+            // sessions will be installed atomically.
+            List<PackageInstallerSession> childSessions;
+            synchronized (mStagedSessions) {
+                childSessions =
+                        Arrays.stream(session.getChildSessionIds())
+                                // Retrieve cached sessions matching ids.
+                                .mapToObj(i -> mStagedSessions.get(i))
+                                // Filter only the ones containing APKs.s
+                                .filter(childSession -> !isApexSession(childSession))
+                                .collect(Collectors.toList());
+            }
+            if (childSessions.isEmpty()) {
+                // APEX-only multi-package staged session, nothing to do.
+                return true;
+            }
+            PackageInstaller.SessionParams params = session.params.copy();
+            params.isStaged = false;
+            int apkParentSessionId = mPi.createSession(
+                    params, session.getInstallerPackageName(), session.userId);
+            PackageInstallerSession apkParentSession = mPi.getSession(apkParentSessionId);
+            try {
+                apkParentSession.open();
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to prepare multi-package session for staged session "
+                        + session.sessionId);
+                return false;
+            }
+
+            for (PackageInstallerSession sessionToClone : childSessions) {
+                PackageInstallerSession apkChildSession = createAndWriteApkSession(sessionToClone);
+                if (apkChildSession == null) {
+                    return false;
+                }
+                apkParentSession.addChildSessionId(apkChildSession.sessionId);
+            }
+            return commitApkSession(apkParentSession, session.sessionId);
+        }
+        // APEX single-package staged session, nothing to do.
+        return true;
     }
 
     void commitSession(@NonNull PackageInstallerSession session) {
@@ -336,9 +500,36 @@ public class StagingManager {
         } else {
             // Session had already being marked ready. Start the checks to verify if there is any
             // follow-up work.
-            // TODO(b/118865310): should this be synchronous to ensure it completes before
-            //                    systemReady() finishes?
-            mBgHandler.post(() -> resumeSession(session));
+            resumeSession(session);
+        }
+    }
+
+    private static class LocalIntentReceiver {
+        private final LinkedBlockingQueue<Intent> mResult = new LinkedBlockingQueue<>();
+
+        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+            @Override
+            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+                             IIntentReceiver finishedReceiver, String requiredPermission,
+                             Bundle options) {
+                try {
+                    mResult.offer(intent, 5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        public IntentSender getIntentSender() {
+            return new IntentSender((IIntentSender) mLocalSender);
+        }
+
+        public Intent getResult() {
+            try {
+                return mResult.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

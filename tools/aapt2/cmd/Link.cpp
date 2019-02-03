@@ -59,6 +59,7 @@
 #include "link/ManifestFixer.h"
 #include "link/NoDefaultResourceRemover.h"
 #include "link/ReferenceLinker.h"
+#include "link/ResourceExcluder.h"
 #include "link/TableMerger.h"
 #include "link/XmlCompatVersioner.h"
 #include "optimize/ResourceDeduper.h"
@@ -1824,6 +1825,29 @@ class Linker {
 
       VersionCollapser collapser;
       if (!collapser.Consume(context_, &final_table_)) {
+        return 1;
+      }
+    }
+
+    if (!options_.exclude_configs_.empty()) {
+      std::vector<ConfigDescription> excluded_configs;
+
+      for (auto& config_string : options_.exclude_configs_) {
+        ConfigDescription config_description;
+
+        if (!ConfigDescription::Parse(config_string, &config_description)) {
+          context_->GetDiagnostics()->Error(DiagMessage()
+                                                << "failed to parse --excluded-configs "
+                                                << config_string);
+          return 1;
+        }
+
+        excluded_configs.push_back(config_description);
+      }
+
+      ResourceExcluder excluder(excluded_configs);
+      if (!excluder.Consume(context_, &final_table_)) {
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed excluding configurations");
         return 1;
       }
     }

@@ -17,19 +17,19 @@
 */
 -->
 <com.android.internal.widget.ResolverDrawerLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:maxWidth="@dimen/resolver_max_width"
-        android:maxCollapsedHeight="288dp"
-        android:maxCollapsedHeightSmall="56dp"
-        android:id="@id/contentPanel">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:maxWidth="@dimen/resolver_max_width"
+    android:maxCollapsedHeight="288dp"
+    android:maxCollapsedHeightSmall="56dp"
+    android:id="@id/contentPanel">
 
     <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alwaysShow="true"
-            android:background="?attr/colorBackgroundFloating" >
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alwaysShow="true"
+        android:background="?attr/colorBackgroundFloating">
         <TextView android:id="@+id/profile_button"
                   android:layout_width="wrap_content"
                   android:layout_height="48dp"
@@ -51,73 +51,98 @@
                   android:textAppearance="?attr/textAppearanceMedium"
                   android:textSize="20sp"
                   android:gravity="center"
-                  android:paddingEnd="?attr/dialogPreferredPadding"
-                  android:paddingTop="12dp"
-                  android:paddingBottom="6dp"
+                  android:paddingTop="18dp"
+                  android:paddingBottom="18dp"
+                  android:paddingLeft="24dp"
+                  android:paddingRight="24dp"
                   android:layout_below="@id/profile_button"
                   android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 
-    <RelativeLayout 
+    <LinearLayout
         android:id="@+id/content_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/chooser_view_spacing"
         android:background="?attr/colorBackgroundFloating">
-      
-      <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
-            android:id="@+id/content_preview_thumbnail"
-            android:layout_alignParentTop="true"
-            android:layout_width="100dp"
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:gravity="center"
-            android:adjustViewBounds="true"
-            android:maxWidth="90dp"
-            android:maxHeight="90dp"
-            android:scaleType="fitCenter"
-            android:padding="5dp"/>
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/chooser_edge_margin_normal"
+            android:paddingRight="@dimen/chooser_edge_margin_normal"
+            android:layout_marginBottom="@dimen/chooser_view_spacing"
+            android:id="@+id/content_preview_text_layout">
+            <TextView
+                android:id="@+id/content_preview_text"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:ellipsize="end"
+                android:gravity="start|top"
+                android:paddingRight="24dp"
+                android:maxLines="2"/>
+            <Button
+                android:id="@+id/copy_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/ic_content_copy_gm2"/>
+        </LinearLayout>
 
-      <TextView
-          android:id="@+id/content_preview_title"
-          android:layout_alignParentTop="true"
-          android:layout_toEndOf="@id/content_preview_thumbnail"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:gravity="start|top"
-          android:textAppearance="?attr/textAppearanceMedium"
-          android:maxLines="2"
-          android:ellipsize="end"
-          android:paddingStart="15dp"
-          android:paddingEnd="15dp"
-          android:paddingTop="10dp" />
+        <!-- Required sub-layout so we can get the nice rounded corners-->
+        <!-- around this section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="@dimen/chooser_edge_margin_thin"
+            android:layout_marginRight="@dimen/chooser_edge_margin_thin"
+            android:minHeight="80dp"
+            android:background="@drawable/chooser_content_preview_rounded"
+            android:id="@+id/content_preview_title_layout">
 
-      <TextView
-          android:id="@+id/content_preview_text"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_below="@id/content_preview_title"
-          android:layout_toEndOf="@id/content_preview_thumbnail"
-          android:gravity="start|top"
-          android:maxLines="2"
-          android:ellipsize="end"
-          android:paddingStart="15dp"
-          android:paddingEnd="15dp"
-          android:paddingTop="10dp"
-          android:paddingBottom="5dp"/>
-    </RelativeLayout>
+            <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
+                  android:id="@+id/content_preview_thumbnail"
+                  android:layout_width="80dp"
+                  android:layout_height="80dp"
+                  android:layout_marginRight="12dp"
+                  android:adjustViewBounds="true"
+                  android:layout_gravity="center_vertical"
+                  android:gravity="center"
+                  android:maxWidth="70dp"
+                  android:maxHeight="70dp"
+                  android:padding="5dp"
+                  android:scaleType="centerCrop"/>
+
+            <TextView
+                android:id="@+id/content_preview_title"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceMedium"/>
+        </LinearLayout>
+    </LinearLayout>
 
     <ListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/resolver_list"
-            android:clipToPadding="false"
-            android:scrollbarStyle="outsideOverlay"
-            android:background="?attr/colorBackgroundFloating"
-            android:elevation="8dp"
-            android:listSelector="@color/transparent"
-            android:divider="@null"
-            android:scrollIndicators="top"
-            android:nestedScrollingEnabled="true" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/resolver_list"
+        android:clipToPadding="false"
+        android:scrollbarStyle="outsideOverlay"
+        android:background="?attr/colorBackgroundFloating"
+        android:elevation="8dp"
+        android:listSelector="@color/transparent"
+        android:divider="@null"
+        android:scrollIndicators="top"
+        android:nestedScrollingEnabled="true"/>
 
     <TextView android:id="@+id/empty"
               android:layout_width="match_parent"
@@ -127,6 +152,6 @@
               android:text="@string/noApplications"
               android:padding="32dp"
               android:gravity="center"
-              android:visibility="gone" />
+              android:visibility="gone"/>
 
 </com.android.internal.widget.ResolverDrawerLayout>

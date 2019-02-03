@@ -26,6 +26,7 @@ import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -346,21 +347,16 @@ public final class ContentCaptureManagerService extends
                 @NonNull ComponentName componentName, @NonNull String sessionId, int flags,
                 @NonNull IResultReceiver result) {
             Preconditions.checkNotNull(activityToken);
-            Preconditions.checkNotNull(componentName);
             Preconditions.checkNotNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
-            // TODO(b/111276913): refactor getTaskIdForActivity() to also return ComponentName,
-            // so we don't pass it on startSession (same for Autofill)
-            final int taskId = getAmInternal().getTaskIdForActivity(activityToken, false);
-
-            // TODO(b/121260224): get from AM as well
-            final int displayId = 0;
+            final ActivityPresentationInfo activityPresentationInfo = getAmInternal()
+                    .getActivityPresentationInfo(activityToken);
 
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
-                service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        sessionId, Binder.getCallingUid(), flags, result);
+                service.startSessionLocked(activityToken, activityPresentationInfo, sessionId,
+                        Binder.getCallingUid(), flags, result);
             }
         }
 

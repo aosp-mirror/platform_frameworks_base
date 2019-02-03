@@ -1001,10 +1001,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // cannot be modified anymore, there is no leak of information. For staged sessions,
         // further validation is performed by the staging manager.
         if (!params.isMultiPackage) {
-            if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
-                // For APEX, validation is done by StagingManager post-commit.
-                return;
-            }
             final PackageInfo pkgInfo = mPm.getPackageInfo(
                     params.appPackageName, PackageManager.GET_SIGNATURES
                             | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
@@ -1012,7 +1008,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             resolveStageDirLocked();
 
             try {
-                validateApkInstallLocked(pkgInfo);
+                if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                    validateApexInstallLocked();
+                } else {
+                    validateApkInstallLocked(pkgInfo);
+                }
             } catch (PackageManagerException e) {
                 throw e;
             } catch (Throwable e) {
@@ -1304,6 +1304,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
+     * Validate apex install.
+     * <p>
+     * Sets {@link #mResolvedBaseFile} for RollbackManager to use.
+     */
+    @GuardedBy("mLock")
+    private void validateApexInstallLocked()
+            throws PackageManagerException {
+        final File[] addedFiles = mResolvedStageDir.listFiles(sAddedFilter);
+        if (ArrayUtils.isEmpty(addedFiles)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+        }
+
+        if (ArrayUtils.size(addedFiles) > 1) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Too many files for apex install");
+        }
+
+        mResolvedBaseFile = addedFiles[0];
+    }
+
+    /**
      * Validate install by confirming that all application packages are have
      * consistent package name, version code, and signing certificates.
      * <p>
@@ -1563,12 +1584,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
         }
-        if (baseApk.preferCodeIntegrity) {
+        if (baseApk.useEmbeddedDex) {
             for (File file : mResolvedStagedFiles) {
                 if (file.getName().endsWith(".apk")
-                        && !DexManager.auditUncompressedCodeInApk(file.getPath())) {
+                        && !DexManager.auditUncompressedDexInApk(file.getPath())) {
                     throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                            "Some code are not uncompressed and aligned correctly for "
+                            "Some dex are not uncompressed and aligned correctly for "
                             + mPackageName);
                 }
             }
@@ -1661,6 +1682,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public int getInstallerUid() {
         synchronized (mLock) {
             return mInstallerUid;
+        }
+    }
+
+    String getInstallerPackageName() {
+        synchronized (mLock) {
+            return mInstallerPackageName;
         }
     }
 
@@ -1964,7 +1991,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Send broadcast to default launcher only if it's a new install
         final boolean isNewInstall = extras == null || !extras.getBoolean(Intent.EXTRA_REPLACING);
-        if (success && isNewInstall) {
+        if (success && isNewInstall && mPm.mInstallerService.isBootCompleted()) {
             mPm.sendSessionCommitBroadcast(generateInfo(), userId);
         }
 

@@ -268,7 +268,7 @@ public interface BiometricFaceConstants {
      * capture plane is too high.
      *
      * The tilt angle is defined as the angle swept out by the user’s face looking up
-     * and down. The pan angle would be zero if the user faced the camera directly.
+     * and down. The tilt angle would be zero if the user faced the camera directly.
      *
      * The user should be informed to look more directly at the camera.
      */
@@ -279,8 +279,8 @@ public interface BiometricFaceConstants {
      * capture plane is too high.
      *
      * The roll angle is defined as the angle swept out by the user’s face tilting their head
-     * towards their shoulders to the left and right. The pan angle would be zero if the user
-     * faced the camera directly.
+     * towards their shoulders to the left and right. The roll angle would be zero if the user's
+     * head is vertically aligned with the camera.
      *
      * The user should be informed to look more directly at the camera.
      */

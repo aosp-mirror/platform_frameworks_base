@@ -2289,6 +2289,7 @@ public final class ViewRootImpl implements ViewParent,
                 surfaceChanged |= surfaceSizeChanged;
                 final boolean alwaysConsumeNavBarChanged =
                         mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar;
+                final boolean colorModeChanged = hasColorModeChanged(lp.getColorMode());
                 if (contentInsetsChanged) {
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     if (DEBUG_LAYOUT) Log.v(mTag, "Content insets changing to: "
@@ -2334,6 +2335,10 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
                     if (DEBUG_LAYOUT) Log.v(mTag, "Visible insets changing to: "
                             + mAttachInfo.mVisibleInsets);
+                }
+                if (colorModeChanged && mAttachInfo.mThreadedRenderer != null) {
+                    mAttachInfo.mThreadedRenderer.setWideGamut(
+                            lp.getColorMode() == ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT);
                 }
 
                 if (!hadSurface) {
@@ -2387,7 +2392,7 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mThreadedRenderer.destroy();
                     }
                 } else if ((surfaceGenerationId != mSurface.getGenerationId()
-                        || surfaceSizeChanged || windowRelayoutWasForced)
+                        || surfaceSizeChanged || windowRelayoutWasForced || colorModeChanged)
                         && mSurfaceHolder == null
                         && mAttachInfo.mThreadedRenderer != null) {
                     mFullRedrawNeeded = true;
@@ -4007,6 +4012,20 @@ public final class ViewRootImpl implements ViewParent,
         if (mView != null) {
             mView.dispatchPointerCaptureChanged(hasCapture);
         }
+    }
+
+    private boolean hasColorModeChanged(int colorMode) {
+        if (mAttachInfo.mThreadedRenderer == null) {
+            return false;
+        }
+        final boolean isWideGamut = colorMode == ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT;
+        if (mAttachInfo.mThreadedRenderer.isWideGamut() == isWideGamut) {
+            return false;
+        }
+        if (isWideGamut && !mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
+            return false;
+        }
+        return true;
     }
 
     @Override

@@ -21,8 +21,6 @@
 #include <fstream>
 #include <memory>
 
-#define DCHECK_NOT_NULL(p) DCHECK((p) != nullptr)
-
 namespace startop {
 namespace dex {
 
@@ -31,6 +29,8 @@ using std::string;
 
 using ::dex::kAccPublic;
 using Op = Instruction::Op;
+
+using Opcode = ::art::Instruction::Code;
 
 const TypeDescriptor TypeDescriptor::Int() { return TypeDescriptor{"I"}; };
 const TypeDescriptor TypeDescriptor::Void() { return TypeDescriptor{"V"}; };
@@ -41,6 +41,23 @@ constexpr uint8_t kDexFileMagic[]{0x64, 0x65, 0x78, 0x0a, 0x30, 0x33, 0x38, 0x00
 
 // Strings lengths can be 32 bits long, but encoded as LEB128 this can take up to five bytes.
 constexpr size_t kMaxEncodedStringLength{5};
+
+// Converts invoke-* to invoke-*/range
+constexpr Opcode InvokeToInvokeRange(Opcode opcode) {
+  switch (opcode) {
+    case ::art::Instruction::INVOKE_VIRTUAL:
+      return ::art::Instruction::INVOKE_VIRTUAL_RANGE;
+    case ::art::Instruction::INVOKE_DIRECT:
+      return ::art::Instruction::INVOKE_DIRECT_RANGE;
+    case ::art::Instruction::INVOKE_STATIC:
+      return ::art::Instruction::INVOKE_STATIC_RANGE;
+    case ::art::Instruction::INVOKE_INTERFACE:
+      return ::art::Instruction::INVOKE_INTERFACE_RANGE;
+    default:
+      LOG(FATAL) << opcode << " is not a recognized invoke opcode.";
+      UNREACHABLE();
+  }
+}
 
 }  // namespace
 
@@ -54,6 +71,9 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
       return out;
     case Instruction::Op::kMove:
       out << "kMove";
+      return out;
+    case Instruction::Op::kMoveObject:
+      out << "kMoveObject";
       return out;
     case Instruction::Op::kInvokeVirtual:
       out << "kInvokeVirtual";
@@ -233,6 +253,11 @@ std::string Prototype::Shorty() const {
   return shorty;
 }
 
+const TypeDescriptor& Prototype::ArgType(size_t index) const {
+  CHECK_LT(index, param_types_.size());
+  return param_types_[index];
+}
+
 ClassBuilder::ClassBuilder(DexBuilder* parent, const std::string& name, ir::Class* class_def)
     : parent_(parent), type_descriptor_{TypeDescriptor::FromClassname(name)}, class_(class_def) {}
 
@@ -257,10 +282,10 @@ ir::EncodedMethod* MethodBuilder::Encode() {
   method->access_flags = kAccPublic | ::dex::kAccStatic;
 
   auto* code = dex_->Alloc<ir::Code>();
-  DCHECK_NOT_NULL(decl_->prototype);
+  CHECK(decl_->prototype != nullptr);
   size_t const num_args =
       decl_->prototype->param_types != nullptr ? decl_->prototype->param_types->types.size() : 0;
-  code->registers = num_registers_ + num_args;
+  code->registers = num_registers_ + num_args + kMaxScratchRegisters;
   code->ins_count = num_args;
   EncodeInstructions();
   code->instructions = slicer::ArrayView<const ::dex::u2>(buffer_.data(), buffer_.size());
@@ -292,7 +317,7 @@ void MethodBuilder::BuildReturn(Value src, bool is_object) {
 }
 
 void MethodBuilder::BuildConst4(Value target, int value) {
-  DCHECK_LT(value, 16);
+  CHECK_LT(value, 16);
   AddInstruction(Instruction::OpWithArgs(Op::kMove, target, Value::Immediate(value)));
 }
 
@@ -315,6 +340,7 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
     case Instruction::Op::kReturnObject:
       return EncodeReturn(instruction, ::art::Instruction::RETURN_OBJECT);
     case Instruction::Op::kMove:
+    case Instruction::Op::kMoveObject:
       return EncodeMove(instruction);
     case Instruction::Op::kInvokeVirtual:
       return EncodeInvoke(instruction, art::Instruction::INVOKE_VIRTUAL);
@@ -338,33 +364,43 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
 }
 
 void MethodBuilder::EncodeReturn(const Instruction& instruction, ::art::Instruction::Code opcode) {
-  DCHECK(!instruction.dest().has_value());
+  CHECK(!instruction.dest().has_value());
   if (instruction.args().size() == 0) {
     Encode10x(art::Instruction::RETURN_VOID);
   } else {
-    DCHECK_EQ(1, instruction.args().size());
+    CHECK_EQ(1, instruction.args().size());
     size_t source = RegisterValue(instruction.args()[0]);
     Encode11x(opcode, source);
   }
 }
 
 void MethodBuilder::EncodeMove(const Instruction& instruction) {
-  DCHECK_EQ(Instruction::Op::kMove, instruction.opcode());
-  DCHECK(instruction.dest().has_value());
-  DCHECK(instruction.dest()->is_register() || instruction.dest()->is_parameter());
-  DCHECK_EQ(1, instruction.args().size());
+  CHECK(Instruction::Op::kMove == instruction.opcode() ||
+        Instruction::Op::kMoveObject == instruction.opcode());
+  CHECK(instruction.dest().has_value());
+  CHECK(instruction.dest()->is_variable());
+  CHECK_EQ(1, instruction.args().size());
 
   const Value& source = instruction.args()[0];
 
   if (source.is_immediate()) {
     // TODO: support more registers
-    DCHECK_LT(RegisterValue(*instruction.dest()), 16);
+    CHECK_LT(RegisterValue(*instruction.dest()), 16);
     Encode11n(art::Instruction::CONST_4, RegisterValue(*instruction.dest()), source.value());
   } else if (source.is_string()) {
     constexpr size_t kMaxRegisters = 256;
-    DCHECK_LT(RegisterValue(*instruction.dest()), kMaxRegisters);
-    DCHECK_LT(source.value(), 65536);  // make sure we don't need a jumbo string
+    CHECK_LT(RegisterValue(*instruction.dest()), kMaxRegisters);
+    CHECK_LT(source.value(), 65536);  // make sure we don't need a jumbo string
     Encode21c(::art::Instruction::CONST_STRING, RegisterValue(*instruction.dest()), source.value());
+  } else if (source.is_variable()) {
+    // For the moment, we only use this when we need to reshuffle registers for
+    // an invoke instruction, meaning we are too big for the 4-bit version.
+    // We'll err on the side of caution and always generate the 16-bit form of
+    // the instruction.
+    Opcode opcode = instruction.opcode() == Instruction::Op::kMove
+                        ? ::art::Instruction::MOVE_16
+                        : ::art::Instruction::MOVE_OBJECT_16;
+    Encode32x(opcode, RegisterValue(*instruction.dest()), RegisterValue(source));
   } else {
     UNIMPLEMENTED(FATAL);
   }
@@ -373,22 +409,61 @@ void MethodBuilder::EncodeMove(const Instruction& instruction) {
 void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruction::Code opcode) {
   constexpr size_t kMaxArgs = 5;
 
+  // Currently, we only support up to 5 arguments.
   CHECK_LE(instruction.args().size(), kMaxArgs);
 
   uint8_t arguments[kMaxArgs]{};
+  bool has_long_args = false;
   for (size_t i = 0; i < instruction.args().size(); ++i) {
     CHECK(instruction.args()[i].is_variable());
     arguments[i] = RegisterValue(instruction.args()[i]);
+    if (!IsShortRegister(arguments[i])) {
+      has_long_args = true;
+    }
   }
 
-  Encode35c(opcode,
-            instruction.args().size(),
-            instruction.method_id(),
-            arguments[0],
-            arguments[1],
-            arguments[2],
-            arguments[3],
-            arguments[4]);
+  if (has_long_args) {
+    // Some of the registers don't fit in the four bit short form of the invoke
+    // instruction, so we need to do an invoke/range. To do this, we need to
+    // first move all the arguments into contiguous temporary registers.
+    std::array<Value, kMaxArgs> scratch{GetScratchRegisters<kMaxArgs>()};
+
+    const auto& prototype = dex_->GetPrototypeByMethodId(instruction.method_id());
+    CHECK(prototype.has_value());
+
+    for (size_t i = 0; i < instruction.args().size(); ++i) {
+      Instruction::Op move_op;
+      if (opcode == ::art::Instruction::INVOKE_VIRTUAL ||
+          opcode == ::art::Instruction::INVOKE_DIRECT) {
+        // In this case, there is an implicit `this` argument, which is always an object.
+        if (i == 0) {
+          move_op = Instruction::Op::kMoveObject;
+        } else {
+          move_op = prototype->ArgType(i - 1).is_object() ? Instruction::Op::kMoveObject
+                                                          : Instruction::Op::kMove;
+        }
+      } else {
+        move_op = prototype->ArgType(i).is_object() ? Instruction::Op::kMoveObject
+                                                    : Instruction::Op::kMove;
+      }
+
+      EncodeMove(Instruction::OpWithArgs(move_op, scratch[i], instruction.args()[i]));
+    }
+
+    Encode3rc(InvokeToInvokeRange(opcode),
+              instruction.args().size(),
+              instruction.method_id(),
+              RegisterValue(scratch[0]));
+  } else {
+    Encode35c(opcode,
+              instruction.args().size(),
+              instruction.method_id(),
+              arguments[0],
+              arguments[1],
+              arguments[2],
+              arguments[3],
+              arguments[4]);
+  }
 
   // If there is a return value, add a move-result instruction
   if (instruction.dest().has_value()) {
@@ -416,26 +491,26 @@ void MethodBuilder::EncodeBranch(art::Instruction::Code op, const Instruction& i
 }
 
 void MethodBuilder::EncodeNew(const Instruction& instruction) {
-  DCHECK_EQ(Instruction::Op::kNew, instruction.opcode());
-  DCHECK(instruction.dest().has_value());
-  DCHECK(instruction.dest()->is_variable());
-  DCHECK_EQ(1, instruction.args().size());
+  CHECK_EQ(Instruction::Op::kNew, instruction.opcode());
+  CHECK(instruction.dest().has_value());
+  CHECK(instruction.dest()->is_variable());
+  CHECK_EQ(1, instruction.args().size());
 
   const Value& type = instruction.args()[0];
-  DCHECK_LT(RegisterValue(*instruction.dest()), 256);
-  DCHECK(type.is_type());
+  CHECK_LT(RegisterValue(*instruction.dest()), 256);
+  CHECK(type.is_type());
   Encode21c(::art::Instruction::NEW_INSTANCE, RegisterValue(*instruction.dest()), type.value());
 }
 
 void MethodBuilder::EncodeCast(const Instruction& instruction) {
-  DCHECK_EQ(Instruction::Op::kCheckCast, instruction.opcode());
-  DCHECK(instruction.dest().has_value());
-  DCHECK(instruction.dest()->is_variable());
-  DCHECK_EQ(1, instruction.args().size());
+  CHECK_EQ(Instruction::Op::kCheckCast, instruction.opcode());
+  CHECK(instruction.dest().has_value());
+  CHECK(instruction.dest()->is_variable());
+  CHECK_EQ(1, instruction.args().size());
 
   const Value& type = instruction.args()[0];
-  DCHECK_LT(RegisterValue(*instruction.dest()), 256);
-  DCHECK(type.is_type());
+  CHECK_LT(RegisterValue(*instruction.dest()), 256);
+  CHECK(type.is_type());
   Encode21c(::art::Instruction::CHECK_CAST, RegisterValue(*instruction.dest()), type.value());
 }
 
@@ -443,9 +518,9 @@ size_t MethodBuilder::RegisterValue(const Value& value) const {
   if (value.is_register()) {
     return value.value();
   } else if (value.is_parameter()) {
-    return value.value() + num_registers_;
+    return value.value() + num_registers_ + kMaxScratchRegisters;
   }
-  DCHECK(false && "Must be either a parameter or a register");
+  CHECK(false && "Must be either a parameter or a register");
   return 0;
 }
 
@@ -498,7 +573,7 @@ const MethodDeclData& DexBuilder::GetOrDeclareMethod(TypeDescriptor type, const 
     // update the index -> ir node map (see tools/dexter/slicer/dex_ir_builder.cc)
     auto new_index = dex_file_->methods_indexes.AllocateIndex();
     auto& ir_node = dex_file_->methods_map[new_index];
-    SLICER_CHECK(ir_node == nullptr);
+    CHECK(ir_node == nullptr);
     ir_node = decl;
     decl->orig_index = decl->index = new_index;
 
@@ -506,6 +581,15 @@ const MethodDeclData& DexBuilder::GetOrDeclareMethod(TypeDescriptor type, const 
   }
 
   return entry;
+}
+
+std::optional<const Prototype> DexBuilder::GetPrototypeByMethodId(size_t method_id) const {
+  for (const auto& entry : method_id_map_) {
+    if (entry.second.id == method_id) {
+      return entry.first.prototype;
+    }
+  }
+  return {};
 }
 
 ir::Proto* DexBuilder::GetOrEncodeProto(Prototype prototype) {

@@ -121,6 +121,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -198,6 +199,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy;
 import android.content.pm.IPackageDataObserver;
@@ -284,6 +286,7 @@ import android.util.TimeUtils;
 import android.util.TimingsTraceLog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.IRecentsAnimationRunner;
 import android.view.LayoutInflater;
@@ -548,6 +551,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     boolean mUseFifoUiScheduling = false;
+
+    // Use an offload queue for long broadcasts, e.g. BOOT_COMPLETED.
+    // For simplicity, since we statically declare the size of the array of BroadcastQueues,
+    // we still create this new offload queue, but never ever put anything on it.
+    boolean mEnableOffloadQueue;
 
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
@@ -1673,7 +1681,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (mPidsSelfLocked) {
                     for (int i = 0; i < mPidsSelfLocked.size(); i++) {
                         final ProcessRecord p = mPidsSelfLocked.valueAt(i);
-                        if (p.uid == uid) {
+                        if (p.uid == uid && p.thread != null) {
                             try {
                                 p.thread.notifyCleartextNetwork(firstPacket);
                             } catch (RemoteException ignored) {
@@ -2282,6 +2290,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         offloadConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
         // by default, no "slow" policy in this queue
         offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
+
+        mEnableOffloadQueue = SystemProperties.getBoolean(
+                "persist.device_config.activity_manager_native_boot.offload_queue_enabled", false);
 
         mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "foreground", foreConstants, false);
@@ -3577,6 +3588,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (tracesFile == null) {
             return null;
         }
+        if (DEBUG_ANR) {
+            Slog.d(TAG, "Dumping to " + tracesFile.getAbsolutePath());
+        }
 
         dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
         return tracesFile;
@@ -4496,6 +4510,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // next app record if we are emulating process with anonymous threads.
         ProcessRecord app;
         long startTime = SystemClock.uptimeMillis();
+        long bindApplicationTimeMillis;
         if (pid != MY_PID && pid >= 0) {
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
@@ -4733,6 +4748,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
+            bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (app.isolatedEntryPoint != null) {
@@ -4836,7 +4852,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 thread.scheduleCreateBackupAgent(backupTarget.appInfo,
                         compatibilityInfoForPackage(backupTarget.appInfo),
-                        backupTarget.backupMode);
+                        backupTarget.backupMode, backupTarget.userId);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
                 badApp = true;
@@ -4854,6 +4870,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
         }
 
+        StatsLog.write(
+                StatsLog.PROCESS_START_TIME,
+                app.info.uid,
+                app.pid,
+                app.info.packageName,
+                StatsLog.PROCESS_START_TIME__TYPE__COLD,
+                app.startTime,
+                (int) (bindApplicationTimeMillis - app.startTime),
+                (int) (SystemClock.elapsedRealtime() - app.startTime),
+                app.hostingType,
+                (app.hostingNameStr != null ? app.hostingNameStr : ""));
         return true;
     }
 
@@ -13530,9 +13557,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setServiceForeground(ComponentName className, IBinder token,
-            int id, Notification notification, int flags) {
+            int id, Notification notification, int flags, int foregroundServiceType) {
         synchronized(this) {
-            mServices.setServiceForegroundLocked(className, token, id, notification, flags);
+            mServices.setServiceForegroundLocked(className, token, id, notification, flags,
+                    foregroundServiceType);
         }
     }
 
@@ -13671,18 +13699,26 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Cause the target app to be launched if necessary and its backup agent
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
-    public boolean bindBackupAgent(String packageName, int backupMode, int userId) {
+    public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId) {
         if (DEBUG_BACKUP) {
-            Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode="
-                    + backupMode + " userId=" + userId + " callingUid = " + Binder.getCallingUid()
+            Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
+                    + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
                     + " uid = " + Process.myUid());
         }
         enforceCallingPermission("android.permission.CONFIRM_FULL_BACKUP", "bindBackupAgent");
 
+        // The instantiatedUserId is the user of the process the backup agent is started in. This is
+        // different from the targetUserId which is the user whose data is to be backed up or
+        // restored. This distinction is important for system-process packages that live in the
+        // system user's process but backup/restore data for non-system users.
+        // TODO (b/123688746): Handle all system-process packages with singleton check.
+        final int instantiatedUserId =
+                PLATFORM_PACKAGE_NAME.equals(packageName) ? UserHandle.USER_SYSTEM : targetUserId;
+
         IPackageManager pm = AppGlobals.getPackageManager();
         ApplicationInfo app = null;
         try {
-            app = pm.getApplicationInfo(packageName, STOCK_PM_FLAGS, userId);
+            app = pm.getApplicationInfo(packageName, STOCK_PM_FLAGS, instantiatedUserId);
         } catch (RemoteException e) {
             // can't happen; package manager is process-local
         }
@@ -13706,7 +13742,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode);
+            BackupRecord r = new BackupRecord(app, backupMode, targetUserId);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
@@ -13728,10 +13764,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc.inFullBackup = true;
             }
             r.app = proc;
-            final BackupRecord backupTarget = mBackupTargets.get(userId);
+            final BackupRecord backupTarget = mBackupTargets.get(targetUserId);
             oldBackupUid = backupTarget != null ? backupTarget.appInfo.uid : -1;
             newBackupUid = proc.inFullBackup ? r.appInfo.uid : -1;
-            mBackupTargets.put(userId, r);
+            mBackupTargets.put(targetUserId, r);
 
             // Try not to kill the process during backup
             updateOomAdjLocked(proc, true);
@@ -13742,7 +13778,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     proc.thread.scheduleCreateBackupAgent(app,
-                            compatibilityInfoForPackage(app), backupMode);
+                            compatibilityInfoForPackage(app), backupMode, targetUserId);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }
@@ -13782,16 +13818,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // A backup agent has just come up
     @Override
-    public void backupAgentCreated(String agentPackageName, IBinder agent) {
-        final int callingUserId = UserHandle.getCallingUserId();
+    public void backupAgentCreated(String agentPackageName, IBinder agent, int userId) {
+        // Resolve the target user id and enforce permissions.
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, /* allowAll */ false, ALLOW_FULL_ONLY, "backupAgentCreated", null);
         if (DEBUG_BACKUP) {
             Slog.v(TAG_BACKUP, "backupAgentCreated: " + agentPackageName + " = " + agent
-                    + " callingUserId = " + callingUserId + " callingUid = "
-                    + Binder.getCallingUid() + " uid = " + Process.myUid());
+                    + " callingUserId = " + UserHandle.getCallingUserId() + " userId = " + userId
+                    + " callingUid = " + Binder.getCallingUid() + " uid = " + Process.myUid());
         }
 
         synchronized(this) {
-            final BackupRecord backupTarget = mBackupTargets.get(callingUserId);
+            final BackupRecord backupTarget = mBackupTargets.get(userId);
             String backupAppName = backupTarget == null ? null : backupTarget.appInfo.packageName;
             if (!agentPackageName.equals(backupAppName)) {
                 Slog.e(TAG, "Backup agent created for " + agentPackageName + " but not requested!");
@@ -13803,7 +13841,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             IBackupManager bm = IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
-            bm.agentConnectedForUser(callingUserId, agentPackageName, agent);
+            bm.agentConnectedForUser(userId, agentPackageName, agent);
         } catch (RemoteException e) {
             // can't happen; the backup manager service is local
         } catch (Exception e) {
@@ -13856,7 +13894,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (proc.thread != null) {
                     try {
                         proc.thread.scheduleDestroyBackupAgent(appInfo,
-                                compatibilityInfoForPackage(appInfo));
+                                compatibilityInfoForPackage(appInfo), userId);
                     } catch (Exception e) {
                         Slog.e(TAG, "Exception when unbinding backup agent:");
                         e.printStackTrace();
@@ -14090,7 +14128,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, -1, -1, false, null, null, OP_NONE, null, receivers,
-                            null, 0, null, null, false, true, true, -1, false);
+                            null, 0, null, null, false, true, true, -1, false,
+                            false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
@@ -14475,6 +14514,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        boolean timeoutExempt = false;
+
         if (action != null) {
             if (getBackgroundLaunchBroadcasts().contains(action)) {
                 if (DEBUG_BACKGROUND_CHECK) {
@@ -14700,6 +14741,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Log.w(TAG, "Broadcast " + action
                             + " no longer supported. It will not be delivered.");
                     return ActivityManager.BROADCAST_SUCCESS;
+                case Intent.ACTION_PRE_BOOT_COMPLETED:
+                    timeoutExempt = true;
+                    break;
             }
 
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
@@ -14842,7 +14886,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, appOp, brOptions, registeredReceivers, resultTo,
                     resultCode, resultData, resultExtras, ordered, sticky, false, userId,
-                    allowBackgroundActivityStarts);
+                    allowBackgroundActivityStarts, timeoutExempt);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending
                     && (queue.replaceParallelBroadcastLocked(r) != null);
@@ -14939,7 +14983,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, appOp, brOptions, receivers, resultTo, resultCode,
                     resultData, resultExtras, ordered, sticky, false, userId,
-                    allowBackgroundActivityStarts);
+                    allowBackgroundActivityStarts, timeoutExempt);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
 
@@ -17628,6 +17672,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public ActivityPresentationInfo getActivityPresentationInfo(IBinder token) {
+            int displayId = Display.INVALID_DISPLAY;
+            try {
+                displayId = mActivityTaskManager.getActivityDisplayId(token);
+            } catch (RemoteException e) {
+            }
+
+            return new ActivityPresentationInfo(mActivityTaskManager.getTaskForActivity(token,
+                    /*onlyRoot=*/ false), displayId,
+                    mActivityTaskManager.getActivityClassForToken(token));
+        }
+
+        @Override
         public void setBooting(boolean booting) {
             mBooting = booting;
         }
@@ -18389,6 +18446,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isOnOffloadQueue(int flags) {
-        return ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0);
+        return (mEnableOffloadQueue && ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0));
     }
 }

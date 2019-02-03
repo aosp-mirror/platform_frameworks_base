@@ -640,19 +640,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_HAS_FRAGILE_USER_DATA = 1 << 24;
 
     /**
-     * Indicate whether this application prefers code integrity, that is, run only code that is
-     * signed. This requires android:extractNativeLibs to be "false", as well as .dex and .so (if
-     * any) stored uncompressed inside the APK, which is signed. At run time, the implications
-     * include:
-     *
-     * <ul>
-     * <li>ART will JIT the dex code directly from the APK. There may be performance characteristic
-     * changes depend on the actual workload.
-     * </ul>
+     * Indicates whether this application wants to use the embedded dex in the APK, rather than
+     * extracted or locally compiled variants. This keeps the dex code protected by the APK
+     * signature. Such apps will always run in JIT mode (same when they are first installed), and
+     * the system will never generate ahead-of-time compiled code for them. Depending on the app's
+     * workload, there may be some run time performance change, noteably the cold start time.
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_PREFER_CODE_INTEGRITY = 1 << 25;
+    public static final int PRIVATE_FLAG_USE_EMBEDDED_DEX = 1 << 25;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
@@ -669,7 +665,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_ISOLATED_SPLIT_LOADING,
             PRIVATE_FLAG_OEM,
             PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
-            PRIVATE_FLAG_PREFER_CODE_INTEGRITY,
+            PRIVATE_FLAG_USE_EMBEDDED_DEX,
             PRIVATE_FLAG_PRIVILEGED,
             PRIVATE_FLAG_PRODUCT,
             PRIVATE_FLAG_PRODUCT_SERVICES,
@@ -1962,8 +1958,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
-    public boolean isCodeIntegrityPreferred() {
-        return (privateFlags & PRIVATE_FLAG_PREFER_CODE_INTEGRITY) != 0;
+    public boolean isEmbeddedDexUsed() {
+        return (privateFlags & PRIVATE_FLAG_USE_EMBEDDED_DEX) != 0;
     }
 
     /**

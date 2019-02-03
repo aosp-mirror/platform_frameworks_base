@@ -64,6 +64,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
@@ -120,6 +121,9 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -161,6 +165,8 @@ public class StatusBarTest extends SysuiTestCase {
     private NotificationAlertingManager mNotificationAlertingManager;
     @Mock
     private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
+    @Mock
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -252,7 +258,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
                 mock(BubbleController.class), mock(NavigationBarController.class),
-                mock(AutoHideController.class));
+                mock(AutoHideController.class), mKeyguardUpdateMonitor);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -631,6 +637,39 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPulseWhileDozing_notifyAuthInterrupt() {
+        HashSet<Integer> reasonsWantingAuth = new HashSet<>(
+                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN));
+        HashSet<Integer> reasonsSkippingAuth = new HashSet<>(
+                Arrays.asList(DozeLog.PULSE_REASON_INTENT,
+                        DozeLog.PULSE_REASON_NOTIFICATION,
+                        DozeLog.PULSE_REASON_SENSOR_SIGMOTION,
+                        DozeLog.REASON_SENSOR_PICKUP,
+                        DozeLog.REASON_SENSOR_DOUBLE_TAP,
+                        DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
+                        DozeLog.PULSE_REASON_DOCKING,
+                        DozeLog.REASON_SENSOR_WAKE_UP,
+                        DozeLog.REASON_SENSOR_TAP));
+        HashSet<Integer> reasonsThatDontPulse = new HashSet<>(
+                Arrays.asList(DozeLog.REASON_SENSOR_PICKUP,
+                        DozeLog.REASON_SENSOR_DOUBLE_TAP,
+                        DozeLog.REASON_SENSOR_TAP));
+
+        for (int i = 0; i < DozeLog.REASONS; i++) {
+            reset(mKeyguardUpdateMonitor);
+            mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class), i);
+            if (reasonsWantingAuth.contains(i)) {
+                verify(mKeyguardUpdateMonitor).onAuthInterruptDetected();
+            } else if (reasonsSkippingAuth.contains(i) || reasonsThatDontPulse.contains(i)) {
+                verify(mKeyguardUpdateMonitor, never()).onAuthInterruptDetected();
+            } else {
+                throw new AssertionError("Reason " + i + " isn't specified as wanting or skipping"
+                        + " passive auth. Please consider how this pulse reason should behave.");
+            }
+        }
+    }
+
+    @Test
     public void testSetState_changesIsFullScreenUserSwitcherState() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
         assertFalse(mStatusBar.isFullScreenUserSwitcherState());
@@ -705,7 +744,8 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationPresenter notificationPresenter,
                 BubbleController bubbleController,
                 NavigationBarController navBarController,
-                AutoHideController autoHideController) {
+                AutoHideController autoHideController,
+                KeyguardUpdateMonitor keyguardUpdateMonitor) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -738,6 +778,7 @@ public class StatusBarTest extends SysuiTestCase {
             mBubbleController = bubbleController;
             mNavigationBarController = navBarController;
             mAutoHideController = autoHideController;
+            mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

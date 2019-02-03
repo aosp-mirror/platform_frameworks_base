@@ -269,6 +269,8 @@
         <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
         <item name="passwordStyle">@style/PasswordTheme</item>
+        <item name="backgroundProtectedStyle">@style/BackgroundProtectedStyle</item>
+        <item name="android:forceDarkAllowed">false</item>
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">false</item>
@@ -283,6 +285,10 @@
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">true</item>
+    </style>
+
+    <style name="BackgroundProtectedStyle">
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
     </style>
 
     <style name="LockPatternStyle">

@@ -332,9 +332,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // true if we started navigation
     private boolean mStarted;
 
-    // true if single shot request is in progress
-    private boolean mSingleShot;
-
     // capabilities of the GPS engine
     private int mEngineCapabilities;
 
@@ -455,7 +452,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             switch (action) {
                 case ALARM_WAKEUP:
-                    startNavigating(false);
+                    startNavigating();
                     break;
                 case ALARM_TIMEOUT:
                     hibernate();
@@ -852,10 +849,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      * allowed mode from properties.
      *
      * @param agpsEnabled whether AGPS is enabled by settings value
-     * @param singleShot  whether "singleshot" is needed
      * @return SUPL mode (MSA vs MSB vs STANDALONE)
      */
-    private int getSuplMode(boolean agpsEnabled, boolean singleShot) {
+    private int getSuplMode(boolean agpsEnabled) {
         if (agpsEnabled) {
             int suplMode = mGnssConfiguration.getSuplMode(0);
             if (suplMode == 0) {
@@ -866,14 +862,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // such mode when it is available
             if (hasCapability(GPS_CAPABILITY_MSB) && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
                 return GPS_POSITION_MODE_MS_BASED;
-            }
-            // for now, just as the legacy code did, we fallback to MS-Assisted if it is available,
-            // do fallback only for single-shot requests, because it is too expensive to do for
-            // periodic requests as well
-            if (singleShot
-                    && hasCapability(GPS_CAPABILITY_MSA)
-                    && (suplMode & AGPS_SUPL_MODE_MSA) != 0) {
-                return GPS_POSITION_MODE_MS_ASSISTED;
             }
         }
         return GPS_POSITION_MODE_STANDALONE;
@@ -965,22 +953,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             return;
         }
 
-        boolean singleShot = false;
-
-        // see if the request is for a single update
-        if (mProviderRequest.locationRequests != null
-                && mProviderRequest.locationRequests.size() > 0) {
-            // if any request has zero or more than one updates
-            // requested, then this is not single-shot mode
-            singleShot = true;
-
-            for (LocationRequest lr : mProviderRequest.locationRequests) {
-                if (lr.getNumUpdates() != 1) {
-                    singleShot = false;
-                }
-            }
-        }
-
         if (DEBUG) Log.d(TAG, "setRequest " + mProviderRequest);
         if (mProviderRequest.reportLocation && !mDisableGps && isEnabled()) {
             // update client uids
@@ -1003,7 +975,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 }
             } else if (!mStarted) {
                 // start GPS
-                startNavigating(singleShot);
+                startNavigating();
             } else {
                 // GNSS Engine is already ON, but no GPS_CAPABILITY_SCHEDULING
                 mAlarmManager.cancel(mTimeoutIntent);
@@ -1148,13 +1120,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    private void startNavigating(boolean singleShot) {
+    private void startNavigating() {
         if (!mStarted) {
-            if (DEBUG) Log.d(TAG, "startNavigating, singleShot is " + singleShot);
+            if (DEBUG) Log.d(TAG, "startNavigating");
             mTimeToFirstFix = 0;
             mLastFixTime = 0;
             mStarted = true;
-            mSingleShot = singleShot;
             mPositionMode = GPS_POSITION_MODE_STANDALONE;
             // Notify about suppressed output, if speed limit was previously exceeded.
             // Elsewhere, we check again with every speed output reported.
@@ -1166,7 +1137,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             boolean agpsEnabled =
                     (Settings.Global.getInt(mContext.getContentResolver(),
                             Settings.Global.ASSISTED_GPS_ENABLED, 1) != 0);
-            mPositionMode = getSuplMode(agpsEnabled, singleShot);
+            mPositionMode = getSuplMode(agpsEnabled);
 
             if (DEBUG) {
                 String mode;
@@ -1221,7 +1192,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (DEBUG) Log.d(TAG, "stopNavigating");
         if (mStarted) {
             mStarted = false;
-            mSingleShot = false;
             native_stop();
             mLastFixTime = 0;
             // native_stop() may reset the position mode in hardware.
@@ -1298,10 +1268,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             // notify status listeners
             mGnssStatusListenerHelper.onFirstFix(mTimeToFirstFix);
-        }
-
-        if (mSingleShot) {
-            stopNavigating();
         }
 
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {

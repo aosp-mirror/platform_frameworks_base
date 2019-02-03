@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB-foutopsporing toestaan?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Altijd toestaan vanaf deze computer"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Toestaan"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-foutopsporing niet toegestaan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als je deze functie wilt gebruiken, schakel je naar de primaire gebruiker."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB-poort uitgeschakeld"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"De USB-poort is uitgeschakeld en detecteert geen accessoires, zodat je apparaat wordt beschermd tegen vloeistof en vuil.\n\nJe ontvangt een melding wanneer het weer veilig is om de USB-poort te gebruiken."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> apps gebruiken je <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> app gebruikt je <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Details weergeven"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App die je <xliff:g id="TYPES_LIST">%s</xliff:g> gebruikt"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apps die je <xliff:g id="TYPES_LIST">%s</xliff:g> gebruiken"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensoren uit"</string>
     <string name="device_services" msgid="1191212554435440592">"Apparaatservices"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Geen titel"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

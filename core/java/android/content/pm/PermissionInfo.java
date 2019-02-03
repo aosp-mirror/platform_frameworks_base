@@ -224,6 +224,17 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @TestApi
     public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 0x100000;
 
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>app_predictor</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_APP_PREDICTOR = 0x200000;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
             PROTECTION_FLAG_PRIVILEGED,
@@ -244,6 +255,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_DOCUMENTER,
             PROTECTION_FLAG_CONFIGURATOR,
             PROTECTION_FLAG_INCIDENT_REPORT_APPROVER,
+            PROTECTION_FLAG_APP_PREDICTOR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -444,6 +456,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_INCIDENT_REPORT_APPROVER) != 0) {
             protLevel += "|incidentReportApprover";
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0) {
+            protLevel += "|appPredictor";
         }
         return protLevel;
     }

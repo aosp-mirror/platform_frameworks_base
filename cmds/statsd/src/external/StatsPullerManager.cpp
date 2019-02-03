@@ -223,6 +223,9 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // RoleHolder.
         {android::util::ROLE_HOLDER,
          {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
+        // PermissionState.
+        {android::util::DANGEROUS_PERMISSION_STATE,
+         {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

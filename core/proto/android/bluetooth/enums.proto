@@ -110,3 +110,25 @@ enum UnbondReasonEnum {
     UNBOND_REASON_REMOTE_AUTH_CANCELED = 8;
     UNBOND_REASON_REMOVED = 9;
 }
+
+enum SocketTypeEnum {
+    SOCKET_TYPE_UNKNOWN = 0;
+    SOCKET_TYPE_RFCOMM = 1;
+    SOCKET_TYPE_SCO = 2;
+    SOCKET_TYPE_L2CAP_BREDR = 3;
+    SOCKET_TYPE_L2CAP_LE = 4;
+}
+
+enum SocketConnectionstateEnum {
+    SOCKET_CONNECTION_STATE_UNKNOWN = 0;
+    // Socket acts as a server waiting for connection
+    SOCKET_CONNECTION_STATE_LISTENING = 1;
+    // Socket acts as a client trying to connect
+    SOCKET_CONNECTION_STATE_CONNECTING = 2;
+    // Socket is connected
+    SOCKET_CONNECTION_STATE_CONNECTED = 3;
+    // Socket tries to disconnect from remote
+    SOCKET_CONNECTION_STATE_DISCONNECTING = 4;
+    // This socket is closed
+    SOCKET_CONNECTION_STATE_DISCONNECTED = 5;
+}

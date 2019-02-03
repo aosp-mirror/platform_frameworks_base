@@ -595,6 +595,21 @@ enum Action {
 
     // ACTION: Tap & Pay -> Default Application Setting -> Use Default
     ACTION_NFC_PAYMENT_ALWAYS_SETTING = 1623;
+
+    // ACTION: Settings > Search Bar > Avatar
+    // CATEGORY: SETTINGS
+    // OS: Q
+    CLICK_ACCOUNT_AVATAR = 1643;
+
+    // ACTION: Set new password (action intent android.app.action.SET_NEW_PASSWORD)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_SET_NEW_PASSWORD = 1645;
+
+    // ACTION: Set new password (action intent android.app.action.SET_NEW_PARENT_PROFILE_PASSWORD)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_SET_NEW_PARENT_PROFILE_PASSWORD = 1646;
 }
 
 /**
@@ -2194,4 +2209,9 @@ enum PageId {
     // details for a SIM/eSIM mobile network > Click edit icon to bring up a rename dialog.
     // OS: Q
     MOBILE_NETWORK_RENAME_DIALOG = 1642;
+
+    // OPEN: Set new password (android.app.action.SET_NEW_PASSWORD action intent)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SET_NEW_PASSWORD_ACTIVITY = 1644;
 }

@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Display;
 import android.view.View;
 
 import com.android.internal.util.Preconditions;
@@ -90,8 +91,8 @@ public final class ContentCaptureContext implements Parcelable {
     // Fields below are set by server when the session starts
     private final @Nullable ComponentName mComponentName;
     private final int mTaskId;
-    private final int mDisplayId;
     private final int mFlags;
+    private final int mDisplayId;
 
     // Fields below are set by the service upon "delivery" and are not marshalled in the parcel
     private @Nullable String mParentSessionId;
@@ -123,7 +124,8 @@ public final class ContentCaptureContext implements Parcelable {
         mAction = builder.mAction;
 
         mComponentName  = null;
-        mTaskId = mFlags = mDisplayId = 0;
+        mTaskId = mFlags = 0;
+        mDisplayId = Display.INVALID_DISPLAY;
     }
 
     /**

@@ -552,8 +552,6 @@ public abstract class PackageManager {
      * currently active, i.e. mounted and available to other processes of the OS.
      * In particular, this flag alone will not match APEX files that are staged
      * for activation at next reboot.
-     * TODO(b/119767311): include uninstalled/inactive APEX if
-     *                    MATCH_UNINSTALLED_PACKAGES is set.
      */
     public static final int MATCH_APEX = 0x40000000;
 
@@ -6724,6 +6722,16 @@ public abstract class PackageManager {
     public String getWellbeingPackageName() {
         throw new UnsupportedOperationException(
                 "getWellbeingPackageName not implemented in subclass");
+    }
+
+    /**
+     * @return the system defined app predictor package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getAppPredictionServicePackageName() {
+        throw new UnsupportedOperationException(
+            "getAppPredictionServicePackageName not implemented in subclass");
     }
 
     /**

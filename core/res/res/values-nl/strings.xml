@@ -322,7 +322,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Aangetikte items worden hardop benoemd en het scherm kan worden verkend via gebaren."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tekst observeren die je typt"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonsgegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Schermvergroting bedienen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Het zoomniveau en de positionering van het scherm bedienen."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gebaren uitvoeren"</string>
@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nooit"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Je hebt geen toestemming om deze pagina te openen."</string>
     <string name="text_copied" msgid="4985729524670131385">"Tekst naar klembord gekopieerd."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Meer"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1132,7 +1134,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Bewerken met"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Bewerken met %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Bewerken"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Delen met"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Delen"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Delen met %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Delen"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Verzenden met"</string>
@@ -1206,7 +1208,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> heeft geheugenlimiet overschreden"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap dump verzameld. Tik om te delen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap dump delen?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonlijke gegevens bevatten waartoe de app toegang heeft."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonsgegevens bevatten waartoe de app toegang heeft."</string>
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
@@ -1245,10 +1247,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerken te bekijken"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinding maken"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle netwerken"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Er is een wifi-netwerk beschikbaar dat is voorgesteld door <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Wil je verbinding maken met netwerken die worden voorgesteld door <xliff:g id="NAME">%s</xliff:g>?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nee"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wifi wordt automatisch ingeschakeld"</string>
@@ -1262,8 +1262,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wifi-netwerk heeft geen internettoegang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tik voor opties"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Verbonden"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Wijzigingen in je hotspot-instellingen"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Je hotspot-band is gewijzigd."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dit apparaat biedt geen ondersteuning voor je voorkeur voor alleen 5 GHz. In plaats daarvan gebruikt dit apparaat de 5-GHz-band wanneer deze beschikbaar is."</string>
@@ -1348,14 +1347,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Tik om USB-foutopsporing uit te schakelen"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecteer deze optie om USB-foutopsporing uit te schakelen."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Vloeistof of vuil in USB-poort"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-poort is automatisch uitgeschakeld. Tik voor meer informatie."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Veilig om USB-poort te gebruiken"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"De telefoon detecteert geen vloeistof of vuil meer."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Bugrapport genereren…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bugrapport delen?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Bugrapport delen…"</string>
@@ -1394,6 +1389,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configureren"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Uitwerpen"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Verkennen"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ontbreekt"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Voer apparaat opnieuw in"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> verplaatsen"</string>

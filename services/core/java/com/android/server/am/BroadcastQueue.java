@@ -461,14 +461,21 @@ public final class BroadcastQueue {
 
         // if this receiver was slow, impose deferral policy on the app.  This will kick in
         // when processNextBroadcastLocked() next finds this uid as a receiver identity.
-        if (mConstants.SLOW_TIME > 0 && elapsed > mConstants.SLOW_TIME) {
-            if (DEBUG_BROADCAST_DEFERRAL) {
-                Slog.i(TAG, "Broadcast receiver was slow: " + receiver + " br=" + r);
+        if (!r.timeoutExempt) {
+            if (mConstants.SLOW_TIME > 0 && elapsed > mConstants.SLOW_TIME) {
+                if (DEBUG_BROADCAST_DEFERRAL) {
+                    Slog.i(TAG, "Broadcast receiver was slow: " + receiver + " br=" + r);
+                }
+                if (r.curApp != null) {
+                    mDispatcher.startDeferring(r.curApp.uid);
+                } else {
+                    Slog.d(TAG, "finish receiver curApp is null? " + r);
+                }
             }
-            if (r.curApp != null) {
-                mDispatcher.startDeferring(r.curApp.uid);
-            } else {
-                Slog.d(TAG, "finish receiver curApp is null? " + r);
+        } else {
+            if (DEBUG_BROADCAST_DEFERRAL) {
+                Slog.i(TAG_BROADCAST, "Finished broadcast " + r.intent.getAction()
+                        + " is exempt from deferral policy");
             }
         }
 
@@ -1008,12 +1015,11 @@ public final class BroadcastQueue {
             // detection, we catch "hung" broadcasts here, discard them,
             // and continue to make progress.
             //
-            // This is only done if the system is ready so that PRE_BOOT_COMPLETED
-            // receivers don't get executed with timeouts. They're intended for
-            // one time heavy lifting after system upgrades and can take
-            // significant amounts of time.
+            // This is only done if the system is ready so that early-stage receivers
+            // don't get executed with timeouts; and of course other timeout-
+            // exempt broadcasts are ignored.
             int numReceivers = (r.receivers != null) ? r.receivers.size() : 0;
-            if (mService.mProcessesReady && r.dispatchTime > 0) {
+            if (mService.mProcessesReady && !r.timeoutExempt && r.dispatchTime > 0) {
                 if ((numReceivers > 0) &&
                         (now > r.dispatchTime + (2 * mConstants.TIMEOUT * numReceivers))) {
                     Slog.w(TAG, "Hung broadcast ["
@@ -1619,9 +1625,17 @@ public final class BroadcastQueue {
         BroadcastRecord r = mDispatcher.getActiveBroadcastLocked();
         if (fromMsg) {
             if (!mService.mProcessesReady) {
-                // Only process broadcast timeouts if the system is ready. That way
-                // PRE_BOOT_COMPLETED broadcasts can't timeout as they are intended
-                // to do heavy lifting for system up.
+                // Only process broadcast timeouts if the system is ready; some early
+                // broadcasts do heavy work setting up system facilities
+                return;
+            }
+
+            // If the broadcast is generally exempt from timeout tracking, we're done
+            if (r.timeoutExempt) {
+                if (DEBUG_BROADCAST) {
+                    Slog.i(TAG_BROADCAST, "Broadcast timeout but it's exempt: "
+                            + r.intent.getAction());
+                }
                 return;
             }
 

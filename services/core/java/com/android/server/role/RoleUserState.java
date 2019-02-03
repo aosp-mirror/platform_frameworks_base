@@ -376,7 +376,7 @@ public class RoleUserState {
 
             version = mVersion;
             packagesHash = mPackagesHash;
-            roles = getRoleHolders();
+            roles = snapshotRolesLocked();
         }
 
         AtomicFile atomicFile = new AtomicFile(getFile(mUserId), "roles-" + mUserId);
@@ -541,7 +541,7 @@ public class RoleUserState {
 
             version = mVersion;
             packagesHash = mPackagesHash;
-            roles = getRoleHolders();
+            roles = snapshotRolesLocked();
         }
 
         long fieldToken = dumpOutputStream.start(fieldName, fieldId);
@@ -578,16 +578,21 @@ public class RoleUserState {
     @NonNull
     public ArrayMap<String, ArraySet<String>> getRoleHolders() {
         synchronized (mLock) {
-            ArrayMap<String, ArraySet<String>> roles = new ArrayMap<>();
-            for (int i = 0, size = CollectionUtils.size(mRoles); i < size; ++i) {
-                String roleName = mRoles.keyAt(i);
-                ArraySet<String> roleHolders = mRoles.valueAt(i);
-
-                roleHolders = new ArraySet<>(roleHolders);
-                roles.put(roleName, roleHolders);
-            }
-            return roles;
+            return snapshotRolesLocked();
         }
+    }
+
+    @GuardedBy("mLock")
+    private ArrayMap<String, ArraySet<String>> snapshotRolesLocked() {
+        ArrayMap<String, ArraySet<String>> roles = new ArrayMap<>();
+        for (int i = 0, size = CollectionUtils.size(mRoles); i < size; ++i) {
+            String roleName = mRoles.keyAt(i);
+            ArraySet<String> roleHolders = mRoles.valueAt(i);
+
+            roleHolders = new ArraySet<>(roleHolders);
+            roles.put(roleName, roleHolders);
+        }
+        return roles;
     }
 
     /**

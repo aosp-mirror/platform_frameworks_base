@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -35,6 +36,11 @@ public abstract class EnumerateClient extends ClientMonitor {
             boolean restricted, String owner) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
+    }
+
+    @Override
+    protected int statsAction() {
+        return BiometricsProtoEnums.ACTION_ENUMERATE;
     }
 
     @Override

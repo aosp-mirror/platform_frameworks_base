@@ -5278,6 +5278,35 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(actual.containsAll(expected));
     }
 
+    public void testIsPackageAllowedToAccessCalendar_adminNotAllowed() {
+        setAsProfileOwner(admin1);
+        dpm.setCrossProfileCalendarPackages(admin1, Collections.emptySet());
+        when(getServices().settings.settingsSecureGetIntForUser(
+                Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
+                0, DpmMockContext.CALLER_USER_HANDLE)).thenReturn(1);
+        assertFalse(dpm.isPackageAllowedToAccessCalendar("TEST_PACKAGE"));
+    }
+
+    public void testIsPackageAllowedToAccessCalendar_settingOff() {
+        final String testPackage = "TEST_PACKAGE";
+        setAsProfileOwner(admin1);
+        dpm.setCrossProfileCalendarPackages(admin1, Collections.singleton(testPackage));
+        when(getServices().settings.settingsSecureGetIntForUser(
+                Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
+                0, DpmMockContext.CALLER_USER_HANDLE)).thenReturn(0);
+        assertFalse(dpm.isPackageAllowedToAccessCalendar(testPackage));
+    }
+
+    public void testIsPackageAllowedToAccessCalendar_bothAllowed() {
+        final String testPackage = "TEST_PACKAGE";
+        setAsProfileOwner(admin1);
+        dpm.setCrossProfileCalendarPackages(admin1, null);
+        when(getServices().settings.settingsSecureGetIntForUser(
+                Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
+                0, DpmMockContext.CALLER_USER_HANDLE)).thenReturn(1);
+        assertTrue(dpm.isPackageAllowedToAccessCalendar(testPackage));
+    }
+
     private void configureProfileOwnerForDeviceIdAccess(ComponentName who, int userId) {
         final long ident = mServiceContext.binder.clearCallingIdentity();
         mServiceContext.binder.callingUid =

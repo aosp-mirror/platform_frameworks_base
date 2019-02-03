@@ -35,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -55,6 +56,7 @@ import android.os.UserManager;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -220,13 +222,34 @@ public abstract class BiometricServiceBase extends SystemService
      */
     protected void notifyClientActiveCallbacks(boolean isActive) {}
 
+    protected abstract int statsModality();
+
     protected abstract class AuthenticationClientImpl extends AuthenticationClient {
+
+        // Used to check if the public API that was invoked was from FingerprintManager. Only
+        // to be overridden by FingerprintService.
+        protected boolean isFingerprint() {
+            return false;
+        }
 
         public AuthenticationClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie, boolean requireConfirmation) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener, targetUserId,
                     groupId, opId, restricted, owner, cookie, requireConfirmation);
+        }
+
+        @Override
+        protected int statsClient() {
+            if (isKeyguard(getOwnerString())) {
+                return BiometricsProtoEnums.CLIENT_KEYGUARD;
+            } else if (isBiometricPrompt()) {
+                return BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT;
+            } else if (isFingerprint()) {
+                return BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
+            } else {
+                return BiometricsProtoEnums.CLIENT_UNKNOWN;
+            }
         }
 
         @Override
@@ -296,7 +319,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    protected class RemovalClientImpl extends RemovalClient {
+    protected abstract class RemovalClientImpl extends RemovalClient {
         private boolean mShouldNotify;
 
         public RemovalClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
@@ -318,7 +341,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    protected class EnumerateClientImpl extends EnumerateClient {
+    protected abstract class EnumerateClientImpl extends EnumerateClient {
 
         public EnumerateClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int groupId, int userId,
@@ -600,6 +623,8 @@ public abstract class BiometricServiceBase extends SystemService
         mHALDeathCount++;
         handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                 0 /*vendorCode */);
+
+        StatsLog.write(StatsLog.BIOMETRIC_HAL_DEATH_REPORTED, statsModality());
     }
 
     protected ClientMonitor getCurrentClient() {
@@ -653,7 +678,6 @@ public abstract class BiometricServiceBase extends SystemService
             } else {
                 updateActiveGroup(mCurrentUserId, null);
             }
-
         }
     }
 

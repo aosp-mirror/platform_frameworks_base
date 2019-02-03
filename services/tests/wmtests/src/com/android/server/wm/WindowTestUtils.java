@@ -152,7 +152,7 @@ public class WindowTestUtils {
     public static class TestAppWindowToken extends AppWindowToken {
         boolean mOnTop = false;
         private Transaction mPendingTransactionOverride;
-        boolean mSkipOnParentSet = true;
+        boolean mSkipOnParentChanged = true;
 
         private TestAppWindowToken(DisplayContent dc) {
             super(dc.mWmService, new IApplicationToken.Stub() {
@@ -200,9 +200,11 @@ public class WindowTestUtils {
         }
 
         @Override
-        void onParentSet() {
-            if (!mSkipOnParentSet) {
-                super.onParentSet();
+        void onParentChanged() {
+            if (!mSkipOnParentChanged) {
+                super.onParentChanged();
+            } else {
+                updateConfigurationFromParent(this);
             }
         }
 
@@ -220,6 +222,21 @@ public class WindowTestUtils {
             return mPendingTransactionOverride == null
                     ? super.getPendingTransaction()
                     : mPendingTransactionOverride;
+        }
+    }
+
+    /**
+     * Used when we don't want to perform surface related operation in
+     * {@link WindowContainer#onParentChanged} or the overridden method, but the configuration
+     * still needs to propagate from parent.
+     *
+     * @see ConfigurationContainer#onParentChanged
+     */
+    static void updateConfigurationFromParent(WindowContainer container) {
+        final WindowContainer parent = container.getParent();
+        if (parent != null) {
+            container.onConfigurationChanged(parent.getConfiguration());
+            container.onMergedOverrideConfigurationChanged();
         }
     }
 
@@ -341,8 +358,8 @@ public class WindowTestUtils {
         }
 
         @Override
-        void onParentSet() {
-            // Do nothing;
+        void onParentChanged() {
+            updateConfigurationFromParent(this);
         }
     }
 }

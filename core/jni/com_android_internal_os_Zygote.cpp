@@ -276,6 +276,7 @@ enum MountExternalKind {
 // Must match values in com.android.internal.os.Zygote.
 enum RuntimeFlags : uint32_t {
   DEBUG_ENABLE_JDWP = 1,
+  PROFILE_FROM_SHELL = 1 << 15,
 };
 
 // Forward declaration so we don't have to move the signal handler.
@@ -1224,6 +1225,13 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   if ((runtime_flags & RuntimeFlags::DEBUG_ENABLE_JDWP) != 0) {
     EnableDebugger();
   }
+  if ((runtime_flags & RuntimeFlags::PROFILE_FROM_SHELL) != 0) {
+    // simpleperf needs the process to be dumpable to profile it.
+    if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) == -1) {
+      ALOGE("prctl(PR_SET_DUMPABLE) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 1) failed");
+    }
+  }
 
   if (NeedsNoRandomizeWorkaround()) {
     // Work around ARM kernel ASLR lossage (http://b/5817320).
@@ -1526,15 +1534,12 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
           RuntimeAbort(env, __LINE__, "System server process has died. Restarting Zygote!");
       }
 
-      bool low_ram_device = GetBoolProperty("ro.config.low_ram", false);
-      bool per_app_memcg = GetBoolProperty("ro.config.per_app_memcg", low_ram_device);
-      if (per_app_memcg) {
+      if (UsePerAppMemcg()) {
           // Assign system_server to the correct memory cgroup.
-          // Not all devices mount /dev/memcg so check for the file first
+          // Not all devices mount memcg so check if it is mounted first
           // to avoid unnecessarily printing errors and denials in the logs.
-          if (!access("/dev/memcg/system/tasks", F_OK) &&
-                !WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
-              ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
+          if (!SetTaskProfiles(pid, std::vector<std::string>{"SystemMemoryProcess"})) {
+              ALOGE("couldn't add process %d into system memcg group", pid);
           }
       }
   }

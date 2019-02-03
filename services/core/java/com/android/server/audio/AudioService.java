@@ -908,6 +908,9 @@ public class AudioService extends IAudioService.Stub
         // Restore mono mode
         updateMasterMono(mContentResolver);
 
+        // Restore audio balance
+        updateMasterBalance(mContentResolver);
+
         // Restore ringer mode
         setRingerModeInt(getRingerModeInternal(), false);
 
@@ -1196,6 +1199,17 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.setMasterMono(masterMono);
     }
 
+    private void updateMasterBalance(ContentResolver cr) {
+        final float masterBalance = System.getFloatForUser(
+                cr, System.MASTER_BALANCE, 0.f /* default */, UserHandle.USER_CURRENT);
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Master balance %f", masterBalance));
+        }
+        if (AudioSystem.setMasterBalance(masterBalance) != 0) {
+            Log.e(TAG, String.format("setMasterBalance failed for %f", masterBalance));
+        }
+    }
+
     private void sendEncodedSurroundMode(ContentResolver cr, String eventSource)
     {
         final int encodedSurroundMode = Settings.Global.getInt(
@@ -1371,6 +1385,8 @@ public class AudioService extends IAudioService.Stub
                 UserHandle.USER_CURRENT);
 
         updateMasterMono(cr);
+
+        updateMasterBalance(cr);
 
         // Each stream will read its own persisted settings
 
@@ -4948,6 +4964,8 @@ public class AudioService extends IAudioService.Stub
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.MASTER_MONO), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.MASTER_BALANCE), false, this);
 
             mEncodedSurroundMode = Settings.Global.getInt(
                     mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT,
@@ -4981,6 +4999,7 @@ public class AudioService extends IAudioService.Stub
                 }
                 readDockAudioSettings(mContentResolver);
                 updateMasterMono(mContentResolver);
+                updateMasterBalance(mContentResolver);
                 updateEncodedSurroundOutput();
                 sendEnabledSurroundFormats(mContentResolver, mSurroundModeChanged);
                 updateAssistantUId(false);

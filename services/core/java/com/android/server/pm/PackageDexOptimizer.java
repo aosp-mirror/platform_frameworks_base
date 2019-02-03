@@ -507,7 +507,7 @@ public class PackageDexOptimizer {
         int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         // When an app or priv app is configured to run out of box, only verify it.
-        if (info.isCodeIntegrityPreferred()
+        if (info.isEmbeddedDexUsed()
                 || (info.isPrivilegedApp()
                     && DexManager.isPackageSelectedToRunOob(info.packageName))) {
             return "verify";

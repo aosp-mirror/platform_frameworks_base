@@ -1394,6 +1394,17 @@ public class Resources {
         mResourcesImpl.getValue(name, outValue, resolveRefs);
     }
 
+
+    /**
+     * @param set AttributeSet for which we want to find the source.
+     * @return The resource id for the source that is backing the given AttributeSet
+     * @hide
+     */
+    @AnyRes
+    public static int getAttributeSetSourceResId(@Nullable AttributeSet set) {
+        return ResourcesImpl.getAttributeSetSourceResId(set);
+    }
+
     /**
      * This class holds the current attribute values for a particular theme.
      * In other words, a Theme is a set of values for resource attributes;

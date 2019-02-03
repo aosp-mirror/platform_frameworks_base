@@ -47,7 +47,6 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
-import com.android.server.pm.PackageManagerServiceUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -329,15 +328,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 int sessionId = packageInstaller.createSession(params);
                 PackageInstaller.Session session = packageInstaller.openSession(sessionId);
 
-                // TODO: Will it always be called "base.apk"? What about splits?
-                // What about apex?
-                File packageDir = new File(data.backupDir, info.getPackageName());
-                File baseApk = new File(packageDir, "base.apk");
-                try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(baseApk,
+                File packageCode = RollbackStore.getPackageCode(data, info.getPackageName());
+                if (packageCode == null) {
+                    sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
+                            "Backup copy of package code inaccessible");
+                    return;
+                }
+
+                try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCode,
                         ParcelFileDescriptor.MODE_READ_ONLY)) {
                     final long token = Binder.clearCallingIdentity();
                     try {
-                        session.write("base.apk", 0, baseApk.length(), fd);
+                        session.write(packageCode.getName(), 0, packageCode.length(), fd);
                     } finally {
                         Binder.restoreCallingIdentity(token);
                     }
@@ -735,17 +737,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         VersionedPackage newVersion = new VersionedPackage(packageName, newPackage.versionCode);
 
         // Get information about the currently installed package.
-        PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
-        PackageParser.Package installedPackage = pm.getPackage(packageName);
-        if (installedPackage == null) {
+        PackageManager pm = mContext.getPackageManager();
+        PackageInfo pkgInfo = null;
+        try {
+            pkgInfo = pm.getPackageInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
             // TODO: Support rolling back fresh package installs rather than
             // fail here. Test this case.
             Log.e(TAG, packageName + " is not installed");
             return false;
         }
-        VersionedPackage installedVersion = new VersionedPackage(packageName,
-                installedPackage.getLongVersionCode());
 
+        VersionedPackage installedVersion = new VersionedPackage(packageName,
+                pkgInfo.getLongVersionCode());
 
         final IntArray pendingBackups = mUserdataHelper.snapshotAppData(packageName,
                 installedUsers);
@@ -769,16 +773,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return false;
         }
 
-        File packageDir = mRollbackStore.packageCodePathForAvailableRollback(data, packageName);
-        packageDir.mkdirs();
-
-        // TODO: Copy by hard link instead to save on cpu and storage space?
-        int status = PackageManagerServiceUtils.copyPackage(installedPackage.codePath, packageDir);
-        if (status != PackageManager.INSTALL_SUCCEEDED) {
-            Log.e(TAG, "Unable to copy package for rollback for " + packageName);
+        try {
+            RollbackStore.backupPackageCode(data, packageName, pkgInfo.applicationInfo.sourceDir);
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to copy package for rollback for " + packageName, e);
             return false;
         }
-
         return true;
     }
 

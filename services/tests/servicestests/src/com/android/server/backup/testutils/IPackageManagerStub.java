@@ -1156,6 +1156,11 @@ public class IPackageManagerStub implements IPackageManager {
     }
 
     @Override
+    public String getAppPredictionServicePackageName() {
+        return null;
+    }
+
+    @Override
     public boolean isPackageStateProtected(String packageName, int userId) throws RemoteException {
         return false;
     }

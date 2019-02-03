@@ -82,7 +82,8 @@ private:
          */
         EGLSyncKHR mEglFence;
 
-        void createIfNeeded(sp<GraphicBuffer> graphicBuffer, android_dataspace dataspace);
+        void createIfNeeded(sp<GraphicBuffer> graphicBuffer, android_dataspace dataspace,
+                            bool forceCreate);
     };
 
     /**

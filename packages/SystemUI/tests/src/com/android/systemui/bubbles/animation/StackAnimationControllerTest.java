@@ -178,17 +178,20 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
 
     @Test
     public void testChildRemoved() throws InterruptedException {
+        assertEquals(0, mLayout.getTransientViewCount());
+
         final View firstView = mLayout.getChildAt(0);
         mLayout.removeView(firstView);
 
-        // The view should still be there, since the controller is animating it out and hasn't yet
-        // actually removed it from the parent view.
-        assertEquals(0, mLayout.indexOfChild(firstView));
+        // The view should now be transient, and missing from the view's normal hierarchy.
+        assertEquals(1, mLayout.getTransientViewCount());
+        assertEquals(-1, mLayout.indexOfChild(firstView));
 
         waitForPropertyAnimations(DynamicAnimation.ALPHA);
         waitForLayoutMessageQueue();
 
-        assertEquals(-1, mLayout.indexOfChild(firstView));
+        // The view should now be gone entirely, no transient views left.
+        assertEquals(0, mLayout.getTransientViewCount());
 
         // The subsequent view should have been translated over to 0, not stacked off to the left.
         assertEquals(0, mLayout.getChildAt(0).getTranslationX(), .1f);

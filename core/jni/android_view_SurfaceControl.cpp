@@ -36,6 +36,7 @@
 #include <memory>
 #include <stdio.h>
 #include <system/graphics.h>
+#include <ui/ConfigStoreTypes.h>
 #include <ui/DisplayInfo.h>
 #include <ui/DisplayedFrameStats.h>
 #include <ui/FrameStats.h>
@@ -107,6 +108,23 @@ static struct {
     jclass clazz;
     jmethodID ctor;
 } gDisplayedContentSamplingAttributesClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+    jfieldID X;
+    jfieldID Y;
+    jfieldID Z;
+} gCieXyzClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+    jfieldID red;
+    jfieldID green;
+    jfieldID blue;
+    jfieldID white;
+} gDisplayPrimariesClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -688,6 +706,66 @@ static jintArray nativeGetDisplayColorModes(JNIEnv* env, jclass, jobject tokenOb
     return colorModesArray;
 }
 
+static jobject nativeGetDisplayNativePrimaries(JNIEnv* env, jclass, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return NULL;
+
+    ui::DisplayPrimaries primaries;
+    if (SurfaceComposerClient::getDisplayNativePrimaries(token, primaries) != NO_ERROR) {
+        return NULL;
+    }
+
+    jobject jred = env->NewObject(gCieXyzClassInfo.clazz, gCieXyzClassInfo.ctor);
+    if (jred == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    jobject jgreen = env->NewObject(gCieXyzClassInfo.clazz, gCieXyzClassInfo.ctor);
+    if (jgreen == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    jobject jblue = env->NewObject(gCieXyzClassInfo.clazz, gCieXyzClassInfo.ctor);
+    if (jblue == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    jobject jwhite = env->NewObject(gCieXyzClassInfo.clazz, gCieXyzClassInfo.ctor);
+    if (jwhite == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    jobject jprimaries = env->NewObject(gDisplayPrimariesClassInfo.clazz,
+            gDisplayPrimariesClassInfo.ctor);
+    if (jprimaries == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    env->SetFloatField(jred, gCieXyzClassInfo.X, primaries.red.X);
+    env->SetFloatField(jred, gCieXyzClassInfo.Y, primaries.red.Y);
+    env->SetFloatField(jred, gCieXyzClassInfo.Z, primaries.red.Z);
+    env->SetFloatField(jgreen, gCieXyzClassInfo.X, primaries.green.X);
+    env->SetFloatField(jgreen, gCieXyzClassInfo.Y, primaries.green.Y);
+    env->SetFloatField(jgreen, gCieXyzClassInfo.Z, primaries.green.Z);
+    env->SetFloatField(jblue, gCieXyzClassInfo.X, primaries.blue.X);
+    env->SetFloatField(jblue, gCieXyzClassInfo.Y, primaries.blue.Y);
+    env->SetFloatField(jblue, gCieXyzClassInfo.Z, primaries.blue.Z);
+    env->SetFloatField(jwhite, gCieXyzClassInfo.X, primaries.white.X);
+    env->SetFloatField(jwhite, gCieXyzClassInfo.Y, primaries.white.Y);
+    env->SetFloatField(jwhite, gCieXyzClassInfo.Z, primaries.white.Z);
+    env->SetObjectField(jprimaries, gDisplayPrimariesClassInfo.red, jred);
+    env->SetObjectField(jprimaries, gDisplayPrimariesClassInfo.green, jgreen);
+    env->SetObjectField(jprimaries, gDisplayPrimariesClassInfo.blue, jblue);
+    env->SetObjectField(jprimaries, gDisplayPrimariesClassInfo.white, jwhite);
+
+    return jprimaries;
+}
+
 static jint nativeGetActiveColorMode(JNIEnv* env, jclass, jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return -1;
@@ -1089,6 +1167,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetActiveConfig },
     {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
             (void*)nativeGetDisplayColorModes},
+    {"nativeGetDisplayNativePrimaries", "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayPrimaries;",
+            (void*)nativeGetDisplayNativePrimaries },
     {"nativeGetActiveColorMode", "(Landroid/os/IBinder;)I",
             (void*)nativeGetActiveColorMode},
     {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
@@ -1209,6 +1289,28 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             displayedContentSamplingAttributesClazz);
     gDisplayedContentSamplingAttributesClassInfo.ctor = GetMethodIDOrDie(env,
             displayedContentSamplingAttributesClazz, "<init>", "(III)V");
+
+    jclass cieXyzClazz = FindClassOrDie(env, "android/view/SurfaceControl$CieXyz");
+    gCieXyzClassInfo.clazz = MakeGlobalRefOrDie(env, cieXyzClazz);
+    gCieXyzClassInfo.ctor = GetMethodIDOrDie(env, gCieXyzClassInfo.clazz, "<init>", "()V");
+    gCieXyzClassInfo.X = GetFieldIDOrDie(env, cieXyzClazz, "X", "F");
+    gCieXyzClassInfo.Y = GetFieldIDOrDie(env, cieXyzClazz, "Y", "F");
+    gCieXyzClassInfo.Z = GetFieldIDOrDie(env, cieXyzClazz, "Z", "F");
+
+    jclass displayPrimariesClazz = FindClassOrDie(env,
+            "android/view/SurfaceControl$DisplayPrimaries");
+    gDisplayPrimariesClassInfo.clazz = MakeGlobalRefOrDie(env, displayPrimariesClazz);
+    gDisplayPrimariesClassInfo.ctor = GetMethodIDOrDie(env, gDisplayPrimariesClassInfo.clazz,
+            "<init>", "()V");
+    gDisplayPrimariesClassInfo.red = GetFieldIDOrDie(env, displayPrimariesClazz, "red",
+            "Landroid/view/SurfaceControl$CieXyz;");
+    gDisplayPrimariesClassInfo.green = GetFieldIDOrDie(env, displayPrimariesClazz, "green",
+            "Landroid/view/SurfaceControl$CieXyz;");
+    gDisplayPrimariesClassInfo.blue = GetFieldIDOrDie(env, displayPrimariesClazz, "blue",
+            "Landroid/view/SurfaceControl$CieXyz;");
+    gDisplayPrimariesClassInfo.white = GetFieldIDOrDie(env, displayPrimariesClazz, "white",
+            "Landroid/view/SurfaceControl$CieXyz;");
+
     return err;
 }
 

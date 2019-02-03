@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"କଦାପି ନୁହେଁ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"ଏହି ପୃଷ୍ଠା ଖୋଲିବାକୁ ଆପଣଙ୍କ ପାଖରେ ଅନୁମତି ନାହିଁ।"</string>
     <string name="text_copied" msgid="4985729524670131385">"ଟେକ୍ସଟ୍‍ କ୍ଲିପବୋର୍ଡକୁ କପୀ ହୋଇଯାଇଛି"</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"ଅଧିକ"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ମେନୁ"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1132,7 +1134,8 @@
     <string name="whichEditApplication" msgid="144727838241402655">"ସହିତ ଏଡିଟ୍‌ କରନ୍ତୁ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$sରେ ସଂଶୋଧନ କରନ୍ତୁ"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ଏଡିଟ୍‌ କରନ୍ତୁ"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"ଏହାଙ୍କ ସହ ଶେୟାର୍‌ କରନ୍ତୁ"</string>
+    <!-- no translation found for whichSendApplication (5803792421724377602) -->
+    <skip />
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ସହିତ ଶେୟାର୍‌ କରନ୍ତୁ"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ଶେୟାର୍‌ କରନ୍ତୁ"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ଏହା ଜରିଆରେ ପଠାନ୍ତୁ"</string>
@@ -1245,10 +1248,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ସମସ୍ତ ନେଟ୍‌ୱର୍କ ଦେଖିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"କନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ସମସ୍ତ ନେଟ୍‌ୱର୍କ"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g>ଙ୍କ ଦ୍ୱାରା ପ୍ରସ୍ତାବିତ ଏକ ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ଅଛି"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"<xliff:g id="NAME">%s</xliff:g>ଙ୍କ ଦ୍ବାରା ପ୍ରସ୍ତାବିତ ନେଟ୍‌ୱର୍କ ସହ ସଂଯୋଗ କରିବାକୁ ଚାହାନ୍ତି କି?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ହଁ"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ନାହିଁ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ୱାଇ-ଫାଇ ସ୍ୱଚାଳିତ ଭାବେ ଅନ୍ ହେବ"</string>
@@ -1262,8 +1263,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ୱାଇ-ଫାଇର କୌଣସି ଇଣ୍ଟରନେଟ୍‍ ଆକ୍ସେସ୍‍ ନାହିଁ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ବିକଳ୍ପ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ସଂଯୁକ୍ତ ହୋଇଛି"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ଆପଣଙ୍କର ହଟ୍‌ସ୍ପଟ୍‍ ସେଟିଙ୍ଗକୁ ବଦଳିଯାଇଛି"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ଆପଣଙ୍କର ହଟ୍‍ସ୍ପଟ୍‌ ପରିବର୍ତ୍ତନ କରାଯାଇଛି"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"କେବଳ 5GHz ପାଇଁ, ଏହି ଡିଭାଇସ୍‍ ଆପଣଙ୍କର ପସନ୍ଦକୁ ସପୋର୍ଟ କରେନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ, ଏହି ଡିଭାଇସ୍‍ 5GHz ବ୍ୟାଣ୍ଡ ବ୍ୟବହାର କରିବ।"</string>
@@ -1348,14 +1348,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ଡିବଗିଙ୍ଗ ସଂଯୁକ୍ତ ହୋଇଛି"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USBର ଡିବଗିଙ୍ଗ ସୁବିଧାକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ଡିବଗିଙ୍ଗକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଚୟନ କରନ୍ତୁ।"</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ପୋର୍ଟରେ ତରଳ ପଦାର୍ଥ ବା ଧୂଳି"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ପୋର୍ଟ ସ୍ୱଚାଳିତ ଭାବେ ଅକ୍ଷମ ହୋଇଛି। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ପୋର୍ଟ ବ୍ୟବହାର କରିବା ପାଇଁ ସୁରକ୍ଷିତ ଅଟେ"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ଫୋନ୍ ଆଉ ତରଳ ପଦାର୍ଥ କିମ୍ବା ଧୂଳିର ଚିହ୍ନଟ କରୁନାହିଁ।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ବଗ୍ ରିପୋର୍ଟ ନିଆଯାଉଛି…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‌ କରିବେ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‌ କରାଯାଉଛି…"</string>
@@ -1395,6 +1391,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ବାହାର କରନ୍ତୁ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ଖୋଜନ୍ତୁ"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ନାହିଁ"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ଡିଭାଇସ୍‌କୁ ପୁଣି ଭର୍ତ୍ତି କରନ୍ତୁ"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ନିଆଯାଉଛି"</string>

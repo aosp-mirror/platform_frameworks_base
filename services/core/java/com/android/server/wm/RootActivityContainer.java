@@ -777,11 +777,8 @@ class RootActivityContainer extends ConfigurationContainer
             // First the front stacks. In case any are not fullscreen and are in front of home.
             for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
                 final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-                for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                    final ActivityStack stack = display.getChildAt(stackNdx);
-                    stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
-                            notifyClients);
-                }
+                display.ensureActivitiesVisible(starting, configChanges, preserveWindows,
+                        notifyClients);
             }
         } finally {
             mStackSupervisor.getKeyguardController().endActivityVisibilityUpdate();

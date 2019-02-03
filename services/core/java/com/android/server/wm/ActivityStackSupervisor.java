@@ -720,6 +720,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             r.setProcess(proc);
 
+            // Ensure activity is allowed to be resumed after process has set.
+            if (andResume && !r.canResumeByCompat()) {
+                andResume = false;
+            }
+
             if (getKeyguardController().isKeyguardLocked()) {
                 r.notifyUnknownVisibilityLaunched();
             }

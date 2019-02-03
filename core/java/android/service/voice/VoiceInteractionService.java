@@ -348,7 +348,7 @@ public class VoiceInteractionService extends Service {
      */
     public final void setVoiceState(int state) {
         try {
-            mSystemService.setVoiceState(state);
+            mSystemService.setVoiceState(mInterface, state);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -359,7 +359,7 @@ public class VoiceInteractionService extends Service {
      */
     public final void setTranscription(@NonNull String transcription) {
         try {
-            mSystemService.setTranscription(transcription);
+            mSystemService.setTranscription(mInterface, transcription);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -372,7 +372,7 @@ public class VoiceInteractionService extends Service {
      */
     public final void clearTranscription(boolean immediate) {
         try {
-            mSystemService.clearTranscription(immediate);
+            mSystemService.clearTranscription(mInterface, immediate);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -89,12 +89,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      */
     public static final String EXTRA_BINDER = "binder";
 
-    // TODO(b/111276913): make sure disabled state is in sync with manager's disabled
     @NonNull
-    private final AtomicBoolean mDisabled;
+    private final AtomicBoolean mDisabled = new AtomicBoolean(false);
 
     @NonNull
     private final Context mContext;
+
+    @NonNull
+    private final ContentCaptureManager mManager;
 
     @NonNull
     private final Handler mHandler;
@@ -103,7 +105,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * Interface to the system_server binder object - it's only used to start the session (and
      * notify when the session is finished).
      */
-    @Nullable
+    @Nullable // TODO(b/122959591): shoul never be null, we should make main session null instead
     private final IContentCaptureManager mSystemServerInterface;
 
     /**
@@ -136,13 +138,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     private final LocalLog mFlushHistory = new LocalLog(10);
 
     /** @hide */
-    protected MainContentCaptureSession(@NonNull Context context, @NonNull Handler handler,
-            @Nullable IContentCaptureManager systemServerInterface,
-            @NonNull boolean disabled) {
+    protected MainContentCaptureSession(@NonNull Context context,
+            @NonNull ContentCaptureManager manager, @NonNull Handler handler,
+            @Nullable IContentCaptureManager systemServerInterface) {
         mContext = context;
+        mManager = manager;
         mHandler = handler;
         mSystemServerInterface = systemServerInterface;
-        mDisabled = new AtomicBoolean(disabled);
     }
 
     @Override
@@ -235,8 +237,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     /**
      * Callback from {@code system_server} after call to
-     * {@link IContentCaptureManager#startSession(int, IBinder, ComponentName, String,
-     * int, IResultReceiver)}.
+     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int,
+     * IResultReceiver)}
      *
      * @param resultCode session state
      * @param binder handle to {@code IContentCaptureDirectManager}
@@ -517,8 +519,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Override
     boolean isContentCaptureEnabled() {
-        return super.isContentCaptureEnabled() && mSystemServerInterface != null
-                && !mDisabled.get();
+        return super.isContentCaptureEnabled() && mManager.isContentCaptureEnabled();
+    }
+
+    // Called by ContentCaptureManager.isContentCaptureEnabled
+    boolean isDisabled() {
+        return mDisabled.get();
     }
 
     // TODO(b/122454205): refactor "notifyXXXX" methods below to a common "Buffer" object that is

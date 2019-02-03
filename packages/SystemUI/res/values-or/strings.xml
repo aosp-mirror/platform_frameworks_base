@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ଡିବଗିଙ୍ଗ କରିବେ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"କମ୍ପ୍ୟୁଟର୍‌ର RSA କୀ\' ଆଙ୍ଗୁଠି ଚିହ୍ନ ହେଉଛି:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ସବୁବେଳେ ଏହି କମ୍ପ୍ୟୁଟର୍‌ରୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USBରେ ଡିବଗ୍‍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ସମ୍ପ୍ରତି ସାଇନ୍‍-ଇନ୍‍ କରିଥିବା ୟୁଜର୍‍ ଜଣକ ଏହି ଡିଭାଇସରେ USB ଡିବଗିଙ୍ଗ ଅନ୍‍ କରିପାରିବେ ନାହିଁ। ଏହି ବୈଶିଷ୍ଟ୍ୟ ବ୍ୟବହାର କରିବାକୁ, ପ୍ରାଥମିକ ୟୁଜର୍‍ରେ ସାଇନ୍‍-ଇନ୍‍ କରନ୍ତୁ।"</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB ପୋର୍ଟକୁ ଅକ୍ଷମ କରାଯାଇଛି"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"ଆପଣଙ୍କ ଡିଭାଇସ୍‌କୁ ତରଳ ପଦାର୍ଥ ଏବଂ ଧୂଳିରୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ, USB ପୋର୍ଟକୁ ଅକ୍ଷମ କରାଯାଇଛି ଏବଂ ଏହା କୌଣସି ଉପକରଣ ଚିହ୍ନଟ କରିବ ନାହିଁ। \n\nUSB ପୋର୍ଟକୁ ପୁଣିି ବ୍ୟବହାର କରିବାକୁ ସୁରକ୍ଷିତ ହେଲେ ଆପଣଙ୍କୁ ସୂଚିତ କରାଯିବ।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ସ୍କ୍ରୀନ ଭରିବା ପାଇଁ ଜୁମ୍ କରନ୍ତୁ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ସ୍କ୍ରୀନ୍‌କୁ ଭରିବା ପାଇଁ ଟାଣନ୍ତୁ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ସ୍କ୍ରୀନଶଟ୍‌"</string>
@@ -881,9 +878,9 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g>ଟି ଆପ୍ଲିକେସନ୍ ଆପଣଙ୍କର <xliff:g id="TYPE_5">%2$s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି।</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g>ଟି ଆପ୍ଲିକେସନ୍ ଆପଣଙ୍କର <xliff:g id="TYPE_1">%2$s</xliff:g>ବ୍ୟବହାର କରୁଛନ୍ତି।</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"ବୁଝିଗଲି"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"ବିବରଣୀ ଦେଖନ୍ତୁ"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"ଆପ୍‍ ଆପଣଙ୍କ <xliff:g id="TYPES_LIST">%s</xliff:g> ବ୍ୟବହାର କରୁଛି"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"ଆପ୍ସ ଆପଣଙ୍କ <xliff:g id="TYPES_LIST">%s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"ସେନ୍ସର୍‍ଗୁଡ଼ିକ ବନ୍ଦ ଅଛି"</string>
     <string name="device_services" msgid="1191212554435440592">"ଡିଭାଇସ୍‍ ସେବାଗୁଡିକ"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"କୌଣସି ଶୀର୍ଷକ ନାହିଁ"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

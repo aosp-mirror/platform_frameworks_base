@@ -204,11 +204,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSessionsDir = new File(Environment.getDataSystemDirectory(), "install_sessions");
         mSessionsDir.mkdirs();
 
-        mStagingManager = new StagingManager(pm);
+        mStagingManager = new StagingManager(pm, this);
     }
 
     private void setBootCompleted()  {
         mBootCompleted = true;
+    }
+
+    boolean isBootCompleted()  {
+        return mBootCompleted;
     }
 
     public void systemReady() {
@@ -245,12 +249,23 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // the updated information.
             writeSessionsLocked();
 
+        }
+    }
+
+    void restoreAndApplyStagedSessionIfNeeded() {
+        List<PackageInstallerSession> stagedSessionsToRestore = new ArrayList<>();
+        synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
                 if (session.isStaged()) {
-                    mStagingManager.restoreSession(session);
+                    stagedSessionsToRestore.add(session);
                 }
             }
+        }
+        // Don't hold mSessions lock when calling restoreSession, since it might trigger an APK
+        // atomic install which needs to query sessions, which requires lock on mSessions.
+        for (PackageInstallerSession session : stagedSessionsToRestore) {
+            mStagingManager.restoreSession(session);
         }
     }
 

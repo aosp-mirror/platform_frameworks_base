@@ -280,6 +280,9 @@
         <!-- Additional flag from base permission type: this permission designates the app
             that will approve the sharing of incident reports. -->
         <flag name="incidentReportApprover" value="0x100000" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to the system app predictor -->
+        <flag name="appPredictor" value="0x200000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -1138,10 +1141,12 @@
          resource] to be present in order to function. Default value is false. -->
     <attr name="isSplitRequired" format="boolean" />
 
-    <!-- Flag to specify if this app prioritizes code integrity. The system may choose
-         to run with better integrity guarantee in various components if possible based on the app's
-         <code>targetSdkVersion</code>. -->
-    <attr name="preferCodeIntegrity" format="boolean" />
+    <!-- Flag to specify if this app wants to run the dex within its APK but not extracted or
+         locally compiled variants. This keeps the dex code protected by the APK signature. Such
+         apps will always run in JIT mode (same when they are first installed), and the system will
+         never generate ahead-of-time compiled code for them. Depending on the app's workload,
+         there may be some run time performance change, noteably the cold start time. -->
+    <attr name="useEmbeddedDex" format="boolean" />
 
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
          {@code <application>} tag. If specified on the {@code <application>}
@@ -1445,26 +1450,20 @@
 
     <attr name="usesNonSdkApi" format="boolean" />
 
-    <!-- Specify the type of foreground service. Apps targeting API
-     {@link android.os.Build.VERSION_CODES#Q} or later must specify foreground service type,
-     otherwise a SecurityException is thrown when
-     {@link android.app.Service#startForeground(int, Notification)} on this service is called.
-    -->
+    <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
+         together. -->
     <attr name="foregroundServiceType">
         <!-- Data (photo, file, account) upload/download, backup/restore, import/export, fetch,
         transfer over network between device and cloud.  -->
-        <enum name="sync" value="1" />
+        <flag name="dataSync" value="0x01" />
         <!-- Music, video, news or other media play. -->
-        <enum name="mediaPlay" value="2" />
+        <flag name="mediaPlayback" value="0x02" />
         <!-- Ongoing phone call or video conference. -->
-        <enum name="phoneCall" value="3" />
+        <flag name="phoneCall" value="0x04" />
         <!-- GPS, map, navigation location update. -->
-        <enum name="location" value="4" />
+        <flag name="location" value="0x08" />
         <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction. -->
-        <enum name="deviceCompanion" value="5" />
-        <!-- Process that should not be interrupted, including installation, setup, photo
-        compression etc. -->
-        <enum name="ongoingProcess" value="6" />
+        <flag name="connectedDevice" value="0x10" />
     </attr>
 
 
@@ -1611,7 +1610,7 @@
              to honor this flag as well. -->
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
-        <attr name="preferCodeIntegrity" />
+        <attr name="useEmbeddedDex" />
         <attr name="extractNativeLibs" />
         <attr name="defaultToDeviceProtectedStorage" format="boolean" />
         <attr name="directBootAware" />

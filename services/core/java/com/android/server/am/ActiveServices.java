@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
@@ -218,7 +219,7 @@ public final class ActiveServices {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.i(TAG, "  Stopping fg for service " + r);
                     }
-                    setServiceForegroundInnerLocked(r, 0, null, 0);
+                    setServiceForegroundInnerLocked(r, 0, null, 0, 0);
                 }
             }
         }
@@ -914,13 +915,13 @@ public final class ActiveServices {
     }
 
     public void setServiceForegroundLocked(ComponentName className, IBinder token,
-            int id, Notification notification, int flags) {
+            int id, Notification notification, int flags, int foregroundServiceType) {
         final int userId = UserHandle.getCallingUserId();
         final long origId = Binder.clearCallingIdentity();
         try {
             ServiceRecord r = findServiceLocked(className, token, userId);
             if (r != null) {
-                setServiceForegroundInnerLocked(r, id, notification, flags);
+                setServiceForegroundInnerLocked(r, id, notification, flags, foregroundServiceType);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1211,7 +1212,7 @@ public final class ActiveServices {
      * @param id Notification ID.  Zero === exit foreground state for the given service.
      */
     private void setServiceForegroundInnerLocked(final ServiceRecord r, int id,
-            Notification notification, int flags) {
+            Notification notification, int flags, int foregroundServiceType) {
         if (id != 0) {
             if (notification == null) {
                 throw new IllegalArgumentException("null notification");
@@ -1244,13 +1245,20 @@ public final class ActiveServices {
                             android.Manifest.permission.FOREGROUND_SERVICE,
                             r.app.pid, r.appInfo.uid, "startForeground");
                 }
-                if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
-                    if (r.serviceInfo.getForegroundServiceType()
-                            == ServiceInfo.FOREGROUND_SERVICE_TYPE_UNSPECIFIED) {
-                        // STOPSHIP(b/120611119): replace log message with SecurityException.
-                        Slog.w(TAG, "missing foregroundServiceType attribute in "
-                                + "service element of manifest file");
-                    }
+
+                int manifestType = r.serviceInfo.getForegroundServiceType();
+                // If passed in foreground service type is FOREGROUND_SERVICE_TYPE_MANIFEST,
+                // consider it is the same as manifest foreground service type.
+                if (foregroundServiceType == FOREGROUND_SERVICE_TYPE_MANIFEST) {
+                    foregroundServiceType = manifestType;
+                }
+                // Check the passed in foreground service type flags is a subset of manifest
+                // foreground service type flags.
+                if ((foregroundServiceType & manifestType) != foregroundServiceType) {
+                    // STOPSHIP(b/120611119): replace log message with IllegalArgumentException.
+                    Slog.w(TAG, "foregroundServiceType must be a subset of "
+                            + "foregroundServiceType attribute in "
+                            + "service element of manifest file");
                 }
             }
             boolean alreadyStartedOp = false;
@@ -1307,6 +1315,7 @@ public final class ActiveServices {
                     }
                     notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
                     r.foregroundNoti = notification;
+                    r.foregroundServiceType = foregroundServiceType;
                     if (!r.isForeground) {
                         final ServiceMap smap = getServiceMapLocked(r.userId);
                         if (smap != null) {
@@ -1443,7 +1452,7 @@ public final class ActiveServices {
             ServiceRecord sr = proc.services.valueAt(i);
             if (sr.isForeground || sr.fgRequired) {
                 anyForeground = true;
-                fgServiceTypes |= sr.serviceInfo.mForegroundServiceType;
+                fgServiceTypes |= sr.foregroundServiceType;
                 break;
             }
         }

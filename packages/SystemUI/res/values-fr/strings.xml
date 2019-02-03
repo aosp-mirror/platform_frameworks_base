@@ -57,14 +57,11 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Autoriser le débogage USB ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Empreinte numérique de la clé RSA de l\'ordinateur : \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Toujours autoriser sur cet ordinateur"</string>
-    <!-- no translation found for usb_debugging_allow (2272145052073254852) -->
-    <skip />
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Autoriser"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Débogage USB non autorisé"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage USB. Pour utiliser cette fonctionnalité, l\'utilisateur principal doit se connecter."</string>
-    <!-- no translation found for usb_contaminant_title (206854874263058490) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_message (2205845572186473860) -->
-    <skip />
+    <string name="usb_contaminant_title" msgid="206854874263058490">"Port USB désactivé"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"Pour protéger votre appareil des liquides et des saletés, le port USB est désactivé et ne détecte plus les accessoires.\n\nVous recevrez une notification lorsque vous pourrez de nouveau utiliser le port USB en toute sécurité."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomer pour remplir l\'écran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Étirer pour remplir l\'écran"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Capture d\'écran"</string>
@@ -881,9 +878,9 @@
       <item quantity="one"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> application utilise votre <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> applications utilisent votre <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
     </plurals>
-    <!-- no translation found for ongoing_privacy_dialog_ok (3273300106348958308) -->
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
+    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
     <skip />
-    <string name="ongoing_privacy_dialog_open_settings" msgid="2074844974365194279">"Voir les détails"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Application utilisant votre/vos <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Applications utilisant votre/vos <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -898,4 +895,8 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Capteurs désactivés"</string>
     <string name="device_services" msgid="1191212554435440592">"Services pour l\'appareil"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Sans titre"</string>
+    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <skip />
+    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
 </resources>

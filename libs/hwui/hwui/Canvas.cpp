@@ -25,6 +25,8 @@
 
 #include "hwui/PaintFilter.h"
 
+#include <SkFontMetrics.h>
+
 namespace android {
 
 Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::RenderNode* renderNode) {

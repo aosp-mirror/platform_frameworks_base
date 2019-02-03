@@ -18,6 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:id="@+id/bubble_expanded_view">
 
     <View
@@ -26,17 +27,48 @@
         android:layout_height="@dimen/bubble_pointer_height"
     />
 
-    <TextView
-        android:id="@+id/bubble_content_header"
-        android:background="@drawable/bubble_expanded_header_bg"
-        android:textAppearance="@*android:style/TextAppearance.Material.Title"
-        android:textSize="18sp"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/header_layout"
         android:layout_height="@dimen/bubble_expanded_header_height"
-        android:gravity="start|center_vertical"
-        android:singleLine="true"
-        android:paddingLeft="@dimen/bubble_expanded_header_horizontal_padding"
-        android:paddingRight="@dimen/bubble_expanded_header_horizontal_padding"
-    />
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:background="@drawable/bubble_expanded_header_bg">
+
+        <TextView
+            android:id="@+id/header_text"
+            android:textAppearance="@*android:style/TextAppearance.Material.Title"
+            android:textSize="18sp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="start|center_vertical"
+            android:singleLine="true"
+            android:paddingLeft="@dimen/bubble_expanded_header_horizontal_padding"
+            android:paddingRight="@dimen/bubble_expanded_header_horizontal_padding"
+        />
+
+        <ImageButton
+            android:id="@+id/deep_link_button"
+            android:layout_width="@dimen/bubble_header_icon_size"
+            android:layout_height="@dimen/bubble_header_icon_size"
+            android:gravity="end|center_vertical"
+            android:src="@drawable/ic_open_in_new"
+            android:scaleType="center"
+            android:tint="?android:attr/colorForeground"
+            android:background="?android:attr/selectableItemBackground"
+        />
+
+        <ImageButton
+            android:id="@id/settings_button"
+            android:layout_width="@dimen/bubble_header_icon_size"
+            android:layout_height="@dimen/bubble_header_icon_size"
+            android:src="@drawable/ic_settings"
+            android:gravity="end|center_vertical"
+            android:scaleType="center"
+            android:tint="?android:attr/colorForeground"
+            android:background="?android:attr/selectableItemBackground"
+        />
+
+    </LinearLayout>
 
 </com.android.systemui.bubbles.BubbleExpandedViewContainer>

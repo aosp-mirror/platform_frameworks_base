@@ -431,8 +431,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * This flag indicates that the window that received this motion event is partly
-     * or wholly obscured by another visible window above it.  This flag is set to true
-     * even if the event did not directly pass through the obscured area.
+     * or wholly obscured by another visible window above it. This flag is set to true
+     * if the event directly passed through the obscured area.
+     *
      * A security sensitive application can check this flag to identify situations in which
      * a malicious application may have covered up part of its content for the purpose
      * of misleading the user or hijacking touches.  An appropriate response might be
@@ -443,16 +444,17 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * This flag indicates that the window that received this motion event is partly
-     * or wholly obscured by another visible window above it.  This flag is set to true
+     * or wholly obscured by another visible window above it. This flag is set to true
      * even if the event did not directly pass through the obscured area.
+     *
      * A security sensitive application can check this flag to identify situations in which
      * a malicious application may have covered up part of its content for the purpose
      * of misleading the user or hijacking touches.  An appropriate response might be
      * to drop the suspect touches or to take additional precautions to confirm the user's
      * actual intent.
      *
-     * Unlike FLAG_WINDOW_IS_OBSCURED, this is actually true.
-     * @hide
+     * Unlike FLAG_WINDOW_IS_OBSCURED, this is true even if the window that received this event is
+     * obstructed in areas other than the touched location.
      */
     public static final int FLAG_WINDOW_IS_PARTIALLY_OBSCURED = 0x2;
 

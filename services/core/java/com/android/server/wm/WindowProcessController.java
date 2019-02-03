@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -32,11 +33,11 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFI
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskManagerService
-        .INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
@@ -155,6 +156,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final ArrayList<ActivityRecord> mActivities = new ArrayList<>();
     // any tasks this process had run root activities in
     private final ArrayList<TaskRecord> mRecentTasks = new ArrayList<>();
+    // The most recent top-most activity that was resumed in the process for pre-Q app.
+    private ActivityRecord mPreQTopResumedActivity = null;
 
     // Last configuration that was reported to the process.
     private final Configuration mLastReportedConfiguration;
@@ -364,21 +367,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mAllowBackgroundActivityStarts;
     }
 
-    public void setInstrumenting(boolean instrumenting) {
+    public void setInstrumenting(boolean instrumenting,
+            boolean hasBackgroundActivityStartPrivileges) {
         mInstrumenting = instrumenting;
+        mInstrumentingWithBackgroundActivityStartPrivileges = hasBackgroundActivityStartPrivileges;
     }
 
     boolean isInstrumenting() {
         return mInstrumenting;
-    }
-
-    /**
-     * {@see isInstrumentingWithBackgroundActivityStartPrivileges}
-     */
-    public void setInstrumentingWithBackgroundActivityStartPrivileges(
-            boolean instrumentingWithBackgroundActivityStartPrivileges) {
-        mInstrumentingWithBackgroundActivityStartPrivileges =
-                instrumentingWithBackgroundActivityStartPrivileges;
     }
 
     /**
@@ -467,6 +463,59 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mActivities.isEmpty() || !mRecentTasks.isEmpty();
         }
+    }
+
+    /**
+     * Update the top resuming activity in process for pre-Q apps, only the top-most visible
+     * activities are allowed to be resumed per process.
+     * @return {@code true} if the activity is allowed to be resumed by compatibility
+     * restrictions, which the activity was the topmost visible activity in process or the app is
+     * targeting after Q.
+     */
+    boolean updateTopResumingActivityInProcessIfNeeded(@NonNull ActivityRecord activity) {
+        if (mInfo.targetSdkVersion >= Q || mPreQTopResumedActivity == activity) {
+            return true;
+        }
+
+        final ActivityDisplay display = activity.getDisplay();
+        if (display == null) {
+            // No need to update if the activity hasn't attach to any display.
+            return false;
+        }
+
+        boolean canUpdate = false;
+        final ActivityDisplay topDisplay =
+                mPreQTopResumedActivity != null ? mPreQTopResumedActivity.getDisplay() : null;
+        // Update the topmost activity if current top activity was not on any display or no
+        // longer visible.
+        if (topDisplay == null || !mPreQTopResumedActivity.visible) {
+            canUpdate = true;
+        }
+
+        // Update the topmost activity if the current top activity wasn't on top of the other one.
+        if (!canUpdate && topDisplay.mDisplayContent.compareTo(display.mDisplayContent) < 0) {
+            canUpdate = true;
+        }
+
+        // Compare the z-order of ActivityStacks if both activities landed on same display.
+        if (display == topDisplay
+                && mPreQTopResumedActivity.getActivityStack().mTaskStack.compareTo(
+                activity.getActivityStack().mTaskStack) <= 0) {
+            canUpdate = true;
+        }
+
+        if (canUpdate) {
+            // Make sure the previous top activity in the process no longer be resumed.
+            if (mPreQTopResumedActivity != null && mPreQTopResumedActivity.isState(RESUMED)) {
+                final ActivityStack stack = mPreQTopResumedActivity.getActivityStack();
+                if (stack != null) {
+                    stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                            null /* resuming */, false /* pauseImmediately */);
+                }
+            }
+            mPreQTopResumedActivity = activity;
+        }
+        return canUpdate;
     }
 
     public void stopFreezingActivities() {

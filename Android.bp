@@ -117,7 +117,6 @@ java_defaults {
         "core/java/android/app/timedetector/ITimeDetectorService.aidl",
         "core/java/android/app/timezone/ICallback.aidl",
         "core/java/android/app/timezone/IRulesManager.aidl",
-        "core/java/android/app/timezonedetector/ITimeZoneDetectorService.aidl",
         "core/java/android/app/usage/ICacheQuotaService.aidl",
         "core/java/android/app/usage/IStorageStatsManager.aidl",
         "core/java/android/app/usage/IUsageStatsManager.aidl",
@@ -735,6 +734,7 @@ java_defaults {
     no_framework_libs: true,
     libs: [
         "ext",
+        "updatable_media_stubs",
     ],
 
     jarjar_rules: "jarjar_rules_hidl.txt",
@@ -1296,7 +1296,7 @@ stubs_defaults {
         ":non_openjdk_javadoc_files",
         ":android_icu4j_src_files_for_docs",
         ":conscrypt_public_api_files",
-        ":media-srcs-without-aidls",
+        ":updatable-media-srcs-without-aidls",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
     ],
@@ -1358,7 +1358,7 @@ stubs_defaults {
         ":non_openjdk_javadoc_files",
         ":android_icu4j_src_files_for_docs",
         ":conscrypt_public_api_files",
-        ":media-srcs-without-aidls",
+        ":updatable-media-srcs-without-aidls",
     ],
     srcs_lib: "framework",
     srcs_lib_whitelist_dirs: frameworks_base_subdirs,

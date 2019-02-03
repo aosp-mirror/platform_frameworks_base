@@ -518,7 +518,7 @@ package android.app {
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean removeConfiguration(long);
-    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void setActiveConfigsChangedOperation(@Nullable android.app.PendingIntent) throws android.app.StatsManager.StatsUnavailableException;
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] setActiveConfigsChangedOperation(@Nullable android.app.PendingIntent) throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void setBroadcastSubscriber(android.app.PendingIntent, long, long) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setDataFetchOperation(long, android.app.PendingIntent);
@@ -1127,6 +1127,7 @@ package android.app.usage {
     method public String getNotificationChannelId();
     method @Nullable public String getTaskRootClassName();
     method @Nullable public String getTaskRootPackageName();
+    method public boolean isInstantApp();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
     field public static final int SLICE_PINNED = 14; // 0xe
@@ -1316,6 +1317,32 @@ package android.content {
     method public void sendBroadcast(android.content.Intent, String, android.os.Bundle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, String, android.os.Bundle);
     method public void sendOrderedBroadcast(android.content.Intent, String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
+  }
+
+  public class DynamicAndroidClient {
+    ctor public DynamicAndroidClient(@NonNull android.content.Context);
+    method public void bind();
+    method public void setOnStatusChangedListener(@NonNull android.content.DynamicAndroidClient.OnStatusChangedListener, @NonNull java.util.concurrent.Executor);
+    method public void setOnStatusChangedListener(@NonNull android.content.DynamicAndroidClient.OnStatusChangedListener);
+    method public void start(String, long);
+    method public void start(String, long, long);
+    method public void unbind();
+    field public static final int CAUSE_ERROR_EXCEPTION = 6; // 0x6
+    field public static final int CAUSE_ERROR_INVALID_URL = 4; // 0x4
+    field public static final int CAUSE_ERROR_IO = 3; // 0x3
+    field public static final int CAUSE_ERROR_IPC = 5; // 0x5
+    field public static final int CAUSE_INSTALL_CANCELLED = 2; // 0x2
+    field public static final int CAUSE_INSTALL_COMPLETED = 1; // 0x1
+    field public static final int CAUSE_NOT_SPECIFIED = 0; // 0x0
+    field public static final int STATUS_IN_PROGRESS = 2; // 0x2
+    field public static final int STATUS_IN_USE = 4; // 0x4
+    field public static final int STATUS_NOT_STARTED = 1; // 0x1
+    field public static final int STATUS_READY = 3; // 0x3
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+  }
+
+  public static interface DynamicAndroidClient.OnStatusChangedListener {
+    method public void onStatusChanged(int, int, long);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -1639,6 +1666,7 @@ package android.content.pm {
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     field public static final int FLAG_REMOVED = 2; // 0x2
+    field public static final int PROTECTION_FLAG_APP_PREDICTOR = 2097152; // 0x200000
     field public static final int PROTECTION_FLAG_CONFIGURATOR = 524288; // 0x80000
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
     field public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 1048576; // 0x100000
@@ -1815,7 +1843,9 @@ package android.hardware.display {
     field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessChangeEvent> CREATOR;
     field public final float batteryLevel;
     field public final float brightness;
+    field public final long colorSampleDuration;
     field public final int colorTemperature;
+    field @Nullable public final long[] colorValueBuckets;
     field public final boolean isDefaultBrightnessConfig;
     field public final boolean isUserSetBrightness;
     field public final float lastBrightness;
@@ -3461,15 +3491,6 @@ package android.media {
     method public void stop();
   }
 
-  public final class Session2Token implements android.os.Parcelable {
-    ctor public Session2Token(@NonNull android.content.Context, @NonNull String, @Nullable android.os.Bundle);
-    method public void destroy();
-    method @NonNull public android.os.Bundle getExtras();
-    method public int getPid();
-    method public boolean isDestroyed();
-    field public static final String SESSION_SERVICE_INTERFACE = "android.media.MediaSession2Service";
-  }
-
   public static class SubtitleData.Builder {
     ctor public SubtitleData.Builder();
     ctor public SubtitleData.Builder(@NonNull android.media.SubtitleData);
@@ -4922,6 +4943,10 @@ package android.net.wifi.rtt {
     field public final boolean supports80211mc;
   }
 
+  public final class ResponderLocation implements android.os.Parcelable {
+    method public boolean getExtraInfoOnAssociationIndication();
+  }
+
   public class WifiRttManager {
     method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE}) public void cancelRanging(@Nullable android.os.WorkSource);
     method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.ACCESS_WIFI_STATE}) public void startRanging(@Nullable android.os.WorkSource, @NonNull android.net.wifi.rtt.RangingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.rtt.RangingResultCallback);
@@ -5501,6 +5526,8 @@ package android.permission {
 
   public final class PermissionControllerManager {
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
+    field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
+    field public static final int COUNT_WHEN_SYSTEM = 2; // 0x2
     field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2
     field public static final int REASON_MALWARE = 1; // 0x1
   }
@@ -5514,7 +5541,7 @@ package android.permission {
     ctor public PermissionControllerService();
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract int onCountPermissionApps(@NonNull java.util.List<java.lang.String>, boolean, boolean);
+    method public abstract int onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int);
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(@NonNull String);
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
     method public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
@@ -9183,6 +9210,21 @@ package android.util {
 
   public static final class EventLog.Event {
     method public int getUid();
+  }
+
+  public class StatsLogAtoms {
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED = 170; // 0xaa
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_DENIED = 8; // 0x8
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_GRANTED = 5; // 0x5
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED = 1; // 0x1
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_POLICY_FIXED = 3; // 0x3
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_USER_FIXED = 2; // 0x2
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED = 6; // 0x6
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED_WITH_PREJUDICE = 7; // 0x7
+    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_GRANTED = 4; // 0x4
+  }
+
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @IntDef(prefix="PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__", value={android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_USER_FIXED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_POLICY_FIXED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_GRANTED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_GRANTED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED_WITH_PREJUDICE, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_DENIED}) public static @interface StatsLogAtoms.PermissionGrantRequestResultReported_Result {
   }
 
 }

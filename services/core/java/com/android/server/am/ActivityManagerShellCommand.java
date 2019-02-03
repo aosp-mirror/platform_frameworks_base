@@ -1815,7 +1815,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runTrackAssociations(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
-                "registerUidObserver()");
+                "runTrackAssociations()");
         synchronized (mInternal) {
             if (!mInternal.mTrackingAssociations) {
                 mInternal.mTrackingAssociations = true;
@@ -1829,7 +1829,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runUntrackAssociations(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
-                "registerUidObserver()");
+                "runUntrackAssociations()");
         synchronized (mInternal) {
             if (mInternal.mTrackingAssociations) {
                 mInternal.mTrackingAssociations = false;

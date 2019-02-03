@@ -2645,6 +2645,9 @@
     <!-- Displayed to the user to confirm that they have copied text from a web page to the clipboard. -->
     <string name="text_copied">Text copied to clipboard.</string>
 
+    <!-- Displayed to the user to confirm that they have copied text/images to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="copied">Copied</string>
+
     <!-- Menu item displayed at the end of a menu to allow users to see another page worth of menu items. This is shown on any app's menu as long as the app has too many items in the menu.-->
     <string name="more_item_label">More</string>
     <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the MENU button together with the shortcut to invoke the item. For example, if the shortcut to open a new tab in browser is MENU and B together, then this would be prepended to the letter "B" -->

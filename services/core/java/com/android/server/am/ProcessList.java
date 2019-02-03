@@ -58,7 +58,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
-import android.net.Uri;
 import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
@@ -1481,6 +1480,9 @@ public final class ProcessList {
                     mService.mSafeMode == true) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
+            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0) {
+                runtimeFlags |= Zygote.PROFILE_FROM_SHELL;
+            }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
@@ -1507,7 +1509,7 @@ public final class ProcessList {
                 mService.mNativeDebuggingApp = null;
             }
 
-            if (app.info.isCodeIntegrityPreferred()
+            if (app.info.isEmbeddedDexUsed()
                     || (app.info.isPrivilegedApp()
                         && DexManager.isPackageSelectedToRunOob(app.pkgList.mPkgList.keySet()))) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;

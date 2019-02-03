@@ -2597,6 +2597,10 @@ class ActivityStack extends ConfigurationContainer {
             return false;
         }
 
+        if (!next.canResumeByCompat()) {
+            return false;
+        }
+
         // If we are sleeping, and there is no resumed activity, and the top
         // activity is paused, well that is the state we want.
         if (shouldSleepOrShutDownActivities()

@@ -137,8 +137,8 @@
     <color name="car_toast_background">#E6282a2d</color>
 
     <!-- Misc colors -->
-    <color name="car_highlight_light">@color/car_teal_200</color>
-    <color name="car_highlight_dark">@color/car_teal_200</color>
+    <color name="car_highlight_light">#ff66b5ff</color>
+    <color name="car_highlight_dark">#ff60a8f0</color>
     <color name="car_highlight">@color/car_highlight_dark</color>
     <color name="car_accent_light">@color/car_highlight_light</color>
     <color name="car_accent_dark">@color/car_highlight_dark</color>

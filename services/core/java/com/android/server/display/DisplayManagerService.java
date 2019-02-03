@@ -2196,6 +2196,22 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
+            if (mDisplayPowerController != null) {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.setDisplayWhiteBalanceLoggingEnabled(enabled);
+                }
+            }
+        }
+
+        void setAmbientColorTemperatureOverride(float cct) {
+            if (mDisplayPowerController != null) {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.setAmbientColorTemperatureOverride(cct);
+                }
+            }
+        }
+
         private boolean validatePackageName(int uid, String packageName) {
             if (packageName != null) {
                 String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);

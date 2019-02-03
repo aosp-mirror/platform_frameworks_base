@@ -129,6 +129,7 @@ import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
 import android.util.proto.ProtoOutputStream;
@@ -305,8 +306,14 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage
     final ArrayList<Application> mAllApplications
             = new ArrayList<Application>();
-    // set of instantiated backup agents, keyed by package name
-    final ArrayMap<String, BackupAgent> mBackupAgents = new ArrayMap<String, BackupAgent>();
+    /**
+     * Bookkeeping of instantiated backup agents indexed first by user id, then by package name.
+     * Indexing by user id supports parallel backups across users on system packages as they run in
+     * the same process with the same package name. Indexing by package name supports multiple
+     * distinct applications running in the same process.
+     */
+    private final SparseArray<ArrayMap<String, BackupAgent>> mBackupAgentsByUser =
+            new SparseArray<>();
     /** Reference to singleton {@link ActivityThread} */
     @UnsupportedAppUsage
     private static volatile ActivityThread sCurrentActivityThread;
@@ -659,10 +666,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         ApplicationInfo appInfo;
         CompatibilityInfo compatInfo;
         int backupMode;
+        int userId;
         public String toString() {
             return "CreateBackupAgentData{appInfo=" + appInfo
                     + " backupAgent=" + appInfo.backupAgentName
-                    + " mode=" + backupMode + "}";
+                    + " mode=" + backupMode + " userId=" + userId + "}";
         }
     }
 
@@ -877,20 +885,22 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
-                CompatibilityInfo compatInfo, int backupMode) {
+                CompatibilityInfo compatInfo, int backupMode, int userId) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
             d.compatInfo = compatInfo;
             d.backupMode = backupMode;
+            d.userId = userId;
 
             sendMessage(H.CREATE_BACKUP_AGENT, d);
         }
 
         public final void scheduleDestroyBackupAgent(ApplicationInfo app,
-                CompatibilityInfo compatInfo) {
+                CompatibilityInfo compatInfo, int userId) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
             d.compatInfo = compatInfo;
+            d.userId = userId;
 
             sendMessage(H.DESTROY_BACKUP_AGENT, d);
         }
@@ -3616,7 +3626,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         try {
             IBinder binder = null;
-            BackupAgent agent = mBackupAgents.get(packageName);
+            ArrayMap<String, BackupAgent> backupAgents = getBackupAgentsForUser(data.userId);
+            BackupAgent agent = backupAgents.get(packageName);
             if (agent != null) {
                 // reusing the existing instance
                 if (DEBUG_BACKUP) {
@@ -3635,9 +3646,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                     context.setOuterContext(agent);
                     agent.attach(context);
 
-                    agent.onCreate();
+                    agent.onCreate(UserHandle.of(data.userId));
                     binder = agent.onBind();
-                    mBackupAgents.put(packageName, agent);
+                    backupAgents.put(packageName, agent);
                 } catch (Exception e) {
                     // If this is during restore, fail silently; otherwise go
                     // ahead and let the user see the crash.
@@ -3653,7 +3664,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             // tell the OS that we're live now
             try {
-                ActivityManager.getService().backupAgentCreated(packageName, binder);
+                ActivityManager.getService().backupAgentCreated(packageName, binder, data.userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3669,7 +3680,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
         String packageName = packageInfo.mPackageName;
-        BackupAgent agent = mBackupAgents.get(packageName);
+        ArrayMap<String, BackupAgent> backupAgents = getBackupAgentsForUser(data.userId);
+        BackupAgent agent = backupAgents.get(packageName);
         if (agent != null) {
             try {
                 agent.onDestroy();
@@ -3677,10 +3689,19 @@ public final class ActivityThread extends ClientTransactionHandler {
                 Slog.w(TAG, "Exception thrown in onDestroy by backup agent of " + data.appInfo);
                 e.printStackTrace();
             }
-            mBackupAgents.remove(packageName);
+            backupAgents.remove(packageName);
         } else {
             Slog.w(TAG, "Attempt to destroy unknown backup agent " + data);
         }
+    }
+
+    private ArrayMap<String, BackupAgent> getBackupAgentsForUser(int userId) {
+        ArrayMap<String, BackupAgent> backupAgents = mBackupAgentsByUser.get(userId);
+        if (backupAgents == null) {
+            backupAgents = new ArrayMap<>();
+            mBackupAgentsByUser.put(userId, backupAgents);
+        }
+        return backupAgents;
     }
 
     @UnsupportedAppUsage

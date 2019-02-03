@@ -6915,6 +6915,27 @@ message MetricsEvent {
     // OS: Q
     MOBILE_NETWORK_RENAME_DIALOG = 1642;
 
+    // ACTION: Settings > Search Bar > Avatar
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_CLICK_ACCOUNT_AVATAR = 1643;
+
+    // OPEN: Set new password (action intents android.app.action.SET_NEW_PASSWORD or
+    // android.app.action.SET_NEW_PARENT_PROFILE_PASSWORD)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SET_NEW_PASSWORD_ACTIVITY = 1644;
+
+    // ACTION: Set new password (action intent android.app.action.SET_NEW_PASSWORD)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_SET_NEW_PASSWORD = 1645;
+
+    // ACTION: Set new password (action intent android.app.action.SET_NEW_PARENT_PROFILE_PASSWORD)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_SET_NEW_PARENT_PROFILE_PASSWORD = 1646;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

@@ -3017,6 +3017,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getAppPredictionServicePackageName() {
+        try {
+            return mPM.getAppPredictionServicePackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public String getContentCaptureServicePackageName() {
         try {
             return mPM.getContentCaptureServicePackageName();

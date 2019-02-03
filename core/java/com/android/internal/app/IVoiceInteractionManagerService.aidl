@@ -155,15 +155,15 @@ interface IVoiceInteractionManagerService {
     /**
      * Sets the transcribed voice to the given string.
      */
-    void setTranscription(String transcription);
+    void setTranscription(IVoiceInteractionService service, String transcription);
 
     /**
      * Indicates that the transcription session is finished.
      */
-    void clearTranscription(boolean immediate);
+    void clearTranscription(IVoiceInteractionService service, boolean immediate);
 
     /**
      * Sets the voice state indication based upon the given value.
      */
-    void setVoiceState(int state);
+    void setVoiceState(IVoiceInteractionService service, int state);
 }

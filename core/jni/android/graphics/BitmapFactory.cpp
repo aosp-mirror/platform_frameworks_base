@@ -15,6 +15,7 @@
 #include "Utils.h"
 #include "core_jni_helpers.h"
 
+#include <HardwareBitmapUploader.h>
 #include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
@@ -278,6 +279,11 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     // Set the decode colorType
     SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
+    if (decodeColorType == kRGBA_F16_SkColorType && isHardware &&
+            !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        decodeColorType = kN32_SkColorType;
+    }
+
     sk_sp<SkColorSpace> decodeColorSpace = codec->computeOutputColorSpace(
             decodeColorType, prefColorSpace);
 
@@ -354,13 +360,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
             decodeColorType, alphaType, decodeColorSpace);
 
-    // For wide gamut images, we will leave the color space on the SkBitmap.  Otherwise,
-    // use the default.
     SkImageInfo bitmapInfo = decodeInfo;
-    if (decodeInfo.colorSpace() && decodeInfo.colorSpace()->isSRGB()) {
-        bitmapInfo = bitmapInfo.makeColorSpace(decodeInfo.refColorSpace());
-    }
-
     if (decodeColorType == kGray_8_SkColorType) {
         // The legacy implementation of BitmapFactory used kAlpha8 for
         // grayscale images (before kGray8 existed).  While the codec

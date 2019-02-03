@@ -203,7 +203,7 @@ interface IActivityManager {
     void unbindFinished(in IBinder token, in Intent service, boolean doRebind);
     void setProcessImportant(in IBinder token, int pid, boolean isForeground, String reason);
     void setServiceForeground(in ComponentName className, in IBinder token,
-            int id, in Notification notification, int flags);
+            int id, in Notification notification, int flags, int foregroundServiceType);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     void getMemoryInfo(out ActivityManager.MemoryInfo outInfo);
     List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
@@ -221,8 +221,8 @@ interface IActivityManager {
     boolean shutdown(int timeout);
     void stopAppSwitches();
     void resumeAppSwitches();
-    boolean bindBackupAgent(in String packageName, int backupRestoreMode, int userId);
-    void backupAgentCreated(in String packageName, in IBinder agent);
+    boolean bindBackupAgent(in String packageName, int backupRestoreMode, int targetUserId);
+    void backupAgentCreated(in String packageName, in IBinder agent, int userId);
     void unbindBackupAgent(in ApplicationInfo appInfo);
     int getUidForIntentSender(in IIntentSender sender);
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,

@@ -27,10 +27,6 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
-
-        // TODO: Linear blending should be enabled by default, but we are
-        // TODO: making it an opt-in while it's a work in progress
-        //"-DANDROID_ENABLE_LINEAR_BLENDING",
     ],
 
     cppflags: ["-Wno-conversion-null"],

@@ -368,4 +368,15 @@ public class ActivityRecordTests extends ActivityTestsBase {
         verify(mService.getLifecycleManager()).scheduleTransaction(eq(mActivity.app.getThread()),
                 eq(mActivity.appToken), eq(expected));
     }
+
+    @Test
+    public void testShouldMakeActive_deferredResume() {
+        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+
+        mSupervisor.beginDeferResume();
+        assertEquals(false, mActivity.shouldMakeActive(null /* activeActivity */));
+
+        mSupervisor.endDeferResume();
+        assertEquals(true, mActivity.shouldMakeActive(null /* activeActivity */));
+    }
 }

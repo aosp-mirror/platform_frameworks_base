@@ -782,6 +782,9 @@ public:
     void getPosition(ResXMLPosition* pos) const;
     void setPosition(const ResXMLPosition& pos);
 
+    void setSourceResourceId(const uint32_t resId);
+    uint32_t getSourceResourceId() const;
+
 private:
     friend class ResXMLTree;
     
@@ -791,6 +794,7 @@ private:
     event_code_t                mEventCode;
     const ResXMLTree_node*      mCurNode;
     const void*                 mCurExt;
+    uint32_t                    mSourceResourceId;
 };
 
 class DynamicRefTable;

@@ -194,6 +194,7 @@ public class BroadcastRecordTest {
                 false /* sticky */,
                 false /* initialSticky */,
                 userId,
-                false /* allowBackgroundActivityStarts */);
+                false, /* allowBackgroundActivityStarts */
+                false /* timeoutExempt */ );
     }
 }

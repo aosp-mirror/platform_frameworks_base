@@ -235,6 +235,9 @@ message Atom {
         BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported = 166;
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
         ScreenTimeoutExtensionReported screen_timeout_extension_reported = 168;
+        ProcessStartTime process_start_time = 169;
+        PermissionGrantRequestResultReported permission_grant_request_result_reported = 170;
+        BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
     }
 
     // Pulled events will start at field 10000.
@@ -290,6 +293,7 @@ message Atom {
         DebugFailingElapsedClock debug_failing_elapsed_clock = 10047;
         NumBiometricsEnrolled num_faces_enrolled = 10048;
         RoleHolder role_holder = 10049;
+        DangerousPermissionState dangerous_permission_state = 10050;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2062,6 +2066,36 @@ message BluetoothSmpPairingEventReported {
     // SMP failure reason code
     // Default: PAIRING_FAIL_REASON_DEFAULT
     optional android.bluetooth.smp.PairingFailReasonEnum smp_fail_reason = 4;
+}
+
+/**
+ * Logs when a Bluetooth socket’s connection state changed
+ *
+ * Logged from:
+ *   system/bt
+ */
+message BluetoothSocketConnectionStateChanged {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Port of this socket
+    // Default 0 when unknown or don't care
+    optional int32 port = 2;
+    // Socket type as mentioned in
+    // frameworks/base/core/java/android/bluetooth/BluetoothSocket.java
+    // Default: SOCKET_TYPE_UNKNOWN
+    optional android.bluetooth.SocketTypeEnum type = 3;
+    // Socket connection state
+    // Default: SOCKET_CONNECTION_STATE_UNKNOWN
+    optional android.bluetooth.SocketConnectionstateEnum state = 4;
+    // Number of bytes sent to remote device during this connection
+    optional int64 tx_bytes = 5;
+    // Number of bytes received from remote device during this connection
+    optional int64 rx_bytes = 6;
 }
 
 /**
@@ -5096,6 +5130,48 @@ message SeStateChanged {
 }
 
 /**
+ * Information about a permission grant request
+ */
+message PermissionGrantRequestResultReported {
+    // unique value identifying an API call. A API call might result in multiple of these atoms
+    optional int64 request_id = 1;
+
+    // UID of package requesting the permission grant
+    optional int32 requesting_uid = 2 [(is_uid) = true];
+
+    // Name of package requesting the permission grant
+    optional string requesting_package_name = 3;
+
+    // The permission to be granted
+    optional string permission_name = 4;
+
+    // If the permission was explicitly requested via the API or added by the system
+    optional bool is_implicit = 5;
+
+    enum Result {
+        UNDEFINED = 0;
+        // permission request was ignored
+        IGNORED = 1;
+        // permission request was ignored because it was user fixed
+        IGNORED_USER_FIXED = 2;
+        // permission request was ignored because it was policy fixed
+        IGNORED_POLICY_FIXED = 3;
+        // permission was granted by user action
+        USER_GRANTED = 4;
+        // permission was automatically granted
+        AUTO_GRANTED = 5;
+        // permission was denied by user action
+        USER_DENIED = 6;
+        // permission was denied with prejudice by the user
+        USER_DENIED_WITH_PREJUDICE = 7;
+        // permission was automatically denied
+        AUTO_DENIED = 8;
+    }
+    // The result of the permission grant
+    optional Result result = 6;
+}
+
+/**
  * Logs when Omapi API used
  * Logged from:
  *     packages/apps/SecureElement/src/com/android/se/Terminal.java
@@ -5263,6 +5339,7 @@ message BubbleUIChanged {
         PERMISSION_IGNORED = 12;
         SWIPE_LEFT = 13;
         SWIPE_RIGHT = 14;
+        STACK_EXPANDED = 15;
     }
     optional Action action = 6;
 
@@ -5303,3 +5380,76 @@ message ScreenTimeoutExtensionReported {
     // Describes how many times in a row did the power manager reset the screen off timeout.
     optional uint32 consecutive_timeout_extended_count = 1;
 }
+
+/*
+* Logs number of milliseconds it takes to start a process.
+* The definition of app process start time is from the app launch time to
+* the time that Zygote finished forking the app process and loaded the
+* application package's java classes.
+
+* This metric is different from AppStartOccurred which is for foreground
+* activity only.
+
+* ProcessStartTime can report all processes (both foreground and background)
+* start time.
+*
+* Logged from:
+*   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+*/
+message ProcessStartTime {
+    // The uid of the ProcessRecord.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process pid.
+    optional int32 pid = 2;
+
+    // The process name.
+    // Usually package name, "system" for system server.
+    // Provided by ActivityManagerService.
+    optional string process_name = 3;
+
+    enum StartType {
+        UNKNOWN = 0;
+        WARM = 1;
+        HOT = 2;
+        COLD = 3;
+    }
+
+    // The start type.
+    optional StartType type = 4;
+
+    // The elapsed realtime at the start of the process.
+    optional int64 process_start_time_millis = 5;
+
+    // Number of milliseconds it takes to reach bind application.
+    optional int32 bind_application_delay_millis = 6;
+
+    // Number of milliseconds it takes to finish start of the process.
+    optional int32 process_start_delay_millis = 7;
+
+    // hostingType field in ProcessRecord, the component type such as "activity",
+    // "service", "content provider", "broadcast" or other strings.
+    optional string hosting_type = 8;
+
+    // hostingNameStr field in ProcessRecord. The component class name that runs
+    // in this process.
+    optional string hosting_name = 9;
+}
+
+/**
+ * State of a dangerous permission requested by a package
+ */
+message DangerousPermissionState {
+    // Name of the permission
+    optional string permission_name = 1;
+
+    // Uid of the package
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Package requesting the permission
+    optional string package_name = 3;
+
+    // If the permission is granted to the uid
+    optional bool is_granted = 4;
+}
+

@@ -1373,13 +1373,13 @@ public class NotificationContentView extends FrameLayout {
         }
         // Apps didn't provide any smart replies / actions, use those from NAS (if any).
         if (!appGeneratedSmartRepliesExist && !appGeneratedSmartActionsExist) {
-            boolean useGeneratedReplies = !ArrayUtils.isEmpty(entry.smartReplies)
+            boolean useGeneratedReplies = !ArrayUtils.isEmpty(entry.systemGeneratedSmartReplies)
                     && freeformRemoteInputActionPair != null
                     && freeformRemoteInputActionPair.second.getAllowGeneratedReplies()
                     && freeformRemoteInputActionPair.second.actionIntent != null;
             if (useGeneratedReplies) {
                 smartReplies = new SmartReplyView.SmartReplies(
-                        entry.smartReplies,
+                        entry.systemGeneratedSmartReplies,
                         freeformRemoteInputActionPair.first,
                         freeformRemoteInputActionPair.second.actionIntent,
                         true /* fromAssistant */);

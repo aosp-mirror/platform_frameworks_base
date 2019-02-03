@@ -17,6 +17,7 @@
 #define LOG_TAG "InputWindowHandle"
 
 #include <nativehelper/JNIHelp.h>
+#include "core_jni_helpers.h"
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
@@ -86,24 +87,14 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.touchableRegion.clear();
 
-    jobject tokenObj = env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.token);
+    jobject tokenObj = env->GetObjectField(obj, gInputWindowHandleClassInfo.token);
     if (tokenObj) {
         mInfo.token = ibinderForJavaObject(env, tokenObj);
     } else {
         mInfo.token.clear();
     }
 
-    jstring nameObj = jstring(env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.name));
-    if (nameObj) {
-        const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-        mInfo.name = nameStr;
-        env->ReleaseStringUTFChars(nameObj, nameStr);
-        env->DeleteLocalRef(nameObj);
-    } else {
-        mInfo.name = "<null>";
-    }
+    mInfo.name = getStringField(env, obj, gInputWindowHandleClassInfo.name, "<null>");
 
     mInfo.layoutParamsFlags = env->GetIntField(obj,
             gInputWindowHandleClassInfo.layoutParamsFlags);
@@ -241,8 +232,7 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, clazz,
             "ptr", "J");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.inputApplicationHandle,
-            clazz,
+    GET_FIELD_ID(gInputWindowHandleClassInfo.inputApplicationHandle, clazz,
             "inputApplicationHandle", "Landroid/view/InputApplicationHandle;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.token, clazz,

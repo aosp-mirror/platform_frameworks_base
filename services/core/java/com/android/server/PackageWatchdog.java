@@ -247,9 +247,8 @@ public class PackageWatchdog {
                 }
 
                 for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
-                    String packageToReport = packages.get(pIndex).getPackageName();
-                    long packageVersionCode = packages.get(pIndex).getVersionCode();
-                    // Observer that will receive failure for packageToReport
+                    VersionedPackage versionedPackage = packages.get(pIndex);
+                    // Observer that will receive failure for versionedPackage
                     PackageHealthObserver currentObserverToNotify = null;
                     int currentObserverImpact = Integer.MAX_VALUE;
 
@@ -258,9 +257,8 @@ public class PackageWatchdog {
                         ObserverInternal observer = mAllObservers.valueAt(oIndex);
                         PackageHealthObserver registeredObserver = observer.mRegisteredObserver;
                         if (registeredObserver != null
-                                && observer.onPackageFailure(packageToReport)) {
-                            int impact = registeredObserver.onHealthCheckFailed(packageToReport,
-                                    packageVersionCode);
+                                && observer.onPackageFailure(versionedPackage.getPackageName())) {
+                            int impact = registeredObserver.onHealthCheckFailed(versionedPackage);
                             if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                                     && impact < currentObserverImpact) {
                                 currentObserverToNotify = registeredObserver;
@@ -271,7 +269,7 @@ public class PackageWatchdog {
 
                     // Execute action with least user impact
                     if (currentObserverToNotify != null) {
-                        currentObserverToNotify.execute(packageToReport, packageVersionCode);
+                        currentObserverToNotify.execute(versionedPackage);
                     }
                 }
             }
@@ -310,19 +308,19 @@ public class PackageWatchdog {
     /** Register instances of this interface to receive notifications on package failure. */
     public interface PackageHealthObserver {
         /**
-         * Called when health check fails for the {@code packageName}.
+         * Called when health check fails for the {@code versionedPackage}.
          *
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
          * to the user on {@link #execute}
          */
-        @PackageHealthObserverImpact int onHealthCheckFailed(String packageName, long versionCdoe);
+        @PackageHealthObserverImpact int onHealthCheckFailed(VersionedPackage versionedPackage);
 
         /**
          * Executes mitigation for {@link #onHealthCheckFailed}.
          *
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
-        boolean execute(String packageName, long versionCode);
+        boolean execute(VersionedPackage versionedPackage);
 
         // TODO(zezeozue): Ensure uniqueness?
         /**

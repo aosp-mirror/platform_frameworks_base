@@ -53,7 +53,10 @@
   <java-symbol type="id" name="content_preview" />
   <java-symbol type="id" name="content_preview_thumbnail" />
   <java-symbol type="id" name="content_preview_text" />
+  <java-symbol type="id" name="content_preview_text_layout" />
   <java-symbol type="id" name="content_preview_title" />
+  <java-symbol type="id" name="content_preview_title_layout" />
+  <java-symbol type="id" name="copy_button" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -545,6 +548,7 @@
   <java-symbol type="string" name="activity_resolver_work_profiles_support" />
   <java-symbol type="string" name="app_running_notification_title" />
   <java-symbol type="string" name="app_running_notification_text" />
+  <java-symbol type="string" name="copied" />
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
   <java-symbol type="string" name="grant_permissions_header_text" />
@@ -1354,6 +1358,9 @@
   <java-symbol type="drawable" name="ic_text_dot" />
   <java-symbol type="drawable" name="ic_print" />
   <java-symbol type="drawable" name="ic_print_error" />
+  <java-symbol type="drawable" name="ic_lock_24dp" />
+  <java-symbol type="drawable" name="ic_lock_open_24dp" />
+  <java-symbol type="drawable" name="ic_auth_error" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_left_green" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_right_red" />
   <java-symbol type="drawable" name="jog_dial_arrow_short_left_and_right" />
@@ -2215,6 +2222,10 @@
   <java-symbol type="anim" name="lock_screen_wallpaper_exit" />
   <java-symbol type="anim" name="launch_task_behind_source" />
   <java-symbol type="anim" name="wallpaper_open_exit" />
+  <java-symbol type="anim" name="lock_to_error" />
+  <java-symbol type="anim" name="lock_lock" />
+  <java-symbol type="anim" name="lock_unlock" />
+  <java-symbol type="anim" name="lock_in" />
 
   <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="dimen" name="status_bar_icon_size" />
@@ -2711,6 +2722,9 @@
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
   <java-symbol type="dimen" name="chooser_corner_radius" />
+  <java-symbol type="dimen" name="chooser_view_spacing" />
+  <java-symbol type="dimen" name="chooser_edge_margin_thin" />
+  <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="resolve_grid_item" />
   <java-symbol type="id" name="day_picker_view_pager" />
@@ -3591,4 +3605,20 @@
   <java-symbol type="integer" name="config_attentionApiTimeout" />
 
   <java-symbol type="string" name="config_incidentReportApproverPackage" />
+
+  <!-- Display White-Balance -->
+  <java-symbol type="integer" name="config_displayWhiteBalanceBrightnessSensorRate" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceBrightnessFilterHorizon" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceBrightnessFilterIntercept" />
+  <java-symbol type="string" name="config_displayWhiteBalanceColorTemperatureSensorName" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureSensorRate" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureFilterHorizon" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceColorTemperatureFilterIntercept" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceIncreaseDebounce" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceDecreaseDebounce" />
+  <java-symbol type="array" name="config_displayWhiteBalanceBaseThresholds" />
+  <java-symbol type="array" name="config_displayWhiteBalanceIncreaseThresholds" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDecreaseThresholds" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperature" />
 </resources>

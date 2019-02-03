@@ -613,11 +613,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @Override
         public void showSession(IVoiceInteractionService service, Bundle args, int flags) {
             synchronized (this) {
-                if (mImpl == null || mImpl.mService == null
-                        || service.asBinder() != mImpl.mService.asBinder()) {
-                    throw new SecurityException(
-                            "Caller is not the current voice interaction service");
-                }
+                enforceIsCurrentVoiceInteractionService(service);
+
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     mImpl.showSessionLocked(args, flags, null, null);
@@ -896,11 +893,7 @@ public class VoiceInteractionManagerService extends SystemService {
         public boolean isEnrolledForKeyphrase(IVoiceInteractionService service, int keyphraseId,
                 String bcp47Locale) {
             synchronized (this) {
-                if (mImpl == null || mImpl.mService == null
-                        || service.asBinder() != mImpl.mService.asBinder()) {
-                    throw new SecurityException(
-                            "Caller is not the current voice interaction service");
-                }
+                enforceIsCurrentVoiceInteractionService(service);
             }
 
             if (bcp47Locale == null) {
@@ -922,11 +915,7 @@ public class VoiceInteractionManagerService extends SystemService {
         public ModuleProperties getDspModuleProperties(IVoiceInteractionService service) {
             // Allow the call if this is the current voice interaction service.
             synchronized (this) {
-                if (mImpl == null || mImpl.mService == null
-                        || service == null || service.asBinder() != mImpl.mService.asBinder()) {
-                    throw new SecurityException(
-                            "Caller is not the current voice interaction service");
-                }
+                enforceIsCurrentVoiceInteractionService(service);
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
@@ -943,11 +932,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 RecognitionConfig recognitionConfig) {
             // Allow the call if this is the current voice interaction service.
             synchronized (this) {
-                if (mImpl == null || mImpl.mService == null
-                        || service == null || service.asBinder() != mImpl.mService.asBinder()) {
-                    throw new SecurityException(
-                            "Caller is not the current voice interaction service");
-                }
+                enforceIsCurrentVoiceInteractionService(service);
 
                 if (callback == null || recognitionConfig == null || bcp47Locale == null) {
                     throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
@@ -983,11 +968,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 IRecognitionStatusCallback callback) {
             // Allow the call if this is the current voice interaction service.
             synchronized (this) {
-                if (mImpl == null || mImpl.mService == null
-                        || service == null || service.asBinder() != mImpl.mService.asBinder()) {
-                    throw new SecurityException(
-                            "Caller is not the current voice interaction service");
-                }
+                enforceIsCurrentVoiceInteractionService(service);
             }
 
             final long caller = Binder.clearCallingIdentity();
@@ -1212,8 +1193,10 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void setTranscription(String transcription) {
+        public void setTranscription(IVoiceInteractionService service, String transcription) {
             synchronized (this) {
+                enforceIsCurrentVoiceInteractionService(service);
+
                 final int size = mVoiceInteractionSessionListeners.beginBroadcast();
                 for (int i = 0; i < size; ++i) {
                     final IVoiceInteractionSessionListener listener =
@@ -1229,8 +1212,10 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void clearTranscription(boolean immediate) {
+        public void clearTranscription(IVoiceInteractionService service, boolean immediate) {
             synchronized (this) {
+                enforceIsCurrentVoiceInteractionService(service);
+
                 final int size = mVoiceInteractionSessionListeners.beginBroadcast();
                 for (int i = 0; i < size; ++i) {
                     final IVoiceInteractionSessionListener listener =
@@ -1246,8 +1231,10 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void setVoiceState(int state) {
+        public void setVoiceState(IVoiceInteractionService service, int state) {
             synchronized (this) {
+                enforceIsCurrentVoiceInteractionService(service);
+
                 final int size = mVoiceInteractionSessionListeners.beginBroadcast();
                 for (int i = 0; i < size; ++i) {
                     final IVoiceInteractionSessionListener listener =
@@ -1266,6 +1253,14 @@ public class VoiceInteractionManagerService extends SystemService {
             if (mContext.checkCallingOrSelfPermission(permission)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Caller does not hold the permission " + permission);
+            }
+        }
+
+        private void enforceIsCurrentVoiceInteractionService(IVoiceInteractionService service) {
+            if (mImpl == null || mImpl.mService == null
+                    || service.asBinder() != mImpl.mService.asBinder()) {
+                throw new
+                    SecurityException("Caller is not the current voice interaction service");
             }
         }
 

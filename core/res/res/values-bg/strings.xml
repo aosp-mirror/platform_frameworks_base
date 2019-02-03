@@ -947,6 +947,8 @@
     <string name="save_password_never" msgid="8274330296785855105">"Никога"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Нямате разрешение да отворите тази страница."</string>
     <string name="text_copied" msgid="4985729524670131385">"Текстът е копиран в буферната памет."</string>
+    <!-- no translation found for copied (8564151838171791598) -->
+    <skip />
     <string name="more_item_label" msgid="4650918923083320495">"Още"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Меню+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1132,7 +1134,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Редактиране чрез"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редактиране чрез %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Редактиране"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Споделяне чрез"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Споделяне"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Споделяне чрез %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Споделяне"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Изпращане посредством"</string>
@@ -1245,10 +1247,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Докоснете, за да видите всички мрежи"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Свързване"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Всички мрежи"</string>
-    <!-- no translation found for wifi_suggestion_title (8951405130379148709) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (2658317015552324848) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Налице е Wi‑Fi мрежа, предложена от <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Искате ли да се свържете с мрежите, предложени от <xliff:g id="NAME">%s</xliff:g>?"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ще се включи автоматично"</string>
@@ -1262,8 +1262,7 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi мрежата няма достъп до интернет"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Докоснете за опции"</string>
-    <!-- no translation found for captive_portal_logged_in_detailed (8489345381637456021) -->
-    <skip />
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Установена е връзка"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промени в настройките ви за точка за достъп"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Честотната лента на точката ви за достъп е променена."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Това устройство не поддържа предпочитанието ви за използване само на честотната лента от 5 ГХц. Вместо това то ще я ползва, когато е възможно."</string>
@@ -1348,14 +1347,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отстраняване на грешки през USB"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Докоснете, за да изключите отстраняването на грешки през USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изберете, за да деактивирате отстраняването на грешки през USB."</string>
-    <!-- no translation found for usb_contaminant_detected_title (7136400633704058349) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_detected_message (832337061059487250) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_title (4202417484434906086) -->
-    <skip />
-    <!-- no translation found for usb_contaminant_not_detected_message (2415791798244545292) -->
-    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Течност или замърсяване в USB порта"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB портът е деактивиран автоматично. Докоснете, за да научите повече."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Безопасно е да използвате USB порта"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Телефонът вече не открива течности или замърсяване."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Сигналът за програмна грешка се извлича…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели ли сигналът за програмна грешка?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Сигналът за програмна грешка се споделя…"</string>
@@ -1394,6 +1389,8 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Настройване"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Изваждане"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Изследване"</string>
+    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Липсва <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Поставете отново устройството"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> се премества"</string>

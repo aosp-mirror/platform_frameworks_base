@@ -1800,11 +1800,9 @@ public class NotificationPanelView extends PanelView implements
                 || mBarState == StatusBarState.SHADE_LOCKED) {
             boolean active = getMaxPanelHeight() - getExpandedHeight() > mUnlockMoveDistance;
             KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
-            if (active && !mUnlockIconActive && mTracking) {
-                lockIcon.setImageAlpha(1.0f, true, 150, Interpolators.FAST_OUT_LINEAR_IN, null);
-            } else if (!active && mUnlockIconActive && mTracking) {
-                lockIcon.setImageAlpha(lockIcon.getRestingAlpha(), true /* animate */,
-                        150, Interpolators.FAST_OUT_LINEAR_IN, null);
+            if (active != mUnlockIconActive && mTracking) {
+                lockIcon.setImageAlpha(lockIcon.getRestingAlpha(), true, 150,
+                        Interpolators.FAST_OUT_LINEAR_IN, null);
             }
             mUnlockIconActive = active;
         }
@@ -2015,7 +2013,6 @@ public class NotificationPanelView extends PanelView implements
                 || mBarState == StatusBarState.SHADE_LOCKED)) {
             KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
             lockIcon.setImageAlpha(0.0f, true, 100, Interpolators.FAST_OUT_LINEAR_IN, null);
-            lockIcon.setImageScale(2.0f, true, 100, Interpolators.FAST_OUT_LINEAR_IN);
         }
     }
 

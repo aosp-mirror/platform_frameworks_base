@@ -621,6 +621,24 @@ android_media_AudioSystem_getMasterMono(JNIEnv *env, jobject thiz)
 }
 
 static jint
+android_media_AudioSystem_setMasterBalance(JNIEnv *env, jobject thiz, jfloat balance)
+{
+    return (jint) check_AudioSystem_Command(AudioSystem::setMasterBalance(balance));
+}
+
+static jfloat
+android_media_AudioSystem_getMasterBalance(JNIEnv *env, jobject thiz)
+{
+    float balance;
+    const status_t status = AudioSystem::getMasterBalance(&balance);
+    if (status != NO_ERROR) {
+        ALOGW("%s getMasterBalance error %d, returning 0.f, audioserver down?", __func__, status);
+        balance = 0.f;
+    }
+    return balance;
+}
+
+static jint
 android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint stream)
 {
     return (jint) AudioSystem::getDevicesForStream(static_cast <audio_stream_type_t>(stream));
@@ -2160,6 +2178,8 @@ static const JNINativeMethod gMethods[] = {
     {"getMasterMute",       "()Z",      (void *)android_media_AudioSystem_getMasterMute},
     {"setMasterMono",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMono},
     {"getMasterMono",       "()Z",      (void *)android_media_AudioSystem_getMasterMono},
+    {"setMasterBalance",    "(F)I",     (void *)android_media_AudioSystem_setMasterBalance},
+    {"getMasterBalance",    "()F",      (void *)android_media_AudioSystem_getMasterBalance},
     {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
     {"getPrimaryOutputSamplingRate", "()I", (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
     {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
