@@ -346,30 +346,34 @@ static void parse_cpuset_cpus(char *cpus, cpu_set_t *cpu_set) {
 static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
 {
     FILE *file;
-    const char *filename;
+    std::string filename;
 
     CPU_ZERO(cpu_set);
 
     switch (policy) {
         case SP_BACKGROUND:
-            filename = "/dev/cpuset/background/cpus";
+            if (!CgroupGetAttributePath("LowCapacityCPUs", &filename)) {
+                return;
+            }
             break;
         case SP_FOREGROUND:
         case SP_AUDIO_APP:
         case SP_AUDIO_SYS:
         case SP_RT_APP:
-            filename = "/dev/cpuset/foreground/cpus";
+            if (!CgroupGetAttributePath("HighCapacityCPUs", &filename)) {
+                return;
+            }
             break;
         case SP_TOP_APP:
-            filename = "/dev/cpuset/top-app/cpus";
+            if (!CgroupGetAttributePath("MaxCapacityCPUs", &filename)) {
+                return;
+            }
             break;
         default:
-            filename = NULL;
+            return;
     }
 
-    if (!filename) return;
-
-    file = fopen(filename, "re");
+    file = fopen(filename.c_str(), "re");
     if (file != NULL) {
         // Parse cpus string
         char *line = NULL;
@@ -379,7 +383,7 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
         if (num_read > 0) {
             parse_cpuset_cpus(line, cpu_set);
         } else {
-            ALOGE("Failed to read %s", filename);
+            ALOGE("Failed to read %s", filename.c_str());
         }
         free(line);
     }
