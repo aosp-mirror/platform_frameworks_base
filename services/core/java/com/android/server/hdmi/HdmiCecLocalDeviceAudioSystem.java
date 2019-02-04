@@ -781,7 +781,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         int maxVolume = mService.getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         int minVolume = mService.getAudioManager().getStreamMinVolume(AudioManager.STREAM_MUSIC);
         int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
-        HdmiLogger.debug("Reporting volume %i (%i-%i) as CEC volume %i", volume,
+        HdmiLogger.debug("Reporting volume %d (%d-%d) as CEC volume %d", volume,
                 minVolume, maxVolume, scaledVolume);
 
         mService.sendCecCommand(
