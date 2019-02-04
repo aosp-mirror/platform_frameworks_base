@@ -1016,6 +1016,40 @@ abstract class HdmiCecLocalDevice {
     }
 
     /**
+     * Send a volume key event to other CEC device. The logical address of target device will be
+     * given by {@link #findAudioReceiverAddress()}.
+     *
+     * @param keyCode key code defined in {@link android.view.KeyEvent}
+     * @param isPressed {@code true} for key down event
+     * @see #findAudioReceiverAddress()
+     */
+    @ServiceThreadOnly
+    protected void sendVolumeKeyEvent(int keyCode, boolean isPressed) {
+        assertRunOnServiceThread();
+        if (!HdmiCecKeycode.isVolumeKeycode(keyCode)) {
+            Slog.w(TAG, "Not a volume key: " + keyCode);
+            return;
+        }
+        List<SendKeyAction> action = getActions(SendKeyAction.class);
+        int logicalAddress = findAudioReceiverAddress();
+        if (logicalAddress == Constants.ADDR_INVALID || logicalAddress == mAddress) {
+            // Don't send key event to invalid device or itself.
+            Slog.w(
+                TAG,
+                "Discard volume key event: "
+                    + keyCode
+                    + ", pressed:"
+                    + isPressed
+                    + ", receiverAddr="
+                    + logicalAddress);
+        } else if (!action.isEmpty()) {
+            action.get(0).processKeyEvent(keyCode, isPressed);
+        } else if (isPressed) {
+            addAndStartAction(new SendKeyAction(this, logicalAddress, keyCode));
+        }
+    }
+
+    /**
      * Returns the logical address of the device which will receive key events via {@link
      * #sendKeyEvent}.
      *
@@ -1023,6 +1057,17 @@ abstract class HdmiCecLocalDevice {
      */
     protected int findKeyReceiverAddress() {
         Slog.w(TAG, "findKeyReceiverAddress is not implemented");
+        return Constants.ADDR_INVALID;
+    }
+
+    /**
+     * Returns the logical address of the audio receiver device which will receive volume key events
+     * via {@link#sendVolumeKeyEvent}.
+     *
+     * @see #sendVolumeKeyEvent(int, boolean)
+     */
+    protected int findAudioReceiverAddress() {
+        Slog.w(TAG, "findAudioReceiverAddress is not implemented");
         return Constants.ADDR_INVALID;
     }
 
