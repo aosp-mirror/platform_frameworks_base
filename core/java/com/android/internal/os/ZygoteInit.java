@@ -41,6 +41,7 @@ import android.system.OsConstants;
 import android.system.StructCapUserData;
 import android.system.StructCapUserHeader;
 import android.text.Hyphenator;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -84,6 +85,8 @@ public class ZygoteInit {
 
     private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String PROPERTY_USE_APP_IMAGE_STARTUP_CACHE =
+            "persist.device_config.runtime_native.use_app_image_startup_cache";
 
     private static final int LOG_BOOT_PROGRESS_PRELOAD_START = 3020;
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
@@ -703,6 +706,13 @@ public class ZygoteInit {
                     "dalvik.vm.profilesystemserver", false);
             if (profileSystemServer) {
                 parsedArgs.mRuntimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
+            }
+
+            String use_app_image_cache = SystemProperties.get(
+                    PROPERTY_USE_APP_IMAGE_STARTUP_CACHE, "");
+            // Property defaults to true currently.
+            if (!TextUtils.isEmpty(use_app_image_cache) && !use_app_image_cache.equals("false")) {
+                parsedArgs.mRuntimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
             /* Request to fork the system server process */
