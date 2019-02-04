@@ -138,8 +138,10 @@ void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
 void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        // TODO(cblume) use VkFunctorDrawable instead of VkInteropFunctorDrawable here when the
+        // interop is disabled.
         functorDrawable =
-                mDisplayList->allocateDrawable<VkFunctorDrawable>(functor, asSkCanvas());
+                mDisplayList->allocateDrawable<VkInteropFunctorDrawable>(functor, asSkCanvas());
     } else {
         functorDrawable = mDisplayList->allocateDrawable<GLFunctorDrawable>(functor, asSkCanvas());
     }
