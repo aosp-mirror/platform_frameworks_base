@@ -25,6 +25,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.res.ResourcesImpl;
 import android.hardware.HardwareBuffer;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
@@ -77,7 +78,7 @@ public final class Bitmap implements Parcelable {
      */
     private boolean mRequestPremultiplied;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769491)
     private byte[] mNinePatchChunk; // may be null
     @UnsupportedAppUsage
     private NinePatch.InsetStruct mNinePatchInsets; // may be null
