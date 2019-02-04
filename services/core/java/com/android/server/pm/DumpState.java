@@ -41,6 +41,7 @@ public final class DumpState {
     public static final int DUMP_CHANGES = 1 << 22;
     public static final int DUMP_VOLUMES = 1 << 23;
     public static final int DUMP_SERVICE_PERMISSIONS = 1 << 24;
+    public static final int DUMP_APEX = 1 << 25;
 
     public static final int OPTION_SHOW_FILTERS = 1 << 0;
     public static final int OPTION_DUMP_ALL_COMPONENTS = 1 << 1;
