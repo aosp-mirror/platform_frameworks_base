@@ -1,0 +1,52 @@
+<!--
+/**
+ * Copyright (c) 2019, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 5.5 4 L 6.5 4 Q 8 4 8 5.5 L 8 6.5 Q 8 8 6.5 8 L 5.5 8 Q 4 8 4 6.5 L 4 5.5 Q 4 4 5.5 4 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 11.5 4 L 12.5 4 Q 14 4 14 5.5 L 14 6.5 Q 14 8 12.5 8 L 11.5 8 Q 10 8 10 6.5 L 10 5.5 Q 10 4 11.5 4 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 17.5 4 L 18.5 4 Q 20 4 20 5.5 L 20 6.5 Q 20 8 18.5 8 L 17.5 8 Q 16 8 16 6.5 L 16 5.5 Q 16 4 17.5 4 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 5.5 10 L 6.5 10 Q 8 10 8 11.5 L 8 12.5 Q 8 14 6.5 14 L 5.5 14 Q 4 14 4 12.5 L 4 11.5 Q 4 10 5.5 10 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 11.5 10 L 12.5 10 Q 14 10 14 11.5 L 14 12.5 Q 14 14 12.5 14 L 11.5 14 Q 10 14 10 12.5 L 10 11.5 Q 10 10 11.5 10 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 17.5 10 L 18.5 10 Q 20 10 20 11.5 L 20 12.5 Q 20 14 18.5 14 L 17.5 14 Q 16 14 16 12.5 L 16 11.5 Q 16 10 17.5 10 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 5.5 16 L 6.5 16 Q 8 16 8 17.5 L 8 18.5 Q 8 20 6.5 20 L 5.5 20 Q 4 20 4 18.5 L 4 17.5 Q 4 16 5.5 16 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 11.5 16 L 12.5 16 Q 14 16 14 17.5 L 14 18.5 Q 14 20 12.5 20 L 11.5 20 Q 10 20 10 18.5 L 10 17.5 Q 10 16 11.5 16 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 17.5 16 L 18.5 16 Q 20 16 20 17.5 L 20 18.5 Q 20 20 18.5 20 L 17.5 20 Q 16 20 16 18.5 L 16 17.5 Q 16 16 17.5 16 Z" />
+</vector>
