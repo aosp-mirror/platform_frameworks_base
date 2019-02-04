@@ -168,12 +168,14 @@ public class BubbleControllerTest extends SysuiTestCase {
         // We should have bubbles & their notifs should show in the shade
         assertTrue(mBubbleController.hasBubbles());
         assertTrue(mRow.getEntry().showInShadeWhenBubble());
+        assertFalse(mStatusBarWindowController.getBubbleExpanded());
 
         // Expand the stack
         BubbleStackView stackView = mBubbleController.getStackView();
         stackView.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().key);
+        assertTrue(mStatusBarWindowController.getBubbleExpanded());
 
         // Make sure it's no longer in the shade
         assertFalse(mRow.getEntry().showInShadeWhenBubble());
@@ -182,6 +184,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         stackView.collapseStack();
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().key);
         assertFalse(mBubbleController.isStackExpanded());
+        assertFalse(mStatusBarWindowController.getBubbleExpanded());
     }
 
     @Test
