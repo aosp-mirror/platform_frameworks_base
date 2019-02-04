@@ -28,6 +28,7 @@ import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -48,6 +49,7 @@ import android.util.Log;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +104,28 @@ public abstract class PermissionControllerService extends Service {
      */
     public abstract void onGetRuntimePermissionsBackup(@NonNull UserHandle user,
             @NonNull OutputStream backup);
+
+    /**
+     * Restore a backup of the runtime permissions.
+     *
+     * @param user The user to restore
+     * @param backup The stream to read the backup from
+     */
+    @BinderThread
+    public abstract void onRestoreRuntimePermissionsBackup(@NonNull UserHandle user,
+            @NonNull InputStream backup);
+
+    /**
+     * Restore a delayed backup of the runtime permissions.
+     *
+     * @param packageName The app to restore
+     * @param user The user to restore
+     *
+     * @return {@code true} iff there is still delayed backup left
+     */
+    @BinderThread
+    public abstract boolean onRestoreDelayedRuntimePermissionsBackup(@NonNull String packageName,
+            @NonNull UserHandle user);
 
     /**
      * Gets the runtime permissions for an app.
@@ -204,6 +228,36 @@ public abstract class PermissionControllerService extends Service {
                 mHandler.sendMessage(obtainMessage(
                         PermissionControllerService::getRuntimePermissionsBackup,
                         PermissionControllerService.this, user, pipe));
+            }
+
+            @Override
+            public void restoreRuntimePermissionBackup(UserHandle user, ParcelFileDescriptor pipe) {
+                checkNotNull(user);
+                checkNotNull(pipe);
+
+                enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
+
+                try (InputStream backup = new ParcelFileDescriptor.AutoCloseInputStream(pipe)) {
+                    onRestoreRuntimePermissionsBackup(user, backup);
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Could not open pipe to read backup from", e);
+                }
+            }
+
+            @Override
+            public void restoreDelayedRuntimePermissionBackup(String packageName, UserHandle user,
+                    RemoteCallback callback) {
+                checkNotNull(packageName);
+                checkNotNull(user);
+                checkNotNull(callback);
+
+                enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
+
+                boolean hasMoreBackup = onRestoreDelayedRuntimePermissionsBackup(packageName, user);
+
+                Bundle result = new Bundle();
+                result.putBoolean(PermissionControllerManager.KEY_RESULT, hasMoreBackup);
+                callback.sendResult(result);
             }
 
             @Override
