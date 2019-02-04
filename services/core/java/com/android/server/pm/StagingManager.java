@@ -186,6 +186,7 @@ public class StagingManager {
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
         boolean success = true;
 
+        // STOPSHIP: TODO(b/123753157): Verify APKs through Package Verifier.
         if (!sessionContainsApex(session)) {
             // TODO: Decide whether we want to fail fast by detecting signature mismatches for APKs,
             // right away.
@@ -336,6 +337,7 @@ public class StagingManager {
 
         PackageInstaller.SessionParams params = originalSession.params.copy();
         params.isStaged = false;
+        params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
         int apkSessionId = mPi.createSession(
                 params, originalSession.getInstallerPackageName(), originalSession.userId);
         PackageInstallerSession apkSession = mPi.getSession(apkSessionId);

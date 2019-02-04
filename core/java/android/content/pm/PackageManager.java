@@ -866,6 +866,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_ENABLE_ROLLBACK = 0x00040000;
 
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that package verification should be
+     * disabled for this package.
+     *
+     * @hide
+     */
+    public static final int INSTALL_DISABLE_VERIFICATION = 0x00080000;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {
             DONT_KILL_APP
