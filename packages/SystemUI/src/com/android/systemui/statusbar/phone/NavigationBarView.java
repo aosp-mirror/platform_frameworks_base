@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_QUICK_SCRUB;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
@@ -35,6 +37,8 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
+import android.annotation.SuppressLint;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -51,6 +55,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -87,11 +92,20 @@ import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.function.Consumer;
 
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({WINDOW_TARGET_BOTTOM, WINDOW_TARGET_LEFT, WINDOW_TARGET_RIGHT})
+    public @interface WindowTarget{}
+    public static final int WINDOW_TARGET_BOTTOM = 0;
+    public static final int WINDOW_TARGET_LEFT = 1;
+    public static final int WINDOW_TARGET_RIGHT = 2;
 
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
@@ -109,6 +123,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     int mNavigationIconHints = 0;
 
     private @NavigationBarCompat.HitTarget int mDownHitTarget = HIT_TARGET_NONE;
+    private @WindowTarget int mWindowHitTarget = WINDOW_TARGET_BOTTOM;
     private Rect mHomeButtonBounds = new Rect();
     private Rect mBackButtonBounds = new Rect();
     private Rect mRecentsButtonBounds = new Rect();
@@ -159,6 +174,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private QuickSwitchAction mQuickSwitchAction;
     private NavigationAssistantAction mAssistantAction;
     private NavigationNotificationPanelAction mNotificationPanelAction;
+
+    private NavigationBarEdgePanel mLeftEdgePanel;
+    private NavigationBarEdgePanel mRightEdgePanel;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -219,6 +237,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         public void onClick(View view) {
             mContext.getSystemService(InputMethodManager.class).showInputMethodPickerFromSystem(
                     true /* showAuxiliarySubtypes */, getContext().getDisplayId());
+        }
+    };
+
+    private final OnTouchListener mEdgePanelTouchListener = new OnTouchListener() {
+        @SuppressLint("ClickableViewAccessibility")
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getActionMasked() == ACTION_DOWN) {
+                mWindowHitTarget = v == mLeftEdgePanel ? WINDOW_TARGET_LEFT : WINDOW_TARGET_RIGHT;
+                mDownHitTarget = HIT_TARGET_NONE;
+            }
+            return mGestureHelper.onTouchEvent(event);
         }
     };
 
@@ -295,6 +325,16 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 mColorAdaptionController.start();
             } else {
                 mColorAdaptionController.end();
+            }
+        }
+
+        @Override
+        public void onEdgeSensitivityChanged(int width, int height) {
+            if (mLeftEdgePanel != null) {
+                mLeftEdgePanel.setDimensions(width, height);
+            }
+            if (mRightEdgePanel != null) {
+                mRightEdgePanel.setDimensions(width, height);
             }
         }
     };
@@ -433,6 +473,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 int x = (int) event.getX();
                 int y = (int) event.getY();
                 mDownHitTarget = HIT_TARGET_NONE;
+                mWindowHitTarget = WINDOW_TARGET_BOTTOM;
                 if (deadZoneConsumed) {
                     mDownHitTarget = HIT_TARGET_DEAD_ZONE;
                 } else if (getBackButton().isVisible() && mBackButtonBounds.contains(x, y)) {
@@ -481,6 +522,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public @NavigationBarCompat.HitTarget int getDownHitTarget() {
         return mDownHitTarget;
+    }
+
+    public @WindowTarget int getWindowTarget() {
+        return mWindowHitTarget;
     }
 
     public void abortCurrentGesture() {
@@ -837,24 +882,32 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void setSlippery(boolean slippery) {
-        boolean changed = false;
+        setWindowFlag(WindowManager.LayoutParams.FLAG_SLIPPERY, slippery);
+    }
+
+    public void setWindowTouchable(boolean flag) {
+        setWindowFlag(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, !flag);
+        if (mLeftEdgePanel != null) {
+            mLeftEdgePanel.setWindowFlag(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, !flag);
+        }
+        if (mRightEdgePanel != null) {
+            mRightEdgePanel.setWindowFlag(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, !flag);
+        }
+    }
+
+    private void setWindowFlag(int flags, boolean enable) {
         final ViewGroup navbarView = ((ViewGroup) getParent());
-        final WindowManager.LayoutParams lp = (WindowManager.LayoutParams) navbarView
-                .getLayoutParams();
-        if (lp == null) {
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) navbarView.getLayoutParams();
+        if (lp == null || enable == ((lp.flags & flags) != 0)) {
             return;
         }
-        if (slippery && (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) == 0) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
-            changed = true;
-        } else if (!slippery && (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) != 0) {
-            lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
-            changed = true;
+        if (enable) {
+            lp.flags |= flags;
+        } else {
+            lp.flags &= ~flags;
         }
-        if (changed) {
-            WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
-            wm.updateViewLayout(navbarView, lp);
-        }
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        wm.updateViewLayout(navbarView, lp);
     }
 
     public void setMenuVisibility(final boolean show) {
@@ -1016,6 +1069,17 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get nav bar position.", e);
         }
+
+        // For landscape, hide the panel that would interfere with navigation bar layout
+        if (mLeftEdgePanel != null && mRightEdgePanel != null) {
+            mLeftEdgePanel.setVisibility(VISIBLE);
+            mRightEdgePanel.setVisibility(VISIBLE);
+            if (navBarPos == NAV_BAR_LEFT) {
+                mLeftEdgePanel.setVisibility(GONE);
+            } else if (navBarPos == NAV_BAR_RIGHT) {
+                mRightEdgePanel.setVisibility(GONE);
+            }
+        }
         mGestureHelper.setBarState(isRtl, navBarPos);
     }
 
@@ -1142,6 +1206,21 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 NavGesture.class, false /* Only one */);
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
         mColorAdaptionController.start();
+
+        if (mPrototypeController.isEnabled()) {
+            WindowManager wm = (WindowManager) getContext()
+                    .getSystemService(Context.WINDOW_SERVICE);
+            int width = mPrototypeController.getEdgeSensitivityWidth();
+            int height = mPrototypeController.getEdgeSensitivityHeight();
+            mLeftEdgePanel = NavigationBarEdgePanel.create(getContext(), width, height,
+                    Gravity.START | Gravity.BOTTOM);
+            mRightEdgePanel = NavigationBarEdgePanel.create(getContext(), width, height,
+                    Gravity.END | Gravity.BOTTOM);
+            mLeftEdgePanel.setOnTouchListener(mEdgePanelTouchListener);
+            mRightEdgePanel.setOnTouchListener(mEdgePanelTouchListener);
+            wm.addView(mLeftEdgePanel, mLeftEdgePanel.getLayoutParams());
+            wm.addView(mRightEdgePanel, mRightEdgePanel.getLayoutParams());
+        }
     }
 
     @Override
@@ -1156,6 +1235,17 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         setUpSwipeUpOnboarding(false);
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).onDestroy();
+        }
+
+        if (mPrototypeController.isEnabled()) {
+            WindowManager wm = (WindowManager) getContext()
+                    .getSystemService(Context.WINDOW_SERVICE);
+            if (mLeftEdgePanel != null) {
+                wm.removeView(mLeftEdgePanel);
+            }
+            if (mRightEdgePanel != null) {
+                wm.removeView(mRightEdgePanel);
+            }
         }
     }
 
