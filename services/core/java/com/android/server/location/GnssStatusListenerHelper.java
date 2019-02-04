@@ -48,18 +48,18 @@ public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGns
 
     public void onStatusChanged(boolean isNavigating) {
         if (isNavigating) {
-            foreach((IGnssStatusListener listener, int uid, String packageName) -> {
+            foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
                 listener.onGnssStarted();
             });
         } else {
-            foreach((IGnssStatusListener listener, int uid, String packageName) -> {
+            foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
                 listener.onGnssStopped();
             });
         }
     }
 
     public void onFirstFix(final int timeToFirstFix) {
-        foreach((IGnssStatusListener listener, int uid, String packageName) -> {
+        foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
                     listener.onFirstFix(timeToFirstFix);
                 }
         );
@@ -72,9 +72,10 @@ public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGns
             final float[] elevations,
             final float[] azimuths,
             final float[] carrierFreqs) {
-        foreach((IGnssStatusListener listener, int uid, String packageName) -> {
-            if (!hasPermission(uid, packageName)) {
-                logPermissionDisabledEventNotReported(TAG, packageName, "GNSS status");
+        foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
+            if (!hasPermission(mContext, callerIdentity)) {
+                logPermissionDisabledEventNotReported(TAG, callerIdentity.mPackageName,
+                        "GNSS status");
                 return;
             }
             listener.onSvStatusChanged(svCount, prnWithFlags, cn0s, elevations, azimuths,
@@ -83,9 +84,9 @@ public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGns
     }
 
     public void onNmeaReceived(final long timestamp, final String nmea) {
-        foreach((IGnssStatusListener listener, int uid, String packageName) -> {
-            if (!hasPermission(uid, packageName)) {
-                logPermissionDisabledEventNotReported(TAG, packageName, "NMEA");
+        foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
+            if (!hasPermission(mContext, callerIdentity)) {
+                logPermissionDisabledEventNotReported(TAG, callerIdentity.mPackageName, "NMEA");
                 return;
             }
             listener.onNmeaReceived(timestamp, nmea);
