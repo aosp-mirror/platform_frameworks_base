@@ -485,4 +485,17 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
         <item>Fifty\nNine</item>
     </string-array>
 
+    <!-- Title for default clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_default" translatable="false">Default</string>
+    <!-- Title for Bubble clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_bubble" translatable="false">Bubble</string>
+    <!-- Title for Stretch clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_stretch" translatable="false">Stretch</string>
+    <!-- Title for Typographic clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_type" translatable="false">Type</string>
+
 </resources>

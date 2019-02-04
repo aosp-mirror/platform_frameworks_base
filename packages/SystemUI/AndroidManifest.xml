@@ -631,6 +631,14 @@
                   android:exported="true">
         </provider>
 
+        <!-- Provides list and realistic previews of clock faces for the picker app. -->
+        <provider
+            android:name="com.android.keyguard.clock.ClockOptionsProvider"
+            android:authorities="com.android.keyguard.clock"
+            android:exported="true"
+            android:grantUriPermissions="true">
+        </provider>
+
         <receiver
             android:name=".statusbar.KeyboardShortcutsReceiver">
             <intent-filter>
