@@ -48,6 +48,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -56,7 +57,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
@@ -92,8 +93,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             Dependency.get(NotificationViewHierarchyManager.class);
     private final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
-    private final StatusBarStateController mStatusBarStateController =
-            Dependency.get(StatusBarStateController.class);
+    private final SysuiStatusBarStateController mStatusBarStateController =
+            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
     private final NotificationRowBinder mNotificationRowBinder =

@@ -35,13 +35,14 @@ import android.view.ViewParent;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.Callback;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -57,10 +58,10 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         StatusBarStateController.StateListener {
 
     private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
-    private final StatusBarStateController mStatusBarStateController
-            = Dependency.get(StatusBarStateController.class);
-    private final NotificationLockscreenUserManager mLockscreenUserManager
-            = Dependency.get(NotificationLockscreenUserManager.class);
+    private final SysuiStatusBarStateController mStatusBarStateController =
+            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
+    private final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
     private final Context mContext;
     private View mPendingWorkRemoteInputView;

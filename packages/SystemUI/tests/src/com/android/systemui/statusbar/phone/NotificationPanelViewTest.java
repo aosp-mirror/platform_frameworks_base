@@ -27,8 +27,9 @@ import android.testing.TestableLooper;
 
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -46,7 +47,7 @@ import org.mockito.MockitoAnnotations;
 public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Mock
-    private StatusBarStateController mStatusBarStateController;
+    private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
     private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock

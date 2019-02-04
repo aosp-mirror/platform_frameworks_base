@@ -15,8 +15,8 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
 
 import java.util.TimeZone;
 

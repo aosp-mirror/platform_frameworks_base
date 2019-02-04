@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,27 +11,22 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.IntDef;
 import android.util.FloatProperty;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.Interpolators;
-import com.android.systemui.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
 
-import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -42,24 +37,25 @@ import javax.inject.Singleton;
  * Tracks and reports on {@link StatusBarState}.
  */
 @Singleton
-public class StatusBarStateController implements CallbackController<StateListener> {
+public class StatusBarStateControllerImpl implements SysuiStatusBarStateController,
+        CallbackController<StateListener> {
     private static final String TAG = "SbStateController";
 
     private static final int MAX_STATE = StatusBarState.FULLSCREEN_USER_SWITCHER;
     private static final int MIN_STATE = StatusBarState.SHADE;
 
-    private static final Comparator <RankedListener> mComparator
-            = (o1, o2) -> Integer.compare(o1.rank, o2.rank);
-    private static final FloatProperty<StatusBarStateController> SET_DARK_AMOUNT_PROPERTY =
-            new FloatProperty<StatusBarStateController>("mDozeAmount") {
+    private static final Comparator<RankedListener> sComparator =
+            Comparator.comparingInt(o -> o.mRank);
+    private static final FloatProperty<StatusBarStateControllerImpl> SET_DARK_AMOUNT_PROPERTY =
+            new FloatProperty<StatusBarStateControllerImpl>("mDozeAmount") {
 
                 @Override
-                public void setValue(StatusBarStateController object, float value) {
+                public void setValue(StatusBarStateControllerImpl object, float value) {
                     object.setDozeAmountInternal(value);
                 }
 
                 @Override
-                public Float get(StatusBarStateController object) {
+                public Float get(StatusBarStateControllerImpl object) {
                     return object.mDozeAmount;
                 }
             };
@@ -95,29 +91,16 @@ public class StatusBarStateController implements CallbackController<StateListene
      */
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
-    // TODO: b/115739177 (remove this explicit ordering if we can)
-    @Retention(SOURCE)
-    @IntDef({RANK_STATUS_BAR, RANK_STATUS_BAR_WINDOW_CONTROLLER, RANK_STACK_SCROLLER, RANK_SHELF})
-    public @interface SbStateListenerRank {}
-    // This is the set of known dependencies when updating StatusBarState
-    public static final int RANK_STATUS_BAR = 0;
-    public static final int RANK_STATUS_BAR_WINDOW_CONTROLLER = 1;
-    public static final int RANK_STACK_SCROLLER = 2;
-    public static final int RANK_SHELF = 3;
-
     @Inject
-    public StatusBarStateController() {
+    public StatusBarStateControllerImpl() {
     }
 
+    @Override
     public int getState() {
         return mState;
     }
 
-    /**
-     * Update the status bar state
-     * @param state see {@link StatusBarState} for valid options
-     * @return {@code true} if the state changed, else {@code false}
-     */
+    @Override
     public boolean setState(int state) {
         if (state > MAX_STATE || state < MIN_STATE) {
             throw new IllegalArgumentException("Invalid state " + state);
@@ -127,40 +110,38 @@ public class StatusBarStateController implements CallbackController<StateListene
         }
         synchronized (mListeners) {
             for (RankedListener rl : new ArrayList<>(mListeners)) {
-                rl.listener.onStatePreChange(mState, state);
+                rl.mListener.onStatePreChange(mState, state);
             }
             mLastState = mState;
             mState = state;
             for (RankedListener rl : new ArrayList<>(mListeners)) {
-                rl.listener.onStateChanged(mState);
+                rl.mListener.onStateChanged(mState);
             }
 
             for (RankedListener rl : new ArrayList<>(mListeners)) {
-                rl.listener.onStatePostChange();
+                rl.mListener.onStatePostChange();
             }
         }
 
         return true;
     }
 
+    @Override
     public boolean isDozing() {
         return mIsDozing;
     }
 
+    @Override
     public float getDozeAmount() {
         return mDozeAmount;
     }
 
+    @Override
     public float getInterpolatedDozeAmount() {
         return mDozeInterpolator.getInterpolation(mDozeAmount);
     }
 
-    /**
-     * Update the dozing state from {@link StatusBar}'s perspective
-     * @param isDozing well, are we dozing?
-     * @return {@code true} if the state changed, else {@code false}
-     */
-    @SuppressWarnings("UnusedReturnValue")
+    @Override
     public boolean setIsDozing(boolean isDozing) {
         if (mIsDozing == isDozing) {
             return false;
@@ -170,19 +151,14 @@ public class StatusBarStateController implements CallbackController<StateListene
 
         synchronized (mListeners) {
             for (RankedListener rl : new ArrayList<>(mListeners)) {
-                rl.listener.onDozingChanged(isDozing);
+                rl.mListener.onDozingChanged(isDozing);
             }
         }
 
         return true;
     }
 
-    /**
-     * Changes the current doze amount.
-     *
-     * @param dozeAmount New doze/dark amount.
-     * @param animated If change should be animated or not. This will cancel current animations.
-     */
+    @Override
     public void setDozeAmount(float dozeAmount, boolean animated) {
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animated && mDozeAmountTarget == dozeAmount) {
@@ -217,27 +193,32 @@ public class StatusBarStateController implements CallbackController<StateListene
         float interpolatedAmount = mDozeInterpolator.getInterpolation(dozeAmount);
         synchronized (mListeners) {
             for (RankedListener rl : new ArrayList<>(mListeners)) {
-                rl.listener.onDozeAmountChanged(mDozeAmount, interpolatedAmount);
+                rl.mListener.onDozeAmountChanged(mDozeAmount, interpolatedAmount);
             }
         }
     }
 
+    @Override
     public boolean goingToFullShade() {
         return mState == StatusBarState.SHADE && mLeaveOpenOnKeyguardHide;
     }
 
+    @Override
     public void setLeaveOpenOnKeyguardHide(boolean leaveOpen) {
         mLeaveOpenOnKeyguardHide = leaveOpen;
     }
 
+    @Override
     public boolean leaveOpenOnKeyguardHide() {
         return mLeaveOpenOnKeyguardHide;
     }
 
+    @Override
     public boolean fromShadeLocked() {
         return mLastState == StatusBarState.SHADE_LOCKED;
     }
 
+    @Override
     public void addCallback(StateListener listener) {
         synchronized (mListeners) {
             addListenerInternalLocked(listener, Integer.MAX_VALUE);
@@ -254,6 +235,8 @@ public class StatusBarStateController implements CallbackController<StateListene
      * StatusBarState out of StatusBar.java. Any new listeners should be built not to need ranking
      * (i.e., they are non-dependent on the order of operations of StatusBarState listeners).
      */
+    @Deprecated
+    @Override
     public void addCallback(StateListener listener, @SbStateListenerRank int rank) {
         synchronized (mListeners) {
             addListenerInternalLocked(listener, rank);
@@ -264,91 +247,38 @@ public class StatusBarStateController implements CallbackController<StateListene
     private void addListenerInternalLocked(StateListener listener, int rank) {
         // Protect against double-subscribe
         for (RankedListener rl : mListeners) {
-            if (rl.listener.equals(listener)) {
+            if (rl.mListener.equals(listener)) {
                 return;
             }
         }
 
-        RankedListener rl = new RankedListener(listener, rank);
+        RankedListener rl = new SysuiStatusBarStateController.RankedListener(listener, rank);
         mListeners.add(rl);
-        mListeners.sort(mComparator);
+        mListeners.sort(sComparator);
     }
 
+
+    @Override
     public void removeCallback(StateListener listener) {
         synchronized (mListeners) {
-            mListeners.removeIf((it) -> it.listener.equals(listener));
+            mListeners.removeIf((it) -> it.mListener.equals(listener));
         }
     }
 
+    @Override
     public void setKeyguardRequested(boolean keyguardRequested) {
         mKeyguardRequested = keyguardRequested;
     }
 
+    @Override
     public boolean isKeyguardRequested() {
         return mKeyguardRequested;
     }
 
+    /**
+     * Returns String readable state of status bar from {@link StatusBarState}
+     */
     public static String describe(int state) {
         return StatusBarState.toShortString(state);
-    }
-
-    private class RankedListener {
-        private final StateListener listener;
-        private final int rank;
-
-        private RankedListener(StateListener l, int r) {
-            listener = l;
-            rank = r;
-        }
-    }
-
-    /**
-     * Listener for StatusBarState updates
-     */
-    public interface StateListener {
-
-        /**
-         * Callback before the new state is applied, for those who need to preempt the change.
-         *
-         * @param oldState state before the change
-         * @param newState new state to be applied in {@link #onStateChanged}
-         */
-        public default void onStatePreChange(int oldState, int newState) {
-        }
-
-        /**
-         * Callback after all listeners have had a chance to update based on the state change
-         */
-        public default void onStatePostChange() {
-        }
-
-        /**
-         * Required callback. Get the new state and do what you will with it. Keep in mind that
-         * other listeners are typically unordered and don't rely on your work being done before
-         * other peers.
-         *
-         * Only called if the state is actually different.
-         *
-         * @param newState the new {@link StatusBarState}
-         */
-        default void onStateChanged(int newState) {
-        }
-
-        /**
-         * Callback to be notified when Dozing changes. Dozing is stored separately from state.
-         *
-         * @param isDozing {@code true} if dozing according to {@link StatusBar}
-         */
-        public default void onDozingChanged(boolean isDozing) {}
-
-        /**
-         * Callback to be notified when the doze amount changes. Useful for animations.
-         * Note: this will be called for each animation frame. Please be careful to avoid
-         * performance regressions.
-         *
-         * @param linear A number from 0 to 1, where 1 means that the device is dozing.
-         * @param eased Same as {@code linear} but transformed by an interpolator.
-         */
-        default void onDozeAmountChanged(float linear, float eased) {}
     }
 }
