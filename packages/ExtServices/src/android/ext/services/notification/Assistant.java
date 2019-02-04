@@ -105,6 +105,7 @@ public class Assistant extends NotificationAssistantService {
     protected AssistantSettings.Factory mSettingsFactory = AssistantSettings.FACTORY;
     @VisibleForTesting
     protected AssistantSettings mSettings;
+    private SmsHelper mSmsHelper;
 
     public Assistant() {
     }
@@ -122,6 +123,18 @@ public class Assistant extends NotificationAssistantService {
         mAgingHelper = new AgingHelper(getContext(),
                 mNotificationCategorizer,
                 new AgingCallback());
+        mSmsHelper = new SmsHelper(this);
+        mSmsHelper.initialize();
+    }
+
+    @Override
+    public void onDestroy() {
+        // This null check is only for the unit tests as ServiceTestCase.tearDown calls onDestroy
+        // without having first called onCreate.
+        if (mSmsHelper != null) {
+            mSmsHelper.destroy();
+        }
+        super.onDestroy();
     }
 
     private void loadFile() {
@@ -215,7 +228,7 @@ public class Assistant extends NotificationAssistantService {
             return null;
         }
         NotificationEntry entry =
-                new NotificationEntry(mPackageManager, sbn, channel, SmsHelper.getInstance(this));
+                new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
         SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
         return createEnqueuedNotificationAdjustment(
                 entry, suggestions.actions, suggestions.replies);
@@ -262,7 +275,7 @@ public class Assistant extends NotificationAssistantService {
             Ranking ranking = getRanking(sbn.getKey(), rankingMap);
             if (ranking != null && ranking.getChannel() != null) {
                 NotificationEntry entry = new NotificationEntry(mPackageManager,
-                        sbn, ranking.getChannel(), SmsHelper.getInstance(this));
+                        sbn, ranking.getChannel(), mSmsHelper);
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
@@ -398,7 +411,6 @@ public class Assistant extends NotificationAssistantService {
     @Override
     public void onListenerConnected() {
         if (DEBUG) Log.i(TAG, "CONNECTED");
-        SmsHelper.getInstance(this).initialize();
         try {
             mFile = new AtomicFile(new File(new File(
                     Environment.getDataUserCePackageDirectory(
@@ -415,7 +427,6 @@ public class Assistant extends NotificationAssistantService {
 
     @Override
     public void onListenerDisconnected() {
-        SmsHelper.getInstance(this).destroy();
         if (mAgingHelper != null) {
             mAgingHelper.onDestroy();
         }

@@ -33,23 +33,11 @@ import com.android.internal.telephony.SmsApplication;
 public class SmsHelper {
     private static final String TAG = "SmsHelper";
 
-    private static SmsHelper sSmsHelper;
-    private static final Object sLock = new Object();
-
     private final Context mContext;
     private ComponentName mDefaultSmsApplication;
     private BroadcastReceiver mBroadcastReceiver;
 
-    static SmsHelper getInstance(Context context) {
-        synchronized (sLock) {
-            if (sSmsHelper == null) {
-                sSmsHelper = new SmsHelper(context);
-            }
-            return sSmsHelper;
-        }
-    }
-
-    private SmsHelper(Context context) {
+    SmsHelper(Context context) {
         mContext = context.getApplicationContext();
     }
 
