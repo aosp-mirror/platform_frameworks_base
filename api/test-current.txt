@@ -1439,6 +1439,10 @@ package android.telecom {
     ctor public CallAudioState(boolean, int, int, @Nullable android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.bluetooth.BluetoothDevice>);
   }
 
+  public abstract class Conference extends android.telecom.Conferenceable {
+    method public android.telecom.Connection getPrimaryConnection();
+  }
+
   public final class PhoneAccountSuggestion implements android.os.Parcelable {
     ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
   }
@@ -1449,6 +1453,16 @@ package android.telecom {
     method public android.os.IBinder onBind(android.content.Intent);
     method public final void suggestPhoneAccounts(@NonNull String, @NonNull java.util.List<android.telecom.PhoneAccountSuggestion>);
     field public static final String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
+  }
+
+  public class TelecomManager {
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(android.telecom.PhoneAccountHandle);
+    field public static final int TTY_MODE_FULL = 1; // 0x1
+    field public static final int TTY_MODE_HCO = 2; // 0x2
+    field public static final int TTY_MODE_OFF = 0; // 0x0
+    field public static final int TTY_MODE_VCO = 3; // 0x3
   }
 
 }
