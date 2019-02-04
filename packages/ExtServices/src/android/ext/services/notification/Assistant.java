@@ -214,7 +214,8 @@ public class Assistant extends NotificationAssistantService {
         if (!isForCurrentUser(sbn)) {
             return null;
         }
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel);
+        NotificationEntry entry =
+                new NotificationEntry(mPackageManager, sbn, channel, SmsHelper.getInstance(this));
         SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
         return createEnqueuedNotificationAdjustment(
                 entry, suggestions.actions, suggestions.replies);
@@ -261,7 +262,7 @@ public class Assistant extends NotificationAssistantService {
             Ranking ranking = getRanking(sbn.getKey(), rankingMap);
             if (ranking != null && ranking.getChannel() != null) {
                 NotificationEntry entry = new NotificationEntry(mPackageManager,
-                        sbn, ranking.getChannel());
+                        sbn, ranking.getChannel(), SmsHelper.getInstance(this));
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
@@ -397,6 +398,7 @@ public class Assistant extends NotificationAssistantService {
     @Override
     public void onListenerConnected() {
         if (DEBUG) Log.i(TAG, "CONNECTED");
+        SmsHelper.getInstance(this).initialize();
         try {
             mFile = new AtomicFile(new File(new File(
                     Environment.getDataUserCePackageDirectory(
@@ -413,6 +415,7 @@ public class Assistant extends NotificationAssistantService {
 
     @Override
     public void onListenerDisconnected() {
+        SmsHelper.getInstance(this).destroy();
         if (mAgingHelper != null) {
             mAgingHelper.onDestroy();
         }

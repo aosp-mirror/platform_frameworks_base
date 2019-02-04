@@ -22,6 +22,7 @@ applications that come with the platform
 <permissions>
     <privapp-permissions package="android.ext.services">
         <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
+        <permission name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.apps.tag">
