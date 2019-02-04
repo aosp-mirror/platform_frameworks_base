@@ -138,6 +138,26 @@ public final class LooperStatsTest {
     }
 
     @Test
+    public void testThrewException_notSampled() {
+        TestableLooperStats looperStats = new TestableLooperStats(2, 100);
+
+        Object token = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(10);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token, mHandlerFirst.obtainMessage(0));
+        assertThat(looperStats.getEntries()).hasSize(1);
+
+        // Will not be sampled so does not contribute to any entries.
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(100);
+        looperStats.tickThreadTime(10);
+        looperStats.dispatchingThrewException(
+                token2, mHandlerSecond.obtainMessage(7), new ArithmeticException());
+        assertThat(looperStats.getEntries()).hasSize(1);
+        assertThat(looperStats.getEntries().get(0).messageCount).isEqualTo(1);
+    }
+
+    @Test
     public void testMultipleMessagesDispatched() {
         TestableLooperStats looperStats = new TestableLooperStats(2, 100);
 

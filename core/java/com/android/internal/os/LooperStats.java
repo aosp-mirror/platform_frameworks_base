@@ -126,9 +126,11 @@ public class LooperStats implements Looper.Observer {
         }
 
         DispatchSession session = (DispatchSession) token;
-        Entry entry = findEntry(msg, /* allowCreateNew= */true);
-        synchronized (entry) {
-            entry.exceptionCount++;
+        Entry entry = findEntry(msg, /* allowCreateNew= */session != DispatchSession.NOT_SAMPLED);
+        if (entry != null) {
+            synchronized (entry) {
+                entry.exceptionCount++;
+            }
         }
 
         recycleSession(session);
