@@ -131,8 +131,6 @@ import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
-import android.app.role.RoleManager;
-import android.app.role.RoleManagerCallback;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -290,7 +288,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -372,10 +369,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -988,6 +983,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private CheckPermissionDelegate mCheckPermissionDelegate;
+
+    @GuardedBy("mPackages")
+    private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
 
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
         private Context mContext;
@@ -13581,31 +13579,25 @@ public class PackageManagerService extends IPackageManager.Stub
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
-
         if (userId == UserHandle.USER_ALL) {
             return false;
         }
-        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
-        UserHandle user = UserHandle.of(userId);
-        RoleManagerCallback.Future future = new RoleManagerCallback.Future();
-        if (packageName != null) {
-            Binder.withCleanCallingIdentity(() -> roleManager.addRoleHolderAsUser(
-                    RoleManager.ROLE_BROWSER, packageName, user, AsyncTask.THREAD_POOL_EXECUTOR,
-                    future));
-        } else {
-            Binder.withCleanCallingIdentity(() -> roleManager.clearRoleHoldersAsUser(
-                    RoleManager.ROLE_BROWSER, user, AsyncTask.THREAD_POOL_EXECUTOR, future));
+        PackageManagerInternal.DefaultBrowserProvider provider;
+        synchronized (mPackages) {
+            provider = mDefaultBrowserProvider;
         }
-        try {
-            future.get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            Slog.e(TAG, "Exception while setting default browser package name: " + packageName, e);
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultBrowserProvider is null");
             return false;
         }
-        synchronized (mPackages) {
-            if (packageName != null) {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(
-                        packageName, userId);
+        boolean successful = provider.setDefaultBrowser(packageName, userId);
+        if (!successful) {
+            return false;
+        }
+        if (packageName != null) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                        userId);
             }
         }
         return true;
@@ -13620,10 +13612,15 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
-        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
-        List<String> packageNames = Binder.withCleanCallingIdentity(() ->
-                roleManager.getRoleHoldersAsUser(RoleManager.ROLE_BROWSER, UserHandle.of(userId)));
-        return CollectionUtils.firstOrNull(packageNames);
+        PackageManagerInternal.DefaultBrowserProvider provider;
+        synchronized (mPackages) {
+            provider = mDefaultBrowserProvider;
+        }
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultBrowserProvider is null");
+            return null;
+        }
+        return provider.getDefaultBrowser(userId);
     }
 
     /**
@@ -23920,6 +23917,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public String removeLegacyDefaultBrowserPackageName(int userId) {
             synchronized (mPackages) {
                 return mSettings.removeDefaultBrowserPackageNameLPw(userId);
+            }
+        }
+
+        @Override
+        public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
+            synchronized (mPackages) {
+                mDefaultBrowserProvider = provider;
             }
         }
     }

@@ -118,7 +118,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
-import com.android.server.role.RoleManagerServiceInternal;
+import com.android.server.role.RoleManagerInternal;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
@@ -1867,16 +1867,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long callingToken = Binder.clearCallingIdentity();
         try {
             PackageManager pm = mContext.getPackageManager();
-            RoleManagerServiceInternal rm =
-                    LocalServices.getService(RoleManagerServiceInternal.class);
+            RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);
 
             List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
 
             int numUsers = users.size();
             for (int userNum = 0; userNum < numUsers; userNum++) {
-                UserHandle user = users.get(userNum).getUserHandle();
+                int userId = users.get(userNum).getUserHandle().getIdentifier();
 
-                ArrayMap<String, ArraySet<String>> roles = rm.getRoleHoldersAsUser(user);
+                ArrayMap<String, ArraySet<String>> roles = rmi.getRolesAndHolders(
+                        userId);
 
                 int numRoles = roles.size();
                 for (int roleNum = 0; roleNum < numRoles; roleNum++) {
@@ -1889,7 +1889,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
                         PackageInfo pkg;
                         try {
-                            pkg = pm.getPackageInfoAsUser(holderName, 0, user.getIdentifier());
+                            pkg = pm.getPackageInfoAsUser(holderName, 0, userId);
                         } catch (PackageManager.NameNotFoundException e) {
                             Log.w(TAG, "Role holder " + holderName + " not found");
                             return;
