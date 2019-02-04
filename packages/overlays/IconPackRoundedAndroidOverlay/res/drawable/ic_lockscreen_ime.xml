@@ -1,0 +1,55 @@
+<!--
+/**
+ * Copyright (c) 2019, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M3,21H21a2,2,0,0,0,2-2V6a2,2,0,0,0-2-2H3A2,2,0,0,0,1,6V19A2,2,0,0,0,3,21ZM2.5,6A0.51 0.51 ,0,0,1,3,5.5H21a0.51 0.51 ,0,0,1,0.5 0.5 V19a0.51 0.51 ,0,0,1-0.5 0.5 H3a0.51 0.51 ,0,0,1-0.5-0.5Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 9.5 8 L 10.5 8 Q 11 8 11 8.5 L 11 9.5 Q 11 10 10.5 10 L 9.5 10 Q 9 10 9 9.5 L 9 8.5 Q 9 8 9.5 8 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 5.5 8 L 6.5 8 Q 7 8 7 8.5 L 7 9.5 Q 7 10 6.5 10 L 5.5 10 Q 5 10 5 9.5 L 5 8.5 Q 5 8 5.5 8 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M8.75,17.5h6.5a0.75 0.75 ,0,0,0,0-1.5H8.75a0.75 0.75 ,0,0,0,0,1.5Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 13.5 8 L 14.5 8 Q 15 8 15 8.5 L 15 9.5 Q 15 10 14.5 10 L 13.5 10 Q 13 10 13 9.5 L 13 8.5 Q 13 8 13.5 8 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 9.5 12 L 10.5 12 Q 11 12 11 12.5 L 11 13.5 Q 11 14 10.5 14 L 9.5 14 Q 9 14 9 13.5 L 9 12.5 Q 9 12 9.5 12 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 5.5 12 L 6.5 12 Q 7 12 7 12.5 L 7 13.5 Q 7 14 6.5 14 L 5.5 14 Q 5 14 5 13.5 L 5 12.5 Q 5 12 5.5 12 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 13.5 12 L 14.5 12 Q 15 12 15 12.5 L 15 13.5 Q 15 14 14.5 14 L 13.5 14 Q 13 14 13 13.5 L 13 12.5 Q 13 12 13.5 12 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 17.5 8 L 18.5 8 Q 19 8 19 8.5 L 19 9.5 Q 19 10 18.5 10 L 17.5 10 Q 17 10 17 9.5 L 17 8.5 Q 17 8 17.5 8 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 17.5 12 L 18.5 12 Q 19 12 19 12.5 L 19 13.5 Q 19 14 18.5 14 L 17.5 14 Q 17 14 17 13.5 L 17 12.5 Q 17 12 17.5 12 Z" />
+</vector>
