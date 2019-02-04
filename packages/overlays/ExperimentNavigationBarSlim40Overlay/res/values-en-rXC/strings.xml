@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="experiment_navigationbar_overlay" msgid="6415947279345789008">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‏‎‏‎‎‎‎‎‎‏‏‎‎‎‎‎‏‏‏‎‏‎‏‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎Slim Navigation Bar Experiment (40dp)‎‏‎‎‏‎"</string>
+    <string name="experiment_navigationbar_overlay" msgid="6415947279345789008">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‏‎‏‎‎‎‎‎‎‏‏‎‎‎‎‎‏‏‏‎‏‎‏‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎Slim Navigation Bar Experiment (40dp)‎‏‎‎‏‎"</string>
 </resources>
