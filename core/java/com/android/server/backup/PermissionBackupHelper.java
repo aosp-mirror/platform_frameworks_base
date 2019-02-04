@@ -19,7 +19,6 @@ package com.android.server.backup;
 import android.app.AppGlobals;
 import android.app.backup.BlobBackupHelper;
 import android.content.pm.IPackageManager;
-import android.os.UserHandle;
 import android.util.Slog;
 
 public class PermissionBackupHelper extends BlobBackupHelper {
@@ -32,8 +31,12 @@ public class PermissionBackupHelper extends BlobBackupHelper {
     // key under which the permission-grant state blob is committed to backup
     private static final String KEY_PERMISSIONS = "permissions";
 
-    public PermissionBackupHelper() {
+    private final int mUserId;
+
+    public PermissionBackupHelper(int userId) {
         super(STATE_VERSION, KEY_PERMISSIONS);
+
+        mUserId = userId;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class PermissionBackupHelper extends BlobBackupHelper {
         try {
             switch (key) {
                 case KEY_PERMISSIONS:
-                    return pm.getPermissionGrantBackup(UserHandle.USER_SYSTEM);
+                    return pm.getPermissionGrantBackup(mUserId);
 
                 default:
                     Slog.w(TAG, "Unexpected backup key " + key);
@@ -65,7 +68,7 @@ public class PermissionBackupHelper extends BlobBackupHelper {
         try {
             switch (key) {
                 case KEY_PERMISSIONS:
-                    pm.restorePermissionGrants(payload, UserHandle.USER_SYSTEM);
+                    pm.restorePermissionGrants(payload, mUserId);
                     break;
 
                 default:
