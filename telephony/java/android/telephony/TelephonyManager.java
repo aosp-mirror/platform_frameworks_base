@@ -4866,12 +4866,13 @@ public class TelephonyManager {
      *
      * <p>Apps targeting {@link android.os.Build.VERSION_CODES#Q Android Q} or higher will no
      * longer trigger a refresh of the cached CellInfo by invoking this API. Instead, those apps
-     * will receive the latest cached results. Apps targeting
+     * will receive the latest cached results, which may not be current. Apps targeting
      * {@link android.os.Build.VERSION_CODES#Q Android Q} or higher that wish to request updated
      * CellInfo should call
-     * {android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()} and
-     * listen for responses via {@link android.telephony.PhoneStateListener#onCellInfoChanged
-     * onCellInfoChanged()}.
+     * {@link android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()};
+     * however, in all cases, updates will be rate-limited and are not guaranteed. To determine the
+     * recency of CellInfo data, callers should check
+     * {@link android.telephony.CellInfo#getTimeStamp CellInfo#getTimeStamp()}.
      *
      * <p>This method returns valid data for devices with
      * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY FEATURE_TELEPHONY}. In cases
