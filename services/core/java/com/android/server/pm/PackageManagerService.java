@@ -197,7 +197,6 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.UsesPermissionInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
@@ -11312,26 +11311,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                             != PackageManager.SIGNATURE_MATCH)) {
                         throw new PackageManagerException("Overlay " + pkg.packageName +
                                 " must be signed with the platform certificate.");
-                    }
-                }
-            }
-
-            // Check permission usage info requirements.
-            if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
-                for (UsesPermissionInfo upi : pkg.usesPermissionInfos) {
-                    if (!mPermissionManager.isPermissionUsageInfoRequired(upi.getPermission())) {
-                        continue;
-                    }
-                    if (upi.getDataSentOffDevice() == UsesPermissionInfo.USAGE_UNDEFINED
-                            || upi.getDataSharedWithThirdParty()
-                                == UsesPermissionInfo.USAGE_UNDEFINED
-                            || upi.getDataUsedForMonetization()
-                                == UsesPermissionInfo.USAGE_UNDEFINED
-                            || upi.getDataRetention() == UsesPermissionInfo.RETENTION_UNDEFINED) {
-                        // STOPSHIP: Make this throw
-                        Slog.e(TAG, "Package " + pkg.packageName + " does not provide usage "
-                                + "information for permission " + upi.getPermission()
-                                + ". This will be a fatal error in Q.");
                     }
                 }
             }

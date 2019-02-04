@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -368,12 +367,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     public CharSequence nonLocalizedDescription;
 
-    /**
-     * If {@code true} an application targeting {@link Build.VERSION_CODES#Q} <em>must</em>
-     * include permission data usage information in order to be able to be granted this permission.
-     */
-    public boolean usageInfoRequired;
-
     /** @hide */
     public static int fixProtectionLevel(int level) {
         if (level == PROTECTION_SIGNATURE_OR_SYSTEM) {
@@ -475,7 +468,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = orig.descriptionRes;
         requestRes = orig.requestRes;
         nonLocalizedDescription = orig.nonLocalizedDescription;
-        usageInfoRequired = orig.usageInfoRequired;
     }
 
     /**
@@ -540,7 +532,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
-        dest.writeInt(usageInfoRequired ? 1 : 0);
     }
 
     /** @hide */
@@ -581,6 +572,5 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = source.readInt();
         requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-        usageInfoRequired = source.readInt() != 0;
     }
 }
