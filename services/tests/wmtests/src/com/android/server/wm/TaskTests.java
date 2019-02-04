@@ -22,6 +22,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -122,5 +124,20 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(0, task.positionInParent());
         assertEquals(1, task2.positionInParent());
         assertTrue(task.mOnDisplayChangedCalled);
+    }
+
+    @Test
+    public void testBounds() {
+        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack1);
+
+        // Check that setting bounds also updates surface position
+        Rect bounds = new Rect(10, 10, 100, 200);
+        task.setBounds(bounds);
+        assertEquals(new Point(bounds.left, bounds.top), task.getLastSurfacePosition());
+
+        Rect dispBounds = new Rect(20, 30, 110, 220);
+        task.setOverrideDisplayedBounds(dispBounds);
+        assertEquals(new Point(dispBounds.left, dispBounds.top), task.getLastSurfacePosition());
     }
 }

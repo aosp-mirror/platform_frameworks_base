@@ -32,6 +32,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -1329,6 +1330,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         getPendingTransaction().setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
+    }
+
+    @TestApi
+    Point getLastSurfacePosition() {
+        return mLastSurfacePosition;
     }
 
     /**

@@ -316,6 +316,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
         mRotation = rotation;
 
+        updateSurfacePosition();
         return boundsChange;
     }
 
@@ -358,6 +359,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         } else {
             mOverrideDisplayedBounds.setEmpty();
         }
+        updateSurfacePosition();
     }
 
     /**
