@@ -3941,13 +3941,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (apex != null) {
                     try {
                         final ApexInfo activePkg = apex.getActivePackage(packageName);
-                        if (activePkg != null) {
+                        if (activePkg != null && !TextUtils.isEmpty(activePkg.packagePath)) {
                             try {
                                 return PackageParser.generatePackageInfoFromApex(
                                         new File(activePkg.packagePath), true /* collect certs */);
                             } catch (PackageParserException pe) {
-                                throw new IllegalStateException("Unable to parse: " + activePkg,
-                                        pe);
+                                Log.e(TAG, "Unable to parse package at "
+                                        + activePkg.packagePath, pe);
                             }
                         }
                     } catch (RemoteException e) {
