@@ -6286,6 +6286,15 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mManager.getShareTargets(filter);
     }
 
+    public void testHasShareTargets_permission() {
+        assertExpectException(SecurityException.class, "Missing permission", () ->
+                mManager.hasShareTargets(CALLING_PACKAGE_1));
+
+        // Has permission, now it should pass.
+        mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
+        mManager.hasShareTargets(CALLING_PACKAGE_1);
+    }
+
     public void testDumpsys_crossProfile() {
         prepareCrossProfileDataSet();
         dumpsysOnLogcat("test1", /* force= */ true);

@@ -2173,7 +2173,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public boolean hasShareTargets(String packageName, String packageToCheck,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
-        enforceSystem();
+        enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS,
+                "hasShareTargets");
 
         synchronized (mLock) {
             throwIfUserLockedL(userId);
