@@ -77,7 +77,11 @@ public class SyncRtSurfaceTransactionApplier {
         t.setAlpha(params.surface, params.alpha);
         t.setLayer(params.surface, params.layer);
         t.setCornerRadius(params.surface, params.cornerRadius);
-        t.show(params.surface);
+        if (params.visible) {
+            t.show(params.surface);
+        } else {
+            t.hide(params.surface);
+        }
     }
 
     /**
@@ -121,13 +125,14 @@ public class SyncRtSurfaceTransactionApplier {
          * @param windowCrop Crop to apply.
          */
         public SurfaceParams(SurfaceControl surface, float alpha, Matrix matrix,
-                Rect windowCrop, int layer, float cornerRadius) {
+                Rect windowCrop, int layer, float cornerRadius, boolean visible) {
             this.surface = surface;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
             this.windowCrop = new Rect(windowCrop);
             this.layer = layer;
             this.cornerRadius = cornerRadius;
+            this.visible = visible;
         }
 
         @VisibleForTesting
@@ -147,5 +152,7 @@ public class SyncRtSurfaceTransactionApplier {
 
         @VisibleForTesting
         public final int layer;
+
+        public final boolean visible;
     }
 }
