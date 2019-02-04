@@ -102,7 +102,6 @@ import com.android.server.lights.LightsService;
 import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
-import com.android.server.media.MediaUpdateService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
@@ -1686,10 +1685,6 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartMediaSessionService");
             mSystemServiceManager.startService(MediaSessionService.class);
-            traceEnd();
-
-            traceBeginAndSlog("StartMediaUpdateService");
-            mSystemServiceManager.startService(MediaUpdateService.class);
             traceEnd();
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
