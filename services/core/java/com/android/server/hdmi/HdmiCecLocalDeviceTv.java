@@ -77,11 +77,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // True by default for all the ARC-enabled ports.
     private final SparseBooleanArray mArcFeatureEnabled = new SparseBooleanArray();
 
-    // Whether System audio mode is activated or not.
-    // This becomes true only when all system audio sequences are finished.
-    @GuardedBy("mLock")
-    private boolean mSystemAudioActivated = false;
-
     // Whether the System Audio Control feature is enabled or not. True by default.
     @GuardedBy("mLock")
     private boolean mSystemAudioControlFeatureEnabled;
@@ -829,11 +824,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     + "because the System Audio Control feature is disabled.");
             return;
         }
-        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]", mSystemAudioActivated, on);
+        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]",
+                mService.isSystemAudioActivated(), on);
         updateAudioManagerForSystemAudio(on);
         synchronized (mLock) {
-            if (mSystemAudioActivated != on) {
-                mSystemAudioActivated = on;
+            if (mService.isSystemAudioActivated() != on) {
+                mService.setSystemAudioActivated(on);
                 mService.announceSystemAudioModeChange(on);
             }
             startArcAction(on);
@@ -849,9 +845,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!hasSystemAudioDevice()) {
             return false;
         }
-        synchronized (mLock) {
-            return mSystemAudioActivated;
-        }
+        return mService.isSystemAudioActivated();
     }
 
     @ServiceThreadOnly
@@ -1904,7 +1898,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         super.dump(pw);
         pw.println("mArcEstablished: " + mArcEstablished);
         pw.println("mArcFeatureEnabled: " + mArcFeatureEnabled);
-        pw.println("mSystemAudioActivated: " + mSystemAudioActivated);
         pw.println("mSystemAudioMute: " + mSystemAudioMute);
         pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
         pw.println("mAutoDeviceOff: " + mAutoDeviceOff);
