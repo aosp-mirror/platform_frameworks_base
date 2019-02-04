@@ -117,7 +117,7 @@ public class ApkSignatureSchemeV3Verifier {
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v3.
      * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    public static VerifiedSigner plsCertsNoVerifyOnlyCerts(String apkFile)
+    public static VerifiedSigner unsafeGetCertsWithoutVerification(String apkFile)
             throws SignatureNotFoundException, SecurityException, IOException {
         return verify(apkFile, false);
     }

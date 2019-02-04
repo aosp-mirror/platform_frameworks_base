@@ -120,7 +120,7 @@ public class ApkSignatureSchemeV2Verifier {
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v2.
      * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    public static X509Certificate[][] plsCertsNoVerifyOnlyCerts(String apkFile)
+    public static X509Certificate[][] unsafeGetCertsWithoutVerification(String apkFile)
             throws SignatureNotFoundException, SecurityException, IOException {
         VerifiedSigner vSigner = verify(apkFile, false);
         return vSigner.certs;

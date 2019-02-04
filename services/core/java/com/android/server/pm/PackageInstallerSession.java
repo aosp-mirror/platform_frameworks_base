@@ -1463,7 +1463,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
                 try {
-                    mSigningDetails = ApkSignatureVerifier.plsCertsNoVerifyOnlyCerts(
+                    mSigningDetails = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
                             pkgInfo.applicationInfo.sourceDir,
                             PackageParser.SigningDetails.SignatureSchemeVersion.JAR);
                 } catch (PackageParserException e) {
