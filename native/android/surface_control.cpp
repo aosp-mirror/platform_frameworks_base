@@ -499,7 +499,5 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
     color.g = g;
     color.b = b;
 
-    transaction->setColor(surfaceControl, color)
-                .setColorAlpha(surfaceControl, alpha)
-                .setColorDataspace(surfaceControl, static_cast<ui::Dataspace>(dataspace));
+    transaction->setBackgroundColor(surfaceControl, color, alpha, static_cast<ui::Dataspace>(dataspace));
 }
