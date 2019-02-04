@@ -3230,6 +3230,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         });
     }
 
+    /**
+     * NetworkStack endpoint to start the captive portal app. The NetworkStack needs to use this
+     * endpoint as it does not have INTERACT_ACROSS_USERS_FULL itself.
+     * @param appExtras Bundle to use as intent extras for the captive portal application.
+     *                  Must be treated as opaque to avoid preventing the captive portal app to
+     *                  update its arguments.
+     */
+    @Override
+    public void startCaptivePortalAppInternal(Bundle appExtras) {
+        mContext.checkCallingOrSelfPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+
+        final Intent appIntent = new Intent(ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
+        appIntent.putExtras(appExtras);
+        appIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Binder.withCleanCallingIdentity(() ->
+                mContext.startActivityAsUser(appIntent, UserHandle.CURRENT));
+    }
+
     public boolean avoidBadWifi() {
         return mMultinetworkPolicyTracker.getAvoidBadWifi();
     }

@@ -27,6 +27,7 @@ import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.ProxyInfo;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
@@ -167,6 +168,7 @@ interface IConnectivityManager
     void setAcceptUnvalidated(in Network network, boolean accept, boolean always);
     void setAvoidUnvalidated(in Network network);
     void startCaptivePortalApp(in Network network);
+    void startCaptivePortalAppInternal(in Bundle appExtras);
 
     boolean getAvoidBadWifi();
     int getMultipathPreference(in Network Network);
