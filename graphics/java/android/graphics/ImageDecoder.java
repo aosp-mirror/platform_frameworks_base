@@ -1606,14 +1606,16 @@ public final class ImageDecoder implements AutoCloseable {
         mTempStorage = null;
     }
 
-    private void checkState() {
+    private void checkState(boolean animated) {
         if (mNativePtr == 0) {
             throw new IllegalStateException("Cannot use closed ImageDecoder!");
         }
 
         checkSubset(mDesiredWidth, mDesiredHeight, mCropRect);
 
-        if (mAllocator == ALLOCATOR_HARDWARE) {
+        // animated ignores the allocator, so no need to check for incompatible
+        // fields.
+        if (!animated && mAllocator == ALLOCATOR_HARDWARE) {
             if (mMutable) {
                 throw new IllegalStateException("Cannot make mutable HARDWARE Bitmap!");
             }
@@ -1637,21 +1639,30 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
+    private boolean checkForExtended() {
+        if (mDesiredColorSpace == null) {
+            return false;
+        }
+        return mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB)
+                || mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+    }
+
+    private long getColorSpacePtr() {
+        if (mDesiredColorSpace == null) {
+            return 0;
+        }
+        return mDesiredColorSpace.getNativeInstance();
+    }
+
     @WorkerThread
     @NonNull
     private Bitmap decodeBitmapInternal() throws IOException {
-        checkState();
-        long colorSpacePtr = 0;
-        boolean extended = false;
-        if (mDesiredColorSpace != null) {
-            colorSpacePtr = mDesiredColorSpace.getNativeInstance();
-            extended = mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB)
-                || mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
-        }
+        checkState(false);
         return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
                 mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mUnpremultipliedRequired,
-                mConserveMemory, mDecodeAsAlphaMask, colorSpacePtr, extended);
+                mConserveMemory, mDecodeAsAlphaMask, getColorSpacePtr(),
+                checkForExtended());
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1717,9 +1728,11 @@ public final class ImageDecoder implements AutoCloseable {
                 // mPostProcessor exists.
                 ImageDecoder postProcessPtr = decoder.mPostProcessor == null ?
                         null : decoder;
+                decoder.checkState(true);
                 Drawable d = new AnimatedImageDrawable(decoder.mNativePtr,
                         postProcessPtr, decoder.mDesiredWidth,
-                        decoder.mDesiredHeight, srcDensity,
+                        decoder.mDesiredHeight, decoder.getColorSpacePtr(),
+                        decoder.checkForExtended(), srcDensity,
                         src.computeDstDensity(), decoder.mCropRect,
                         decoder.mInputStream, decoder.mAssetFd);
                 // d has taken ownership of these objects.

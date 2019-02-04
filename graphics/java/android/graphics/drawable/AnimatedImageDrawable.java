@@ -291,8 +291,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      */
     public AnimatedImageDrawable(long nativeImageDecoder,
             @Nullable ImageDecoder decoder, int width, int height,
-            int srcDensity, int dstDensity, Rect cropRect,
-            InputStream inputStream, AssetFileDescriptor afd)
+            long colorSpaceHandle, boolean extended, int srcDensity, int dstDensity,
+            Rect cropRect, InputStream inputStream, AssetFileDescriptor afd)
             throws IOException {
         width = Bitmap.scaleFromDensity(width, srcDensity, dstDensity);
         height = Bitmap.scaleFromDensity(height, srcDensity, dstDensity);
@@ -309,8 +309,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             mIntrinsicHeight = cropRect.height();
         }
 
-        mState = new State(nCreate(nativeImageDecoder, decoder, width, height, cropRect),
-                inputStream, afd);
+        mState = new State(nCreate(nativeImageDecoder, decoder, width, height, colorSpaceHandle,
+                    extended, cropRect), inputStream, afd);
 
         final long nativeSize = nNativeByteSize(mState.mNativePtr);
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
@@ -574,8 +574,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
 
     private static native long nCreate(long nativeImageDecoder,
-            @Nullable ImageDecoder decoder, int width, int height, Rect cropRect)
-        throws IOException;
+            @Nullable ImageDecoder decoder, int width, int height, long colorSpaceHandle,
+            boolean extended, Rect cropRect) throws IOException;
     @FastNative
     private static native long nGetNativeFinalizer();
     private static native long nDraw(long nativePtr, long canvasNativePtr);
