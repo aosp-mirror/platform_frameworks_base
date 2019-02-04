@@ -102,7 +102,8 @@ metalava_updatable_media_args = " --error UnhiddenSystemApi " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant "
+    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi " +
+    " --show-annotation android.annotation.TestApi "
 
 droidstubs {
     name: "updatable-media-stubs",
@@ -110,8 +111,7 @@ droidstubs {
         ":updatable-media-srcs-without-aidls",
         ":framework-media-annotation-srcs",
     ],
-    args: metalava_updatable_media_args + " --show-annotation android.annotation.SystemApi " +
-        " --show-annotation android.annotation.TestApi ",
+    args: metalava_updatable_media_args,
     // Ideally, sdk_version here should be "current_system", but "current - 1" is used
     // to avoid dependency cycle with framework.
     sdk_version: "28",
