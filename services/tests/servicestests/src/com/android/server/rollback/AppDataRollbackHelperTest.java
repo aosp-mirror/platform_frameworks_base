@@ -16,19 +16,22 @@
 
 package com.android.server.rollback;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
+import android.content.rollback.RollbackInfo;
 import android.util.IntArray;
 import android.util.SparseLongArray;
 
@@ -42,7 +45,9 @@ import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class AppDataRollbackHelperTest {
@@ -55,72 +60,54 @@ public class AppDataRollbackHelperTest {
         // All users are unlocked so we should snapshot data for them.
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
         doReturn(true).when(helper).isUserCredentialLocked(eq(11));
-        AppDataRollbackHelper.SnapshotAppDataResult result = helper.snapshotAppData("com.foo.bar",
-                new int[]{10, 11});
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar", new int[]{10, 11});
+        helper.snapshotAppData(5, info);
 
-        assertEquals(2, result.pendingBackups.size());
-        assertEquals(10, result.pendingBackups.get(0));
-        assertEquals(11, result.pendingBackups.get(1));
+        assertEquals(2, info.getPendingBackups().size());
+        assertEquals(10, info.getPendingBackups().get(0));
+        assertEquals(11, info.getPendingBackups().get(1));
 
-        assertEquals(0, result.ceSnapshotInodes.size());
+        assertEquals(0, info.getCeSnapshotInodes().size());
 
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).snapshotAppData(
-                eq("com.foo.bar"), eq(10), eq(Installer.FLAG_STORAGE_DE));
+                eq("com.foo.bar"), eq(10), eq(5), eq(Installer.FLAG_STORAGE_DE));
         inOrder.verify(installer).snapshotAppData(
-                eq("com.foo.bar"), eq(11), eq(Installer.FLAG_STORAGE_DE));
+                eq("com.foo.bar"), eq(11), eq(5), eq(Installer.FLAG_STORAGE_DE));
         inOrder.verifyNoMoreInteractions();
 
         // One of the users is unlocked but the other isn't
         doReturn(false).when(helper).isUserCredentialLocked(eq(10));
         doReturn(true).when(helper).isUserCredentialLocked(eq(11));
-        when(installer.snapshotAppData(anyString(), anyInt(), anyInt())).thenReturn(239L);
+        when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(239L);
 
-        result = helper.snapshotAppData("com.foo.bar", new int[]{10, 11});
-        assertEquals(1, result.pendingBackups.size());
-        assertEquals(11, result.pendingBackups.get(0));
+        PackageRollbackInfo info2 = createPackageRollbackInfo("com.foo.bar", new int[]{10, 11});
+        helper.snapshotAppData(7, info2);
+        assertEquals(1, info2.getPendingBackups().size());
+        assertEquals(11, info2.getPendingBackups().get(0));
 
-        assertEquals(1, result.ceSnapshotInodes.size());
-        assertEquals(239L, result.ceSnapshotInodes.get(10));
+        assertEquals(1, info2.getCeSnapshotInodes().size());
+        assertEquals(239L, info2.getCeSnapshotInodes().get(10));
 
         inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).snapshotAppData(
-                eq("com.foo.bar"), eq(10),
+                eq("com.foo.bar"), eq(10), eq(7),
                 eq(Installer.FLAG_STORAGE_CE | Installer.FLAG_STORAGE_DE));
         inOrder.verify(installer).snapshotAppData(
-                eq("com.foo.bar"), eq(11), eq(Installer.FLAG_STORAGE_DE));
+                eq("com.foo.bar"), eq(11), eq(7), eq(Installer.FLAG_STORAGE_DE));
         inOrder.verifyNoMoreInteractions();
     }
 
-    private static RollbackData createInProgressRollbackData(String packageName) {
-        RollbackData data = new RollbackData(1, new File("/does/not/exist"), -1, true);
-        data.packages.add(new PackageRollbackInfo(
-                new VersionedPackage(packageName, 1), new VersionedPackage(packageName, 1),
-                new IntArray(), new ArrayList<>(), false, new IntArray(), new SparseLongArray()));
-        data.inProgress = true;
-
-        return data;
+    private static PackageRollbackInfo createPackageRollbackInfo(String packageName,
+            final int[] installedUsers) {
+        return new PackageRollbackInfo(
+                new VersionedPackage(packageName, 2), new VersionedPackage(packageName, 1),
+                new IntArray(), new ArrayList<>(), false, IntArray.wrap(installedUsers),
+                new SparseLongArray());
     }
 
-    @Test
-    public void testRestoreAppDataSnapshot_noRollbackData() throws Exception {
-        Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
-
-        assertFalse(helper.restoreAppData("com.foo", null, 0, 0, 0, "seinfo"));
-        verifyZeroInteractions(installer);
-    }
-
-    @Test
-    public void testRestoreAppDataSnapshot_noRollbackInProgress() throws Exception {
-        Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
-
-        RollbackData rd = createInProgressRollbackData("com.foo");
-        // Override the in progress flag.
-        rd.inProgress = false;
-        assertFalse(helper.restoreAppData("com.foo", rd, 0, 0, 0, "seinfo"));
-        verifyZeroInteractions(installer);
+    private static PackageRollbackInfo createPackageRollbackInfo(String packageName) {
+        return createPackageRollbackInfo(packageName, new int[] {});
     }
 
     @Test
@@ -128,18 +115,20 @@ public class AppDataRollbackHelperTest {
         Installer installer = mock(Installer.class);
         AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
 
-        RollbackData rd = createInProgressRollbackData("com.foo");
-        IntArray pendingBackups = rd.packages.get(0).getPendingBackups();
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
+        IntArray pendingBackups = info.getPendingBackups();
         pendingBackups.add(10);
         pendingBackups.add(11);
 
-        assertTrue(helper.restoreAppData("com.foo", rd, 10 /* userId */, 1, 2, "seinfo"));
+        assertTrue(helper.restoreAppData(13 /* rollbackId */, info, 10 /* userId */, 1 /* appId */,
+                      "seinfo"));
 
         // Should only require FLAG_STORAGE_DE here because we have a pending backup that we
         // didn't manage to execute.
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).restoreAppDataSnapshot(
-                eq("com.foo"), eq(1), eq(2L), eq("seinfo"), eq(10), eq(Installer.FLAG_STORAGE_DE));
+                eq("com.foo"), eq(1) /* appId */, eq("seinfo"), eq(10) /* userId */,
+                eq(13) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE));
         inOrder.verifyNoMoreInteractions();
 
         assertEquals(1, pendingBackups.size());
@@ -152,16 +141,18 @@ public class AppDataRollbackHelperTest {
         AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
 
-        RollbackData rd = createInProgressRollbackData("com.foo");
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
 
-        assertTrue(helper.restoreAppData("com.foo", rd, 10 /* userId */, 1, 2, "seinfo"));
+        assertTrue(helper.restoreAppData(73 /* rollbackId */, info, 10 /* userId */, 1 /* appId */,
+                      "seinfo"));
 
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).restoreAppDataSnapshot(
-                eq("com.foo"), eq(1), eq(2L), eq("seinfo"), eq(10), eq(Installer.FLAG_STORAGE_DE));
+                eq("com.foo"), eq(1) /* appId */, eq("seinfo"), eq(10) /* userId */,
+                eq(73) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE));
         inOrder.verifyNoMoreInteractions();
 
-        ArrayList<RestoreInfo> pendingRestores = rd.packages.get(0).getPendingRestores();
+        ArrayList<RestoreInfo> pendingRestores = info.getPendingRestores();
         assertEquals(1, pendingRestores.size());
         assertEquals(10, pendingRestores.get(0).userId);
         assertEquals(1, pendingRestores.get(0).appId);
@@ -169,21 +160,23 @@ public class AppDataRollbackHelperTest {
     }
 
     @Test
-    public void testRestoreAppDataSnapshot_availableBackupForUnockedUser() throws Exception {
+    public void testRestoreAppDataSnapshot_availableBackupForUnlockedUser() throws Exception {
         Installer installer = mock(Installer.class);
         AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
         doReturn(false).when(helper).isUserCredentialLocked(eq(10));
 
-        RollbackData rd = createInProgressRollbackData("com.foo");
-        assertFalse(helper.restoreAppData("com.foo", rd, 10 /* userId */, 1, 2, "seinfo"));
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
+        assertFalse(helper.restoreAppData(101 /* rollbackId */, info, 10 /* userId */,
+                      1 /* appId */, "seinfo"));
 
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).restoreAppDataSnapshot(
-                eq("com.foo"), eq(1), eq(2L), eq("seinfo"), eq(10),
+                eq("com.foo"), eq(1) /* appId */, eq("seinfo"), eq(10) /* userId */,
+                eq(101) /* rollbackId */,
                 eq(Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE));
         inOrder.verifyNoMoreInteractions();
 
-        ArrayList<RestoreInfo> pendingRestores = rd.packages.get(0).getPendingRestores();
+        ArrayList<RestoreInfo> pendingRestores = info.getPendingRestores();
         assertEquals(0, pendingRestores.size());
     }
 
@@ -191,48 +184,99 @@ public class AppDataRollbackHelperTest {
     public void destroyAppData() throws Exception {
         Installer installer = mock(Installer.class);
         AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
-        SparseLongArray ceSnapshotInodes = new SparseLongArray();
-        ceSnapshotInodes.put(11, 239L);
 
-        helper.destroyAppDataSnapshot("com.foo.bar", 10, 0L);
-        helper.destroyAppDataSnapshot("com.foo.bar", 11, 239L);
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
+        info.putCeSnapshotInode(11, 239L);
+        helper.destroyAppDataSnapshot(5 /* rollbackId */, info, 10 /* userId */);
+        helper.destroyAppDataSnapshot(5 /* rollbackId */, info, 11 /* userId */);
 
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).destroyAppDataSnapshot(
-                eq("com.foo.bar"), eq(10), eq(0L),
-                eq(Installer.FLAG_STORAGE_DE));
+                eq("com.foo.bar"), eq(10) /* userId */, eq(0L) /* ceSnapshotInode */,
+                eq(5) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE));
         inOrder.verify(installer).destroyAppDataSnapshot(
-                eq("com.foo.bar"), eq(11), eq(239L),
-                eq(Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE));
+                eq("com.foo.bar"), eq(11) /* userId */, eq(239L) /* ceSnapshotInode */,
+                eq(5) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE));
         inOrder.verifyNoMoreInteractions();
+
+        assertEquals(0, info.getCeSnapshotInodes().size());
     }
 
     @Test
-    public void commitPendingBackupAndRestoreForUser_updatesRollbackData() throws Exception {
+    public void commitPendingBackupAndRestoreForUser() throws Exception {
         Installer installer = mock(Installer.class);
         AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
 
-        ArrayList<RollbackData> changedRollbackData = new ArrayList<>();
-        changedRollbackData.add(createInProgressRollbackData("com.foo.bar"));
+        when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(53L);
 
-        when(installer.snapshotAppData(anyString(), anyInt(), anyInt())).thenReturn(239L);
+        // This one should be backed up.
+        PackageRollbackInfo pendingBackup = createPackageRollbackInfo("com.foo", new int[]{37, 73});
+        pendingBackup.addPendingBackup(37);
 
-        ArrayList<String> pendingBackups = new ArrayList<>();
-        pendingBackups.add("com.foo.bar");
+        // Nothing should be done for this one.
+        PackageRollbackInfo wasRecentlyRestored = createPackageRollbackInfo("com.bar",
+                new int[]{37, 73});
+        wasRecentlyRestored.addPendingBackup(37);
+        wasRecentlyRestored.getPendingRestores().add(
+                new RestoreInfo(37 /* userId */, 239 /* appId*/, "seInfo"));
 
-        helper.commitPendingBackupAndRestoreForUser(11, pendingBackups,
-                new HashMap<>() /* pendingRestores */, changedRollbackData);
+        // This one should be restored
+        PackageRollbackInfo pendingRestore = createPackageRollbackInfo("com.abc",
+                new int[]{37, 73});
+        pendingRestore.putCeSnapshotInode(37, 1543L);
+        pendingRestore.getPendingRestores().add(
+                new RestoreInfo(37 /* userId */, 57 /* appId*/, "seInfo"));
 
-        assertEquals(1, changedRollbackData.size());
-        assertEquals(1, changedRollbackData.get(0).packages.size());
-        PackageRollbackInfo info = changedRollbackData.get(0).packages.get(0);
+        // This one shouldn't be processed, because it hasn't pending backups/restores for userId
+        // 37.
+        PackageRollbackInfo ignoredInfo = createPackageRollbackInfo("com.bar",
+                new int[]{3, 73});
+        wasRecentlyRestored.addPendingBackup(3);
+        wasRecentlyRestored.addPendingBackup(73);
+        wasRecentlyRestored.getPendingRestores().add(
+                new RestoreInfo(73 /* userId */, 239 /* appId*/, "seInfo"));
 
-        assertEquals(1, info.getCeSnapshotInodes().size());
-        assertEquals(239L, info.getCeSnapshotInodes().get(11));
+        RollbackData dataWithPendingBackup = new RollbackData(101, new File("/does/not/exist"), -1,
+                true);
+        dataWithPendingBackup.packages.add(pendingBackup);
 
+        RollbackData dataWithRecentRestore = new RollbackData(17239, new File("/does/not/exist"),
+                -1, true);
+        dataWithRecentRestore.packages.add(wasRecentlyRestored);
+
+        RollbackData dataForDifferentUser = new RollbackData(17239, new File("/does/not/exist"),
+                -1, true);
+        dataForDifferentUser.packages.add(ignoredInfo);
+
+        RollbackInfo rollbackInfo = new RollbackInfo(17239,
+                Arrays.asList(pendingRestore, wasRecentlyRestored), false);
+
+        List<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
+                Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser),
+                Collections.singletonList(rollbackInfo));
         InOrder inOrder = Mockito.inOrder(installer);
-        inOrder.verify(installer).snapshotAppData("com.foo.bar", 11 /* userId */,
-                Installer.FLAG_STORAGE_CE);
+
+        // Check that pending backup and restore for the same package mutually destroyed each other.
+        assertEquals(-1, wasRecentlyRestored.getPendingBackups().indexOf(37));
+        assertNull(wasRecentlyRestored.getRestoreInfo(37));
+
+        // Check that backup was performed.
+        inOrder.verify(installer).snapshotAppData(eq("com.foo"), eq(37), eq(101),
+                eq(Installer.FLAG_STORAGE_CE));
+        assertEquals(-1, pendingBackup.getPendingBackups().indexOf(37));
+        assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
+
+        // Check that changed returns correct RollbackData.
+        assertEquals(2, changed.size());
+        assertEquals(dataWithPendingBackup, changed.get(0));
+        assertEquals(dataWithRecentRestore, changed.get(1));
+
+        // Check that restore was performed.
+        inOrder.verify(installer).restoreAppDataSnapshot(
+                eq("com.abc"), eq(57) /* appId */, eq("seInfo"), eq(37) /* userId */,
+                eq(17239) /* rollbackId */, eq(Installer.FLAG_STORAGE_CE));
+        assertNull(pendingRestore.getRestoreInfo(37));
+
         inOrder.verifyNoMoreInteractions();
     }
 }
