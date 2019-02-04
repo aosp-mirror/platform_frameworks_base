@@ -42,7 +42,13 @@ namespace uirenderer {
 namespace skiapipeline {
 
 SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread)
-        : SkiaPipeline(thread), mVkManager(thread.vulkanManager()) {}
+        : SkiaPipeline(thread), mVkManager(thread.vulkanManager()) {
+    thread.renderState().registerContextCallback(this);
+}
+
+SkiaVulkanPipeline::~SkiaVulkanPipeline() {
+    mRenderThread.renderState().removeContextCallback(this);
+}
 
 MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
     return MakeCurrentResult::AlreadyCurrent;
@@ -53,6 +59,8 @@ Frame SkiaVulkanPipeline::getFrame() {
                         "drawRenderNode called on a context with no surface!");
 
     SkSurface* backBuffer = mVkManager.getBackbufferSurface(&mVkSurface);
+    LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr,
+                        "drawRenderNode called on a context with an invalid surface");
     if (backBuffer == nullptr) {
         SkDebugf("failed to get backbuffer");
         return Frame(-1, -1, 0);
@@ -151,6 +159,13 @@ sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThr
                                                          SkBitmap& skBitmap) {
     LOG_ALWAYS_FATAL("Unimplemented");
     return nullptr;
+}
+
+void SkiaVulkanPipeline::onContextDestroyed() {
+    if (mVkSurface) {
+        mVkManager.destroySurface(mVkSurface);
+        mVkSurface = nullptr;
+    }
 }
 
 } /* namespace skiapipeline */
