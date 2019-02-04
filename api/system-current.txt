@@ -1711,6 +1711,10 @@ package android.content.pm {
     field public boolean handleAllWebDataURI;
   }
 
+  public final class ShortcutInfo implements android.os.Parcelable {
+    method @Nullable public android.app.Person[] getPersons();
+  }
+
   public class ShortcutManager {
     method @NonNull public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(@NonNull android.content.IntentFilter);
   }
