@@ -22,6 +22,7 @@ import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,18 +43,31 @@ public final class RollbackInfo implements Parcelable {
 
     private final List<VersionedPackage> mCausePackages;
 
+    private final boolean mIsStaged;
+    private final int mCommittedSessionId;
+
     /** @hide */
-    public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages,
-            List<VersionedPackage> causePackages) {
+    public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages, boolean isStaged) {
+        this(rollbackId, packages, isStaged, Collections.emptyList(),
+                PackageInstaller.SessionInfo.INVALID_ID);
+    }
+
+    /** @hide */
+    public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages, boolean isStaged,
+            List<VersionedPackage> causePackages,  int committedSessionId) {
         this.mRollbackId = rollbackId;
         this.mPackages = packages;
+        this.mIsStaged = isStaged;
         this.mCausePackages = causePackages;
+        this.mCommittedSessionId = committedSessionId;
     }
 
     private RollbackInfo(Parcel in) {
         mRollbackId = in.readInt();
         mPackages = in.createTypedArrayList(PackageRollbackInfo.CREATOR);
+        mIsStaged = in.readBoolean();
         mCausePackages = in.createTypedArrayList(VersionedPackage.CREATOR);
+        mCommittedSessionId = in.readInt();
     }
 
     /**
@@ -75,8 +89,7 @@ public final class RollbackInfo implements Parcelable {
      * being committed.
      */
     public boolean isStaged() {
-        // TODO: Support rollback of staged installs.
-        return false;
+        return mIsStaged;
     }
 
     /**
@@ -84,8 +97,7 @@ public final class RollbackInfo implements Parcelable {
      * Only applicable for rollbacks that have been committed.
      */
     public int getCommittedSessionId() {
-        // TODO: Support rollback of staged installs.
-        return PackageInstaller.SessionInfo.INVALID_ID;
+        return mCommittedSessionId;
     }
 
     /**
@@ -106,7 +118,9 @@ public final class RollbackInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mRollbackId);
         out.writeTypedList(mPackages);
+        out.writeBoolean(mIsStaged);
         out.writeTypedList(mCausePackages);
+        out.writeInt(mCommittedSessionId);
     }
 
     public static final Parcelable.Creator<RollbackInfo> CREATOR =

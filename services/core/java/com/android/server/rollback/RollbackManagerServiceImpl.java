@@ -54,7 +54,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -210,8 +209,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages,
-                            Collections.emptyList()));
+                // TODO: Pass the correct value for isStaged instead of
+                // assuming always false.
+                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages, false));
             }
             return new ParceledListSlice<>(rollbacks);
         }
@@ -364,8 +364,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                 return;
                             }
 
+                            // TODO: Set the correct values for isStaged and
+                            // committedSessionId.
                             addRecentlyExecutedRollback(new RollbackInfo(
-                                        data.rollbackId, data.packages, causePackages));
+                                        data.rollbackId, data.packages, false, causePackages,
+                                        PackageInstaller.SessionInfo.INVALID_ID));
                             sendSuccess(statusReceiver);
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
