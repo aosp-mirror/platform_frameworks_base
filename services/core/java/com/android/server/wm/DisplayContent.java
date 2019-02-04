@@ -31,14 +31,11 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InsetsState.TYPE_IME;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -173,7 +170,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -1160,14 +1156,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
             ConfigurationContainer requestingContainer) {
-        final int previousRotation = mRotation;
         final Configuration config = updateOrientationFromAppTokens(
                 getRequestedOverrideConfiguration(), freezeDisplayToken, false);
-        // This event is considered handled iff a configuration propagation is triggered, because
-        // that's the only place lower level containers check if they need to do something to this
-        // request. The only guaranteed signal is that the display is rotated to a different
-        // orientation (i.e. rotating 180 degrees doesn't count).
-        final boolean handled = (mRotation - previousRotation) % 2 != 0;
+        // If display rotation class tells us that it doesn't consider app requested orientation,
+        // this display won't rotate just because of an app changes its requested orientation. Thus
+        // it indicates that this display chooses not to handle this request.
+        final boolean handled = getDisplayRotation().respectAppRequestedOrientation();
         if (config == null) {
             return handled;
         }
@@ -1187,6 +1181,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     config, null /* starting */, false /* deferResume */, getDisplayId());
         }
         return handled;
+    }
+
+    @Override
+    boolean handlesOrientationChangeFromDescendant() {
+        return getDisplayRotation().respectAppRequestedOrientation();
     }
 
     /**
@@ -1369,8 +1368,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
                 + " selected orientation " + lastOrientation
-                + ", got rotation " + rotation + " which has "
-                + " metrics");
+                + ", got rotation " + rotation);
 
         if (oldRotation == rotation) {
             // No change.

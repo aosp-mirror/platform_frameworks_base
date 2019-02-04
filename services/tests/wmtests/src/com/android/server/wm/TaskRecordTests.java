@@ -25,13 +25,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.hamcrest.Matchers.not;
@@ -41,6 +34,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -53,7 +47,6 @@ import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Xml;
 import android.view.DisplayInfo;
-import android.view.Surface;
 
 import androidx.test.filters.MediumTest;
 
@@ -62,6 +55,7 @@ import com.android.server.wm.TaskRecord.TaskRecordFactory;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -284,48 +278,33 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testUpdatesForcedOrientationInBackground() {
-        final DisplayInfo info = new DisplayInfo();
-        info.logicalWidth = 1920;
-        info.logicalHeight = 1080;
-        final ActivityDisplay display = addNewActivityDisplayAt(info, POSITION_TOP);
-        doCallRealMethod().when(display.mDisplayContent).setDisplayRotation(any());
-        display.mDisplayContent.setDisplayRotation(mock(DisplayRotation.class));
-        doCallRealMethod().when(display.mDisplayContent).onDescendantOrientationChanged(any(),
-                any());
-        doCallRealMethod().when(display.mDisplayContent).setRotation(anyInt());
-        doAnswer(invocation -> {
-            display.mDisplayContent.setRotation(Surface.ROTATION_0);
-            return null;
-        }).when(display.mDisplayContent).updateOrientationFromAppTokens(any(), any(), anyBoolean());
+    public void testIgnoresForcedOrientationWhenParentHandles() {
+        final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
+        DisplayInfo info = new DisplayInfo();
+        info.logicalWidth = fullScreenBounds.width();
+        info.logicalHeight = fullScreenBounds.height();
+        ActivityDisplay display = addNewActivityDisplayAt(info, POSITION_TOP);
 
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+        display.getRequestedOverrideConfiguration().orientation =
+                Configuration.ORIENTATION_LANDSCAPE;
+        display.onRequestedOverrideConfigurationChanged(
+                display.getRequestedOverrideConfiguration());
+        ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
-        final TaskRecord task = stack.getChildAt(0);
-        final ActivityRecord activity = task.getRootActivity();
+        TaskRecord task = stack.getChildAt(0);
+        ActivityRecord root = task.getTopActivity();
 
-        // Wire up app window token and task.
-        doCallRealMethod().when(activity.mAppWindowToken).setOrientation(anyInt(), any(), any());
-        doCallRealMethod().when(activity.mAppWindowToken).onDescendantOrientationChanged(any(),
-                any());
-        doReturn(task.mTask).when(activity.mAppWindowToken).getParent();
+        final WindowContainer parentWindowContainer = mock(WindowContainer.class);
+        Mockito.doReturn(parentWindowContainer).when(task.mTask).getParent();
+        Mockito.doReturn(true).when(parentWindowContainer)
+                .handlesOrientationChangeFromDescendant();
 
-        // Wire up task and stack.
-        task.mTask.mTaskRecord = task;
-        doCallRealMethod().when(task.mTask).onDescendantOrientationChanged(any(), any());
-        doReturn(stack.getTaskStack()).when(task.mTask).getParent();
-
-        // Wire up stack and display content.
-        doCallRealMethod().when(stack.mTaskStack).onDescendantOrientationChanged(any(), any());
-        doReturn(display.mDisplayContent).when(stack.mTaskStack).getParent();
-
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertTrue("Bounds of the task should be pillarboxed.",
-                task.getBounds().width() < task.getBounds().height());
-
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        assertTrue("Bounds of the task should be fullscreen.",
-                task.getBounds().equals(new Rect(0, 0, 1920, 1080)));
+        // Setting app to fixed portrait fits within parent, but TaskRecord shouldn't adjust the
+        // bounds because its parent says it will handle it at a later time.
+        setActivityRequestedOrientation(root, SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(root, task.getRootActivity());
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getRootActivity().getOrientation());
+        assertEquals(fullScreenBounds, task.getBounds());
     }
 
     /** Ensures that the alias intent won't have target component resolved. */
