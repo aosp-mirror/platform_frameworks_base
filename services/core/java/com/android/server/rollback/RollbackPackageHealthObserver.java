@@ -26,6 +26,7 @@ import android.content.rollback.RollbackManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.StatsLog;
 
@@ -64,10 +65,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             return PackageHealthObserverImpact.USER_IMPACT_NONE;
         }
 
-        RollbackInfo rollback =
-                getAvailableMainlineRollback(mContext.getSystemService(RollbackManager.class),
-                        failedPackage, moduleMetadataPackage);
-        if (rollback == null) {
+        if (getAvailableRollback(mContext.getSystemService(RollbackManager.class),
+                        failedPackage, moduleMetadataPackage) == null) {
             // Don't handle the notification, no rollbacks available for the package
             return PackageHealthObserverImpact.USER_IMPACT_NONE;
         }
@@ -84,38 +83,46 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
 
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
-        RollbackInfo rollback = getAvailableMainlineRollback(rollbackManager,
+        Pair<RollbackInfo, Boolean> rollbackPair = getAvailableRollback(rollbackManager,
                 failedPackage, moduleMetadataPackage);
-        if (rollback == null) {
-            Slog.w(TAG, "Expected rollback but no mainline rollback found for package: [ "
+        if (rollbackPair == null) {
+            Slog.w(TAG, "Expected rollback but no valid rollback found for package: [ "
                     + failedPackage.getPackageName() + "] with versionCode: ["
                     + failedPackage.getVersionCode() + "]");
             return false;
         }
+        RollbackInfo rollback = rollbackPair.first;
+        // We only log mainline package rollbacks, so check if rollback contains the
+        // module metadata provider, if it does, the rollback is a mainline rollback
+        boolean hasModuleMetadataPackage = rollbackPair.second;
 
-        StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
-                StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
-                moduleMetadataPackage.getPackageName(),
-                moduleMetadataPackage.getVersionCode());
+        if (hasModuleMetadataPackage) {
+            StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
+                    moduleMetadataPackage.getPackageName(),
+                    moduleMetadataPackage.getVersionCode());
+        }
         LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver((Intent result) -> {
-            int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
-                    RollbackManager.STATUS_FAILURE);
-            if (status == RollbackManager.STATUS_SUCCESS) {
-                StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
-                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
-                        moduleMetadataPackage.getPackageName(),
-                        moduleMetadataPackage.getVersionCode());
-            } else {
-                StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
-                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
-                        moduleMetadataPackage.getPackageName(),
-                        moduleMetadataPackage.getVersionCode());
+            if (hasModuleMetadataPackage) {
+                int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
+                        RollbackManager.STATUS_FAILURE);
+                if (status == RollbackManager.STATUS_SUCCESS) {
+                    StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                            moduleMetadataPackage.getPackageName(),
+                            moduleMetadataPackage.getVersionCode());
+                } else {
+                    StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                            moduleMetadataPackage.getPackageName(),
+                            moduleMetadataPackage.getVersionCode());
+                }
             }
         });
 
         mHandler.post(() ->
                 rollbackManager.commitRollback(rollback.getRollbackId(),
-                    Collections.singletonList(moduleMetadataPackage),
+                    Collections.singletonList(failedPackage),
                     rollbackReceiver.getIntentSender()));
         // Assume rollback executed successfully
         return true;
@@ -134,7 +141,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
     }
 
-    private RollbackInfo getAvailableMainlineRollback(RollbackManager rollbackManager,
+    private Pair<RollbackInfo, Boolean> getAvailableRollback(RollbackManager rollbackManager,
             VersionedPackage failedPackage, VersionedPackage moduleMetadataPackage) {
         for (RollbackInfo rollback : rollbackManager.getAvailableRollbacks()) {
             // We only rollback mainline packages, so check if rollback contains the
@@ -149,8 +156,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                         && packageRollback.getVersionRolledBackFrom().getVersionCode()
                         == failedPackage.getVersionCode();
             }
-            if (hasModuleMetadataPackage && hasFailedPackage) {
-                return rollback;
+            if (hasFailedPackage) {
+                return new Pair<RollbackInfo, Boolean>(rollback, hasModuleMetadataPackage);
             }
         }
         return null;
@@ -159,7 +166,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private VersionedPackage getModuleMetadataPackage() {
         String packageName = mContext.getResources().getString(
                 R.string.config_defaultModuleMetadataProvider);
-        if (!TextUtils.isEmpty(packageName)) {
+        if (TextUtils.isEmpty(packageName)) {
             return null;
         }
 
