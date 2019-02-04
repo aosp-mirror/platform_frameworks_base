@@ -21,11 +21,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -206,6 +209,7 @@ public class CarrierTextController {
     protected void updateCarrierText() {
         boolean allSimsMissing = true;
         boolean anySimReadyAndInService = false;
+        boolean missingSimsWithSubs = false;
         CharSequence displayText = null;
 
         List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
@@ -252,6 +256,7 @@ public class CarrierTextController {
                 // described above.
                 displayText = makeCarrierStringOnEmergencyCapable(
                         getMissingSimMessage(), subs.get(0).getCarrierName());
+                missingSimsWithSubs = true;
             } else {
                 // We don't have a SubscriptionInfo to get the emergency calls only from.
                 // Grab it from the old sticky broadcast if possible instead. We can use it
@@ -288,12 +293,14 @@ public class CarrierTextController {
             displayText = getAirplaneModeMessage();
         }
 
+        Handler handler = Dependency.get(Dependency.MAIN_HANDLER);
+        final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
+                displayText,
+                displayText.toString().split(mSeparator.toString()),
+                anySimReadyAndInService && !missingSimsWithSubs,
+                subsIds);
         if (mCarrierTextCallback != null) {
-            mCarrierTextCallback.updateCarrierInfo(new CarrierTextCallbackInfo(
-                    displayText,
-                    displayText.toString().split(mSeparator.toString()),
-                    anySimReadyAndInService,
-                    subsIds));
+            handler.post(() -> mCarrierTextCallback.updateCarrierInfo(info));
         }
 
     }
@@ -487,7 +494,8 @@ public class CarrierTextController {
         public final boolean anySimReady;
         public final int[] subscriptionIds;
 
-        CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
+        @VisibleForTesting
+        public CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
                 boolean anySimReady, int[] subscriptionIds) {
             this.carrierText = carrierText;
             this.listOfCarriers = listOfCarriers;
