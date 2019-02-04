@@ -81,12 +81,12 @@ static jlong android_content_XmlBlock_nativeCreateParseState(JNIEnv* env, jobjec
     }
 
     ResXMLParser* st = new ResXMLParser(*osb);
-    st->setSourceResourceId(res_id);
     if (st == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return 0;
     }
 
+    st->setSourceResourceId(res_id);
     st->restart();
 
     return reinterpret_cast<jlong>(st);
