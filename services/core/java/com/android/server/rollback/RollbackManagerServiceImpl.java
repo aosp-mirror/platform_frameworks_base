@@ -221,9 +221,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                // TODO: Pass the correct value for isStaged instead of
-                // assuming always false.
-                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages, false));
+                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages, data.isStaged()));
             }
             return new ParceledListSlice<>(rollbacks);
         }
@@ -323,6 +321,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
             parentParams.setAllowDowngrade(true);
             parentParams.setMultiPackage();
+            if (data.isStaged()) {
+                parentParams.setStaged();
+            }
+
             int parentSessionId = packageInstaller.createSession(parentParams);
             PackageInstaller.Session parentSession = packageInstaller.openSession(parentSessionId);
 
@@ -337,6 +339,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
                 params.setInstallerPackageName(installerPackageName);
                 params.setAllowDowngrade(true);
+                if (data.isStaged()) {
+                    params.setStaged();
+                }
+                if (info.isApex()) {
+                    params.setInstallAsApex();
+                }
                 int sessionId = packageInstaller.createSession(params);
                 PackageInstaller.Session session = packageInstaller.openSession(sessionId);
 
@@ -376,11 +384,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                 return;
                             }
 
-                            // TODO: Set the correct values for isStaged and
-                            // committedSessionId.
                             addRecentlyExecutedRollback(new RollbackInfo(
-                                        data.rollbackId, data.packages, false, causePackages,
-                                        PackageInstaller.SessionInfo.INVALID_ID));
+                                        data.rollbackId, data.packages, data.isStaged(),
+                                        causePackages, parentSessionId));
                             sendSuccess(statusReceiver);
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);

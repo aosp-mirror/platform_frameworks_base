@@ -68,4 +68,11 @@ class RollbackData {
         this.backupDir = backupDir;
         this.stagedSessionId = stagedSessionId;
     }
+
+    /**
+     * Whether the rollback is for rollback of a staged install.
+     */
+    public boolean isStaged() {
+        return stagedSessionId != -1;
+    }
 }
