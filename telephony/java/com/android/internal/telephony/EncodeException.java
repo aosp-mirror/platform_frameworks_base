@@ -22,6 +22,12 @@ import android.annotation.UnsupportedAppUsage;
  * {@hide}
  */
 public class EncodeException extends Exception {
+
+    private int mError = ERROR_UNENCODABLE;
+
+    public static final int ERROR_UNENCODABLE = 0;
+    public static final int ERROR_EXCEED_SIZE = 1;
+
     public EncodeException() {
         super();
     }
@@ -31,9 +37,18 @@ public class EncodeException extends Exception {
         super(s);
     }
 
+    public EncodeException(String s, int error) {
+        super(s);
+        mError = error;
+    }
+
     @UnsupportedAppUsage
     public EncodeException(char c) {
         super("Unencodable char: '" + c + "'");
+    }
+
+    public int getError() {
+        return mError;
     }
 }
 

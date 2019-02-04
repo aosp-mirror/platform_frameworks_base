@@ -388,7 +388,7 @@ public class GsmAlphabet {
      *     GSM extension table
      * @return the encoded message
      *
-     * @throws EncodeException if String is too large to encode
+     * @throws EncodeException if String is too large to encode or any characters are unencodable
      */
     @UnsupportedAppUsage
     public static byte[] stringToGsm7BitPacked(String data, int startingSeptetOffset,
@@ -402,7 +402,8 @@ public class GsmAlphabet {
         }
         septetCount += startingSeptetOffset;
         if (septetCount > 255) {
-            throw new EncodeException("Payload cannot exceed 255 septets");
+            throw new EncodeException(
+                    "Payload cannot exceed 255 septets", EncodeException.ERROR_EXCEED_SIZE);
         }
         int byteCount = ((septetCount * 7) + 7) / 8;
         byte[] ret = new byte[byteCount + 1];  // Include space for one byte length prefix.
