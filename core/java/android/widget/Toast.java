@@ -95,7 +95,7 @@ public class Toast {
     public static final int LENGTH_LONG = 1;
 
     final Context mContext;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final TN mTN;
     @UnsupportedAppUsage
     int mDuration;
@@ -354,7 +354,7 @@ public class Toast {
     }
 
     private static class TN extends ITransientNotification.Stub {
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
 
         private static final int SHOW = 0;
@@ -362,18 +362,18 @@ public class Toast {
         private static final int CANCEL = 2;
         final Handler mHandler;
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         int mGravity;
         int mX;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         int mY;
         float mHorizontalMargin;
         float mVerticalMargin;
 
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         View mView;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         View mNextView;
         int mDuration;
 
