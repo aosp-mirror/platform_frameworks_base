@@ -16,22 +16,18 @@
   -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <color name="nav_bar_ripple_background_color">#40ffffff</color>
-    <color name="car_accent">#356FE5</color>
     <!-- colors for user switcher -->
     <color name="car_user_switcher_background_color">#000000</color>
-    <color name="car_user_switcher_name_text_color">@color/car_body1_light</color>
+    <color name="car_user_switcher_name_text_color">@*android:color/car_body1_light</color>
     <color name="car_user_switcher_add_user_background_color">#131313</color>
-    <color name="car_nav_icon_fill_color">@color/car_grey_50</color>
+    <color name="car_nav_icon_fill_color">@*android:color/car_grey_50</color>
     <!-- colors for seekbar -->
     <color name="car_seekbar_track_background">#131315</color>
-    <color name="car_seekbar_track_secondary_progress">@color/car_accent</color>
+    <color name="car_seekbar_track_secondary_progress">@*android:color/car_accent</color>
     <!-- colors for volume dialog tint -->
-    <color name="car_volume_dialog_tint">@color/car_tint_light</color>
+    <color name="car_volume_dialog_tint">@*android:color/car_tint</color>
 
-    <!-- System ui can't depend on car libs so redefine. -->
-    <color name="car_grey_50">#fffafafa</color>
-
-    <color name="docked_divider_background">@color/car_grey_50</color>
+    <color name="docked_divider_background">@*android:color/car_grey_50</color>
     <color name="system_bar_background_opaque">#ff172026</color>
 
     <color name="status_bar_background_color">#33000000</color>
@@ -45,10 +41,6 @@
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">@color/ripple_material_light</color>
-
-    <color name="car_teal_700">#ff00796b</color>
-    <color name="car_grey_300">#ffe0e0e0</color>
-    <color name="car_grey_900">#ff212121</color>
 
     <color name="keyguard_button_text_color">@android:color/black</color>
 
