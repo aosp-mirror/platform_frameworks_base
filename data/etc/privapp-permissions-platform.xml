@@ -48,17 +48,6 @@ applications that come with the platform
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.dialer">
-        <permission name="android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK"/>
-        <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
-        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.STATUS_BAR"/>
-        <permission name="android.permission.STOP_APP_SWITCHES"/>
-        <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
-        <permission name="com.android.voicemail.permission.WRITE_VOICEMAIL"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.emergency">
         <!-- Required to place emergency calls from emergency info screen. -->
         <permission name="android.permission.CALL_PRIVILEGED"/>
