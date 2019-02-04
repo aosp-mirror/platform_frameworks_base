@@ -2425,6 +2425,22 @@ public class LocationManager {
     }
 
     /**
+     * Returns true if the given package name matches a location provider package, and false
+     * otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isProviderPackage(String packageName) {
+        try {
+            return mService.isProviderPackage(packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
+
+    /**
      * Set the extra location controller package for location services on the device.
      *
      * @hide

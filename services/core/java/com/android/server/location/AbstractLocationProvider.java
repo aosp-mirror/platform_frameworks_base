@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationProvider;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,9 +67,12 @@ public abstract class AbstractLocationProvider {
         void onReportLocation(List<Location> locations);
     }
 
+    protected final Context mContext;
     private final LocationProviderManager mLocationProviderManager;
 
-    protected AbstractLocationProvider(LocationProviderManager locationProviderManager) {
+    protected AbstractLocationProvider(
+            Context context, LocationProviderManager locationProviderManager) {
+        mContext = context;
         mLocationProviderManager = locationProviderManager;
     }
 
@@ -99,6 +104,11 @@ public abstract class AbstractLocationProvider {
      */
     protected void setProperties(ProviderProperties properties) {
         mLocationProviderManager.onSetProperties(properties);
+    }
+
+    /** Returns list of packages currently associated with this provider. */
+    public List<String> getProviderPackages() {
+        return Collections.singletonList(mContext.getPackageName());
     }
 
     /**

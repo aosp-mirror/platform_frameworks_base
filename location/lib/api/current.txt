@@ -19,6 +19,7 @@ package com.android.location.provider {
     method protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
     method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
     method public void reportLocation(android.location.Location);
+    method public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
     method public void setEnabled(boolean);
     method public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
     field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";

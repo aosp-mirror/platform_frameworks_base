@@ -114,6 +114,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -669,7 +670,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // create a passive location provider, which is always enabled
         LocationProvider passiveProviderManager = new LocationProvider(PASSIVE_PROVIDER);
         addProviderLocked(passiveProviderManager);
-        mPassiveProvider = new PassiveProvider(passiveProviderManager);
+        mPassiveProvider = new PassiveProvider(mContext, passiveProviderManager);
         passiveProviderManager.attachLocked(mPassiveProvider);
 
         if (GnssLocationProvider.isSupported()) {
@@ -805,7 +806,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     Integer.parseInt(fragments[9]) /* accuracy */);
             LocationProvider testProviderManager = new LocationProvider(name);
             addProviderLocked(testProviderManager);
-            new MockProvider(testProviderManager, properties);
+            new MockProvider(mContext, testProviderManager, properties);
         }
     }
 
@@ -895,15 +896,12 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @GuardedBy("mLock")
-        @Nullable
-        public String getPackageLocked() {
+        public List<String> getPackagesLocked() {
             if (mProvider == null) {
-                return null;
-            } else if (mProvider instanceof LocationProviderProxy) {
-                // safe to not clear binder context since this doesn't call into the actual provider
-                return ((LocationProviderProxy) mProvider).getConnectedPackageName();
+                return Collections.emptyList();
             } else {
-                return mContext.getPackageName();
+                // safe to not clear binder context since this doesn't call into the real provider
+                return mProvider.getProviderPackages();
             }
         }
 
@@ -2172,10 +2170,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             return true;
         }
 
-        for (LocationProvider provider : mProviders) {
-            if (callerIdentity.mPackageName.equals(provider.getPackageLocked())) {
-                return true;
-            }
+        if (isProviderPackage(callerIdentity.mPackageName)) {
+            return true;
         }
 
         return false;
@@ -2192,10 +2188,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             return true;
         }
 
-        for (LocationProvider provider : mProviders) {
-            if (record.mReceiver.mCallerIdentity.mPackageName.equals(provider.getPackageLocked())) {
-                return true;
-            }
+        if (isProviderPackage(record.mReceiver.mCallerIdentity.mPackageName)) {
+            return true;
         }
 
         return false;
@@ -2571,8 +2565,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 if (provider == null) return null;
 
                 // only the current user or location providers may get location this way
-                if (!isCurrentProfileLocked(UserHandle.getUserId(uid)) && !isLocationProviderLocked(
-                        uid)) {
+                if (!isCurrentProfileLocked(UserHandle.getUserId(uid)) && !isProviderPackage(
+                        packageName)) {
                     return null;
                 }
 
@@ -2894,7 +2888,25 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (provider == null) {
                 return null;
             }
-            return provider.getPackageLocked();
+            List<String> packages = provider.getPackagesLocked();
+            if (packages.isEmpty()) {
+                return null;
+            } else {
+                return packages.get(0);
+            }
+        }
+    }
+
+    @Override
+    public boolean isProviderPackage(String packageName) {
+        synchronized (mLock) {
+            for (LocationProvider provider : mProviders) {
+                if (provider.getPackagesLocked().contains(packageName)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -2973,28 +2985,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             LocationProvider provider = getLocationProviderLocked(providerName);
             return provider != null && provider.isUseableForUserLocked(userId);
         }
-    }
-
-    @GuardedBy("mLock")
-    private boolean isLocationProviderLocked(int uid) {
-        if (uid == Process.SYSTEM_UID) {
-            return true;
-        }
-
-        String[] packageNames = mPackageManager.getPackagesForUid(uid);
-        if (packageNames == null) {
-            return false;
-        }
-        for (LocationProvider provider : mProviders) {
-            String packageName = provider.getPackageLocked();
-            if (packageName == null) {
-                continue;
-            }
-            if (ArrayUtils.contains(packageNames, packageName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @GuardedBy("mLock")
@@ -3099,7 +3089,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             int receiverUserId = UserHandle.getUserId(receiver.mCallerIdentity.mUid);
             if (!isCurrentProfileLocked(receiverUserId)
-                    && !isLocationProviderLocked(receiver.mCallerIdentity.mUid)) {
+                    && !isProviderPackage(receiver.mCallerIdentity.mPackageName)) {
                 if (D) {
                     Log.d(TAG, "skipping loc update for background user " + receiverUserId +
                             " (current user: " + mCurrentUserId + ", app: " +
@@ -3288,7 +3278,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                 MockLocationProvider mockProviderManager = new MockLocationProvider(name);
                 addProviderLocked(mockProviderManager);
-                mockProviderManager.attachLocked(new MockProvider(mockProviderManager, properties));
+                mockProviderManager.attachLocked(
+                        new MockProvider(mContext, mockProviderManager, properties));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3428,7 +3419,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 if (provider.mProvider instanceof LocationProviderProxy) {
                     pw.println("    " + provider.getName() + ": "
                             + ((LocationProviderProxy) provider.mProvider)
-                            .getConnectedPackageName());
+                            .getProviderPackages());
                 }
             }
             pw.println("  Historical Records by Provider:");
