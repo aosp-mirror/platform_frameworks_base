@@ -16,13 +16,15 @@
 
 package android.ddm;
 
+import android.os.Debug;
+import android.os.UserHandle;
+import android.util.Log;
+
+import dalvik.system.VMRuntime;
+
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
-import android.util.Log;
-import android.os.Debug;
-import android.os.UserHandle;
-import dalvik.system.VMRuntime;
 
 import java.nio.ByteBuffer;
 
@@ -34,6 +36,8 @@ public class DdmHandleHello extends ChunkHandler {
     public static final int CHUNK_HELO = type("HELO");
     public static final int CHUNK_WAIT = type("WAIT");
     public static final int CHUNK_FEAT = type("FEAT");
+
+    private static final int CLIENT_PROTOCOL_VERSION = 1;
 
     private static DdmHandleHello mInstance = new DdmHandleHello();
 
@@ -145,7 +149,7 @@ public class DdmHandleHello extends ChunkHandler {
                             + vmFlags.length() * 2
                             + 1);
         out.order(ChunkHandler.CHUNK_ORDER);
-        out.putInt(DdmServer.CLIENT_PROTOCOL_VERSION);
+        out.putInt(CLIENT_PROTOCOL_VERSION);
         out.putInt(android.os.Process.myPid());
         out.putInt(vmIdent.length());
         out.putInt(appName.length());
