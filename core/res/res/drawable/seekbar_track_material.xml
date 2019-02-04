@@ -19,9 +19,9 @@
           android:gravity="center_vertical|fill_horizontal">
         <shape android:shape="rectangle"
                android:tint="#90808080">
-            <size android:width="100dp" />
+            <size android:width="@dimen/seekbar_track_material_width" />
             <solid android:color="#90808080"/>
-            <corners android:radius="15dp" />
+            <corners android:radius="@dimen/seekbar_track_material_radius"/>
         </shape>
     </item>
     <item android:id="@android:id/progress"
@@ -29,9 +29,9 @@
         <scale android:scaleWidth="90%">
             <shape android:shape="rectangle"
                    android:tint="?android:attr/colorAccent">
-                <size android:width="1000dp" />
+                <size android:width="@dimen/seekbar_track_material_width" />
                 <solid android:color="?android:attr/colorAccent" />
-                <corners android:radius="15dp" />
+                <corners android:radius="@dimen/seekbar_track_material_radius"/>
             </shape>
         </scale>
     </item>
