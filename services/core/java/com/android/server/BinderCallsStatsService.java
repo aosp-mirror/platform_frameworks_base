@@ -61,11 +61,11 @@ public class BinderCallsStatsService extends Binder {
             mAppIdWhitelist = new ArraySet<>();
         }
 
-        public int resolveWorkSourceUid() {
+        public int resolveWorkSourceUid(int untrustedWorkSourceUid) {
             final int callingUid = getCallingUid();
             final int appId = UserHandle.getAppId(callingUid);
             if (mAppIdWhitelist.contains(appId)) {
-                final int workSource = getCallingWorkSourceUid();
+                final int workSource = untrustedWorkSourceUid;
                 final boolean isWorkSourceSet = workSource != Binder.UNSET_WORKSOURCE;
                 return isWorkSourceSet ?  workSource : callingUid;
             }
@@ -86,10 +86,6 @@ public class BinderCallsStatsService extends Binder {
 
         protected int getCallingUid() {
             return Binder.getCallingUid();
-        }
-
-        protected int getCallingWorkSourceUid() {
-            return Binder.getCallingWorkSourceUid();
         }
 
         private ArraySet<Integer> createAppidWhitelist(Context context) {
@@ -186,7 +182,7 @@ public class BinderCallsStatsService extends Binder {
                 } else {
                     Binder.setObserver(null);
                     Binder.setProxyTransactListener(null);
-                    Binder.setWorkSourceProvider(Binder::getCallingUid);
+                    Binder.setWorkSourceProvider((x) -> Binder.getCallingUid());
                 }
                 mEnabled = enabled;
                 mBinderCallsStats.reset();

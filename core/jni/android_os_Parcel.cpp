@@ -670,6 +670,24 @@ static jlong android_os_Parcel_getBlobAshmemSize(jlong nativePtr)
     return 0;
 }
 
+static jint android_os_Parcel_readCallingWorkSourceUid(jlong nativePtr)
+{
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        return parcel->readCallingWorkSourceUid();
+    }
+    return IPCThreadState::kUnsetWorkSource;
+}
+
+static jboolean android_os_Parcel_replaceCallingWorkSourceUid(jlong nativePtr, jint uid)
+{
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        return parcel->replaceCallingWorkSourceUid(uid);
+    }
+    return false;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gParcelMethods[] = {
@@ -740,6 +758,11 @@ static const JNINativeMethod gParcelMethods[] = {
 
     // @CriticalNative
     {"nativeGetBlobAshmemSize",       "(J)J", (void*)android_os_Parcel_getBlobAshmemSize},
+
+    // @CriticalNative
+    {"nativeReadCallingWorkSourceUid", "(J)I", (void*)android_os_Parcel_readCallingWorkSourceUid},
+    // @CriticalNative
+    {"nativeReplaceCallingWorkSourceUid", "(JI)Z", (void*)android_os_Parcel_replaceCallingWorkSourceUid},
 };
 
 const char* const kParcelPathName = "android/os/Parcel";
