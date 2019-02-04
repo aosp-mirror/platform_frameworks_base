@@ -280,6 +280,14 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @Override
+    protected int findAudioReceiverAddress() {
+        if (mService.isSystemAudioActivated()) {
+            return Constants.ADDR_AUDIO_SYSTEM;
+        }
+        return Constants.ADDR_TV;
+    }
+
+    @Override
     @ServiceThreadOnly
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         super.disableDevice(initiatedByCec, callback);
