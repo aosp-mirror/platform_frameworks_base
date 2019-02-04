@@ -178,9 +178,12 @@ class RollbackStore {
                     int rollbackId = element.getInt("rollbackId");
                     List<PackageRollbackInfo> packages = packageRollbackInfosFromJson(
                             element.getJSONArray("packages"));
+                    boolean isStaged = element.getBoolean("isStaged");
                     List<VersionedPackage> causePackages = versionedPackagesFromJson(
                             element.getJSONArray("causePackages"));
-                    RollbackInfo rollback = new RollbackInfo(rollbackId, packages, causePackages);
+                    int committedSessionId = element.getInt("committedSessionId");
+                    RollbackInfo rollback = new RollbackInfo(rollbackId, packages, isStaged,
+                            causePackages, committedSessionId);
                     recentlyExecutedRollbacks.add(rollback);
                 }
             } catch (IOException | JSONException e) {
@@ -270,7 +273,9 @@ class RollbackStore {
                 JSONObject element = new JSONObject();
                 element.put("rollbackId", rollback.getRollbackId());
                 element.put("packages", toJson(rollback.getPackages()));
+                element.put("isStaged", rollback.isStaged());
                 element.put("causePackages", versionedPackagesToJson(rollback.getCausePackages()));
+                element.put("committedSessionId", rollback.getCommittedSessionId());
                 array.put(element);
             }
 
