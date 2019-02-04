@@ -194,6 +194,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -500,17 +501,17 @@ public class ConnectivityServiceTest {
                 public void unwanted() { mDisconnected.open(); }
 
                 @Override
-                public void startPacketKeepalive(Message msg) {
+                public void startSocketKeepalive(Message msg) {
                     int slot = msg.arg1;
                     if (mExpectedKeepaliveSlot != null) {
                         assertEquals((int) mExpectedKeepaliveSlot, slot);
                     }
-                    onPacketKeepaliveEvent(slot, mStartKeepaliveError);
+                    onSocketKeepaliveEvent(slot, mStartKeepaliveError);
                 }
 
                 @Override
-                public void stopPacketKeepalive(Message msg) {
-                    onPacketKeepaliveEvent(msg.arg1, mStopKeepaliveError);
+                public void stopSocketKeepalive(Message msg) {
+                    onSocketKeepaliveEvent(msg.arg1, mStopKeepaliveError);
                 }
 
                 @Override
@@ -3817,10 +3818,17 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testNattSocketKeepalives() throws Exception {
+        final ExecutorService executorSingleThread = Executors.newSingleThreadExecutor();
+        doTestNattSocketKeepalivesWithExecutor(executorSingleThread);
+        executorSingleThread.shutdown();
+
+        final Executor executorInline = (Runnable r) -> r.run();
+        doTestNattSocketKeepalivesWithExecutor(executorInline);
+    }
+
+    private void doTestNattSocketKeepalivesWithExecutor(Executor executor) throws Exception {
         // TODO: 1. Move this outside of ConnectivityServiceTest.
-        //       2. Add helper function to test against newSingleThreadExecutor as well as inline
-        //          executor.
-        //       3. Make test to verify that Nat-T keepalive socket is created by IpSecService.
+        //       2. Make test to verify that Nat-T keepalive socket is created by IpSecService.
         final int srcPort = 12345;
         final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         final InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
@@ -3833,8 +3841,6 @@ public class ConnectivityServiceTest {
 
         final IpSecManager mIpSec = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
         final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket(srcPort);
-
-        final Executor executor = Executors.newSingleThreadExecutor();
 
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("wlan12");
@@ -3952,6 +3958,11 @@ public class ConnectivityServiceTest {
 
         ka2.stop();
         callback2.expectStopped();
+
+        testSocket.close();
+        testSocket2.close();
+
+        mWiFiNetworkAgent.disconnect();
     }
 
     @Test
