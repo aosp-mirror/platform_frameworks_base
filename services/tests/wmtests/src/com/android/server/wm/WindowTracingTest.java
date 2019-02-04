@@ -123,7 +123,7 @@ public class WindowTracingTest {
         mWindowTracing.startTrace(mock(PrintWriter.class));
         mWindowTracing.traceStateLocked("where", mWmMock);
 
-        verify(mWmMock).writeToProtoLocked(any(), eq(true));
+        verify(mWmMock).writeToProtoLocked(any(), eq(WindowTraceLogLevel.TRIM));
     }
 
     @Test

@@ -158,7 +158,9 @@ class AppWindowThumbnail implements Animatable {
         final long token = proto.start(fieldId);
         proto.write(WIDTH, mWidth);
         proto.write(HEIGHT, mHeight);
-        mSurfaceAnimator.writeToProto(proto, SURFACE_ANIMATOR);
+        if (mSurfaceAnimator.isAnimating()) {
+            mSurfaceAnimator.writeToProto(proto, SURFACE_ANIMATOR);
+        }
         proto.end(token);
     }
 

@@ -841,11 +841,8 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
             synchronized (mGlobalLock) {
-                try {
-                    traceStateLocked(where);
-                } finally {
-                    SurfaceControl.closeTransaction();
-                }
+                SurfaceControl.closeTransaction();
+                traceStateLocked(where);
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -5742,11 +5739,11 @@ public class WindowManagerService extends IWindowManager.Stub
      * {@link com.android.server.wm.WindowManagerServiceDumpProto}.
      *
      * @param proto     Stream to write the WindowContainer object to.
-     * @param trim      If true, reduce the amount of data written.
+     * @param logLevel  Determines the amount of data to be written to the Protobuf.
      */
-    void writeToProtoLocked(ProtoOutputStream proto, boolean trim) {
+    void writeToProtoLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         mPolicy.writeToProto(proto, POLICY);
-        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, trim);
+        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, logLevel);
         final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
         if (topFocusedDisplayContent.mCurrentFocus != null) {
             topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
@@ -5765,13 +5762,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void traceStateLocked(String where) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "traceStateLocked");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "traceStateLocked");
         try {
             mWindowTracing.traceStateLocked(where, this);
         } catch (Exception e) {
             Log.wtf(TAG, "Exception while tracing state", e);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -6074,7 +6071,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             synchronized (mGlobalLock) {
-                writeToProtoLocked(proto, false /* trim */);
+                writeToProtoLocked(proto, WindowTraceLogLevel.ALL);
             }
             proto.flush();
             return;

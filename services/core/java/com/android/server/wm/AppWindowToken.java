@@ -2885,10 +2885,16 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        // Critical log level logs only visible elements to mitigate performance overheard
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
         writeNameToProto(proto, NAME);
-        super.writeToProto(proto, WINDOW_TOKEN, trim);
+        super.writeToProto(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
         proto.write(IS_REALLY_ANIMATING, isReallyAnimating());
@@ -2907,7 +2913,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         proto.write(ALL_DRAWN, allDrawn);
         proto.write(LAST_ALL_DRAWN, mLastAllDrawn);
         proto.write(REMOVED, removed);
-        if (startingWindow != null){
+        if (startingWindow != null) {
             startingWindow.writeIdentifierToProto(proto, STARTING_WINDOW);
         }
         proto.write(STARTING_DISPLAYED, startingDisplayed);

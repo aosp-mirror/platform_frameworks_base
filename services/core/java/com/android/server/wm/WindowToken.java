@@ -270,13 +270,18 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, trim);
+        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         proto.write(HASH_CODE, System.identityHashCode(this));
         for (int i = 0; i < mChildren.size(); i++) {
             final WindowState w = mChildren.get(i);
-            w.writeToProto(proto, WINDOWS, trim);
+            w.writeToProto(proto, WINDOWS, logLevel);
         }
         proto.write(HIDDEN, mHidden);
         proto.write(WAITING_TO_SHOW, waitingToShow);

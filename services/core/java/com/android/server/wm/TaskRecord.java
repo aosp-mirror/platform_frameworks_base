@@ -2476,9 +2476,14 @@ class TaskRecord extends ConfigurationContainer {
         return toString();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
         proto.write(ID, taskId);
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             ActivityRecord activity = mActivities.get(i);

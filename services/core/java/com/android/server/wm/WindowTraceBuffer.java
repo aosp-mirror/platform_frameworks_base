@@ -40,7 +40,7 @@ abstract class WindowTraceBuffer {
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 
     final Object mBufferLock = new Object();
-    final Queue<byte[]> mBuffer = new ArrayDeque<>();
+    final Queue<ProtoOutputStream> mBuffer = new ArrayDeque<>();
     final File mTraceFile;
     int mBufferSize;
     private final int mBufferCapacity;
@@ -64,8 +64,7 @@ abstract class WindowTraceBuffer {
      *                               than the buffer size.
      */
     void add(ProtoOutputStream proto) {
-        byte[] protoBytes = proto.getBytes();
-        int protoLength = protoBytes.length;
+        int protoLength = proto.getRawSize();
         if (protoLength > mBufferCapacity) {
             throw new IllegalStateException("Trace object too large for the buffer. Buffer size:"
                     + mBufferCapacity + " Object size: " + protoLength);
@@ -73,7 +72,7 @@ abstract class WindowTraceBuffer {
         synchronized (mBufferLock) {
             boolean canAdd = canAdd(protoLength);
             if (canAdd) {
-                mBuffer.offer(protoBytes);
+                mBuffer.add(proto);
                 mBufferSize += protoLength;
             }
             mBufferLock.notify();
@@ -97,7 +96,7 @@ abstract class WindowTraceBuffer {
     @VisibleForTesting
     boolean contains(byte[] other) {
         return mBuffer.stream()
-                .anyMatch(p -> Arrays.equals(p, other));
+                .anyMatch(p -> Arrays.equals(p.getBytes(), other));
     }
 
     private void initTraceFile() throws IOException {

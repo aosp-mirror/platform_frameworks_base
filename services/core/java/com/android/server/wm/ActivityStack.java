@@ -5655,13 +5655,14 @@ class ActivityStack extends ConfigurationContainer {
         return shouldSleepActivities() || mService.mShuttingDown;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
         proto.write(ID, mStackId);
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            task.writeToProto(proto, TASKS);
+            task.writeToProto(proto, TASKS, logLevel);
         }
         if (mResumedActivity != null) {
             mResumedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
