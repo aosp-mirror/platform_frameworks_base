@@ -26,6 +26,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
@@ -107,10 +108,13 @@ public class MenuPopupHelper implements MenuHelper {
      * <p>
      * Changes take effect on the next call to show().
      *
+     * This method should not be accessed directly outside the framework, please use
+     * {@link android.widget.PopupMenu#setForceShowIcon(boolean)} instead.
+     *
      * @param forceShowIcon {@code true} to force icons to be shown, or
      *                  {@code false} for icons to be optionally shown
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void setForceShowIcon(boolean forceShowIcon) {
         mForceShowIcon = forceShowIcon;
         if (mPopup != null) {
