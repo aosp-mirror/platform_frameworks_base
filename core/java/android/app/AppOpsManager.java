@@ -4485,6 +4485,7 @@ public class AppOpsManager {
      * @hide
      */
     public int noteProxyOpNoThrow(int op, String proxiedPackageName) {
+        logOperationIfNeeded(op, mContext.getOpPackageName(), proxiedPackageName);
         try {
             return mService.noteProxyOperation(op, Process.myUid(), mContext.getOpPackageName(),
                     Binder.getCallingUid(), proxiedPackageName);
@@ -4500,7 +4501,7 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int noteOpNoThrow(int op, int uid, String packageName) {
-        logNoteOpIfNeeded(op, packageName);
+        logOperationIfNeeded(op, packageName, null);
         try {
             return mService.noteOperation(op, uid, packageName);
         } catch (RemoteException e) {
@@ -4608,6 +4609,7 @@ public class AppOpsManager {
      * @hide
      */
     public int startOpNoThrow(int op, int uid, String packageName, boolean startIfModeDefault) {
+        logOperationIfNeeded(op, packageName, null);
         try {
             return mService.startOperation(getToken(mService), op, uid, packageName,
                     startIfModeDefault);
@@ -4624,6 +4626,7 @@ public class AppOpsManager {
      * @hide
      */
     public void finishOp(int op, int uid, String packageName) {
+        logOperationIfNeeded(op, packageName, null);
         try {
             mService.finishOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
@@ -4870,7 +4873,7 @@ public class AppOpsManager {
         return AppOpsManager.MODE_DEFAULT;
     }
 
-    private static void logNoteOpIfNeeded(int op, String callingPackage) {
+    private static void logOperationIfNeeded(int op, String callingPackage, String proxiedPackage) {
         // Check if debug logging propety is enabled.
         if (!SystemProperties.getBoolean(DEBUG_LOGGING_ENABLE_PROP, false)) {
             return;
@@ -4908,6 +4911,6 @@ public class AppOpsManager {
         // Log a stack trace
         Exception here = new Exception("HERE!");
         android.util.Log.i(DEBUG_LOGGING_TAG, "Note operation package= " + callingPackage
-                + " op= " + opStr, here);
+                + " proxied= " + proxiedPackage + " op= " + opStr, here);
     }
 }
