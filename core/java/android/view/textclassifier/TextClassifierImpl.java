@@ -113,6 +113,7 @@ public final class TextClassifierImpl implements TextClassifier {
     private final ModelFileManager mActionsModelFileManager;
 
     private final IntentFactory mIntentFactory;
+    private final TemplateIntentFactory mTemplateIntentFactory;
 
     public TextClassifierImpl(
             Context context, TextClassificationConstants settings, TextClassifier fallback) {
@@ -142,8 +143,10 @@ public final class TextClassifierImpl implements TextClassifier {
                         ActionsSuggestionsModel::getVersion,
                         ActionsSuggestionsModel::getLocales));
 
+        mTemplateIntentFactory = new TemplateIntentFactory();
         mIntentFactory = mSettings.isTemplateIntentFactoryEnabled()
-                ? new TemplateIntentFactory(new LegacyIntentFactory())
+                ? new TemplateClassificationIntentFactory(
+                mTemplateIntentFactory, new LegacyIntentFactory())
                 : new LegacyIntentFactory();
     }
 
@@ -189,7 +192,10 @@ public final class TextClassifierImpl implements TextClassifier {
                                             refTime.toInstant().toEpochMilli(),
                                             refTime.getZone().getId(),
                                             localesString),
-                                    mContext);
+                                    // Passing null here to suppress intent generation
+                                    // TODO: Use an explicit flag to suppress it.
+                                    /* appContext */ null,
+                                    /* deviceLocales */null);
                     final int size = results.length;
                     for (int i = 0; i < size; i++) {
                         tsBuilder.setEntityType(results[i].getCollection(), results[i].getScore());
@@ -233,7 +239,11 @@ public final class TextClassifierImpl implements TextClassifier {
                                                 refTime.toInstant().toEpochMilli(),
                                                 refTime.getZone().getId(),
                                                 localesString),
-                                        mContext);
+                                        mContext,
+                                        // TODO: Pass the locale list once it is supported in
+                                        //  native side.
+                                        LocaleList.getDefault().get(0).toLanguageTag()
+                                );
                 if (results.length > 0) {
                     return createClassificationResult(
                             results, string,
@@ -389,37 +399,55 @@ public final class TextClassifierImpl implements TextClassifier {
                     new ActionsSuggestionsModel.Conversation(nativeMessages);
 
             ActionsSuggestionsModel.ActionSuggestion[] nativeSuggestions =
-                    actionsImpl.suggestActions(nativeConversation, null);
-
-            Collection<String> expectedTypes = resolveActionTypesFromRequest(request);
-            List<ConversationAction> conversationActions = new ArrayList<>();
-            int maxSuggestions = nativeSuggestions.length;
-            if (request.getMaxSuggestions() > 0) {
-                maxSuggestions = Math.min(request.getMaxSuggestions(), nativeSuggestions.length);
-            }
-            for (int i = 0; i < maxSuggestions; i++) {
-                ActionsSuggestionsModel.ActionSuggestion nativeSuggestion = nativeSuggestions[i];
-                String actionType = nativeSuggestion.getActionType();
-                if (!expectedTypes.contains(actionType)) {
-                    continue;
-                }
-                conversationActions.add(
-                        new ConversationAction.Builder(actionType)
-                                .setTextReply(nativeSuggestion.getResponseText())
-                                .setConfidenceScore(nativeSuggestion.getScore())
-                                .build());
-            }
-            String resultId = ActionsSuggestionsHelper.createResultId(
-                    mContext,
-                    request.getConversation(),
-                    mActionModelInUse.getVersion(),
-                    mActionModelInUse.getSupportedLocales());
-            return new ConversationActions(conversationActions, resultId);
+                    actionsImpl.suggestActionsWithIntents(
+                            nativeConversation,
+                            null,
+                            mContext,
+                            // TODO: Pass the locale list once it is supported in native side.
+                            LocaleList.getDefault().get(0).toLanguageTag());
+            return createConversationActionResult(request, nativeSuggestions);
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error suggesting conversation actions.", t);
         }
         return mFallback.suggestConversationActions(request);
+    }
+
+    private ConversationActions createConversationActionResult(
+            ConversationActions.Request request,
+            ActionsSuggestionsModel.ActionSuggestion[] nativeSuggestions) {
+        Collection<String> expectedTypes = resolveActionTypesFromRequest(request);
+        List<ConversationAction> conversationActions = new ArrayList<>();
+        for (ActionsSuggestionsModel.ActionSuggestion nativeSuggestion : nativeSuggestions) {
+            if (request.getMaxSuggestions() >= 0
+                    && conversationActions.size() == request.getMaxSuggestions()) {
+                break;
+            }
+            String actionType = nativeSuggestion.getActionType();
+            if (!expectedTypes.contains(actionType)) {
+                continue;
+            }
+            List<LabeledIntent> labeledIntents =
+                    mTemplateIntentFactory.create(nativeSuggestion.getRemoteActionTemplates());
+            RemoteAction remoteAction = null;
+            // Given that we only support implicit intent here, we should expect there is just one
+            // intent for each action type.
+            if (!labeledIntents.isEmpty()) {
+                remoteAction = labeledIntents.get(0).asRemoteAction(mContext);
+            }
+            conversationActions.add(
+                    new ConversationAction.Builder(actionType)
+                            .setConfidenceScore(nativeSuggestion.getScore())
+                            .setTextReply(nativeSuggestion.getResponseText())
+                            .setAction(remoteAction)
+                            .build());
+        }
+        String resultId = ActionsSuggestionsHelper.createResultId(
+                mContext,
+                request.getConversation(),
+                mActionModelInUse.getVersion(),
+                mActionModelInUse.getSupportedLocales());
+        return new ConversationActions(conversationActions, resultId);
     }
 
     @Nullable
@@ -462,11 +490,13 @@ public final class TextClassifierImpl implements TextClassifier {
             }
             if (mAnnotatorImpl == null || !Objects.equals(mAnnotatorModelInUse, bestModel)) {
                 Log.d(DEFAULT_LOG_TAG, "Loading " + bestModel);
-                destroyAnnotatorImplIfExistsLocked();
                 final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {
                     if (pfd != null) {
+                        // The current annotator model may be still used by another thread / model.
+                        // Do not call close() here, and let the GC to clean it up when no one else
+                        // is using it.
                         mAnnotatorImpl = new AnnotatorModel(pfd.getFd());
                         mAnnotatorModelInUse = bestModel;
                     }
@@ -475,14 +505,6 @@ public final class TextClassifierImpl implements TextClassifier {
                 }
             }
             return mAnnotatorImpl;
-        }
-    }
-
-    @GuardedBy("mLock") // Do not call outside this lock.
-    private void destroyAnnotatorImplIfExistsLocked() {
-        if (mAnnotatorImpl != null) {
-            mAnnotatorImpl.close();
-            mAnnotatorImpl = null;
         }
     }
 
@@ -522,7 +544,8 @@ public final class TextClassifierImpl implements TextClassifier {
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {
                     if (pfd != null) {
-                        mActionsImpl = new ActionsSuggestionsModel(pfd.getFd());
+                        mActionsImpl = new ActionsSuggestionsModel(
+                                pfd.getFd(), getAnnotatorImpl(LocaleList.getDefault()));
                         mActionModelInUse = bestModel;
                     }
                 } finally {
