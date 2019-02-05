@@ -157,28 +157,22 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
 
     @Override
     public void invalidateDrawable(Drawable who) {
-        final Callback callback = getCallback();
-
-        if (callback != null) {
-            callback.invalidateDrawable(who);
+        if (who == mColorDrawable && getCallback() != null) {
+            getCallback().invalidateDrawable(this);
         }
     }
 
     @Override
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
-        final Callback callback = getCallback();
-
-        if (callback != null) {
-            callback.scheduleDrawable(who, what, when);
+        if (who == mColorDrawable && getCallback() != null) {
+            getCallback().scheduleDrawable(this, what, when);
         }
     }
 
     @Override
     public void unscheduleDrawable(Drawable who, Runnable what) {
-        final Callback callback = getCallback();
-
-        if (callback != null) {
-            callback.unscheduleDrawable(who, what);
+        if (who == mColorDrawable && getCallback() != null) {
+            getCallback().unscheduleDrawable(this, what);
         }
     }
 
