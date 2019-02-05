@@ -928,6 +928,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    @Override
+    public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
+        // TODO: Handle this callback.
+    }
+
     /**
      * Gets the version of the package currently installed.
      * Returns null if the package is not currently installed.

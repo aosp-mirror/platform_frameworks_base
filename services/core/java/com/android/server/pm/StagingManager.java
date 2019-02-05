@@ -380,6 +380,19 @@ public class StagingManager {
 
     private boolean commitApkSession(@NonNull PackageInstallerSession apkSession,
                                      int originalSessionId) {
+
+        if ((apkSession.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+            // If rollback is available for this session, notify the rollback
+            // manager of the apk session so it can properly enable rollback.
+            final IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
+            try {
+                rm.notifyStagedApkSession(originalSessionId, apkSession.sessionId);
+            } catch (RemoteException re) {
+                // Cannot happen, the rollback manager is in the same process.
+            }
+        }
+
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
         apkSession.commit(receiver.getIntentSender(), false);
         final Intent result = receiver.getResult();
