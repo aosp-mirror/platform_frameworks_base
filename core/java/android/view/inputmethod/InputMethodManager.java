@@ -954,6 +954,13 @@ public final class InputMethodManager {
         return mIInputContext;
     }
 
+    /**
+     * Returns the list of installed input methods.
+     *
+     * <p>On multi user environment, this API returns a result for the calling process user.</p>
+     *
+     * @return {@link List} of {@link InputMethodInfo}.
+     */
     public List<InputMethodInfo> getInputMethodList() {
         try {
             return mService.getInputMethodList();
@@ -962,6 +969,13 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * Returns the list of enabled input methods.
+     *
+     * <p>On multi user environment, this API returns a result for the calling process user.</p>
+     *
+     * @return {@link List} of {@link InputMethodInfo}.
+     */
     public List<InputMethodInfo> getEnabledInputMethodList() {
         try {
             return mService.getEnabledInputMethodList();
@@ -972,6 +986,9 @@ public final class InputMethodManager {
 
     /**
      * Returns a list of enabled input method subtypes for the specified input method info.
+     *
+     * <p>On multi user environment, this API returns a result for the calling process user.</p>
+     *
      * @param imi An input method info whose subtypes list will be returned.
      * @param allowsImplicitlySelectedSubtypes A boolean flag to allow to return the implicitly
      * selected subtypes. If an input method info doesn't have enabled subtypes, the framework
