@@ -499,4 +499,8 @@
 
     <!-- Whether to show VoLTE icon in the status bar -->
     <bool name="config_display_volte">true</bool>
+
+    <!-- Whether to show HD icon in the status bar for volte -->
+    <bool name="config_display_hd_volte">false</bool>
+
 </resources>

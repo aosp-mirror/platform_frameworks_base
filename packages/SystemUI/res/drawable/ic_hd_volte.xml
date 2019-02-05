@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ *                2018, Citrus-CAF
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials provided
+ *    with the distribution.
+ *  * Neither the name of The Linux Foundation nor the names of its
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+ * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="15dp"
+    android:height="15dp"
+    android:viewportWidth="17"
+    android:viewportHeight="17">
+
+    <path
+        android:pathData="M14.5 1C15.328 1 16 1.672 16 2.5l0 12c0 0.828 -0.672 1.5 -1.5 1.5l-12 0C1.672 16 1 15.328 1 14.5L1 2.5C1 1.672 1.672 1 2.5 1l12 0zm-6.904 11.13l0 -7.26 -0.736 0 0 3.071 -2.995 0 0 -3.071 -0.736 0 0 7.26 0.736 0 0 -3.386 2.995 0 0 3.386 0.736 0zm3.224 0c0.96 0 1.708 -0.31 2.245 -0.931 0.538 -0.62 0.806 -1.543 0.806 -2.77 0 -0.773 -0.117 -1.424 -0.351 -1.952C13.285 5.948 12.951 5.548 12.517 5.277 12.084 5.006 11.575 4.87 10.991 4.87l-1.8 0 0 7.26 1.629 0zm0.065 -6.477c0.704 0 1.248 0.225 1.632 0.676 0.385 0.451 0.577 1.161 0.577 2.13 0 1.925 -0.791 2.888 -2.373 2.888l-0.793 0 0 -5.694 0.957 0z"
+        android:fillType="evenOdd"
+        android:fillColor="#ffffff" />
+</vector>
