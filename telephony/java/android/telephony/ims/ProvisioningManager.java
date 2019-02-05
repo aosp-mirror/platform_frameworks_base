@@ -372,14 +372,6 @@ public class ProvisioningManager {
         }
     }
 
-    private static SubscriptionManager getSubscriptionManager(Context context) {
-        SubscriptionManager manager = context.getSystemService(SubscriptionManager.class);
-        if (manager == null) {
-            throw new RuntimeException("Could not find SubscriptionManager.");
-        }
-        return manager;
-    }
-
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(
                 ServiceManager.getService(Context.TELEPHONY_SERVICE));
