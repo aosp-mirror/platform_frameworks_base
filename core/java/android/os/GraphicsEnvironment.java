@@ -104,15 +104,15 @@ public class GraphicsEnvironment {
 
         if (isDebuggable(context)) {
 
-            int enable = Settings.Global.getInt(context.getContentResolver(),
-                                                Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
+            final int enable = Settings.Global.getInt(context.getContentResolver(),
+                                                      Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
 
             if (enable != 0) {
 
-                String gpuDebugApp = Settings.Global.getString(context.getContentResolver(),
-                                                               Settings.Global.GPU_DEBUG_APP);
+                final String gpuDebugApp = Settings.Global.getString(context.getContentResolver(),
+                                                                     Settings.Global.GPU_DEBUG_APP);
 
-                String packageName = context.getPackageName();
+                final String packageName = context.getPackageName();
 
                 if ((gpuDebugApp != null && packageName != null)
                         && (!gpuDebugApp.isEmpty() && !packageName.isEmpty())
@@ -144,7 +144,7 @@ public class GraphicsEnvironment {
 
     private static List<String> getGlobalSettingsString(Bundle bundle, String globalSetting) {
         List<String> valueList = null;
-        String settingsValue = bundle.getString(globalSetting);
+        final String settingsValue = bundle.getString(globalSetting);
 
         if (settingsValue != null) {
             valueList = new ArrayList<>(Arrays.asList(settingsValue.split(",")));
@@ -159,12 +159,12 @@ public class GraphicsEnvironment {
      * Choose whether the current process should use the builtin or an updated driver.
      */
     private static void chooseDriver(Context context, Bundle coreSettings) {
-        String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
+        final String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (driverPackageName == null || driverPackageName.isEmpty()) {
             return;
         }
 
-        ApplicationInfo driverInfo;
+        final ApplicationInfo driverInfo;
         try {
             driverInfo = context.getPackageManager().getApplicationInfo(driverPackageName,
                     PackageManager.MATCH_SYSTEM_ONLY);
@@ -185,7 +185,7 @@ public class GraphicsEnvironment {
         // To minimize risk of driver updates crippling the device beyond user repair, never use an
         // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
         // were tested thoroughly with the pre-installed driver.
-        ApplicationInfo ai = context.getApplicationInfo();
+        final ApplicationInfo ai = context.getApplicationInfo();
         if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
             if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
             return;
@@ -195,7 +195,7 @@ public class GraphicsEnvironment {
         // 0: Default (Invalid values fallback to default as well)
         // 1: All apps use Game Driver
         // 2: All apps use system graphics driver
-        int gameDriverAllApps = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
+        final int gameDriverAllApps = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
         if (gameDriverAllApps == 2) {
             if (DEBUG) {
                 Log.w(TAG, "Game Driver is turned off on this device");
@@ -212,7 +212,7 @@ public class GraphicsEnvironment {
                 }
                 return;
             }
-            boolean isOptIn =
+            final boolean isOptIn =
                     getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
                             .contains(ai.packageName);
             if (!isOptIn
@@ -229,13 +229,13 @@ public class GraphicsEnvironment {
                 // on the blacklist, terminate early when it's on the blacklist.
                 try {
                     // TODO(b/121350991) Switch to DeviceConfig with property listener.
-                    String base64String =
+                    final String base64String =
                             coreSettings.getString(Settings.Global.GAME_DRIVER_BLACKLIST);
                     if (base64String != null && !base64String.isEmpty()) {
-                        Blacklists blacklistsProto = Blacklists.parseFrom(
-                                Base64.decode(base64String, BASE64_FLAGS));
-                        List<Blacklist> blacklists = blacklistsProto.getBlacklistsList();
-                        long driverVersionCode = driverInfo.longVersionCode;
+                        final Blacklists blacklistsProto =
+                                Blacklists.parseFrom(Base64.decode(base64String, BASE64_FLAGS));
+                        final List<Blacklist> blacklists = blacklistsProto.getBlacklistsList();
+                        final long driverVersionCode = driverInfo.longVersionCode;
                         for (Blacklist blacklist : blacklists) {
                             if (blacklist.getVersionCode() == driverVersionCode) {
                                 for (String packageName : blacklist.getPackageNamesList()) {
@@ -255,7 +255,7 @@ public class GraphicsEnvironment {
             }
         }
 
-        String abi = chooseAbi(driverInfo);
+        final String abi = chooseAbi(driverInfo);
         if (abi == null) {
             if (DEBUG) {
                 // This is the normal case for the pre-installed empty driver package, don't spam
@@ -266,13 +266,13 @@ public class GraphicsEnvironment {
             return;
         }
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append(driverInfo.nativeLibraryDir)
           .append(File.pathSeparator);
         sb.append(driverInfo.sourceDir)
           .append("!/lib/")
           .append(abi);
-        String paths = sb.toString();
+        final String paths = sb.toString();
 
         if (DEBUG) Log.v(TAG, "gfx driver package libs: " + paths);
         setDriverPath(paths);
@@ -289,7 +289,7 @@ public class GraphicsEnvironment {
      * Should only be called after chooseDriver().
      */
     public static void earlyInitEGL() {
-        Thread eglInitThread = new Thread(
+        final Thread eglInitThread = new Thread(
                 () -> {
                     EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
                 },
@@ -298,7 +298,7 @@ public class GraphicsEnvironment {
     }
 
     private static String chooseAbi(ApplicationInfo ai) {
-        String isa = VMRuntime.getCurrentInstructionSet();
+        final String isa = VMRuntime.getCurrentInstructionSet();
         if (ai.primaryCpuAbi != null &&
                 isa.equals(VMRuntime.getInstructionSet(ai.primaryCpuAbi))) {
             return ai.primaryCpuAbi;
