@@ -166,12 +166,12 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyGps_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.GPS);
+        testServiceDefaultValue_On(ServiceType.LOCATION);
 
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
         PowerSaveState stateOn =
-                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.GPS);
-        assertThat(stateOn.gpsMode).isEqualTo(DEFAULT_GPS_MODE);
+                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION);
+        assertThat(stateOn.locationMode).isEqualTo(DEFAULT_GPS_MODE);
     }
 
     @SmallTest
@@ -222,9 +222,9 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertThat(dataSaverState.batterySaverEnabled).isTrue();
 
         final PowerSaveState gpsState =
-                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.GPS);
+                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION);
         assertThat(gpsState.batterySaverEnabled).isTrue();
-        assertThat(gpsState.gpsMode).isEqualTo(GPS_MODE);
+        assertThat(gpsState.locationMode).isEqualTo(GPS_MODE);
 
         final PowerSaveState quickDozeState = mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.QUICK_DOZE);

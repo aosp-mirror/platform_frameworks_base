@@ -128,7 +128,7 @@ public class BatterySaverPolicy extends ContentObserver {
             new ArrayMap<>(), /* filesForNoninteractive */
             false, /* forceAllAppsStandby */
             false, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_NO_CHANGE /* gpsMode */
+            PowerManager.LOCATION_MODE_NO_CHANGE /* locationMode */
     );
 
     private static final Policy DEFAULT_ADAPTIVE_POLICY = OFF_POLICY;
@@ -152,7 +152,7 @@ public class BatterySaverPolicy extends ContentObserver {
             new ArrayMap<>(), /* filesForNoninteractive */
             true, /* forceAllAppsStandby */
             true, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF /* gpsMode */
+            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF /* locationMode */
     );
 
     private final Object mLock;
@@ -416,7 +416,7 @@ public class BatterySaverPolicy extends ContentObserver {
         if (currPolicy.disableAod) sb.append("o");
         if (currPolicy.enableQuickDoze) sb.append("q");
 
-        sb.append(currPolicy.gpsMode);
+        sb.append(currPolicy.locationMode);
 
         mEventLogKeys = sb.toString();
     }
@@ -554,12 +554,13 @@ public class BatterySaverPolicy extends ContentObserver {
         public final boolean forceBackgroundCheck;
 
         /**
-         * This is the flag to decide the gps mode in battery saver mode.
+         * This is the flag to decide the location mode in battery saver mode. This was
+         * previously called gpsMode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
          * @see #KEY_GPS_MODE
          */
-        public final int gpsMode;
+        public final int locationMode;
 
         private final int mHashCode;
 
@@ -582,7 +583,7 @@ public class BatterySaverPolicy extends ContentObserver {
                 ArrayMap<String, String> filesForNoninteractive,
                 boolean forceAllAppsStandby,
                 boolean forceBackgroundCheck,
-                int gpsMode) {
+                int locationMode) {
 
             this.adjustBrightnessFactor = adjustBrightnessFactor;
             this.advertiseIsEnabled = advertiseIsEnabled;
@@ -602,7 +603,7 @@ public class BatterySaverPolicy extends ContentObserver {
             this.filesForNoninteractive = filesForNoninteractive;
             this.forceAllAppsStandby = forceAllAppsStandby;
             this.forceBackgroundCheck = forceBackgroundCheck;
-            this.gpsMode = gpsMode;
+            this.locationMode = locationMode;
 
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,
@@ -623,7 +624,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     filesForNoninteractive,
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    gpsMode);
+                    locationMode);
         }
 
         static Policy fromConfig(BatterySaverPolicyConfig config) {
@@ -721,7 +722,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     defaultPolicy.forceAllAppsStandby);
             boolean forceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK,
                     defaultPolicy.forceBackgroundCheck);
-            int gpsMode = parser.getInt(KEY_GPS_MODE, defaultPolicy.gpsMode);
+            int locationMode = parser.getInt(KEY_GPS_MODE, defaultPolicy.locationMode);
 
             return new Policy(
                     adjustBrightnessFactor,
@@ -745,7 +746,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    gpsMode
+                    locationMode
             );
         }
 
@@ -770,7 +771,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     && enableQuickDoze == other.enableQuickDoze
                     && forceAllAppsStandby == other.forceAllAppsStandby
                     && forceBackgroundCheck == other.forceBackgroundCheck
-                    && gpsMode == other.gpsMode
+                    && locationMode == other.locationMode
                     && filesForInteractive.equals(other.filesForInteractive)
                     && filesForNoninteractive.equals(other.filesForNoninteractive);
         }
@@ -795,11 +796,11 @@ public class BatterySaverPolicy extends ContentObserver {
             final PowerSaveState.Builder builder = new PowerSaveState.Builder()
                     .setGlobalBatterySaverEnabled(currPolicy.advertiseIsEnabled);
             switch (type) {
-                case ServiceType.GPS:
+                case ServiceType.LOCATION:
                     boolean isEnabled = currPolicy.advertiseIsEnabled
-                            || currPolicy.gpsMode != PowerManager.LOCATION_MODE_NO_CHANGE;
+                            || currPolicy.locationMode != PowerManager.LOCATION_MODE_NO_CHANGE;
                     return builder.setBatterySaverEnabled(isEnabled)
-                            .setGpsMode(currPolicy.gpsMode)
+                            .setLocationMode(currPolicy.locationMode)
                             .build();
                 case ServiceType.ANIMATION:
                     return builder.setBatterySaverEnabled(currPolicy.disableAnimation)
@@ -910,7 +911,7 @@ public class BatterySaverPolicy extends ContentObserver {
 
     public int getGpsMode() {
         synchronized (mLock) {
-            return getCurrentPolicyLocked().gpsMode;
+            return getCurrentPolicyLocked().locationMode;
         }
     }
 
@@ -995,7 +996,7 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.print(indent);
         pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + p.adjustBrightnessFactor);
         pw.print(indent);
-        pw.println("  " + KEY_GPS_MODE + "=" + p.gpsMode);
+        pw.println("  " + KEY_GPS_MODE + "=" + p.locationMode);
         pw.print(indent);
         pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + p.forceAllAppsStandby);
         pw.print(indent);
