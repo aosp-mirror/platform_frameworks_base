@@ -186,7 +186,12 @@ public class BubbleController {
      * Set a listener to be notified of bubble expand events.
      */
     public void setExpandListener(BubbleExpandListener listener) {
-        mExpandListener = listener;
+        mExpandListener = ((isExpanding, key) -> {
+            if (listener != null) {
+                listener.onBubbleExpandChanged(isExpanding, key);
+            }
+            mStatusBarWindowController.setBubbleExpanded(isExpanding);
+        });
         if (mStackView != null) {
             mStackView.setExpandListener(mExpandListener);
         }
