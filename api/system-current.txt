@@ -9267,11 +9267,7 @@ package android.view.accessibility {
 package android.view.autofill {
 
   public final class AutofillManager {
-    method @NonNull public java.util.Set<android.content.ComponentName> getAugmentedAutofillDisabledActivities();
-    method @NonNull public java.util.Set<java.lang.String> getAugmentedAutofillDisabledPackages();
-    method public void setActivityAugmentedAutofillEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
-    method public void setPackageAugmentedAutofillEnabled(@NonNull String, boolean);
   }
 
 }

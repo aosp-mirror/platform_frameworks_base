@@ -2639,11 +2639,7 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
-    method @NonNull public java.util.Set<android.content.ComponentName> getAugmentedAutofillDisabledActivities();
-    method @NonNull public java.util.Set<java.lang.String> getAugmentedAutofillDisabledPackages();
-    method public void setActivityAugmentedAutofillEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
-    method public void setPackageAugmentedAutofillEnabled(@NonNull String, boolean);
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
   }
