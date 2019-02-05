@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -217,6 +218,7 @@ public final class ContentCaptureManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public boolean isContentCaptureFeatureEnabled() {
         if (mService == null) return false;
 
@@ -249,6 +251,7 @@ public final class ContentCaptureManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public void setContentCaptureFeatureEnabled(boolean enabled) {
         if (DEBUG) Log.d(TAG, "setContentCaptureFeatureEnabled(): setting to " + enabled);
 

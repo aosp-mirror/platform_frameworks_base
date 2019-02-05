@@ -17,6 +17,7 @@ package android.service.contentcapture;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.contentcapture.ContentCaptureEvent;
@@ -32,6 +33,7 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
 @Deprecated
 public final class ContentCaptureEventsRequest implements Parcelable {
 // TODO(b/121051220): remove .java and .aidl once service implementation doesn't use it anymore

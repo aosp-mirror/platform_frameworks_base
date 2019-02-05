@@ -3,6 +3,7 @@ package android.app.assist;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -715,9 +716,10 @@ public class AssistStructure implements Parcelable {
         ViewNode[] mChildren;
 
         // TODO(b/111276913): temporarily made public / @hide until we decide what will be used by
-        // ScreenObservation.
+        // COntent Capture.
         /** @hide */
         @SystemApi
+        @TestApi
         public ViewNode() {
         }
 

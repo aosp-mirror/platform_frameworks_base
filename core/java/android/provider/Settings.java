@@ -5704,7 +5704,6 @@ public final class Settings {
          * Defines whether Content Capture is enabled  for the user.
          * @hide
          */
-        @SystemApi
         @TestApi
         public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
 
