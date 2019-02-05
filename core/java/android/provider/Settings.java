@@ -11442,6 +11442,7 @@ public final class Settings {
          * <pre>
          * advertise_is_enabled              (boolean)
          * datasaver_disabled                (boolean)
+         * enable_night_mode                 (boolean)
          * launch_boost_disabled             (boolean)
          * vibration_disabled                (boolean)
          * animation_disabled                (boolean)

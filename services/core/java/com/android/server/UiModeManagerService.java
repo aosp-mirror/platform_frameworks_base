@@ -37,6 +37,8 @@ import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -161,9 +163,6 @@ final class UiModeManagerService extends SystemService {
                 case Intent.ACTION_BATTERY_CHANGED:
                     mCharging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
                     break;
-                case PowerManager.ACTION_POWER_SAVE_MODE_CHANGING:
-                    mPowerSave = intent.getBooleanExtra(PowerManager.EXTRA_POWER_SAVE_MODE, false);
-                    break;
             }
             synchronized (mLock) {
                 if (mSystemReady) {
@@ -208,8 +207,23 @@ final class UiModeManagerService extends SystemService {
         context.registerReceiver(mDockModeReceiver,
                 new IntentFilter(Intent.ACTION_DOCK_EVENT));
         IntentFilter batteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        batteryFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
         context.registerReceiver(mBatteryReceiver, batteryFilter);
+
+        PowerManagerInternal localPowerManager =
+                LocalServices.getService(PowerManagerInternal.class);
+        mPowerSave = localPowerManager.getLowPowerState(ServiceType.NIGHT_MODE).batterySaverEnabled;
+        localPowerManager.registerLowPowerModeObserver(ServiceType.NIGHT_MODE,
+                state -> {
+                    synchronized (mLock) {
+                        if (mPowerSave == state.batterySaverEnabled) {
+                            return;
+                        }
+                        mPowerSave = state.batterySaverEnabled;
+                        if (mSystemReady) {
+                            updateLocked(0, 0);
+                        }
+                    }
+                });
 
         mConfiguration.setToDefaults();
 

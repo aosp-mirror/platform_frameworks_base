@@ -104,6 +104,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_AOD_DISABLED = "aod_disabled";
     // Go into deep Doze as soon as the screen turns off.
     private static final String KEY_QUICK_DOZE_ENABLED = "quick_doze_enabled";
+    private static final String KEY_ENABLE_NIGHT_MODE = "enable_night_mode";
 
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
@@ -123,6 +124,7 @@ public class BatterySaverPolicy extends ContentObserver {
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
             false, /* enableFireWall */
+            false, /* enableNightMode */
             false, /* enableQuickDoze */
             new ArrayMap<>(), /* filesForInteractive */
             new ArrayMap<>(), /* filesForNoninteractive */
@@ -147,6 +149,7 @@ public class BatterySaverPolicy extends ContentObserver {
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
             true,  /* enableFirewall */
+            true, /* enableNightMode */
             true, /* enableQuickDoze */
             new ArrayMap<>(), /* filesForInteractive */
             new ArrayMap<>(), /* filesForNoninteractive */
@@ -523,6 +526,11 @@ public class BatterySaverPolicy extends ContentObserver {
         public final boolean enableFirewall;
 
         /**
+         * Whether to enable night mode or not.
+         */
+        public final boolean enableNightMode;
+
+        /**
          * Whether Quick Doze is enabled or not.
          */
         public final boolean enableQuickDoze;
@@ -578,6 +586,7 @@ public class BatterySaverPolicy extends ContentObserver {
                 boolean enableAdjustBrightness,
                 boolean enableDataSaver,
                 boolean enableFirewall,
+                boolean enableNightMode,
                 boolean enableQuickDoze,
                 ArrayMap<String, String> filesForInteractive,
                 ArrayMap<String, String> filesForNoninteractive,
@@ -598,6 +607,7 @@ public class BatterySaverPolicy extends ContentObserver {
             this.enableAdjustBrightness = enableAdjustBrightness;
             this.enableDataSaver = enableDataSaver;
             this.enableFirewall = enableFirewall;
+            this.enableNightMode = enableNightMode;
             this.enableQuickDoze = enableQuickDoze;
             this.filesForInteractive = filesForInteractive;
             this.filesForNoninteractive = filesForNoninteractive;
@@ -619,6 +629,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     enableAdjustBrightness,
                     enableDataSaver,
                     enableFirewall,
+                    enableNightMode,
                     enableQuickDoze,
                     filesForInteractive,
                     filesForNoninteractive,
@@ -654,6 +665,8 @@ public class BatterySaverPolicy extends ContentObserver {
                     config.getEnableAdjustBrightness(),
                     config.getEnableDataSaver(),
                     config.getEnableFirewall(),
+                    // TODO: add option to config
+                    config.getAdvertiseIsEnabled(),
                     config.getEnableQuickDoze(),
                     /* filesForInteractive */
                     (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
@@ -716,6 +729,8 @@ public class BatterySaverPolicy extends ContentObserver {
                     !defaultPolicy.enableDataSaver);
             boolean enableFirewall = !parser.getBoolean(KEY_ACTIVATE_FIREWALL_DISABLED,
                     !defaultPolicy.enableFirewall);
+            boolean enableNightMode = !parser.getBoolean(KEY_ENABLE_NIGHT_MODE,
+                    !defaultPolicy.enableNightMode);
             boolean enableQuickDoze = parser.getBoolean(KEY_QUICK_DOZE_ENABLED,
                     defaultPolicy.enableQuickDoze);
             boolean forceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY,
@@ -739,6 +754,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     enableAdjustBrightness,
                     enableDataSaver,
                     enableFirewall,
+                    enableNightMode,
                     enableQuickDoze,
                     /* filesForInteractive */
                     (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
@@ -768,6 +784,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     && enableAdjustBrightness == other.enableAdjustBrightness
                     && enableDataSaver == other.enableDataSaver
                     && enableFirewall == other.enableFirewall
+                    && enableNightMode == other.enableNightMode
                     && enableQuickDoze == other.enableQuickDoze
                     && forceAllAppsStandby == other.forceAllAppsStandby
                     && forceBackgroundCheck == other.forceBackgroundCheck
@@ -832,6 +849,9 @@ public class BatterySaverPolicy extends ContentObserver {
                             .build();
                 case ServiceType.FORCE_BACKGROUND_CHECK:
                     return builder.setBatterySaverEnabled(currPolicy.forceBackgroundCheck)
+                            .build();
+                case ServiceType.NIGHT_MODE:
+                    return builder.setBatterySaverEnabled(currPolicy.enableNightMode)
                             .build();
                 case ServiceType.OPTIONAL_SENSORS:
                     return builder.setBatterySaverEnabled(currPolicy.disableOptionalSensors)
@@ -1009,6 +1029,8 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.println("  " + KEY_SOUNDTRIGGER_DISABLED + "=" + p.disableSoundTrigger);
         pw.print(indent);
         pw.println("  " + KEY_QUICK_DOZE_ENABLED + "=" + p.enableQuickDoze);
+        pw.print(indent);
+        pw.println("  " + KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
 
         pw.print("    Interactive File values:\n");
         dumpMap(pw, "      ", p.filesForInteractive);
