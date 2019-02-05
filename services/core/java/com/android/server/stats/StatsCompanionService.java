@@ -1780,8 +1780,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
         final long elapsedMillis = SystemClock.elapsedRealtime();
-        // Fails every 10 buckets.
-        if (mDebugFailingElapsedClockPullCount++ % 10 == 0) {
+        // Fails every 5 buckets.
+        if (mDebugFailingElapsedClockPullCount++ % 5 == 0) {
             mDebugFailingElapsedClockPreviousValue = elapsedMillis;
             throw new RuntimeException("Failing debug elapsed clock");
         }
