@@ -110,6 +110,16 @@ public final class MediaStore {
     public static final String SCAN_VOLUME_CALL = "scan_volume";
 
     /**
+     * Extra used with {@link #SCAN_FILE_CALL} or {@link #SCAN_VOLUME_CALL} to indicate that
+     * the file path originated from shell.
+     *
+     * {@hide}
+     */
+    @TestApi
+    public static final String EXTRA_ORIGINATED_FROM_SHELL =
+            "android.intent.extra.originated_from_shell";
+
+    /**
      * The method name used by the media scanner and mtp to tell the media provider to
      * rescan and reclassify that have become unhidden because of renaming folders or
      * removing nomedia files
