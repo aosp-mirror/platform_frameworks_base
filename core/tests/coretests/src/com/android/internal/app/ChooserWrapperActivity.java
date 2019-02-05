@@ -85,6 +85,15 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return super.loadThumbnail(uri, size);
     }
 
+    @Override
+    protected boolean isImageType(String mimeType) {
+        if (sOverrides.previewThumbnail != null) {
+            return true;
+        }
+
+        return super.isImageType(mimeType);
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
