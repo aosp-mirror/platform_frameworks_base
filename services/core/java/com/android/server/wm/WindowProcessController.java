@@ -986,7 +986,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @Override
     public String toString() {
-        return mOwner.toString();
+        return mOwner != null ? mOwner.toString() : null;
     }
 
     public void dump(PrintWriter pw, String prefix) {
