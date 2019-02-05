@@ -37,6 +37,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.graphics.drawable.shapes.Shape;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -187,7 +188,7 @@ public class ProgressBar extends View {
     private int mBehavior;
     @UnsupportedAppUsage
     private int mDuration;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mIndeterminate;
     @UnsupportedAppUsage
     private boolean mOnlyIndeterminate;
