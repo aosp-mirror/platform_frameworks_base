@@ -486,6 +486,47 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         });
     }
 
+    void onBootCompleted() {
+        getHandler().post(() -> {
+            // Check to see if any staged sessions with rollback enabled have
+            // been applied.
+            List<RollbackData> staged = new ArrayList<>();
+            synchronized (mLock) {
+                ensureRollbackDataLoadedLocked();
+                for (RollbackData data : mAvailableRollbacks) {
+                    if (data.stagedSessionId != -1) {
+                        staged.add(data);
+                    }
+                }
+            }
+
+            for (RollbackData data : staged) {
+                PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
+                PackageInstaller.SessionInfo session = installer.getSessionInfo(
+                        data.stagedSessionId);
+                if (session != null) {
+                    if (session.isSessionApplied()) {
+                        synchronized (mLock) {
+                            data.isAvailable = true;
+                        }
+                        try {
+                            mRollbackStore.saveAvailableRollback(data);
+                        } catch (IOException ioe) {
+                            Log.e(TAG, "Unable to save rollback info for : "
+                                    + data.rollbackId, ioe);
+                        }
+                    } else if (session.isSessionFailed()) {
+                        // TODO: Do we need to remove this from
+                        // mAvailableRollbacks, or is it okay to leave as
+                        // unavailable until the next reboot when it will go
+                        // away on its own?
+                        mRollbackStore.deleteAvailableRollback(data);
+                    }
+                }
+            }
+        });
+    }
+
     /**
      * Load rollback data from storage if it has not already been loaded.
      * After calling this funciton, mAvailableRollbacks and
