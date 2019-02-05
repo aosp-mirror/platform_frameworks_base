@@ -1,0 +1,15 @@
+{
+    "presubmit": [
+        {
+            "name": "CtsStatsdHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.cts.statsd.atom.UidAtomTests#testRoleHolder"
+                }
+            ]
+        },
+        {
+            "name": "CtsRoleTestCases"
+        }
+    ]
+}
