@@ -162,10 +162,7 @@ public final class AudioDeviceInventory {
                 "A2DP sink connected: device addr=" + address + " state=" + state
                         + " vol=" + a2dpVolume));
 
-        final int a2dpCodec;
-        synchronized (mDeviceBroker.mA2dpAvrcpLock) {
-            a2dpCodec = btInfo.getCodec();
-        }
+        final int a2dpCodec = btInfo.getCodec();
 
         synchronized (mConnectedDevices) {
             final String key = DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
@@ -508,22 +505,20 @@ public final class AudioDeviceInventory {
 
     /*package*/ void disconnectA2dp() {
         synchronized (mConnectedDevices) {
-            synchronized (mDeviceBroker.mA2dpAvrcpLock) {
-                final ArraySet<String> toRemove = new ArraySet<>();
-                // Disconnect ALL DEVICE_OUT_BLUETOOTH_A2DP devices
-                mConnectedDevices.values().forEach(deviceInfo -> {
-                    if (deviceInfo.mDeviceType == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-                        toRemove.add(deviceInfo.mDeviceAddress);
-                    }
-                });
-                if (toRemove.size() > 0) {
-                    final int delay = checkSendBecomingNoisyIntentInt(
-                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                            0, AudioSystem.DEVICE_NONE);
-                    toRemove.stream().forEach(deviceAddress ->
-                            makeA2dpDeviceUnavailableLater(deviceAddress, delay)
-                    );
+            final ArraySet<String> toRemove = new ArraySet<>();
+            // Disconnect ALL DEVICE_OUT_BLUETOOTH_A2DP devices
+            mConnectedDevices.values().forEach(deviceInfo -> {
+                if (deviceInfo.mDeviceType == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    toRemove.add(deviceInfo.mDeviceAddress);
                 }
+            });
+            if (toRemove.size() > 0) {
+                final int delay = checkSendBecomingNoisyIntentInt(
+                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                        AudioService.CONNECTION_STATE_DISCONNECTED, AudioSystem.DEVICE_NONE);
+                toRemove.stream().forEach(deviceAddress ->
+                        makeA2dpDeviceUnavailableLater(deviceAddress, delay)
+                );
             }
         }
     }
@@ -543,22 +538,20 @@ public final class AudioDeviceInventory {
 
     /*package*/ void disconnectHearingAid() {
         synchronized (mConnectedDevices) {
-            synchronized (mDeviceBroker.mHearingAidLock) {
-                final ArraySet<String> toRemove = new ArraySet<>();
-                // Disconnect ALL DEVICE_OUT_HEARING_AID devices
-                mConnectedDevices.values().forEach(deviceInfo -> {
-                    if (deviceInfo.mDeviceType == AudioSystem.DEVICE_OUT_HEARING_AID) {
-                        toRemove.add(deviceInfo.mDeviceAddress);
-                    }
-                });
-                if (toRemove.size() > 0) {
-                    final int delay = checkSendBecomingNoisyIntentInt(
-                            AudioSystem.DEVICE_OUT_HEARING_AID, 0, AudioSystem.DEVICE_NONE);
-                    toRemove.stream().forEach(deviceAddress ->
-                            // TODO delay not used?
-                            makeHearingAidDeviceUnavailable(deviceAddress /*, delay*/)
-                    );
+            final ArraySet<String> toRemove = new ArraySet<>();
+            // Disconnect ALL DEVICE_OUT_HEARING_AID devices
+            mConnectedDevices.values().forEach(deviceInfo -> {
+                if (deviceInfo.mDeviceType == AudioSystem.DEVICE_OUT_HEARING_AID) {
+                    toRemove.add(deviceInfo.mDeviceAddress);
                 }
+            });
+            if (toRemove.size() > 0) {
+                final int delay = checkSendBecomingNoisyIntentInt(
+                        AudioSystem.DEVICE_OUT_HEARING_AID, 0, AudioSystem.DEVICE_NONE);
+                toRemove.stream().forEach(deviceAddress ->
+                        // TODO delay not used?
+                        makeHearingAidDeviceUnavailable(deviceAddress /*, delay*/)
+                );
             }
         }
     }
@@ -566,7 +559,8 @@ public final class AudioDeviceInventory {
     // must be called before removing the device from mConnectedDevices
     // musicDevice argument is used when not AudioSystem.DEVICE_NONE instead of querying
     // from AudioSystem
-    /*package*/ int checkSendBecomingNoisyIntent(int device, int state, int musicDevice) {
+    /*package*/ int checkSendBecomingNoisyIntent(int device,
+            @AudioService.ConnectionState int state, int musicDevice) {
         synchronized (mConnectedDevices) {
             return checkSendBecomingNoisyIntentInt(device, state, musicDevice);
         }
@@ -840,8 +834,9 @@ public final class AudioDeviceInventory {
     // musicDevice argument is used when not AudioSystem.DEVICE_NONE instead of querying
     // from AudioSystem
     @GuardedBy("mConnectedDevices")
-    private int checkSendBecomingNoisyIntentInt(int device, int state, int musicDevice) {
-        if (state != 0) {
+    private int checkSendBecomingNoisyIntentInt(int device,
+            @AudioService.ConnectionState int state, int musicDevice) {
+        if (state != AudioService.CONNECTION_STATE_DISCONNECTED) {
             return 0;
         }
         if ((device & mBecomingNoisyIntentDevices) == 0) {
