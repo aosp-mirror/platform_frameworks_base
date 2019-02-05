@@ -170,6 +170,9 @@ public final class AppCompactor {
             updateCompactionThrottles();
             updateStatsdSampleRate();
         }
+        Process.setThreadGroupAndCpuset(mCompactionThread.getThreadId(),
+                Process.THREAD_GROUP_SYSTEM);
+
     }
 
     /**
