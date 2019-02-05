@@ -800,6 +800,33 @@ package android.location {
 
   public class LocationManager {
     method public String[] getBackgroundThrottlingWhitelist();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, android.os.UserHandle);
+  }
+
+  public final class LocationRequest implements android.os.Parcelable {
+    method public static android.location.LocationRequest create();
+    method public int describeContents();
+    method public long getExpireAt();
+    method public long getFastestInterval();
+    method public long getInterval();
+    method public int getNumUpdates();
+    method public int getQuality();
+    method public android.location.LocationRequest setExpireAt(long);
+    method public android.location.LocationRequest setExpireIn(long);
+    method public android.location.LocationRequest setFastestInterval(long);
+    method public android.location.LocationRequest setInterval(long);
+    method public android.location.LocationRequest setNumUpdates(int);
+    method public android.location.LocationRequest setQuality(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACCURACY_BLOCK = 102; // 0x66
+    field public static final int ACCURACY_CITY = 104; // 0x68
+    field public static final int ACCURACY_FINE = 100; // 0x64
+    field public static final android.os.Parcelable.Creator<android.location.LocationRequest> CREATOR;
+    field public static final int POWER_HIGH = 203; // 0xcb
+    field public static final int POWER_LOW = 201; // 0xc9
+    field public static final int POWER_NONE = 200; // 0xc8
   }
 
 }
