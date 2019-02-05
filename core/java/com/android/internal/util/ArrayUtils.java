@@ -690,4 +690,17 @@ public class ArrayUtils {
         }
         return result;
     }
+
+    /**
+     * Returns the first element from the array for which
+     * condition {@code predicate} is true, or null if there is no such element
+     */
+    public static @Nullable <T> T find(@Nullable T[] items,
+            @NonNull java.util.function.Predicate<T> predicate) {
+        if (isEmpty(items)) return null;
+        for (final T item : items) {
+            if (predicate.test(item)) return item;
+        }
+        return null;
+    }
 }

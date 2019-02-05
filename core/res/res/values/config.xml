@@ -1937,6 +1937,7 @@
          holders, with each item in the format of "ROLE_NAME: PACKAGE_NAME_1, PACKAGE_NAME_2". -->
     <string-array name="config_defaultRoleHolders" translatable="false">
         <item>android.app.role.SMS: com.android.messaging</item>
+        <item>android.app.role.DIALER: com.android.phone</item>
     </string-array>
 
     <!-- Enable/disable default bluetooth profiles:
