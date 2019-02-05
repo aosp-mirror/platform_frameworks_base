@@ -201,13 +201,13 @@ class RollbackStore {
      */
     RollbackData createAvailableRollback(int rollbackId) throws IOException {
         File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
-        return new RollbackData(rollbackId, backupDir, -1);
+        return new RollbackData(rollbackId, backupDir, -1, true);
     }
 
     RollbackData createPendingStagedRollback(int rollbackId, int stagedSessionId)
             throws IOException {
         File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
-        return new RollbackData(rollbackId, backupDir, stagedSessionId);
+        return new RollbackData(rollbackId, backupDir, stagedSessionId, false);
     }
 
     /**
@@ -247,6 +247,7 @@ class RollbackStore {
             dataJson.put("packages", toJson(data.packages));
             dataJson.put("timestamp", data.timestamp.toString());
             dataJson.put("stagedSessionId", data.stagedSessionId);
+            dataJson.put("isAvailable", data.isAvailable);
 
             PrintWriter pw = new PrintWriter(new File(data.backupDir, "rollback.json"));
             pw.println(dataJson.toString());
@@ -307,8 +308,9 @@ class RollbackStore {
 
             int rollbackId = dataJson.getInt("rollbackId");
             int stagedSessionId = dataJson.getInt("stagedSessionId");
+            boolean isAvailable = dataJson.getBoolean("isAvailable");
             RollbackData data = new RollbackData(rollbackId, backupDir,
-                    stagedSessionId);
+                    stagedSessionId, isAvailable);
             data.packages.addAll(packageRollbackInfosFromJson(dataJson.getJSONArray("packages")));
             data.timestamp = Instant.parse(dataJson.getString("timestamp"));
             return data;

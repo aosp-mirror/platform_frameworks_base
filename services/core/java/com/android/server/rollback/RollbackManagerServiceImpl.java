@@ -221,7 +221,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages, data.isStaged()));
+                if (data.isAvailable) {
+                    rollbacks.add(new RollbackInfo(data.rollbackId,
+                                data.packages, data.isStaged()));
+                }
             }
             return new ParceledListSlice<>(rollbacks);
         }
@@ -655,6 +658,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
+                if (!data.isAvailable) {
+                    continue;
+                }
+
                 if (!now.isBefore(data.timestamp.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS))) {
                     iter.remove();
                     mRollbackStore.deleteAvailableRollback(data);
@@ -1064,7 +1071,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                if (getPackageRollbackInfo(data, packageName) != null) {
+                if (data.isAvailable && getPackageRollbackInfo(data, packageName) != null) {
                     return data;
                 }
             }
@@ -1083,7 +1090,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                if (data.rollbackId == rollbackId) {
+                if (data.isAvailable && data.rollbackId == rollbackId) {
                     return data;
                 }
             }
