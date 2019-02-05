@@ -201,10 +201,15 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 new ContentObserver(getContext().getMainThreadHandler()) {
                     @Override
                     public void onChange(boolean selfChange, Uri uri, int userId) {
-                        getOrCreateControllerService(userId).onSmsKillSwitchToggled(
-                                Settings.Global.getInt(
-                                        getContext().getContentResolver(),
-                                        Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0) == 1);
+                        boolean killSwitchEnabled = Settings.Global.getInt(
+                                getContext().getContentResolver(),
+                                Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0) == 1;
+                        for (int user : mUserManagerInternal.getUserIds()) {
+                            if (mUserManagerInternal.isUserRunning(user)) {
+                                getOrCreateControllerService(user)
+                                        .onSmsKillSwitchToggled(killSwitchEnabled);
+                            }
+                        }
                     }
                 }, UserHandle.USER_ALL);
     }
