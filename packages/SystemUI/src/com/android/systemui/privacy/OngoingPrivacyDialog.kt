@@ -69,7 +69,7 @@ class OngoingPrivacyDialog constructor(
             setPositiveButton(R.string.ongoing_privacy_dialog_ok, null)
             setNeutralButton(R.string.ongoing_privacy_dialog_open_settings,
                     object : DialogInterface.OnClickListener {
-                        val intent = Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS).putExtra(
+                        val intent = Intent(Settings.ACTION_PRIVACY_SETTINGS).putExtra(
                                 Intent.EXTRA_DURATION_MILLIS, TimeUnit.MINUTES.toMillis(1))
 
                         @Suppress("DEPRECATION")
@@ -167,7 +167,7 @@ class OngoingPrivacyDialog constructor(
             // Check if package exists
             context.packageManager.getPackageInfo(app.packageName, 0)
             item.setOnClickListener(object : View.OnClickListener {
-                val intent = Intent(Intent.ACTION_REVIEW_APP_PERMISSION_USAGE)
+                val intent = Intent(Intent.ACTION_MANAGE_APP_PERMISSIONS)
                         .putExtra(Intent.EXTRA_PACKAGE_NAME, app.packageName)
                         .putExtra(Intent.EXTRA_USER, UserHandle.getUserHandleForUid(app.uid))
                 override fun onClick(v: View?) {
