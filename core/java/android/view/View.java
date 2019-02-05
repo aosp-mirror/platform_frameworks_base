@@ -19532,7 +19532,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param info the {@link android.view.View.AttachInfo} to associated with
      *        this view
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     void dispatchAttachedToWindow(AttachInfo info, int visibility) {
         mAttachInfo = info;
         if (mOverlay != null) {
@@ -19598,7 +19598,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(true);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     void dispatchDetachedFromWindow() {
         AttachInfo info = mAttachInfo;
         if (info != null) {
