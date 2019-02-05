@@ -420,7 +420,7 @@ public class AppRestrictionsHelper {
         List<InputMethodInfo> getInputMethodList() {
             InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
-            return imm.getInputMethodList();
+            return imm.getInputMethodListAsUser(mUser.getIdentifier());
         }
     }
 }

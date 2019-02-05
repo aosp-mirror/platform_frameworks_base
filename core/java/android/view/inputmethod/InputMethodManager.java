@@ -966,7 +966,26 @@ public final class InputMethodManager {
      */
     public List<InputMethodInfo> getInputMethodList() {
         try {
-            return mService.getInputMethodList();
+            // We intentionally do not use UserHandle.getCallingUserId() here because for system
+            // services InputMethodManagerInternal.getInputMethodListAsUser() should be used
+            // instead.
+            return mService.getInputMethodList(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of installed input methods for the specified user.
+     *
+     * @param userId user ID to query
+     * @return {@link List} of {@link InputMethodInfo}.
+     * @hide
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
+        try {
+            return mService.getInputMethodList(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

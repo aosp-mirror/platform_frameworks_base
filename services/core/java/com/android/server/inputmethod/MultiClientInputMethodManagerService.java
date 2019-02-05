@@ -1236,8 +1236,11 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public List<InputMethodInfo> getInputMethodList() {
-            return mInputMethodInfoMap.getAsList(UserHandle.getUserId(Binder.getCallingUid()));
+        public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
+            if (UserHandle.getCallingUserId() != userId) {
+                mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL, null);
+            }
+            return mInputMethodInfoMap.getAsList(userId);
         }
 
         @BinderThread
