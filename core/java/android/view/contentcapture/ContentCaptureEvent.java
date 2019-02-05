@@ -138,8 +138,11 @@ public final class ContentCaptureEvent implements Parcelable {
 
     /**
      * Adds an autofill id to the this event, merging the single id into a list if necessary.
-     * @hide */
+     *
+     * @hide
+     */
     public ContentCaptureEvent addAutofillId(@NonNull AutofillId id) {
+        Preconditions.checkNotNull(id);
         if (mIds == null) {
             mIds = new ArrayList<>();
             if (mId == null) {
