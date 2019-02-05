@@ -237,6 +237,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // TimeZoneDataInfo.
         {android::util::TIME_ZONE_DATA_INFO,
          {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
+        // SDCardInfo
+        {android::util::SDCARD_INFO,
+         {.puller = new StatsCompanionServicePuller(android::util::SDCARD_INFO)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
