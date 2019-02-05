@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.pm.dex;
@@ -44,12 +44,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class is responsible for logging data about secondary dex files and, despite the name,
- * native code executed from an app's private directory. The data logged includes hashes of the
- * name and content of each file.
+ * This class is responsible for logging data about secondary dex files and native code executed
+ * from an app's private directory. The data logged includes hashes of the name and content of each
+ * file.
  */
-public class DexLogger {
-    private static final String TAG = "DexLogger";
+public class DynamicCodeLogger {
+    private static final String TAG = "DynamicCodeLogger";
 
     // Event log tag & subtags used for SafetyNet logging of dynamic code loading (DCL) -
     // see b/63927552.
@@ -61,12 +61,12 @@ public class DexLogger {
     private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
     private final Installer mInstaller;
 
-    public DexLogger(IPackageManager pms, Installer installer) {
+    DynamicCodeLogger(IPackageManager pms, Installer installer) {
         this(pms, installer, new PackageDynamicCodeLoading());
     }
 
     @VisibleForTesting
-    DexLogger(IPackageManager pms, Installer installer,
+    DynamicCodeLogger(IPackageManager pms, Installer installer,
             PackageDynamicCodeLoading packageDynamicCodeLoading) {
         mPackageManager = pms;
         mPackageDynamicCodeLoading = packageDynamicCodeLoading;
@@ -217,7 +217,7 @@ public class DexLogger {
 
     /**
      * Record that an app running in the specified uid has executed native code from the file at
-     * {@link path}.
+     * {@param path}.
      */
     public void recordNative(int loadingUid, String path) {
         String[] packages;

@@ -53,7 +53,7 @@ import org.mockito.stubbing.Stubber;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class DexLoggerTests {
+public class DynamicCodeLoggerTests {
     private static final String OWNING_PACKAGE_NAME = "package.name";
     private static final String VOLUME_UUID = "volUuid";
     private static final String FILE_PATH = "/bar/foo.jar";
@@ -85,7 +85,7 @@ public class DexLoggerTests {
     @Mock IPackageManager mPM;
     @Mock Installer mInstaller;
 
-    private DexLogger mDexLogger;
+    private DynamicCodeLogger mDynamicCodeLogger;
 
     private final ListMultimap<Integer, String> mMessagesForUid = ArrayListMultimap.create();
     private boolean mWriteTriggered = false;
@@ -106,7 +106,7 @@ public class DexLoggerTests {
         };
 
         // For test purposes capture log messages as well as sending to the event log.
-        mDexLogger = new DexLogger(mPM, mInstaller, packageDynamicCodeLoading) {
+        mDynamicCodeLogger = new DynamicCodeLogger(mPM, mInstaller, packageDynamicCodeLoading) {
             @Override
             void writeDclEvent(String subtag, int uid, String message) {
                 super.writeDclEvent(subtag, uid, message);
@@ -131,13 +131,13 @@ public class DexLoggerTests {
         whenFileIsHashed(FILE_PATH, doReturn(CONTENT_HASH_BYTES));
 
         recordLoad(OWNING_PACKAGE_NAME, FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid.keys()).containsExactly(OWNER_UID);
         assertThat(mMessagesForUid).containsEntry(OWNER_UID, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
 
         assertThat(mWriteTriggered).isFalse();
-        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading())
+        assertThat(mDynamicCodeLogger.getAllPackagesWithDynamicCodeLoading())
                 .containsExactly(OWNING_PACKAGE_NAME);
     }
 
@@ -146,14 +146,14 @@ public class DexLoggerTests {
         whenFileIsHashed(FILE_PATH, doReturn(EMPTY_BYTES));
 
         recordLoad(OWNING_PACKAGE_NAME, FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid.keys()).containsExactly(OWNER_UID);
         assertThat(mMessagesForUid).containsEntry(OWNER_UID, EXPECTED_MESSAGE_WITHOUT_CONTENT_HASH);
 
         // File should be removed from the DCL list, since we can't hash it.
         assertThat(mWriteTriggered).isTrue();
-        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
+        assertThat(mDynamicCodeLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
     }
 
     @Test
@@ -162,24 +162,24 @@ public class DexLoggerTests {
                 doThrow(new InstallerException("Intentional failure for test")));
 
         recordLoad(OWNING_PACKAGE_NAME, FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid.keys()).containsExactly(OWNER_UID);
         assertThat(mMessagesForUid).containsEntry(OWNER_UID, EXPECTED_MESSAGE_WITHOUT_CONTENT_HASH);
 
         // File should be removed from the DCL list, since we can't hash it.
         assertThat(mWriteTriggered).isTrue();
-        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
+        assertThat(mDynamicCodeLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
     }
 
     @Test
     public void testOneLoader_ownFile_unknownPath() {
         recordLoad(OWNING_PACKAGE_NAME, "other/path");
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid).isEmpty();
         assertThat(mWriteTriggered).isTrue();
-        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
+        assertThat(mDynamicCodeLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
     }
 
     @Test
@@ -189,7 +189,7 @@ public class DexLoggerTests {
         setPackageUid(OWNING_PACKAGE_NAME, -1);
 
         recordLoad(OWNING_PACKAGE_NAME, filePath);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid).isEmpty();
     }
@@ -200,7 +200,7 @@ public class DexLoggerTests {
         setPackageUid("other.package.name", 1001);
 
         recordLoad("other.package.name", FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid.keys()).containsExactly(1001);
         assertThat(mMessagesForUid).containsEntry(1001, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
@@ -213,7 +213,7 @@ public class DexLoggerTests {
         setPackageUid("other.package.name", -1);
 
         recordLoad("other.package.name", FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid).isEmpty();
         assertThat(mWriteTriggered).isFalse();
@@ -224,14 +224,14 @@ public class DexLoggerTests {
         whenFileIsHashed(FILE_PATH, doReturn(CONTENT_HASH_BYTES));
 
         recordLoadNative(FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid.keys()).containsExactly(OWNER_UID);
         assertThat(mMessagesForUid)
                 .containsEntry(OWNER_UID, EXPECTED_MESSAGE_NATIVE_WITH_CONTENT_HASH);
 
         assertThat(mWriteTriggered).isFalse();
-        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading())
+        assertThat(mDynamicCodeLogger.getAllPackagesWithDynamicCodeLoading())
                 .containsExactly(OWNING_PACKAGE_NAME);
     }
 
@@ -247,7 +247,7 @@ public class DexLoggerTests {
         recordLoad("other.package.name1", otherDexPath);
         recordLoad("other.package.name2", FILE_PATH);
         recordLoad(OWNING_PACKAGE_NAME, FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid.keys()).containsExactly(1001, 1001, 1002, OWNER_UID);
         assertThat(mMessagesForUid).containsEntry(1001, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
@@ -256,10 +256,10 @@ public class DexLoggerTests {
         assertThat(mMessagesForUid).containsEntry(OWNER_UID, EXPECTED_MESSAGE_WITH_CONTENT_HASH);
 
         assertThat(mWriteTriggered).isTrue();
-        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading())
+        assertThat(mDynamicCodeLogger.getAllPackagesWithDynamicCodeLoading())
                 .containsExactly(OWNING_PACKAGE_NAME);
 
-        // Check the DexLogger caching is working
+        // Check the DynamicCodeLogger caching is working
         verify(mPM, atMost(1)).getPackageInfo(OWNING_PACKAGE_NAME, /*flags*/ 0, OWNER_USER_ID);
     }
 
@@ -267,7 +267,7 @@ public class DexLoggerTests {
     public void testUnknownOwner() {
         reset(mPM);
         recordLoad(OWNING_PACKAGE_NAME, FILE_PATH);
-        mDexLogger.logDynamicCodeLoading("other.package.name");
+        mDynamicCodeLogger.logDynamicCodeLoading("other.package.name");
 
         assertThat(mMessagesForUid).isEmpty();
         assertThat(mWriteTriggered).isFalse();
@@ -278,11 +278,11 @@ public class DexLoggerTests {
     public void testUninstalledPackage() {
         reset(mPM);
         recordLoad(OWNING_PACKAGE_NAME, FILE_PATH);
-        mDexLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
+        mDynamicCodeLogger.logDynamicCodeLoading(OWNING_PACKAGE_NAME);
 
         assertThat(mMessagesForUid).isEmpty();
         assertThat(mWriteTriggered).isTrue();
-        assertThat(mDexLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
+        assertThat(mDynamicCodeLogger.getAllPackagesWithDynamicCodeLoading()).isEmpty();
     }
 
     private void setPackageUid(String packageName, int uid) throws Exception {
@@ -295,7 +295,8 @@ public class DexLoggerTests {
     }
 
     private void recordLoad(String loadingPackageName, String dexPath) {
-        mDexLogger.recordDex(OWNER_USER_ID, dexPath, OWNING_PACKAGE_NAME, loadingPackageName);
+        mDynamicCodeLogger.recordDex(
+                OWNER_USER_ID, dexPath, OWNING_PACKAGE_NAME, loadingPackageName);
         mWriteTriggered = false;
     }
 
@@ -304,7 +305,7 @@ public class DexLoggerTests {
         String[] packageNames = { OWNING_PACKAGE_NAME };
         when(mPM.getPackagesForUid(loadingUid)).thenReturn(packageNames);
 
-        mDexLogger.recordNative(loadingUid, nativePath);
+        mDynamicCodeLogger.recordNative(loadingUid, nativePath);
         mWriteTriggered = false;
     }
 }

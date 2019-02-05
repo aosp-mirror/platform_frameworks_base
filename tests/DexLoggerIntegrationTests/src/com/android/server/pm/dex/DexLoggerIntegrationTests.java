@@ -49,13 +49,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Integration tests for {@link com.android.server.pm.dex.DexLogger}.
+ * Integration tests for {@link DynamicCodeLogger}, formerly known as {@code DexLogger}.
  *
  * The setup for the test dynamically loads code in a jar extracted
  * from our assets (a secondary dex file).
  *
  * We then use shell commands to trigger dynamic code logging (and wait
- * for it to complete). This causes DexLogger to log the hash of the
+ * for it to complete). This causes DynamicCodeLogger to log the hash of the
  * file's name and content.  We verify that this message appears in
  * the event log.
  *
@@ -99,7 +99,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_standardClassLoader() throws Exception {
+    public void testGeneratesEvents_standardClassLoader() throws Exception {
         File privateCopyFile = privateFile("copied.jar");
         // Obtained via "echo -n copied.jar | sha256sum"
         String expectedNameHash =
@@ -121,7 +121,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_unknownClassLoader() throws Exception {
+    public void testGeneratesEvents_unknownClassLoader() throws Exception {
         File privateCopyFile = privateFile("copied2.jar");
         String expectedNameHash =
                 "202158B6A3169D78F1722487205A6B036B3F2F5653FDCFB4E74710611AC7EB93";
@@ -143,7 +143,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_nativeLibrary() throws Exception {
+    public void testGeneratesEvents_nativeLibrary() throws Exception {
         File privateCopyFile = privateFile("copied.so");
         String expectedNameHash =
                 "996223BAD4B4FE75C57A3DEC61DB9C0B38E0A7AD479FC95F33494F4BC55A0F0E";
@@ -164,7 +164,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_nativeLibrary_escapedName() throws Exception {
+    public void testGeneratesEvents_nativeLibrary_escapedName() throws Exception {
         // A file name with a space will be escaped in the audit log; verify we un-escape it
         // correctly.
         File privateCopyFile = privateFile("second copy.so");
@@ -187,7 +187,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_nativeExecutable() throws Exception {
+    public void testGeneratesEvents_nativeExecutable() throws Exception {
         File privateCopyFile = privateFile("test_executable");
         String expectedNameHash =
                 "3FBEC3F925A132D18F347F11AE9A5BB8DE1238828F8B4E064AA86EB68BD46DCF";
@@ -211,7 +211,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_spoofed_validFile() throws Exception {
+    public void testGeneratesEvents_spoofed_validFile() throws Exception {
         File privateCopyFile = privateFile("spoofed");
 
         String expectedContentHash =
@@ -239,7 +239,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_spoofed_pathTraversal() throws Exception {
+    public void testGeneratesEvents_spoofed_pathTraversal() throws Exception {
         File privateDir = privateFile("x").getParentFile();
 
         // Transform /a/b/c -> /a/b/c/../../.. so we get back to the root
@@ -276,7 +276,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     @Test
-    public void testDexLoggerGeneratesEvents_spoofed_otherAppFile() throws Exception {
+    public void testGeneratesEvents_spoofed_otherAppFile() throws Exception {
         File ourPath = sContext.getDatabasePath("android_pay");
         File targetPath = new File(ourPath.toString()
                 .replace("com.android.frameworks.dexloggertest", "com.google.android.gms"));
