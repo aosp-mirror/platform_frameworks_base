@@ -2882,22 +2882,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public String getNetworkProviderPackage() {
-        synchronized (mLock) {
-            LocationProvider provider = getLocationProviderLocked(NETWORK_PROVIDER);
-            if (provider == null) {
-                return null;
-            }
-            List<String> packages = provider.getPackagesLocked();
-            if (packages.isEmpty()) {
-                return null;
-            } else {
-                return packages.get(0);
-            }
-        }
-    }
-
-    @Override
     public boolean isProviderPackage(String packageName) {
         synchronized (mLock) {
             for (LocationProvider provider : mProviders) {
