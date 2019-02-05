@@ -205,6 +205,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mKeyguardGoingAway;
     private boolean mGoingToSleep;
     private boolean mBouncer;
+    private boolean mAuthInterruptActive;
     private boolean mBootCompleted;
     private boolean mNeedsSlowUnlockTransition;
     private boolean mHasLockscreenWallpaper;
@@ -1565,10 +1566,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * Request passive authentication, when sensors detect that a user might be present.
+     * Called whenever passive authentication is requested or aborted by a sensor.
+     * @param active If the interrupt started or ended.
      */
-    public void onAuthInterruptDetected() {
-        if (DEBUG) Log.d(TAG, "onAuthInterruptDetected()");
+    public void onAuthInterruptDetected(boolean active) {
+        if (DEBUG) Log.d(TAG, "onAuthInterruptDetected(" + active + ")");
+        if (mAuthInterruptActive == active) {
+            return;
+        }
+        mAuthInterruptActive = active;
         updateFaceListeningState();
     }
 
@@ -1612,7 +1618,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
 
-        return (mBouncer || awakeKeyguard || shouldListenForFaceAssistant())
+        return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
                 && !mKeyguardGoingAway && !mFaceLockedOut && mFaceSettingEnabledForUser
                 && mUserManager.isUserUnlocked(user);
