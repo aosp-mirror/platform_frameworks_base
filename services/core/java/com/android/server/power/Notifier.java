@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeReason;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
@@ -48,6 +49,7 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.StatsLog;
+import android.view.WindowManagerPolicyConstants.OnReason;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -136,6 +138,7 @@ public class Notifier {
     // broadcasted state over the course of reporting the transition asynchronously.
     private boolean mInteractive = true;
     private int mInteractiveChangeReason;
+    private long mInteractiveChangeStartTime; // In SystemClock.uptimeMillis()
     private boolean mInteractiveChanging;
 
     // The pending interactive state that we will eventually want to broadcast.
@@ -371,7 +374,7 @@ public class Notifier {
      * which case it will assume that the state did not fully converge before the
      * next transition began and will recover accordingly.
      */
-    public void onWakefulnessChangeStarted(final int wakefulness, int reason) {
+    public void onWakefulnessChangeStarted(final int wakefulness, int reason, long eventTime) {
         final boolean interactive = PowerManagerInternal.isInteractive(wakefulness);
         if (DEBUG) {
             Slog.d(TAG, "onWakefulnessChangeStarted: wakefulness=" + wakefulness
@@ -410,6 +413,7 @@ public class Notifier {
             // Handle early behaviors.
             mInteractive = interactive;
             mInteractiveChangeReason = reason;
+            mInteractiveChangeStartTime = eventTime;
             mInteractiveChanging = true;
             handleEarlyInteractiveChange();
         }
@@ -440,8 +444,8 @@ public class Notifier {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        // Note a SCREEN tron event is logged in PowerManagerService.
-                        mPolicy.startedWakingUp();
+                        final int why = translateOnReason(mInteractiveChangeReason);
+                        mPolicy.startedWakingUp(why);
                     }
                 });
 
@@ -470,12 +474,21 @@ public class Notifier {
      */
     private void handleLateInteractiveChange() {
         synchronized (mLock) {
+            final int interactiveChangeLatency =
+                    (int) (SystemClock.uptimeMillis() - mInteractiveChangeStartTime);
             if (mInteractive) {
                 // Finished waking up...
+                final int why = translateOnReason(mInteractiveChangeReason);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mPolicy.finishedWakingUp();
+                        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
+                        log.setType(MetricsEvent.TYPE_OPEN);
+                        log.setSubtype(why);
+                        log.setLatency(interactiveChangeLatency);
+                        MetricsLogger.action(log);
+                        EventLogTags.writePowerScreenState(1, 0, 0, 0, interactiveChangeLatency);
+                        mPolicy.finishedWakingUp(why);
                     }
                 });
             } else {
@@ -499,8 +512,9 @@ public class Notifier {
                         LogMaker log = new LogMaker(MetricsEvent.SCREEN);
                         log.setType(MetricsEvent.TYPE_CLOSE);
                         log.setSubtype(why);
+                        log.setLatency(interactiveChangeLatency);
                         MetricsLogger.action(log);
-                        EventLogTags.writePowerScreenState(0, why, 0, 0, 0);
+                        EventLogTags.writePowerScreenState(0, why, 0, 0, interactiveChangeLatency);
                         mPolicy.finishedGoingToSleep(why);
                     }
                 });
@@ -521,6 +535,23 @@ public class Notifier {
                 return WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
             default:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_USER;
+        }
+    }
+
+    private static @OnReason int translateOnReason(@WakeReason int reason) {
+        switch (reason) {
+            case PowerManager.WAKE_REASON_POWER_BUTTON:
+            case PowerManager.WAKE_REASON_PLUGGED_IN:
+            case PowerManager.WAKE_REASON_GESTURE:
+            case PowerManager.WAKE_REASON_CAMERA_LAUNCH:
+            case PowerManager.WAKE_REASON_WAKE_KEY:
+            case PowerManager.WAKE_REASON_WAKE_MOTION:
+            case PowerManager.WAKE_REASON_LID:
+                return WindowManagerPolicy.ON_BECAUSE_OF_USER;
+            case PowerManager.WAKE_REASON_APPLICATION:
+                return WindowManagerPolicy.ON_BECAUSE_OF_APPLICATION;
+            default:
+                return WindowManagerPolicy.ON_BECAUSE_OF_UNKNOWN;
         }
     }
 
@@ -565,14 +596,16 @@ public class Notifier {
     /**
      * Called when the screen has turned on.
      */
-    public void onWakeUp(String reason, int reasonUid, String opPackageName, int opUid) {
+    public void onWakeUp(int reason, String details, int reasonUid, String opPackageName,
+            int opUid) {
         if (DEBUG) {
-            Slog.d(TAG, "onWakeUp: event=" + reason + ", reasonUid=" + reasonUid
+            Slog.d(TAG, "onWakeUp: reason=" + PowerManager.wakeReasonToString(reason)
+                    + ", details=" + details + ", reasonUid=" + reasonUid
                     + " opPackageName=" + opPackageName + " opUid=" + opUid);
         }
 
         try {
-            mBatteryStats.noteWakeUp(reason, reasonUid);
+            mBatteryStats.noteWakeUp(details, reasonUid);
             if (opPackageName != null) {
                 mAppOps.noteOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName);
             }

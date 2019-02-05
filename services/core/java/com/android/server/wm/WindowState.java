@@ -156,6 +156,7 @@ import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeReason;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -611,7 +612,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     interface PowerManagerWrapper {
-        void wakeUp(long time, String reason);
+        void wakeUp(long time, @WakeReason int reason, String details);
 
         boolean isInteractive();
 
@@ -623,8 +624,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         this(service, s, c, token, parentWindow, appOp, seq, a, viewVisibility, ownerId,
                 ownerCanAddInternalSystemWindow, new PowerManagerWrapper() {
                     @Override
-                    public void wakeUp(long time, String reason) {
-                        service.mPowerManager.wakeUp(time, reason);
+                    public void wakeUp(long time, @WakeReason int reason, String details) {
+                        service.mPowerManager.wakeUp(time, reason, details);
                     }
 
                     @Override
@@ -2253,7 +2254,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     Slog.v(TAG, "Relayout window turning screen on: " + this);
                 }
                 mPowerManagerWrapper.wakeUp(SystemClock.uptimeMillis(),
-                        "android.server.wm:TURN_ON");
+                        PowerManager.WAKE_REASON_APPLICATION, "android.server.wm:SCREEN_ON_FLAG");
             }
 
             if (mAppToken != null) {

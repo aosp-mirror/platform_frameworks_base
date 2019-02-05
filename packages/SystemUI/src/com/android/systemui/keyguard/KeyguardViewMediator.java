@@ -884,6 +884,7 @@ public class KeyguardViewMediator extends SystemUI {
 
                 // Just to make sure, make sure the device is awake.
                 mContext.getSystemService(PowerManager.class).wakeUp(SystemClock.uptimeMillis(),
+                        PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                         "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
                 mPendingLock = false;
                 mPendingReset = false;
@@ -1854,8 +1855,9 @@ public class KeyguardViewMediator extends SystemUI {
 
         // It's possible that the device was unlocked in a dream state. It's time to wake up.
         if (mAodShowing) {
-            PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-            pm.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:BOUNCER_DOZING");
+            PowerManager pm = mContext.getSystemService(PowerManager.class);
+            pm.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
+                    "com.android.systemui:BOUNCER_DOZING");
         }
 
         synchronized (KeyguardViewMediator.this) {

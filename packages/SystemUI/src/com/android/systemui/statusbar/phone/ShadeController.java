@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.NonNull;
 import android.view.View;
 
 import com.android.systemui.statusbar.StatusBarState;
@@ -96,8 +97,9 @@ public interface ShadeController {
      *
      * @param time when to wake up
      * @param view the view requesting the wakeup
+     * @param why the reason for the wake up
      */
-    void wakeUpIfDozing(long time, View view);
+    void wakeUpIfDozing(long time, View view, @NonNull String why);
 
     /**
      * If secure with redaction: Show bouncer, go to unlocked shade.

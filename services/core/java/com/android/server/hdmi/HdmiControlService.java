@@ -2412,7 +2412,8 @@ public class HdmiControlService extends SystemService {
     void wakeUp() {
         assertRunOnServiceThread();
         mWakeUpMessageReceived = true;
-        mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.server.hdmi:WAKE");
+        mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_HDMI,
+                "android.server.hdmi:WAKE");
         // PowerManger will send the broadcast Intent.ACTION_SCREEN_ON and after this gets
         // the intent, the sequence will continue at onWakeUp().
     }
@@ -2637,7 +2638,8 @@ public class HdmiControlService extends SystemService {
                 playback().sendStandby(0 /* unused */);
             }
         } else if (isPowerStandbyOrTransient() && !isStandbyModeOn) {
-            mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.server.hdmi:WAKE");
+            mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_HDMI,
+                    "android.server.hdmi:WAKE");
             if (playback() != null) {
                 oneTouchPlay(new IHdmiControlCallback.Stub() {
                     @Override

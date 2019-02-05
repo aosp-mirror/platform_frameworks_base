@@ -39,7 +39,6 @@ import android.hardware.SystemSensorManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.hardware.power.V1_0.PowerHint;
-import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
@@ -52,6 +51,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
+import android.os.PowerManager.WakeReason;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
@@ -82,8 +82,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.server.EventLogTags;
@@ -295,6 +293,7 @@ public final class PowerManagerService extends SystemService
     private long mLastSleepTime;
 
     // Last reason the device went to sleep.
+    private @WakeReason int mLastWakeReason;
     private int mLastSleepReason;
 
     // Timestamp of the last call to user activity.
@@ -1119,8 +1118,9 @@ public final class PowerManagerService extends SystemService
                 opPackageName = wakeLock.mPackageName;
                 opUid = wakeLock.mOwnerUid;
             }
-            wakeUpNoUpdateLocked(SystemClock.uptimeMillis(), wakeLock.mTag, opUid,
-                    opPackageName, opUid);
+            wakeUpNoUpdateLocked(SystemClock.uptimeMillis(),
+                    PowerManager.WAKE_REASON_APPLICATION, wakeLock.mTag,
+                    opUid, opPackageName, opUid);
         }
     }
 
@@ -1410,17 +1410,17 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private void wakeUpInternal(long eventTime, String reason, int uid, String opPackageName,
-            int opUid) {
+    private void wakeUpInternal(long eventTime, @WakeReason int reason, String details, int uid,
+            String opPackageName, int opUid) {
         synchronized (mLock) {
-            if (wakeUpNoUpdateLocked(eventTime, reason, uid, opPackageName, opUid)) {
+            if (wakeUpNoUpdateLocked(eventTime, reason, details, uid, opPackageName, opUid)) {
                 updatePowerStateLocked();
             }
         }
     }
 
-    private boolean wakeUpNoUpdateLocked(long eventTime, String reason, int reasonUid,
-            String opPackageName, int opUid) {
+    private boolean wakeUpNoUpdateLocked(long eventTime, @WakeReason int reason, String details,
+            int reasonUid, String opPackageName, int opUid) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "wakeUpNoUpdateLocked: eventTime=" + eventTime + ", uid=" + reasonUid);
         }
@@ -1434,25 +1434,18 @@ public final class PowerManagerService extends SystemService
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "wakeUp");
         try {
-            switch (mWakefulness) {
-                case WAKEFULNESS_ASLEEP:
-                    Slog.i(TAG, "Waking up from sleep (uid=" + reasonUid + " reason=" + reason
-                            + ")...");
-                    break;
-                case WAKEFULNESS_DREAMING:
-                    Slog.i(TAG, "Waking up from dream (uid=" + reasonUid + " reason=" + reason
-                            + ")...");
-                    break;
-                case WAKEFULNESS_DOZING:
-                    Slog.i(TAG, "Waking up from dozing (uid=" + reasonUid + " reason=" + reason
-                            + ")...");
-                    break;
-            }
+            Slog.i(TAG, "Waking up from "
+                    + PowerManagerInternal.wakefulnessToString(mWakefulness)
+                    + " (uid=" + reasonUid
+                    + ", reason=" + PowerManager.wakeReasonToString(reason)
+                    + ", details=" + details
+                    + ")...");
 
             mLastWakeTime = eventTime;
-            setWakefulnessLocked(WAKEFULNESS_AWAKE, 0);
+            mLastWakeReason = reason;
+            setWakefulnessLocked(WAKEFULNESS_AWAKE, reason, eventTime);
 
-            mNotifier.onWakeUp(reason, reasonUid, opPackageName, opUid);
+            mNotifier.onWakeUp(reason, details, reasonUid, opPackageName, opUid);
             userActivityNoUpdateLocked(
                     eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, reasonUid);
         } finally {
@@ -1520,7 +1513,7 @@ public final class PowerManagerService extends SystemService
             mLastSleepTime = eventTime;
             mLastSleepReason = reason;
             mSandmanSummoned = true;
-            setWakefulnessLocked(WAKEFULNESS_DOZING, reason);
+            setWakefulnessLocked(WAKEFULNESS_DOZING, reason, eventTime);
 
             // Report the number of wake locks that will be cleared by going to sleep.
             int numWakeLocksCleared = 0;
@@ -1570,7 +1563,7 @@ public final class PowerManagerService extends SystemService
             Slog.i(TAG, "Nap time (uid " + uid +")...");
 
             mSandmanSummoned = true;
-            setWakefulnessLocked(WAKEFULNESS_DREAMING, 0);
+            setWakefulnessLocked(WAKEFULNESS_DREAMING, 0, eventTime);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -1593,7 +1586,8 @@ public final class PowerManagerService extends SystemService
         try {
             Slog.i(TAG, "Sleeping (uid " + uid +")...");
 
-            setWakefulnessLocked(WAKEFULNESS_ASLEEP, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+            setWakefulnessLocked(WAKEFULNESS_ASLEEP, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
+                    eventTime);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -1601,13 +1595,13 @@ public final class PowerManagerService extends SystemService
     }
 
     @VisibleForTesting
-    void setWakefulnessLocked(int wakefulness, int reason) {
+    void setWakefulnessLocked(int wakefulness, int reason, long eventTime) {
         if (mWakefulness != wakefulness) {
             mWakefulness = wakefulness;
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
             if (mNotifier != null) {
-                mNotifier.onWakefulnessChangeStarted(wakefulness, reason);
+                mNotifier.onWakefulnessChangeStarted(wakefulness, reason, eventTime);
             }
             mAttentionDetector.onWakefulnessChangeStarted(wakefulness);
         }
@@ -1631,23 +1625,6 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private void logScreenOn() {
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, 0);
-
-        final int latencyMs = (int) (SystemClock.uptimeMillis() - mLastWakeTime);
-
-        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
-        log.setType(MetricsEvent.TYPE_OPEN);
-        log.setSubtype(0); // not user initiated
-        log.setLatency(latencyMs); // How long it took.
-        MetricsLogger.action(log);
-        EventLogTags.writePowerScreenState(1, 0, 0, 0, latencyMs);
-
-        if (latencyMs >= SCREEN_ON_LATENCY_WARNING_MS) {
-            Slog.w(TAG, "Screen on took " + latencyMs+ " ms");
-        }
-    }
-
     private void finishWakefulnessChangeIfNeededLocked() {
         if (mWakefulnessChanging && mDisplayReady) {
             if (mWakefulness == WAKEFULNESS_DOZING
@@ -1658,7 +1635,11 @@ public final class PowerManagerService extends SystemService
                 logSleepTimeoutRecapturedLocked();
             }
             if (mWakefulness == WAKEFULNESS_AWAKE) {
-                logScreenOn();
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, 0);
+                final int latencyMs = (int) (SystemClock.uptimeMillis() - mLastWakeTime);
+                if (latencyMs >= SCREEN_ON_LATENCY_WARNING_MS) {
+                    Slog.w(TAG, "Screen on took " + latencyMs + " ms");
+                }
             }
             mWakefulnessChanging = false;
             mNotifier.onWakefulnessChangeFinished();
@@ -1786,7 +1767,8 @@ public final class PowerManagerService extends SystemService
                 final long now = SystemClock.uptimeMillis();
                 if (shouldWakeUpWhenPluggedOrUnpluggedLocked(wasPowered, oldPlugType,
                         dockedOnWirelessCharger)) {
-                    wakeUpNoUpdateLocked(now, "android.server.power:POWER", Process.SYSTEM_UID,
+                    wakeUpNoUpdateLocked(now, PowerManager.WAKE_REASON_PLUGGED_IN,
+                            "android.server.power:PLUGGED:" + mIsPowered, Process.SYSTEM_UID,
                             mContext.getOpPackageName(), Process.SYSTEM_UID);
                 }
                 userActivityNoUpdateLocked(
@@ -2369,8 +2351,10 @@ public final class PowerManagerService extends SystemService
                             PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0, Process.SYSTEM_UID);
                     updatePowerStateLocked();
                 } else {
-                    wakeUpNoUpdateLocked(SystemClock.uptimeMillis(), "android.server.power:DREAM",
-                            Process.SYSTEM_UID, mContext.getOpPackageName(), Process.SYSTEM_UID);
+                    wakeUpNoUpdateLocked(SystemClock.uptimeMillis(),
+                            PowerManager.WAKE_REASON_UNKNOWN,
+                            "android.server.power:DREAM_FINISHED", Process.SYSTEM_UID,
+                            mContext.getOpPackageName(), Process.SYSTEM_UID);
                     updatePowerStateLocked();
                 }
             } else if (wakefulness == WAKEFULNESS_DOZING) {
@@ -4375,7 +4359,8 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
-        public void wakeUp(long eventTime, String reason, String opPackageName) {
+        public void wakeUp(long eventTime, @WakeReason int reason, String details,
+                String opPackageName) {
             if (eventTime > SystemClock.uptimeMillis()) {
                 throw new IllegalArgumentException("event time must not be in the future");
             }
@@ -4386,7 +4371,7 @@ public final class PowerManagerService extends SystemService
             final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                wakeUpInternal(eventTime, reason, uid, opPackageName, uid);
+                wakeUpInternal(eventTime, reason, details, uid, opPackageName, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
