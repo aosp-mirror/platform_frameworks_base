@@ -26,7 +26,6 @@
 #include <media/AudioTrack.h>
 #include "SoundPool.h"
 #include "SoundPoolThread.h"
-#include <media/AudioPolicyHelper.h>
 #include <media/NdkMediaCodec.h>
 #include <media/NdkMediaExtractor.h>
 #include <media/NdkMediaFormat.h>
@@ -746,7 +745,8 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         // initialize track
         size_t afFrameCount;
         uint32_t afSampleRate;
-        audio_stream_type_t streamType = audio_attributes_to_stream_type(mSoundPool->attributes());
+        audio_stream_type_t streamType =
+                AudioSystem::attributesToStreamType(*mSoundPool->attributes());
         if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
             afFrameCount = kDefaultFrameCount;
         }
