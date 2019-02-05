@@ -120,6 +120,7 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
+    @UiThread
     public void onActivityStarted(@NonNull IBinder applicationToken,
             @NonNull ComponentName activityComponent, int flags) {
         synchronized (mLock) {
@@ -129,6 +130,7 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
+    @UiThread
     public void onActivityStopped() {
         getMainContentCaptureSession().destroy();
     }
@@ -140,6 +142,7 @@ public final class ContentCaptureManager {
      *
      * @hide
      */
+    @UiThread
     public void flush(@FlushReason int reason) {
         getMainContentCaptureSession().flush(reason);
     }
