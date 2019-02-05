@@ -2459,5 +2459,23 @@ public final class SurfaceControl implements Parcelable {
             nativeMergeTransaction(mNativeObject, other.mNativeObject);
             return this;
         }
+
+        /**
+         * Equivalent to reparent with a null parent, in that it removes
+         * the SurfaceControl from the scene, but it also releases
+         * the local resources (by calling {@link SurfaceControl#release})
+         * after this method returns, {@link SurfaceControl#isValid} will return
+         * false for the argument.
+         *
+         * @param sc The surface to remove and release.
+         * @return This transaction
+         * @hide
+         */
+        @NonNull
+        public Transaction remove(@NonNull SurfaceControl sc) {
+            reparent(sc, null);
+            sc.release();
+            return this;
+        }
     }
 }

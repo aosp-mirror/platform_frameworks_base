@@ -212,7 +212,7 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mSurfaceAnimatorStarter).startAnimation(any(SurfaceAnimator.class), any(
                 SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean());
-        verify(mHost.getPendingTransaction()).reparent(dimLayer, null);
+        verify(mHost.getPendingTransaction()).remove(dimLayer);
     }
 
     @Test
@@ -269,7 +269,7 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mSurfaceAnimatorStarter, never()).startAnimation(any(SurfaceAnimator.class), any(
                 SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean());
-        verify(mTransaction).reparent(dimLayer, null);
+        verify(mTransaction).remove(dimLayer);
     }
 
     private SurfaceControl getDimLayer() {
