@@ -273,7 +273,7 @@ public class PopupWindow {
     private int mAnchorXoff;
     private int mAnchorYoff;
     private int mAnchoredGravity;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mOverlapAnchor;
 
     private boolean mPopupViewInitialLayoutDirectionInherited;
