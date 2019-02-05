@@ -4140,9 +4140,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The layout parameters associated with this view and used by the parent
      * {@link android.view.ViewGroup} to determine how this view should be
      * laid out.
+     *
+     * The field should not be used directly. Instead {@link #getLayoutParams()} and {@link
+     * #setLayoutParams(ViewGroup.LayoutParams)} should be used. The setter guarantees internal
+     * state correctness of the class.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected ViewGroup.LayoutParams mLayoutParams;
 
     /**
