@@ -34,49 +34,61 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/media_notification_header_height" />
     <LinearLayout
-        android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginStart="@dimen/notification_content_margin_start"
-        android:layout_marginTop="@dimen/notification_content_margin_top"
-        android:tag="media"
+        android:orientation="vertical"
+        android:id="@+id/notification_media_content"
         >
         <LinearLayout
-            android:id="@+id/notification_content_container"
+            android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="fill_vertical"
-            android:layout_weight="1"
-            android:minHeight="@dimen/notification_min_content_height"
-            android:paddingBottom="@dimen/notification_content_margin"
-            android:orientation="vertical"
-            >
-            <include layout="@layout/notification_template_part_line1"/>
-            <include layout="@layout/notification_template_text"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/media_actions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginStart="10dp"
-            android:layout_marginBottom="@dimen/media_notification_actions_padding_bottom"
-            android:layoutDirection="ltr"
             android:orientation="horizontal"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:layout_alignParentTop="true"
+            android:tag="media"
             >
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action0"
-            />
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action1"
-            />
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/action2"
-            />
+            <LinearLayout
+                android:id="@+id/notification_content_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_vertical"
+                android:layout_weight="1"
+                android:minHeight="@dimen/notification_min_content_height"
+                android:paddingBottom="@dimen/notification_content_margin"
+                android:orientation="vertical"
+                >
+                <include layout="@layout/notification_template_part_line1"/>
+                <include layout="@layout/notification_template_text"/>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/media_actions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginStart="10dp"
+                android:layoutDirection="ltr"
+                android:orientation="horizontal"
+                >
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action0"
+                />
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action1"
+                />
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action2"
+                />
+            </LinearLayout>
         </LinearLayout>
+        <ViewStub android:id="@+id/notification_media_seekbar_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+        />
     </LinearLayout>
 </FrameLayout>

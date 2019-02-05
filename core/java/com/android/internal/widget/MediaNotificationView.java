@@ -39,6 +39,7 @@ public class MediaNotificationView extends FrameLayout {
     private View mActions;
     private View mHeader;
     private View mMainColumn;
+    private View mMediaContent;
     private int mImagePushIn;
 
     public MediaNotificationView(Context context) {
@@ -70,7 +71,7 @@ public class MediaNotificationView extends FrameLayout {
                     (MarginLayoutParams) mRightIcon.getLayoutParams();
             int imageEndMargin = layoutParams.getMarginEnd();
             size -= imageEndMargin;
-            int fullHeight = getMeasuredHeight();
+            int fullHeight = mMediaContent.getMeasuredHeight();
             if (size > fullHeight) {
                 size = fullHeight;
             } else if (size < fullHeight) {
@@ -154,5 +155,6 @@ public class MediaNotificationView extends FrameLayout {
         mActions = findViewById(com.android.internal.R.id.media_actions);
         mHeader = findViewById(com.android.internal.R.id.notification_header);
         mMainColumn = findViewById(com.android.internal.R.id.notification_main_column);
+        mMediaContent = findViewById(com.android.internal.R.id.notification_media_content);
     }
 }

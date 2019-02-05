@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationMediaTemplateViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -144,6 +145,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mNotificationMinHeightBeforeP;
     private int mNotificationMinHeight;
     private int mNotificationMinHeightLarge;
+    private int mNotificationMinHeightMedia;
     private int mNotificationMaxHeight;
     private int mIncreasedPaddingBetweenElements;
     private int mNotificationLaunchHeight;
@@ -652,8 +654,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         boolean beforeN = mEntry.targetSdk < Build.VERSION_CODES.N;
         boolean beforeP = mEntry.targetSdk < Build.VERSION_CODES.P;
         int minHeight;
+
+        View expandedView = layout.getExpandedChild();
+        boolean isMediaLayout = expandedView != null
+                && expandedView.findViewById(com.android.internal.R.id.media_actions) != null;
+
         if (customView && beforeP && !mIsSummaryWithChildren) {
             minHeight = beforeN ? mNotificationMinHeightBeforeN : mNotificationMinHeightBeforeP;
+        } else if (isMediaLayout && !NotificationMediaTemplateViewWrapper.HIDE_COMPACT_SCRUBBER) {
+            minHeight = mNotificationMinHeightMedia;
         } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
             minHeight = mNotificationMinHeightLarge;
         } else {
@@ -1642,6 +1651,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height);
         mNotificationMinHeightLarge = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_increased);
+        mNotificationMinHeightMedia = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_min_height_media);
         mNotificationMaxHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
