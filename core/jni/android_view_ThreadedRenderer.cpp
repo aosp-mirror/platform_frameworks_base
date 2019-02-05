@@ -1207,7 +1207,7 @@ static void attachRenderThreadToJvm() {
 
     JavaVMAttachArgs args;
     args.version = JNI_VERSION_1_4;
-    args.name = (char*) "RenderThread";
+    args.name = NULL;
     args.group = NULL;
     JNIEnv* env;
     mJvm->AttachCurrentThreadAsDaemon(&env, (void*) &args);

@@ -75,12 +75,15 @@ struct VsyncSource {
 
 class DummyVsyncSource;
 
+typedef void (*JVMAttachHook)();
+
 class RenderThread : private ThreadBase {
     PREVENT_COPY_AND_ASSIGN(RenderThread);
 
 public:
     // Sets a callback that fires before any RenderThread setup has occurred.
-    ANDROID_API static void setOnStartHook(void (*onStartHook)());
+    ANDROID_API static void setOnStartHook(JVMAttachHook onStartHook);
+    static JVMAttachHook getOnStartHook();
 
     WorkQueue& queue() { return ThreadBase::queue(); }
 
