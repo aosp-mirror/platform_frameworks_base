@@ -2069,8 +2069,12 @@ public class LocationManagerService extends ILocationManager.Stub {
                         record.mReceiver.mAllowedResolutionLevel)) {
                     continue;
                 }
-                if (!provider.isUseableLocked() && !isSettingsExemptLocked(record)) {
-                    continue;
+                if (!provider.isUseableLocked()) {
+                    if (isSettingsExemptLocked(record)) {
+                        providerRequest.forceLocation = true;
+                    } else {
+                        continue;
+                    }
                 }
 
                 LocationRequest locationRequest = record.mRealRequest;
