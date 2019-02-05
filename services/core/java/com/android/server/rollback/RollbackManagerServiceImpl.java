@@ -331,13 +331,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (PackageRollbackInfo info : data.packages) {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-                String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
-                if (installerPackageName == null) {
-                    sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
-                            "Cannot find installer package");
-                    return;
+                // TODO: We can't get the installerPackageName for apex
+                // (b/123920130). Is it okay to ignore the installer package
+                // for apex?
+                if (!info.isApex()) {
+                    String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
+                    if (installerPackageName == null) {
+                        sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
+                                "Cannot find installer package");
+                        return;
+                    }
+                    params.setInstallerPackageName(installerPackageName);
                 }
-                params.setInstallerPackageName(installerPackageName);
                 params.setAllowDowngrade(true);
                 if (data.isStaged()) {
                     params.setStaged();
