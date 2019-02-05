@@ -127,7 +127,10 @@ public class Typeface {
     static Typeface sDefaultTypeface;
 
     // Following two fields are not used but left for hiddenapi private list
-    @UnsupportedAppUsage
+    /**
+     * Use {@link SystemFonts#getAvailableFonts()} instead.
+     */
+    @UnsupportedAppUsage(trackingBug = 123769347)
     static final Map<String, Typeface> sSystemFontMap;
 
     // We cannot support sSystemFallbackMap since we will migrate to public FontFamily API.
