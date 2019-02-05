@@ -32,13 +32,14 @@ interface IRoleManager {
 
     List<String> getRoleHoldersAsUser(in String roleName, int userId);
 
-    void addRoleHolderAsUser(in String roleName, in String packageName, int userId,
+    void addRoleHolderAsUser(in String roleName, in String packageName, int flags, int userId,
             in IRoleManagerCallback callback);
 
-    void removeRoleHolderAsUser(in String roleName, in String packageName, int userId,
+    void removeRoleHolderAsUser(in String roleName, in String packageName, int flags, int userId,
             in IRoleManagerCallback callback);
 
-    void clearRoleHoldersAsUser(in String roleName, int userId, in IRoleManagerCallback callback);
+    void clearRoleHoldersAsUser(in String roleName, int flags, int userId,
+            in IRoleManagerCallback callback);
 
     void addOnRoleHoldersChangedListenerAsUser(IOnRoleHoldersChangedListener listener, int userId);
 

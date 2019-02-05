@@ -78,7 +78,7 @@ public class DefaultDialerManager {
         try {
             RoleManagerCallback.Future cb = new RoleManagerCallback.Future();
             context.getSystemService(RoleManager.class).addRoleHolderAsUser(
-                    RoleManager.ROLE_DIALER, packageName, UserHandle.of(user),
+                    RoleManager.ROLE_DIALER, packageName, 0, UserHandle.of(user),
                     AsyncTask.THREAD_POOL_EXECUTOR, cb);
             cb.get(5, TimeUnit.SECONDS);
             return true;

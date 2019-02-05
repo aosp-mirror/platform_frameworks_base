@@ -636,7 +636,7 @@ public final class SmsApplication {
             // Update the setting.
             RoleManagerCallback.Future res = new RoleManagerCallback.Future();
             context.getSystemService(RoleManager.class).addRoleHolderAsUser(
-                    RoleManager.ROLE_SMS, applicationData.mPackageName, UserHandle.of(userId),
+                    RoleManager.ROLE_SMS, applicationData.mPackageName, 0, UserHandle.of(userId),
                     AsyncTask.THREAD_POOL_EXECUTOR, res);
             try {
                 res.get(5, TimeUnit.SECONDS);
