@@ -4697,7 +4697,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mSettings.getCurrentUserId(),
                     mContext.getBasePackageName());
             nextIme = mSettings.getSelectedInputMethod();
-            nextEnabledImes = getEnabledInputMethodList();
+            nextEnabledImes = mSettings.getEnabledInputMethodListLocked();
             final PrintWriter pr = shellCommand.getOutPrintWriter();
             pr.println("Reset current and enabled IMEs");
             pr.println("Newly selected IME:");
