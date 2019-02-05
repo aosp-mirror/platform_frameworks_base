@@ -22,7 +22,6 @@ import static com.android.systemui.recents.OverviewProxyService.TAG_OPS;
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -34,7 +33,6 @@ import com.android.systemui.shared.recents.utilities.Utilities;
  */
 public class QuickSwitchAction extends NavigationGestureAction {
     private static final String TAG = "QuickSwitchAction";
-    private static final String QUICKSWITCH_ENABLED_SETTING = "QUICK_SWITCH";
 
     protected final Rect mDragOverRect = new Rect();
 
@@ -71,10 +69,6 @@ public class QuickSwitchAction extends NavigationGestureAction {
 
     @Override
     protected void onGestureStart(MotionEvent event) {
-        // Temporarily enable launcher to allow quick switch instead of quick scrub
-        Settings.Global.putInt(mNavigationBarView.getContext().getContentResolver(),
-                QUICKSWITCH_ENABLED_SETTING, 1 /* enabled */);
-
         startQuickGesture(event);
     }
 
@@ -105,10 +99,6 @@ public class QuickSwitchAction extends NavigationGestureAction {
     @Override
     protected void onGestureEnd() {
         endQuickGesture(true /* animate */);
-
-        // Disable launcher to use quick switch instead of quick scrub
-        Settings.Global.putInt(mNavigationBarView.getContext().getContentResolver(),
-                QUICKSWITCH_ENABLED_SETTING, 0 /* disabled */);
     }
 
     protected void startQuickGesture(MotionEvent event) {
