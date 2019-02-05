@@ -191,8 +191,8 @@ public class BtHelper {
             Log.i(TAG, "setAvrcpAbsoluteVolumeIndex index=" + index);
         }
         AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
-                AudioServiceEvents.VolumeEvent.VOL_SET_AVRCP_VOL, index / 10));
-        mA2dp.setAvrcpAbsoluteVolume(index / 10);
+                AudioServiceEvents.VolumeEvent.VOL_SET_AVRCP_VOL, index));
+        mA2dp.setAvrcpAbsoluteVolume(index);
     }
 
     /*package*/ synchronized int getA2dpCodec(@NonNull BluetoothDevice device) {
