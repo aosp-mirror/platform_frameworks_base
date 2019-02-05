@@ -56,13 +56,12 @@ public class SmartReplyController {
      * Notifies StatusBarService a smart reply is sent.
      */
     public void smartReplySent(NotificationEntry entry, int replyIndex, CharSequence reply,
-            boolean generatedByAssistant, int notificationLocation) {
+            int notificationLocation, boolean modifiedBeforeSending) {
         mCallback.onSmartReplySent(entry, reply);
         mSendingKeys.add(entry.key);
         try {
-            mBarService.onNotificationSmartReplySent(
-                    entry.notification.getKey(), replyIndex, reply, generatedByAssistant,
-                    notificationLocation);
+            mBarService.onNotificationSmartReplySent(entry.notification.getKey(), replyIndex, reply,
+                    notificationLocation, modifiedBeforeSending);
         } catch (RemoteException e) {
             // Nothing to do, system going down
         }
@@ -100,10 +99,10 @@ public class SmartReplyController {
      * Smart Replies and Actions have been added to the UI.
      */
     public void smartSuggestionsAdded(final NotificationEntry entry, int replyCount,
-            int actionCount, boolean generatedByAssistant) {
+            int actionCount, boolean generatedByAssistant, boolean editBeforeSending) {
         try {
-            mBarService.onNotificationSmartSuggestionsAdded(
-                    entry.notification.getKey(), replyCount, actionCount, generatedByAssistant);
+            mBarService.onNotificationSmartSuggestionsAdded(entry.notification.getKey(), replyCount,
+                    actionCount, generatedByAssistant, editBeforeSending);
         } catch (RemoteException e) {
             // Nothing to do, system going down
         }

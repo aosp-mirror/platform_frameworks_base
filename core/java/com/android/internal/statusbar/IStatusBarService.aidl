@@ -69,8 +69,9 @@ interface IStatusBarService
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded, in int notificationLocation);
     void onNotificationDirectReplied(String key);
     void onNotificationSmartSuggestionsAdded(String key, int smartReplyCount, int smartActionCount,
-            boolean generatedByAsssistant);
-    void onNotificationSmartReplySent(in String key, in int replyIndex, in CharSequence reply, boolean generatedByAssistant, in int notificationLocation);
+            boolean generatedByAsssistant, boolean editBeforeSending);
+    void onNotificationSmartReplySent(in String key, in int replyIndex, in CharSequence reply,
+            in int notificationLocation, boolean modifiedBeforeSending);
     void onNotificationSettingsViewed(String key);
     void setSystemUiVisibility(int displayId, int vis, int mask, String cause);
 

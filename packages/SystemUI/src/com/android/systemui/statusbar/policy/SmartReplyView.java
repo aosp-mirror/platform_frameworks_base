@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
@@ -252,16 +253,17 @@ public class SmartReplyView extends ViewGroup {
         OnDismissAction action = () -> {
             if (mConstants.getEffectiveEditChoicesBeforeSending(
                     smartReplies.remoteInput.getEditChoicesBeforeSending())) {
-                entry.remoteInputText = choice;
+                EditedSuggestionInfo editedSuggestionInfo =
+                        new EditedSuggestionInfo(choice, replyIndex);
                 mRemoteInputManager.activateRemoteInput(b,
                         new RemoteInput[] { smartReplies.remoteInput }, smartReplies.remoteInput,
-                        smartReplies.pendingIntent);
+                        smartReplies.pendingIntent, editedSuggestionInfo);
                 return false;
             }
 
             smartReplyController.smartReplySent(entry, replyIndex, b.getText(),
-                    smartReplies.fromAssistant,
-                    NotificationLogger.getNotificationLocation(entry).toMetricsEventEnum());
+                    NotificationLogger.getNotificationLocation(entry).toMetricsEventEnum(),
+                    false /* modifiedBeforeSending */);
             Bundle results = new Bundle();
             results.putString(smartReplies.remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);

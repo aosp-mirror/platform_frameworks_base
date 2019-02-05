@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -59,6 +60,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
@@ -269,10 +271,24 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mPendingIntent = pendingIntent;
     }
 
-    public void setRemoteInput(RemoteInput[] remoteInputs, RemoteInput remoteInput) {
+    /**
+     * Sets the remote input for this view.
+     *
+     * @param remoteInputs The remote inputs that need to be sent to the app.
+     * @param remoteInput The remote input that needs to be activated.
+     * @param editedSuggestionInfo The smart reply that should be inserted in the remote input, or
+     *         {@code null} if the user is not editing a smart reply.
+     */
+    public void setRemoteInput(RemoteInput[] remoteInputs, RemoteInput remoteInput,
+            @Nullable EditedSuggestionInfo editedSuggestionInfo) {
         mRemoteInputs = remoteInputs;
         mRemoteInput = remoteInput;
         mEditText.setHint(mRemoteInput.getLabel());
+
+        mEntry.editedSuggestionInfo = editedSuggestionInfo;
+        if (editedSuggestionInfo != null) {
+            mEntry.remoteInputText = editedSuggestionInfo.originalText;
+        }
     }
 
     public void focusAnimated() {
@@ -389,7 +405,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     public void stealFocusFrom(RemoteInputView other) {
         other.close();
         setPendingIntent(other.mPendingIntent);
-        setRemoteInput(other.mRemoteInputs, other.mRemoteInput);
+        setRemoteInput(other.mRemoteInputs, other.mRemoteInput, mEntry.editedSuggestionInfo);
         setRevealParameters(other.mRevealCx, other.mRevealCy, other.mRevealR);
         focus();
     }
@@ -429,7 +445,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 continue;
             }
             setPendingIntent(a.actionIntent);
-            setRemoteInput(inputs, input);
+            setRemoteInput(inputs, input, null /* editedSuggestionInfo*/);
             return true;
         }
         return false;
