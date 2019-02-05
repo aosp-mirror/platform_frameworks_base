@@ -382,9 +382,16 @@ int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTime
     return mTimeBaseNs + ((currentTimeNs - mTimeBaseNs) / mBucketSizeNs) * mBucketSizeNs;
 }
 
-void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
+void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData,
+                                       bool pullSuccess) {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mCondition) {
+        if (!pullSuccess) {
+            // If the pull failed, we won't be able to compute a diff.
+            resetBase();
+            return;
+        }
+
         if (allData.size() == 0) {
             VLOG("Data pulled is empty");
             StatsdStats::getInstance().noteEmptyData(mPullTagId);
@@ -399,12 +406,13 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         // if the diff base will be cleared and this new data will serve as new diff base.
         int64_t realEventTime = allData.at(0)->GetElapsedTimestampNs();
         int64_t bucketEndTime = calcPreviousBucketEndTime(realEventTime) - 1;
-        if (bucketEndTime < mCurrentBucketStartTimeNs) {
+        bool isEventLate = bucketEndTime < mCurrentBucketStartTimeNs;
+        if (isEventLate) {
             VLOG("Skip bucket end pull due to late arrival: %lld vs %lld", (long long)bucketEndTime,
                  (long long)mCurrentBucketStartTimeNs);
             StatsdStats::getInstance().noteLateLogEventSkipped(mMetricId);
-            return;
         }
+
         for (const auto& data : allData) {
             LogEvent localCopy = data->makeCopy();
             if (mEventMatcherWizard->matchLogEvent(localCopy, mWhatMatcherIndex) ==

@@ -51,7 +51,8 @@ public:
     virtual ~ValueMetricProducer();
 
     // Process data pulled on bucket boundary.
-    void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
+    void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data,
+                      bool pullSuccess) override;
 
     // ValueMetric needs special logic if it's a pulled atom.
     void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
@@ -216,7 +217,9 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);
     FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
-    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFail);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailBeforeConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange_EndOfBucket);
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate);
 };
 
