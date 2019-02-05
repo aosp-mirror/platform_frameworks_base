@@ -21,6 +21,7 @@
 #include "TaskManager.h"
 #include "TaskProcessor.h"
 #include "utils/MathUtils.h"
+#include "renderthread/RenderThread.h"
 
 namespace android {
 namespace uirenderer {
@@ -84,6 +85,11 @@ bool TaskManager::addTaskBase(const sp<TaskBase>& task, const sp<TaskProcessorBa
 
 status_t TaskManager::WorkerThread::readyToRun() {
     setpriority(PRIO_PROCESS, 0, PRIORITY_FOREGROUND);
+    auto onStartHook = renderthread::RenderThread::getOnStartHook();
+    if (onStartHook) {
+        onStartHook();
+    }
+
     return NO_ERROR;
 }
 
