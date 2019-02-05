@@ -37,17 +37,20 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final IWallpaperManager mWallpaperManagerService;
-    private boolean mIsAmbientMode;
     private final DozeParameters mDozeParameters;
+    private final DozeMachine mMachine;
+    private boolean mIsAmbientMode;
 
-    public DozeWallpaperState(Context context) {
-        this(IWallpaperManager.Stub.asInterface(
+    public DozeWallpaperState(Context context, DozeMachine machine) {
+        this(machine, IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE)),
                 DozeParameters.getInstance(context));
     }
 
     @VisibleForTesting
-    DozeWallpaperState(IWallpaperManager wallpaperManagerService, DozeParameters parameters) {
+    DozeWallpaperState(DozeMachine machine, IWallpaperManager wallpaperManagerService,
+            DozeParameters parameters) {
+        mMachine = machine;
         mWallpaperManagerService = wallpaperManagerService;
         mDozeParameters = parameters;
     }
@@ -61,9 +64,12 @@ public class DozeWallpaperState implements DozeMachine.Part {
             case DOZE_AOD_PAUSING:
             case DOZE_AOD_PAUSED:
             case DOZE_REQUEST_PULSE:
-            case DOZE_PULSING:
             case DOZE_PULSE_DONE:
                 isAmbientMode = true;
+                break;
+            case DOZE_PULSING:
+                isAmbientMode =
+                        mMachine.getPulseReason() != DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN;
                 break;
             default:
                 isAmbientMode = false;
