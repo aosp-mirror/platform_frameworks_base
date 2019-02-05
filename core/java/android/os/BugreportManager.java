@@ -24,7 +24,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
-import android.os.IBinder.DeathRecipient;
+
+import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -127,13 +128,16 @@ public class BugreportManager {
             @NonNull BugreportParams params,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BugreportCallback callback) {
-        // TODO(b/111441001): Enforce android.Manifest.permission.DUMP if necessary.
+        Preconditions.checkNotNull(bugreportFd);
+        Preconditions.checkNotNull(params);
+        Preconditions.checkNotNull(executor);
+        Preconditions.checkNotNull(callback);
         DumpstateListener dsListener = new DumpstateListener(executor, callback);
         try {
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
-                    (bugreportFd != null ? bugreportFd.getFileDescriptor() : new FileDescriptor()),
+                    bugreportFd.getFileDescriptor(),
                     (screenshotFd != null
                             ? screenshotFd.getFileDescriptor() : new FileDescriptor()),
                     params.getMode(), dsListener);
@@ -154,19 +158,13 @@ public class BugreportManager {
         }
     }
 
-    private final class DumpstateListener extends IDumpstateListener.Stub
-            implements DeathRecipient {
+    private final class DumpstateListener extends IDumpstateListener.Stub {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
 
         DumpstateListener(Executor executor, @Nullable BugreportCallback callback) {
             mExecutor = executor;
             mCallback = callback;
-        }
-
-        @Override
-        public void binderDied() {
-            // TODO(b/111441001): implement
         }
 
         @Override
