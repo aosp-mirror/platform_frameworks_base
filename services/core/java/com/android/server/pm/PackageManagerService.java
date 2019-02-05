@@ -13426,6 +13426,10 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
 
+        if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
+            return false;
+        }
+
         boolean ensureVerifyAppsEnabled = isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS);
 
         // Check if installing from ADB
