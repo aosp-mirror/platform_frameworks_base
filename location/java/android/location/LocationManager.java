@@ -2410,21 +2410,6 @@ public class LocationManager {
     }
 
     /**
-     * Return the package that implements the {@link #NETWORK_PROVIDER} functionality.
-     *
-     * @hide
-     */
-    @SystemApi
-    public @Nullable String getNetworkProviderPackage() {
-        try {
-            return mService.getNetworkProviderPackage();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
-        }
-    }
-
-    /**
      * Returns true if the given package name matches a location provider package, and false
      * otherwise.
      *
