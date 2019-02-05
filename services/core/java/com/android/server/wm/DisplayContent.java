@@ -4417,13 +4417,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         .show(mSplitScreenDividerAnchor);
                 scheduleAnimation();
             } else {
-                mAppAnimationLayer.destroy();
+                mAppAnimationLayer.remove();
                 mAppAnimationLayer = null;
-                mBoostedAppAnimationLayer.destroy();
+                mBoostedAppAnimationLayer.remove();
                 mBoostedAppAnimationLayer = null;
-                mHomeAppAnimationLayer.destroy();
+                mHomeAppAnimationLayer.remove();
                 mHomeAppAnimationLayer = null;
-                mSplitScreenDividerAnchor.destroy();
+                mSplitScreenDividerAnchor.remove();
                 mSplitScreenDividerAnchor = null;
             }
         }

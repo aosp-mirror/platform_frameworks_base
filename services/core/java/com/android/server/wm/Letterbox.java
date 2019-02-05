@@ -107,10 +107,10 @@ public class Letterbox {
         mOuter.setEmpty();
         mInner.setEmpty();
 
-        mTop.destroy();
-        mLeft.destroy();
-        mBottom.destroy();
-        mRight.destroy();
+        mTop.remove();
+        mLeft.remove();
+        mBottom.remove();
+        mRight.remove();
     }
 
     /** Returns whether a call to {@link #applySurfaceChanges} would change the surface. */
@@ -154,9 +154,9 @@ public class Letterbox {
             mSurface.setColor(new float[]{0, 0, 0});
         }
 
-        public void destroy() {
+        public void remove() {
             if (mSurface != null) {
-                mSurface.destroy();
+                mSurface.remove();
                 mSurface = null;
             }
         }

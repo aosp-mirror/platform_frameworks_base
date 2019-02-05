@@ -868,12 +868,11 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Free all server-side state associated with this surface and
-     * release this object's reference.  This method can only be
-     * called from the process that created the service.
+     * Release the local resources like {@link #release} but also
+     * remove the Surface from the screen.
      * @hide
      */
-    public void destroy() {
+    public void remove() {
         if (mNativeObject != 0) {
             nativeDestroy(mNativeObject);
             mNativeObject = 0;

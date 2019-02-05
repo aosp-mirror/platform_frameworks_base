@@ -626,7 +626,7 @@ class ScreenRotationAnimation {
             if (SHOW_TRANSACTIONS ||
                     SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
                             "  FREEZE " + mSurfaceControl + ": DESTROY");
-            mSurfaceControl.destroy();
+            mSurfaceControl.remove();
             mSurfaceControl = null;
         }
         if (mCustomBlackFrame != null) {

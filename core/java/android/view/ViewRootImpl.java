@@ -1596,7 +1596,7 @@ public final class ViewRootImpl implements ViewParent,
         mSurfaceSession = null;
 
         if (mBoundsSurfaceControl != null) {
-            mBoundsSurfaceControl.destroy();
+            mBoundsSurfaceControl.remove();
             mBoundsSurface.release();
             mBoundsSurfaceControl = null;
         }

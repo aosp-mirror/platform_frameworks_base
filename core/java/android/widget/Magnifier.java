@@ -1013,7 +1013,7 @@ public final class Magnifier {
             }
             synchronized (mLock) {
                 mRenderer.destroy();
-                mSurfaceControl.destroy();
+                mSurfaceControl.remove();
                 mSurfaceSession.kill();
                 mHandler.removeCallbacks(mMagnifierUpdater);
                 if (mBitmap != null) {

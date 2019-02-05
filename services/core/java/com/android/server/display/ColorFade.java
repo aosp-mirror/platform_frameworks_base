@@ -629,7 +629,7 @@ final class ColorFade {
             mSurfaceLayout = null;
             SurfaceControl.openTransaction();
             try {
-                mSurfaceControl.destroy();
+                mSurfaceControl.remove();
                 mSurface.release();
             } finally {
                 SurfaceControl.closeTransaction();
