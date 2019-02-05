@@ -365,6 +365,11 @@ public:
     void noteConditionChangeInNextBucket(int atomId);
 
     /**
+     * A bucket has been tagged as invalid.
+     */
+    void noteInvalidatedBucket(int metricId);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -408,6 +413,7 @@ public:
         long skippedForwardBuckets = 0;
         long badValueType = 0;
         long conditionChangeInNextBucket = 0;
+        long invalidatedBucket = 0;
     } AtomMetricStats;
 
 private:

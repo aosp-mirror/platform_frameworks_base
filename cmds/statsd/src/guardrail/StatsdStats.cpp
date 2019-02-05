@@ -448,6 +448,11 @@ void StatsdStats::noteConditionChangeInNextBucket(int metricId) {
     getAtomMetricStats(metricId).conditionChangeInNextBucket++;
 }
 
+void StatsdStats::noteInvalidatedBucket(int metricId) {
+    lock_guard<std::mutex> lock(mLock);
+    getAtomMetricStats(metricId).invalidatedBucket++;
+}
+
 StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int metricId) {
     auto atomMetricStatsIter = mAtomMetricStats.find(metricId);
     if (atomMetricStatsIter != mAtomMetricStats.end()) {

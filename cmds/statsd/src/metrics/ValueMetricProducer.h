@@ -103,6 +103,9 @@ private:
     // Calculate previous bucket end time based on current time.
     int64_t calcPreviousBucketEndTime(const int64_t currentTimeNs);
 
+    // Mark the data as invalid.
+    void invalidateCurrentBucket();
+
     const int mWhatMatcherIndex;
 
     sp<EventMatcherWizard> mEventMatcherWizard;
@@ -156,6 +159,11 @@ private:
 
     void pullAndMatchEventsLocked(const int64_t timestampNs);
 
+    ValueBucket buildPartialBucket(int64_t bucketEndTime,
+                                   const std::vector<Interval>& intervals);
+    void initCurrentSlicedBucket();
+    void appendToFullBucket(int64_t eventTimeNs, int64_t fullBucketEndTimeNs);
+
     // Reset diff base and mHasGlobalBase
     void resetBase();
 
@@ -186,6 +194,12 @@ private:
     // This is used to decide if we have the right base data to compute the
     // diff against.
     bool mHasGlobalBase;
+
+    // Invalid bucket. There was a problem in collecting data in the current bucket so we cannot
+    // trust any of the data in this bucket.
+    //
+    // For instance, one pull failed.
+    bool mCurrentBucketIsInvalid;
 
     const int64_t mMaxPullDelayNs;
 
@@ -221,6 +235,9 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange);
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange_EndOfBucket);
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed);
 };
 
 }  // namespace statsd
