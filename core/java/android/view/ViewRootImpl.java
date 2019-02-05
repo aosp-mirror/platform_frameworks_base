@@ -180,7 +180,7 @@ public final class ViewRootImpl implements ViewParent,
      * @see #USE_NEW_INSETS_PROPERTY
      * @hide
      */
-    public static final int sNewInsetsMode =
+    public static int sNewInsetsMode =
             SystemProperties.getInt(USE_NEW_INSETS_PROPERTY, 0);
 
     /**

@@ -51,6 +51,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_TOGGLE_SOFT_INPUT = 105;
     private static final int DO_FINISH_SESSION = 110;
     private static final int DO_VIEW_CLICKED = 115;
+    private static final int DO_NOTIFY_IME_HIDDEN = 120;
 
     HandlerCaller mCaller;
     InputMethodSession mInputMethodSession;
@@ -129,6 +130,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.viewClicked(msg.arg1 == 1);
                 return;
             }
+            case DO_NOTIFY_IME_HIDDEN: {
+                mInputMethodSession.notifyImeHidden();
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -169,6 +174,11 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     public void viewClicked(boolean focusChanged) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageI(DO_VIEW_CLICKED, focusChanged ? 1 : 0));
+    }
+
+    @Override
+    public void notifyImeHidden() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_NOTIFY_IME_HIDDEN));
     }
 
     @Override

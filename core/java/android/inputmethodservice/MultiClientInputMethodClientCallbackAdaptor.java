@@ -290,6 +290,12 @@ final class MultiClientInputMethodClientCallbackAdaptor {
                         CallbackImpl::updateCursorAnchorInfo, mCallbackImpl, info));
             }
         }
+
+        @Override
+        public final void notifyImeHidden() {
+            // no-op for multi-session since IME is responsible controlling navigation bar buttons.
+            reportNotSupported();
+        }
     }
 
     private static final class MultiClientInputMethodSessionImpl

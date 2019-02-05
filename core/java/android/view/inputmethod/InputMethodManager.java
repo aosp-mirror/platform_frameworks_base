@@ -1887,6 +1887,36 @@ public final class InputMethodManager {
     }
 
     /**
+     * Call showSoftInput with currently focused view.
+     * @return {@code true} if IME can be shown.
+     * @hide
+     */
+    public boolean requestImeShow(ResultReceiver resultReceiver) {
+        synchronized (mH) {
+            if (mServedView == null) {
+                return false;
+            }
+            showSoftInput(mServedView, 0 /* flags */, resultReceiver);
+            return true;
+        }
+    }
+
+    /**
+     * Notify IME directly that it is no longer visible.
+     * @hide
+     */
+    public void notifyImeHidden() {
+        synchronized (mH) {
+            try {
+                if (mCurMethod != null) {
+                    mCurMethod.notifyImeHidden();
+                }
+            } catch (RemoteException re) {
+            }
+        }
+    }
+
+    /**
      * Report the current selection range.
      *
      * <p><strong>Editor authors</strong>, you need to call this method whenever

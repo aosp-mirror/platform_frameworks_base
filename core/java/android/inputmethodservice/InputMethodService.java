@@ -592,7 +592,6 @@ public class InputMethodService extends AbstractInputMethodService {
             final boolean wasVisible = mIsPreRendered
                     ? mDecorViewVisible && mWindowVisible : isInputViewShown();
             if (mIsPreRendered) {
-                // TODO: notify visibility to insets consumer.
                 if (DEBUG) {
                     Log.v(TAG, "Making IME window invisible");
                 }
@@ -656,6 +655,11 @@ public class InputMethodService extends AbstractInputMethodService {
         public void changeInputMethodSubtype(InputMethodSubtype subtype) {
             dispatchOnCurrentInputMethodSubtypeChanged(subtype);
         }
+    }
+
+    private void notifyImeHidden() {
+        setImeWindowStatus(IME_ACTIVE | IME_INVISIBLE, mBackDisposition);
+        onPreRenderedWindowVisibilityChanged(false /* setVisible */);
     }
 
     private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
@@ -759,6 +763,14 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
             InputMethodService.this.onUpdateCursorAnchorInfo(info);
+        }
+
+        /**
+         * Notify IME that window is hidden.
+         * @hide
+         */
+        public final void notifyImeHidden() {
+            InputMethodService.this.notifyImeHidden();
         }
     }
     
