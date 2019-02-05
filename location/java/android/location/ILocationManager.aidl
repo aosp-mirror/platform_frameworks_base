@@ -85,12 +85,13 @@ interface ILocationManager
     boolean stopGnssBatch();
     boolean injectLocation(in Location location);
 
-    // --- deprecated ---
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     ProviderProperties getProviderProperties(String provider);
     String getNetworkProviderPackage();
+    boolean isProviderPackage(String packageName);
+
     void setLocationControllerExtraPackage(String packageName);
     String getLocationControllerExtraPackage();
     void setLocationControllerExtraPackageEnabled(boolean enabled);

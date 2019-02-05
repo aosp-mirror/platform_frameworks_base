@@ -463,6 +463,63 @@ public final class MediaFormat {
         = "repeat-previous-frame-after";
 
     /**
+     * Instruct the video encoder in "surface-input" mode to drop excessive
+     * frames from the source, so that the input frame rate to the encoder
+     * does not exceed the specified fps.
+     *
+     * The associated value is a float, representing the max frame rate to
+     * feed the encoder at.
+     *
+     * @hide
+     */
+    public static final String KEY_MAX_FPS_TO_ENCODER
+        = "max-fps-to-encoder";
+
+    /**
+     * Instruct the video encoder in "surface-input" mode to limit the gap of
+     * timestamp between any two adjacent frames fed to the encoder to the
+     * specified amount (in micro-second).
+     *
+     * The associated value is a long int. When positive, it represents the max
+     * timestamp gap between two adjacent frames fed to the encoder. When negative,
+     * the absolute value represents a fixed timestamp gap between any two adjacent
+     * frames fed to the encoder. Note that this will also apply even when the
+     * original timestamp goes backward in time. Under normal conditions, such frames
+     * would be dropped and not sent to the encoder.
+     *
+     * The output timestamp will be restored to the original timestamp and will
+     * not be affected.
+     *
+     * This is used in some special scenarios where input frames arrive sparingly
+     * but it's undesirable to allocate more bits to any single frame, or when it's
+     * important to ensure all frames are captured (rather than captured in the
+     * correct order).
+     *
+     * @hide
+     */
+    public static final String KEY_MAX_PTS_GAP_TO_ENCODER
+        = "max-pts-gap-to-encoder";
+
+    /**
+     * If specified when configuring a video encoder that's in "surface-input"
+     * mode, it will instruct the encoder to put the surface source in suspended
+     * state when it's connected. No video frames will be accepted until a resume
+     * operation (see {@link MediaCodec#PARAMETER_KEY_SUSPEND}), optionally with
+     * timestamp specified via {@link MediaCodec#PARAMETER_KEY_SUSPEND_TIME}, is
+     * received.
+     *
+     * The value is an integer, with 1 indicating to create with the surface
+     * source suspended, or 0 otherwise. The default value is 0.
+     *
+     * If this key is not set or set to 0, the surface source will accept buffers
+     * as soon as it's connected to the encoder (although they may not be encoded
+     * immediately). This key can be used when the client wants to prepare the
+     * encoder session in advance, but do not want to accept buffers immediately.
+     */
+    public static final String KEY_CREATE_INPUT_SURFACE_SUSPENDED
+        = "create-input-buffers-suspended";
+
+    /**
      * If specified when configuring a video decoder rendering to a surface,
      * causes the decoder to output "blank", i.e. black frames to the surface
      * when stopped to clear out any previously displayed contents.

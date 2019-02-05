@@ -786,7 +786,6 @@ public class AudioService extends IAudioService.Stub
                 mPrescaleAbsoluteVolume[i] = preScale[i];
             }
         }
-
     }
 
     public void systemReady() {
@@ -3821,7 +3820,6 @@ public class AudioService extends IAudioService.Stub
 
     private static void sendMsg(Handler handler, int msg,
             int existingMsgPolicy, int arg1, int arg2, Object obj, int delay) {
-
         if (existingMsgPolicy == SENDMSG_REPLACE) {
             handler.removeMessages(msg);
         } else if (existingMsgPolicy == SENDMSG_NOOP && handler.hasMessages(msg)) {

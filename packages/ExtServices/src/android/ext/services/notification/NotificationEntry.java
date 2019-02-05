@@ -27,6 +27,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.Person;
 import android.app.RemoteInput;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -56,15 +57,17 @@ public class NotificationEntry {
     private boolean mSeen;
     private boolean mExpanded;
     private boolean mIsShowActionEventLogged;
+    private SmsHelper mSmsHelper;
 
     public NotificationEntry(IPackageManager packageManager, StatusBarNotification sbn,
-            NotificationChannel channel) {
+            NotificationChannel channel, SmsHelper smsHelper) {
         mSbn = sbn;
         mChannel = channel;
         mPackageManager = packageManager;
         mPreChannelsNotification = isPreChannelsNotification();
         mAttributes = calculateAudioAttributes();
         mImportance = calculateInitialImportance();
+        mSmsHelper = smsHelper;
     }
 
     private boolean isPreChannelsNotification() {
@@ -192,7 +195,16 @@ public class NotificationEntry {
     protected boolean involvesPeople() {
         return isMessaging()
                 || hasStyle(Notification.InboxStyle.class)
-                || hasPerson();
+                || hasPerson()
+                || isDefaultSmsApp();
+    }
+
+    private boolean isDefaultSmsApp() {
+        ComponentName defaultSmsApp = mSmsHelper.getDefaultSmsApplication();
+        if (defaultSmsApp == null) {
+            return false;
+        }
+        return mSbn.getPackageName().equals(defaultSmsApp.getPackageName());
     }
 
     protected boolean isMessaging() {

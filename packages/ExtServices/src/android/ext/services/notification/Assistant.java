@@ -105,6 +105,7 @@ public class Assistant extends NotificationAssistantService {
     protected AssistantSettings.Factory mSettingsFactory = AssistantSettings.FACTORY;
     @VisibleForTesting
     protected AssistantSettings mSettings;
+    private SmsHelper mSmsHelper;
 
     public Assistant() {
     }
@@ -122,6 +123,18 @@ public class Assistant extends NotificationAssistantService {
         mAgingHelper = new AgingHelper(getContext(),
                 mNotificationCategorizer,
                 new AgingCallback());
+        mSmsHelper = new SmsHelper(this);
+        mSmsHelper.initialize();
+    }
+
+    @Override
+    public void onDestroy() {
+        // This null check is only for the unit tests as ServiceTestCase.tearDown calls onDestroy
+        // without having first called onCreate.
+        if (mSmsHelper != null) {
+            mSmsHelper.destroy();
+        }
+        super.onDestroy();
     }
 
     private void loadFile() {
@@ -214,7 +227,8 @@ public class Assistant extends NotificationAssistantService {
         if (!isForCurrentUser(sbn)) {
             return null;
         }
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel);
+        NotificationEntry entry =
+                new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
         SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
         return createEnqueuedNotificationAdjustment(
                 entry, suggestions.actions, suggestions.replies);
@@ -261,7 +275,7 @@ public class Assistant extends NotificationAssistantService {
             Ranking ranking = getRanking(sbn.getKey(), rankingMap);
             if (ranking != null && ranking.getChannel() != null) {
                 NotificationEntry entry = new NotificationEntry(mPackageManager,
-                        sbn, ranking.getChannel());
+                        sbn, ranking.getChannel(), mSmsHelper);
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,

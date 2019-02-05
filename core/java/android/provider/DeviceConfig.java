@@ -160,6 +160,17 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for all runtime native boot related features. Boot in this case refers to the
+     * fact that the properties only take affect after rebooting the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface RuntimeNativeBoot {
+        String NAMESPACE = "runtime_native_boot";
+    }
+
+    /**
      * Namespace for all activity manager related features that are used at the native level.
      * These features are applied at reboot.
      *

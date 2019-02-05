@@ -120,6 +120,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.apex.ApexInfo;
+import android.apex.ApexSessionInfo;
 import android.apex.IApexService;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -982,6 +983,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private CheckPermissionDelegate mCheckPermissionDelegate;
+
+    @GuardedBy("mPackages")
+    private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
 
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
         private Context mContext;
@@ -1926,7 +1930,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                             if (pkgSetting.getInstallReason(userId)
                                     != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                                mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                                setDefaultBrowserPackageName(null, userId);
                             }
                         }
 
@@ -2940,7 +2944,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!onlyCore && (mPromoteSystemApps || mFirstBoot)) {
                 for (UserInfo user : sUserManager.getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(user.id);
-                    applyFactoryDefaultBrowserLPw(user.id);
                     primeDomainVerificationsLPw(user.id);
                 }
             }
@@ -3012,8 +3015,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 ver.fingerprint = Build.FINGERPRINT;
             }
-
-            checkDefaultBrowser();
 
             // clear only after permissions and other defaults have been updated
             mExistingSystemPackages.clear();
@@ -3669,58 +3670,6 @@ public class PackageManagerService extends IPackageManager.Stub
         scheduleWriteSettingsLocked();
     }
 
-    @GuardedBy("mPackages")
-    private void applyFactoryDefaultBrowserLPw(int userId) {
-        // The default browser app's package name is stored in a string resource,
-        // with a product-specific overlay used for vendor customization.
-        String browserPkg = mContext.getResources().getString(
-                com.android.internal.R.string.default_browser);
-        if (!TextUtils.isEmpty(browserPkg)) {
-            // non-empty string => required to be a known package
-            PackageSetting ps = mSettings.mPackages.get(browserPkg);
-            if (ps == null) {
-                Slog.e(TAG, "Product default browser app does not exist: " + browserPkg);
-                browserPkg = null;
-            } else {
-                mSettings.setDefaultBrowserPackageNameLPw(browserPkg, userId);
-            }
-        }
-
-        // Nothing valid explicitly set? Make the factory-installed browser the explicit
-        // default.  If there's more than one, just leave everything alone.
-        if (browserPkg == null) {
-            calculateDefaultBrowserLPw(userId);
-        }
-    }
-
-    @GuardedBy("mPackages")
-    private void calculateDefaultBrowserLPw(int userId) {
-        List<String> allBrowsers = resolveAllBrowserApps(userId);
-        final String browserPkg = (allBrowsers.size() == 1) ? allBrowsers.get(0) : null;
-        mSettings.setDefaultBrowserPackageNameLPw(browserPkg, userId);
-    }
-
-    private List<String> resolveAllBrowserApps(int userId) {
-        // Resolve the canonical browser intent and check that the handleAllWebDataURI boolean is set
-        List<ResolveInfo> list = queryIntentActivitiesInternal(sBrowserIntent, null,
-                PackageManager.MATCH_ALL, userId);
-
-        final int count = list.size();
-        List<String> result = new ArrayList<>(count);
-        for (int i=0; i<count; i++) {
-            ResolveInfo info = list.get(i);
-            if (info.activityInfo == null
-                    || !info.handleAllWebDataURI
-                    || (info.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0
-                    || result.contains(info.activityInfo.packageName)) {
-                continue;
-            }
-            result.add(info.activityInfo.packageName);
-        }
-
-        return result;
-    }
-
     private boolean packageIsBrowser(String packageName, int userId) {
         List<ResolveInfo> list = queryIntentActivitiesInternal(sBrowserIntent, null,
                 PackageManager.MATCH_ALL, userId);
@@ -3732,20 +3681,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return false;
-    }
-
-    private void checkDefaultBrowser() {
-        final int myUserId = UserHandle.myUserId();
-        final String packageName = getDefaultBrowserPackageName(myUserId);
-        if (packageName != null) {
-            PackageInfo info = getPackageInfo(packageName, 0, myUserId);
-            if (info == null) {
-                Slog.w(TAG, "Default browser no longer installed: " + packageName);
-                synchronized (mPackages) {
-                    applyFactoryDefaultBrowserLPw(myUserId);    // leaves ambiguous when > 1
-                }
-            }
-        }
     }
 
     @Override
@@ -13644,15 +13579,28 @@ public class PackageManagerService extends IPackageManager.Stub
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
-
-        synchronized (mPackages) {
-            boolean result = mSettings.setDefaultBrowserPackageNameLPw(packageName, userId);
-            if (packageName != null) {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(
-                        packageName, userId);
-            }
-            return result;
+        if (userId == UserHandle.USER_ALL) {
+            return false;
         }
+        PackageManagerInternal.DefaultBrowserProvider provider;
+        synchronized (mPackages) {
+            provider = mDefaultBrowserProvider;
+        }
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultBrowserProvider is null");
+            return false;
+        }
+        boolean successful = provider.setDefaultBrowser(packageName, userId);
+        if (!successful) {
+            return false;
+        }
+        if (packageName != null) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                        userId);
+            }
+        }
+        return true;
     }
 
     @Override
@@ -13664,9 +13612,15 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
+        PackageManagerInternal.DefaultBrowserProvider provider;
         synchronized (mPackages) {
-            return mSettings.getDefaultBrowserPackageNameLPw(userId);
+            provider = mDefaultBrowserProvider;
         }
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultBrowserProvider is null");
+            return null;
+        }
+        return provider.getDefaultBrowser(userId);
     }
 
     /**
@@ -19418,7 +19372,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // significant refactoring to keep all default apps in the package
                 // manager (cleaner but more work) or have the services provide
                 // callbacks to the package manager to request a default app reset.
-                applyFactoryDefaultBrowserLPw(userId);
+                setDefaultBrowserPackageName(null, userId);
                 clearIntentFilterVerificationsLPw(userId);
                 primeDomainVerificationsLPw(userId);
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(userId);
@@ -20859,6 +20813,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    -h: print this help");
                 pw.println("    --all-components: include all component names in package dump");
                 pw.println("  cmd may be one of:");
+                pw.println("    apex: list active APEXes and APEX session state");
                 pw.println("    l[ibraries]: list known shared libraries");
                 pw.println("    f[eatures]: list device features");
                 pw.println("    k[eysets]: print known keysets");
@@ -21386,6 +21341,54 @@ public class PackageManagerService extends IPackageManager.Stub
             // the given package is involved with.
             if (dumpState.onTitlePrinted()) pw.println();
             mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
+        }
+
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
+            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+            ipw.println();
+            ipw.println("Active APEX packages:");
+            ipw.increaseIndent();
+            final IApexService apex = IApexService.Stub.asInterface(
+                    ServiceManager.getService("apexservice"));
+            try {
+                final ApexInfo[] activeApexes = apex.getActivePackages();
+                for (ApexInfo ai : activeApexes) {
+                    if (packageName != null && !packageName.equals(ai.packageName)) {
+                        continue;
+                    }
+                    ipw.println(ai.packageName);
+                    ipw.increaseIndent();
+                    ipw.println("Version: " + Long.toString(ai.versionCode));
+                    ipw.println("Path: " + ai.packagePath);
+                    ipw.decreaseIndent();
+                }
+                ipw.decreaseIndent();
+                ipw.println();
+                ipw.println("APEX session state:");
+                ipw.increaseIndent();
+                final ApexSessionInfo[] sessions = apex.getSessions();
+                for (ApexSessionInfo si : sessions) {
+                    ipw.println("Session ID: " + Integer.toString(si.sessionId));
+                    ipw.increaseIndent();
+                    if (si.isUnknown) {
+                        ipw.println("State: UNKNOWN");
+                    } else if (si.isVerified) {
+                        ipw.println("State: VERIFIED");
+                    } else if (si.isStaged) {
+                        ipw.println("State: STAGED");
+                    } else if (si.isActivated) {
+                        ipw.println("State: ACTIVATED");
+                    } else if (si.isActivationPendingRetry) {
+                        ipw.println("State: ACTIVATION PENDING RETRY");
+                    } else if (si.isActivationFailed) {
+                        ipw.println("State: ACTIVATION FAILED");
+                    }
+                    ipw.decreaseIndent();
+                }
+                ipw.decreaseIndent();
+            } catch (RemoteException e) {
+                ipw.println("Couldn't communicate with apexd.");
+            }
         }
     }
 
@@ -22711,7 +22714,6 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
-            applyFactoryDefaultBrowserLPw(userId);
             primeDomainVerificationsLPw(userId);
         }
     }
@@ -23908,6 +23910,21 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void finishPackageInstall(int token, boolean didLaunch) {
             PackageManagerService.this.finishPackageInstall(token, didLaunch);
+        }
+
+        @Nullable
+        @Override
+        public String removeLegacyDefaultBrowserPackageName(int userId) {
+            synchronized (mPackages) {
+                return mSettings.removeDefaultBrowserPackageNameLPw(userId);
+            }
+        }
+
+        @Override
+        public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
+            synchronized (mPackages) {
+                mDefaultBrowserProvider = provider;
+            }
         }
     }
 

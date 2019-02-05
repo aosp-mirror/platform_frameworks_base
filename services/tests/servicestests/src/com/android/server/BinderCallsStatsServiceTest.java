@@ -40,14 +40,10 @@ public class BinderCallsStatsServiceTest {
             protected int getCallingUid() {
                 return Process.myUid();
             }
-
-            protected int getCallingWorkSourceUid() {
-                return 1;
-            }
         };
         workSourceProvider.systemReady(InstrumentationRegistry.getContext());
 
-        assertEquals(1, workSourceProvider.resolveWorkSourceUid());
+        assertEquals(1, workSourceProvider.resolveWorkSourceUid(1));
     }
 
     @Test
@@ -57,14 +53,10 @@ public class BinderCallsStatsServiceTest {
                 // System process uid which as UPDATE_DEVICE_STATS.
                 return 1001;
             }
-
-            protected int getCallingWorkSourceUid() {
-                return 1;
-            }
         };
         workSourceProvider.systemReady(InstrumentationRegistry.getContext());
 
-        assertEquals(1, workSourceProvider.resolveWorkSourceUid());
+        assertEquals(1, workSourceProvider.resolveWorkSourceUid(1));
     }
 
     @Test
@@ -74,13 +66,9 @@ public class BinderCallsStatsServiceTest {
                 // UID without permissions.
                 return Integer.MAX_VALUE;
             }
-
-            protected int getCallingWorkSourceUid() {
-                return 1;
-            }
         };
         workSourceProvider.systemReady(InstrumentationRegistry.getContext());
 
-        assertEquals(Integer.MAX_VALUE, workSourceProvider.resolveWorkSourceUid());
+        assertEquals(Integer.MAX_VALUE, workSourceProvider.resolveWorkSourceUid(1));
     }
 }

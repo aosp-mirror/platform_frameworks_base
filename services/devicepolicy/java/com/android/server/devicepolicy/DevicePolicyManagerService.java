@@ -4765,6 +4765,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     @PasswordComplexity
     public int getPasswordComplexity() {
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.GET_USER_PASSWORD_COMPLEXITY_LEVEL)
+                .setStrings(mInjector.getPackageManager()
+                        .getPackagesForUid(mInjector.binderGetCallingUid()))
+                .write();
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         enforceUserUnlocked(callingUserId);
         mContext.enforceCallingOrSelfPermission(

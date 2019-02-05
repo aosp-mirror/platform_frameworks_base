@@ -3373,6 +3373,8 @@ final public class MediaCodec {
     /**
      * Change a video encoder's target bitrate on the fly. The value is an
      * Integer object containing the new bitrate in bps.
+     *
+     * @see #setParameters(Bundle)
      */
     public static final String PARAMETER_KEY_VIDEO_BITRATE = "video-bitrate";
 
@@ -3384,12 +3386,43 @@ final public class MediaCodec {
      * input-side of the encoder in that case.
      * The value is an Integer object containing the value 1 to suspend
      * or the value 0 to resume.
+     *
+     * @see #setParameters(Bundle)
      */
     public static final String PARAMETER_KEY_SUSPEND = "drop-input-frames";
 
     /**
+     * When {@link #PARAMETER_KEY_SUSPEND} is present, the client can also
+     * optionally use this key to specify the timestamp (in micro-second)
+     * at which the suspend/resume operation takes effect.
+     *
+     * Note that the specified timestamp must be greater than or equal to the
+     * timestamp of any previously queued suspend/resume operations.
+     *
+     * The value is a long int, indicating the timestamp to suspend/resume.
+     *
+     * @see #setParameters(Bundle)
+     */
+    public static final String PARAMETER_KEY_SUSPEND_TIME = "drop-start-time-us";
+
+    /**
+     * Specify an offset (in micro-second) to be added on top of the timestamps
+     * onward. A typical use case is to apply an adjust to the timestamps after
+     * a period of pause by the user.
+     *
+     * This parameter can only be used on an encoder in "surface-input" mode.
+     *
+     * The value is a long int, indicating the timestamp offset to be applied.
+     *
+     * @see #setParameters(Bundle)
+     */
+    public static final String PARAMETER_KEY_OFFSET_TIME = "time-offset-us";
+
+    /**
      * Request that the encoder produce a sync frame "soon".
      * Provide an Integer with the value 0.
+     *
+     * @see #setParameters(Bundle)
      */
     public static final String PARAMETER_KEY_REQUEST_SYNC_FRAME = "request-sync";
 

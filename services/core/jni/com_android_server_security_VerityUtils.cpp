@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <type_traits>
+
 #include <android-base/unique_fd.h>
 
 // TODO(112037636): Always include once fsverity.h is upstreamed.
@@ -99,8 +101,14 @@ namespace {
 
 class JavaByteArrayHolder {
   public:
-    static JavaByteArrayHolder* newArray(JNIEnv* env, jsize size) {
-        return new JavaByteArrayHolder(env, size);
+    JavaByteArrayHolder(const JavaByteArrayHolder &other) = delete;
+    JavaByteArrayHolder(JavaByteArrayHolder &&other)
+          : mEnv(other.mEnv), mBytes(other.mBytes), mElements(other.mElements) {
+        other.mElements = nullptr;
+    }
+
+    static JavaByteArrayHolder newArray(JNIEnv* env, jsize size) {
+        return JavaByteArrayHolder(env, size);
     }
 
     jbyte* getRaw() {
@@ -113,16 +121,16 @@ class JavaByteArrayHolder {
         return mBytes;
     }
 
+    ~JavaByteArrayHolder() {
+        LOG_ALWAYS_FATAL_IF(mElements == nullptr, "Elements are not released");
+    }
+
   private:
     JavaByteArrayHolder(JNIEnv* env, jsize size) {
         mEnv = env;
         mBytes = mEnv->NewByteArray(size);
         mElements = mEnv->GetByteArrayElements(mBytes, nullptr);
         memset(mElements, 0, size);
-    }
-
-    virtual ~JavaByteArrayHolder() {
-        LOG_ALWAYS_FATAL_IF(mElements == nullptr, "Elements are not released");
     }
 
     JNIEnv* mEnv;
@@ -143,8 +151,10 @@ int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
 }
 
 int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
-    auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest) + kSha256Bytes);
-    fsverity_digest* data = reinterpret_cast<fsverity_digest*>(raii->getRaw());
+    using Storage = std::aligned_storage_t<sizeof(fsverity_digest) + kSha256Bytes>;
+
+    Storage bytes;
+    fsverity_digest *data = reinterpret_cast<fsverity_digest *>(&bytes);
     data->digest_size = kSha256Bytes;  // the only input/output parameter
 
     const char* path = env->GetStringUTFChars(filePath, nullptr);
@@ -160,7 +170,7 @@ int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
 
 jbyteArray constructFsveritySignedData(JNIEnv* env, jobject /* clazz */, jbyteArray digest) {
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest_disk) + kSha256Bytes);
-    fsverity_digest_disk* data = reinterpret_cast<fsverity_digest_disk*>(raii->getRaw());
+    fsverity_digest_disk* data = reinterpret_cast<fsverity_digest_disk*>(raii.getRaw());
 
     data->digest_algorithm = FS_VERITY_ALG_SHA256;
     data->digest_size = kSha256Bytes;
@@ -172,13 +182,13 @@ jbyteArray constructFsveritySignedData(JNIEnv* env, jobject /* clazz */, jbyteAr
     const jbyte* src = env->GetByteArrayElements(digest, nullptr);
     memcpy(data->digest, src, kSha256Bytes);
 
-    return raii->release();
+    return raii.release();
 }
 
 
 jbyteArray constructFsverityDescriptor(JNIEnv* env, jobject /* clazz */, jlong fileSize) {
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_descriptor));
-    fsverity_descriptor* desc = reinterpret_cast<fsverity_descriptor*>(raii->getRaw());
+    fsverity_descriptor* desc = reinterpret_cast<fsverity_descriptor*>(raii.getRaw());
 
     memcpy(desc->magic, FS_VERITY_MAGIC, sizeof(desc->magic));
     desc->major_version = 1;
@@ -191,29 +201,29 @@ jbyteArray constructFsverityDescriptor(JNIEnv* env, jobject /* clazz */, jlong f
     desc->orig_file_size = fileSize;
     desc->auth_ext_count = 1;
 
-    return raii->release();
+    return raii.release();
 }
 
 jbyteArray constructFsverityExtension(JNIEnv* env, jobject /* clazz */, jshort extensionId,
         jint extensionDataSize) {
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_extension));
-    fsverity_extension* ext = reinterpret_cast<fsverity_extension*>(raii->getRaw());
+    fsverity_extension* ext = reinterpret_cast<fsverity_extension*>(raii.getRaw());
 
     ext->length = sizeof(fsverity_extension) + extensionDataSize;
     ext->type = extensionId;
 
-    return raii->release();
+    return raii.release();
 }
 
 jbyteArray constructFsverityFooter(JNIEnv* env, jobject /* clazz */,
         jint offsetToDescriptorHead) {
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_footer));
-    fsverity_footer* footer = reinterpret_cast<fsverity_footer*>(raii->getRaw());
+    fsverity_footer* footer = reinterpret_cast<fsverity_footer*>(raii.getRaw());
 
     footer->desc_reverse_offset = offsetToDescriptorHead + sizeof(fsverity_footer);
     memcpy(footer->magic, FS_VERITY_MAGIC, sizeof(footer->magic));
 
-    return raii->release();
+    return raii.release();
 }
 
 const JNINativeMethod sMethods[] = {

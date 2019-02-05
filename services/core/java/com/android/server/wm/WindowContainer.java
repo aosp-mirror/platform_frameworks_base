@@ -32,6 +32,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -1096,17 +1097,25 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *
      * @param proto     Stream to write the WindowContainer object to.
      * @param fieldId   Field Id of the WindowContainer as defined in the parent message.
-     * @param trim      If true, reduce the amount of data written.
+     * @param logLevel  Determines the amount of data to be written to the Protobuf.
      * @hide
      */
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        boolean isVisible = isVisible();
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER, trim);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
         proto.write(ORIENTATION, mOrientation);
-        proto.write(VISIBLE, isVisible());
-        mSurfaceAnimator.writeToProto(proto, SURFACE_ANIMATOR);
+        proto.write(VISIBLE, isVisible);
+        if (mSurfaceAnimator.isAnimating()) {
+            mSurfaceAnimator.writeToProto(proto, SURFACE_ANIMATOR);
+        }
         proto.end(token);
     }
 
@@ -1321,6 +1330,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         getPendingTransaction().setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
+    }
+
+    @TestApi
+    Point getLastSurfacePosition() {
+        return mLastSurfacePosition;
     }
 
     /**

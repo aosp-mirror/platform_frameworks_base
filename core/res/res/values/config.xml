@@ -1933,14 +1933,6 @@
          the platform will search for an SMS app and use that (if there is one)-->
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
-    <!-- Default web browser.  This is the package name of the application that will
-         be the default browser when the device first boots.  Afterwards the user
-         can select whatever browser app they wish to use as the default.
-
-         If this string is empty or the specified package does not exist, then
-         the behavior will be as though no app was named as an explicit default. -->
-    <string name="default_browser" translatable="false"></string>
-
     <!-- Default role holders. This will be an array of roles and package names of their default
          holders, with each item in the format of "ROLE_NAME: PACKAGE_NAME_1, PACKAGE_NAME_2". -->
     <string-array name="config_defaultRoleHolders" translatable="false">

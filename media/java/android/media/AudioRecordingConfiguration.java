@@ -402,7 +402,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
                 && (mClientPortId == that.mClientPortId)
                 && (mClientSilenced == that.mClientSilenced)
                 && (mDeviceSource == that.mDeviceSource)
-                && (mClientEffects.equals(that.mClientEffects))
-                && (mDeviceEffects.equals(that.mDeviceEffects)));
+                && (Arrays.equals(mClientEffects, that.mClientEffects))
+                && (Arrays.equals(mDeviceEffects, that.mDeviceEffects)));
     }
 }

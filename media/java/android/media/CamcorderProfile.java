@@ -97,9 +97,33 @@ public class CamcorderProfile
      */
     public static final int QUALITY_2160P = 8;
 
+    /**
+     * Quality level corresponding to the VGA (640 x 480) resolution.
+     * @hide
+     */
+    public static final int QUALITY_VGA = 9;
+
+    /**
+     * Quality level corresponding to 4k-DCI (4096 x 2160) resolution.
+     * @hide
+     */
+    public static final int QUALITY_4KDCI = 10;
+
+    /**
+     * Quality level corresponding to QHD (2560 x 1440) resolution
+     * @hide
+     */
+    public static final int QUALITY_QHD = 11;
+
+    /**
+     * Quality level corresponding to 2K (2048 x 1080) resolution
+     * @hide
+     */
+    public static final int QUALITY_2K = 12;
+
     // Start and end of quality list
     private static final int QUALITY_LIST_START = QUALITY_LOW;
-    private static final int QUALITY_LIST_END = QUALITY_2160P;
+    private static final int QUALITY_LIST_END = QUALITY_2K;
 
     /**
      * Time lapse quality level corresponding to the lowest available resolution.
@@ -146,9 +170,34 @@ public class CamcorderProfile
      */
     public static final int QUALITY_TIME_LAPSE_2160P = 1008;
 
+    /**
+     * Time lapse quality level corresponding to the VGA (640 x 480) resolution.
+     * @hide
+     */
+    public static final int QUALITY_TIME_LAPSE_VGA = 1009;
+
+    /**
+     * Time lapse quality level corresponding to the 4k-DCI (4096 x 2160) resolution.
+     * @hide
+     */
+    public static final int QUALITY_TIME_LAPSE_4KDCI = 1010;
+
+    /**
+     * Time lapse quality level corresponding to the QHD (2560 x 1440) resolution.
+     * @hide
+     */
+    public static final int QUALITY_TIME_LAPSE_QHD = 1011;
+
+    /**
+     * Time lapse quality level corresponding to the 2K (2048 x 1080) resolution.
+     * @hide
+     */
+    public static final int QUALITY_TIME_LAPSE_2K = 1012;
+
+
     // Start and end of timelapse quality list
     private static final int QUALITY_TIME_LAPSE_LIST_START = QUALITY_TIME_LAPSE_LOW;
-    private static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_2160P;
+    private static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_2K;
 
     /**
      * High speed ( >= 100fps) quality level corresponding to the lowest available resolution.
@@ -204,9 +253,27 @@ public class CamcorderProfile
      */
     public static final int QUALITY_HIGH_SPEED_2160P = 2005;
 
+    /**
+     * High speed ( >= 100fps) quality level corresponding to the CIF (352 x 288)
+     * @hide
+     */
+    public static final int QUALITY_HIGH_SPEED_CIF = 2006;
+
+    /**
+     * High speed ( >= 100fps) quality level corresponding to the VGA (640 x 480)
+     * @hide
+     */
+    public static final int QUALITY_HIGH_SPEED_VGA = 2007;
+
+    /**
+     * High speed ( >= 100fps) quality level corresponding to the 4K-DCI (4096 x 2160)
+     * @hide
+     */
+    public static final int QUALITY_HIGH_SPEED_4KDCI = 2008;
+
     // Start and end of high speed quality list
     private static final int QUALITY_HIGH_SPEED_LIST_START = QUALITY_HIGH_SPEED_LOW;
-    private static final int QUALITY_HIGH_SPEED_LIST_END = QUALITY_HIGH_SPEED_2160P;
+    private static final int QUALITY_HIGH_SPEED_LIST_END = QUALITY_HIGH_SPEED_4KDCI;
 
     /**
      * Default recording duration in seconds before the session is terminated.

@@ -109,7 +109,6 @@ public class InsetsSourceConsumer {
             return;
         }
         mVisible = visible;
-        applyHiddenToControl();
         applyLocalVisibilityOverride();
         mController.notifyVisibilityChanged();
     }
@@ -119,7 +118,6 @@ public class InsetsSourceConsumer {
             return;
         }
 
-        // TODO: Animation
         final Transaction t = mTransactionSupplier.get();
         if (mVisible) {
             t.show(mSourceControl.getLeash());

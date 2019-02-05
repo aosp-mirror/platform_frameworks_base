@@ -47,6 +47,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * NotificationEntryManager is responsible for the adding, removing, and updating of notifications.
@@ -63,6 +64,9 @@ public class NotificationEntryManager implements
 
     @VisibleForTesting
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
+
+    private final Map<NotificationEntry, NotificationLifetimeExtender> mRetainedNotifications =
+            new ArrayMap<>();
 
     // Lazily retrieved dependencies
     private NotificationRemoteInputManager mRemoteInputManager;
@@ -87,6 +91,16 @@ public class NotificationEntryManager implements
         } else {
             for (NotificationEntry entry : mPendingNotifications.values()) {
                 pw.println(entry.notification);
+            }
+        }
+        pw.println("  Lifetime-extended notifications:");
+        if (mRetainedNotifications.isEmpty()) {
+            pw.println("    None");
+        } else {
+            for (Map.Entry<NotificationEntry, NotificationLifetimeExtender> entry
+                    : mRetainedNotifications.entrySet()) {
+                pw.println("    " + entry.getKey().notification + " retained by "
+                        + entry.getValue().getClass().getName());
             }
         }
     }
@@ -244,7 +258,7 @@ public class NotificationEntryManager implements
                 for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
                     if (extender.shouldExtendLifetime(entry)) {
                         mLatestRankingMap = ranking;
-                        extender.setShouldManageLifetime(entry, true /* shouldManage */);
+                        extendLifetime(entry, extender);
                         lifetimeExtended = true;
                         break;
                     }
@@ -255,9 +269,7 @@ public class NotificationEntryManager implements
                 // At this point, we are guaranteed the notification will be removed
 
                 // Ensure any managers keeping the lifetime extended stop managing the entry
-                for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
-                    extender.setShouldManageLifetime(entry, false /* shouldManage */);
-                }
+                cancelLifetimeExtension(entry);
 
                 if (entry.rowExists()) {
                     entry.removeRow();
@@ -368,9 +380,7 @@ public class NotificationEntryManager implements
 
         // Notification is updated so it is essentially re-added and thus alive again.  Don't need
         // to keep its lifetime extended.
-        for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
-            extender.setShouldManageLifetime(entry, false /* shouldManage */);
-        }
+        cancelLifetimeExtension(entry);
 
         mNotificationData.update(entry, ranking, notification);
 
@@ -463,5 +473,21 @@ public class NotificationEntryManager implements
      */
     public Iterable<NotificationEntry> getPendingNotificationsIterator() {
         return mPendingNotifications.values();
+    }
+
+    private void extendLifetime(NotificationEntry entry, NotificationLifetimeExtender extender) {
+        NotificationLifetimeExtender activeExtender = mRetainedNotifications.get(entry);
+        if (activeExtender != null && activeExtender != extender) {
+            activeExtender.setShouldManageLifetime(entry, false);
+        }
+        mRetainedNotifications.put(entry, extender);
+        extender.setShouldManageLifetime(entry, true);
+    }
+
+    private void cancelLifetimeExtension(NotificationEntry entry) {
+        NotificationLifetimeExtender activeExtender = mRetainedNotifications.remove(entry);
+        if (activeExtender != null) {
+            activeExtender.setShouldManageLifetime(entry, false);
+        }
     }
 }

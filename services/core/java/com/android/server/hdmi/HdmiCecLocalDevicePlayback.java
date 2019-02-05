@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
@@ -30,6 +31,7 @@ import com.android.internal.app.LocalePicker;
 import com.android.internal.app.LocalePicker.LocaleInfo;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
+import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -85,6 +87,22 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
+        if (mService.audioSystem() == null) {
+            // If current device is not a functional audio system device,
+            // send message to potential audio system device in the system to get the system
+            // audio mode status. If no response, set to false.
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
+                    mAddress, Constants.ADDR_AUDIO_SYSTEM), new SendMessageCallback() {
+                        @Override
+                        public void onSendCompleted(int error) {
+                            if (error != SendMessageResult.SUCCESS) {
+                                HdmiLogger.debug(
+                                        "AVR did not respond to <Give System Audio Mode Status>");
+                                mService.setSystemAudioActivated(false);
+                            }
+                        }
+                    });
+        }
         startQueuedActions();
     }
 
@@ -275,7 +293,46 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @Override
+    protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
+        // System Audio Mode only turns on/off when Audio System broadcasts on/off message.
+        // For device with type 4 and 5, it can set system audio mode on/off
+        // when there is another audio system device connected into the system first.
+        if (message.getDestination() != Constants.ADDR_BROADCAST
+                || message.getSource() != Constants.ADDR_AUDIO_SYSTEM
+                || mService.audioSystem() != null) {
+            return true;
+        }
+        boolean setSystemAudioModeOn = HdmiUtils.parseCommandParamSystemAudioStatus(message);
+        if (mService.isSystemAudioActivated() != setSystemAudioModeOn) {
+            mService.setSystemAudioActivated(setSystemAudioModeOn);
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
+        // Only directly addressed System Audio Mode Status message can change internal
+        // system audio mode status.
+        if (message.getDestination() == mAddress
+                && message.getSource() == Constants.ADDR_AUDIO_SYSTEM) {
+            boolean setSystemAudioModeOn = HdmiUtils.parseCommandParamSystemAudioStatus(message);
+            if (mService.isSystemAudioActivated() != setSystemAudioModeOn) {
+                mService.setSystemAudioActivated(setSystemAudioModeOn);
+            }
+        }
+        return true;
+    }
+
+    @Override
     protected int findKeyReceiverAddress() {
+        return Constants.ADDR_TV;
+    }
+
+    @Override
+    protected int findAudioReceiverAddress() {
+        if (mService.isSystemAudioActivated()) {
+            return Constants.ADDR_AUDIO_SYSTEM;
+        }
         return Constants.ADDR_TV;
     }
 

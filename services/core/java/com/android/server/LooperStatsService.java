@@ -59,7 +59,8 @@ public class LooperStatsService extends Binder {
 
     private final Context mContext;
     private final LooperStats mStats;
-    private boolean mEnabled = DEFAULT_ENABLED;
+    // Default should be false so that the first call to #setEnabled installed the looper observer.
+    private boolean mEnabled = false;
 
     private LooperStatsService(Context context, LooperStats stats) {
         this.mContext = context;

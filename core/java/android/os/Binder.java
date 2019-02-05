@@ -967,7 +967,7 @@ public class Binder implements IBinder {
      * By default, we use the calling uid since we can always trust it.
      */
     private static volatile BinderInternal.WorkSourceProvider sWorkSourceProvider =
-            Binder::getCallingUid;
+            (x) -> Binder.getCallingUid();
 
     /**
      * Sets the work source provider.
@@ -991,21 +991,23 @@ public class Binder implements IBinder {
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
-        final int workSourceUid = sWorkSourceProvider.resolveWorkSourceUid();
-        final long origWorkSource = ThreadLocalWorkSource.setUid(workSourceUid);
+        // At that point, the parcel request headers haven't been parsed so we do not know what
+        // WorkSource the caller has set. Use calling uid as the default.
+        final int callingUid = Binder.getCallingUid();
+        final long origWorkSource = ThreadLocalWorkSource.setUid(callingUid);
         try {
-            return execTransactInternal(code, dataObj, replyObj, flags, workSourceUid);
+            return execTransactInternal(code, dataObj, replyObj, flags, callingUid);
         } finally {
             ThreadLocalWorkSource.restore(origWorkSource);
         }
     }
 
-    private boolean execTransactInternal(int code, long dataObj, long replyObj,
-            int flags, int workSourceUid) {
+    private boolean execTransactInternal(int code, long dataObj, long replyObj, int flags,
+            int callingUid) {
         // Make sure the observer won't change while processing a transaction.
         final BinderInternal.Observer observer = sObserver;
         final CallSession callSession =
-                observer != null ? observer.callStarted(this, code, workSourceUid) : null;
+                observer != null ? observer.callStarted(this, code, UNSET_WORKSOURCE) : null;
         Parcel data = Parcel.obtain(dataObj);
         Parcel reply = Parcel.obtain(replyObj);
         // theoretically, we should call transact, which will call onTransact,
@@ -1045,6 +1047,10 @@ public class Binder implements IBinder {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
             }
             if (observer != null) {
+                // The parcel RPC headers have been called during onTransact so we can now access
+                // the worksource uid from the parcel.
+                final int workSourceUid = sWorkSourceProvider.resolveWorkSourceUid(
+                        data.readCallingWorkSourceUid());
                 observer.callEnded(callSession, data.dataSize(), reply.dataSize(), workSourceUid);
             }
         }

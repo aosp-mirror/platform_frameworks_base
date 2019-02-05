@@ -54,7 +54,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -210,8 +209,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages,
-                            Collections.emptyList()));
+                // TODO: Pass the correct value for isStaged instead of
+                // assuming always false.
+                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages, false));
             }
             return new ParceledListSlice<>(rollbacks);
         }
@@ -364,8 +364,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                 return;
                             }
 
+                            // TODO: Set the correct values for isStaged and
+                            // committedSessionId.
                             addRecentlyExecutedRollback(new RollbackInfo(
-                                        data.rollbackId, data.packages, causePackages));
+                                        data.rollbackId, data.packages, false, causePackages,
+                                        PackageInstaller.SessionInfo.INVALID_ID));
                             sendSuccess(statusReceiver);
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
@@ -685,30 +688,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private boolean enableRollback(int installFlags, File newPackageCodePath,
             int[] installedUsers) {
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            Log.e(TAG, "Rollbacks not supported for instant app install");
-            return false;
-        }
-        if ((installFlags & PackageManager.INSTALL_APEX) != 0) {
-            Log.e(TAG, "Rollbacks not supported for apex install");
-            return false;
-        }
 
-        // Get information about the package to be installed.
-        PackageParser.PackageLite newPackage = null;
-        try {
-            newPackage = PackageParser.parsePackageLite(newPackageCodePath, 0);
-        } catch (PackageParser.PackageParserException e) {
-            Log.e(TAG, "Unable to parse new package", e);
-            return false;
-        }
+        // Find the session id associated with this install.
+        // TODO: It would be nice if package manager or package installer told
+        // us the session directly, rather than have to search for it
+        // ourselves.
+        PackageInstaller.SessionInfo session = null;
 
-        String packageName = newPackage.packageName;
-        Log.i(TAG, "Enabling rollback for install of " + packageName);
-
-        // Figure out the session id associated with this install.
-        int parentSessionId = PackageInstaller.SessionInfo.INVALID_ID;
-        int childSessionId = PackageInstaller.SessionInfo.INVALID_ID;
         PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
         for (PackageInstaller.SessionInfo info : installer.getAllSessions()) {
             if (info.isMultiPackage()) {
@@ -716,23 +702,54 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     PackageInstaller.SessionInfo child = installer.getSessionInfo(childId);
                     if (sessionMatchesForEnableRollback(child, installFlags, newPackageCodePath)) {
                         // TODO: Check we only have one matching session?
-                        parentSessionId = info.getSessionId();
-                        childSessionId = childId;
+                        session = child;
+                        break;
                     }
                 }
-            } else {
-                if (sessionMatchesForEnableRollback(info, installFlags, newPackageCodePath)) {
-                    // TODO: Check we only have one matching session?
-                    parentSessionId = info.getSessionId();
-                    childSessionId = parentSessionId;
-                }
+            } else if (sessionMatchesForEnableRollback(info, installFlags, newPackageCodePath)) {
+                // TODO: Check we only have one matching session?
+                session = info;
+                break;
             }
         }
 
-        if (parentSessionId == PackageInstaller.SessionInfo.INVALID_ID) {
+        if (session == null) {
             Log.e(TAG, "Unable to find session id for enabled rollback.");
             return false;
         }
+
+        return enableRollbackForSession(session, installedUsers);
+    }
+
+    /**
+     * Do code and userdata backups to enable rollback of the given session.
+     * In case of multiPackage sessions, <code>session</code> should be one of
+     * the child sessions, not the parent session.
+     */
+    private boolean enableRollbackForSession(PackageInstaller.SessionInfo session,
+            int[] installedUsers) {
+        // TODO: Don't attempt to enable rollback for split installs.
+        final int installFlags = session.installFlags;
+        if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
+            Log.e(TAG, "Rollback is not enabled.");
+            return false;
+        }
+        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+            Log.e(TAG, "Rollbacks not supported for instant app install");
+            return false;
+        }
+
+        // Get information about the package to be installed.
+        PackageParser.PackageLite newPackage = null;
+        try {
+            newPackage = PackageParser.parsePackageLite(new File(session.resolvedBaseCodePath), 0);
+        } catch (PackageParser.PackageParserException e) {
+            Log.e(TAG, "Unable to parse new package", e);
+            return false;
+        }
+
+        String packageName = newPackage.packageName;
+        Log.i(TAG, "Enabling rollback for install of " + packageName);
 
         VersionedPackage newVersion = new VersionedPackage(packageName, newPackage.versionCode);
 
@@ -751,14 +768,27 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         VersionedPackage installedVersion = new VersionedPackage(packageName,
                 pkgInfo.getLongVersionCode());
 
-        final IntArray pendingBackups = mUserdataHelper.snapshotAppData(packageName,
-                installedUsers);
+        final boolean isApex = ((installFlags & PackageManager.INSTALL_APEX) != 0);
+        final IntArray pendingBackups;
+        if (isApex) {
+            pendingBackups = IntArray.wrap(new int[0]);
+        } else {
+            pendingBackups = mUserdataHelper.snapshotAppData(packageName, installedUsers);
+        }
 
+        // TODO: Record if this is an apex or not.
         PackageRollbackInfo info = new PackageRollbackInfo(newVersion, installedVersion,
                 pendingBackups, new ArrayList<>());
         RollbackData data;
         try {
+            int childSessionId = session.getSessionId();
+            int parentSessionId = session.getParentSessionId();
+            if (parentSessionId == PackageInstaller.SessionInfo.INVALID_ID) {
+                parentSessionId = childSessionId;
+            }
             synchronized (mLock) {
+                // TODO: no need to add to mChildSessions if childSessionId is
+                // the same as parentSessionId.
                 mChildSessions.put(childSessionId, parentSessionId);
                 data = mPendingRollbacks.get(parentSessionId);
                 if (data == null) {

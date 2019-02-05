@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.os.Debug;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
@@ -29,6 +30,7 @@ import android.util.Slog;
 
 import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.CollectionUtils;
+import com.android.server.LocalServices;
 import com.android.server.role.RoleManagerService;
 
 import java.util.Collection;
@@ -112,6 +114,13 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
                 return CollectionUtils.singletonOrEmpty(!TextUtils.isEmpty(setting)
                         ? setting
                         : mContext.getSystemService(TelecomManager.class).getSystemDialerPackage());
+            }
+            case RoleManager.ROLE_BROWSER: {
+                PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                        PackageManagerInternal.class);
+                String packageName = packageManagerInternal.removeLegacyDefaultBrowserPackageName(
+                        userId);
+                return CollectionUtils.singletonOrEmpty(packageName);
             }
             default: {
                 Slog.e(LOG_TAG, "Don't know how to find legacy role holders for " + roleName);

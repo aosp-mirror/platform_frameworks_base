@@ -34,6 +34,8 @@ import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetType;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -46,8 +48,9 @@ import java.util.ArrayList;
  */
 public class InsetsController implements WindowInsetsController {
 
-    // TODO: Use animation scaling and more optimal duration.
-    private static final int ANIMATION_DURATION_MS = 400;
+    private static final int ANIMATION_DURATION_SHOW_MS = 275;
+    private static final int ANIMATION_DURATION_HIDE_MS = 340;
+    private static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private static final int DIRECTION_NONE = 0;
     private static final int DIRECTION_SHOW = 1;
     private static final int DIRECTION_HIDE = 2;
@@ -329,6 +332,11 @@ public class InsetsController implements WindowInsetsController {
         WindowInsetsAnimationControlListener listener = new WindowInsetsAnimationControlListener() {
             @Override
             public void onReady(WindowInsetsAnimationController controller, int types) {
+                if (show) {
+                    showDirectly(types);
+                } else {
+                    hideDirectly(types);
+                }
                 mAnimator = ObjectAnimator.ofObject(
                         controller,
                         new InsetsProperty(),
@@ -336,7 +344,10 @@ public class InsetsController implements WindowInsetsController {
                         show ? controller.getHiddenStateInsets() : controller.getShownStateInsets(),
                         show ? controller.getShownStateInsets() : controller.getHiddenStateInsets()
                 );
-                mAnimator.setDuration(ANIMATION_DURATION_MS);
+                mAnimator.setDuration(show
+                        ? ANIMATION_DURATION_SHOW_MS
+                        : ANIMATION_DURATION_HIDE_MS);
+                mAnimator.setInterpolator(INTERPOLATOR);
                 mAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationCancel(Animator animation) {
@@ -356,11 +367,6 @@ public class InsetsController implements WindowInsetsController {
 
             private void onAnimationFinish() {
                 mAnimationDirection = DIRECTION_NONE;
-                if (show) {
-                    showOnAnimationEnd(types);
-                } else {
-                    hideOnAnimationEnd(types);
-                }
             }
         };
         // TODO: Instead of clearing this here, properly wire up
@@ -369,14 +375,14 @@ public class InsetsController implements WindowInsetsController {
         controlWindowInsetsAnimation(types, listener);
     }
 
-    private void hideOnAnimationEnd(@InsetType int types) {
+    private void hideDirectly(@InsetType int types) {
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).hide();
         }
     }
 
-    private void showOnAnimationEnd(@InsetType int types) {
+    private void showDirectly(@InsetType int types) {
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).show();

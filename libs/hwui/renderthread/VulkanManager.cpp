@@ -89,7 +89,7 @@ void VulkanManager::destroy() {
     mPhysicalDeviceFeatures2 = {};
 }
 
-bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFeatures2& features) {
+void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFeatures2& features) {
     VkResult err;
 
     constexpr VkApplicationInfo app_info = {
@@ -107,15 +107,11 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 
         uint32_t extensionCount = 0;
         err = mEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-        if (VK_SUCCESS != err) {
-            return false;
-        }
+        LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         std::unique_ptr<VkExtensionProperties[]> extensions(
                 new VkExtensionProperties[extensionCount]);
         err = mEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.get());
-        if (VK_SUCCESS != err) {
-            return false;
-        }
+        LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         bool hasKHRSurfaceExtension = false;
         bool hasKHRAndroidSurfaceExtension = false;
         for (uint32_t i = 0; i < extensionCount; ++i) {
@@ -127,10 +123,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
                 hasKHRAndroidSurfaceExtension = true;
             }
         }
-        if (!hasKHRSurfaceExtension || !hasKHRAndroidSurfaceExtension) {
-            this->destroy();
-            return false;
-        }
+        LOG_ALWAYS_FATAL_IF(!hasKHRSurfaceExtension || !hasKHRAndroidSurfaceExtension);
     }
 
     const VkInstanceCreateInfo instance_create = {
@@ -146,10 +139,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 
     GET_PROC(CreateInstance);
     err = mCreateInstance(&instance_create, nullptr, &mInstance);
-    if (err < 0) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(err < 0);
 
     GET_INST_PROC(DestroyInstance);
     GET_INST_PROC(EnumeratePhysicalDevices);
@@ -166,39 +156,23 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     GET_INST_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
 
     uint32_t gpuCount;
-    err = mEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr);
-    if (err) {
-        this->destroy();
-        return false;
-    }
-    if (!gpuCount) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(mEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr));
+    LOG_ALWAYS_FATAL_IF(!gpuCount);
     // Just returning the first physical device instead of getting the whole array. Since there
     // should only be one device on android.
     gpuCount = 1;
     err = mEnumeratePhysicalDevices(mInstance, &gpuCount, &mPhysicalDevice);
     // VK_INCOMPLETE is returned when the count we provide is less than the total device count.
-    if (err && VK_INCOMPLETE != err) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(err && VK_INCOMPLETE != err);
 
     VkPhysicalDeviceProperties physDeviceProperties;
     mGetPhysicalDeviceProperties(mPhysicalDevice, &physDeviceProperties);
-    if (physDeviceProperties.apiVersion < VK_MAKE_VERSION(1, 1, 0)) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(physDeviceProperties.apiVersion < VK_MAKE_VERSION(1, 1, 0));
 
     // query to get the initial queue props size
     uint32_t queueCount;
     mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, nullptr);
-    if (!queueCount) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!queueCount);
 
     // now get the actual queue props
     std::unique_ptr<VkQueueFamilyProperties[]> queueProps(new VkQueueFamilyProperties[queueCount]);
@@ -212,10 +186,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
             break;
         }
     }
-    if (mGraphicsQueueIndex == queueCount) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(mGraphicsQueueIndex == queueCount);
 
     // All physical devices and queue families on Android must be capable of
     // presentation with any native window. So just use the first one.
@@ -225,18 +196,12 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         uint32_t extensionCount = 0;
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
                 nullptr);
-        if (VK_SUCCESS != err) {
-            this->destroy();
-            return false;
-        }
+        LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         std::unique_ptr<VkExtensionProperties[]> extensions(
                 new VkExtensionProperties[extensionCount]);
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
                 extensions.get());
-        if (VK_SUCCESS != err) {
-            this->destroy();
-            return false;
-        }
+        LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         bool hasKHRSwapchainExtension = false;
         for (uint32_t i = 0; i < extensionCount; ++i) {
             mDeviceExtensions.push_back(extensions[i].extensionName);
@@ -244,10 +209,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
                 hasKHRSwapchainExtension = true;
             }
         }
-        if (!hasKHRSwapchainExtension) {
-            this->destroy();
-            return false;
-        }
+        LOG_ALWAYS_FATAL_IF(!hasKHRSwapchainExtension);
     }
 
     auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
@@ -259,10 +221,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     grExtensions.init(getProc, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
             mInstanceExtensions.data(), mDeviceExtensions.size(), mDeviceExtensions.data());
 
-    if (!grExtensions.hasExtension(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME, 1)) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!grExtensions.hasExtension(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME, 1));
 
     memset(&features, 0, sizeof(VkPhysicalDeviceFeatures2));
     features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -332,11 +291,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         nullptr,                                 // ppEnabledFeatures
     };
 
-    err = mCreateDevice(mPhysicalDevice, &deviceInfo, nullptr, &mDevice);
-    if (err) {
-        this->destroy();
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(mCreateDevice(mPhysicalDevice, &deviceInfo, nullptr, &mDevice));
 
     GET_DEV_PROC(GetDeviceQueue);
     GET_DEV_PROC(DeviceWaitIdle);
@@ -366,8 +321,6 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     GET_DEV_PROC(DestroyFence);
     GET_DEV_PROC(WaitForFences);
     GET_DEV_PROC(ResetFences);
-
-    return true;
 }
 
 void VulkanManager::initialize() {
@@ -381,7 +334,7 @@ void VulkanManager::initialize() {
     LOG_ALWAYS_FATAL_IF(instanceVersion < VK_MAKE_VERSION(1, 1, 0));
 
     GrVkExtensions extensions;
-    LOG_ALWAYS_FATAL_IF(!this->setupDevice(extensions, mPhysicalDeviceFeatures2));
+    this->setupDevice(extensions, mPhysicalDeviceFeatures2);
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
 
@@ -419,7 +372,7 @@ void VulkanManager::initialize() {
 
     if (!setupDummyCommandBuffer()) {
         this->destroy();
-        return;
+        // Pass through will crash on next line.
     }
     LOG_ALWAYS_FATAL_IF(mDummyCB == VK_NULL_HANDLE);
 
@@ -520,6 +473,9 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface** surfaceOut) {
         destroySurface(surface);
         *surfaceOut = createSurface(window, colorMode, colorSpace, colorType);
         surface = *surfaceOut;
+        if (!surface) {
+            return nullptr;
+        }
     }
 
     VulkanSurface::BackbufferInfo* backbuffer = getAvailableBackbuffer(surface);

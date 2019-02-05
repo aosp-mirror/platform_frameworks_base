@@ -16,9 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ALWAYS_ON_TOP;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
@@ -26,7 +29,9 @@ import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
@@ -35,7 +40,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -47,7 +51,6 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:WindowConfigurationTests
  */
-@FlakyTest(bugId = 74078662)
 @SmallTest
 @Presubmit
 public class WindowConfigurationTests extends WindowTestsBase {
@@ -110,39 +113,39 @@ public class WindowConfigurationTests extends WindowTestsBase {
         final Configuration config2 = new Configuration(config1);
         final WindowConfiguration winConfig2 = config2.windowConfiguration;
 
-        assertEquals(config1.compareTo(config2), 0);
-        assertEquals(winConfig1.compareTo(winConfig2), 0);
+        assertEquals(0, config1.compareTo(config2));
+        assertEquals(0, winConfig1.compareTo(winConfig2));
 
         // Different windowing mode
         winConfig2.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertNotEquals(config1.compareTo(config2), 0);
-        assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        assertNotEquals(0, config1.compareTo(config2));
+        assertNotEquals(0, winConfig1.compareTo(winConfig2));
         winConfig2.setWindowingMode(winConfig1.getWindowingMode());
 
         // Different always on top state
         winConfig2.setAlwaysOnTop(true);
-        assertNotEquals(config1.compareTo(config2), 0);
-        assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        assertNotEquals(0, config1.compareTo(config2));
+        assertNotEquals(0, winConfig1.compareTo(winConfig2));
         winConfig2.setAlwaysOnTop(winConfig1.isAlwaysOnTop());
 
         // Different bounds
         winConfig2.setAppBounds(0, 2, 3, 4);
-        assertNotEquals(config1.compareTo(config2), 0);
-        assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        assertNotEquals(0, config1.compareTo(config2));
+        assertNotEquals(0, winConfig1.compareTo(winConfig2));
         winConfig2.setAppBounds(winConfig1.getAppBounds());
 
         // No bounds
-        assertEquals(config1.compareTo(blankConfig), -1);
-        assertEquals(winConfig1.compareTo(blankWinConfig), -1);
+        assertEquals(-1, config1.compareTo(blankConfig));
+        assertEquals(-1, winConfig1.compareTo(blankWinConfig));
 
         // Different rotation
         winConfig2.setRotation(Surface.ROTATION_180);
-        assertNotEquals(config1.compareTo(config2), 0);
-        assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        assertNotEquals(0, config1.compareTo(config2));
+        assertNotEquals(0, winConfig1.compareTo(winConfig2));
         winConfig2.setRotation(winConfig1.getRotation());
 
-        assertEquals(blankConfig.compareTo(config1), 1);
-        assertEquals(blankWinConfig.compareTo(winConfig1), 1);
+        assertEquals(1, blankConfig.compareTo(config1));
+        assertEquals(1, blankWinConfig.compareTo(winConfig1));
     }
 
     @Test
@@ -165,12 +168,54 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
         final Rect appBounds = mWm.computeNewConfiguration(
                 mDisplayContent.getDisplayId()).windowConfiguration.getAppBounds();
-        // The bounds should always be positioned in the top left.
-        assertEquals(appBounds.left, 0);
-        assertEquals(appBounds.top, 0);
+        // The bounds should always be positioned in the top left besides cutout.
+        final int expectedLeft = info.displayCutout != null
+                ? info.displayCutout.getSafeInsetLeft() : 0;
+        final int expectedTop = info.displayCutout != null
+                ? info.displayCutout.getSafeInsetTop() : 0;
+        assertEquals(expectedLeft, appBounds.left);
+        assertEquals(expectedTop, appBounds.top);
 
         // The bounds should equal the defined app width and height
-        assertEquals(appBounds.width(), info.appWidth);
-        assertEquals(appBounds.height(), info.appHeight);
+        assertEquals(info.appWidth, appBounds.width());
+        assertEquals(info.appHeight, appBounds.height());
+    }
+
+    /** Ensure the window always has a caption in Freeform window mode or display mode. */
+    @Test
+    public void testCaptionShownForFreeformWindowingMode() {
+        final WindowConfiguration config = new WindowConfiguration();
+        config.setActivityType(ACTIVITY_TYPE_STANDARD);
+        config.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        config.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertTrue(config.hasWindowDecorCaption());
+
+        config.setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertTrue(config.hasWindowDecorCaption());
+
+        config.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertTrue(config.hasWindowDecorCaption());
+
+        config.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertFalse(config.hasWindowDecorCaption());
+    }
+
+    /** Caption should not show for non-standard activity window. */
+    @Test
+    public void testCaptionNotShownForNonStandardActivityType() {
+        final WindowConfiguration config = new WindowConfiguration();
+        config.setActivityType(ACTIVITY_TYPE_HOME);
+        config.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        config.setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertFalse(config.hasWindowDecorCaption());
+
+        config.setActivityType(ACTIVITY_TYPE_ASSISTANT);
+        assertFalse(config.hasWindowDecorCaption());
+
+        config.setActivityType(ACTIVITY_TYPE_RECENTS);
+        assertFalse(config.hasWindowDecorCaption());
+
+        config.setActivityType(ACTIVITY_TYPE_STANDARD);
+        assertTrue(config.hasWindowDecorCaption());
     }
 }

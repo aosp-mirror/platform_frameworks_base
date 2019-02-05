@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.os.Build.IS_USER;
 
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -67,19 +68,18 @@ class WindowTraceQueueBuffer extends WindowTraceBuffer {
 
     private void loop() throws IOException, InterruptedException {
         while (!mCancel) {
-            byte[] proto;
+            ProtoOutputStream proto;
             synchronized (mBufferLock) {
                 mBufferLock.wait();
-
                 proto = mBuffer.poll();
                 if (proto != null) {
-                    mBufferSize -= proto.length;
+                    mBufferSize -= proto.getRawSize();
                 }
             }
-
             if (proto != null) {
                 try (OutputStream os = new FileOutputStream(mTraceFile, true)) {
-                    os.write(proto);
+                    byte[] protoBytes = proto.getBytes();
+                    os.write(protoBytes);
                 }
             }
         }
@@ -97,7 +97,6 @@ class WindowTraceQueueBuffer extends WindowTraceBuffer {
             mCancel = true;
             mBufferLock.notify();
         }
-
         if (mConsumerThread != null) {
             mConsumerThread.join();
             mConsumerThread = null;

@@ -48,9 +48,7 @@ import com.android.internal.os.IResultReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A service used to capture the content of the screen to provide contextual data in other areas of
@@ -166,10 +164,6 @@ public abstract class ContentCaptureService extends Service {
     /**
      * Explicitly limits content capture to the given packages and activities.
      *
-     * <p>When the whitelist is set, it overrides the values passed to
-     * {@link #setActivityContentCaptureEnabled(ComponentName, boolean)}
-     * and {@link #setPackageContentCaptureEnabled(String, boolean)}.
-     *
      * <p>To reset the whitelist, call it passing {@code null} to both arguments.
      *
      * <p>Useful when the service wants to restrict content capture to a category of apps, like
@@ -191,76 +185,6 @@ public abstract class ContentCaptureService extends Service {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Defines whether content capture should be enabled for activities with such
-     * {@link android.content.ComponentName}.
-     *
-     * <p>Useful to blacklist a particular activity.
-     */
-    public final void setActivityContentCaptureEnabled(@NonNull ComponentName activity,
-            boolean enabled) {
-        final IContentCaptureServiceCallback callback = mCallback;
-        if (callback == null) {
-            Log.w(TAG, "setActivityContentCaptureEnabled(): no server callback");
-            return;
-        }
-        try {
-            callback.setActivityContentCaptureEnabled(activity, enabled);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Defines whether content capture should be enabled for activities of the app with such
-     * {@code packageName}.
-     *
-     * <p>Useful to blacklist any activity from a particular app.
-     */
-    public final void setPackageContentCaptureEnabled(@NonNull String packageName,
-            boolean enabled) {
-        final IContentCaptureServiceCallback callback = mCallback;
-        if (callback == null) {
-            Log.w(TAG, "setPackageContentCaptureEnabled(): no server callback");
-            return;
-        }
-        try {
-            callback.setPackageContentCaptureEnabled(packageName, enabled);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Gets the activities where content capture was disabled by
-     * {@link #setActivityContentCaptureEnabled(ComponentName, boolean)}.
-     */
-    @NonNull
-    public final Set<ComponentName> getContentCaptureDisabledActivities() {
-        final IContentCaptureServiceCallback callback = mCallback;
-        if (callback == null) {
-            Log.w(TAG, "getContentCaptureDisabledActivities(): no server callback");
-            return Collections.emptySet();
-        }
-        //TODO(b/122595322): implement (using SyncResultReceiver)
-        return null;
-    }
-
-    /**
-     * Gets the apps where content capture was disabled by
-     * {@link #setPackageContentCaptureEnabled(String, boolean)}.
-     */
-    @NonNull
-    public final Set<String> getContentCaptureDisabledPackages() {
-        final IContentCaptureServiceCallback callback = mCallback;
-        if (callback == null) {
-            Log.w(TAG, "getContentCaptureDisabledPackages(): no server callback");
-            return Collections.emptySet();
-        }
-        //TODO(b/122595322): implement (using SyncResultReceiver)
-        return null;
     }
 
     /**

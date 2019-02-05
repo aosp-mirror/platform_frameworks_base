@@ -173,7 +173,8 @@ public class PackageInstallerSessionTest {
                 /* isReady */ staged ? true : false,
                 /* isFailed */ false,
                 /* isApplied */false,
-                /* stagedSessionErrorCode */ PackageInstaller.SessionInfo.VERIFICATION_FAILED,
+                /* stagedSessionErrorCode */
+                PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                 /* stagedSessionErrorMessage */ "some error");
     }
 

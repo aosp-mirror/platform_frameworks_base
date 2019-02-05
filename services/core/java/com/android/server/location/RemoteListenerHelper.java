@@ -71,10 +71,10 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         return mIsRegistered;
     }
 
-    public boolean addListener(@NonNull TListener listener, int uid, String packageName) {
+    public boolean addListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
         Preconditions.checkNotNull(listener, "Attempted to register a 'null' listener.");
         IBinder binder = listener.asBinder();
-        LinkedListener deathListener = new LinkedListener(listener, uid, packageName);
+        LinkedListener deathListener = new LinkedListener(listener, callerIdentity);
         synchronized (mListenerMap) {
             if (mListenerMap.containsKey(binder)) {
                 // listener already added
@@ -137,7 +137,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     protected abstract ListenerOperation<TListener> getHandlerOperation(int result);
 
     protected interface ListenerOperation<TListener extends IInterface> {
-        void execute(TListener listener, int uid, String packageName) throws RemoteException;
+        void execute(TListener listener, CallerIdentity callerIdentity) throws RemoteException;
     }
 
     protected void foreach(ListenerOperation<TListener> operation) {
@@ -177,9 +177,16 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         }
     }
 
-    protected boolean hasPermission(int uid, String packageName) {
-        return mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, uid, packageName)
-                == AppOpsManager.MODE_ALLOWED;
+    protected boolean hasPermission(Context context, CallerIdentity callerIdentity) {
+        if (LocationPermissionUtil.doesCallerReportToAppOps(context, callerIdentity)) {
+            // The caller is identified as a location provider that will report location
+            // access to AppOps. Skip noteOp but do checkOp to check for location permission.
+            return mAppOps.checkOpNoThrow(AppOpsManager.OP_FINE_LOCATION, callerIdentity.mUid,
+                    callerIdentity.mPackageName) == AppOpsManager.MODE_ALLOWED;
+        }
+
+        return mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, callerIdentity.mUid,
+                callerIdentity.mPackageName) == AppOpsManager.MODE_ALLOWED;
     }
 
     protected void logPermissionDisabledEventNotReported(String tag, String packageName,
@@ -254,13 +261,11 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     private class LinkedListener implements IBinder.DeathRecipient {
         private final TListener mListener;
-        private final int mUid;
-        private final String mPackageName;
+        private final CallerIdentity mCallerIdentity;
 
-        LinkedListener(@NonNull TListener listener, int uid, String packageName) {
+        LinkedListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
             mListener = listener;
-            mUid = uid;
-            mPackageName = packageName;
+            mCallerIdentity = callerIdentity;
         }
 
         @Override
@@ -282,8 +287,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         @Override
         public void run() {
             try {
-                mOperation.execute(mLinkedListener.mListener, mLinkedListener.mUid,
-                        mLinkedListener.mPackageName);
+                mOperation.execute(mLinkedListener.mListener, mLinkedListener.mCallerIdentity);
             } catch (RemoteException e) {
                 Log.v(mTag, "Error in monitored listener.", e);
             }

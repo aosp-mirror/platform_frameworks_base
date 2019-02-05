@@ -335,6 +335,13 @@ public class CollectionUtils {
     }
 
     /**
+     * @return the first element if not empty/null, null otherwise
+     */
+    public static @Nullable <T> T firstOrNull(@Nullable Collection<T> cur) {
+        return isEmpty(cur) ? null : cur.iterator().next();
+    }
+
+    /**
      * @return list of single given element if it's not null, empty list otherwise
      */
     public static @NonNull <T> List<T> singletonOrEmpty(@Nullable T item) {

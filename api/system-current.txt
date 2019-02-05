@@ -3322,6 +3322,7 @@ package android.location {
     method public boolean isLocationControllerExtraPackageEnabled();
     method public boolean isLocationEnabledForUser(android.os.UserHandle);
     method public boolean isProviderEnabledForUser(String, android.os.UserHandle);
+    method public boolean isProviderPackage(String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, android.location.BatchedLocationCallback, android.os.Handler);
     method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
@@ -5546,6 +5547,8 @@ package android.permission {
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
     method public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
     method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
+    method @BinderThread public abstract boolean onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle);
+    method @BinderThread public abstract void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream);
     method public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
     method @NonNull public abstract java.util.Map<java.lang.String,java.util.List<java.lang.String>> onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String);
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
@@ -5765,6 +5768,10 @@ package android.provider {
 
   public static interface DeviceConfig.RuntimeNative {
     field public static final String NAMESPACE = "runtime_native";
+  }
+
+  public static interface DeviceConfig.RuntimeNativeBoot {
+    field public static final String NAMESPACE = "runtime_native_boot";
   }
 
   public static interface DeviceConfig.Storage {
@@ -6302,8 +6309,6 @@ package android.service.contentcapture {
 
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
-    method @NonNull public final java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
-    method @NonNull public final java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
@@ -6312,9 +6317,7 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
-    method public final void setActivityContentCaptureEnabled(@NonNull android.content.ComponentName, boolean);
     method public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
-    method public final void setPackageContentCaptureEnabled(@NonNull String, boolean);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
   }
 

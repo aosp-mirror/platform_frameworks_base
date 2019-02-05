@@ -6587,7 +6587,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // The output proto of "activity --proto activities"
                 // is ActivityManagerServiceDumpActivitiesProto
                 mRootActivityContainer.writeToProto(proto,
-                        ActivityManagerServiceDumpActivitiesProto.ACTIVITY_STACK_SUPERVISOR);
+                        ActivityManagerServiceDumpActivitiesProto.ACTIVITY_STACK_SUPERVISOR,
+                        WindowTraceLogLevel.ALL);
             }
         }
 

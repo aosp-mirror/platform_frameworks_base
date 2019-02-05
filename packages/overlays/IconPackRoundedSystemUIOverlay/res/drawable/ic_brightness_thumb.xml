@@ -1,0 +1,52 @@
+<!--
+/**
+ * Copyright (c) 2019, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M12,19.5h0A7.49,7.49,0,0,0,19.5,12h0A7.5,7.5,0,1,0,12,19.5ZM12,6a6,6,0,0,1,6,6h0a6,6,0,0,1-6,6h0A6,6,0,0,1,12,6Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M11.25 0.75 v1.5a0.75 0.75 ,0,0,0,1.5,0V0.75a0.75 0.75 ,0,0,0-1.5,0Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M4.58,3.51A0.76 0.76 ,0,0,0,3.51,4.58L4.57,5.64a0.79 0.79 ,0,0,0,1.07,0,0.77 0.77 ,0,0,0,0-1.07Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M3,12a0.76 0.76 ,0,0,0-0.75-0.75H0.75a0.75 0.75 ,0,0,0,0,1.5h1.5A0.76 0.76 ,0,0,0,3,12Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M3.51,20.49a0.76 0.76 ,0,0,0,1.07,0l1.06-1.06a0.76 0.76 ,0,1,0-1.07-1.07L3.51,19.42A0.77 0.77 ,0,0,0,3.51,20.49Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M11.25,21.75v1.5a0.75 0.75 ,0,0,0,1.5,0v-1.5a0.75 0.75 ,0,0,0-1.5,0Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M18.36,18.36a0.77 0.77 ,0,0,0,0,1.07l1.06,1.06a0.76 0.76 ,0,0,0,1.07,0,0.77 0.77 ,0,0,0,0-1.07l-1.06-1.06A0.77 0.77 ,0,0,0,18.36,18.36Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M23.25,11.25h-1.5a0.75 0.75 ,0,0,0,0,1.5h1.5a0.75 0.75 ,0,0,0,0-1.5Z" />
+    <path
+        android:fillColor="?android:attr/colorControlActivated"
+        android:pathData="M19.42,3.51,18.36,4.57a0.77 0.77 ,0,0,0,0,1.07 0.79 0.79,0,0,0,1.07,0l1.06-1.06a0.76 0.76 ,0,0,0-1.07-1.07Z" />
+</vector>

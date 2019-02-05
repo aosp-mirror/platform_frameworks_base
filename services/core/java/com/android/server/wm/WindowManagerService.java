@@ -841,11 +841,8 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
             synchronized (mGlobalLock) {
-                try {
-                    traceStateLocked(where);
-                } finally {
-                    SurfaceControl.closeTransaction();
-                }
+                SurfaceControl.closeTransaction();
+                traceStateLocked(where);
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -4436,7 +4433,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Losing focus: " + lastFocus);
                         lastFocus.reportFocusChangedSerialized(false, mInTouchMode);
                     }
-                } break;
+                    break;
+                }
 
                 case REPORT_LOSING_FOCUS: {
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
@@ -4453,7 +4451,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 losers.get(i));
                         losers.get(i).reportFocusChangedSerialized(false, mInTouchMode);
                     }
-                } break;
+                    break;
+                }
 
                 case WINDOW_FREEZE_TIMEOUT: {
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
@@ -4617,12 +4616,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case NOTIFY_ACTIVITY_DRAWN:
+                case NOTIFY_ACTIVITY_DRAWN: {
                     try {
                         mActivityTaskManager.notifyActivityDrawn((IBinder) msg.obj);
                     } catch (RemoteException e) {
                     }
                     break;
+                }
                 case ALL_WINDOWS_DRAWN: {
                     Runnable callback;
                     synchronized (mGlobalLock) {
@@ -4659,8 +4659,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
                     }
+                    break;
                 }
-                break;
                 case CHECK_IF_BOOT_ANIMATION_FINISHED: {
                     final boolean bootAnimationComplete;
                     synchronized (mGlobalLock) {
@@ -4670,15 +4670,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (bootAnimationComplete) {
                         performEnableScreen();
                     }
+                    break;
                 }
-                break;
                 case RESET_ANR_MESSAGE: {
                     synchronized (mGlobalLock) {
                         mLastANRState = null;
                     }
                     mAtmInternal.clearSavedANRState();
+                    break;
                 }
-                break;
                 case WALLPAPER_DRAW_PENDING_TIMEOUT: {
                     synchronized (mGlobalLock) {
                         final WallpaperController wallpaperController =
@@ -4688,16 +4688,16 @@ public class WindowManagerService extends IWindowManager.Stub
                             mWindowPlacerLocked.performSurfacePlacement();
                         }
                     }
+                    break;
                 }
-                break;
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     synchronized (mGlobalLock) {
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
                         displayContent.getDockedDividerController().reevaluateVisibility(false);
                         displayContent.adjustForImeIfNeeded();
                     }
+                    break;
                 }
-                break;
                 case WINDOW_REPLACEMENT_TIMEOUT: {
                     synchronized (mGlobalLock) {
                         for (int i = mWindowReplacementTimeouts.size() - 1; i >= 0; i--) {
@@ -4706,8 +4706,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         mWindowReplacementTimeouts.clear();
                     }
+                    break;
                 }
-                break;
                 case WINDOW_HIDE_TIMEOUT: {
                     final WindowState window = (WindowState) msg.obj;
                     synchronized (mGlobalLock) {
@@ -4727,44 +4727,44 @@ public class WindowManagerService extends IWindowManager.Stub
                         window.setDisplayLayoutNeeded();
                         mWindowPlacerLocked.performSurfacePlacement();
                     }
+                    break;
                 }
-                break;
                 case RESTORE_POINTER_ICON: {
                     synchronized (mGlobalLock) {
                         restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
                     }
+                    break;
                 }
-                break;
                 case SEAMLESS_ROTATION_TIMEOUT: {
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
                     synchronized (mGlobalLock) {
                         displayContent.onSeamlessRotationTimeout();
                     }
+                    break;
                 }
-                break;
                 case SET_HAS_OVERLAY_UI: {
                     mAmInternal.setHasOverlayUi(msg.arg1, msg.arg2 == 1);
+                    break;
                 }
-                break;
                 case SET_RUNNING_REMOTE_ANIMATION: {
                     mAmInternal.setRunningRemoteAnimation(msg.arg1, msg.arg2 == 1);
+                    break;
                 }
-                break;
                 case ANIMATION_FAILSAFE: {
                     synchronized (mGlobalLock) {
                         if (mRecentsAnimationController != null) {
                             mRecentsAnimationController.scheduleFailsafe();
                         }
                     }
+                    break;
                 }
-                break;
                 case RECOMPUTE_FOCUS: {
                     synchronized (mGlobalLock) {
                         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                                 true /* updateInputWindows */);
                     }
+                    break;
                 }
-                break;
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG_WM, "handleMessage: exit");
@@ -5742,11 +5742,11 @@ public class WindowManagerService extends IWindowManager.Stub
      * {@link com.android.server.wm.WindowManagerServiceDumpProto}.
      *
      * @param proto     Stream to write the WindowContainer object to.
-     * @param trim      If true, reduce the amount of data written.
+     * @param logLevel  Determines the amount of data to be written to the Protobuf.
      */
-    void writeToProtoLocked(ProtoOutputStream proto, boolean trim) {
+    void writeToProtoLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         mPolicy.writeToProto(proto, POLICY);
-        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, trim);
+        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, logLevel);
         final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
         if (topFocusedDisplayContent.mCurrentFocus != null) {
             topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
@@ -5765,13 +5765,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void traceStateLocked(String where) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "traceStateLocked");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "traceStateLocked");
         try {
             mWindowTracing.traceStateLocked(where, this);
         } catch (Exception e) {
             Log.wtf(TAG, "Exception while tracing state", e);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -6074,7 +6074,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             synchronized (mGlobalLock) {
-                writeToProtoLocked(proto, false /* trim */);
+                writeToProtoLocked(proto, WindowTraceLogLevel.ALL);
             }
             proto.flush();
             return;

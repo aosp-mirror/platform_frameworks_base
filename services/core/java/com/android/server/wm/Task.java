@@ -316,6 +316,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
         mRotation = rotation;
 
+        updateSurfacePosition();
         return boundsChange;
     }
 
@@ -358,6 +359,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         } else {
             mOverrideDisplayedBounds.setEmpty();
         }
+        updateSurfacePosition();
     }
 
     /**
@@ -795,13 +797,18 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, trim);
+        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         proto.write(ID, mTaskId);
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken appWindowToken = mChildren.get(i);
-            appWindowToken.writeToProto(proto, APP_WINDOW_TOKENS, trim);
+            appWindowToken.writeToProto(proto, APP_WINDOW_TOKENS, logLevel);
         }
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().writeToProto(proto, BOUNDS);

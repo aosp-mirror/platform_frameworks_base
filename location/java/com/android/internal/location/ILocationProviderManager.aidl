@@ -26,6 +26,8 @@ import com.android.internal.location.ProviderProperties;
  */
 interface ILocationProviderManager {
 
+    void onSetAdditionalProviderPackages(in List<String> packageNames);
+
     void onSetEnabled(boolean enabled);
 
     void onSetProperties(in ProviderProperties properties);

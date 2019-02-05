@@ -379,4 +379,39 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mSupervisor.endDeferResume();
         assertEquals(true, mActivity.shouldMakeActive(null /* activeActivity */));
     }
+
+    @Test
+    public void testPushConfigurationWhenLaunchTaskBehind() throws Exception {
+        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+
+        final TestActivityStack stack = (TestActivityStack) new StackBuilder(mRootActivityContainer)
+                .build();
+        try {
+            stack.setIsTranslucent(false);
+            assertFalse(mStack.shouldBeVisible(null /* starting */));
+
+            mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
+            mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
+                    mActivity.getConfiguration()));
+
+            mActivity.mLaunchTaskBehind = true;
+            mActivity.info.configChanges |= ActivityInfo.CONFIG_ORIENTATION;
+            final Configuration newConfig = new Configuration(mActivity.getConfiguration());
+            newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+                    ? Configuration.ORIENTATION_LANDSCAPE
+                    : Configuration.ORIENTATION_PORTRAIT;
+
+            mTask.onConfigurationChanged(newConfig);
+
+            mActivity.ensureActivityConfiguration(0 /* globalChanges */,
+                    false /* preserveWindow */, true /* ignoreStopState */);
+
+            final ActivityConfigurationChangeItem expected =
+                    ActivityConfigurationChangeItem.obtain(newConfig);
+            verify(mService.getLifecycleManager()).scheduleTransaction(
+                    eq(mActivity.app.getThread()), eq(mActivity.appToken), eq(expected));
+        } finally {
+            stack.getDisplay().removeChild(stack);
+        }
+    }
 }

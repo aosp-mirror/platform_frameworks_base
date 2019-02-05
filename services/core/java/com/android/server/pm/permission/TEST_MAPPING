@@ -18,6 +18,14 @@
                     "include-filter": "android.permission.cts.SplitPermissionTest"
                 }
             ]
+        },
+        {
+            "name": "CtsStatsdHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.cts.statsd.atom.UidAtomTests#testDangerousPermissionState"
+                }
+            ]
         }
     ]
 }

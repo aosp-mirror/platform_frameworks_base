@@ -24,6 +24,8 @@ import static com.android.internal.util.Preconditions.checkFlagsArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 
+import static java.lang.Math.min;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -60,6 +62,7 @@ import libcore.io.IoUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -275,6 +278,49 @@ public final class PermissionControllerManager {
 
         sRemoteService.scheduleRequest(new PendingGetRuntimePermissionBackup(sRemoteService,
                 user, executor, callback));
+    }
+
+    /**
+     * Restore a backup of the runtime permissions.
+     *
+     * @param backup the backup to restore. The backup is sent asynchronously, hence it should not
+     *               be modified after calling this method.
+     * @param user The user to be restore
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
+    public void restoreRuntimePermissionBackup(@NonNull byte[] backup, @NonNull UserHandle user) {
+        checkNotNull(backup);
+        checkNotNull(user);
+
+        sRemoteService.scheduleAsyncRequest(
+                new PendingRestoreRuntimePermissionBackup(sRemoteService, backup, user));
+    }
+
+    /**
+     * Restore a backup of the runtime permissions that has been delayed.
+     *
+     * @param packageName The package that is ready to have it's permissions restored.
+     * @param user The user to restore
+     * @param executor Executor to execute the callback on
+     * @param callback Is called with {@code true} iff there is still more delayed backup left
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
+    public void restoreDelayedRuntimePermissionBackup(@NonNull String packageName,
+            @NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        checkNotNull(packageName);
+        checkNotNull(user);
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        sRemoteService.scheduleRequest(
+                new PendingRestoreDelayedRuntimePermissionBackup(sRemoteService, packageName,
+                        user, executor, callback));
     }
 
     /**
@@ -520,6 +566,80 @@ public final class PermissionControllerManager {
     }
 
     /**
+     * Task to send a large amount of data to a remote service.
+     */
+    private static class FileWriterTask extends AsyncTask<byte[], Void, Void> {
+        private static final int CHUNK_SIZE = 4 * 1024;
+
+        private ParcelFileDescriptor mLocalPipe;
+        private ParcelFileDescriptor mRemotePipe;
+
+        @Override
+        protected void onPreExecute() {
+            ParcelFileDescriptor[] pipe;
+            try {
+                pipe = ParcelFileDescriptor.createPipe();
+            } catch (IOException e) {
+                Log.e(TAG, "Could not create pipe needed to send runtime permission backup",
+                        e);
+                return;
+            }
+
+            mRemotePipe = pipe[0];
+            mLocalPipe = pipe[1];
+        }
+
+        /**
+         * Get the file descriptor the remote service should read the data from.
+         *
+         * @return The file the data should be read from
+         */
+        ParcelFileDescriptor getRemotePipe() {
+            return mRemotePipe;
+        }
+
+        /**
+         * Send the data to the remove service.
+         *
+         * @param in The data to send
+         *
+         * @return ignored
+         */
+        @Override
+        protected Void doInBackground(byte[]... in) {
+            byte[] buffer = in[0];
+            try (OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(mLocalPipe)) {
+                for (int offset = 0; offset < buffer.length; offset += CHUNK_SIZE) {
+                    out.write(buffer, offset, min(CHUNK_SIZE, buffer.length - offset));
+                }
+            } catch (IOException | NullPointerException e) {
+                Log.e(TAG, "Error sending runtime permission backup", e);
+            }
+
+            return null;
+        }
+
+        /**
+         * Interrupt the send of the data.
+         *
+         * <p>Needs to be called when canceling this task as it might be hung.
+         */
+        void interruptRead() {
+            IoUtils.closeQuietly(mLocalPipe);
+        }
+
+        @Override
+        protected void onCancelled() {
+            onPostExecute(null);
+        }
+
+        @Override
+        protected void onPostExecute(Void ignored) {
+            IoUtils.closeQuietly(mLocalPipe);
+        }
+    }
+
+    /**
      * Request for {@link #revokeRuntimePermissions}
      */
     private static final class PendingRevokeRuntimePermissionRequest extends
@@ -664,6 +784,97 @@ public final class PermissionControllerManager {
             }
 
             finish();
+        }
+    }
+
+    /**
+     * Request for {@link #restoreRuntimePermissionBackup}
+     */
+    private static final class PendingRestoreRuntimePermissionBackup implements
+            AbstractRemoteService.AsyncRequest<IPermissionController> {
+        private final @NonNull FileWriterTask mBackupSender;
+        private final @NonNull byte[] mBackup;
+        private final @NonNull UserHandle mUser;
+
+        private PendingRestoreRuntimePermissionBackup(@NonNull RemoteService service,
+                @NonNull byte[] backup, @NonNull UserHandle user) {
+            mBackup = backup;
+            mUser = user;
+
+            mBackupSender = new FileWriterTask();
+        }
+
+        @Override
+        public void run(@NonNull IPermissionController service) {
+            ParcelFileDescriptor remotePipe = mBackupSender.getRemotePipe();
+            try {
+                service.restoreRuntimePermissionBackup(mUser, remotePipe);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error sending runtime permission backup", e);
+                mBackupSender.cancel(false);
+            } finally {
+                // Remote pipe end is duped by binder call. Local copy is not needed anymore
+                IoUtils.closeQuietly(remotePipe);
+            }
+
+            mBackupSender.execute(mBackup);
+        }
+    }
+
+    /**
+     * Request for {@link #restoreDelayedRuntimePermissionBackup(String, UserHandle, Executor,
+     * Consumer<Boolean>)}
+     */
+    private static final class PendingRestoreDelayedRuntimePermissionBackup extends
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
+        private final @NonNull String mPackageName;
+        private final @NonNull UserHandle mUser;
+        private final @NonNull Executor mExecutor;
+        private final @NonNull Consumer<Boolean> mCallback;
+
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingRestoreDelayedRuntimePermissionBackup(@NonNull RemoteService service,
+                @NonNull String packageName, @NonNull UserHandle user, @NonNull Executor executor,
+                @NonNull Consumer<Boolean> callback) {
+            super(service);
+
+            mPackageName = packageName;
+            mUser = user;
+            mExecutor = executor;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> executor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    callback.accept(result.getBoolean(KEY_RESULT, false));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+
+                    finish();
+                }
+            }), null);
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.accept(true));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().restoreDelayedRuntimePermissionBackup(
+                        mPackageName, mUser, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error restoring delayed permissions for " + mPackageName, e);
+            }
         }
     }
 

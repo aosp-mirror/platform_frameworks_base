@@ -137,6 +137,32 @@ public abstract class PackageManagerInternal {
     }
 
     /**
+     * Provider for default browser
+     */
+    public interface DefaultBrowserProvider {
+
+        /**
+         * Get the package name of the default browser.
+         *
+         * @param userId the user id
+         *
+         * @return the package name of the default browser, or {@code null} if none
+         */
+        @Nullable
+        String getDefaultBrowser(@UserIdInt int userId);
+
+        /**
+         * Set the package name of the default browser.
+         *
+         * @param packageName package name of the default browser, or {@code null} to remove
+         * @param userId the user id
+         *
+         * @return whether the default browser was successfully set.
+         */
+        boolean setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId);
+    }
+
+    /**
      * Sets the location provider packages provider.
      * @param provider The packages provider.
      */
@@ -843,4 +869,21 @@ public abstract class PackageManagerInternal {
      * {@code token} can be completed.
      */
     public abstract void finishPackageInstall(int token, boolean didLaunch);
+
+    /**
+     * Remove the default browser stored in the legacy package settings.
+     *
+     * @param userId the user id
+     *
+     * @return the package name of the default browser, or {@code null} if none
+     */
+    @Nullable
+    public abstract String removeLegacyDefaultBrowserPackageName(int userId);
+
+    /**
+     * Sets the default browser provider.
+     *
+     * @param provider the provider
+     */
+    public abstract void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider);
 }

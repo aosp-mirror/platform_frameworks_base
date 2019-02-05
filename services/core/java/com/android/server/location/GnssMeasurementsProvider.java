@@ -95,15 +95,11 @@ public abstract class GnssMeasurementsProvider
      */
     public void injectGnssMeasurementCorrections(
             GnssMeasurementCorrections measurementCorrections) {
-        mHandler.post(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!mNative.injectGnssMeasurementCorrections(measurementCorrections)) {
-                            Log.e(TAG, "Failure in injecting GNSS corrections.");
-                        }
-                    }
-                });
+        mHandler.post(() -> {
+            if (!mNative.injectGnssMeasurementCorrections(measurementCorrections)) {
+                Log.e(TAG, "Failure in injecting GNSS corrections.");
+            }
+        });
     }
 
     @Override
@@ -115,15 +111,14 @@ public abstract class GnssMeasurementsProvider
     }
 
     public void onMeasurementsAvailable(final GnssMeasurementsEvent event) {
-        foreach(
-                (IGnssMeasurementsListener listener, int uid, String packageName) -> {
-                    if (!hasPermission(uid, packageName)) {
-                        logPermissionDisabledEventNotReported(
-                                TAG, packageName, "GNSS measurements");
-                        return;
-                    }
-                    listener.onGnssMeasurementsReceived(event);
-                });
+        foreach((IGnssMeasurementsListener listener, CallerIdentity callerIdentity) -> {
+            if (!hasPermission(mContext, callerIdentity)) {
+                logPermissionDisabledEventNotReported(
+                        TAG, callerIdentity.mPackageName, "GNSS measurements");
+                return;
+            }
+            listener.onGnssMeasurementsReceived(event);
+        });
     }
 
     /** Updates the framework about the capabilities of the GNSS chipset */
@@ -182,7 +177,7 @@ public abstract class GnssMeasurementsProvider
 
         @Override
         public void execute(IGnssMeasurementsListener listener,
-                int uid, String packageName) throws RemoteException {
+                CallerIdentity callerIdentity) throws RemoteException {
             listener.onStatusChanged(mStatus);
         }
     }

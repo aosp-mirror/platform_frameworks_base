@@ -19,14 +19,16 @@
 #include "SkiaPipeline.h"
 #include "renderthread/VulkanManager.h"
 
+#include "renderstate/RenderState.h"
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-class SkiaVulkanPipeline : public SkiaPipeline {
+class SkiaVulkanPipeline : public SkiaPipeline, public IGpuContextCallback {
 public:
     explicit SkiaVulkanPipeline(renderthread::RenderThread& thread);
-    virtual ~SkiaVulkanPipeline() {}
+    virtual ~SkiaVulkanPipeline();
 
     renderthread::MakeCurrentResult makeCurrent() override;
     renderthread::Frame getFrame() override;
@@ -48,6 +50,9 @@ public:
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
     static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
                                                 SkBitmap& skBitmap);
+
+protected:
+    void onContextDestroyed() override;
 
 private:
     renderthread::VulkanManager& mVkManager;

@@ -68,11 +68,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     private static final String TAG = "HdmiCecLocalDeviceAudioSystem";
 
-    // Whether System audio mode is activated or not.
-    // This becomes true only when all system audio sequences are finished.
-    @GuardedBy("mLock")
-    private boolean mSystemAudioActivated;
-
     // Whether the System Audio Control feature is enabled or not. True by default.
     @GuardedBy("mLock")
     private boolean mSystemAudioControlFeatureEnabled;
@@ -271,7 +266,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         synchronized (mLock) {
             mService.writeStringSystemProperty(
                     Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
-                    mSystemAudioActivated ? "true" : "false");
+                    isSystemAudioActivated() ? "true" : "false");
         }
         terminateSystemAudioMode();
     }
@@ -786,7 +781,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         int maxVolume = mService.getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         int minVolume = mService.getAudioManager().getStreamMinVolume(AudioManager.STREAM_MUSIC);
         int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
-        HdmiLogger.debug("Reporting volume %i (%i-%i) as CEC volume %i", volume,
+        HdmiLogger.debug("Reporting volume %d (%d-%d) as CEC volume %d", volume,
                 minVolume, maxVolume, scaledVolume);
 
         mService.sendCecCommand(
@@ -814,7 +809,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         HdmiLogger.debug(
                 "System Audio Mode change[old:%b new:%b]",
-                mSystemAudioActivated, newSystemAudioMode);
+                isSystemAudioActivated(), newSystemAudioMode);
         // Wake up device if System Audio Control is turned on
         if (newSystemAudioMode) {
             mService.wakeUp();
@@ -854,8 +849,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         updateAudioManagerForSystemAudio(newSystemAudioMode);
         synchronized (mLock) {
-            if (mSystemAudioActivated != newSystemAudioMode) {
-                mSystemAudioActivated = newSystemAudioMode;
+            if (isSystemAudioActivated() != newSystemAudioMode) {
+                mService.setSystemAudioActivated(newSystemAudioMode);
                 mService.announceSystemAudioModeChange(newSystemAudioMode);
             }
         }
@@ -946,9 +941,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     protected boolean isSystemAudioActivated() {
-        synchronized (mLock) {
-            return mSystemAudioActivated;
-        }
+        return mService.isSystemAudioActivated();
     }
 
     protected void terminateSystemAudioMode() {
@@ -1215,7 +1208,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     protected void dump(IndentingPrintWriter pw) {
         pw.println("HdmiCecLocalDeviceAudioSystem:");
         pw.increaseIndent();
-        pw.println("mSystemAudioActivated: " + mSystemAudioActivated);
         pw.println("isRoutingFeatureEnabled " + isRoutingControlFeatureEnabled());
         pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
         pw.println("mTvSystemAudioModeSupport: " + mTvSystemAudioModeSupport);

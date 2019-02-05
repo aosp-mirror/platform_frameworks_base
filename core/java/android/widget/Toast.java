@@ -341,10 +341,10 @@ public class Toast {
     // the proper ordering of these system-wide.
     // =======================================================================================
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static INotificationManager sService;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     static private INotificationManager getService() {
         if (sService != null) {
             return sService;

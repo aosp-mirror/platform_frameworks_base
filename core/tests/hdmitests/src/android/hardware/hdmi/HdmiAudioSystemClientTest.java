@@ -181,6 +181,11 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
+        public void sendVolumeKeyEvent(
+            final int deviceType, final int keyCode, final boolean isPressed) {
+        }
+
+        @Override
         public void oneTouchPlay(final IHdmiControlCallback callback) {
         }
 

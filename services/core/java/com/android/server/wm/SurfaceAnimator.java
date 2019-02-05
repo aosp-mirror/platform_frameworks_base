@@ -325,7 +325,7 @@ class SurfaceAnimator {
         if (mAnimation != null) {
             mAnimation.writeToProto(proto, ANIMATION_ADAPTER);
         }
-        if (mLeash != null){
+        if (mLeash != null) {
             mLeash.writeToProto(proto, LEASH);
         }
         proto.write(ANIMATION_START_DELAYED, mAnimationStartDelayed);

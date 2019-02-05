@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.os.Bundle;
@@ -42,8 +43,8 @@ public class PassiveProvider extends AbstractLocationProvider {
 
     private boolean mReportLocation;
 
-    public PassiveProvider(LocationProviderManager locationProviderManager) {
-        super(locationProviderManager);
+    public PassiveProvider(Context context, LocationProviderManager locationProviderManager) {
+        super(context, locationProviderManager);
 
         mReportLocation = false;
 
