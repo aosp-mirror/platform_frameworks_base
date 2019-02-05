@@ -286,6 +286,46 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
+     * Sets whether the default service should be used.
+     *
+     * <p>Typically used during CTS tests to make sure only the default service doesn't interfere
+     * with the test results.
+     *
+     * @throws SecurityException if caller is not allowed to manage this service's settings.
+     */
+    public final void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
+        Slog.i(mTag, "setDefaultServiceEnabled() for userId " + userId + ": " + enabled);
+        enforceCallingPermissionForManagement();
+
+        synchronized (mLock) {
+            final S oldService = peekServiceForUserLocked(userId);
+            if (oldService != null) {
+                oldService.removeSelfFromCacheLocked();
+            }
+            mServiceNameResolver.setDefaultServiceEnabled(userId, enabled);
+
+            // Must update the service on cache so its initialization code is triggered
+            updateCachedServiceLocked(userId);
+        }
+    }
+
+    /**
+     * Checks whether the default service should be used.
+     *
+     * <p>Typically used during CTS tests to make sure only the default service doesn't interfere
+     * with the test results.
+     *
+     * @throws SecurityException if caller is not allowed to manage this service's settings.
+     */
+    public final boolean isDefaultServiceEnabled(@UserIdInt int userId) {
+        enforceCallingPermissionForManagement();
+
+        synchronized (mLock) {
+            return mServiceNameResolver.isDefaultServiceEnabled(userId);
+        }
+    }
+
+    /**
      * Gets the maximum time the service implementation can be changed.
      *
      * @throws UnsupportedOperationException if subclass doesn't override it.

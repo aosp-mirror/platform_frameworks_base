@@ -77,6 +77,15 @@ public final class ContentCaptureManagerServiceShellCommand extends ShellCommand
             pw.println("    Temporarily (for DURATION ms) changes the service implemtation.");
             pw.println("    To reset, call with just the USER_ID argument.");
             pw.println("");
+            pw.println("");
+            pw.println("  set default-service-enabled USER_ID [true|false]");
+            pw.println("    Enable / disable the default service for the user.");
+            pw.println("");
+            pw.println("");
+            pw.println("  get default-service-enabled USER_ID");
+            pw.println("    Checks whether the default service is enabled for the user.");
+            pw.println("");
+            pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
             pw.println("");
@@ -91,6 +100,8 @@ public final class ContentCaptureManagerServiceShellCommand extends ShellCommand
         switch(what) {
             case "bind-instant-service-allowed":
                 return getBindInstantService(pw);
+            case "default-service-enabled":
+                return getDefaultServiceEnabled(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -105,6 +116,8 @@ public final class ContentCaptureManagerServiceShellCommand extends ShellCommand
                 return setBindInstantService(pw);
             case "temporary-service":
                 return setTemporaryService(pw);
+            case "default-service-enabled":
+                return setDefaultServiceEnabled();
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -146,6 +159,20 @@ public final class ContentCaptureManagerServiceShellCommand extends ShellCommand
         mService.setTemporaryService(userId, serviceName, duration);
         pw.println("ContentCaptureService temporarily set to " + serviceName + " for "
                 + duration + "ms");
+        return 0;
+    }
+
+    private int setDefaultServiceEnabled() {
+        final int userId = getNextIntArgRequired();
+        final boolean enabled = Boolean.parseBoolean(getNextArg());
+        mService.setDefaultServiceEnabled(userId, enabled);
+        return 0;
+    }
+
+    private int getDefaultServiceEnabled(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final boolean enabled = mService.isDefaultServiceEnabled(userId);
+        pw.println(enabled);
         return 0;
     }
 
