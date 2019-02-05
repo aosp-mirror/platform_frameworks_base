@@ -126,7 +126,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private boolean mDropDownDismissedOnCompletion = true;
 
     private int mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-    private boolean mOpenBefore;
+    private MyWatcher mAutoCompleteTextWatcher;
 
     private Validator mValidator = null;
 
@@ -302,7 +302,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         setFocusable(true);
 
-        addTextChangedListener(new MyWatcher());
+        mAutoCompleteTextWatcher = new MyWatcher();
+        addTextChangedListener(mAutoCompleteTextWatcher);
 
         mPassThroughClickListener = new PassThroughClickListener();
         super.setOnClickListener(mPassThroughClickListener);
@@ -872,45 +873,66 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         return getText().length() >= mThreshold;
     }
 
-    /**
-     * This is used to watch for edits to the text view.  Note that we call
-     * to methods on the auto complete text view class so that we can access
-     * private vars without going through thunks.
-     */
+
+
+    /** This is used to watch for edits to the text view. */
     private class MyWatcher implements TextWatcher {
-        public void afterTextChanged(Editable s) {
-            doAfterTextChanged();
-        }
+        private boolean mOpenBefore;
+
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            doBeforeTextChanged();
+            if (mBlockCompletion) return;
+
+            // when text is changed, inserted or deleted, we attempt to show
+            // the drop down
+            mOpenBefore = isPopupShowing();
+            if (DEBUG) Log.v(TAG, "before text changed: open=" + mOpenBefore);
         }
+
+        public void afterTextChanged(Editable s) {
+            if (mBlockCompletion) return;
+
+            // if the list was open before the keystroke, but closed afterwards,
+            // then something in the keystroke processing (an input filter perhaps)
+            // called performCompletion() and we shouldn't do any more processing.
+            if (DEBUG) {
+                Log.v(TAG, "after text changed: openBefore=" + mOpenBefore
+                        + " open=" + isPopupShowing());
+            }
+
+            if (mOpenBefore && !isPopupShowing()) return;
+
+            refreshAutoCompleteResults();
+        }
+
         public void onTextChanged(CharSequence s, int start, int before, int count) {
         }
     }
 
-    @UnsupportedAppUsage
+    /**
+     * This function is deprecated. Please use {@link #refreshAutoCompleteResults} instead.
+     * Note: Remove {@link #mAutoCompleteTextWatcher} after removing this function.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     void doBeforeTextChanged() {
-        if (mBlockCompletion) return;
-
-        // when text is changed, inserted or deleted, we attempt to show
-        // the drop down
-        mOpenBefore = isPopupShowing();
-        if (DEBUG) Log.v(TAG, "before text changed: open=" + mOpenBefore);
+        mAutoCompleteTextWatcher.beforeTextChanged(null, 0, 0, 0);
     }
 
-    @UnsupportedAppUsage
+    /**
+     * This function is deprecated. Please use {@link #refreshAutoCompleteResults} instead.
+     * Note: Remove {@link #mAutoCompleteTextWatcher} after removing this function.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     void doAfterTextChanged() {
-        if (mBlockCompletion) return;
+        mAutoCompleteTextWatcher.afterTextChanged(null);
+    }
 
-        // if the list was open before the keystroke, but closed afterwards,
-        // then something in the keystroke processing (an input filter perhaps)
-        // called performCompletion() and we shouldn't do any more processing.
-        if (DEBUG) Log.v(TAG, "after text changed: openBefore=" + mOpenBefore
-                + " open=" + isPopupShowing());
-        if (mOpenBefore && !isPopupShowing()) {
-            return;
-        }
-
+    /**
+     * Refreshes the auto complete results. You usually shouldn't have to manually refresh the
+     * AutoCompleteResults as this is done automatically whenever the text changes. However if the
+     * results are not available and have to be fetched, you can call this function after fetching
+     * the results.
+     */
+    public final void refreshAutoCompleteResults() {
         // the drop down is shown only when a minimum number of characters
         // was typed in the text view
         if (enoughToFilter()) {
