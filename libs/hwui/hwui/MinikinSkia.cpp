@@ -65,6 +65,15 @@ float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id, const minikin::Mi
     return skWidth;
 }
 
+void MinikinFontSkia::GetHorizontalAdvances(uint16_t* glyph_ids, uint32_t count,
+                                            const minikin::MinikinPaint& paint,
+                                            const minikin::FontFakery& fakery,
+                                            float* outAdvances) const {
+    SkFont skFont;
+    MinikinFontSkia_SetSkiaFont(this, &skFont, paint, fakery);
+    skFont.getWidths(glyph_ids, count, outAdvances);
+}
+
 void MinikinFontSkia::GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
                                 const minikin::MinikinPaint& paint,
                                 const minikin::FontFakery& fakery) const {
