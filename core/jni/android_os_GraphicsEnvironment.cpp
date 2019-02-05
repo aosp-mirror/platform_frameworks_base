@@ -32,6 +32,17 @@ void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
     android::GraphicsEnv::getInstance().setDriverPath(pathChars.c_str());
 }
 
+void setGpuStats_native(JNIEnv* env, jobject clazz, jstring driverPackageName,
+                        jstring driverVersionName, jlong driverVersionCode,
+                        jstring appPackageName) {
+    ScopedUtfChars driverPackageNameChars(env, driverPackageName);
+    ScopedUtfChars driverVersionNameChars(env, driverVersionName);
+    ScopedUtfChars appPackageNameChars(env, appPackageName);
+    android::GraphicsEnv::getInstance().setGpuStats(driverPackageNameChars.c_str(),
+                                                    driverVersionNameChars.c_str(),
+                                                    driverVersionCode, appPackageNameChars.c_str());
+}
+
 void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appName, jstring devOptIn,
                          jobject rulesFd, jlong rulesOffset, jlong rulesLength) {
     ScopedUtfChars pathChars(env, path);
@@ -68,6 +79,7 @@ void setDebugLayersGLES_native(JNIEnv* env, jobject clazz, jstring layers) {
 const JNINativeMethod g_methods[] = {
     { "getCanLoadSystemLibraries", "()I", reinterpret_cast<void*>(getCanLoadSystemLibraries_native) },
     { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
+    { "setGpuStats", "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V", reinterpret_cast<void*>(setGpuStats_native) },
     { "setAngleInfo", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/FileDescriptor;JJ)V", reinterpret_cast<void*>(setAngleInfo_native) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
     { "setDebugLayers", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayers_native) },
