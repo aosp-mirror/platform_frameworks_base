@@ -4167,10 +4167,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * The view flags hold various views states.
+     *
+     * Use {@link #setTransitionVisibility(int)} to change the visibility of this view without
+     * triggering updates.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(formatToHexString = true)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     int mViewFlags;
 
     static class TransformationInfo {
@@ -12910,14 +12913,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Change the visibility of the View without triggering any other changes. This is
-     * important for transitions, where visibility changes should not adjust focus or
-     * trigger a new layout. This is only used when the visibility has already been changed
-     * and we need a transient value during an animation. When the animation completes,
-     * the original visibility value is always restored.
+     * Changes the visibility of this View without triggering any other changes. This should only
+     * be used by animation frameworks, such as {@link android.transition.Transition}, where
+     * visibility changes should not adjust focus or trigger a new layout. Application developers
+     * should use {@link #setVisibility} instead to ensure that the hierarchy is correctly updated.
+     *
+     * <p>Only call this method when a temporary visibility must be applied during an
+     * animation and the original visibility value is guaranteed to be reset after the
+     * animation completes. Use {@link #setVisibility} in all other cases.</p>
      *
      * @param visibility One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
-     * @hide
+     * @see #setVisibility(int)
      */
     public void setTransitionVisibility(@Visibility int visibility) {
         mViewFlags = (mViewFlags & ~View.VISIBILITY_MASK) | visibility;
