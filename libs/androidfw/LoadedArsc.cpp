@@ -598,6 +598,13 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         std::string actor;
         util::ReadUtf16StringFromDevice(header->actor, arraysize(header->actor), &actor);
 
+        if (loaded_package->overlayable_map_.find(name) !=
+            loaded_package->overlayable_map_.end()) {
+          LOG(ERROR) << "Multiple <overlayable> blocks with the same name '" << name << "'.";
+          return {};
+        }
+        loaded_package->overlayable_map_.emplace(name, actor);
+
         // Iterate over the overlayable policy chunks contained within the overlayable chunk data
         ChunkIterator overlayable_iter(child_chunk.data_ptr(), child_chunk.data_size());
         while (overlayable_iter.HasNext()) {

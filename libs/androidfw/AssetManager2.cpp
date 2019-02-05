@@ -203,6 +203,27 @@ const DynamicRefTable* AssetManager2::GetDynamicRefTableForCookie(ApkAssetsCooki
   return nullptr;
 }
 
+const std::unordered_map<std::string, std::string>*
+  AssetManager2::GetOverlayableMapForPackage(uint32_t package_id) const {
+
+  if (package_id >= package_ids_.size()) {
+    return nullptr;
+  }
+
+  const size_t idx = package_ids_[package_id];
+  if (idx == 0xff) {
+    return nullptr;
+  }
+
+  const PackageGroup& package_group = package_groups_[idx];
+  if (package_group.packages_.size() == 0) {
+    return nullptr;
+  }
+
+  const auto loaded_package = package_group.packages_[0].loaded_package_;
+  return &loaded_package->GetOverlayableMap();
+}
+
 void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
   const int diff = configuration_.diff(configuration);
   configuration_ = configuration;

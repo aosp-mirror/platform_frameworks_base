@@ -124,6 +124,9 @@ class AssetManager2 {
   // This may be nullptr if the APK represented by `cookie` has no resource table.
   const DynamicRefTable* GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
 
+  const std::unordered_map<std::string, std::string>*
+    GetOverlayableMapForPackage(uint32_t package_id) const;
+
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
   void SetConfiguration(const ResTable_config& configuration);
