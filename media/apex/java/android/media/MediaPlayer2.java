@@ -86,6 +86,12 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * MediaPlayer2 class can be used to control playback of audio/video files and streams.
  *
+ * <p>
+ * This API is not generally intended for third party application developers.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
+ * for consistent behavior across all devices.
+ *
  * <p>Topics covered here are:
  * <ol>
  * <li><a href="#PlayerStates">Player states</a>
