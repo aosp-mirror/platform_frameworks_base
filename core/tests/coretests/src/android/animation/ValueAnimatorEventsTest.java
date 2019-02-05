@@ -26,5 +26,4 @@ public class ValueAnimatorEventsTest extends EventsTest {
         mAnimator = ValueAnimator.ofFloat(0, 1);
         super.setUp();
     }
-
 }
