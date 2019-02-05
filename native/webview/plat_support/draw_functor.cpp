@@ -177,9 +177,6 @@ int CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks) {
         webview_functor_callbacks.vk.initialize = &initializeVk;
         webview_functor_callbacks.vk.draw = &drawVk;
         webview_functor_callbacks.vk.postDraw = &postDrawVk;
-        // TODO(boliu): Remove this once SkiaRecordingCanvas::drawWebViewFunctor
-        // no longer uses GL interop.
-        webview_functor_callbacks.gles.draw = &draw_gl;
         break;
     }
     callbacks_initialized = true;
