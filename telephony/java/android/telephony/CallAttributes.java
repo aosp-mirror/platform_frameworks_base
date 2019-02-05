@@ -117,9 +117,9 @@ public class CallAttributes implements Parcelable {
 
         CallAttributes s = (CallAttributes) o;
 
-        return (mPreciseCallState == s.mPreciseCallState
+        return (Objects.equals(mPreciseCallState, s.mPreciseCallState)
                 && mNetworkType == s.mNetworkType
-                && mCallQuality == s.mCallQuality);
+                && Objects.equals(mCallQuality, s.mCallQuality));
     }
 
     /**
