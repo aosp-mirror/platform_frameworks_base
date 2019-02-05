@@ -559,7 +559,7 @@ void LogEvent::init(android_log_context context) {
 
                 // Handles the oneof field in KeyValuePair atom.
                 if (isKeyValuePairAtom && depth == 2) {
-                    pos[depth] = 4;
+                    pos[depth] = 5;
                 }
 
                 mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(elem.data.float32)));
@@ -575,7 +575,7 @@ void LogEvent::init(android_log_context context) {
 
                 // Handles the oneof field in KeyValuePair atom.
                 if (isKeyValuePairAtom && depth == 2) {
-                    pos[depth] = 3;
+                    pos[depth] = 4;
                 }
                 mValues.push_back(FieldValue(Field(mTagId, pos, depth),
                                              Value(string(elem.data.string, elem.len))));
@@ -593,7 +593,7 @@ void LogEvent::init(android_log_context context) {
                     }
                     // Handles the oneof field in KeyValuePair atom.
                     if (isKeyValuePairAtom && depth == 2) {
-                        pos[depth] = 2;
+                        pos[depth] = 3;
                     }
                     mValues.push_back(
                             FieldValue(Field(mTagId, pos, depth), Value((int64_t)elem.data.int64)));
