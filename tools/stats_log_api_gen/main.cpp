@@ -674,7 +674,7 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
 
     size_t i = 0;
-    // Print constants
+    // Print atom constants
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
         atom != atoms.decls.end(); atom++) {
         string constant = make_constant_name(atom->name);
@@ -699,6 +699,30 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "\n");
     fprintf(out, "};\n");
     fprintf(out, "\n");
+
+    // Print constants for the enum values.
+    fprintf(out, "//\n");
+    fprintf(out, "// Constants for enum values\n");
+    fprintf(out, "//\n\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+        atom != atoms.decls.end(); atom++) {
+        for (vector<AtomField>::const_iterator field = atom->fields.begin();
+            field != atom->fields.end(); field++) {
+            if (field->javaType == JAVA_TYPE_ENUM) {
+                fprintf(out, "// Values for %s.%s\n", atom->message.c_str(),
+                    field->name.c_str());
+                for (map<int, string>::const_iterator value = field->enumValues.begin();
+                    value != field->enumValues.end(); value++) {
+                    fprintf(out, "const int32_t %s__%s__%s = %d;\n",
+                        make_constant_name(atom->message).c_str(),
+                        make_constant_name(field->name).c_str(),
+                        make_constant_name(value->second).c_str(),
+                        value->first);
+                }
+                fprintf(out, "\n");
+            }
+        }
+    }
 
     fprintf(out, "struct BytesField {\n");
     fprintf(out,
