@@ -80,6 +80,12 @@ public:
     /* Flushes data to disk. Data on memory will be gone after written to disk. */
     void WriteDataToDisk(const DumpReportReason dumpReportReason);
 
+    /* Persist metric activation status onto disk. */
+    void WriteMetricsActivationToDisk(int64_t currentTimeNs);
+
+    /* Load metric activation status from disk. */
+    void LoadMetricsActivationFromDisk();
+
     // Reset all configs.
     void resetConfigs();
 
@@ -188,6 +194,8 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
+    FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
+
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3);
