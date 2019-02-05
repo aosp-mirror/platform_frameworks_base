@@ -264,7 +264,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
      */
     private boolean hasMultipleEnabledIMEsOrSubtypes(InputMethodManager imm,
             final boolean shouldIncludeAuxiliarySubtypes) {
-        final List<InputMethodInfo> enabledImis = imm.getEnabledInputMethodList();
+        final List<InputMethodInfo> enabledImis =
+                imm.getEnabledInputMethodListAsUser(KeyguardUpdateMonitor.getCurrentUser());
 
         // Number of the filtered IMEs
         int filteredImisCount = 0;

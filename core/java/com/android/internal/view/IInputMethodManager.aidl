@@ -36,7 +36,7 @@ interface IInputMethodManager {
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getInputMethodList();
     // TODO: Use ParceledListSlice instead
-    List<InputMethodInfo> getEnabledInputMethodList();
+    List<InputMethodInfo> getEnabledInputMethodList(int userId);
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();

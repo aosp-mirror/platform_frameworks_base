@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.annotation.DrawableRes;
@@ -26,6 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -46,6 +48,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
@@ -978,7 +981,26 @@ public final class InputMethodManager {
      */
     public List<InputMethodInfo> getEnabledInputMethodList() {
         try {
-            return mService.getEnabledInputMethodList();
+            // We intentionally do not use UserHandle.getCallingUserId() here because for system
+            // services InputMethodManagerInternal.getEnabledInputMethodListAsUser() should be used
+            // instead.
+            return mService.getEnabledInputMethodList(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of enabled input methods for the specified user.
+     *
+     * @param userId user ID to query
+     * @return {@link List} of {@link InputMethodInfo}.
+     * @hide
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
+        try {
+            return mService.getEnabledInputMethodList(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
