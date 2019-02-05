@@ -899,9 +899,20 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public void setIsSyncable(Account account, String providerName, int syncable) {
+        setIsSyncableAsUser(account, providerName, syncable, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setIsSyncableAsUser(Account account, String providerName, int syncable,
+            int userId) {
         if (TextUtils.isEmpty(providerName)) {
             throw new IllegalArgumentException("Authority must not be empty");
         }
+        enforceCrossUserPermission(userId,
+                "no permission to set the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
 
@@ -909,7 +920,6 @@ public final class ContentService extends IContentService.Stub {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
 
-        int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
