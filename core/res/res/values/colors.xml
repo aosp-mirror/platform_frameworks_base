@@ -199,8 +199,6 @@
     <color name="Red_700">#ffc53929</color>
     <color name="Red_800">#ffb93221</color>
 
-    <color name="chooser_service_row_background_color">#fff5f5f5</color>
-
     <!-- Status bar color for semi transparent mode. -->
     <color name="system_bar_background_semi_transparent">#66000000</color> <!-- 40% black -->
 
