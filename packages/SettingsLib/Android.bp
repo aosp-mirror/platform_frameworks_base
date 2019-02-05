@@ -20,7 +20,7 @@ android_library {
         "SettingsLibLayoutPreference",
         "SettingsLibActionButtonsPreference",
         "SettingsLibEntityHeaderWidgets",
-        "SettingsLibBarChartPreference"
+        "SettingsLibBarChartPreference",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
@@ -34,4 +34,18 @@ android_library {
 
 }
 
-// For the test package.
+// NOTE: Keep this module in sync with ./common.mk
+java_defaults {
+    name: "SettingsLibDefaults",
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.lifecycle_lifecycle-common",
+        "androidx.legacy_legacy-support-v4",
+        "androidx.lifecycle_lifecycle-runtime",
+        "androidx.recyclerview_recyclerview",
+        "androidx.preference_preference",
+        "androidx.appcompat_appcompat",
+        "androidx.legacy_legacy-preference-v14",
+        "SettingsLib",
+    ],
+}
