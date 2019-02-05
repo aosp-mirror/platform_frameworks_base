@@ -228,8 +228,11 @@ public class DexManager {
                     continue;
                 }
 
-                mDexLogger.recordDex(loaderUserId, dexPath, searchResult.mOwningPackageName,
-                        loadingAppInfo.packageName);
+                if (!primaryOrSplit) {
+                    // Record loading of a DEX file from an app data directory.
+                    mDexLogger.recordDex(loaderUserId, dexPath, searchResult.mOwningPackageName,
+                            loadingAppInfo.packageName);
+                }
 
                 if (classLoaderContexts != null) {
 
