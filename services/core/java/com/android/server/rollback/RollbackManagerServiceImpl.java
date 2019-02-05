@@ -924,7 +924,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = mContext.getPackageManager();
         PackageInfo pkgInfo = null;
         try {
-            pkgInfo = pm.getPackageInfo(packageName, 0);
+            pkgInfo = pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
