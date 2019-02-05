@@ -141,10 +141,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         mAnimationStateHandler = handler;
     }
 
-    public void destroy() {
-        Dependency.get(StatusBarStateController.class).removeCallback(this);
-    }
-
     private void initResources() {
         Resources resources = mContext.getResources();
         mStatusBarHeight = resources.getDimensionPixelSize(
