@@ -54,6 +54,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.dimen;
 import com.android.systemui.plugins.ActivityStarter;
@@ -132,6 +133,15 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mUserInfoController = userInfoController;
         mNetworkController = networkController;
         mDeviceProvisionedController = deviceProvisionedController;
+    }
+
+    @VisibleForTesting
+    public QSFooterImpl(Context context, AttributeSet attrs) {
+        this(context, attrs,
+                Dependency.get(ActivityStarter.class),
+                Dependency.get(UserInfoController.class),
+                Dependency.get(NetworkController.class),
+                Dependency.get(DeviceProvisionedController.class));
     }
 
     @Override
@@ -476,32 +486,62 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 mInfos[0].visible && mInfos[1].visible ? View.VISIBLE : View.GONE);
     }
 
+    @VisibleForTesting
+    protected int getSlotIndex(int subscriptionId) {
+        return SubscriptionManager.getSlotIndex(subscriptionId);
+    }
+
     @Override
     public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
         if (info.anySimReady) {
             boolean[] slotSeen = new boolean[SIM_SLOTS];
-            for (int i = 0; i < SIM_SLOTS && i < info.listOfCarriers.length; i++) {
-                int slot = SubscriptionManager.getSlotIndex(info.subscriptionIds[i]);
-                mInfos[slot].visible = true;
-                slotSeen[slot] = true;
-                mCarrierTexts[slot].setText(info.listOfCarriers[i].toString().trim());
-                mCarrierGroups[slot].setVisibility(View.VISIBLE);
-            }
-            for (int i = 0; i < SIM_SLOTS; i++) {
-                if (!slotSeen[i]) {
+            if (info.listOfCarriers.length == info.subscriptionIds.length) {
+                for (int i = 0; i < SIM_SLOTS && i < info.listOfCarriers.length; i++) {
+                    int slot = getSlotIndex(info.subscriptionIds[i]);
+                    if (slot >= SIM_SLOTS) {
+                        Log.w(TAG, "updateInfoCarrier - slot: " + slot);
+                        continue;
+                    }
+                    if (slot == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+                        Log.e(TAG,
+                                "Invalid SIM slot index for subscription: "
+                                        + info.subscriptionIds[i]);
+                        continue;
+                    }
+                    mInfos[slot].visible = true;
+                    slotSeen[slot] = true;
+                    mCarrierTexts[slot].setText(info.listOfCarriers[i].toString().trim());
+                    mCarrierGroups[slot].setVisibility(View.VISIBLE);
+                }
+                for (int i = 0; i < SIM_SLOTS; i++) {
+                    if (!slotSeen[i]) {
+                        mInfos[i].visible = false;
+                        mCarrierGroups[i].setVisibility(View.GONE);
+                    }
+                }
+            } else {
+                // If there are sims ready but there are not the same number of carrier names as
+                // subscription ids, just show the full text in the first slot
+                mInfos[0].visible = true;
+                mCarrierTexts[0].setText(info.carrierText);
+                mCarrierGroups[0].setVisibility(View.VISIBLE);
+                for (int i = 1; i < SIM_SLOTS; i++) {
                     mInfos[i].visible = false;
+                    mCarrierTexts[i].setText("");
                     mCarrierGroups[i].setVisibility(View.GONE);
                 }
             }
-            handleUpdateState();
         } else {
             mInfos[0].visible = false;
-            mInfos[1].visible = false;
             mCarrierTexts[0].setText(info.carrierText);
             mCarrierGroups[0].setVisibility(View.VISIBLE);
-            mCarrierGroups[1].setVisibility(View.GONE);
-            handleUpdateState();
+            for (int i = 1; i < SIM_SLOTS; i++) {
+                mInfos[i].visible = false;
+                mCarrierTexts[i].setText("");
+                mCarrierGroups[i].setVisibility(View.GONE);
+            }
         }
+        handleUpdateState();
     }
 
     @Override
@@ -510,9 +550,14 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             int qsType, boolean activityIn, boolean activityOut,
             String typeContentDescription,
             String description, boolean isWide, int subId, boolean roaming) {
-        int slotIndex = SubscriptionManager.getSlotIndex(subId);
+        int slotIndex = getSlotIndex(subId);
         if (slotIndex >= SIM_SLOTS) {
-            Log.e(TAG, "setMobileDataIndicators - slot: " + slotIndex);
+            Log.w(TAG, "setMobileDataIndicators - slot: " + slotIndex);
+            return;
+        }
+        if (slotIndex == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+            Log.e(TAG, "Invalid SIM slot index for subscription: " + subId);
+            return;
         }
         mInfos[slotIndex].visible = statusIcon.visible;
         mInfos[slotIndex].mobileSignalIconId = statusIcon.icon;
@@ -538,7 +583,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         String typeContentDescription;
         boolean roaming;
     }
-
 
     /**
      * TextView that changes its ellipsize value with its visibility.
