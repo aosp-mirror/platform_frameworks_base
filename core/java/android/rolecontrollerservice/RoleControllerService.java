@@ -96,6 +96,11 @@ public abstract class RoleControllerService extends Service {
                 RoleControllerService.this.onGrantDefaultRoles(new RoleManagerCallbackDelegate(
                         callback));
             }
+
+            @Override
+            public void onSmsKillSwitchToggled(boolean smsRestrictionEnabled) {
+                RoleControllerService.this.onSmsKillSwitchToggled(smsRestrictionEnabled);
+            }
         };
     }
 
@@ -139,6 +144,14 @@ public abstract class RoleControllerService extends Service {
      */
     public abstract void onClearRoleHolders(@NonNull String roleName,
             @NonNull RoleManagerCallback callback);
+
+    /**
+     * Cleanup appop/permissions state in response to sms kill switch toggle
+     *
+     * @param smsRestrictionEnabled whether kill switch was turned on
+     */
+    //STOPSHIP: remove this api before shipping a final version
+    public abstract void onSmsKillSwitchToggled(boolean smsRestrictionEnabled);
 
     /**
      * Called by system to grant default permissions and roles.

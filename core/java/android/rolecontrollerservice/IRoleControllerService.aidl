@@ -32,4 +32,6 @@ oneway interface IRoleControllerService {
     void onClearRoleHolders(in String roleName, in IRoleManagerCallback callback);
 
     void onGrantDefaultRoles(in IRoleManagerCallback callback);
+
+    void onSmsKillSwitchToggled(boolean smsRestrictionEnabled);
 }

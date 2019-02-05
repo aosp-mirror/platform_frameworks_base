@@ -6030,6 +6030,7 @@ package android.rolecontrollerservice {
     method public abstract void onClearRoleHolders(@NonNull String, @NonNull android.app.role.RoleManagerCallback);
     method public abstract void onGrantDefaultRoles(@NonNull android.app.role.RoleManagerCallback);
     method public abstract void onRemoveRoleHolder(@NonNull String, @NonNull String, @NonNull android.app.role.RoleManagerCallback);
+    method public abstract void onSmsKillSwitchToggled(boolean);
     field public static final String SERVICE_INTERFACE = "android.rolecontrollerservice.RoleControllerService";
   }
 

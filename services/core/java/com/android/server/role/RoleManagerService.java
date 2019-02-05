@@ -38,7 +38,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
+import android.database.ContentObserver;
 import android.database.CursorWindow;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +51,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.provider.Settings;
 import android.service.sms.FinancialSmsService;
 import android.telephony.IFinancialSmsCallback;
 import android.text.TextUtils;
@@ -192,6 +195,18 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 performInitialGrantsIfNecessary(userId);
             }
         }, UserHandle.SYSTEM, intentFilter, null /* broadcastPermission */, null /* handler */);
+
+        getContext().getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED), false,
+                new ContentObserver(getContext().getMainThreadHandler()) {
+                    @Override
+                    public void onChange(boolean selfChange, Uri uri, int userId) {
+                        getOrCreateControllerService(userId).onSmsKillSwitchToggled(
+                                Settings.Global.getInt(
+                                        getContext().getContentResolver(),
+                                        Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0) == 1);
+                    }
+                }, UserHandle.USER_ALL);
     }
 
     @Override
