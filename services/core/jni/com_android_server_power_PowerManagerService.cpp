@@ -20,6 +20,7 @@
 
 #include <android/hardware/power/1.1/IPower.h>
 #include <android/system/suspend/1.0/ISystemSuspend.h>
+#include <android/system/suspend/ISuspendControlService.h>
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
@@ -30,13 +31,14 @@
 #include <android-base/chrono_utils.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
+#include <binder/IServiceManager.h>
+#include <hardware/power.h>
+#include <hardware_legacy/power.h>
+#include <hidl/ServiceManagement.h>
 #include <utils/Timers.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
 #include <utils/Log.h>
-#include <hardware/power.h>
-#include <hardware_legacy/power.h>
-#include <hidl/ServiceManagement.h>
 
 #include "com_android_server_power_PowerManagerService.h"
 
@@ -48,6 +50,7 @@ using android::String8;
 using android::system::suspend::V1_0::ISystemSuspend;
 using android::system::suspend::V1_0::IWakeLock;
 using android::system::suspend::V1_0::WakeLockType;
+using android::system::suspend::ISuspendControlService;
 using IPowerV1_1 = android::hardware::power::V1_1::IPower;
 using IPowerV1_0 = android::hardware::power::V1_0::IPower;
 
@@ -176,6 +179,7 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
 }
 
 static sp<ISystemSuspend> gSuspendHal = nullptr;
+static sp<ISuspendControlService> gSuspendControl = nullptr;
 static sp<IWakeLock> gSuspendBlocker = nullptr;
 static std::mutex gSuspendMutex;
 
@@ -191,18 +195,33 @@ sp<ISystemSuspend> getSuspendHal() {
     return gSuspendHal;
 }
 
+sp<ISuspendControlService> getSuspendControl() {
+    static std::once_flag suspendControlFlag;
+    std::call_once(suspendControlFlag, [](){
+        while(gSuspendControl == nullptr) {
+            sp<IBinder> control =
+                    defaultServiceManager()->getService(String16("suspend_control"));
+            if (control != nullptr) {
+                gSuspendControl = interface_cast<ISuspendControlService>(control);
+            }
+        }
+    });
+    return gSuspendControl;
+}
+
 void enableAutoSuspend() {
     static bool enabled = false;
-
-    std::lock_guard<std::mutex> lock(gSuspendMutex);
     if (!enabled) {
-        sp<ISystemSuspend> suspendHal = getSuspendHal();
-        suspendHal->enableAutosuspend();
-        enabled = true;
+        sp<ISuspendControlService> suspendControl = getSuspendControl();
+        suspendControl->enableAutosuspend(&enabled);
     }
-    if (gSuspendBlocker) {
-        gSuspendBlocker->release();
-        gSuspendBlocker.clear();
+
+    {
+        std::lock_guard<std::mutex> lock(gSuspendMutex);
+        if (gSuspendBlocker) {
+            gSuspendBlocker->release();
+            gSuspendBlocker.clear();
+        }
     }
 }
 
