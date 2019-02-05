@@ -5770,6 +5770,10 @@ package android.provider {
     field public static final String NAMESPACE = "runtime_native";
   }
 
+  public static interface DeviceConfig.RuntimeNativeBoot {
+    field public static final String NAMESPACE = "runtime_native_boot";
+  }
+
   public static interface DeviceConfig.Storage {
     field public static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
     field public static final String NAMESPACE = "storage";

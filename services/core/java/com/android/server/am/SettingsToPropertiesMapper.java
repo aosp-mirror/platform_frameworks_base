@@ -80,6 +80,7 @@ class SettingsToPropertiesMapper {
         DeviceConfig.ActivityManagerNativeBoot.NAMESPACE,
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_NETD_NATIVE,
+        DeviceConfig.RuntimeNativeBoot.NAMESPACE,
         DeviceConfig.RuntimeNative.NAMESPACE,
     };
 
