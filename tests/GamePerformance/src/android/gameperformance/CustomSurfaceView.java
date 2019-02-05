@@ -104,7 +104,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             if (traceCalls) {
                 Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, LOCAL_REQUEST_BUFFER);
             }
-            Canvas canvas = mSurface.lockCanvas(null);
+            Canvas canvas = mSurface.lockHardwareCanvas();
             if (traceCalls) {
                 Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
             }
