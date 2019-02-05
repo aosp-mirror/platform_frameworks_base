@@ -1113,6 +1113,13 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
     const std::string& element_name = parser->element_name();
     const std::string& element_namespace = parser->element_namespace();
     if (element_namespace.empty() && element_name == "item") {
+      if (current_policies == OverlayableItem::Policy::kNone) {
+        diag_->Error(DiagMessage(element_source)
+                         << "<item> within an <overlayable> must be inside a <policy> block");
+        error = true;
+        continue;
+      }
+
       // Items specify the name and type of resource that should be overlayable
       Maybe<StringPiece> item_name = xml::FindNonEmptyAttribute(parser, "name");
       if (!item_name) {
@@ -1169,6 +1176,8 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
             current_policies |= OverlayableItem::Policy::kSystem;
           } else if (trimmed_part == "vendor") {
             current_policies |= OverlayableItem::Policy::kVendor;
+          } else if (trimmed_part == "signature") {
+            current_policies |= OverlayableItem::Policy::kSignature;
           } else {
             diag_->Error(DiagMessage(element_source)
                          << "<policy> has unsupported type '" << trimmed_part << "'");
@@ -1176,6 +1185,11 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
             continue;
           }
         }
+      } else {
+        diag_->Error(DiagMessage(element_source)
+                         << "<policy> must have a 'type' attribute");
+        error = true;
+        continue;
       }
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
       diag_->Error(DiagMessage(element_source) << "invalid element <" << element_name << "> "

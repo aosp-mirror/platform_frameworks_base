@@ -1647,6 +1647,10 @@ struct ResTable_overlayable_policy_header
     // The overlay must reside of the product partition or must have existed on the product
     // partition before an upgrade to overlay these resources.
     POLICY_PRODUCT_PARTITION = 0x00000008,
+
+    // The overlay must be signed with the same signature as the actor of the target resource,
+    // which can be separate or the same as the target package with the resource.
+    POLICY_SIGNATURE = 0x00000010,
   };
   uint32_t policy_flags;
 

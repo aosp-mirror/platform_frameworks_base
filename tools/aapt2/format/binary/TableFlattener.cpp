@@ -274,7 +274,9 @@ class PackageFlattener {
       FlattenLibrarySpec(buffer);
     }
 
-    FlattenOverlayable(buffer);
+    if (!FlattenOverlayable(buffer)) {
+      return false;
+    }
 
     pkg_writer.Finish();
     return true;
@@ -468,23 +470,29 @@ class PackageFlattener {
           overlayable_chunk = &chunk;
         }
 
+        if (item.policies == 0) {
+          context_->GetDiagnostics()->Error(DiagMessage(item.overlayable->source)
+                                                << "overlayable "
+                                                << entry->name
+                                                << " does not specify policy");
+          return false;
+        }
+
         uint32_t policy_flags = 0;
-        if (item.policies == OverlayableItem::Policy::kNone) {
-          // Encode overlayable entries defined without a policy as publicly overlayable
+        if (item.policies & OverlayableItem::Policy::kPublic) {
           policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
-        } else {
-          if (item.policies & OverlayableItem::Policy::kPublic) {
-            policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
-          }
-          if (item.policies & OverlayableItem::Policy::kSystem) {
-            policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
-          }
-          if (item.policies & OverlayableItem::Policy::kVendor) {
-            policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
-          }
-          if (item.policies & OverlayableItem::Policy::kProduct) {
-            policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
-          }
+        }
+        if (item.policies & OverlayableItem::Policy::kSystem) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
+        }
+        if (item.policies & OverlayableItem::Policy::kVendor) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
+        }
+        if (item.policies & OverlayableItem::Policy::kProduct) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
+        }
+        if (item.policies & OverlayableItem::Policy::kSignature) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_SIGNATURE;
         }
 
         auto policy = overlayable_chunk->policy_ids.find(policy_flags);

@@ -526,6 +526,10 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
       "FontPack", "overlay://theme"));
   overlayable_item_baz.policies |= OverlayableItem::Policy::kPublic;
 
+  OverlayableItem overlayable_item_boz(std::make_shared<Overlayable>(
+      "IconPack", "overlay://theme"));
+  overlayable_item_boz.policies |= OverlayableItem::Policy::kSignature;
+
   OverlayableItem overlayable_item_biz(std::make_shared<Overlayable>(
       "Other", "overlay://customization"));
   overlayable_item_biz.comment ="comment";
@@ -536,6 +540,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
           .SetOverlayable("com.app.a:bool/foo", overlayable_item_foo)
           .SetOverlayable("com.app.a:bool/bar", overlayable_item_bar)
           .SetOverlayable("com.app.a:bool/baz", overlayable_item_baz)
+          .SetOverlayable("com.app.a:bool/boz", overlayable_item_boz)
           .SetOverlayable("com.app.a:bool/biz", overlayable_item_biz)
           .AddValue("com.app.a:bool/fiz", ResourceUtils::TryParseBool("true"))
           .Build();
@@ -575,6 +580,14 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("FontPack"));
   EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
   EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/boz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("IconPack"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
   ASSERT_TRUE(search_result);
