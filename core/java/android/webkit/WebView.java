@@ -61,6 +61,7 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inspector.InspectableProperty;
 import android.view.textclassifier.TextClassifier;
 import android.widget.AbsoluteLayout;
 
@@ -1239,6 +1240,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the URL for the current page
      */
+    @InspectableProperty(hasAttributeId = false)
     @ViewDebug.ExportedProperty(category = "webview")
     public String getUrl() {
         checkThread();
@@ -1254,6 +1256,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the URL that was originally requested for the current page
      */
+    @InspectableProperty(hasAttributeId = false)
     @ViewDebug.ExportedProperty(category = "webview")
     public String getOriginalUrl() {
         checkThread();
@@ -1266,6 +1269,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the title for the current page
      */
+    @InspectableProperty(hasAttributeId = false)
     @ViewDebug.ExportedProperty(category = "webview")
     public String getTitle() {
         checkThread();
@@ -1278,6 +1282,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the favicon for the current page
      */
+    @InspectableProperty(hasAttributeId = false)
     public Bitmap getFavicon() {
         checkThread();
         return mProvider.getFavicon();
@@ -1300,6 +1305,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the progress for the current page between 0 and 100
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getProgress() {
         checkThread();
         return mProvider.getProgress();
@@ -1310,6 +1316,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the height of the HTML content
      */
+    @InspectableProperty(hasAttributeId = false)
     @ViewDebug.ExportedProperty(category = "webview")
     public int getContentHeight() {
         checkThread();
@@ -2276,6 +2283,11 @@ public class WebView extends AbsoluteLayout
      *
      * @return the requested renderer priority policy.
      */
+    @InspectableProperty(hasAttributeId = false, enumMapping = {
+            @InspectableProperty.EnumMap(name = "waived", value = RENDERER_PRIORITY_WAIVED),
+            @InspectableProperty.EnumMap(name = "bound", value = RENDERER_PRIORITY_BOUND),
+            @InspectableProperty.EnumMap(name = "important", value = RENDERER_PRIORITY_IMPORTANT)
+    })
     @RendererPriority
     public int getRendererRequestedPriority() {
         return mProvider.getRendererRequestedPriority();
@@ -2288,6 +2300,7 @@ public class WebView extends AbsoluteLayout
      * @return whether this WebView requests a priority of
      * {@link #RENDERER_PRIORITY_WAIVED} when not visible.
      */
+    @InspectableProperty(hasAttributeId = false)
     public boolean getRendererPriorityWaivedWhenNotVisible() {
         return mProvider.getRendererPriorityWaivedWhenNotVisible();
     }
