@@ -50,6 +50,12 @@ class RollbackData {
     public Instant timestamp;
 
     /**
+     * The session ID for the staged session if this rollback data represents a staged session,
+     * {@code -1} otherwise.
+     */
+    public int stagedSessionId;
+
+    /**
      * Whether this Rollback is currently in progress. This field is true from the point
      * we commit a {@code PackageInstaller} session containing these packages to the point the
      * {@code PackageInstaller} calls into the {@code onFinished} callback.
@@ -57,8 +63,9 @@ class RollbackData {
     // NOTE: All accesses to this field are from the RollbackManager handler thread.
     public boolean inProgress = false;
 
-    RollbackData(int rollbackId, File backupDir) {
+    RollbackData(int rollbackId, File backupDir, int stagedSessionId) {
         this.rollbackId = rollbackId;
         this.backupDir = backupDir;
+        this.stagedSessionId = stagedSessionId;
     }
 }

@@ -40,4 +40,11 @@ interface IRollbackManager {
 
     // Exposed for test purposes only.
     void expireRollbackForPackage(String packageName);
+
+    // Used by the staging manager to notify the RollbackManager that a session is
+    // being staged. In the case of multi-package sessions, the specified sessionId
+    // is that of the parent session.
+    //
+    // NOTE: This call is synchronous.
+    boolean notifyStagedSession(int sessionId);
 }

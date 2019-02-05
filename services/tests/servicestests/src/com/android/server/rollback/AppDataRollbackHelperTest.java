@@ -80,10 +80,10 @@ public class AppDataRollbackHelperTest {
     }
 
     private static RollbackData createInProgressRollbackData(String packageName) {
-        RollbackData data = new RollbackData(1, new File("/does/not/exist"));
+        RollbackData data = new RollbackData(1, new File("/does/not/exist"), -1);
         data.packages.add(new PackageRollbackInfo(
                 new VersionedPackage(packageName, 1), new VersionedPackage(packageName, 1),
-                new IntArray(), new ArrayList<>()));
+                new IntArray(), new ArrayList<>(), false));
         data.inProgress = true;
 
         return data;
