@@ -32,7 +32,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -46,6 +45,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 
@@ -1332,7 +1332,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
     }
 
-    @TestApi
+    @VisibleForTesting
     Point getLastSurfacePosition() {
         return mLastSurfacePosition;
     }
