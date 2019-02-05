@@ -614,6 +614,11 @@ public final class PowerManager {
          * Whether to go into Deep Doze as soon as the screen turns off or not.
          */
         int QUICK_DOZE = 15;
+
+        /**
+         * Whether to enable night mode when battery saver is enabled.
+         */
+        int NIGHT_MODE = 16;
     }
 
     /**

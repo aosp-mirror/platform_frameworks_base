@@ -40,7 +40,7 @@ import org.mockito.MockitoAnnotations;
  * Tests for {@link com.android.server.power.batterysaver.BatterySaverPolicy}
  */
 public class BatterySaverPolicyTest extends AndroidTestCase {
-    private static final int MAX_SERVICE_TYPE = 15;
+    private static final int MAX_SERVICE_TYPE = 16;
     private static final float BRIGHTNESS_FACTOR = 0.7f;
     private static final float DEFAULT_BRIGHTNESS_FACTOR = 0.5f;
     private static final float PRECISION = 0.001f;
@@ -143,6 +143,11 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyNetworkFirewall_DefaultValueCorrect() {
         testServiceDefaultValue_On(ServiceType.NETWORK_FIREWALL);
+    }
+
+    @SmallTest
+    public void testGetBatterySaverPolicy_PolicyNightMode_DefaultValueCorrect() {
+        testServiceDefaultValue_On(ServiceType.NIGHT_MODE);
     }
 
     @SmallTest
