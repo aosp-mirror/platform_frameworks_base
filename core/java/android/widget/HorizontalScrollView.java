@@ -43,6 +43,7 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -293,6 +294,7 @@ public class HorizontalScrollView extends FrameLayout {
      *
      * @attr ref android.R.styleable#HorizontalScrollView_fillViewport
      */
+    @InspectableProperty
     public boolean isFillViewport() {
         return mFillViewport;
     }

@@ -21733,6 +21733,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The known solid color background for this view, or 0 if the color may vary
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @InspectableProperty
     @ColorInt
     public int getSolidColor() {
         return 0;

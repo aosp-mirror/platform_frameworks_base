@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -367,6 +368,7 @@ public class FrameLayout extends ViewGroup {
      *
      * @return Whether all children are considered when measuring.
      */
+    @InspectableProperty
     public boolean getMeasureAllChildren() {
         return mMeasureAllChildren;
     }

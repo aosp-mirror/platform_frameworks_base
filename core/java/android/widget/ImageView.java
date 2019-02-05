@@ -51,6 +51,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -326,6 +327,7 @@ public class ImageView extends View {
      *
      * @attr ref android.R.styleable#ImageView_adjustViewBounds
      */
+    @InspectableProperty
     public boolean getAdjustViewBounds() {
         return mAdjustViewBounds;
     }
@@ -364,6 +366,7 @@ public class ImageView extends View {
      *
      * @attr ref android.R.styleable#ImageView_maxWidth
      */
+    @InspectableProperty
     public int getMaxWidth() {
         return mMaxWidth;
     }
@@ -402,6 +405,7 @@ public class ImageView extends View {
      *
      * @attr ref android.R.styleable#ImageView_maxHeight
      */
+    @InspectableProperty
     public int getMaxHeight() {
         return mMaxHeight;
     }
@@ -438,6 +442,7 @@ public class ImageView extends View {
      * @return the view's drawable, or null if no drawable has been
      * assigned.
      */
+    @InspectableProperty(name = "src")
     public Drawable getDrawable() {
         if (mDrawable == mRecycleableBitmapDrawable) {
             // Consider our cached version dirty since app code now has a reference to it
@@ -650,6 +655,7 @@ public class ImageView extends View {
      * @see #setImageTintList(ColorStateList)
      */
     @Nullable
+    @InspectableProperty(name = "tint")
     public ColorStateList getImageTintList() {
         return mDrawableTintList;
     }
@@ -679,6 +685,7 @@ public class ImageView extends View {
      * @see #setImageTintMode(PorterDuff.Mode)
      */
     @Nullable
+    @InspectableProperty(name = "tintMode")
     public PorterDuff.Mode getImageTintMode() {
         return mDrawableTintMode;
     }
@@ -844,6 +851,7 @@ public class ImageView extends View {
      * @see ImageView.ScaleType
      * @attr ref android.R.styleable#ImageView_scaleType
      */
+    @InspectableProperty
     public ScaleType getScaleType() {
         return mScaleType;
     }
@@ -893,6 +901,7 @@ public class ImageView extends View {
      *
      * @attr ref android.R.styleable#ImageView_cropToPadding
      */
+    @InspectableProperty
     public boolean getCropToPadding() {
         return mCropToPadding;
     }
@@ -1404,6 +1413,7 @@ public class ImageView extends View {
      *         if baseline alignment is not supported.
      */
     @Override
+    @InspectableProperty
     @ViewDebug.ExportedProperty(category = "layout")
     public int getBaseline() {
         if (mBaselineAlignBottom) {
@@ -1451,6 +1461,7 @@ public class ImageView extends View {
      * @return True if the ImageView's baseline is considered the bottom of the view, false if otherwise.
      * @see #setBaselineAlignBottom(boolean)
      */
+    @InspectableProperty
     public boolean getBaselineAlignBottom() {
         return mBaselineAlignBottom;
     }

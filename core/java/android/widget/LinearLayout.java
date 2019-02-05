@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -342,6 +343,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#LinearLayout_divider
      */
+    @InspectableProperty(name = "divider")
     public Drawable getDividerDrawable() {
         return mDivider;
     }
@@ -526,6 +528,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @return true when widgets are baseline-aligned, false otherwise
      */
+    @InspectableProperty
     public boolean isBaselineAligned() {
         return mBaselineAligned;
     }
@@ -554,6 +557,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#LinearLayout_measureWithLargestChild
      */
+    @InspectableProperty(name = "measureWithLargestChild")
     public boolean isMeasureWithLargestChildEnabled() {
         return mUseLargestChild;
     }
@@ -633,6 +637,7 @@ public class LinearLayout extends ViewGroup {
      *   part of a larger layout that is baseline aligned, or -1 if none has
      *   been set.
      */
+    @InspectableProperty
     public int getBaselineAlignedChildIndex() {
         return mBaselineAlignedChildIndex;
     }
@@ -686,6 +691,7 @@ public class LinearLayout extends ViewGroup {
      *         a number lower than or equals to 0.0f if not weight sum is
      *         to be used.
      */
+    @InspectableProperty
     public float getWeightSum() {
         return mWeightSum;
     }
@@ -1841,6 +1847,10 @@ public class LinearLayout extends ViewGroup {
      * @return either {@link #HORIZONTAL} or {@link #VERTICAL}
      */
     @OrientationMode
+    @InspectableProperty(enumMapping = {
+            @InspectableProperty.EnumMap(value = HORIZONTAL, name = "horizontal"),
+            @InspectableProperty.EnumMap(value = VERTICAL, name = "vertical")
+    })
     public int getOrientation() {
         return mOrientation;
     }
@@ -1877,6 +1887,7 @@ public class LinearLayout extends ViewGroup {
      * @return the current gravity.
      * @see #setGravity
      */
+    @InspectableProperty(valueType = InspectableProperty.ValueType.GRAVITY)
     public int getGravity() {
         return mGravity;
     }

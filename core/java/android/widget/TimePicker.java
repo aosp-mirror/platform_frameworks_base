@@ -35,6 +35,7 @@ import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -165,6 +166,10 @@ public class TimePicker extends FrameLayout {
      */
     @TimePickerMode
     @TestApi
+    @InspectableProperty(name = "timePickerMode", enumMapping = {
+            @InspectableProperty.EnumMap(name = "clock", value = MODE_CLOCK),
+            @InspectableProperty.EnumMap(name = "spinner", value = MODE_SPINNER)
+    })
     public int getMode() {
         return mMode;
     }
@@ -185,6 +190,7 @@ public class TimePicker extends FrameLayout {
      * @return the currently selected hour, in the range (0-23)
      * @see #setHour(int)
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getHour() {
         return mDelegate.getHour();
     }
@@ -205,6 +211,7 @@ public class TimePicker extends FrameLayout {
      * @return the currently selected minute, in the range (0-59)
      * @see #setMinute(int)
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getMinute() {
         return mDelegate.getMinute();
     }
@@ -272,6 +279,7 @@ public class TimePicker extends FrameLayout {
      *         {@code false} otherwise}
      * @see #setIs24HourView(Boolean)
      */
+    @InspectableProperty(hasAttributeId = false, name = "24Hour")
     public boolean is24HourView() {
         return mDelegate.is24Hour();
     }

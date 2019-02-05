@@ -60,6 +60,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.autofill.Helper;
+import android.view.inspector.InspectableProperty;
+import android.view.inspector.InspectableProperty.EnumMap;
 
 import com.android.internal.R;
 
@@ -773,6 +775,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @ViewDebug.IntToString(from = FOCUS_AFTER_DESCENDANTS, to = "FOCUS_AFTER_DESCENDANTS"),
         @ViewDebug.IntToString(from = FOCUS_BLOCK_DESCENDANTS, to = "FOCUS_BLOCK_DESCENDANTS")
     })
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = FOCUS_BEFORE_DESCENDANTS, name = "beforeDescendants"),
+            @EnumMap(value = FOCUS_AFTER_DESCENDANTS, name = "afterDescendants"),
+            @EnumMap(value = FOCUS_BLOCK_DESCENDANTS, name = "blocksDescendants")
+    })
     public int getDescendantFocusability() {
         return mGroupFlags & FLAG_MASK_FOCUSABILITY;
     }
@@ -1391,6 +1398,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Check whether this ViewGroup should ignore focus requests for itself and its children.
      */
     @ViewDebug.ExportedProperty(category = "focus")
+    @InspectableProperty
     public boolean getTouchscreenBlocksFocus() {
         return (mGroupFlags & FLAG_TOUCHSCREEN_BLOCKS_FOCUS) != 0;
     }
@@ -3116,6 +3124,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Returns true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
      * @return true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
      */
+    @InspectableProperty(name = "splitMotionEvents")
     public boolean isMotionEventSplittingEnabled() {
         return (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS;
     }
@@ -3132,6 +3141,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@link android.view.ViewOutlineProvider#BACKGROUND} was given to
      * {@link #setOutlineProvider(ViewOutlineProvider)} and false otherwise.
      */
+    @InspectableProperty
     public boolean isTransitionGroup() {
         if ((mGroupFlags & FLAG_IS_TRANSITION_GROUP_SET) != 0) {
             return ((mGroupFlags & FLAG_IS_TRANSITION_GROUP) != 0);
@@ -4436,6 +4446,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * false otherwise.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @InspectableProperty
     public boolean getClipChildren() {
         return ((mGroupFlags & FLAG_CLIP_CHILDREN) != 0);
     }
@@ -4493,6 +4504,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @attr ref android.R.styleable#ViewGroup_clipToPadding
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @InspectableProperty
     public boolean getClipToPadding() {
         return hasBooleanFlag(FLAG_CLIP_TO_PADDING);
     }
@@ -6340,6 +6352,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @return the current animation controller
      */
+    @InspectableProperty
     public LayoutAnimationController getLayoutAnimation() {
         return mLayoutAnimationController;
     }
@@ -6359,6 +6372,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Caching behavior of children may be controlled through {@link View#setLayerType(int, Paint)}.
      */
     @Deprecated
+    @InspectableProperty(name = "animationCache")
     public boolean isAnimationCacheEnabled() {
         return (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
     }
@@ -6396,6 +6410,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Child views may no longer have their caching behavior disabled by parents.
      */
     @Deprecated
+    @InspectableProperty(name = "alwaysDrawnWithCache")
     public boolean isAlwaysDrawnWithCacheEnabled() {
         return (mGroupFlags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE;
     }
@@ -6539,6 +6554,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @ViewDebug.IntToString(from = PERSISTENT_SCROLLING_CACHE, to = "SCROLLING"),
         @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ALL")
     })
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = PERSISTENT_NO_CACHE, name = "none"),
+            @EnumMap(value = PERSISTENT_ANIMATION_CACHE, name = "animation"),
+            @EnumMap(value = PERSISTENT_SCROLLING_CACHE, name = "scrolling"),
+            @EnumMap(value = PERSISTENT_ALL_CACHES, name = "all"),
+    })
     public int getPersistentDrawingCache() {
         return mPersistentDrawingCache;
     }
@@ -6616,6 +6637,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @see #setLayoutMode(int)
      */
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = LAYOUT_MODE_CLIP_BOUNDS, name = "clipBounds"),
+            @EnumMap(value = LAYOUT_MODE_OPTICAL_BOUNDS, name = "opticalBounds")
+    })
     public int getLayoutMode() {
         if (mLayoutMode == LAYOUT_MODE_UNDEFINED) {
             int inheritedLayoutMode = (mParent instanceof ViewGroup) ?
@@ -7307,6 +7332,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * make a group appear to be focused when its child EditText or button
      * is focused.
      */
+    @InspectableProperty
     public boolean addStatesFromChildren() {
         return (mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) != 0;
     }

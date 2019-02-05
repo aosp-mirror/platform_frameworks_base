@@ -82,6 +82,8 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inspector.InspectableProperty;
+import android.view.inspector.InspectableProperty.EnumMap;
 import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.R;
@@ -1221,6 +1223,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @return The current choice mode
      */
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = CHOICE_MODE_NONE, name = "none"),
+            @EnumMap(value = CHOICE_MODE_SINGLE, name = "singleChoice"),
+            @EnumMap(value = CHOICE_MODE_MULTIPLE, name = "multipleChoice"),
+            @EnumMap(value = CHOICE_MODE_MULTIPLE_MODAL, name = "multipleChoiceModal")
+    })
     public int getChoiceMode() {
         return mChoiceMode;
     }
@@ -1421,6 +1429,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return true if fast scroll is enabled, false otherwise
      */
     @ViewDebug.ExportedProperty
+    @InspectableProperty
     public boolean isFastScrollEnabled() {
         if (mFastScroll == null) {
             return mFastScrollEnabled;
@@ -1485,6 +1494,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setSmoothScrollbarEnabled(boolean)
      */
     @ViewDebug.ExportedProperty
+    @InspectableProperty(name = "smoothScrollbar")
     public boolean isSmoothScrollbarEnabled() {
         return mSmoothScrollbarEnabled;
     }
@@ -1620,6 +1630,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see View#setDrawingCacheEnabled(boolean)
      */
     @ViewDebug.ExportedProperty
+    @InspectableProperty(name = "scrollingCache")
     public boolean isScrollingCacheEnabled() {
         return mScrollingCacheEnabled;
     }
@@ -1667,6 +1678,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see Filterable
      */
     @ViewDebug.ExportedProperty
+    @InspectableProperty
     public boolean isTextFilterEnabled() {
         return mTextFilterEnabled;
     }
@@ -1697,6 +1709,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return true if the content is stacked from the bottom edge, false otherwise
      */
     @ViewDebug.ExportedProperty
+    @InspectableProperty
     public boolean isStackFromBottom() {
         return mStackFromBottom;
     }
@@ -2813,6 +2826,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
+     * Returns whether the selection highlight drawable should be drawn on top of the item or
+     * behind it.
+     *
+     * @return true if selector is drawn on top, false otherwise
+     * @attr ref android.R.styleable#AbsListView_drawSelectorOnTop
+     */
+    @InspectableProperty
+    public boolean getDrawSelectorOnTop() {
+        return mDrawSelectorOnTop;
+    }
+
+    /**
      * Set a Drawable that should be used to highlight the currently selected item.
      *
      * @param resID A Drawable resource to use as the selection highlight.
@@ -2845,6 +2870,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @return the drawable used to display the selector
      */
+    @InspectableProperty(name = "listSelector")
     public Drawable getSelector() {
         return mSelector;
     }
@@ -6272,6 +6298,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return {@link #TRANSCRIPT_MODE_DISABLED}, {@link #TRANSCRIPT_MODE_NORMAL} or
      *         {@link #TRANSCRIPT_MODE_ALWAYS_SCROLL}
      */
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = TRANSCRIPT_MODE_DISABLED, name = "disabled"),
+            @EnumMap(value = TRANSCRIPT_MODE_NORMAL, name = "normal"),
+            @EnumMap(value = TRANSCRIPT_MODE_ALWAYS_SCROLL, name = "alwaysScroll")
+    })
     public int getTranscriptMode() {
         return mTranscriptMode;
     }
@@ -6309,6 +6340,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return The cache color hint
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @InspectableProperty
     @ColorInt
     public int getCacheColorHint() {
         return mCacheColorHint;

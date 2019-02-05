@@ -39,6 +39,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -145,6 +146,7 @@ public abstract class CompoundButton extends Button implements Checkable {
         return handled;
     }
 
+    @InspectableProperty
     @ViewDebug.ExportedProperty
     @Override
     public boolean isChecked() {
@@ -282,6 +284,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @see #setButtonDrawable(Drawable)
      * @see #setButtonDrawable(int)
      */
+    @InspectableProperty(name = "button")
     @Nullable
     public Drawable getButtonDrawable() {
         return mButtonDrawable;
@@ -314,6 +317,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @attr ref android.R.styleable#CompoundButton_buttonTint
      * @see #setButtonTintList(ColorStateList)
      */
+    @InspectableProperty(name = "buttonTint")
     @Nullable
     public ColorStateList getButtonTintList() {
         return mButtonTintList;
@@ -342,6 +346,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @attr ref android.R.styleable#CompoundButton_buttonTintMode
      * @see #setButtonTintMode(PorterDuff.Mode)
      */
+    @InspectableProperty
     @Nullable
     public PorterDuff.Mode getButtonTintMode() {
         return mButtonTintMode;

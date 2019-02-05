@@ -39,6 +39,7 @@ import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.view.ViewHierarchyEncoder;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -285,6 +286,7 @@ public class TextClock extends TextView {
      * @see #setFormat12Hour(CharSequence)
      * @see #is24HourModeEnabled()
      */
+    @InspectableProperty
     @ExportedProperty
     public CharSequence getFormat12Hour() {
         return mFormat12;
@@ -344,6 +346,7 @@ public class TextClock extends TextView {
      * @see #setFormat24Hour(CharSequence)
      * @see #is24HourModeEnabled()
      */
+    @InspectableProperty
     @ExportedProperty
     public CharSequence getFormat24Hour() {
         return mFormat24;
@@ -435,6 +438,7 @@ public class TextClock extends TextView {
      * @see #setFormat24Hour(CharSequence)
      * @see #getFormat24Hour()
      */
+    @InspectableProperty(hasAttributeId = false)
     public boolean is24HourModeEnabled() {
         if (mShowCurrentUserTime) {
             return DateFormat.is24HourFormat(getContext(), ActivityManager.getCurrentUser());
@@ -453,6 +457,7 @@ public class TextClock extends TextView {
      * @see java.util.TimeZone#getAvailableIDs()
      * @see #setTimeZone(String)
      */
+    @InspectableProperty
     public String getTimeZone() {
         return mTimeZone;
     }
