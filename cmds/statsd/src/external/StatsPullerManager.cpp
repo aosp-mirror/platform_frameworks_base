@@ -234,6 +234,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
         // TrainInfo.
         {android::util::TRAIN_INFO, {.puller = new TrainInfoPuller()}},
+        // TimeZoneDataInfo.
+        {android::util::TIME_ZONE_DATA_INFO,
+         {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

@@ -1942,6 +1942,20 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullTimeZoneDataInfo(int tagId,
+            long elapsedNanos, long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        String tzDbVersion = "Unknown";
+        try {
+            tzDbVersion = android.icu.util.TimeZone.getTZDataVersion();
+        } catch (Exception e) {
+            Log.e(TAG, "Getting tzdb version failed: ", e);
+        }
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeString(tzDbVersion);
+        pulledData.add(e);
+    }
+
     /**
      * Pulls various data.
      */
@@ -2128,6 +2142,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.DANGEROUS_PERMISSION_STATE: {
                 pullDangerousPermissionState(elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.TIME_ZONE_DATA_INFO: {
+                pullTimeZoneDataInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
