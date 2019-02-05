@@ -110,7 +110,7 @@ public class ScrollView extends FrameLayout {
      * layout is dirty. This prevents the scroll from being wrong if the child has not been
      * laid out before requesting focus.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769715)
     private View mChildToScrollTo = null;
 
     /**
@@ -1382,16 +1382,20 @@ public class ScrollView extends FrameLayout {
      *
      * @param child the View to scroll to
      */
-    private void scrollToChild(View child) {
-        child.getDrawingRect(mTempRect);
+    public void scrollToDescendant(View child) {
+        if (!mIsLayoutDirty) {
+            child.getDrawingRect(mTempRect);
 
-        /* Offset from child's local coordinates to ScrollView coordinates */
-        offsetDescendantRectToMyCoords(child, mTempRect);
+            /* Offset from child's local coordinates to ScrollView coordinates */
+            offsetDescendantRectToMyCoords(child, mTempRect);
 
-        int scrollDelta = computeScrollDeltaToGetChildRectOnScreen(mTempRect);
+            int scrollDelta = computeScrollDeltaToGetChildRectOnScreen(mTempRect);
 
-        if (scrollDelta != 0) {
-            scrollBy(0, scrollDelta);
+            if (scrollDelta != 0) {
+                scrollBy(0, scrollDelta);
+            }
+        } else {
+            mChildToScrollTo = child;
         }
     }
 
@@ -1486,7 +1490,7 @@ public class ScrollView extends FrameLayout {
     public void requestChildFocus(View child, View focused) {
         if (focused != null && focused.getRevealOnFocusHint()) {
             if (!mIsLayoutDirty) {
-                scrollToChild(focused);
+                scrollToDescendant(focused);
             } else {
                 // The child may not be laid out yet, we can't compute the scroll yet
                 mChildToScrollTo = focused;
@@ -1567,7 +1571,7 @@ public class ScrollView extends FrameLayout {
         mIsLayoutDirty = false;
         // Give a child focus if it needs it
         if (mChildToScrollTo != null && isViewDescendantOf(mChildToScrollTo, this)) {
-            scrollToChild(mChildToScrollTo);
+            scrollToDescendant(mChildToScrollTo);
         }
         mChildToScrollTo = null;
 
