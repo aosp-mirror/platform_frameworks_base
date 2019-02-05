@@ -930,7 +930,28 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @Override
     public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
-        // TODO: Handle this callback.
+        getHandler().post(() -> {
+            RollbackData rd = null;
+            synchronized (mLock) {
+                ensureRollbackDataLoadedLocked();
+                for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                    RollbackData data = mAvailableRollbacks.get(i);
+                    if (data.stagedSessionId == originalSessionId) {
+                        data.apkSessionId = apkSessionId;
+                        rd = data;
+                        break;
+                    }
+                }
+            }
+
+            if (rd != null) {
+                try {
+                    mRollbackStore.saveAvailableRollback(rd);
+                } catch (IOException ioe) {
+                    Log.e(TAG, "Unable to save rollback info for : " + rd.rollbackId, ioe);
+                }
+            }
+        });
     }
 
     /**
