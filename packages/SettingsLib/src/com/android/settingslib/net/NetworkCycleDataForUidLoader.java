@@ -26,21 +26,23 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.VisibleForTesting;
+
 /**
- * Loader for network data usage history. It returns a list of usage data per billing cycle for a
- * specific Uid.
+ * Loader for network data usage history. It returns a list of usage data per billing cycle for the
+ * specific Uid(s).
  */
 public class NetworkCycleDataForUidLoader extends
         NetworkCycleDataLoader<List<NetworkCycleDataForUid>> {
     private static final String TAG = "NetworkDataForUidLoader";
 
     private final List<NetworkCycleDataForUid> mData;
-    private final int mUid;
+    private final List<Integer> mUids;
     private final boolean mRetrieveDetail;
 
     private NetworkCycleDataForUidLoader(Builder builder) {
         super(builder);
-        mUid = builder.mUid;
+        mUids = builder.mUids;
         mRetrieveDetail = builder.mRetrieveDetail;
         mData = new ArrayList<NetworkCycleDataForUid>();
     }
@@ -48,18 +50,27 @@ public class NetworkCycleDataForUidLoader extends
     @Override
     void recordUsage(long start, long end) {
         try {
-            final NetworkStats stats = mNetworkStatsManager.queryDetailsForUid(
-                mNetworkType, mSubId, start, end, mUid);
-            final long total = getTotalUsage(stats);
-            if (total > 0L) {
+            long totalUsage = 0L;
+            long totalForeground = 0L;
+            for (int uid : mUids) {
+                final NetworkStats stats = mNetworkStatsManager.queryDetailsForUid(
+                    mNetworkType, mSubId, start, end, uid);
+                final long usage = getTotalUsage(stats);
+                if (usage > 0L) {
+                    totalUsage += usage;
+                    if (mRetrieveDetail) {
+                        totalForeground += getForegroundUsage(start, end, uid);
+                    }
+                }
+            }
+            if (totalUsage > 0L) {
                 final NetworkCycleDataForUid.Builder builder = new NetworkCycleDataForUid.Builder();
                 builder.setStartTime(start)
                     .setEndTime(end)
-                    .setTotalUsage(total);
+                    .setTotalUsage(totalUsage);
                 if (mRetrieveDetail) {
-                    final long foreground = getForegroundUsage(start, end);
-                    builder.setBackgroundUsage(total - foreground)
-                        .setForegroundUsage(foreground);
+                    builder.setBackgroundUsage(totalUsage - totalForeground)
+                        .setForegroundUsage(totalForeground);
                 }
                 mData.add(builder.build());
             }
@@ -82,24 +93,29 @@ public class NetworkCycleDataForUidLoader extends
         };
     }
 
-    private long getForegroundUsage(long start, long end) {
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public List<Integer> getUids() {
+        return mUids;
+    }
+
+    private long getForegroundUsage(long start, long end, int uid) {
         final NetworkStats stats = mNetworkStatsManager.queryDetailsForUidTagState(
-            mNetworkType, mSubId, start, end, mUid, TAG_NONE, STATE_FOREGROUND);
+            mNetworkType, mSubId, start, end, uid, TAG_NONE, STATE_FOREGROUND);
         return getTotalUsage(stats);
     }
 
     public static abstract class Builder<T extends NetworkCycleDataForUidLoader>
             extends NetworkCycleDataLoader.Builder<T> {
 
-        private int mUid;
+        private final List<Integer> mUids = new ArrayList<>();
         private boolean mRetrieveDetail = true;
 
         public Builder(Context context) {
             super(context);
         }
 
-        public Builder<T> setUid(int uid) {
-            mUid = uid;
+        public Builder<T> addUid(int uid) {
+            mUids.add(uid);
             return this;
         }
 
