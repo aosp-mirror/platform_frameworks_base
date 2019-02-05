@@ -20,7 +20,6 @@ import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_H;
 import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_L;
 
-import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,24 +35,30 @@ import java.util.Queue;
 /**
  * Buffer used for window tracing.
  */
-abstract class WindowTraceBuffer {
+class WindowTraceBuffer {
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 
-    final Object mBufferLock = new Object();
-    final Queue<ProtoOutputStream> mBuffer = new ArrayDeque<>();
-    final File mTraceFile;
-    int mBufferSize;
-    private final int mBufferCapacity;
+    private final Object mBufferLock = new Object();
 
-    WindowTraceBuffer(int size, File traceFile) throws IOException {
-        mBufferCapacity = size;
-        mTraceFile = traceFile;
+    private final Queue<ProtoOutputStream> mBuffer = new ArrayDeque<>();
+    private int mBufferUsedSize;
+    private int mBufferCapacity;
 
-        initTraceFile();
+    WindowTraceBuffer(int bufferCapacity) {
+        mBufferCapacity = bufferCapacity;
+        resetBuffer();
     }
 
     int getAvailableSpace() {
-        return mBufferCapacity - mBufferSize;
+        return mBufferCapacity - mBufferUsedSize;
+    }
+
+    int size() {
+        return mBuffer.size();
+    }
+
+    void setCapacity(int capacity) {
+        mBufferCapacity = capacity;
     }
 
     /**
@@ -70,42 +75,37 @@ abstract class WindowTraceBuffer {
                     + mBufferCapacity + " Object size: " + protoLength);
         }
         synchronized (mBufferLock) {
-            boolean canAdd = canAdd(protoLength);
-            if (canAdd) {
-                mBuffer.add(proto);
-                mBufferSize += protoLength;
-            }
+            discardOldest(protoLength);
+            mBuffer.add(proto);
+            mBufferUsedSize += protoLength;
             mBufferLock.notify();
         }
     }
 
-    /**
-     * Stops the buffer execution and flush all buffer content to the disk.
-     *
-     * @throws IOException if the buffer cannot write its contents to the {@link #mTraceFile}
-     */
-    void dump() throws IOException, InterruptedException {
-        try {
-            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "writeTraceToFile");
-            writeTraceToFile();
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    @VisibleForTesting
     boolean contains(byte[] other) {
         return mBuffer.stream()
                 .anyMatch(p -> Arrays.equals(p.getBytes(), other));
     }
 
-    private void initTraceFile() throws IOException {
-        mTraceFile.delete();
-        try (OutputStream os = new FileOutputStream(mTraceFile)) {
-            mTraceFile.setReadable(true, false);
-            ProtoOutputStream proto = new ProtoOutputStream(os);
-            proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
-            proto.flush();
+    /**
+     * Writes the trace buffer to disk.
+     */
+    void writeTraceToFile(File traceFile) throws IOException {
+        synchronized (mBufferLock) {
+            traceFile.delete();
+            traceFile.setReadable(true, false);
+            try (OutputStream os = new FileOutputStream(traceFile)) {
+                ProtoOutputStream proto = new ProtoOutputStream();
+                proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
+                os.write(proto.getBytes());
+                while (!mBuffer.isEmpty()) {
+                    proto = mBuffer.poll();
+                    mBufferUsedSize -= proto.getRawSize();
+                    byte[] protoBytes = proto.getBytes();
+                    os.write(protoBytes);
+                }
+                os.flush();
+            }
         }
     }
 
@@ -114,59 +114,48 @@ abstract class WindowTraceBuffer {
      * smaller than the overall buffer size.
      *
      * @param protoLength byte array representation of the Proto object to add
-     * @return {@code true} if the element can be added to the buffer or not
      */
-    abstract boolean canAdd(int protoLength);
+    private void discardOldest(int protoLength) {
+        long availableSpace = getAvailableSpace();
+
+        while (availableSpace < protoLength) {
+
+            ProtoOutputStream item = mBuffer.poll();
+            if (item == null) {
+                throw new IllegalStateException("No element to discard from buffer");
+            }
+            mBufferUsedSize -= item.getRawSize();
+            availableSpace = getAvailableSpace();
+        }
+    }
 
     /**
-     * Flush all buffer content to the disk.
-     *
-     * @throws IOException if the buffer cannot write its contents to the {@link #mTraceFile}
+     * Removes all elements form the buffer
      */
-    abstract void writeTraceToFile() throws IOException, InterruptedException;
-
-    /**
-     * Builder for a {@code WindowTraceBuffer} which creates a {@link WindowTraceRingBuffer} for
-     * continuous mode or a {@link WindowTraceQueueBuffer} otherwise
-     */
-    static class Builder {
-        private boolean mContinuous;
-        private File mTraceFile;
-        private int mBufferCapacity;
-
-        Builder setContinuousMode(boolean continuous) {
-            mContinuous = continuous;
-            return this;
+    void resetBuffer() {
+        synchronized (mBufferLock) {
+            mBuffer.clear();
+            mBufferUsedSize = 0;
         }
+    }
 
-        Builder setTraceFile(File traceFile) {
-            mTraceFile = traceFile;
-            return this;
-        }
+    @VisibleForTesting
+    int getBufferSize() {
+        return mBufferUsedSize;
+    }
 
-        Builder setBufferCapacity(int size) {
-            mBufferCapacity = size;
-            return this;
-        }
-
-        File getFile() {
-            return mTraceFile;
-        }
-
-        WindowTraceBuffer build() throws IOException {
-            if (mBufferCapacity <= 0) {
-                throw new IllegalStateException("Buffer capacity must be greater than 0.");
-            }
-
-            if (mTraceFile == null) {
-                throw new IllegalArgumentException("A valid trace file must be specified.");
-            }
-
-            if (mContinuous) {
-                return new WindowTraceRingBuffer(mBufferCapacity, mTraceFile);
-            } else {
-                return new WindowTraceQueueBuffer(mBufferCapacity, mTraceFile);
-            }
+    String getStatus() {
+        synchronized (mBufferLock) {
+            return "Buffer size: "
+                    + mBufferCapacity
+                    + " bytes"
+                    + "\n"
+                    + "Buffer usage: "
+                    + mBufferUsedSize
+                    + " bytes"
+                    + "\n"
+                    + "Elements in the buffer: "
+                    + mBuffer.size();
         }
     }
 }
