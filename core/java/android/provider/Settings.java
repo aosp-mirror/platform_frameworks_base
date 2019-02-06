@@ -13334,6 +13334,14 @@ public final class Settings {
         public static final String ISOLATED_STORAGE_REMOTE = "isolated_storage_remote";
 
         /**
+         * Indicates whether aware is available in the current location.
+         * @hide
+         */
+        public static final String AWARE_ALLOWED = "aware_allowed";
+
+        private static final Validator AWARE_ALLOWED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -13379,6 +13387,7 @@ public final class Settings {
             SOFT_AP_TIMEOUT_ENABLED,
             ZEN_DURATION,
             CHARGING_VIBRATION_ENABLED,
+            AWARE_ALLOWED,
         };
 
         /**
@@ -13439,6 +13448,7 @@ public final class Settings {
             VALIDATORS.put(WIFI_PNO_RECENCY_SORTING_ENABLED,
                     WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR);
             VALIDATORS.put(WIFI_LINK_PROBING_ENABLED, WIFI_LINK_PROBING_ENABLED_VALIDATOR);
+            VALIDATORS.put(AWARE_ALLOWED, AWARE_ALLOWED_VALIDATOR);
         }
 
         /**
