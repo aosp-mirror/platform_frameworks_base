@@ -3496,6 +3496,18 @@ package android.media {
     method public android.media.AudioRecord.Builder setSessionId(int) throws java.lang.IllegalArgumentException;
   }
 
+  public class HwAudioSource {
+    method public void start();
+    method public void stop();
+  }
+
+  public static class HwAudioSource.Builder {
+    ctor public HwAudioSource.Builder();
+    method @NonNull public android.media.HwAudioSource build();
+    method @NonNull public android.media.HwAudioSource.Builder setAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull public android.media.HwAudioSource.Builder setAudioDeviceInfo(@NonNull android.media.AudioDeviceInfo);
+  }
+
   public final class MediaRecorder.AudioSource {
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int ECHO_REFERENCE = 1997; // 0x7cd
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD) public static final int HOTWORD = 1999; // 0x7cf
