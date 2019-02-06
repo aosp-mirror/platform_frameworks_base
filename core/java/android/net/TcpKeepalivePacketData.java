@@ -17,6 +17,7 @@ package android.net;
 
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.util.IpUtils;
@@ -122,6 +123,7 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     // TODO: add buildV6Packet.
 
     /** Represents tcp/ip information. */
+    // TODO: Replace TcpSocketInfo with TcpKeepalivePacketDataParcelable.
     public static class TcpSocketInfo {
         public final InetAddress srcAddress;
         public final InetAddress dstAddress;
@@ -166,7 +168,10 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     }
 
     /* Parcelable Implementation. */
-    /** No special parcel contents. */
+    /* Note that this object implements parcelable (and needs to keep doing this as it inherits
+     * from a class that does), but should usually be parceled as a stable parcelable using
+     * the toStableParcelable() and fromStableParcelable() methods.
+     */
     public int describeContents() {
         return 0;
     }
@@ -199,4 +204,31 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
                     return new TcpKeepalivePacketData[size];
                 }
             };
+
+    /**
+     * Convert this TcpKeepalivePacketData to a TcpKeepalivePacketDataParcelable.
+     */
+    @NonNull
+    public TcpKeepalivePacketDataParcelable toStableParcelable() {
+        final TcpKeepalivePacketDataParcelable parcel = new TcpKeepalivePacketDataParcelable();
+        parcel.srcAddress = srcAddress.getAddress();
+        parcel.srcPort = srcPort;
+        parcel.dstAddress = dstAddress.getAddress();
+        parcel.dstPort = dstPort;
+        parcel.seq = tcpSeq;
+        parcel.ack = tcpAck;
+        return parcel;
+    }
+
+    @Override
+    public String toString() {
+        return "saddr: " + srcAddress
+                + " daddr: " + dstAddress
+                + " sport: " + srcPort
+                + " dport: " + dstPort
+                + " seq: " + tcpSeq
+                + " ack: " + tcpAck
+                + " wnd: " + tcpWnd
+                + " wndScale: " + tcpWndScale;
+    }
 }
