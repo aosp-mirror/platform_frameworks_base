@@ -11235,6 +11235,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Starts {@link Activity} as a text-operation user if it is specified with
+     * {@link #setTextOperationUser(UserHandle)}.
+     *
+     * <p>Otherwise, just starts {@link Activity} with {@link Context#startActivity(Intent)}.</p>
+     *
+     * @param intent The description of the activity to start.
+     */
+    void startActivityAsTextOperationUserIfNecessary(@NonNull Intent intent) {
+        if (mTextOperationUser != null) {
+            getContext().startActivityAsUser(intent, mTextOperationUser);
+        } else {
+            getContext().startActivity(intent);
+        }
+    }
+
+    /**
      * This is a temporary method. Future versions may support multi-locale text.
      * Caveat: This method may not return the latest text services locale, but this should be
      * acceptable and it's more important to make this method asynchronous.
