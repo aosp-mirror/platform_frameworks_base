@@ -833,6 +833,7 @@ aidl_interface {
         "core/java/android/net/ProxyInfoParcelable.aidl",
         "core/java/android/net/RouteInfoParcelable.aidl",
         "core/java/android/net/StaticIpConfigurationParcelable.aidl",
+        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
         "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
         "core/java/android/net/dhcp/IDhcpServer.aidl",
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
