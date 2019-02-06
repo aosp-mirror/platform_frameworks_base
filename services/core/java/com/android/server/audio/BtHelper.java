@@ -374,10 +374,10 @@ public class BtHelper {
     }
 
     /*package*/ synchronized void disconnectAllBluetoothProfiles() {
-        mDeviceBroker.handleDisconnectA2dp();
-        mDeviceBroker.handleDisconnectA2dpSink();
-        disconnectHeadset();
-        mDeviceBroker.handleDisconnectHearingAid();
+        mDeviceBroker.postDisconnectA2dp();
+        mDeviceBroker.postDisconnectA2dpSink();
+        mDeviceBroker.postDisconnectHeadset();
+        mDeviceBroker.postDisconnectHearingAid();
     }
 
     /*package*/ synchronized void resetBluetoothSco() {
@@ -388,9 +388,14 @@ public class BtHelper {
         mDeviceBroker.setBluetoothScoOn(false, "resetBluetoothSco");
     }
 
+    /*package*/ synchronized void disconnectHeadset() {
+        setBtScoActiveDevice(null);
+        mBluetoothHeadset = null;
+    }
+
     //----------------------------------------------------------------------
     private void broadcastScoConnectionState(int state) {
-        mDeviceBroker.broadcastScoConnectionState(state);
+        mDeviceBroker.postBroadcastScoConnectionState(state);
     }
 
     private boolean handleBtScoActiveDeviceChange(BluetoothDevice btDevice, boolean isActive) {
@@ -487,7 +492,7 @@ public class BtHelper {
                                 btDevice = deviceList.get(0);
                                 final @BluetoothProfile.BtProfileState int state =
                                         proxy.getConnectionState(btDevice);
-                                mDeviceBroker.handleSetA2dpSourceConnectionState(
+                                mDeviceBroker.postSetA2dpSourceConnectionState(
                                         state, new BluetoothA2dpDeviceInfo(btDevice));
                             }
                             break;
@@ -558,19 +563,19 @@ public class BtHelper {
 
                     switch (profile) {
                         case BluetoothProfile.A2DP:
-                            mDeviceBroker.handleDisconnectA2dp();
+                            mDeviceBroker.postDisconnectA2dp();
                             break;
 
                         case BluetoothProfile.A2DP_SINK:
-                            mDeviceBroker.handleDisconnectA2dpSink();
+                            mDeviceBroker.postDisconnectA2dpSink();
                             break;
 
                         case BluetoothProfile.HEADSET:
-                            disconnectHeadset();
+                            mDeviceBroker.postDisconnectHeadset();
                             break;
 
                         case BluetoothProfile.HEARING_AID:
-                            mDeviceBroker.handleDisconnectHearingAid();
+                            mDeviceBroker.postDisconnectHearingAid();
                             break;
 
                         default:
@@ -578,11 +583,6 @@ public class BtHelper {
                     }
                 }
             };
-
-    private void disconnectHeadset() {
-        setBtScoActiveDevice(null);
-        mBluetoothHeadset = null;
-    }
 
     //----------------------------------------------------------------------
     private class ScoClient implements IBinder.DeathRecipient {
