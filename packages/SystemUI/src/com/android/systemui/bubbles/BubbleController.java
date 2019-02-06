@@ -16,6 +16,10 @@
 
 package com.android.systemui.bubbles;
 
+import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
+import static android.util.StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_MISSING;
+import static android.util.StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_NOT_RESIZABLE;
+import static android.util.StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__DOCUMENT_LAUNCH_NOT_ALWAYS;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -26,17 +30,16 @@ import static com.android.systemui.statusbar.notification.NotificationAlertingMa
 import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.StatsLog;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -427,11 +430,15 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     @Nullable
     private PendingIntent getValidBubbleIntent(NotificationEntry notif) {
         Notification notification = notif.notification.getNotification();
+        String packageName = notif.notification.getPackageName();
         Notification.BubbleMetadata data = notif.getBubbleMetadata();
-        if (data != null && canLaunchInActivityView(data.getIntent())) {
+        if (data != null && canLaunchInActivityView(data.getIntent(),
+                true /* enable logging for bubbles */, packageName)) {
             return data.getIntent();
-        } else if (shouldUseContentIntent(mContext)
-                && canLaunchInActivityView(notification.contentIntent)) {
+        }
+        if (shouldUseContentIntent(mContext)
+                && canLaunchInActivityView(notification.contentIntent,
+                false /* disable logging for notifications */, packageName)) {
             Log.d(TAG, "[addBubble " + notif.key
                     + "]: No appOverlayIntent, using contentIntent.");
             return notification.contentIntent;
@@ -442,16 +449,41 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
     /**
      * Whether an intent is properly configured to display in an {@link android.app.ActivityView}.
+     *
+     * @param intent the pending intent of the bubble.
+     * @param enableLogging whether bubble developer error should be logged.
+     * @param packageName the notification package name for this bubble.
+     * @return
      */
-    private boolean canLaunchInActivityView(PendingIntent intent) {
+    private boolean canLaunchInActivityView(PendingIntent intent, boolean enableLogging,
+                                            String packageName) {
         if (intent == null) {
             return false;
         }
         ActivityInfo info =
                 intent.getIntent().resolveActivityInfo(mContext.getPackageManager(), 0);
-        return info != null
-                && ActivityInfo.isResizeableMode(info.resizeMode)
-                && (info.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) != 0;
+        if (info == null) {
+            if (enableLogging) {
+                StatsLog.write(StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED, packageName,
+                        BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_MISSING);
+            }
+            return false;
+        }
+        if (!ActivityInfo.isResizeableMode(info.resizeMode)) {
+            if (enableLogging) {
+                StatsLog.write(StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED, packageName,
+                        BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_NOT_RESIZABLE);
+            }
+            return false;
+        }
+        if (info.documentLaunchMode != DOCUMENT_LAUNCH_ALWAYS) {
+            if (enableLogging) {
+                StatsLog.write(StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED, packageName,
+                        BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__DOCUMENT_LAUNCH_NOT_ALWAYS);
+            }
+            return false;
+        }
+        return (info.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) != 0;
     }
 
     /**

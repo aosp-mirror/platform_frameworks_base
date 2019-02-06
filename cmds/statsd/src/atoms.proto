@@ -239,6 +239,7 @@ message Atom {
         PermissionGrantRequestResultReported permission_grant_request_result_reported = 170;
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
         DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
+        BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
     }
 
     // Pulled events will start at field 10000.
@@ -5341,6 +5342,27 @@ message BubbleUIChanged {
     // Normalized screen position of the bubble stack. The range is between 0 and 1.
     optional float normalized_x_position = 7;
     optional float normalized_y_position = 8;
+}
+
+/**
+  * Logs System UI bubbles developer errors.
+  *
+  * Logged from:
+  *   frameworks/base/packages/SystemUI/src/com/android/systemui/bubbles/BubbleController.java
+  */
+message BubbleDeveloperErrorReported {
+
+    // The app package that is posting the bubble.
+    optional string package_name = 1;
+
+    // Bubble developer error type enums.
+    enum Error {
+        UNKNOWN = 0;
+        ACTIVITY_INFO_MISSING = 1;
+        ACTIVITY_INFO_NOT_RESIZABLE = 2;
+        DOCUMENT_LAUNCH_NOT_ALWAYS = 3;
+    }
+    optional Error error = 2 [default = UNKNOWN];
 }
 
 /**
