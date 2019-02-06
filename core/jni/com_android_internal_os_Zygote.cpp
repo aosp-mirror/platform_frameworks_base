@@ -620,14 +620,9 @@ static void CreatePkgSandbox(uid_t uid, const std::string& package_name, fail_fn
 static void BindMount(const std::string& sourceDir, const std::string& targetDir,
                       fail_fn_t fail_fn) {
     if (TEMP_FAILURE_RETRY(mount(sourceDir.c_str(), targetDir.c_str(), nullptr,
-                                 MS_BIND | MS_REC, nullptr)) == -1) {
+                                 MS_BIND, nullptr)) == -1) {
         fail_fn(CREATE_ERROR("Failed to mount %s to %s: %s",
                              sourceDir.c_str(), targetDir.c_str(), strerror(errno)));
-    }
-
-    if (TEMP_FAILURE_RETRY(mount(nullptr, targetDir.c_str(), nullptr,
-                                 MS_SLAVE | MS_REC, nullptr)) == -1) {
-        fail_fn(CREATE_ERROR("Failed to set MS_SLAVE for %s", targetDir.c_str()));
     }
 }
 
@@ -646,24 +641,8 @@ static void MountPkgSpecificDir(const std::string& mntSourceRoot,
 
 static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
                                    const std::vector<std::string>& volumeLabels,
-                                   bool mountAllObbs, userid_t userId, fail_fn_t fail_fn) {
-    if (volumeLabels.size() > 0) {
-        std::string sandboxDataDir = StringPrintf("/storage/%s", volumeLabels[0].c_str());
-        if (volumeLabels[0] == "emulated") {
-            StringAppendF(&sandboxDataDir, "/%d", userId);
-        }
-        StringAppendF(&sandboxDataDir, "/Android/data/%s", packageNames[0].c_str());
-        struct stat sb;
-        if (TEMP_FAILURE_RETRY(lstat(sandboxDataDir.c_str(), &sb)) == -1) {
-            if (errno == ENOENT) {
-                ALOGD("Sandbox not fully prepared for %s", sandboxDataDir.c_str());
-                return;
-            } else {
-                fail_fn(CREATE_ERROR("Failed to lstat %s: %s",
-                                     sandboxDataDir.c_str(), strerror(errno)));
-            }
-        }
-    }
+                                   bool mountAllObbs, const std::string& sandboxId,
+                                   userid_t userId, fail_fn_t fail_fn) {
     for (auto& label : volumeLabels) {
         std::string mntSource = StringPrintf("/mnt/runtime/write/%s", label.c_str());
         std::string mntTarget = StringPrintf("/storage/%s", label.c_str());
@@ -671,6 +650,10 @@ static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
             StringAppendF(&mntSource, "/%d", userId);
             StringAppendF(&mntTarget, "/%d", userId);
         }
+
+        std::string sandboxSource = StringPrintf("%s/Android/sandbox/%s",
+            mntSource.c_str(), sandboxId.c_str());
+        BindMount(sandboxSource, mntTarget, fail_fn);
 
         for (auto& package : packageNames) {
             MountPkgSpecificDir(mntSource, mntTarget, package, "data", fail_fn);
@@ -693,7 +676,8 @@ static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
 static void MountEmulatedStorage(uid_t uid, jint mount_mode,
         bool force_mount_namespace, const std::string& package_name,
         const std::vector<std::string>& packages_for_uid,
-        const std::vector<std::string>& visible_vol_ids, fail_fn_t fail_fn) {
+        const std::vector<std::string>& visible_vol_ids, const std::string& sandbox_id,
+        fail_fn_t fail_fn) {
     // See storage config details at http://source.android.com/tech/storage/
 
     String8 storageSource;
@@ -744,7 +728,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
                                      strerror(errno)));
             }
         } else {
-            if (package_name.empty()) {
+            if (package_name.empty() || sandbox_id.empty()) {
                 return;
             }
 
@@ -790,7 +774,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
             // care of by vold later.
             if (sandboxAlreadyCreated) {
                 PreparePkgSpecificDirs(packages_for_uid, visible_vol_ids,
-                    mount_mode == MOUNT_EXTERNAL_INSTALLER, user_id, fail_fn);
+                    mount_mode == MOUNT_EXTERNAL_INSTALLER, sandbox_id, user_id, fail_fn);
             }
         }
     } else {
@@ -1127,7 +1111,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              bool is_child_zygote, jstring managed_instruction_set,
                              jstring managed_app_data_dir, jstring managed_package_name,
                              jobjectArray managed_pacakges_for_uid,
-                             jobjectArray managed_visible_vol_ids) {
+                             jobjectArray managed_visible_vol_ids, jstring managed_sandbox_id) {
   const char* process_name = is_system_server ? "system_server" : "zygote";
   auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
   auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
@@ -1137,6 +1121,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   auto instruction_set = extract_fn(managed_instruction_set);
   auto app_data_dir = extract_fn(managed_app_data_dir);
   auto package_name = extract_fn(managed_package_name);
+  auto sandbox_id = extract_fn(managed_sandbox_id);
 
   // Keep capabilities across UID change, unless we're staying root.
   if (uid != 0) {
@@ -1179,7 +1164,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       value_or(std::vector<std::string>());
 
   MountEmulatedStorage(uid, mount_external, use_native_bridge, package_name.value(),
-                       packages_for_uid, visible_vol_ids, fail_fn);
+                       packages_for_uid, visible_vol_ids, sandbox_id.value_or(""), fail_fn);
 
   // If this zygote isn't root, it won't be able to create a process group,
   // since the directory is owned by root.
@@ -1479,7 +1464,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint mount_external, jstring se_info, jstring nice_name,
         jintArray managed_fds_to_close, jintArray managed_fds_to_ignore, jboolean is_child_zygote,
         jstring instruction_set, jstring app_data_dir, jstring package_name,
-        jobjectArray packages_for_uid, jobjectArray visible_vol_ids) {
+        jobjectArray packages_for_uid, jobjectArray visible_vol_ids, jstring sandbox_id) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
     if (UNLIKELY(managed_fds_to_close == nullptr)) {
@@ -1511,7 +1496,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
                        capabilities, capabilities,
                        mount_external, se_info, nice_name, false,
                        is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                       package_name, packages_for_uid, visible_vol_ids);
+                       package_name, packages_for_uid, visible_vol_ids, sandbox_id);
     }
     return pid;
 }
@@ -1537,7 +1522,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        permitted_capabilities, effective_capabilities,
                        MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
-                       false, nullptr, nullptr, nullptr, nullptr, nullptr);
+                       false, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -1691,14 +1676,15 @@ static void com_android_internal_os_Zygote_nativeSpecializeBlastula(
     jint runtime_flags, jobjectArray rlimits,
     jint mount_external, jstring se_info, jstring nice_name,
     jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir,
-    jstring package_name, jobjectArray packages_for_uid, jobjectArray visible_vol_ids) {
+    jstring package_name, jobjectArray packages_for_uid, jobjectArray visible_vol_ids,
+    jstring sandbox_id) {
   jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
   SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                    capabilities, capabilities,
                    mount_external, se_info, nice_name, false,
                    is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                   package_name, packages_for_uid, visible_vol_ids);
+                   package_name, packages_for_uid, visible_vol_ids, sandbox_id);
 }
 
 /**
@@ -1789,7 +1775,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
@@ -1804,7 +1790,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeForkBlastula", "(II[I)I",
       (void *) com_android_internal_os_Zygote_nativeForkBlastula },
     { "nativeSpecializeBlastula",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeSpecializeBlastula },
     { "nativeGetSocketFDs", "(Z)V",
       (void *) com_android_internal_os_Zygote_nativeGetSocketFDs },
