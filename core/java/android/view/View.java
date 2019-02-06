@@ -4277,32 +4277,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected int mScrollY;
 
     /**
-     * The left padding in pixels, that is the distance in pixels between the
-     * left edge of this view and the left edge of its content.
+     * The final computed left padding in pixels that is used for drawing. This is the distance in
+     * pixels between the left edge of this view and the left edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingLeft = 0;
     /**
-     * The right padding in pixels, that is the distance in pixels between the
-     * right edge of this view and the right edge of its content.
+     * The final computed right padding in pixels that is used for drawing. This is the distance in
+     * pixels between the right edge of this view and the right edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingRight = 0;
     /**
-     * The top padding in pixels, that is the distance in pixels between the
-     * top edge of this view and the top edge of its content.
+     * The final computed top padding in pixels that is used for drawing. This is the distance in
+     * pixels between the top edge of this view and the top edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingTop;
     /**
-     * The bottom padding in pixels, that is the distance in pixels between the
-     * bottom edge of this view and the bottom edge of its content.
+     * The final computed bottom padding in pixels that is used for drawing. This is the distance in
+     * pixels between the bottom edge of this view and the bottom edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
@@ -4354,7 +4354,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private MatchIdPredicate mMatchIdPredicate;
 
     /**
-     * Cache the paddingRight set by the user to append to the scrollbar's size.
+     * The right padding after RTL resolution, but before taking account of scroll bars.
      *
      * @hide
      */
@@ -4362,7 +4362,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected int mUserPaddingRight;
 
     /**
-     * Cache the paddingBottom set by the user to append to the scrollbar's size.
+     * The resolved bottom padding before taking account of scroll bars.
      *
      * @hide
      */
@@ -4370,7 +4370,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected int mUserPaddingBottom;
 
     /**
-     * Cache the paddingLeft set by the user to append to the scrollbar's size.
+     * The left padding after RTL resolution, but before taking account of scroll bars.
      *
      * @hide
      */
@@ -4392,14 +4392,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mUserPaddingEnd;
 
     /**
-     * Cache initial left padding.
+     * The left padding as set by a setter method, a background's padding, or via XML property
+     * resolution. This value is the padding before LTR resolution or taking account of scrollbars.
      *
      * @hide
      */
     int mUserPaddingLeftInitial;
 
     /**
-     * Cache initial right padding.
+     * The right padding as set by a setter method, a background's padding, or via XML property
+     * resolution. This value is the padding before LTR resolution or taking account of scrollbars.
      *
      * @hide
      */
@@ -4411,12 +4413,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int UNDEFINED_PADDING = Integer.MIN_VALUE;
 
     /**
-     * Cache if a left padding has been defined
+     * Cache if a left padding has been defined explicitly via padding, horizontal padding,
+     * or leftPadding in XML, or by setPadding(...) or setRelativePadding(...)
      */
     private boolean mLeftPaddingDefined = false;
 
     /**
-     * Cache if a right padding has been defined
+     * Cache if a right padding has been defined explicitly via padding, horizontal padding,
+     * or rightPadding in XML, or by setPadding(...) or setRelativePadding(...)
      */
     private boolean mRightPaddingDefined = false;
 
@@ -5325,7 +5329,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case com.android.internal.R.styleable.View_paddingVertical:
                     paddingVertical = a.getDimensionPixelSize(attr, -1);
                     break;
-                 case com.android.internal.R.styleable.View_paddingLeft:
+                case com.android.internal.R.styleable.View_paddingLeft:
                     leftPadding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingLeftInitial = leftPadding;
                     leftPaddingDefined = true;
@@ -5791,7 +5795,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         setOverScrollMode(overScrollMode);
 
-        // Cache start/end user padding as we cannot fully resolve padding here (we dont have yet
+        // Cache start/end user padding as we cannot fully resolve padding here (we don't have yet
         // the resolved layout direction). Those cached values will be used later during padding
         // resolution.
         mUserPaddingStart = startPadding;
@@ -5806,6 +5810,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mLeftPaddingDefined = leftPaddingDefined;
         mRightPaddingDefined = rightPaddingDefined;
 
+        // Valid paddingHorizontal/paddingVertical beats leftPadding, rightPadding, topPadding,
+        // bottomPadding, and padding set by background.  Valid padding beats everything.
         if (padding >= 0) {
             leftPadding = padding;
             topPadding = padding;
@@ -5858,6 +5864,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
+        // mPaddingTop and mPaddingBottom may have been set by setBackground(Drawable) so must pass
+        // them on if topPadding or bottomPadding are not valid.
         internalSetPadding(
                 mUserPaddingLeftInitial,
                 topPadding >= 0 ? topPadding : mPaddingTop,
