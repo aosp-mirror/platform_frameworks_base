@@ -33,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.IntArray;
 import android.util.Xml;
@@ -129,7 +130,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.toString().getBytes())), null);
         parser.nextTag();
-        mAssistants.readXml(parser, null);
+        mAssistants.readXml(parser, null, false, UserHandle.USER_ALL);
 
         verify(mNm, never()).readDefaultAssistant(anyInt());
         verify(mAssistants, times(1)).addApprovedList(
