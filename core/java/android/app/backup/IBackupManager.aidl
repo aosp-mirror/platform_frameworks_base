@@ -22,6 +22,7 @@ import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 import android.content.Intent;
 import android.content.ComponentName;
 
@@ -685,4 +686,24 @@ interface IBackupManager {
      * {@link android.app.backup.IBackupManager.cancelBackups} for the calling user id.
      */
     void cancelBackups();
+
+    /**
+     * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the serial
+     * number of the it's ancestral work profile.
+     *
+     * <p> The ancestral work profile is set by {@link #setAncestralSerialNumber(long)}
+     * and it corresponds to the profile that was used to restore to the callers profile.
+     */
+    UserHandle getUserForAncestralSerialNumber(in long ancestralSerialNumber);
+
+    /**
+     * Sets the ancestral work profile for the calling user.
+     *
+     * <p> The ancestral work profile corresponds to the profile that was used to restore to the
+     * callers profile.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void setAncestralSerialNumber(in long ancestralSerialNumber);
+
 }
