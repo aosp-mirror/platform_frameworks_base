@@ -49,6 +49,7 @@ android_test {
         "libhidlbase",
         "libhidltransport",
         "libhwbinder",
+        "libjsoncpp",
         "liblog",
         "liblzma",
         "libnativehelper",
