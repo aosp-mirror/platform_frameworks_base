@@ -67,6 +67,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.OngoingPrivacyDialog;
+import com.android.systemui.privacy.PrivacyDialogBuilder;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.QSDetail.Callback;
@@ -534,10 +535,12 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     AlarmClock.ACTION_SHOW_ALARMS),0);
         } else if (v == mPrivacyChip) {
+            // Makes sure that the builder is grabbed as soon as the chip is pressed
+            PrivacyDialogBuilder builder = mPrivacyChip.getBuilder();
+            if (builder.getAppsAndTypes().size() == 0) return;
             Handler mUiHandler = new Handler(Looper.getMainLooper());
             mUiHandler.post(() -> {
-                Dialog mDialog = new OngoingPrivacyDialog(mContext,
-                        mPrivacyChip.getBuilder()).createDialog();
+                Dialog mDialog = new OngoingPrivacyDialog(mContext, builder).createDialog();
                 mDialog.getWindow().setType(
                         WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
                 SystemUIDialog.setShowForAllUsers(mDialog, true);

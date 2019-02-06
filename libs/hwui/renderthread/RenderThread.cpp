@@ -56,7 +56,7 @@ static const nsecs_t DISPATCH_FRAME_CALLBACKS_DELAY = milliseconds_to_nanosecond
 
 static bool gHasRenderThreadInstance = false;
 
-static void (*gOnStartHook)() = nullptr;
+static JVMAttachHook gOnStartHook = nullptr;
 
 class DisplayEventReceiverWrapper : public VsyncSource {
 public:
@@ -111,9 +111,13 @@ bool RenderThread::hasInstance() {
     return gHasRenderThreadInstance;
 }
 
-void RenderThread::setOnStartHook(void (*onStartHook)()) {
+void RenderThread::setOnStartHook(JVMAttachHook onStartHook) {
     LOG_ALWAYS_FATAL_IF(hasInstance(), "can't set an onStartHook after we've started...");
     gOnStartHook = onStartHook;
+}
+
+JVMAttachHook RenderThread::getOnStartHook() {
+    return gOnStartHook;
 }
 
 RenderThread& RenderThread::getInstance() {

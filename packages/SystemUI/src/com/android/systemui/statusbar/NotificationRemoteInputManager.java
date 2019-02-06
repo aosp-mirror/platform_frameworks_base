@@ -54,6 +54,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -231,7 +232,8 @@ public class NotificationRemoteInputManager implements Dumpable {
                 return false;
             }
 
-            return activateRemoteInput(view, inputs, input, pendingIntent);
+            return activateRemoteInput(view, inputs, input, pendingIntent,
+                    null /* editedSuggestionInfo */);
         }
     };
 
@@ -291,6 +293,19 @@ public class NotificationRemoteInputManager implements Dumpable {
                 }
                 try {
                     mBarService.onNotificationDirectReplied(entry.notification.getKey());
+                    if (entry.editedSuggestionInfo != null) {
+                        boolean modifiedBeforeSending =
+                                !TextUtils.equals(entry.remoteInputText,
+                                        entry.editedSuggestionInfo.originalText);
+                        mBarService.onNotificationSmartReplySent(
+                                entry.notification.getKey(),
+                                entry.editedSuggestionInfo.index,
+                                entry.editedSuggestionInfo.originalText,
+                                NotificationLogger
+                                        .getNotificationLocation(entry)
+                                        .toMetricsEventEnum(),
+                                modifiedBeforeSending);
+                    }
                 } catch (RemoteException e) {
                     // Nothing to do, system going down
                 }
@@ -310,10 +325,12 @@ public class NotificationRemoteInputManager implements Dumpable {
      * @param inputs The remote inputs that need to be sent to the app.
      * @param input The remote input that needs to be activated.
      * @param pendingIntent The pending intent to be sent to the app.
+     * @param editedSuggestionInfo The smart reply that should be inserted in the remote input, or
+     *         {@code null} if the user is not editing a smart reply.
      * @return Whether the {@link RemoteInput} was activated.
      */
     public boolean activateRemoteInput(View view, RemoteInput[] inputs, RemoteInput input,
-            PendingIntent pendingIntent) {
+            PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo) {
 
         ViewParent p = view.getParent();
         RemoteInputView riv = null;
@@ -386,7 +403,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         riv.setRevealParameters(cx, cy, r);
         riv.setPendingIntent(pendingIntent);
-        riv.setRemoteInput(inputs, input);
+        riv.setRemoteInput(inputs, input, editedSuggestionInfo);
         riv.focusAnimated();
 
         return true;

@@ -92,14 +92,18 @@ public class PhysicsAnimationLayout extends FrameLayout {
         abstract void onChildAdded(View child, int index);
 
         /**
-         * Called when a child is to be removed from the layout. Controllers can use this
-         * opportunity to animate out the new view before calling the provided callback to actually
-         * remove it.
+         * Called with a child view that has been removed from the layout, from the given index. The
+         * passed view has been removed from the layout and added back as a transient view, which
+         * renders normally, but is not part of the normal view hierarchy and will not be considered
+         * by getChildAt() and getChildCount().
          *
-         * Controllers should be careful to ensure that actuallyRemove is called on all code paths
-         * or child views will never be removed.
+         * The controller can perform animations on the child (either manually, or by using
+         * {@link #animateValueForChild}), and then call finishRemoval when complete.
+         *
+         * finishRemoval must be called by implementations of this method, or transient views will
+         * never be removed.
          */
-        abstract void onChildToBeRemoved(View child, int index, Runnable actuallyRemove);
+        abstract void onChildRemoved(View child, int index, Runnable finishRemoval);
 
         protected PhysicsAnimationLayout mLayout;
 
@@ -111,6 +115,15 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         protected PhysicsAnimationLayout getLayout() {
             return mLayout;
+        }
+
+        /**
+         * Sets the child's visibility when it moves beyond or within the limits set by a call to
+         * {@link PhysicsAnimationLayout#setMaxRenderedChildren}. This can be overridden to animate
+         * this transition.
+         */
+        protected void setChildVisibility(View child, int index, int visibility) {
+            child.setVisibility(visibility);
         }
     }
 
@@ -236,7 +249,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             // Tell the controller to animate this view out, and call the callback when it's
             // finished.
-            mController.onChildToBeRemoved(view, index, () -> {
+            mController.onChildRemoved(view, index, () -> {
                 // Done animating, remove the transient view.
                 removeTransientView(view);
 
@@ -457,11 +470,16 @@ public class PhysicsAnimationLayout extends FrameLayout {
     /** Hides children beyond the max rendering count. */
     private void setChildrenVisibility() {
         for (int i = 0; i < getChildCount(); i++) {
-            getChildAt(i).setVisibility(
-                    // Ignore views that are animating out when calculating whether to hide the
-                    // view. That is, if we're supposed to render 5 views, but 4 are animating out
-                    // and will soon be removed, render up to 9 views temporarily.
-                    i < mMaxRenderedChildren ? View.VISIBLE : View.GONE);
+            final int targetVisibility = i < mMaxRenderedChildren ? View.VISIBLE : View.GONE;
+            final View targetView = getChildAt(i);
+
+            if (targetView.getVisibility() != targetVisibility) {
+                if (mController != null) {
+                    mController.setChildVisibility(targetView, i, targetVisibility);
+                } else {
+                    targetView.setVisibility(targetVisibility);
+                }
+            }
         }
     }
 

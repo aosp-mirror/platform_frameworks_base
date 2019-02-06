@@ -105,6 +105,14 @@ public final class NotificationEntry {
     /** Smart replies provided by the NotificationAssistantService. */
     @NonNull
     public CharSequence[] systemGeneratedSmartReplies = new CharSequence[0];
+
+    /**
+     * If {@link android.app.RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
+     * currently editing a choice (smart reply), then this field contains the information about the
+     * suggestion being edited. Otherwise <code>null</code>.
+     */
+    public EditedSuggestionInfo editedSuggestionInfo;
+
     @VisibleForTesting
     public int suppressedVisualEffects;
     public boolean suspended;
@@ -745,5 +753,24 @@ public final class NotificationEntry {
 
     private static boolean isCategory(String category, Notification n) {
         return Objects.equals(n.category, category);
+    }
+
+    /** Information about a suggestion that is being edited. */
+    public static class EditedSuggestionInfo {
+
+        /**
+         * The value of the suggestion (before any user edits).
+         */
+        public final CharSequence originalText;
+
+        /**
+         * The index of the suggestion that is being edited.
+         */
+        public final int index;
+
+        public EditedSuggestionInfo(CharSequence originalText, int index) {
+            this.originalText = originalText;
+            this.index = index;
+        }
     }
 }

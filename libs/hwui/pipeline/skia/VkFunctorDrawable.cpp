@@ -43,7 +43,9 @@ VkFunctorDrawHandler::VkFunctorDrawHandler(sp<WebViewFunctor::Handle> functor_ha
         , mImageInfo(image_info) {}
 
 VkFunctorDrawHandler::~VkFunctorDrawHandler() {
-    mFunctorHandle->postDrawVk();
+    if (mDrawn) {
+        mFunctorHandle->postDrawVk();
+    }
 }
 
 void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
@@ -77,6 +79,7 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
     params.format = vulkan_info.fFormat;
 
     mFunctorHandle->drawVk(params);
+    mDrawn = true;
 
     vulkan_info.fDrawBounds->offset.x = mClip.fLeft;
     vulkan_info.fDrawBounds->offset.y = mClip.fTop;

@@ -16,16 +16,17 @@
 
 package android.widget.espresso;
 
-import org.hamcrest.Matcher;
-
-import android.support.test.espresso.UiController;
-import android.support.test.espresso.ViewAction;
-import android.support.test.espresso.action.CoordinatesProvider;
-import android.support.test.espresso.action.GeneralClickAction;
-import android.support.test.espresso.action.PrecisionDescriber;
-import android.support.test.espresso.action.Tapper;
 import android.view.View;
 import android.view.ViewConfiguration;
+
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.action.CoordinatesProvider;
+import androidx.test.espresso.action.GeneralClickAction;
+import androidx.test.espresso.action.PrecisionDescriber;
+import androidx.test.espresso.action.Tapper;
+
+import org.hamcrest.Matcher;
 
 public final class ViewClickAction implements ViewAction {
     private final GeneralClickAction mGeneralClickAction;

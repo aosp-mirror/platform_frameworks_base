@@ -60,6 +60,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.autofill.Helper;
+import android.view.inspector.InspectableProperty;
+import android.view.inspector.InspectableProperty.EnumMap;
 
 import com.android.internal.R;
 
@@ -773,6 +775,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @ViewDebug.IntToString(from = FOCUS_AFTER_DESCENDANTS, to = "FOCUS_AFTER_DESCENDANTS"),
         @ViewDebug.IntToString(from = FOCUS_BLOCK_DESCENDANTS, to = "FOCUS_BLOCK_DESCENDANTS")
     })
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = FOCUS_BEFORE_DESCENDANTS, name = "beforeDescendants"),
+            @EnumMap(value = FOCUS_AFTER_DESCENDANTS, name = "afterDescendants"),
+            @EnumMap(value = FOCUS_BLOCK_DESCENDANTS, name = "blocksDescendants")
+    })
     public int getDescendantFocusability() {
         return mGroupFlags & FLAG_MASK_FOCUSABILITY;
     }
@@ -1391,6 +1398,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Check whether this ViewGroup should ignore focus requests for itself and its children.
      */
     @ViewDebug.ExportedProperty(category = "focus")
+    @InspectableProperty
     public boolean getTouchscreenBlocksFocus() {
         return (mGroupFlags & FLAG_TOUCHSCREEN_BLOCKS_FOCUS) != 0;
     }
@@ -3116,6 +3124,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Returns true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
      * @return true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
      */
+    @InspectableProperty(name = "splitMotionEvents")
     public boolean isMotionEventSplittingEnabled() {
         return (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS;
     }
@@ -3132,6 +3141,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@link android.view.ViewOutlineProvider#BACKGROUND} was given to
      * {@link #setOutlineProvider(ViewOutlineProvider)} and false otherwise.
      */
+    @InspectableProperty
     public boolean isTransitionGroup() {
         if ((mGroupFlags & FLAG_IS_TRANSITION_GROUP_SET) != 0) {
             return ((mGroupFlags & FLAG_IS_TRANSITION_GROUP) != 0);
@@ -3603,7 +3613,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return;
         }
 
-        final ChildListForAutoFill children = getChildrenForAutofill(flags);
+        final ChildListForAutoFillOrContentCapture children = getChildrenForAutofill(flags);
         final int childrenCount = children.size();
         structure.setChildCount(childrenCount);
         for (int i = 0; i < childrenCount; i++) {
@@ -3614,13 +3624,31 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         children.recycle();
     }
 
+    /** @hide */
+    @Override
+    public void dispatchProvideContentCaptureStructure() {
+        super.dispatchProvideContentCaptureStructure();
+
+        if (!isLaidOut()) return;
+
+        final ChildListForAutoFillOrContentCapture children = getChildrenForContentCapture();
+        final int childrenCount = children.size();
+        for (int i = 0; i < childrenCount; i++) {
+            final View child = children.get(i);
+            child.dispatchProvideContentCaptureStructure();
+        }
+        children.recycle();
+    }
+
     /**
      * Gets the children for autofill. Children for autofill are the first
      * level descendants that are important for autofill. The returned
      * child list object is pooled and the caller must recycle it once done.
      * @hide */
-    private @NonNull ChildListForAutoFill getChildrenForAutofill(@AutofillFlags int flags) {
-        final ChildListForAutoFill children = ChildListForAutoFill.obtain();
+    private @NonNull ChildListForAutoFillOrContentCapture getChildrenForAutofill(
+            @AutofillFlags int flags) {
+        final ChildListForAutoFillOrContentCapture children = ChildListForAutoFillOrContentCapture
+                .obtain();
         populateChildrenForAutofill(children, flags);
         return children;
     }
@@ -3643,6 +3671,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);
+            }
+        }
+    }
+
+    private @NonNull ChildListForAutoFillOrContentCapture getChildrenForContentCapture() {
+        final ChildListForAutoFillOrContentCapture children = ChildListForAutoFillOrContentCapture
+                .obtain();
+        populateChildrenForContentCapture(children);
+        return children;
+    }
+
+    /** @hide */
+    private void populateChildrenForContentCapture(ArrayList<View> list) {
+        final int childrenCount = mChildrenCount;
+        if (childrenCount <= 0) {
+            return;
+        }
+        final ArrayList<View> preorderedList = buildOrderedChildList();
+        final boolean customOrder = preorderedList == null
+                && isChildrenDrawingOrderEnabled();
+        for (int i = 0; i < childrenCount; i++) {
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = (preorderedList == null)
+                    ? mChildren[childIndex] : preorderedList.get(childIndex);
+            if (child.isImportantForContentCapture()) {
+                list.add(child);
+            } else if (child instanceof ViewGroup) {
+                ((ViewGroup) child).populateChildrenForContentCapture(list);
             }
         }
     }
@@ -4390,6 +4446,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * false otherwise.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @InspectableProperty
     public boolean getClipChildren() {
         return ((mGroupFlags & FLAG_CLIP_CHILDREN) != 0);
     }
@@ -4447,6 +4504,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @attr ref android.R.styleable#ViewGroup_clipToPadding
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @InspectableProperty
     public boolean getClipToPadding() {
         return hasBooleanFlag(FLAG_CLIP_TO_PADDING);
     }
@@ -6294,6 +6352,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @return the current animation controller
      */
+    @InspectableProperty
     public LayoutAnimationController getLayoutAnimation() {
         return mLayoutAnimationController;
     }
@@ -6313,6 +6372,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Caching behavior of children may be controlled through {@link View#setLayerType(int, Paint)}.
      */
     @Deprecated
+    @InspectableProperty(name = "animationCache")
     public boolean isAnimationCacheEnabled() {
         return (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
     }
@@ -6350,6 +6410,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Child views may no longer have their caching behavior disabled by parents.
      */
     @Deprecated
+    @InspectableProperty(name = "alwaysDrawnWithCache")
     public boolean isAlwaysDrawnWithCacheEnabled() {
         return (mGroupFlags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE;
     }
@@ -6493,6 +6554,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @ViewDebug.IntToString(from = PERSISTENT_SCROLLING_CACHE, to = "SCROLLING"),
         @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ALL")
     })
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = PERSISTENT_NO_CACHE, name = "none"),
+            @EnumMap(value = PERSISTENT_ANIMATION_CACHE, name = "animation"),
+            @EnumMap(value = PERSISTENT_SCROLLING_CACHE, name = "scrolling"),
+            @EnumMap(value = PERSISTENT_ALL_CACHES, name = "all"),
+    })
     public int getPersistentDrawingCache() {
         return mPersistentDrawingCache;
     }
@@ -6570,6 +6637,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @see #setLayoutMode(int)
      */
+    @InspectableProperty(enumMapping = {
+            @EnumMap(value = LAYOUT_MODE_CLIP_BOUNDS, name = "clipBounds"),
+            @EnumMap(value = LAYOUT_MODE_OPTICAL_BOUNDS, name = "opticalBounds")
+    })
     public int getLayoutMode() {
         if (mLayoutMode == LAYOUT_MODE_UNDEFINED) {
             int inheritedLayoutMode = (mParent instanceof ViewGroup) ?
@@ -7261,6 +7332,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * make a group appear to be focused when its child EditText or button
      * is focused.
      */
+    @InspectableProperty
     public boolean addStatesFromChildren() {
         return (mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) != 0;
     }
@@ -8544,16 +8616,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Pooled class that to hold the children for autifill.
      */
-    static class ChildListForAutoFill extends ArrayList<View> {
+    private static class ChildListForAutoFillOrContentCapture extends ArrayList<View> {
         private static final int MAX_POOL_SIZE = 32;
 
-        private static final Pools.SimplePool<ChildListForAutoFill> sPool =
+        private static final Pools.SimplePool<ChildListForAutoFillOrContentCapture> sPool =
                 new Pools.SimplePool<>(MAX_POOL_SIZE);
 
-        public static ChildListForAutoFill obtain() {
-            ChildListForAutoFill list = sPool.acquire();
+        public static ChildListForAutoFillOrContentCapture obtain() {
+            ChildListForAutoFillOrContentCapture list = sPool.acquire();
             if (list == null) {
-                list = new ChildListForAutoFill();
+                list = new ChildListForAutoFillOrContentCapture();
             }
             return list;
         }

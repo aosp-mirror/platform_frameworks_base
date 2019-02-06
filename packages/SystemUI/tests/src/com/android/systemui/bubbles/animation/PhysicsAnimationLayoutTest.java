@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 
 import android.os.SystemClock;
 import android.support.test.filters.SmallTest;
@@ -100,9 +101,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         mTestableController.setRemoveImmediately(true);
         mLayout.removeView(mViews.get(1));
         mLayout.removeView(mViews.get(2));
-        Mockito.verify(mTestableController).onChildToBeRemoved(
+        Mockito.verify(mTestableController).onChildRemoved(
                 eq(mViews.get(1)), eq(1), any());
-        Mockito.verify(mTestableController).onChildToBeRemoved(
+        Mockito.verify(mTestableController).onChildRemoved(
                 eq(mViews.get(2)), eq(1), any());
 
         // Make sure we still get view added notifications after doing some removals.
@@ -345,6 +346,24 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         assertTrue(mViews.get(0).getTranslationY() < 1000);
     }
 
+    @Test
+    public void testSetChildVisibility() throws InterruptedException {
+        mLayout.setController(mTestableController);
+        addOneMoreThanRenderLimitBubbles();
+
+        // The last view should have been set to GONE by the controller, since we added one more
+        // than the limit and it got pushed off. None of the first children should have been set
+        // VISIBLE, since they would have been animated in by onChildAdded.
+        Mockito.verify(mTestableController).setChildVisibility(
+                mViews.get(mViews.size() - 1), 5, View.GONE);
+        Mockito.verify(mTestableController, never()).setChildVisibility(
+                any(View.class), anyInt(), eq(View.VISIBLE));
+
+        // Remove the first view, which should cause the last view to become visible again.
+        mLayout.removeView(mViews.get(0));
+        Mockito.verify(mTestableController).setChildVisibility(
+                mViews.get(mViews.size() - 1), 4, View.VISIBLE);
+    }
 
     /** Standard test of chained translation animations. */
     private void testChainedTranslationAnimations() throws InterruptedException {
@@ -440,10 +459,15 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         void onChildAdded(View child, int index) {}
 
         @Override
-        void onChildToBeRemoved(View child, int index, Runnable actuallyRemove) {
+        void onChildRemoved(View child, int index, Runnable finishRemoval) {
             if (mRemoveImmediately) {
-                actuallyRemove.run();
+                finishRemoval.run();
             }
+        }
+
+        @Override
+        protected void setChildVisibility(View child, int index, int visibility) {
+            super.setChildVisibility(child, index, visibility);
         }
     }
 }

@@ -469,6 +469,11 @@ public class Handler {
         return sendMessageDelayed(getPostMessage(r), delayMillis);
     }
     
+    /** @hide */
+    public final boolean postDelayed(Runnable r, int what, long delayMillis) {
+        return sendMessageDelayed(getPostMessage(r).setWhat(what), delayMillis);
+    }
+
     /**
      * Causes the Runnable r to be added to the message queue, to be run
      * after the specified amount of time elapses.

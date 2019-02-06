@@ -180,9 +180,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         for (int i = items.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = items.valueAt(i);
             final InsetsSource source = mInitialInsetsState.getSource(consumer.getType());
+            final InsetsSourceControl control = consumer.getControl();
             final SurfaceControl leash = consumer.getControl().getLeash();
-            mTmpMatrix.setTranslate(source.getFrame().left, source.getFrame().top);
 
+            mTmpMatrix.setTranslate(control.getSurfacePosition().x, control.getSurfacePosition().y);
             mTmpFrame.set(source.getFrame());
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 

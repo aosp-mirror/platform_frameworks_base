@@ -26,15 +26,16 @@ import android.app.Service;
 import android.app.UiAutomation;
 import android.graphics.Rect;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.TextUtils;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityTestActivity;
 import android.view.accessibility.AccessibilityWindowInfo;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.rule.ActivityTestRule;
 
 import com.android.compatibility.common.util.TestUtils;
 import com.android.frameworks.coretests.R;

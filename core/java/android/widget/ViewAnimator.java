@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inspector.InspectableProperty;
 
 /**
  * Base class for a {@link FrameLayout} container that will perform animations
@@ -265,6 +266,7 @@ public class ViewAnimator extends FrameLayout {
      * @see #setInAnimation(android.view.animation.Animation)
      * @see #setInAnimation(android.content.Context, int)
      */
+    @InspectableProperty
     public Animation getInAnimation() {
         return mInAnimation;
     }
@@ -289,6 +291,7 @@ public class ViewAnimator extends FrameLayout {
      * @see #setOutAnimation(android.view.animation.Animation)
      * @see #setOutAnimation(android.content.Context, int)
      */
+    @InspectableProperty
     public Animation getOutAnimation() {
         return mOutAnimation;
     }
@@ -340,6 +343,7 @@ public class ViewAnimator extends FrameLayout {
      *
      * @see #setAnimateFirstView(boolean)
      */
+    @InspectableProperty
     public boolean getAnimateFirstView() {
         return mAnimateFirstTime;
     }

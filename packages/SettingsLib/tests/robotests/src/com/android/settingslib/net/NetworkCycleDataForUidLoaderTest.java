@@ -70,7 +70,7 @@ public class NetworkCycleDataForUidLoaderTest {
         final String subId = "TestSubscriber";
         final int uid = 1;
         mLoader = spy(NetworkCycleDataForUidLoader.builder(mContext)
-            .setUid(uid).setSubscriberId(subId).build());
+            .addUid(uid).setSubscriberId(subId).build());
         doReturn(1024L).when(mLoader).getTotalUsage(any());
 
         mLoader.recordUsage(start, end);
@@ -88,11 +88,32 @@ public class NetworkCycleDataForUidLoaderTest {
         final String subId = "TestSubscriber";
         final int uid = 1;
         mLoader = spy(NetworkCycleDataForUidLoader.builder(mContext)
-            .setRetrieveDetail(false).setUid(uid).setSubscriberId(subId).build());
+            .setRetrieveDetail(false).addUid(uid).setSubscriberId(subId).build());
         doReturn(1024L).when(mLoader).getTotalUsage(any());
 
         mLoader.recordUsage(start, end);
         verify(mNetworkStatsManager, never()).queryDetailsForUidTagState(
             networkType, subId, start, end, uid, TAG_NONE, STATE_FOREGROUND);
     }
+
+    @Test
+    public void recordUsage_multipleUids_shouldQueryNetworkDetailsForEachUid() {
+        final long end = System.currentTimeMillis();
+        final long start = end - (DateUtils.WEEK_IN_MILLIS * 4);
+        final int networkType = ConnectivityManager.TYPE_MOBILE;
+        final String subId = "TestSubscriber";
+        mLoader = spy(NetworkCycleDataForUidLoader.builder(mContext)
+            .addUid(1)
+            .addUid(2)
+            .addUid(3)
+            .setSubscriberId(subId).build());
+        doReturn(1024L).when(mLoader).getTotalUsage(any());
+
+        mLoader.recordUsage(start, end);
+
+        verify(mNetworkStatsManager).queryDetailsForUid(networkType, subId, start, end, 1);
+        verify(mNetworkStatsManager).queryDetailsForUid(networkType, subId, start, end, 2);
+        verify(mNetworkStatsManager).queryDetailsForUid(networkType, subId, start, end, 3);
+    }
+
 }

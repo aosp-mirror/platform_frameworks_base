@@ -1369,7 +1369,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             } else {
                 if (!allowMonitoring
-                        || mAppOps.noteOpNoThrow(op, mCallerIdentity.mUid,
+                        || mAppOps.checkOpNoThrow(op, mCallerIdentity.mUid,
                         mCallerIdentity.mPackageName) != AppOpsManager.MODE_ALLOWED) {
                     mAppOps.finishOp(op, mCallerIdentity.mUid, mCallerIdentity.mPackageName);
                     return false;
@@ -1904,7 +1904,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             int allowedResolutionLevel) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
-            if (mAppOps.noteOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
+            if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
         }
@@ -2069,8 +2069,12 @@ public class LocationManagerService extends ILocationManager.Stub {
                         record.mReceiver.mAllowedResolutionLevel)) {
                     continue;
                 }
-                if (!provider.isUseableLocked() && !isSettingsExemptLocked(record)) {
-                    continue;
+                if (!provider.isUseableLocked()) {
+                    if (isSettingsExemptLocked(record)) {
+                        providerRequest.forceLocation = true;
+                    } else {
+                        continue;
+                    }
                 }
 
                 LocationRequest locationRequest = record.mRealRequest;
@@ -2549,13 +2553,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                     return null;
                 }
 
-                if (!reportLocationAccessNoThrow(pid, uid, packageName, allowedResolutionLevel)) {
-                    if (D) {
-                        Log.d(TAG, "not returning last loc for no op app: "
-                                + packageName);
-                    }
-                    return null;
-                }
 
                 // Figure out the provider. Either its explicitly request (deprecated API's),
                 // or use the fused provider
@@ -2599,16 +2596,27 @@ public class LocationManagerService extends ILocationManager.Stub {
                     return null;
                 }
 
+                Location lastLocation = null;
                 if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
                     Location noGPSLocation = location.getExtraLocation(
                             Location.EXTRA_NO_GPS_LOCATION);
                     if (noGPSLocation != null) {
-                        return new Location(mLocationFudger.getOrCreate(noGPSLocation));
+                        lastLocation = new Location(mLocationFudger.getOrCreate(noGPSLocation));
                     }
                 } else {
-                    return new Location(location);
+                    lastLocation = new Location(location);
                 }
-                return null;
+                // Don't report location access if there is no last location to deliver.
+                if (lastLocation != null) {
+                    if (!reportLocationAccessNoThrow(
+                            pid, uid, packageName, allowedResolutionLevel)) {
+                        if (D) {
+                            Log.d(TAG, "not returning last loc for no op app: " + packageName);
+                        }
+                        lastLocation =  null;
+                    }
+                }
+                return lastLocation;
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2878,22 +2886,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return null;
             }
             return provider.getPropertiesLocked();
-        }
-    }
-
-    @Override
-    public String getNetworkProviderPackage() {
-        synchronized (mLock) {
-            LocationProvider provider = getLocationProviderLocked(NETWORK_PROVIDER);
-            if (provider == null) {
-                return null;
-            }
-            List<String> packages = provider.getPackagesLocked();
-            if (packages.isEmpty()) {
-                return null;
-            } else {
-                return packages.get(0);
-            }
         }
     }
 
@@ -3249,7 +3241,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     // Mock Providers
 
     private boolean canCallerAccessMockLocation(String opPackageName) {
-        return mAppOps.noteOp(AppOpsManager.OP_MOCK_LOCATION, Binder.getCallingUid(),
+        return mAppOps.checkOp(AppOpsManager.OP_MOCK_LOCATION, Binder.getCallingUid(),
                 opPackageName) == AppOpsManager.MODE_ALLOWED;
     }
 

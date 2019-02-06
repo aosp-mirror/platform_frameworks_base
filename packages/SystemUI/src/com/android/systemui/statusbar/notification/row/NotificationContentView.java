@@ -1509,8 +1509,13 @@ public class NotificationContentView extends FrameLayout {
                     boolean fromAssistant = smartRepliesAndActions.smartReplies == null
                             ? smartRepliesAndActions.smartActions.fromAssistant
                             : smartRepliesAndActions.smartReplies.fromAssistant;
+                    boolean editBeforeSending = smartRepliesAndActions.smartReplies != null
+                            && mSmartReplyConstants.getEffectiveEditChoicesBeforeSending(
+                                    smartRepliesAndActions.smartReplies.remoteInput
+                                            .getEditChoicesBeforeSending());
+
                     mSmartReplyController.smartSuggestionsAdded(entry, numSmartReplies,
-                            numSmartActions, fromAssistant);
+                            numSmartActions, fromAssistant, editBeforeSending);
                 }
             }
         }

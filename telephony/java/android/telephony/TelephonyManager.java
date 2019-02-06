@@ -1351,6 +1351,38 @@ public class TelephonyManager {
     @SystemApi
     public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000;
 
+    /**
+     * Intent sent when an error occurs that debug tools should log and possibly take further
+     * action such as capturing vendor-specific logs.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public static final String ACTION_DEBUG_EVENT = "android.telephony.action.DEBUG_EVENT";
+
+    /**
+     * An arbitrary ParcelUuid which should be consistent for each occurrence of the same event.
+     *
+     * This field must be included in all events.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEBUG_EVENT_ID = "android.telephony.extra.DEBUG_EVENT_ID";
+
+    /**
+     * A freeform string description of the event.
+     *
+     * This field is optional for all events and as a guideline should not exceed 80 characters
+     * and should be as short as possible to convey the essence of the event.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEBUG_EVENT_DESCRIPTION =
+            "android.telephony.extra.DEBUG_EVENT_DESCRIPTION";
+
     //
     //
     // Device Info
@@ -7974,9 +8006,7 @@ public class TelephonyManager {
      * support for the feature and device firmware support.
      *
      * @return {@code true} if the device and carrier both support RTT, {@code false} otherwise.
-     * @hide
      */
-    @TestApi
     public boolean isRttSupported() {
         try {
             ITelephony telephony = getITelephony();
@@ -9702,10 +9732,10 @@ public class TelephonyManager {
      *
      * <p>
      * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isOpportunisticNetworkEnabled() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean isEnabled = false;
@@ -10093,12 +10123,17 @@ public class TelephonyManager {
      * Get preferred opportunistic data subscription Id
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}),
-     * or has permission {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
+     * or has either READ_PRIVILEGED_PHONE_STATE
+     * or {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission.
      * @return subId preferred opportunistic subscription id or
      * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} if there are no preferred
      * subscription id
      *
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public int getPreferredOpportunisticDataSubscription() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;

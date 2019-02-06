@@ -19,8 +19,8 @@ package com.android.internal.statusbar;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 

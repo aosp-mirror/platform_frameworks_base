@@ -52,6 +52,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -444,6 +445,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_switchPadding
      */
+    @InspectableProperty
     public int getSwitchPadding() {
         return mSwitchPadding;
     }
@@ -469,6 +471,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_switchMinWidth
      */
+    @InspectableProperty
     public int getSwitchMinWidth() {
         return mSwitchMinWidth;
     }
@@ -492,6 +495,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_thumbTextPadding
      */
+    @InspectableProperty
     public int getThumbTextPadding() {
         return mThumbTextPadding;
     }
@@ -532,6 +536,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_track
      */
+    @InspectableProperty(name = "track")
     public Drawable getTrackDrawable() {
         return mTrackDrawable;
     }
@@ -562,6 +567,7 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_trackTint
      * @see #setTrackTintList(ColorStateList)
      */
+    @InspectableProperty(name = "trackTint")
     @Nullable
     public ColorStateList getTrackTintList() {
         return mTrackTintList;
@@ -591,6 +597,7 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_trackTintMode
      * @see #setTrackTintMode(PorterDuff.Mode)
      */
+    @InspectableProperty
     @Nullable
     public PorterDuff.Mode getTrackTintMode() {
         return mTrackTintMode;
@@ -655,6 +662,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_thumb
      */
+    @InspectableProperty(name = "thumb")
     public Drawable getThumbDrawable() {
         return mThumbDrawable;
     }
@@ -685,6 +693,7 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_thumbTint
      * @see #setThumbTintList(ColorStateList)
      */
+    @InspectableProperty(name = "thumbTint")
     @Nullable
     public ColorStateList getThumbTintList() {
         return mThumbTintList;
@@ -714,6 +723,7 @@ public class Switch extends CompoundButton {
      * @attr ref android.R.styleable#Switch_thumbTintMode
      * @see #setThumbTintMode(PorterDuff.Mode)
      */
+    @InspectableProperty
     @Nullable
     public PorterDuff.Mode getThumbTintMode() {
         return mThumbTintMode;
@@ -758,6 +768,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_splitTrack
      */
+    @InspectableProperty
     public boolean getSplitTrack() {
         return mSplitTrack;
     }
@@ -767,6 +778,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_textOn
      */
+    @InspectableProperty
     public CharSequence getTextOn() {
         return mTextOn;
     }
@@ -786,6 +798,7 @@ public class Switch extends CompoundButton {
      *
      * @attr ref android.R.styleable#Switch_textOff
      */
+    @InspectableProperty
     public CharSequence getTextOff() {
         return mTextOff;
     }
@@ -817,6 +830,7 @@ public class Switch extends CompoundButton {
      * @return whether the on/off text should be displayed
      * @attr ref android.R.styleable#Switch_showText
      */
+    @InspectableProperty
     public boolean getShowText() {
         return mShowText;
     }

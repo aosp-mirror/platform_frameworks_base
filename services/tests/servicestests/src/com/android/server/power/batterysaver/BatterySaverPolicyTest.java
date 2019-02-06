@@ -40,7 +40,7 @@ import org.mockito.MockitoAnnotations;
  * Tests for {@link com.android.server.power.batterysaver.BatterySaverPolicy}
  */
 public class BatterySaverPolicyTest extends AndroidTestCase {
-    private static final int MAX_SERVICE_TYPE = 15;
+    private static final int MAX_SERVICE_TYPE = 16;
     private static final float BRIGHTNESS_FACTOR = 0.7f;
     private static final float DEFAULT_BRIGHTNESS_FACTOR = 0.5f;
     private static final float PRECISION = 0.001f;
@@ -146,6 +146,11 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testGetBatterySaverPolicy_PolicyNightMode_DefaultValueCorrect() {
+        testServiceDefaultValue_On(ServiceType.NIGHT_MODE);
+    }
+
+    @SmallTest
     public void testGetBatterySaverPolicy_PolicyDataSaver_DefaultValueCorrect() {
         mBatterySaverPolicy.updateConstantsLocked("", "");
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
@@ -166,12 +171,12 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyGps_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.GPS);
+        testServiceDefaultValue_On(ServiceType.LOCATION);
 
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
         PowerSaveState stateOn =
-                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.GPS);
-        assertThat(stateOn.gpsMode).isEqualTo(DEFAULT_GPS_MODE);
+                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION);
+        assertThat(stateOn.locationMode).isEqualTo(DEFAULT_GPS_MODE);
     }
 
     @SmallTest
@@ -222,9 +227,9 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertThat(dataSaverState.batterySaverEnabled).isTrue();
 
         final PowerSaveState gpsState =
-                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.GPS);
+                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION);
         assertThat(gpsState.batterySaverEnabled).isTrue();
-        assertThat(gpsState.gpsMode).isEqualTo(GPS_MODE);
+        assertThat(gpsState.locationMode).isEqualTo(GPS_MODE);
 
         final PowerSaveState quickDozeState = mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.QUICK_DOZE);

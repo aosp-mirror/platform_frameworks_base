@@ -35,6 +35,7 @@ import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -121,6 +122,7 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @ViewDebug.ExportedProperty
+    @InspectableProperty
     public boolean isChecked() {
         return mChecked;
     }
@@ -237,6 +239,7 @@ public class CheckedTextView extends TextView implements Checkable {
      * @attr ref android.R.styleable#CheckedTextView_checkMarkTint
      * @see #setCheckMarkTintList(ColorStateList)
      */
+    @InspectableProperty(name = "checkMarkTint")
     @Nullable
     public ColorStateList getCheckMarkTintList() {
         return mCheckMarkTintList;
@@ -269,6 +272,7 @@ public class CheckedTextView extends TextView implements Checkable {
      * @attr ref android.R.styleable#CheckedTextView_checkMarkTintMode
      * @see #setCheckMarkTintMode(PorterDuff.Mode)
      */
+    @InspectableProperty
     @Nullable
     public PorterDuff.Mode getCheckMarkTintMode() {
         return mCheckMarkTintMode;
@@ -328,6 +332,7 @@ public class CheckedTextView extends TextView implements Checkable {
      *
      * @attr ref android.R.styleable#CheckedTextView_checkMark
      */
+    @InspectableProperty(name = "checkMark")
     public Drawable getCheckMarkDrawable() {
         return mCheckMarkDrawable;
     }

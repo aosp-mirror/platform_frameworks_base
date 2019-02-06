@@ -38,50 +38,20 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Conectouse automaticamente a través de %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Conectada automaticamente a través dun provedor de valoración de rede"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
-    <string name="ssid_by_passpoint_provider" msgid="7898171424140673315">"<xliff:g id="SSID">%1$s</xliff:g> de <xliff:g id="PASSPOINTPROVIDER">%2$s</xliff:g>"</string>
+    <string name="connected_via_app" msgid="5571999941988929520">"Wifi conectada a través de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Dispoñible a través de %1$s"</string>
-    <string name="tap_to_set_up" msgid="2468970825530423314">"Toca aquí para configuralo"</string>
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"Toca para rexistrarte"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Conexión sen Internet"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Non hai conexión a Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"É obrigatorio iniciar sesión"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"O punto de acceso está temporalmente cheo"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Conectado a través de %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Dispoñible a través de %1$s"</string>
-    <string name="osu_failure_ap_connection" msgid="598977488344424542">"Produciuse un erro coa conexión"</string>
-    <string name="osu_failure_server_url_invalid" msgid="2237477219243136714">"URL do servidor OSU non-válido"</string>
-    <string name="osu_failure_server_connection" msgid="8192988165059982174">"Produciuse un erro na conexión do servidor OSU"</string>
-    <string name="osu_failure_server_validation" msgid="4631649978129606823">"Non se puido validar o servidor OSU"</string>
-    <string name="osu_failure_service_provider_verification" msgid="4854091521439785597">"Certificado do servidor OSU non-válido"</string>
-    <string name="osu_failure_provisioning_aborted" msgid="424627208135320329">"Abastecemento anulado"</string>
-    <string name="osu_failure_provisioning_not_available" msgid="3021783729256985432">"Abastecemento non-dispoñible"</string>
-    <string name="osu_failure_invalid_server_url" msgid="8548886196179435758">"URL do servidor OSU non-válido"</string>
-    <string name="osu_failure_unexpected_command_type" msgid="8245921319866603904">"Tipo de comando inesperado"</string>
-    <string name="osu_failure_unexpected_soap_message_type" msgid="2255897608510053065">"Tipo de mensaxe SOAP inesperado"</string>
-    <string name="osu_failure_soap_message_exchange" msgid="4357358438685987192">"Produciuse un erro no intercambio da mensaxe SOAP"</string>
-    <string name="osu_failure_start_redirect_listener" msgid="4292769407279548482">"Non se puido iniciar a recepción de redirección"</string>
-    <string name="osu_failure_timed_out_redirect_listener" msgid="3168657820278807508">"Esgotouse o tempo de espera de redirección"</string>
-    <string name="osu_failure_no_osu_activity_found" msgid="4593038891437878675">"Non se encontrou a actividade de OSU"</string>
-    <string name="osu_failure_unexpected_soap_message_status" msgid="6568467710235256675">"Estado da mensaxe SOAP inesperado"</string>
-    <string name="osu_failure_no_pps_mo" msgid="850567403039076835">"No se puido encontrar PPS-MO"</string>
-    <string name="osu_failure_no_aaa_server_trust_root_node" msgid="8961455873459838456">"No se puido encontrar o nodo raíz de confianza do servidor AAA"</string>
-    <string name="osu_failure_no_remediation_server_trust_root_node" msgid="5041179688081545244">"No se puido encontrar o nodo raíz de confianza do servidor de solucións"</string>
-    <string name="osu_failure_no_policy_server_trust_root_node" msgid="6617290380940513539">"Non se puido encontrar o nodo raíz de confianza do servidor da política"</string>
-    <string name="osu_failure_retrieve_trust_root_certificates" msgid="1499136256195528265">"Produciuse un erro ao recuperar os certificados raíz de confianza"</string>
-    <string name="osu_failure_no_aaa_trust_root_certificate" msgid="1904322497042226984">"Non se puido encontrar o certificado raíz de confianza do servidor AAA"</string>
-    <string name="osu_failure_add_passpoint_configuration" msgid="2173557755811446047">"Non se puido engadir a configuración de PassPoint"</string>
-    <string name="osu_failure_osu_provider_not_found" msgid="6616172862116673082">"No se puido encontrar ningún servidor OSU"</string>
-    <string name="osu_status_ap_connecting" msgid="5296821043003441437">"Conectando"</string>
-    <string name="osu_status_ap_connected" msgid="3777289375683170728">"Conectado"</string>
-    <string name="osu_status_server_connecting" msgid="8499785407540355867">"Conectándose ao servidor OSU"</string>
-    <string name="osu_status_server_validated" msgid="3158727184762596355">"Servidor OSU validado"</string>
-    <string name="osu_status_server_connected" msgid="8382024481520158168">"Conectado ao servidor OSU"</string>
-    <string name="osu_status_init_soap_exchange" msgid="8628063888912101981">"Intercambio SOAP inicial"</string>
-    <string name="osu_status_waiting_for_redirect_response" msgid="2343016207837053197">"Agardando pola resposta de redirección"</string>
-    <string name="osu_status_redirect_response_received" msgid="5323368411922609405">"Resposta de redirección recibida"</string>
-    <string name="osu_status_second_soap_exchange" msgid="7115332266758483909">"Segundo intercambio SOAP"</string>
-    <string name="osu_status_third_soap_exchange" msgid="8460901783597440766">"Terceiro intercambio SOAP"</string>
-    <string name="osu_status_retrieving_trust_root_certs" msgid="1563445892926269689">"Recuperando certificados raíz de confianza"</string>
-    <string name="osu_provisioning_complete" msgid="5120178802493970149">"Abastecemento completado"</string>
+    <string name="osu_opening_provider" msgid="5488997661548640424">"Abrindo <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"Non se puido establecer conexión"</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"Completando o rexistro…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"Non se puido completar o rexistro. Toca para tentalo de novo."</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"Completouse o rexistro. Conectando…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Moi lenta"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Lenta"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Aceptar"</string>
@@ -234,8 +204,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Pantalla activa"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"A pantalla nunca estará en modo de suspensión durante a carga"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Activar rexistro de busca HCI Bluetooth"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Capturar paquetes de Bluetooth. (Activa/desactiva o Bluetooth despois de cambiar esta opción)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Desbloqueo do OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Permitir que se desbloqueo o cargador de inicio"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Queres permitir o desbloqueo do OEM?"</string>
@@ -246,7 +215,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Redes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificado de visualización sen fíos"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Activar rexistro detallado da wifi"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Selección aleatoria de enderezo MAC coa conexión"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datos móbiles sempre activados"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración de hardware para conexión compartida"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sen nomes"</string>
@@ -273,7 +241,6 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Non se puido conectar"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra opcións para o certificado de visualización sen fíos"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumenta o nivel de rexistro da wifi, móstrao por SSID RSSI no selector de wifi"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Selecciona aleatoriamente o enderezo MAC cando te conectes a redes wifi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"De pago por consumo"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sen pago por consumo"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de rexistrador"</string>

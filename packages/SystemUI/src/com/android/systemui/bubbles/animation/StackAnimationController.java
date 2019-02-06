@@ -316,10 +316,10 @@ public class StackAnimationController extends
     }
 
     @Override
-    void onChildToBeRemoved(View child, int index, Runnable actuallyRemove) {
+    void onChildRemoved(View child, int index, Runnable finishRemoval) {
         // Animate the child out, actually removing it once its alpha is zero.
         mLayout.animateValueForChild(
-                DynamicAnimation.ALPHA, child, 0f, actuallyRemove);
+                DynamicAnimation.ALPHA, child, 0f, finishRemoval);
         mLayout.animateValueForChild(DynamicAnimation.SCALE_X, child, ANIMATE_IN_STARTING_SCALE);
         mLayout.animateValueForChild(DynamicAnimation.SCALE_Y, child, ANIMATE_IN_STARTING_SCALE);
 

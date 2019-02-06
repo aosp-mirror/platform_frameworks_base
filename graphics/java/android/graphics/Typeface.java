@@ -1019,9 +1019,8 @@ public class Typeface {
 
     /**
      * This method is used by supportlib-v27.
-     * TODO: Remove private API use in supportlib: http://b/72665240
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 123768395)
     private static Typeface createFromFamiliesWithDefault(
             android.graphics.FontFamily[] families, int weight, int italic) {
         return createFromFamiliesWithDefault(families, DEFAULT_FAMILY, weight, italic);

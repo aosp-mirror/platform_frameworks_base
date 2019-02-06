@@ -402,8 +402,25 @@ number">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. 
 number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
     </plurals>
 
-    <!-- Header for typographic clock face. [CHAR LIMIT=8] -->
-    <string name="type_clock_header">It\u2019s</string>
+    <!-- Time displayed on typographic clock face, which displays the time in words.
+             Example:
+
+                 It's
+                 Four
+                 Twenty
+                 Nine
+
+         This string requires two arguments: the first in the hours of the time and
+         the second is the minutes of the time. The hours string is obtained from
+         string-array type_clock_hours below and the minutes string is obtained
+         from string-array type_clock_minutes below.
+
+    [CHAR LIMIT=8] -->
+    <plurals name="type_clock_header">
+        <item quantity="one"><annotation name="color">It\u2019s</annotation>\n^1\n^2</item>
+        <item quantity="few"><annotation name="color">It\u2019s</annotation>\n^1\n^2</item>
+        <item quantity="other"><annotation name="color">It\u2019s</annotation>\n^1\n^2</item>
+    </plurals>
 
     <!-- Hour displayed in words on the typographic clock face. [CHAR LIMIT=12] -->
     <string-array name="type_clock_hours">
@@ -484,5 +501,18 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
         <item>Fifty\nEight</item>
         <item>Fifty\nNine</item>
     </string-array>
+
+    <!-- Title for default clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_default" translatable="false">Default</string>
+    <!-- Title for Bubble clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_bubble" translatable="false">Bubble</string>
+    <!-- Title for Stretch clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_stretch" translatable="false">Stretch</string>
+    <!-- Title for Typographic clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_type" translatable="false">Type</string>
 
 </resources>

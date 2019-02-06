@@ -50,7 +50,8 @@ public interface IntentFactory {
                 new Intent(Intent.ACTION_TRANSLATE)
                         // TODO: Probably better to introduce a "translate" scheme instead of
                         // using EXTRA_TEXT.
-                        .putExtra(Intent.EXTRA_TEXT, text),
+                        .putExtra(Intent.EXTRA_TEXT, text)
+                        .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true),
                 text.hashCode()));
     }
 }

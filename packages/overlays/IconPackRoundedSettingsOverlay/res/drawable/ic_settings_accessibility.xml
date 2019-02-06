@@ -1,0 +1,40 @@
+<!--
+/**
+ * Copyright (c) 2019, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14.25,2.5A2.25,2.25,0,1,0,12,4.75,2.25,2.25,0,0,0,14.25,2.5Zm-3,0a0.75 0.75 ,0,1,1,0.75 0.75 A0.76 0.76 ,0,0,1,11.25,2.5Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20.72,5.28a0.77 0.77 ,0,0,0-0.94-0.5,29.53,29.53,0,0,1-7.78,1,29.72,29.72,0,0,1-7.78-1,0.75 0.75 ,0,0,0-0.44,1.44A28.14,28.14,0,0,0,9,7.12V19a0.75 0.75 ,0,0,0,1.5,0V14h3v5A0.75 0.75 ,0,0,0,15,19V7.12a28.14,28.14,0,0,0,5.22-0.9A0.76 0.76 ,0,0,0,20.72,5.28Zm-7.22,2V12.5h-3V7.25Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 8 22 C 8.55228474983 22 9 22.4477152502 9 23 C 9 23.5522847498 8.55228474983 24 8 24 C 7.44771525017 24 7 23.5522847498 7 23 C 7 22.4477152502 7.44771525017 22 8 22 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 12 22 C 12.5522847498 22 13 22.4477152502 13 23 C 13 23.5522847498 12.5522847498 24 12 24 C 11.4477152502 24 11 23.5522847498 11 23 C 11 22.4477152502 11.4477152502 22 12 22 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 16 22 C 16.5522847498 22 17 22.4477152502 17 23 C 17 23.5522847498 16.5522847498 24 16 24 C 15.4477152502 24 15 23.5522847498 15 23 C 15 22.4477152502 15.4477152502 22 16 22 Z" />
+</vector>

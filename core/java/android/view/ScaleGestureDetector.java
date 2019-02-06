@@ -143,7 +143,7 @@ public class ScaleGestureDetector {
     private long mCurrTime;
     private long mPrevTime;
     private boolean mInProgress;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768938)
     private int mSpanSlop;
     @UnsupportedAppUsage
     private int mMinSpan;

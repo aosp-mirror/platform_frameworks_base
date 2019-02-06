@@ -44,6 +44,8 @@ private:
     const SkMatrix mMatrix;
     const SkIRect mClip;
     const SkImageInfo mImageInfo;
+
+    bool mDrawn = false;
 };
 
 /**

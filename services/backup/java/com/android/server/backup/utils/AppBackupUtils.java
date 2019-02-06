@@ -20,6 +20,7 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
 import android.app.AppGlobals;
@@ -40,11 +41,18 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.backup.transport.TransportClient;
 
+import com.google.android.collect.Sets;
+
+import java.util.Set;
+
 /**
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
  */
 public class AppBackupUtils {
     private static final boolean DEBUG = false;
+    // Whitelist of system packages that are eligible for backup in non-system users.
+    private static final Set<String> systemPackagesWhitelistedForAllUsers =
+            Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME);
 
     /**
      * Returns whether app is eligible for backup.
@@ -72,9 +80,9 @@ public class AppBackupUtils {
 
         // 2. they run as a system-level uid
         if (UserHandle.isCore(app.uid)) {
-            // and the backup is happening for non-system user
-            if (userId != UserHandle.USER_SYSTEM && !app.packageName.equals(
-                    PACKAGE_MANAGER_SENTINEL)) {
+            // and the backup is happening for non-system user on a non-whitelisted package.
+            if (userId != UserHandle.USER_SYSTEM
+                    && !systemPackagesWhitelistedForAllUsers.contains(app.packageName)) {
                 return false;
             }
 

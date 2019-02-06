@@ -322,6 +322,14 @@ package android.app.admin {
 
 }
 
+package android.app.assist {
+
+  public static class AssistStructure.ViewNode {
+    ctor public AssistStructure.ViewNode();
+  }
+
+}
+
 package android.app.backup {
 
   public class BackupManager {
@@ -792,6 +800,33 @@ package android.location {
 
   public class LocationManager {
     method public String[] getBackgroundThrottlingWhitelist();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, android.os.UserHandle);
+  }
+
+  public final class LocationRequest implements android.os.Parcelable {
+    method public static android.location.LocationRequest create();
+    method public int describeContents();
+    method public long getExpireAt();
+    method public long getFastestInterval();
+    method public long getInterval();
+    method public int getNumUpdates();
+    method public int getQuality();
+    method public android.location.LocationRequest setExpireAt(long);
+    method public android.location.LocationRequest setExpireIn(long);
+    method public android.location.LocationRequest setFastestInterval(long);
+    method public android.location.LocationRequest setInterval(long);
+    method public android.location.LocationRequest setNumUpdates(int);
+    method public android.location.LocationRequest setQuality(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACCURACY_BLOCK = 102; // 0x66
+    field public static final int ACCURACY_CITY = 104; // 0x68
+    field public static final int ACCURACY_FINE = 100; // 0x64
+    field public static final android.os.Parcelable.Creator<android.location.LocationRequest> CREATOR;
+    field public static final int POWER_HIGH = 203; // 0xcb
+    field public static final int POWER_LOW = 201; // 0xc9
+    field public static final int POWER_NONE = 200; // 0xc8
   }
 
 }
@@ -1761,6 +1796,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
     method @NonNull public static java.io.File getVolumePath(@NonNull String) throws java.io.FileNotFoundException;
     method @NonNull public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
+    field public static final String EXTRA_ORIGINATED_FROM_SHELL = "android.intent.extra.originated_from_shell";
     field public static final String SCAN_FILE_CALL = "scan_file";
     field public static final String SCAN_VOLUME_CALL = "scan_volume";
   }
@@ -2042,6 +2078,40 @@ package android.service.autofill.augmented {
 
 }
 
+package android.service.contentcapture {
+
+  @Deprecated public final class ContentCaptureEventsRequest implements android.os.Parcelable {
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public java.util.List<android.view.contentcapture.ContentCaptureEvent> getEvents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated public static final android.os.Parcelable.Creator<android.service.contentcapture.ContentCaptureEventsRequest> CREATOR;
+  }
+
+  public abstract class ContentCaptureService extends android.app.Service {
+    ctor public ContentCaptureService();
+    method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
+    method public void onConnected();
+    method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
+    method @Deprecated public void onContentCaptureEventsRequest(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.ContentCaptureEventsRequest);
+    method public void onCreateContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureContext, @NonNull android.view.contentcapture.ContentCaptureSessionId);
+    method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
+    method public void onDisconnected();
+    method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
+    method public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
+  }
+
+  public final class SnapshotData implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.app.assist.AssistContent getAssistContent();
+    method public android.os.Bundle getAssistData();
+    method public android.app.assist.AssistStructure getAssistStructure();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.contentcapture.SnapshotData> CREATOR;
+  }
+
+}
+
 package android.service.notification {
 
   @Deprecated public abstract class ConditionProviderService extends android.app.Service {
@@ -2122,7 +2192,6 @@ package android.telephony {
   public class TelephonyManager {
     method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
-    method public boolean isRttSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method public void setCarrierTestOverride(String, String, String, String, String, String, String);
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
@@ -2597,13 +2666,52 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
-    method @NonNull public java.util.Set<android.content.ComponentName> getAugmentedAutofillDisabledActivities();
-    method @NonNull public java.util.Set<java.lang.String> getAugmentedAutofillDisabledPackages();
-    method public void setActivityAugmentedAutofillEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
-    method public void setPackageAugmentedAutofillEnabled(@NonNull String, boolean);
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
+  }
+
+}
+
+package android.view.contentcapture {
+
+  public final class ContentCaptureContext implements android.os.Parcelable {
+    method @Nullable public String getAction();
+    method @Nullable public android.content.ComponentName getActivityComponent();
+    method public int getDisplayId();
+    method @Nullable public android.os.Bundle getExtras();
+    method public int getFlags();
+    method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
+    method public int getTaskId();
+    method @Nullable public android.net.Uri getUri();
+    field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
+    field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
+  }
+
+  public final class ContentCaptureEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEventTime();
+    method @Nullable public android.view.autofill.AutofillId getId();
+    method @Nullable public java.util.List<android.view.autofill.AutofillId> getIds();
+    method @Nullable public CharSequence getText();
+    method public int getType();
+    method @Nullable public android.view.contentcapture.ViewNode getViewNode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
+    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5; // 0x5
+    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4; // 0x4
+    field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
+    field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
+    field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
+  }
+
+  public final class ContentCaptureManager {
+    method public boolean isContentCaptureFeatureEnabled();
+    method public void setContentCaptureFeatureEnabled(boolean);
+  }
+
+  public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
+    method @Nullable public android.view.autofill.AutofillId getParentAutofillId();
   }
 
 }
@@ -2664,7 +2772,7 @@ package android.widget {
   }
 
   public class DatePicker extends android.widget.FrameLayout {
-    method public int getMode();
+    method @android.view.inspector.InspectableProperty(name="datePickerMode", enumMapping={@android.view.inspector.InspectableProperty.EnumMap(value=android.widget.DatePicker.MODE_SPINNER, name="spinner"), @android.view.inspector.InspectableProperty.EnumMap(value=android.widget.DatePicker.MODE_CALENDAR, name="calendar")}) public int getMode();
     field public static final int MODE_CALENDAR = 2; // 0x2
     field public static final int MODE_SPINNER = 1; // 0x1
   }
@@ -2700,7 +2808,7 @@ package android.widget {
     method public android.view.View getAmView();
     method public android.view.View getHourView();
     method public android.view.View getMinuteView();
-    method public int getMode();
+    method @android.view.inspector.InspectableProperty(name="timePickerMode", enumMapping={@android.view.inspector.InspectableProperty.EnumMap(name="clock", value=android.widget.TimePicker.MODE_CLOCK), @android.view.inspector.InspectableProperty.EnumMap(name="spinner", value=android.widget.TimePicker.MODE_SPINNER)}) public int getMode();
     method public android.view.View getPmView();
     field public static final int MODE_CLOCK = 2; // 0x2
     field public static final int MODE_SPINNER = 1; // 0x1

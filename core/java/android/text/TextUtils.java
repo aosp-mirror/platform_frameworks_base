@@ -2182,6 +2182,13 @@ public class TextUtils {
         return Character.isWhitespace(codePoint) || codePoint == NBSP_CODE_POINT;
     }
 
+    /** @hide */
+    @Nullable
+    public static String withoutPrefix(@Nullable String prefix, @Nullable String str) {
+        if (prefix == null || str == null) return str;
+        return str.startsWith(prefix) ? str.substring(prefix.length()) : str;
+    }
+
     /**
      * Remove html, remove bad characters, and truncate string.
      *

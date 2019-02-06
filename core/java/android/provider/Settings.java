@@ -5704,7 +5704,6 @@ public final class Settings {
          * Defines whether Content Capture is enabled  for the user.
          * @hide
          */
-        @SystemApi
         @TestApi
         public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
 
@@ -11443,6 +11442,7 @@ public final class Settings {
          * <pre>
          * advertise_is_enabled              (boolean)
          * datasaver_disabled                (boolean)
+         * enable_night_mode                 (boolean)
          * launch_boost_disabled             (boolean)
          * vibration_disabled                (boolean)
          * animation_disabled                (boolean)

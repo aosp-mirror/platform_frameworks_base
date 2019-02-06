@@ -16,41 +16,47 @@
 
 package android.animation;
 
-import android.test.ActivityInstrumentationTestCase2;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.util.StateSet;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
 import com.android.frameworks.coretests.R;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 @LargeTest
-public class StateListAnimatorTest extends ActivityInstrumentationTestCase2<BasicAnimatorActivity> {
+public class StateListAnimatorTest {
 
-    public StateListAnimatorTest() {
-        super(BasicAnimatorActivity.class);
-    }
+    @Rule
+    public final ActivityTestRule<BasicAnimatorActivity> mActivityRule =
+            new ActivityTestRule<>(BasicAnimatorActivity.class);
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testInflateFromAnimator() throws Exception {
         StateListAnimator stateListAnimator = AnimatorInflater
-                .loadStateListAnimator(getActivity(), R.anim.test_state_anim);
+                .loadStateListAnimator(mActivityRule.getActivity(), R.anim.test_state_anim);
         assertNotNull("A state list animator should be returned", stateListAnimator);
         assertEquals("State list animator should have three items", 3,
                 stateListAnimator.getTuples().size());
     }
 
     @UiThreadTest
+    @Test
     public void testAttachDetach() throws Exception {
-        View view = new View(getActivity());
+        final BasicAnimatorActivity activity = mActivityRule.getActivity();
+        View view = new View(activity);
         final AtomicInteger setStateCount = new AtomicInteger(0);
         StateListAnimator stateListAnimator = new StateListAnimator() {
             @Override
@@ -62,7 +68,7 @@ public class StateListAnimatorTest extends ActivityInstrumentationTestCase2<Basi
         view.setStateListAnimator(stateListAnimator);
         assertNotNull("State list animator should have a reference to view even if it is detached",
                 stateListAnimator.getTarget());
-        ViewGroup viewGroup = (ViewGroup) getActivity().findViewById(android.R.id.content);
+        ViewGroup viewGroup = activity.findViewById(android.R.id.content);
         int preSetStateCount = setStateCount.get();
         viewGroup.addView(view);
         assertTrue("When view is attached, state list drawable's setState should be called",
@@ -82,9 +88,10 @@ public class StateListAnimatorTest extends ActivityInstrumentationTestCase2<Basi
                 stateListAnimator2.getTarget());
     }
 
+    @Test
     public void testStateListLoading() throws InterruptedException {
         StateListAnimator stateListAnimator = AnimatorInflater
-                .loadStateListAnimator(getActivity(), R.anim.test_state_anim);
+                .loadStateListAnimator(mActivityRule.getActivity(), R.anim.test_state_anim);
         assertNotNull("A state list animator should be returned", stateListAnimator);
         assertEquals("Steate list animator should have two items", 3,
                 stateListAnimator.getTuples().size());

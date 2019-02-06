@@ -1710,7 +1710,7 @@ public class AudioService extends IAudioService.Stub
                     Log.d(TAG, "adjustSreamVolume: postSetAvrcpAbsoluteVolumeIndex index="
                             + newIndex + "stream=" + streamType);
                 }
-                mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(newIndex);
+                mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(newIndex / 10);
             }
 
             // Check if volume update should be send to Hearing Aid

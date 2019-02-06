@@ -45,6 +45,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
@@ -383,6 +384,7 @@ public class Toolbar extends ViewGroup {
      *         0 if menus are inflated against the toolbar theme
      * @see #setPopupTheme(int)
      */
+    @InspectableProperty
     public int getPopupTheme() {
         return mPopupTheme;
     }
@@ -414,6 +416,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginStart(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginStart
      */
+    @InspectableProperty
     public int getTitleMarginStart() {
         return mTitleMarginStart;
     }
@@ -436,6 +439,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginTop(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginTop
      */
+    @InspectableProperty
     public int getTitleMarginTop() {
         return mTitleMarginTop;
     }
@@ -458,6 +462,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginEnd(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginEnd
      */
+    @InspectableProperty
     public int getTitleMarginEnd() {
         return mTitleMarginEnd;
     }
@@ -480,6 +485,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginBottom(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginBottom
      */
+    @InspectableProperty
     public int getTitleMarginBottom() {
         return mTitleMarginBottom;
     }
@@ -650,6 +656,7 @@ public class Toolbar extends ViewGroup {
      * @see #setLogo(int)
      * @see #setLogo(android.graphics.drawable.Drawable)
      */
+    @InspectableProperty
     public Drawable getLogo() {
         return mLogoView != null ? mLogoView.getDrawable() : null;
     }
@@ -688,6 +695,7 @@ public class Toolbar extends ViewGroup {
      *
      * @return A description of the logo
      */
+    @InspectableProperty
     public CharSequence getLogoDescription() {
         return mLogoView != null ? mLogoView.getContentDescription() : null;
     }
@@ -735,6 +743,7 @@ public class Toolbar extends ViewGroup {
      *
      * @return The current title.
      */
+    @InspectableProperty
     public CharSequence getTitle() {
         return mTitleText;
     }
@@ -791,6 +800,7 @@ public class Toolbar extends ViewGroup {
      *
      * @return The current subtitle
      */
+    @InspectableProperty
     public CharSequence getSubtitle() {
         return mSubtitleText;
     }
@@ -895,6 +905,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_navigationContentDescription
      */
+    @InspectableProperty
     @Nullable
     public CharSequence getNavigationContentDescription() {
         return mNavButtonView != null ? mNavButtonView.getContentDescription() : null;
@@ -987,6 +998,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_navigationIcon
      */
+    @InspectableProperty
     @Nullable
     public Drawable getNavigationIcon() {
         return mNavButtonView != null ? mNavButtonView.getDrawable() : null;
@@ -1024,6 +1036,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_collapseContentDescription
      */
+    @InspectableProperty
     @Nullable
     public CharSequence getCollapseContentDescription() {
         return mCollapseButtonView != null ? mCollapseButtonView.getContentDescription() : null;
@@ -1069,6 +1082,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_collapseIcon
      */
+    @InspectableProperty
     @Nullable
     public Drawable getCollapseIcon() {
         return mCollapseButtonView != null ? mCollapseButtonView.getDrawable() : null;
@@ -1234,6 +1248,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetRight()
      * @attr ref android.R.styleable#Toolbar_contentInsetStart
      */
+    @InspectableProperty
     public int getContentInsetStart() {
         return mContentInsets != null ? mContentInsets.getStart() : 0;
     }
@@ -1254,6 +1269,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetRight()
      * @attr ref android.R.styleable#Toolbar_contentInsetEnd
      */
+    @InspectableProperty
     public int getContentInsetEnd() {
         return mContentInsets != null ? mContentInsets.getEnd() : 0;
     }
@@ -1297,6 +1313,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetRight()
      * @attr ref android.R.styleable#Toolbar_contentInsetLeft
      */
+    @InspectableProperty
     public int getContentInsetLeft() {
         return mContentInsets != null ? mContentInsets.getLeft() : 0;
     }
@@ -1317,6 +1334,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetLeft()
      * @attr ref android.R.styleable#Toolbar_contentInsetRight
      */
+    @InspectableProperty
     public int getContentInsetRight() {
         return mContentInsets != null ? mContentInsets.getRight() : 0;
     }
@@ -1333,6 +1351,7 @@ public class Toolbar extends ViewGroup {
      * @see #setContentInsetStartWithNavigation(int)
      * @attr ref android.R.styleable#Toolbar_contentInsetStartWithNavigation
      */
+    @InspectableProperty
     public int getContentInsetStartWithNavigation() {
         return mContentInsetStartWithNavigation != RtlSpacingHelper.UNDEFINED
                 ? mContentInsetStartWithNavigation
@@ -1376,6 +1395,7 @@ public class Toolbar extends ViewGroup {
      * @see #setContentInsetEndWithActions(int)
      * @attr ref android.R.styleable#Toolbar_contentInsetEndWithActions
      */
+    @InspectableProperty
     public int getContentInsetEndWithActions() {
         return mContentInsetEndWithActions != RtlSpacingHelper.UNDEFINED
                 ? mContentInsetEndWithActions

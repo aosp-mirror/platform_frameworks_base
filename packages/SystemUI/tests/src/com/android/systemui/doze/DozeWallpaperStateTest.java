@@ -44,11 +44,12 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
     private DozeWallpaperState mDozeWallpaperState;
     @Mock IWallpaperManager mIWallpaperManager;
     @Mock DozeParameters mDozeParameters;
+    @Mock DozeMachine mMachine;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDozeWallpaperState = new DozeWallpaperState(mIWallpaperManager, mDozeParameters);
+        mDozeWallpaperState = new DozeWallpaperState(mMachine, mIWallpaperManager, mDozeParameters);
     }
 
     @Test
@@ -108,14 +109,28 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
     }
 
     @Test
-    public void testTransitionTo_pulseIsAmbientMode() throws RemoteException {
+    public void testTransitionTo_notificationPulseIsAmbientMode() throws RemoteException {
+        when(mMachine.getPulseReason()).thenReturn(DozeLog.PULSE_REASON_NOTIFICATION);
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
                 DozeMachine.State.DOZE_PULSING);
         verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(0L));
     }
 
     @Test
+    public void testTransitionTo_wakeFromPulseIsNotAmbientMode() throws RemoteException {
+        when(mMachine.getPulseReason()).thenReturn(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN);
+        mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_AOD,
+                DozeMachine.State.DOZE_REQUEST_PULSE);
+        reset(mIWallpaperManager);
+
+        mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
+                DozeMachine.State.DOZE_PULSING);
+        verify(mIWallpaperManager).setInAmbientMode(eq(false), anyLong());
+    }
+
+    @Test
     public void testTransitionTo_animatesWhenWakingUpFromPulse() throws RemoteException {
+        when(mMachine.getPulseReason()).thenReturn(DozeLog.PULSE_REASON_NOTIFICATION);
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
                 DozeMachine.State.DOZE_PULSING);
         reset(mIWallpaperManager);

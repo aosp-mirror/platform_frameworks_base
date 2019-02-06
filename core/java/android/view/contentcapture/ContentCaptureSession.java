@@ -204,6 +204,12 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         return mId.hashCode();
     }
 
+    /** @hide */
+    @NonNull
+    public String getId() {
+        return mId;
+    }
+
     /**
      * Creates a new {@link ContentCaptureSession}.
      *
@@ -361,6 +367,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     abstract void internalNotifyViewTextChanged(@NonNull AutofillId id,
             @Nullable CharSequence text);
+
+    /** @hide */
+    public abstract void internalNotifyViewHierarchyEvent(boolean started);
 
     /**
      * Creates a {@link ViewStructure} for a "standard" view.

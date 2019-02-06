@@ -917,20 +917,21 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationSmartSuggestionsAdded(String key, int smartReplyCount,
-                int smartActionCount, boolean generatedByAssistant) {
+                int smartActionCount, boolean generatedByAssistant, boolean editBeforeSending) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.setNumSmartRepliesAdded(smartReplyCount);
                     r.setNumSmartActionsAdded(smartActionCount);
                     r.setSuggestionsGeneratedByAssistant(generatedByAssistant);
+                    r.setEditChoicesBeforeSending(editBeforeSending);
                 }
             }
         }
 
         @Override
         public void onNotificationSmartReplySent(String key, int replyIndex, CharSequence reply,
-                boolean generatedByAssistant, int notificationLocation) {
+                int notificationLocation, boolean modifiedBeforeSending) {
 
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
@@ -940,14 +941,20 @@ public class NotificationManagerService extends SystemService {
                             .setSubtype(replyIndex)
                             .addTaggedData(
                                     MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                                    generatedByAssistant ? 1 : 0)
+                                    r.getSuggestionsGeneratedByAssistant() ? 1 : 0)
                             .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
-                                    notificationLocation);
+                                    notificationLocation)
+                            .addTaggedData(
+                                    MetricsEvent.NOTIFICATION_SMART_REPLY_EDIT_BEFORE_SENDING,
+                                    r.getEditChoicesBeforeSending() ? 1 : 0)
+                            .addTaggedData(
+                                    MetricsEvent.NOTIFICATION_SMART_REPLY_MODIFIED_BEFORE_SENDING,
+                                    modifiedBeforeSending ? 1 : 0);
                     mMetricsLogger.write(logMaker);
                     // Treat clicking on a smart reply as a user interaction.
                     reportUserInteraction(r);
                     mAssistants.notifyAssistantSuggestedReplySent(
-                            r.sbn, reply, generatedByAssistant);
+                            r.sbn, reply, r.getSuggestionsGeneratedByAssistant());
                 }
             }
         }
@@ -981,7 +988,10 @@ public class NotificationManagerService extends SystemService {
                             r.getSuggestionsGeneratedByAssistant() ? 1 : 0)
                     // The fields in the NotificationVisibility.NotificationLocation enum map
                     // directly to the fields in the MetricsEvent.NotificationLocation enum.
-                    .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION, notificationLocation);
+                    .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION, notificationLocation)
+                    .addTaggedData(
+                            MetricsEvent.NOTIFICATION_SMART_REPLY_EDIT_BEFORE_SENDING,
+                            r.getEditChoicesBeforeSending() ? 1 : 0);
             mMetricsLogger.write(logMaker);
         }
     }

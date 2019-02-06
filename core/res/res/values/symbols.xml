@@ -50,9 +50,14 @@
   <java-symbol type="id" name="characterPicker" />
   <java-symbol type="id" name="clearDefaultHint" />
   <java-symbol type="id" name="contentPanel" />
-  <java-symbol type="id" name="content_preview" />
+  <java-symbol type="id" name="content_preview_image_area" />
+  <java-symbol type="id" name="content_preview_image_1_large" />
+  <java-symbol type="id" name="content_preview_image_2_large" />
+  <java-symbol type="id" name="content_preview_image_2_small" />
+  <java-symbol type="id" name="content_preview_image_3_small" />
   <java-symbol type="id" name="content_preview_thumbnail" />
   <java-symbol type="id" name="content_preview_text" />
+  <java-symbol type="id" name="content_preview_text_area" />
   <java-symbol type="id" name="content_preview_text_layout" />
   <java-symbol type="id" name="content_preview_title" />
   <java-symbol type="id" name="content_preview_title_layout" />
@@ -195,6 +200,12 @@
   <java-symbol type="id" name="action3" />
   <java-symbol type="id" name="action4" />
   <java-symbol type="id" name="media_seamless" />
+  <java-symbol type="id" name="notification_media_seekbar_container" />
+  <java-symbol type="id" name="notification_media_content" />
+  <java-symbol type="id" name="notification_media_progress" />
+  <java-symbol type="id" name="notification_media_progress_bar" />
+  <java-symbol type="id" name="notification_media_elapsed_time" />
+  <java-symbol type="id" name="notification_media_total_time" />
   <java-symbol type="id" name="big_picture" />
   <java-symbol type="id" name="big_text" />
   <java-symbol type="id" name="chronometer" />
@@ -1572,6 +1583,7 @@
   <java-symbol type="layout" name="immersive_mode_cling" />
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
+  <java-symbol type="layout" name="notification_material_media_seekbar" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -2724,6 +2736,7 @@
   <java-symbol type="dimen" name="chooser_view_spacing" />
   <java-symbol type="dimen" name="chooser_edge_margin_thin" />
   <java-symbol type="dimen" name="chooser_edge_margin_normal" />
+  <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="resolve_grid_item" />
   <java-symbol type="id" name="day_picker_view_pager" />

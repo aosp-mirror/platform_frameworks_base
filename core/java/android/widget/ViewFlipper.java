@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 /**
@@ -134,6 +135,16 @@ public class ViewFlipper extends ViewAnimator {
     }
 
     /**
+     * Get the delay before flipping to the next view.
+     *
+     * @return delay time in milliseconds
+     */
+    @InspectableProperty
+    public int getFlipInterval() {
+        return mFlipInterval;
+    }
+
+    /**
      * Start a timer to cycle through child views
      */
     public void startFlipping() {
@@ -191,6 +202,7 @@ public class ViewFlipper extends ViewAnimator {
     /**
      * Returns true if the child views are flipping.
      */
+    @InspectableProperty(hasAttributeId = false)
     public boolean isFlipping() {
         return mStarted;
     }
@@ -207,6 +219,7 @@ public class ViewFlipper extends ViewAnimator {
      * Returns true if this view automatically calls {@link #startFlipping()}
      * when it becomes attached to a window.
      */
+    @InspectableProperty
     public boolean isAutoStart() {
         return mAutoStart;
     }

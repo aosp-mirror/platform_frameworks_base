@@ -16,6 +16,7 @@
 
 package com.android.server.inputmethod;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -1195,6 +1196,7 @@ public final class MultiClientInputMethodManagerService {
      * Takes care of IPCs exposed to the IME client.
      */
     private static final class ApiCallbacks extends IInputMethodManager.Stub {
+        private final Context mContext;
         private final UserDataMap mUserDataMap;
         private final UserToInputMethodInfoMap mInputMethodInfoMap;
         private final AppOpsManager mAppOpsManager;
@@ -1202,6 +1204,7 @@ public final class MultiClientInputMethodManagerService {
 
         ApiCallbacks(Context context, UserDataMap userDataMap,
                 UserToInputMethodInfoMap inputMethodInfoMap) {
+            mContext = context;
             mUserDataMap = userDataMap;
             mInputMethodInfoMap = inputMethodInfoMap;
             mAppOpsManager = context.getSystemService(AppOpsManager.class);
@@ -1233,14 +1236,20 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public List<InputMethodInfo> getInputMethodList() {
-            return mInputMethodInfoMap.getAsList(UserHandle.getUserId(Binder.getCallingUid()));
+        public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
+            if (UserHandle.getCallingUserId() != userId) {
+                mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL, null);
+            }
+            return mInputMethodInfoMap.getAsList(userId);
         }
 
         @BinderThread
         @Override
-        public List<InputMethodInfo> getEnabledInputMethodList() {
-            return mInputMethodInfoMap.getAsList(UserHandle.getUserId(Binder.getCallingUid()));
+        public List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId) {
+            if (UserHandle.getCallingUserId() != userId) {
+                mContext.enforceCallingPermission(INTERACT_ACROSS_USERS_FULL, null);
+            }
+            return mInputMethodInfoMap.getAsList(userId);
         }
 
         @BinderThread

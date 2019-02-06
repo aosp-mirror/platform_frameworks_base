@@ -24,32 +24,8 @@
       android:orientation="vertical"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-    >
-    <TextView
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="50dp"
-        style="@style/widget_big"
-        android:textColor="@color/typeClockAccentColor"
-        android:text="@string/type_clock_header"
-        android:textSize="40dp"
-    />
-    <TextView
-        android:id="@+id/hour"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="50dp"
-        style="@style/widget_big"
-        android:textSize="40dp"
-    />
-    <TextView
-        android:id="@+id/minute"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="50dp"
-        style="@style/widget_big"
-        android:textSize="40dp"
-    />
-  </com.android.keyguard.clock.TypographicClock>
+      android:paddingLeft="50dp"
+      style="@style/widget_big"
+      android:textSize="40dp"
+      />
 </com.android.keyguard.clock.ClockLayout>

@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.annotation.DrawableRes;
@@ -26,6 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -46,6 +48,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
@@ -954,17 +957,69 @@ public final class InputMethodManager {
         return mIInputContext;
     }
 
+    /**
+     * Returns the list of installed input methods.
+     *
+     * <p>On multi user environment, this API returns a result for the calling process user.</p>
+     *
+     * @return {@link List} of {@link InputMethodInfo}.
+     */
     public List<InputMethodInfo> getInputMethodList() {
         try {
-            return mService.getInputMethodList();
+            // We intentionally do not use UserHandle.getCallingUserId() here because for system
+            // services InputMethodManagerInternal.getInputMethodListAsUser() should be used
+            // instead.
+            return mService.getInputMethodList(UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /**
+     * Returns the list of installed input methods for the specified user.
+     *
+     * @param userId user ID to query
+     * @return {@link List} of {@link InputMethodInfo}.
+     * @hide
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
+        try {
+            return mService.getInputMethodList(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of enabled input methods.
+     *
+     * <p>On multi user environment, this API returns a result for the calling process user.</p>
+     *
+     * @return {@link List} of {@link InputMethodInfo}.
+     */
     public List<InputMethodInfo> getEnabledInputMethodList() {
         try {
-            return mService.getEnabledInputMethodList();
+            // We intentionally do not use UserHandle.getCallingUserId() here because for system
+            // services InputMethodManagerInternal.getEnabledInputMethodListAsUser() should be used
+            // instead.
+            return mService.getEnabledInputMethodList(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of enabled input methods for the specified user.
+     *
+     * @param userId user ID to query
+     * @return {@link List} of {@link InputMethodInfo}.
+     * @hide
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
+        try {
+            return mService.getEnabledInputMethodList(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -972,6 +1027,9 @@ public final class InputMethodManager {
 
     /**
      * Returns a list of enabled input method subtypes for the specified input method info.
+     *
+     * <p>On multi user environment, this API returns a result for the calling process user.</p>
+     *
      * @param imi An input method info whose subtypes list will be returned.
      * @param allowsImplicitlySelectedSubtypes A boolean flag to allow to return the implicitly
      * selected subtypes. If an input method info doesn't have enabled subtypes, the framework
@@ -1883,6 +1941,36 @@ public final class InputMethodManager {
 
         synchronized (mH) {
             mImeInsetsConsumer = imeInsetsConsumer;
+        }
+    }
+
+    /**
+     * Call showSoftInput with currently focused view.
+     * @return {@code true} if IME can be shown.
+     * @hide
+     */
+    public boolean requestImeShow(ResultReceiver resultReceiver) {
+        synchronized (mH) {
+            if (mServedView == null) {
+                return false;
+            }
+            showSoftInput(mServedView, 0 /* flags */, resultReceiver);
+            return true;
+        }
+    }
+
+    /**
+     * Notify IME directly that it is no longer visible.
+     * @hide
+     */
+    public void notifyImeHidden() {
+        synchronized (mH) {
+            try {
+                if (mCurMethod != null) {
+                    mCurMethod.notifyImeHidden();
+                }
+            } catch (RemoteException re) {
+            }
         }
     }
 

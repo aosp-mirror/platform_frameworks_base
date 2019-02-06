@@ -18,15 +18,18 @@ package android.widget.espresso;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import android.annotation.IntDef;
-import android.support.test.espresso.InjectEventSecurityException;
-import android.support.test.espresso.UiController;
+import android.os.SystemClock;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+
+import androidx.test.espresso.InjectEventSecurityException;
+import androidx.test.espresso.UiController;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Iterator;
 
 /**
  * Class to wrap an UiController to overwrite source of motion events to SOURCE_MOUSE.
@@ -69,6 +72,32 @@ public final class MouseUiController implements UiController {
             event.setButtonState(mButton);
         }
         return mUiController.injectMotionEvent(event);
+    }
+
+    /**
+     * Copied from latest {@link androidx.test.espresso.UiController}, since current
+     * {@link androidx.test.espresso.UiController#injectMotionEventSequence(Iterable)} seems not a
+     * default method.
+     */
+    @Override
+    public boolean injectMotionEventSequence(Iterable<MotionEvent> events)
+            throws InjectEventSecurityException {
+        android.util.Log.w(
+                "UIC",
+                "Using default injectMotionEventSeq() - this may not inject a sequence properly. "
+                + "If wrapping UIController please override this method and delegate.");
+        Iterator<MotionEvent> mei = events.iterator();
+        boolean success = true;
+        while (mei.hasNext()) {
+            MotionEvent me = mei.next();
+            if (me.getEventTime() - SystemClock.uptimeMillis() > 10) {
+                // Because the loopMainThreadForAtLeast is overkill for waiting, intentially only
+                // call it with a smaller amount of milliseconds as best effort
+                loopMainThreadForAtLeast(10);
+            }
+            success &= injectMotionEvent(me);
+        }
+        return success;
     }
 
     @Override

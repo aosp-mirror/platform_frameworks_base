@@ -18,6 +18,7 @@ package android.view.contentcapture;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.assist.AssistStructure;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -42,6 +43,7 @@ import com.android.internal.util.Preconditions;
 // instead
 /** @hide */
 @SystemApi
+@TestApi
 public final class ViewNode extends AssistStructure.ViewNode {
 
     private static final String TAG = ViewNode.class.getSimpleName();

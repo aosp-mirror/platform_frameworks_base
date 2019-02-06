@@ -26,6 +26,7 @@ import static android.view.ViewRootImpl.sNewInsetsMode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState;
@@ -135,6 +136,12 @@ class InsetsSourceProvider {
             mTmpRect.inset(mWin.mGivenContentInsets);
         }
         mSource.setFrame(mTmpRect);
+        if (mControl != null) {
+            final Rect frame = mWin.getWindowFrames().mFrame;
+            if (mControl.setSurfacePosition(frame.left, frame.top)) {
+                mStateController.notifyControlChanged(mControllingWin);
+            }
+        }
         setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.mPolicyVisibility
                 && !mWin.mGivenInsetsPending);
     }
@@ -157,7 +164,8 @@ class InsetsSourceProvider {
         mWin.startAnimation(mDisplayContent.getPendingTransaction(), mAdapter,
                 !mClientVisible /* hidden */);
         mControllingWin = target;
-        mControl = new InsetsSourceControl(mSource.getType(), mAdapter.mCapturedLeash);
+        mControl = new InsetsSourceControl(mSource.getType(), mAdapter.mCapturedLeash,
+                new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
     }
 
     boolean onInsetsModified(WindowState caller, InsetsSource modifiedSource) {
@@ -213,7 +221,8 @@ class InsetsSourceProvider {
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
             mCapturedLeash = animationLeash;
-            t.setPosition(mCapturedLeash, mSource.getFrame().left, mSource.getFrame().top);
+            final Rect frame = mWin.getWindowFrames().mFrame;
+            t.setPosition(mCapturedLeash, frame.left, frame.top);
         }
 
         @Override

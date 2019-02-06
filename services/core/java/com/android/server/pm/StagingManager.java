@@ -21,6 +21,7 @@ import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.IApexService;
+import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
+import android.content.rollback.IRollbackManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -186,6 +188,7 @@ public class StagingManager {
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
         boolean success = true;
 
+        // STOPSHIP: TODO(b/123753157): Verify APKs through Package Verifier.
         if (!sessionContainsApex(session)) {
             // TODO: Decide whether we want to fail fast by detecting signature mismatches for APKs,
             // right away.
@@ -235,6 +238,23 @@ public class StagingManager {
                     // TODO(b/118865310): abort the session on apexd.
                     return;
                 }
+            }
+        }
+
+        if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+            // If rollback is enabled for this session, we call through to the RollbackManager
+            // with the list of sessions it must enable rollback for. Note that notifyStagedSession
+            // is a synchronous operation.
+            final IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
+            try {
+                // NOTE: To stay consistent with the non-staged install flow, we don't fail the
+                // entire install if rollbacks can't be enabled.
+                if (!rm.notifyStagedSession(session.sessionId)) {
+                    Slog.e(TAG, "Unable to enable rollback for session: " + session.sessionId);
+                }
+            } catch (RemoteException re) {
+                // Cannot happen, the rollback manager is in the same process.
             }
         }
 
@@ -336,6 +356,7 @@ public class StagingManager {
 
         PackageInstaller.SessionParams params = originalSession.params.copy();
         params.isStaged = false;
+        params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
         int apkSessionId = mPi.createSession(
                 params, originalSession.getInstallerPackageName(), originalSession.userId);
         PackageInstallerSession apkSession = mPi.getSession(apkSessionId);

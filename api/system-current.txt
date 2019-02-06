@@ -3317,7 +3317,6 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
     method public int getGnssCapabilities();
     method @Nullable public String getLocationControllerExtraPackage();
-    method @Nullable public String getNetworkProviderPackage();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isLocationControllerExtraPackageEnabled();
     method public boolean isLocationEnabledForUser(android.os.UserHandle);
@@ -5753,6 +5752,8 @@ package android.provider {
   public static interface DeviceConfig.NotificationAssistant {
     field public static final String GENERATE_ACTIONS = "generate_actions";
     field public static final String GENERATE_REPLIES = "generate_replies";
+    field public static final String MAX_MESSAGES_TO_EXTRACT = "max_messages_to_extract";
+    field public static final String MAX_SUGGESTIONS = "max_suggestions";
     field public static final String NAMESPACE = "notification_assistant";
   }
 
@@ -5764,6 +5765,11 @@ package android.provider {
     field public static final String NAMESPACE = "privacy";
     field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
     field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
+  }
+
+  public static interface DeviceConfig.Runtime {
+    field public static final String NAMESPACE = "runtime";
+    field public static final String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
   }
 
   public static interface DeviceConfig.RuntimeNative {
@@ -5967,7 +5973,6 @@ package android.provider {
     field public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH = "autofill_user_data_max_value_length";
     field public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
     field public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
-    field public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
     field public static final String HUSH_GESTURE_USED = "hush_gesture_used";
     field public static final String INSTANT_APPS_ENABLED = "instant_apps_enabled";
@@ -6031,6 +6036,7 @@ package android.rolecontrollerservice {
     method public abstract void onClearRoleHolders(@NonNull String, @NonNull android.app.role.RoleManagerCallback);
     method public abstract void onGrantDefaultRoles(@NonNull android.app.role.RoleManagerCallback);
     method public abstract void onRemoveRoleHolder(@NonNull String, @NonNull String, @NonNull android.app.role.RoleManagerCallback);
+    method public abstract void onSmsKillSwitchToggled(boolean);
     field public static final String SERVICE_INTERFACE = "android.rolecontrollerservice.RoleControllerService";
   }
 
@@ -7850,6 +7856,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method public void updateServiceLocation();
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_DEBUG_EVENT = "android.telephony.action.DEBUG_EVENT";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
@@ -7857,6 +7864,8 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
+    field public static final String EXTRA_DEBUG_EVENT_DESCRIPTION = "android.telephony.extra.DEBUG_EVENT_DESCRIPTION";
+    field public static final String EXTRA_DEBUG_EVENT_ID = "android.telephony.extra.DEBUG_EVENT_ID";
     field public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
@@ -9265,11 +9274,7 @@ package android.view.accessibility {
 package android.view.autofill {
 
   public final class AutofillManager {
-    method @NonNull public java.util.Set<android.content.ComponentName> getAugmentedAutofillDisabledActivities();
-    method @NonNull public java.util.Set<java.lang.String> getAugmentedAutofillDisabledPackages();
-    method public void setActivityAugmentedAutofillEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
-    method public void setPackageAugmentedAutofillEnabled(@NonNull String, boolean);
   }
 
 }
@@ -9299,6 +9304,8 @@ package android.view.contentcapture {
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
+    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5; // 0x5
+    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4; // 0x4
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
     field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3

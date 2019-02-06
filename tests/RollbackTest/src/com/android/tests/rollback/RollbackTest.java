@@ -37,7 +37,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -629,12 +628,9 @@ public class RollbackTest {
         assertEquals(versionRolledBackTo, info.getVersionRolledBackTo().getLongVersionCode());
     }
 
-    // TODO: Allow installing test app along atomically with module metadata package so that
-    // a failed test app will be flagged as a failed mainline app
     /**
      * Test bad update automatic rollback.
      */
-    @Ignore
     @Test
     public void testBadUpdateRollback() throws Exception {
         BroadcastReceiver crashCountReceiver = null;

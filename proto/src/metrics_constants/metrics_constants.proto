@@ -6936,6 +6936,19 @@ message MetricsEvent {
     // OS: Q
     ACTION_SET_NEW_PARENT_PROFILE_PASSWORD = 1646;
 
+    // Tagged data for SMART_REPLY_VISIBLE and SMART_REPLY_ACTION.
+    // Whether the smart reply was / is to be sent via direct reply because
+    // getEditChoicesBeforeSending was enabled.
+    // OS: Q
+    NOTIFICATION_SMART_REPLY_EDIT_BEFORE_SENDING = 1647;
+
+    // Tagged data for SMART_REPLY_ACTION.
+    // Whether the smart reply was modified by the user via the direct reply field (implies that
+    // getEditChoicesBeforeSending was enabled).
+    // actions/replies.
+    // OS: Q
+    NOTIFICATION_SMART_REPLY_MODIFIED_BEFORE_SENDING = 1648;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

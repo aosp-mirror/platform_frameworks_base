@@ -147,6 +147,25 @@ public final class DeviceConfig {
          * Whether the Notification Assistant should generate contextual actions for notifications.
          */
         String GENERATE_ACTIONS = "generate_actions";
+
+        String MAX_MESSAGES_TO_EXTRACT = "max_messages_to_extract";
+
+        String MAX_SUGGESTIONS = "max_suggestions";
+    }
+
+    /**
+     * Namespace for all runtime related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Runtime {
+        String NAMESPACE = "runtime";
+
+        /**
+         * Whether or not we use the precompiled layout.
+         */
+        String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
     }
 
     /**
@@ -220,6 +239,14 @@ public final class DeviceConfig {
          * Whether to show location access check notifications.
          */
         String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
+
+        /**
+         * Whether to disable the new device identifier access restrictions.
+         *
+         * @hide
+         */
+        String PROPERTY_DEVICE_IDENTIFIER_ACCESS_RESTRICTIONS_DISABLED =
+                "device_identifier_access_restrictions_disabled";
     }
 
     /**

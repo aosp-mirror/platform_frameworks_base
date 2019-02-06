@@ -18,10 +18,10 @@ package android.view;
 
 import static android.view.InsetsState.TYPE_IME;
 
+import android.inputmethodservice.InputMethodService;
 import android.os.Parcel;
 import android.text.TextUtils;
 import android.view.SurfaceControl.Transaction;
-import android.view.WindowInsets.Type;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
@@ -73,11 +73,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
             return;
         }
 
-        if (setVisible) {
-            mController.show(Type.IME);
-        } else {
-            mController.hide(Type.IME);
-        }
+        mController.applyImeVisibility(setVisible);
     }
 
     @Override
@@ -89,6 +85,30 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     @Override
     public void onWindowFocusLost() {
         mHasWindowFocus = false;
+    }
+
+    /**
+     * Request {@link InputMethodManager} to show the IME.
+     * @return @see {@link android.view.InsetsSourceConsumer.ShowResult}.
+     */
+    @Override
+    @ShowResult int requestShow(boolean fromIme) {
+        // TODO: ResultReceiver for IME.
+        // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
+        if (fromIme) {
+            return ShowResult.SHOW_IMMEDIATELY;
+        }
+
+        return getImm().requestImeShow(null /* resultReceiver */)
+                ? ShowResult.SHOW_DELAYED : ShowResult.SHOW_FAILED;
+    }
+
+    /**
+     * Notify {@link InputMethodService} that IME window is hidden.
+     */
+    @Override
+    void notifyHidden() {
+        getImm().notifyImeHidden();
     }
 
     private boolean isDummyOrEmptyEditor(EditorInfo info) {

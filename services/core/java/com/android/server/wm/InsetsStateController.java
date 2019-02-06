@@ -204,6 +204,11 @@ class InsetsStateController {
         mTypeWinControlMap.put(type, win);
     }
 
+    void notifyControlChanged(WindowState target) {
+        mPendingControlChanged.add(target);
+        notifyPendingInsetsControlChanged();
+    }
+
     private void notifyPendingInsetsControlChanged() {
         if (mPendingControlChanged.isEmpty()) {
             return;

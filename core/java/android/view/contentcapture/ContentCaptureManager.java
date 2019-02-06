@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,7 +47,7 @@ import java.io.PrintWriter;
  * of every method.
  */
 /**
- * TODO(b/111276913): add javadocs / implement
+ * TODO(b/123577059): add javadocs / implement
  */
 @SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
 public final class ContentCaptureManager {
@@ -120,6 +121,7 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
+    @UiThread
     public void onActivityStarted(@NonNull IBinder applicationToken,
             @NonNull ComponentName activityComponent, int flags) {
         synchronized (mLock) {
@@ -129,6 +131,7 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
+    @UiThread
     public void onActivityStopped() {
         getMainContentCaptureSession().destroy();
     }
@@ -140,6 +143,7 @@ public final class ContentCaptureManager {
      *
      * @hide
      */
+    @UiThread
     public void flush(@FlushReason int reason) {
         getMainContentCaptureSession().flush(reason);
     }
@@ -217,6 +221,7 @@ public final class ContentCaptureManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public boolean isContentCaptureFeatureEnabled() {
         if (mService == null) return false;
 
@@ -249,6 +254,7 @@ public final class ContentCaptureManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public void setContentCaptureFeatureEnabled(boolean enabled) {
         if (DEBUG) Log.d(TAG, "setContentCaptureFeatureEnabled(): setting to " + enabled);
 

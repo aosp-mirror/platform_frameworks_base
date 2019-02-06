@@ -104,6 +104,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_AOD_DISABLED = "aod_disabled";
     // Go into deep Doze as soon as the screen turns off.
     private static final String KEY_QUICK_DOZE_ENABLED = "quick_doze_enabled";
+    private static final String KEY_ENABLE_NIGHT_MODE = "enable_night_mode";
 
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
@@ -123,12 +124,13 @@ public class BatterySaverPolicy extends ContentObserver {
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
             false, /* enableFireWall */
+            false, /* enableNightMode */
             false, /* enableQuickDoze */
             new ArrayMap<>(), /* filesForInteractive */
             new ArrayMap<>(), /* filesForNoninteractive */
             false, /* forceAllAppsStandby */
             false, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_NO_CHANGE /* gpsMode */
+            PowerManager.LOCATION_MODE_NO_CHANGE /* locationMode */
     );
 
     private static final Policy DEFAULT_ADAPTIVE_POLICY = OFF_POLICY;
@@ -147,12 +149,13 @@ public class BatterySaverPolicy extends ContentObserver {
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
             true,  /* enableFirewall */
+            true, /* enableNightMode */
             true, /* enableQuickDoze */
             new ArrayMap<>(), /* filesForInteractive */
             new ArrayMap<>(), /* filesForNoninteractive */
             true, /* forceAllAppsStandby */
             true, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF /* gpsMode */
+            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF /* locationMode */
     );
 
     private final Object mLock;
@@ -416,7 +419,7 @@ public class BatterySaverPolicy extends ContentObserver {
         if (currPolicy.disableAod) sb.append("o");
         if (currPolicy.enableQuickDoze) sb.append("q");
 
-        sb.append(currPolicy.gpsMode);
+        sb.append(currPolicy.locationMode);
 
         mEventLogKeys = sb.toString();
     }
@@ -523,6 +526,11 @@ public class BatterySaverPolicy extends ContentObserver {
         public final boolean enableFirewall;
 
         /**
+         * Whether to enable night mode or not.
+         */
+        public final boolean enableNightMode;
+
+        /**
          * Whether Quick Doze is enabled or not.
          */
         public final boolean enableQuickDoze;
@@ -554,12 +562,13 @@ public class BatterySaverPolicy extends ContentObserver {
         public final boolean forceBackgroundCheck;
 
         /**
-         * This is the flag to decide the gps mode in battery saver mode.
+         * This is the flag to decide the location mode in battery saver mode. This was
+         * previously called gpsMode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
          * @see #KEY_GPS_MODE
          */
-        public final int gpsMode;
+        public final int locationMode;
 
         private final int mHashCode;
 
@@ -577,12 +586,13 @@ public class BatterySaverPolicy extends ContentObserver {
                 boolean enableAdjustBrightness,
                 boolean enableDataSaver,
                 boolean enableFirewall,
+                boolean enableNightMode,
                 boolean enableQuickDoze,
                 ArrayMap<String, String> filesForInteractive,
                 ArrayMap<String, String> filesForNoninteractive,
                 boolean forceAllAppsStandby,
                 boolean forceBackgroundCheck,
-                int gpsMode) {
+                int locationMode) {
 
             this.adjustBrightnessFactor = adjustBrightnessFactor;
             this.advertiseIsEnabled = advertiseIsEnabled;
@@ -597,12 +607,13 @@ public class BatterySaverPolicy extends ContentObserver {
             this.enableAdjustBrightness = enableAdjustBrightness;
             this.enableDataSaver = enableDataSaver;
             this.enableFirewall = enableFirewall;
+            this.enableNightMode = enableNightMode;
             this.enableQuickDoze = enableQuickDoze;
             this.filesForInteractive = filesForInteractive;
             this.filesForNoninteractive = filesForNoninteractive;
             this.forceAllAppsStandby = forceAllAppsStandby;
             this.forceBackgroundCheck = forceBackgroundCheck;
-            this.gpsMode = gpsMode;
+            this.locationMode = locationMode;
 
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,
@@ -618,12 +629,13 @@ public class BatterySaverPolicy extends ContentObserver {
                     enableAdjustBrightness,
                     enableDataSaver,
                     enableFirewall,
+                    enableNightMode,
                     enableQuickDoze,
                     filesForInteractive,
                     filesForNoninteractive,
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    gpsMode);
+                    locationMode);
         }
 
         static Policy fromConfig(BatterySaverPolicyConfig config) {
@@ -653,6 +665,8 @@ public class BatterySaverPolicy extends ContentObserver {
                     config.getEnableAdjustBrightness(),
                     config.getEnableDataSaver(),
                     config.getEnableFirewall(),
+                    // TODO: add option to config
+                    config.getAdvertiseIsEnabled(),
                     config.getEnableQuickDoze(),
                     /* filesForInteractive */
                     (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
@@ -715,13 +729,15 @@ public class BatterySaverPolicy extends ContentObserver {
                     !defaultPolicy.enableDataSaver);
             boolean enableFirewall = !parser.getBoolean(KEY_ACTIVATE_FIREWALL_DISABLED,
                     !defaultPolicy.enableFirewall);
+            boolean enableNightMode = !parser.getBoolean(KEY_ENABLE_NIGHT_MODE,
+                    !defaultPolicy.enableNightMode);
             boolean enableQuickDoze = parser.getBoolean(KEY_QUICK_DOZE_ENABLED,
                     defaultPolicy.enableQuickDoze);
             boolean forceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY,
                     defaultPolicy.forceAllAppsStandby);
             boolean forceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK,
                     defaultPolicy.forceBackgroundCheck);
-            int gpsMode = parser.getInt(KEY_GPS_MODE, defaultPolicy.gpsMode);
+            int locationMode = parser.getInt(KEY_GPS_MODE, defaultPolicy.locationMode);
 
             return new Policy(
                     adjustBrightnessFactor,
@@ -738,6 +754,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     enableAdjustBrightness,
                     enableDataSaver,
                     enableFirewall,
+                    enableNightMode,
                     enableQuickDoze,
                     /* filesForInteractive */
                     (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
@@ -745,7 +762,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    gpsMode
+                    locationMode
             );
         }
 
@@ -767,10 +784,11 @@ public class BatterySaverPolicy extends ContentObserver {
                     && enableAdjustBrightness == other.enableAdjustBrightness
                     && enableDataSaver == other.enableDataSaver
                     && enableFirewall == other.enableFirewall
+                    && enableNightMode == other.enableNightMode
                     && enableQuickDoze == other.enableQuickDoze
                     && forceAllAppsStandby == other.forceAllAppsStandby
                     && forceBackgroundCheck == other.forceBackgroundCheck
-                    && gpsMode == other.gpsMode
+                    && locationMode == other.locationMode
                     && filesForInteractive.equals(other.filesForInteractive)
                     && filesForNoninteractive.equals(other.filesForNoninteractive);
         }
@@ -795,11 +813,11 @@ public class BatterySaverPolicy extends ContentObserver {
             final PowerSaveState.Builder builder = new PowerSaveState.Builder()
                     .setGlobalBatterySaverEnabled(currPolicy.advertiseIsEnabled);
             switch (type) {
-                case ServiceType.GPS:
+                case ServiceType.LOCATION:
                     boolean isEnabled = currPolicy.advertiseIsEnabled
-                            || currPolicy.gpsMode != PowerManager.LOCATION_MODE_NO_CHANGE;
+                            || currPolicy.locationMode != PowerManager.LOCATION_MODE_NO_CHANGE;
                     return builder.setBatterySaverEnabled(isEnabled)
-                            .setGpsMode(currPolicy.gpsMode)
+                            .setLocationMode(currPolicy.locationMode)
                             .build();
                 case ServiceType.ANIMATION:
                     return builder.setBatterySaverEnabled(currPolicy.disableAnimation)
@@ -831,6 +849,9 @@ public class BatterySaverPolicy extends ContentObserver {
                             .build();
                 case ServiceType.FORCE_BACKGROUND_CHECK:
                     return builder.setBatterySaverEnabled(currPolicy.forceBackgroundCheck)
+                            .build();
+                case ServiceType.NIGHT_MODE:
+                    return builder.setBatterySaverEnabled(currPolicy.enableNightMode)
                             .build();
                 case ServiceType.OPTIONAL_SENSORS:
                     return builder.setBatterySaverEnabled(currPolicy.disableOptionalSensors)
@@ -910,7 +931,7 @@ public class BatterySaverPolicy extends ContentObserver {
 
     public int getGpsMode() {
         synchronized (mLock) {
-            return getCurrentPolicyLocked().gpsMode;
+            return getCurrentPolicyLocked().locationMode;
         }
     }
 
@@ -995,7 +1016,7 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.print(indent);
         pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + p.adjustBrightnessFactor);
         pw.print(indent);
-        pw.println("  " + KEY_GPS_MODE + "=" + p.gpsMode);
+        pw.println("  " + KEY_GPS_MODE + "=" + p.locationMode);
         pw.print(indent);
         pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + p.forceAllAppsStandby);
         pw.print(indent);
@@ -1008,6 +1029,8 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.println("  " + KEY_SOUNDTRIGGER_DISABLED + "=" + p.disableSoundTrigger);
         pw.print(indent);
         pw.println("  " + KEY_QUICK_DOZE_ENABLED + "=" + p.enableQuickDoze);
+        pw.print(indent);
+        pw.println("  " + KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
 
         pw.print("    Interactive File values:\n");
         dumpMap(pw, "      ", p.filesForInteractive);

@@ -566,7 +566,7 @@ public final class PowerManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ServiceType.GPS,
+    @IntDef({ServiceType.LOCATION,
             ServiceType.VIBRATION,
             ServiceType.ANIMATION,
             ServiceType.FULL_BACKUP,
@@ -583,7 +583,7 @@ public final class PowerManager {
     })
     public @interface ServiceType {
         int NULL = 0;
-        int GPS = 1;
+        int LOCATION = 1;
         int VIBRATION = 2;
         int ANIMATION = 3;
         int FULL_BACKUP = 4;
@@ -614,6 +614,11 @@ public final class PowerManager {
          * Whether to go into Deep Doze as soon as the screen turns off or not.
          */
         int QUICK_DOZE = 15;
+
+        /**
+         * Whether to enable night mode when battery saver is enabled.
+         */
+        int NIGHT_MODE = 16;
     }
 
     /**
@@ -1400,11 +1405,11 @@ public final class PowerManager {
      */
     @LocationPowerSaveMode
     public int getLocationPowerSaveMode() {
-        final PowerSaveState powerSaveState = getPowerSaveState(ServiceType.GPS);
+        final PowerSaveState powerSaveState = getPowerSaveState(ServiceType.LOCATION);
         if (!powerSaveState.globalBatterySaverEnabled) {
             return LOCATION_MODE_NO_CHANGE;
         }
-        return powerSaveState.gpsMode;
+        return powerSaveState.locationMode;
     }
 
     /**

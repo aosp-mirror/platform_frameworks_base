@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -36,6 +37,7 @@ import java.util.List;
 
 /** @hide */
 @SystemApi
+@TestApi
 public final class ContentCaptureEvent implements Parcelable {
 
     private static final String TAG = ContentCaptureEvent.class.getSimpleName();
@@ -69,13 +71,33 @@ public final class ContentCaptureEvent implements Parcelable {
      */
     public static final int TYPE_VIEW_TEXT_CHANGED = 3;
 
-    // TODO(b/111276913): add event to indicate when FLAG_SECURE was changed?
+    /**
+     * Called before events (such as {@link #TYPE_VIEW_APPEARED}) representing the initial view
+     * hierarchy are sent.
+     *
+     * <p><b>NOTE</b>: there is no guarantee this event will be sent. For example, it's not sent
+     * if the initial view hierarchy doesn't initially have any view that's important for content
+     * capture.
+     */
+    public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4;
+
+    /**
+     * Called after events (such as {@link #TYPE_VIEW_APPEARED}) representing the initial view
+     * hierarchy are sent.
+     *
+     * <p><b>NOTE</b>: there is no guarantee this event will be sent. For example, it's not sent
+     * if the initial view hierarchy doesn't initially have any view that's important for content
+     * capture.
+     */
+    public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5;
 
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_VIEW_APPEARED,
             TYPE_VIEW_DISAPPEARED,
-            TYPE_VIEW_TEXT_CHANGED
+            TYPE_VIEW_TEXT_CHANGED,
+            TYPE_INITIAL_VIEW_TREE_APPEARING,
+            TYPE_INITIAL_VIEW_TREE_APPEARED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType{}
@@ -108,8 +130,10 @@ public final class ContentCaptureEvent implements Parcelable {
         return this;
     }
 
-    private void setAutofillIds(@NonNull ArrayList<AutofillId> ids) {
+    /** @hide */
+    public ContentCaptureEvent setAutofillIds(@NonNull ArrayList<AutofillId> ids) {
         mIds = Preconditions.checkNotNull(ids);
+        return this;
     }
 
     /**
@@ -193,7 +217,8 @@ public final class ContentCaptureEvent implements Parcelable {
      * Gets the type of the event.
      *
      * @return one of {@link #TYPE_VIEW_APPEARED}, {@link #TYPE_VIEW_DISAPPEARED},
-     * or {@link #TYPE_VIEW_TEXT_CHANGED}.
+     * {@link #TYPE_VIEW_TEXT_CHANGED}, {@link #TYPE_INITIAL_VIEW_TREE_APPEARING}, or
+     * {@link #TYPE_INITIAL_VIEW_TREE_APPEARED}.
      */
     public @EventType int getType() {
         return mType;
@@ -372,6 +397,10 @@ public final class ContentCaptureEvent implements Parcelable {
                 return "VIEW_DISAPPEARED";
             case TYPE_VIEW_TEXT_CHANGED:
                 return "VIEW_TEXT_CHANGED";
+            case TYPE_INITIAL_VIEW_TREE_APPEARING:
+                return "INITIAL_VIEW_HIERARCHY_STARTED";
+            case TYPE_INITIAL_VIEW_TREE_APPEARED:
+                return "INITIAL_VIEW_HIERARCHY_FINISHED";
             default:
                 return "UKNOWN_TYPE: " + type;
         }

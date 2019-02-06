@@ -25,8 +25,15 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Person;
+import android.app.RemoteInput;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.IPackageManager;
+import android.graphics.drawable.Icon;
 import android.os.Process;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.StatusBarNotification;
@@ -53,7 +60,6 @@ import org.mockito.MockitoAnnotations;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -62,20 +68,26 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 @RunWith(AndroidJUnit4.class)
-public class SmartActionHelperTest {
+public class SmartActionsHelperTest {
     private static final String NOTIFICATION_KEY = "key";
     private static final String RESULT_ID = "id";
-
     private static final ConversationAction REPLY_ACTION =
             new ConversationAction.Builder(ConversationAction.TYPE_TEXT_REPLY)
-            .setTextReply("Home")
-            .build();
+                    .setTextReply("Home")
+                    .build();
+    private static final String MESSAGE = "Where are you?";
+
+    @Mock
+    IPackageManager mIPackageManager;
+    @Mock
+    private TextClassifier mTextClassifier;
+    @Mock
+    private StatusBarNotification mStatusBarNotification;
+    @Mock
+    private SmsHelper mSmsHelper;
 
     private SmartActionsHelper mSmartActionsHelper;
     private Context mContext;
-    @Mock private TextClassifier mTextClassifier;
-    @Mock private NotificationEntry mNotificationEntry;
-    @Mock private StatusBarNotification mStatusBarNotification;
     private Notification.Builder mNotificationBuilder;
     private AssistantSettings mSettings;
 
@@ -89,10 +101,6 @@ public class SmartActionHelperTest {
         when(mTextClassifier.suggestConversationActions(any(ConversationActions.Request.class)))
                 .thenReturn(new ConversationActions(Arrays.asList(REPLY_ACTION), RESULT_ID));
 
-        when(mNotificationEntry.getSbn()).thenReturn(mStatusBarNotification);
-        // The notification is eligible to have smart suggestions.
-        when(mNotificationEntry.hasInlineReply()).thenReturn(true);
-        when(mNotificationEntry.isMessaging()).thenReturn(true);
         when(mStatusBarNotification.getPackageName()).thenReturn("random.app");
         when(mStatusBarNotification.getUser()).thenReturn(Process.myUserHandle());
         when(mStatusBarNotification.getKey()).thenReturn(NOTIFICATION_KEY);
@@ -105,33 +113,96 @@ public class SmartActionHelperTest {
     }
 
     @Test
-    public void testSuggestReplies_notMessagingApp() {
-        when(mNotificationEntry.isMessaging()).thenReturn(false);
-        ArrayList<CharSequence> textReplies =
-                mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        assertThat(textReplies).isEmpty();
+    public void testSuggest_notMessageNotification() {
+        Notification notification = mNotificationBuilder.setContentText(MESSAGE).build();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+
+        mSmartActionsHelper.suggest(createNotificationEntry());
+
+        verify(mTextClassifier, never())
+                .suggestConversationActions(any(ConversationActions.Request.class));
     }
 
     @Test
-    public void testSuggestReplies_noInlineReply() {
-        when(mNotificationEntry.hasInlineReply()).thenReturn(false);
-        ArrayList<CharSequence> textReplies =
-                mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        assertThat(textReplies).isEmpty();
+    public void testSuggest_noInlineReply() {
+        Notification notification =
+                mNotificationBuilder
+                        .setContentText(MESSAGE)
+                        .setCategory(Notification.CATEGORY_MESSAGE)
+                        .build();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+
+        ConversationActions.Request request = runSuggestAndCaptureRequest();
+
+        // actions are enabled, but replies are not.
+        assertThat(
+                request.getTypeConfig().resolveEntityListModifications(
+                        Arrays.asList(ConversationAction.TYPE_TEXT_REPLY,
+                                ConversationAction.TYPE_OPEN_URL)))
+                .containsExactly(ConversationAction.TYPE_OPEN_URL);
     }
 
     @Test
-    public void testSuggestReplies_nonMessageStyle() {
-        Notification notification = mNotificationBuilder.setContentText("Where are you?").build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+    public void testSuggest_settingsOff() {
+        mSettings.mGenerateActions = false;
+        mSettings.mGenerateReplies = false;
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        List<ConversationActions.Message> messages = getMessagesInRequest();
+        mSmartActionsHelper.suggest(createNotificationEntry());
+
+        verify(mTextClassifier, never())
+                .suggestConversationActions(any(ConversationActions.Request.class));
+    }
+
+    @Test
+    public void testSuggest_settings_repliesOnActionsOff() {
+        mSettings.mGenerateReplies = true;
+        mSettings.mGenerateActions = false;
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+
+        ConversationActions.Request request = runSuggestAndCaptureRequest();
+
+        // replies are enabled, but actions are not.
+        assertThat(
+                request.getTypeConfig().resolveEntityListModifications(
+                        Arrays.asList(ConversationAction.TYPE_TEXT_REPLY,
+                                ConversationAction.TYPE_OPEN_URL)))
+                .containsExactly(ConversationAction.TYPE_TEXT_REPLY);
+    }
+
+    @Test
+    public void testSuggest_settings_repliesOffActionsOn() {
+        mSettings.mGenerateReplies = false;
+        mSettings.mGenerateActions = true;
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+
+        ConversationActions.Request request = runSuggestAndCaptureRequest();
+
+        // actions are enabled, but replies are not.
+        assertThat(
+                request.getTypeConfig().resolveEntityListModifications(
+                        Arrays.asList(ConversationAction.TYPE_TEXT_REPLY,
+                                ConversationAction.TYPE_OPEN_URL)))
+                .containsExactly(ConversationAction.TYPE_OPEN_URL);
+    }
+
+
+    @Test
+    public void testSuggest_nonMessageStyleMessageNotification() {
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+
+        List<ConversationActions.Message> messages =
+                runSuggestAndCaptureRequest().getConversation();
         assertThat(messages).hasSize(1);
-        MessageSubject.assertThat(messages.get(0)).hasText("Where are you?");
+        MessageSubject.assertThat(messages.get(0)).hasText(MESSAGE);
     }
 
     @Test
-    public void testSuggestReplies_messageStyle() {
+    public void testSuggest_messageStyle() {
         Person me = new Person.Builder().setName("Me").build();
         Person userA = new Person.Builder().setName("A").build();
         Person userB = new Person.Builder().setName("B").build();
@@ -145,10 +216,12 @@ public class SmartActionHelperTest {
                 mNotificationBuilder
                         .setContentText("You have three new messages")
                         .setStyle(style)
+                        .setActions(createReplyAction())
                         .build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        List<ConversationActions.Message> messages = getMessagesInRequest();
+        List<ConversationActions.Message> messages =
+                runSuggestAndCaptureRequest().getConversation();
         assertThat(messages).hasSize(3);
 
         ConversationActions.Message secondMessage = messages.get(0);
@@ -172,7 +245,7 @@ public class SmartActionHelperTest {
     }
 
     @Test
-    public void testSuggestReplies_messageStyle_noPerson() {
+    public void testSuggest_messageStyle_noPerson() {
         Person me = new Person.Builder().setName("Me").build();
         Notification.MessagingStyle style =
                 new Notification.MessagingStyle(me).addMessage("message", 1000, (Person) null);
@@ -180,10 +253,11 @@ public class SmartActionHelperTest {
                 mNotificationBuilder
                         .setContentText("You have one new message")
                         .setStyle(style)
+                        .setActions(createReplyAction())
                         .build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
+        mSmartActionsHelper.suggest(createNotificationEntry());
 
         verify(mTextClassifier, never())
                 .suggestConversationActions(any(ConversationActions.Request.class));
@@ -191,13 +265,12 @@ public class SmartActionHelperTest {
 
     @Test
     public void testOnSuggestedReplySent() {
-        final String message = "Where are you?";
-        Notification notification = mNotificationBuilder.setContentText(message).build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
+        mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onSuggestedReplySent(
-                NOTIFICATION_KEY, message, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
+                NOTIFICATION_KEY, MESSAGE, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
@@ -208,13 +281,12 @@ public class SmartActionHelperTest {
 
     @Test
     public void testOnSuggestedReplySent_anotherNotification() {
-        final String message = "Where are you?";
-        Notification notification = mNotificationBuilder.setContentText(message).build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
+        mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onSuggestedReplySent(
-                "something_else", message, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
+                "something_else", MESSAGE, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
         verify(mTextClassifier, never())
                 .onTextClassifierEvent(Mockito.any(TextClassifierEvent.class));
@@ -225,13 +297,12 @@ public class SmartActionHelperTest {
         when(mTextClassifier.suggestConversationActions(any(ConversationActions.Request.class)))
                 .thenReturn(new ConversationActions(Collections.emptyList(), null));
 
-        final String message = "Where are you?";
-        Notification notification = mNotificationBuilder.setContentText(message).build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
+        mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onSuggestedReplySent(
-                "something_else", message, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
+                "something_else", MESSAGE, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
         verify(mTextClassifier, never())
                 .onTextClassifierEvent(Mockito.any(TextClassifierEvent.class));
@@ -239,10 +310,10 @@ public class SmartActionHelperTest {
 
     @Test
     public void testOnNotificationDirectReply() {
-        Notification notification = mNotificationBuilder.setContentText("Where are you?").build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
+        mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onNotificationDirectReplied(NOTIFICATION_KEY);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
@@ -254,12 +325,11 @@ public class SmartActionHelperTest {
 
     @Test
     public void testOnNotificationExpansionChanged() {
-        final String message = "Where are you?";
-        Notification notification = mNotificationBuilder.setContentText(message).build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        mSmartActionsHelper.onNotificationExpansionChanged(mNotificationEntry, true, true);
+        mSmartActionsHelper.suggest(createNotificationEntry());
+        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), true, true);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
@@ -270,12 +340,11 @@ public class SmartActionHelperTest {
 
     @Test
     public void testOnNotificationsSeen_notExpanded() {
-        final String message = "Where are you?";
-        Notification notification = mNotificationBuilder.setContentText(message).build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        mSmartActionsHelper.onNotificationExpansionChanged(mNotificationEntry, false, false);
+        mSmartActionsHelper.suggest(createNotificationEntry());
+        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), false, false);
 
         verify(mTextClassifier, never()).onTextClassifierEvent(
                 Mockito.any(TextClassifierEvent.class));
@@ -283,12 +352,11 @@ public class SmartActionHelperTest {
 
     @Test
     public void testOnNotifications_expanded() {
-        final String message = "Where are you?";
-        Notification notification = mNotificationBuilder.setContentText(message).build();
-        when(mNotificationEntry.getNotification()).thenReturn(notification);
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
-        mSmartActionsHelper.onNotificationExpansionChanged(mNotificationEntry, false, true);
+        mSmartActionsHelper.suggest(createNotificationEntry());
+        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), false, true);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
@@ -301,14 +369,41 @@ public class SmartActionHelperTest {
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(msUtc), ZoneOffset.systemDefault());
     }
 
-    private List<ConversationActions.Message> getMessagesInRequest() {
-        mSmartActionsHelper.suggestReplies(mNotificationEntry);
+    private ConversationActions.Request runSuggestAndCaptureRequest() {
+        mSmartActionsHelper.suggest(createNotificationEntry());
 
         ArgumentCaptor<ConversationActions.Request> argumentCaptor =
                 ArgumentCaptor.forClass(ConversationActions.Request.class);
         verify(mTextClassifier).suggestConversationActions(argumentCaptor.capture());
-        ConversationActions.Request request = argumentCaptor.getValue();
-        return request.getConversation();
+        return argumentCaptor.getValue();
+    }
+
+    private Notification.Action createReplyAction() {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, new Intent(mContext, this.getClass()), 0);
+        RemoteInput remoteInput = new RemoteInput.Builder("result")
+                .setAllowFreeFormInput(true)
+                .build();
+        return new Notification.Action.Builder(
+                Icon.createWithResource(mContext.getResources(),
+                        android.R.drawable.stat_sys_warning),
+                "Reply", pendingIntent)
+                .addRemoteInput(remoteInput)
+                .build();
+    }
+
+    private NotificationEntry createNotificationEntry() {
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+        return new NotificationEntry(mIPackageManager, mStatusBarNotification, channel, mSmsHelper);
+    }
+
+    private Notification createMessageNotification() {
+        return mNotificationBuilder
+                .setContentText(MESSAGE)
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setActions(createReplyAction())
+                .build();
     }
 
     private void assertTextClassifierEvent(

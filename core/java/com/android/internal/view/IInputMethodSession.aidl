@@ -48,4 +48,6 @@ oneway interface IInputMethodSession {
     void finishSession();
 
     void updateCursorAnchorInfo(in CursorAnchorInfo cursorAnchorInfo);
+
+    void notifyImeHidden();
 }

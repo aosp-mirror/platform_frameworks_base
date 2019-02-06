@@ -201,7 +201,13 @@ class RollbackStore {
      */
     RollbackData createAvailableRollback(int rollbackId) throws IOException {
         File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
-        return new RollbackData(rollbackId, backupDir);
+        return new RollbackData(rollbackId, backupDir, -1);
+    }
+
+    RollbackData createPendingStagedRollback(int rollbackId, int stagedSessionId)
+            throws IOException {
+        File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
+        return new RollbackData(rollbackId, backupDir, stagedSessionId);
     }
 
     /**
@@ -240,6 +246,7 @@ class RollbackStore {
             dataJson.put("rollbackId", data.rollbackId);
             dataJson.put("packages", toJson(data.packages));
             dataJson.put("timestamp", data.timestamp.toString());
+            dataJson.put("stagedSessionId", data.stagedSessionId);
 
             PrintWriter pw = new PrintWriter(new File(data.backupDir, "rollback.json"));
             pw.println(dataJson.toString());
@@ -299,7 +306,9 @@ class RollbackStore {
                     IoUtils.readFileAsString(rollbackJsonFile.getAbsolutePath()));
 
             int rollbackId = dataJson.getInt("rollbackId");
-            RollbackData data = new RollbackData(rollbackId, backupDir);
+            int stagedSessionId = dataJson.getInt("stagedSessionId");
+            RollbackData data = new RollbackData(rollbackId, backupDir,
+                    stagedSessionId);
             data.packages.addAll(packageRollbackInfosFromJson(dataJson.getJSONArray("packages")));
             data.timestamp = Instant.parse(dataJson.getString("timestamp"));
             return data;
@@ -331,6 +340,8 @@ class RollbackStore {
         json.put("pendingBackups", convertToJsonArray(pendingBackups));
         json.put("pendingRestores", convertToJsonArray(pendingRestores));
 
+        json.put("isApex", info.isApex());
+
         return json;
     }
 
@@ -345,8 +356,10 @@ class RollbackStore {
         final ArrayList<RestoreInfo> pendingRestores = convertToRestoreInfoArray(
                 json.getJSONArray("pendingRestores"));
 
+        final boolean isApex = json.getBoolean("isApex");
+
         return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
-                pendingBackups, pendingRestores);
+                pendingBackups, pendingRestores, isApex);
     }
 
     private JSONArray versionedPackagesToJson(List<VersionedPackage> packages)

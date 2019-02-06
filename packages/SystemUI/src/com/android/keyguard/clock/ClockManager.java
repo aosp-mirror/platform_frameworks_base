@@ -17,12 +17,15 @@ package com.android.keyguard.clock;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 
+import com.android.keyguard.R;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
@@ -45,6 +48,7 @@ public final class ClockManager {
     private final LayoutInflater mLayoutInflater;
     private final ContentResolver mContentResolver;
 
+    private final List<ClockInfo> mClockInfos = new ArrayList<>();
     /**
      * Observe settings changes to know when to switch the clock face.
      */
@@ -76,6 +80,36 @@ public final class ClockManager {
         mExtensionController = extensionController;
         mLayoutInflater = LayoutInflater.from(context);
         mContentResolver = context.getContentResolver();
+
+        Resources res = context.getResources();
+        mClockInfos.add(ClockInfo.builder()
+                .setName("default")
+                .setTitle(res.getString(R.string.clock_title_default))
+                .setId("default")
+                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.default_thumbnail))
+                .setPreview(() -> BitmapFactory.decodeResource(res, R.drawable.default_preview))
+                .build());
+        mClockInfos.add(ClockInfo.builder()
+                .setName("bubble")
+                .setTitle(res.getString(R.string.clock_title_bubble))
+                .setId(BubbleClockController.class.getName())
+                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.bubble_thumbnail))
+                .setPreview(() -> BitmapFactory.decodeResource(res, R.drawable.bubble_preview))
+                .build());
+        mClockInfos.add(ClockInfo.builder()
+                .setName("stretch")
+                .setTitle(res.getString(R.string.clock_title_stretch))
+                .setId(StretchAnalogClockController.class.getName())
+                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.stretch_thumbnail))
+                .setPreview(() -> BitmapFactory.decodeResource(res, R.drawable.stretch_preview))
+                .build());
+        mClockInfos.add(ClockInfo.builder()
+                .setName("type")
+                .setTitle(res.getString(R.string.clock_title_type))
+                .setId(TypeClockController.class.getName())
+                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.type_thumbnail))
+                .setPreview(() -> BitmapFactory.decodeResource(res, R.drawable.type_preview))
+                .build());
     }
 
     /**
@@ -99,6 +133,13 @@ public final class ClockManager {
         if (mListeners.isEmpty()) {
             unregister();
         }
+    }
+
+    /**
+     * Get information about available clock faces.
+     */
+    List<ClockInfo> getClockInfos() {
+        return mClockInfos;
     }
 
     private void setClockPlugin(ClockPlugin plugin) {

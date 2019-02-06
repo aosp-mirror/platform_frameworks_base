@@ -184,4 +184,11 @@ public interface InputMethodSession {
      * insertion point and composition string.
      */
     public void updateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo);
+
+    /**
+     * Notifies {@link android.inputmethodservice.InputMethodService} that IME has been
+     * hidden from user.
+     * @hide
+     */
+    public void notifyImeHidden();
 }

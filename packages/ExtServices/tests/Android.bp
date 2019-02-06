@@ -15,6 +15,7 @@ android_test {
     static_libs: [
         "ExtServices-core",
         "android-support-test",
+        "compatibility-device-util",
         "mockito-target-minus-junit4",
         "espresso-core",
         "truth-prebuilt",

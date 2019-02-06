@@ -272,9 +272,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         // AOD wallpapers should fade away after a while.
         // Docking pulses may take a long time, wallpapers should also fade away after a while.
-        if (mWallpaperSupportsAmbientMode && (
-                mDozeParameters.getAlwaysOn() && mState == ScrimState.AOD
-                        || mState == ScrimState.PULSING && mCallback != null)) {
+        if (mWallpaperSupportsAmbientMode && mDozeParameters.getAlwaysOn()
+                && mState == ScrimState.AOD) {
             if (!mWallpaperVisibilityTimedOut) {
                 mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
                         AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);

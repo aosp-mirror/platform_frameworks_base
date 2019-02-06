@@ -69,6 +69,11 @@ public final class PackageRollbackInfo implements Parcelable {
     private final ArrayList<RestoreInfo> mPendingRestores;
 
     /**
+     * Whether this instance represents the PackageRollbackInfo for an APEX module.
+     */
+    private final boolean mIsApex;
+
+    /**
      * Returns the name of the package to roll back from.
      */
     public String getPackageName() {
@@ -116,18 +121,26 @@ public final class PackageRollbackInfo implements Parcelable {
     }
 
     /** @hide */
+    public boolean isApex() {
+        return mIsApex;
+    }
+
+    /** @hide */
     public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
             VersionedPackage packageRolledBackTo,
-            @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores) {
+            @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
+            boolean isApex) {
         this.mVersionRolledBackFrom = packageRolledBackFrom;
         this.mVersionRolledBackTo = packageRolledBackTo;
         this.mPendingBackups = pendingBackups;
         this.mPendingRestores = pendingRestores;
+        this.mIsApex = isApex;
     }
 
     private PackageRollbackInfo(Parcel in) {
         this.mVersionRolledBackFrom = VersionedPackage.CREATOR.createFromParcel(in);
         this.mVersionRolledBackTo = VersionedPackage.CREATOR.createFromParcel(in);
+        this.mIsApex = in.readBoolean();
         this.mPendingRestores = null;
         this.mPendingBackups = null;
     }
@@ -141,6 +154,7 @@ public final class PackageRollbackInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         mVersionRolledBackFrom.writeToParcel(out, flags);
         mVersionRolledBackTo.writeToParcel(out, flags);
+        out.writeBoolean(mIsApex);
     }
 
     public static final Parcelable.Creator<PackageRollbackInfo> CREATOR =

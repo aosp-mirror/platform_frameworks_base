@@ -3925,13 +3925,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnNotificationSmartReplySent() {
         final int replyIndex = 2;
         final String reply = "Hello";
+        final boolean modifiedBeforeSending = true;
         final boolean generatedByAssistant = true;
 
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.setSuggestionsGeneratedByAssistant(generatedByAssistant);
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationSmartReplySent(
-                r.getKey(), replyIndex, reply, generatedByAssistant, NOTIFICATION_LOCATION_UNKNOWN);
+                r.getKey(), replyIndex, reply, NOTIFICATION_LOCATION_UNKNOWN,
+                modifiedBeforeSending);
         verify(mAssistants).notifyAssistantSuggestedReplySent(
                 eq(r.sbn), eq(reply), eq(generatedByAssistant));
     }
