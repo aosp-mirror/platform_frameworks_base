@@ -68,6 +68,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1889,7 +1890,8 @@ public class ConnectivityManager {
      * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
      *        changes. Must be extended by applications that use this API.
      *
-     * @return A {@link SocketKeepalive} object, which can be used to control this keepalive object.
+     * @return A {@link SocketKeepalive} object that can be used to control the keepalive on the
+     *         given socket.
      **/
     public SocketKeepalive createSocketKeepalive(@NonNull Network network,
             @NonNull UdpEncapsulationSocket socket,
@@ -1918,6 +1920,8 @@ public class ConnectivityManager {
      * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
      *        changes. Must be extended by applications that use this API.
      *
+     * @return A {@link SocketKeepalive} object that can be used to control the keepalive on the
+     *         given socket.
      * @hide
      */
     @SystemApi
@@ -1930,6 +1934,34 @@ public class ConnectivityManager {
             @NonNull Callback callback) {
         return new NattSocketKeepalive(mService, network, fd, INVALID_RESOURCE_ID /* Unused */,
                 source, destination, executor, callback);
+    }
+
+    /**
+     * Request that keepalives be started on a TCP socket.
+     * The socket must be established.
+     *
+     * @param network The {@link Network} the socket is on.
+     * @param socket The socket that needs to be kept alive.
+     * @param executor The executor on which callback will be invoked. This implementation assumes
+     *                 the provided {@link Executor} runs the callbacks in sequence with no
+     *                 concurrency. Failing this, no guarantee of correctness can be made. It is
+     *                 the responsibility of the caller to ensure the executor provides this
+     *                 guarantee. A simple way of creating such an executor is with the standard
+     *                 tool {@code Executors.newSingleThreadExecutor}.
+     * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
+     *        changes. Must be extended by applications that use this API.
+     *
+     * @return A {@link SocketKeepalive} object that can be used to control the keepalive on the
+     *         given socket.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD)
+    public SocketKeepalive createSocketKeepalive(@NonNull Network network,
+            @NonNull Socket socket,
+            @NonNull Executor executor,
+            @NonNull Callback callback) {
+        return new TcpSocketKeepalive(mService, network, socket, executor, callback);
     }
 
     /**
