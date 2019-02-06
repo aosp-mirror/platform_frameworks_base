@@ -17906,10 +17906,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void startProcess(String processName, ApplicationInfo info,
                 boolean knownToBeDead, String hostingType, ComponentName hostingName) {
-            synchronized (ActivityManagerService.this) {
-                startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
-                        hostingType, hostingName, false /* allowWhileBooting */,
-                        false /* isolated */, true /* keepIfLarge */);
+            try {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "startProcess:"
+                            + processName);
+                }
+                synchronized (ActivityManagerService.this) {
+                    startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
+                            hostingType, hostingName, false /* allowWhileBooting */,
+                            false /* isolated */, true /* keepIfLarge */);
+                }
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
