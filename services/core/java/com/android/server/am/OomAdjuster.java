@@ -1709,8 +1709,9 @@ public final class OomAdjuster {
                         (app.curAdj == ProcessList.PREVIOUS_APP_ADJ ||
                                 app.curAdj == ProcessList.HOME_APP_ADJ)) {
                     mAppCompact.compactAppSome(app);
-                } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ &&
-                        app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+                } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ
+                        && app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ
+                        && app.curAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
                     mAppCompact.compactAppFull(app);
                 }
             }
