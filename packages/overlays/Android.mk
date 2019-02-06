@@ -24,7 +24,24 @@ LOCAL_REQUIRED_MODULES := \
 	ExperimentNavigationBarSlimOverlay40 \
 	ExperimentNavigationBarLargeOverlay56 \
 	ExperimentNavigationBarLargeOverlay64 \
+	AccentColorBlackOverlay \
+	AccentColorGreenOverlay \
+	AccentColorPurpleOverlay \
+	FontNotoSerifSourceOverlay \
+	IconPackCircularAndroidOverlay \
+	IconPackCircularSettingsOverlay \
+	IconPackCircularSystemUIOverlay \
+	IconPackFilledAndroidOverlay \
+	IconPackFilledSettingsOverlay \
+	IconPackFilledSystemUIOverlay \
+	IconPackRoundedAndroidOverlay \
+	IconPackRoundedSettingsOverlay \
+	IconPackRoundedSystemUIOverlay \
+	IconShapeRoundedRectOverlay \
 	IconShapeSquareOverlay \
+	IconShapeSquircleOverlay \
+	IconShapeTeardropOverlay
+
 
 include $(BUILD_PHONY_PACKAGE)
 
