@@ -4258,18 +4258,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * The offset, in pixels, by which the content of this view is scrolled
      * horizontally.
+     * Please use {@link View#getScrollX()} and {@link View#setScrollX(int)} instead of
+     * accessing these directly.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "scrolling")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mScrollX;
     /**
      * The offset, in pixels, by which the content of this view is scrolled
      * vertically.
+     * Please use {@link View#getScrollY()} and {@link View#setScrollY(int)} instead of
+     * accessing these directly.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "scrolling")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mScrollY;
 
     /**
