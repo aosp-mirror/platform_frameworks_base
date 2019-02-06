@@ -44,6 +44,7 @@ import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -2194,7 +2195,7 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
         public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
             sc.checkNotReleased();
             nativeSetLayerStack(mNativeObject, sc.mNativeObject, layerStack);
