@@ -38,50 +38,20 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"已通过%1$s自动连接"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"已自动连接（通过网络评分服务提供方）"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已通过%1$s连接"</string>
-    <string name="ssid_by_passpoint_provider" msgid="7898171424140673315">"<xliff:g id="SSID">%1$s</xliff:g>（通过<xliff:g id="PASSPOINTPROVIDER">%2$s</xliff:g>连接）"</string>
+    <string name="connected_via_app" msgid="5571999941988929520">"已通过<xliff:g id="NAME">%1$s</xliff:g>连接到网络"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可通过%1$s连接"</string>
-    <string name="tap_to_set_up" msgid="2468970825530423314">"点按即可进行设置"</string>
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"点按即可注册"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"已连接，但无法访问互联网"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"无法访问互联网"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"必须登录"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"接入点暂时满载"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"已通过%1$s连接"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"可通过%1$s连接"</string>
-    <string name="osu_failure_ap_connection" msgid="598977488344424542">"连接失败"</string>
-    <string name="osu_failure_server_url_invalid" msgid="2237477219243136714">"OSU 服务器网址无效"</string>
-    <string name="osu_failure_server_connection" msgid="8192988165059982174">"无法连接到 OSU 服务器"</string>
-    <string name="osu_failure_server_validation" msgid="4631649978129606823">"OSU 服务器验证失败"</string>
-    <string name="osu_failure_service_provider_verification" msgid="4854091521439785597">"OSU 服务器证书无效"</string>
-    <string name="osu_failure_provisioning_aborted" msgid="424627208135320329">"已取消配置"</string>
-    <string name="osu_failure_provisioning_not_available" msgid="3021783729256985432">"配置不可用"</string>
-    <string name="osu_failure_invalid_server_url" msgid="8548886196179435758">"OSU 服务器网址无效"</string>
-    <string name="osu_failure_unexpected_command_type" msgid="8245921319866603904">"非预期的命令类型"</string>
-    <string name="osu_failure_unexpected_soap_message_type" msgid="2255897608510053065">"非预期的 SOAP 消息类型"</string>
-    <string name="osu_failure_soap_message_exchange" msgid="4357358438685987192">"无法交换 SOAP 消息"</string>
-    <string name="osu_failure_start_redirect_listener" msgid="4292769407279548482">"无法启动重定向侦听器"</string>
-    <string name="osu_failure_timed_out_redirect_listener" msgid="3168657820278807508">"等待重定向时出现超时问题"</string>
-    <string name="osu_failure_no_osu_activity_found" msgid="4593038891437878675">"未找到任何 OSU 活动"</string>
-    <string name="osu_failure_unexpected_soap_message_status" msgid="6568467710235256675">"非预期的 SOAP 消息状态"</string>
-    <string name="osu_failure_no_pps_mo" msgid="850567403039076835">"找不到 PPS-MO"</string>
-    <string name="osu_failure_no_aaa_server_trust_root_node" msgid="8961455873459838456">"找不到 AAA 服务器的信任根节点"</string>
-    <string name="osu_failure_no_remediation_server_trust_root_node" msgid="5041179688081545244">"找不到修复服务器的信任根节点"</string>
-    <string name="osu_failure_no_policy_server_trust_root_node" msgid="6617290380940513539">"找不到政策服务器的信任根节点"</string>
-    <string name="osu_failure_retrieve_trust_root_certificates" msgid="1499136256195528265">"未能检索到信任的根证书"</string>
-    <string name="osu_failure_no_aaa_trust_root_certificate" msgid="1904322497042226984">"找不到 AAA 服务器的信任根证书"</string>
-    <string name="osu_failure_add_passpoint_configuration" msgid="2173557755811446047">"无法添加 PassPoint 配置"</string>
-    <string name="osu_failure_osu_provider_not_found" msgid="6616172862116673082">"找不到 OSU 提供程序"</string>
-    <string name="osu_status_ap_connecting" msgid="5296821043003441437">"正在连接"</string>
-    <string name="osu_status_ap_connected" msgid="3777289375683170728">"已连接"</string>
-    <string name="osu_status_server_connecting" msgid="8499785407540355867">"正在连接到 OSU 服务器"</string>
-    <string name="osu_status_server_validated" msgid="3158727184762596355">"OSU 服务器已经过验证"</string>
-    <string name="osu_status_server_connected" msgid="8382024481520158168">"已连接到 OSU 服务器"</string>
-    <string name="osu_status_init_soap_exchange" msgid="8628063888912101981">"初始 SOAP 交换"</string>
-    <string name="osu_status_waiting_for_redirect_response" msgid="2343016207837053197">"正在等待重定向响应"</string>
-    <string name="osu_status_redirect_response_received" msgid="5323368411922609405">"已收到重定向响应"</string>
-    <string name="osu_status_second_soap_exchange" msgid="7115332266758483909">"第二次 SOAP 交换"</string>
-    <string name="osu_status_third_soap_exchange" msgid="8460901783597440766">"第三次 SOAP 交换"</string>
-    <string name="osu_status_retrieving_trust_root_certs" msgid="1563445892926269689">"正在检索信任的根证书"</string>
-    <string name="osu_provisioning_complete" msgid="5120178802493970149">"配置完成"</string>
+    <string name="osu_opening_provider" msgid="5488997661548640424">"正在打开<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"无法连接"</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"正在完成注册…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"无法完成注册。点按即可重试。"</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"注册完毕。正在连接…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"很慢"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"慢"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"良好"</string>
@@ -234,8 +204,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"不锁定屏幕"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"充电时屏幕不会休眠"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"启用蓝牙 HCI 信息收集日志"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (8857606786588106495) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"捕获蓝牙数据包（更改此设置之后请切换蓝牙开关）。"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM 解锁"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"允许解锁引导加载程序"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"要允许 OEM 解锁吗？"</string>
@@ -246,7 +215,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"网络"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"无线显示认证"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"启用 WLAN 详细日志记录功能"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"连接时随机选择 MAC 网址"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"始终开启移动数据网络"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"网络共享硬件加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"显示没有名称的蓝牙设备"</string>
@@ -273,7 +241,6 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"无法连接"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"提升 WLAN 日志记录级别（在 WLAN 选择器中显示每个 SSID 的 RSSI）"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"连接到 WLAN 网络时随机选择 MAC 地址"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"按流量计费"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"不按流量计费"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"日志记录器缓冲区大小"</string>

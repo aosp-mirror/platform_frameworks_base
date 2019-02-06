@@ -58,9 +58,11 @@
     <item msgid="3878793616631049349">"কেৱল DRM সমলৰ বাবে HDCP পৰীক্ষণ ব্যৱহাৰ কৰক"</item>
     <item msgid="45075631231212732">"সদায় HDCP পৰীক্ষণ ব্যৱহাৰ কৰক"</item>
   </string-array>
-    <!-- no translation found for bt_hci_snoop_log_entries:0 (3966341281672645384) -->
-    <!-- no translation found for bt_hci_snoop_log_entries:1 (1969681323976948639) -->
-    <!-- no translation found for bt_hci_snoop_log_entries:2 (8719029132154020716) -->
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"অক্ষম আছে"</item>
+    <item msgid="1969681323976948639">"সক্ষম কৰাবিলাক ফিল্টাৰ কৰা হৈছে"</item>
+    <item msgid="8719029132154020716">"সক্ষম কৰা আছে"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP ১.৪ (ডিফ’ল্ট)"</item>
     <item msgid="2809759619990248160">"AVRCP ১.৩"</item>
