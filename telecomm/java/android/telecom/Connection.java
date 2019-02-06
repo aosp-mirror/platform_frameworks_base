@@ -16,10 +16,6 @@
 
 package android.telecom;
 
-import com.android.internal.os.SomeArgs;
-import com.android.internal.telecom.IVideoCallback;
-import com.android.internal.telecom.IVideoProvider;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -42,6 +38,10 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.view.Surface;
+
+import com.android.internal.os.SomeArgs;
+import com.android.internal.telecom.IVideoCallback;
+import com.android.internal.telecom.IVideoProvider;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
