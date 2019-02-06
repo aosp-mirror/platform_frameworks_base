@@ -221,9 +221,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                // TODO: Pass the correct value for isStaged instead of
-                // assuming always false.
-                rollbacks.add(new RollbackInfo(data.rollbackId, data.packages, false));
+                if (data.isAvailable) {
+                    rollbacks.add(new RollbackInfo(data.rollbackId,
+                                data.packages, data.isStaged()));
+                }
             }
             return new ParceledListSlice<>(rollbacks);
         }
@@ -323,20 +324,35 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
             parentParams.setAllowDowngrade(true);
             parentParams.setMultiPackage();
+            if (data.isStaged()) {
+                parentParams.setStaged();
+            }
+
             int parentSessionId = packageInstaller.createSession(parentParams);
             PackageInstaller.Session parentSession = packageInstaller.openSession(parentSessionId);
 
             for (PackageRollbackInfo info : data.packages) {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-                String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
-                if (installerPackageName == null) {
-                    sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
-                            "Cannot find installer package");
-                    return;
+                // TODO: We can't get the installerPackageName for apex
+                // (b/123920130). Is it okay to ignore the installer package
+                // for apex?
+                if (!info.isApex()) {
+                    String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
+                    if (installerPackageName == null) {
+                        sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
+                                "Cannot find installer package");
+                        return;
+                    }
+                    params.setInstallerPackageName(installerPackageName);
                 }
-                params.setInstallerPackageName(installerPackageName);
                 params.setAllowDowngrade(true);
+                if (data.isStaged()) {
+                    params.setStaged();
+                }
+                if (info.isApex()) {
+                    params.setInstallAsApex();
+                }
                 int sessionId = packageInstaller.createSession(params);
                 PackageInstaller.Session session = packageInstaller.openSession(sessionId);
 
@@ -376,11 +392,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                                 return;
                             }
 
-                            // TODO: Set the correct values for isStaged and
-                            // committedSessionId.
                             addRecentlyExecutedRollback(new RollbackInfo(
-                                        data.rollbackId, data.packages, false, causePackages,
-                                        PackageInstaller.SessionInfo.INVALID_ID));
+                                        data.rollbackId, data.packages, data.isStaged(),
+                                        causePackages, parentSessionId));
                             sendSuccess(statusReceiver);
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
@@ -644,6 +658,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
+                if (!data.isAvailable) {
+                    continue;
+                }
+
                 if (!now.isBefore(data.timestamp.plusMillis(ROLLBACK_LIFETIME_DURATION_MILLIS))) {
                     iter.remove();
                     mRollbackStore.deleteAvailableRollback(data);
@@ -918,7 +936,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = mContext.getPackageManager();
         PackageInfo pkgInfo = null;
         try {
-            pkgInfo = pm.getPackageInfo(packageName, 0);
+            pkgInfo = pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
@@ -1053,7 +1071,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                if (getPackageRollbackInfo(data, packageName) != null) {
+                if (data.isAvailable && getPackageRollbackInfo(data, packageName) != null) {
                     return data;
                 }
             }
@@ -1072,7 +1090,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
                 RollbackData data = mAvailableRollbacks.get(i);
-                if (data.rollbackId == rollbackId) {
+                if (data.isAvailable && data.rollbackId == rollbackId) {
                     return data;
                 }
             }
