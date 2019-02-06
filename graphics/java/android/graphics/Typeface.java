@@ -92,7 +92,13 @@ public class Typeface {
     /** The NORMAL style of the default monospace typeface. */
     public static final Typeface MONOSPACE;
 
-    @UnsupportedAppUsage
+    /**
+     * The default {@link Typeface}s for different text styles.
+     * Call {@link #defaultFromStyle(int)} to get the default typeface for the given text style.
+     * It shouldn't be changed for app wide typeface settings. Please use theme and font XML for
+     * the same purpose.
+     */
+    @UnsupportedAppUsage(trackingBug = 123769446)
     static Typeface[] sDefaults;
 
     /**
