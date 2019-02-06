@@ -27,6 +27,7 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.os.IBinder;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -474,8 +475,14 @@ final class ColorFade {
             final SurfaceTexture st = new SurfaceTexture(mTexNames[0]);
             final Surface s = new Surface(st);
             try {
-                SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
-                        SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), s);
+                final IBinder token = SurfaceControl.getInternalDisplayToken();
+                if (token == null) {
+                    Slog.e(TAG,
+                            "Failed to take screenshot because internal display is disconnected");
+                    return false;
+                }
+
+                SurfaceControl.screenshot(token, s);
                 st.updateTexImage();
                 st.getTransformMatrix(mTexMatrix);
             } finally {

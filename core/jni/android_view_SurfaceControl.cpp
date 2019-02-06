@@ -483,8 +483,29 @@ static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->setLayerStack(ctrl, layerStack);
 }
 
-static jobject nativeGetBuiltInDisplay(JNIEnv* env, jclass clazz, jint id) {
-    sp<IBinder> token(SurfaceComposerClient::getBuiltInDisplay(id));
+static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
+    const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    jlongArray array = env->NewLongArray(displayIds.size());
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+
+    if (displayIds.empty()) {
+        return array;
+    }
+
+    jlong* values = env->GetLongArrayElements(array, 0);
+    for (size_t i = 0; i < displayIds.size(); ++i) {
+        values[i] = static_cast<jlong>(displayIds[i]);
+    }
+
+    env->ReleaseLongArrayElements(array, values, 0);
+    return array;
+}
+
+static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
+    sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(physicalDisplayId);
     return javaObjectForIBinder(env, token);
 }
 
@@ -1145,8 +1166,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetCornerRadius },
     {"nativeSetLayerStack", "(JJI)V",
             (void*)nativeSetLayerStack },
-    {"nativeGetBuiltInDisplay", "(I)Landroid/os/IBinder;",
-            (void*)nativeGetBuiltInDisplay },
+    {"nativeGetPhysicalDisplayIds", "()[J",
+            (void*)nativeGetPhysicalDisplayIds },
+    {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
+            (void*)nativeGetPhysicalDisplayToken },
     {"nativeCreateDisplay", "(Ljava/lang/String;Z)Landroid/os/IBinder;",
             (void*)nativeCreateDisplay },
     {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
@@ -1314,4 +1337,4 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     return err;
 }
 
-};
+} // namespace android

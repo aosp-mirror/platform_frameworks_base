@@ -252,10 +252,12 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
 status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-            ISurfaceComposer::eDisplayIdMain));
+    mDisplayToken = SurfaceComposerClient::getInternalDisplayToken();
+    if (mDisplayToken == nullptr)
+        return -1;
+
     DisplayInfo dinfo;
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &dinfo);
+    status_t status = SurfaceComposerClient::getDisplayInfo(mDisplayToken, &dinfo);
     if (status)
         return -1;
 
@@ -1014,16 +1016,13 @@ void BootAnimation::handleViewport(nsecs_t timestep) {
         // At the end of the animation, we switch to the viewport that DisplayManager will apply
         // later. This changes the coordinate system, and means we must move the surface up by
         // the inset amount.
-        sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-                ISurfaceComposer::eDisplayIdMain));
-
         Rect layerStackRect(0, 0, mWidth, mHeight - mTargetInset);
         Rect displayRect(0, mTargetInset, mWidth, mHeight);
 
         SurfaceComposerClient::Transaction t;
         t.setPosition(mFlingerSurfaceControl, 0, -mTargetInset)
                 .setCrop(mFlingerSurfaceControl, Rect(0, mTargetInset, mWidth, mHeight));
-        t.setDisplayProjection(dtoken, 0 /* orientation */, layerStackRect, displayRect);
+        t.setDisplayProjection(mDisplayToken, 0 /* orientation */, layerStackRect, displayRect);
         t.apply();
 
         mTargetInset = mCurrentInset = 0;

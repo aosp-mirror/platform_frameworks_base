@@ -109,7 +109,7 @@ void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options
 void run(const TestScene::Info& info, const TestScene::Options& opts,
          benchmark::BenchmarkReporter* reporter) {
     // Switch to the real display
-    gDisplay = getBuiltInDisplay();
+    gDisplay = getInternalDisplay();
 
     Properties::forceDrawFrame = true;
     TestContext testContext;

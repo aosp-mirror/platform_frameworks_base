@@ -323,8 +323,7 @@ public final class ColorDisplayService extends SystemService {
         }
 
         private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
-            IBinder displayToken = SurfaceControl.getBuiltInDisplay(
-                    SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
             if (displayToken == null) {
                 return null;
             }

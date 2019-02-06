@@ -46,23 +46,22 @@
 
 using namespace android;
 
-static uint32_t DEFAULT_DISPLAY_ID = ISurfaceComposer::eDisplayIdMain;
-
 #define COLORSPACE_UNKNOWN    0
 #define COLORSPACE_SRGB       1
 #define COLORSPACE_DISPLAY_P3 2
 
-static void usage(const char* pname)
+static void usage(const char* pname, PhysicalDisplayId displayId)
 {
     fprintf(stderr,
             "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
             "   -p: save the file as a png.\n"
-            "   -d: specify the display id to capture, default %d.\n"
+            "   -d: specify the physical display ID to capture (default: %"
+                    ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ")\n"
+            "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname, DEFAULT_DISPLAY_ID
-    );
+            pname, displayId);
 }
 
 static SkColorType flinger2skia(PixelFormat f)
@@ -127,9 +126,14 @@ static status_t notifyMediaScanner(const char* fileName) {
 
 int main(int argc, char** argv)
 {
+    std::optional<PhysicalDisplayId> displayId = SurfaceComposerClient::getInternalDisplayId();
+    if (!displayId) {
+        fprintf(stderr, "Failed to get token for internal display\n");
+        return 1;
+    }
+
     const char* pname = argv[0];
     bool png = false;
-    int32_t displayId = DEFAULT_DISPLAY_ID;
     int c;
     while ((c = getopt(argc, argv, "phd:")) != -1) {
         switch (c) {
@@ -137,11 +141,11 @@ int main(int argc, char** argv)
                 png = true;
                 break;
             case 'd':
-                displayId = atoi(optarg);
+                displayId = atoll(optarg);
                 break;
             case '?':
             case 'h':
-                usage(pname);
+                usage(pname, *displayId);
                 return 1;
         }
     }
@@ -166,7 +170,7 @@ int main(int argc, char** argv)
     }
 
     if (fd == -1) {
-        usage(pname);
+        usage(pname, *displayId);
         return 1;
     }
 
@@ -192,9 +196,10 @@ int main(int argc, char** argv)
     ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
-    sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
-    if (display == NULL) {
-        fprintf(stderr, "Unable to get handle for display %d\n", displayId);
+    const sp<IBinder> display = SurfaceComposerClient::getPhysicalDisplayToken(*displayId);
+    if (display == nullptr) {
+        fprintf(stderr, "Failed to get token for invalid display %"
+                ANDROID_PHYSICAL_DISPLAY_ID_FORMAT "\n", *displayId);
         return 1;
     }
 

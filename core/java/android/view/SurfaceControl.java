@@ -132,7 +132,8 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeClearAnimationFrameStats();
     private static native boolean nativeGetAnimationFrameStats(WindowAnimationFrameStats outStats);
 
-    private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
+    private static native long[] nativeGetPhysicalDisplayIds();
+    private static native IBinder nativeGetPhysicalDisplayToken(long physicalDisplayId);
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
     private static native void nativeDestroyDisplay(IBinder displayToken);
     private static native void nativeSetDisplaySurface(long transactionObj,
@@ -329,24 +330,6 @@ public final class SurfaceControl implements Parcelable {
      * Updates the value set during Surface creation (see {@link #OPAQUE}).
      */
     private static final int SURFACE_OPAQUE = 0x02;
-
-
-    /* built-in physical display ids (keep in sync with ISurfaceComposer.h)
-     * these are different from the logical display ids used elsewhere in the framework */
-
-    /**
-     * Built-in physical display id: Main display.
-     * Use only with {@link SurfaceControl#getBuiltInDisplay(int)}.
-     * @hide
-     */
-    public static final int BUILT_IN_DISPLAY_ID_MAIN = 0;
-
-    /**
-     * Built-in physical display id: Attached HDMI display.
-     * Use only with {@link SurfaceControl#getBuiltInDisplay(int)}.
-     * @hide
-     */
-    public static final int BUILT_IN_DISPLAY_ID_HDMI = 1;
 
     // Display power modes.
     /**
@@ -1730,9 +1713,28 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
-    public static IBinder getBuiltInDisplay(int builtInDisplayId) {
-        return nativeGetBuiltInDisplay(builtInDisplayId);
+    public static long[] getPhysicalDisplayIds() {
+        return nativeGetPhysicalDisplayIds();
+    }
+
+    /**
+     * @hide
+     */
+    public static IBinder getPhysicalDisplayToken(long physicalDisplayId) {
+        return nativeGetPhysicalDisplayToken(physicalDisplayId);
+    }
+
+    /**
+     * TODO(116025192): Remove this stopgap once framework is display-agnostic.
+     *
+     * @hide
+     */
+    public static IBinder getInternalDisplayToken() {
+        final long[] physicalDisplayIds = getPhysicalDisplayIds();
+        if (physicalDisplayIds.length == 0) {
+            return null;
+        }
+        return getPhysicalDisplayToken(physicalDisplayIds[0]);
     }
 
     /**
@@ -1791,8 +1793,12 @@ public final class SurfaceControl implements Parcelable {
     public static Bitmap screenshot(Rect sourceCrop, int width, int height,
             boolean useIdentityTransform, int rotation) {
         // TODO: should take the display as a parameter
-        IBinder displayToken = SurfaceControl.getBuiltInDisplay(
-                SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+        if (displayToken == null) {
+            Log.w(TAG, "Failed to take screenshot because internal display is disconnected");
+            return null;
+        }
+
         if (rotation == ROTATION_90 || rotation == ROTATION_270) {
             rotation = (rotation == ROTATION_90) ? ROTATION_270 : ROTATION_90;
         }

@@ -171,6 +171,7 @@ private:
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
+    sp<IBinder> mDisplayToken;
     sp<SurfaceControl> mFlingerSurfaceControl;
     sp<Surface> mFlingerSurface;
     bool        mClockEnabled;
