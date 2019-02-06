@@ -29,6 +29,7 @@
 #include <net/if.h>
 #include <linux/filter.h>
 #include <linux/if_arp.h>
+#include <linux/tcp.h>
 #include <netinet/ether.h>
 #include <netinet/icmp6.h>
 #include <netinet/ip.h>
@@ -226,6 +227,34 @@ static void android_net_utils_attachControlPacketFilter(
     }
 }
 
+static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
+{
+    struct sock_filter filter_code[] = {
+        // Reject all.
+        BPF_STMT(BPF_RET | BPF_K, 0)
+    };
+    struct sock_fprog filter = {
+        sizeof(filter_code) / sizeof(filter_code[0]),
+        filter_code,
+    };
+
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)) != 0) {
+        jniThrowExceptionFmt(env, "java/net/SocketException",
+                "setsockopt(SO_ATTACH_FILTER): %s", strerror(errno));
+    }
+}
+
+static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
+{
+    int dummy = 0;
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    if (setsockopt(fd, SOL_SOCKET, SO_DETACH_FILTER, &dummy, sizeof(dummy)) != 0) {
+        jniThrowExceptionFmt(env, "java/net/SocketException",
+                "setsockopt(SO_DETACH_FILTER): %s", strerror(errno));
+    }
+
+}
 static void android_net_utils_setupRaSocket(JNIEnv *env, jobject clazz, jobject javaFd,
         jint ifIndex)
 {
@@ -458,6 +487,41 @@ static jbyteArray android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, 
     return answer;
 }
 
+static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
+    if (javaFd == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return NULL;
+    }
+
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    struct tcp_repair_window trw = {};
+    socklen_t size = sizeof(trw);
+
+    // Obtain the parameters of the TCP repair window.
+    int rc = getsockopt(fd, IPPROTO_TCP, TCP_REPAIR_WINDOW, &trw, &size);
+    if (rc == -1) {
+      throwErrnoException(env, "getsockopt : TCP_REPAIR_WINDOW", errno);
+      return NULL;
+    }
+
+    struct tcp_info tcpinfo = {};
+    socklen_t tcpinfo_size = sizeof(tcp_info);
+
+    // Obtain the window scale from the tcp info structure. This contains a scale factor that
+    // should be applied to the window size.
+    rc = getsockopt(fd, IPPROTO_TCP, TCP_INFO, &tcpinfo, &tcpinfo_size);
+    if (rc == -1) {
+      throwErrnoException(env, "getsockopt : TCP_INFO", errno);
+      return NULL;
+    }
+
+    jclass class_TcpRepairWindow = env->FindClass("android/net/TcpRepairWindow");
+    jmethodID ctor = env->GetMethodID(class_TcpRepairWindow, "<init>", "(IIIIII)V");
+
+    return env->NewObject(class_TcpRepairWindow, ctor, trw.snd_wl1, trw.snd_wnd, trw.max_window,
+            trw.rcv_wnd, trw.rcv_wup, tcpinfo.tcpi_rcv_wscale);
+}
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -475,6 +539,9 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "attachDhcpFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDhcpFilter },
     { "attachRaFilter", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_attachRaFilter },
     { "attachControlPacketFilter", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_attachControlPacketFilter },
+    { "attachDropAllBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDropAllBPFFilter },
+    { "detachBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_detachBPFFilter },
+    { "getTcpRepairWindow", "(Ljava/io/FileDescriptor;)Landroid/net/TcpRepairWindow;", (void*) android_net_utils_getTcpRepairWindow },
     { "setupRaSocket", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_setupRaSocket },
     { "resNetworkSend", "(I[BII)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkSend },
     { "resNetworkQuery", "(ILjava/lang/String;III)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkQuery },
