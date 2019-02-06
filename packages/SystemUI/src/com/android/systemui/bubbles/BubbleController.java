@@ -70,7 +70,7 @@ import javax.inject.Singleton;
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
 @Singleton
-public class BubbleController implements BubbleExpandedViewContainer.OnBubbleBlockedListener {
+public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListener {
     private static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
     private static final String TAG = "BubbleController";

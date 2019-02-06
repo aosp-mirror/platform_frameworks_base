@@ -51,7 +51,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 /**
  * Container for the expanded bubble view, handles rendering the caret and header of the view.
  */
-public class BubbleExpandedViewContainer extends LinearLayout implements View.OnClickListener {
+public class BubbleExpandedView extends LinearLayout implements View.OnClickListener {
     private static final String TAG = "BubbleExpandedView";
 
     // The triangle pointing to the expanded view
@@ -81,19 +81,19 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
 
     private OnBubbleBlockedListener mOnBubbleBlockedListener;
 
-    public BubbleExpandedViewContainer(Context context) {
+    public BubbleExpandedView(Context context) {
         this(context, null);
     }
 
-    public BubbleExpandedViewContainer(Context context, AttributeSet attrs) {
+    public BubbleExpandedView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public BubbleExpandedViewContainer(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BubbleExpandedView(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public BubbleExpandedViewContainer(Context context, AttributeSet attrs, int defStyleAttr,
+    public BubbleExpandedView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mPm = context.getPackageManager();
