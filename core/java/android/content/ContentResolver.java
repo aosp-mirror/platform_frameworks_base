@@ -2748,6 +2748,19 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
+     * @see #setIsSyncable(Account, String, int)
+     * @hide
+     */
+    public static void setIsSyncableAsUser(Account account, String authority, int syncable,
+            int userId) {
+        try {
+            getContentService().setIsSyncableAsUser(account, authority, syncable, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the master auto-sync setting that applies to all the providers and accounts.
      * If this is false then the per-provider auto-sync setting is ignored.
      * <p>This method requires the caller to hold the permission

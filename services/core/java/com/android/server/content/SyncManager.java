@@ -3261,7 +3261,7 @@ public class SyncManager {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
                         Log.d(TAG, "Account " + aau.account + " added, checking sync restore data");
                     }
-                    AccountSyncSettingsBackupHelper.accountAdded(mContext);
+                    AccountSyncSettingsBackupHelper.accountAdded(mContext, syncTargets.userId);
                     break;
                 }
             }
