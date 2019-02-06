@@ -70,7 +70,7 @@ import javax.inject.Singleton;
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
 @Singleton
-public class BubbleController {
+public class BubbleController implements BubbleExpandedViewContainer.OnBubbleBlockedListener {
     private static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
     private static final String TAG = "BubbleController";
@@ -266,6 +266,7 @@ public class BubbleController {
                 if (mExpandListener != null) {
                     mStackView.setExpandListener(mExpandListener);
                 }
+                mStackView.setOnBlockedListener(this);
             }
             // It's new
             BubbleView bubble = (BubbleView) mInflater.inflate(
@@ -300,6 +301,19 @@ public class BubbleController {
             mNotificationEntryManager.updateNotifications();
         }
         updateVisibility();
+    }
+
+    @Override
+    public void onBubbleBlocked(NotificationEntry entry) {
+        Object[] bubbles = mBubbles.values().toArray();
+        for (int i = 0; i < bubbles.length; i++) {
+            NotificationEntry e = ((BubbleView) bubbles[i]).getEntry();
+            boolean samePackage = entry.notification.getPackageName().equals(
+                    e.notification.getPackageName());
+            if (samePackage) {
+                removeBubble(entry.key);
+            }
+        }
     }
 
     @SuppressWarnings("FieldCanBeLocal")

@@ -16,7 +16,10 @@
 
 package com.android.systemui.bubbles;
 
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -26,16 +29,21 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -48,21 +56,30 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
 
     // The triangle pointing to the expanded view
     private View mPointerView;
-    // The view displayed between the pointer and the expanded view
-    private TextView mHeaderView;
-    // Tappable header icon deeplinking into the app
+
+    // Header
+    private View mHeaderView;
+    private TextView mHeaderTextView;
     private ImageButton mDeepLinkIcon;
-    // Tappable header icon deeplinking into notification settings
     private ImageButton mSettingsIcon;
+
+    // Permission view
+    private View mPermissionView;
+
     // The view that is being displayed for the expanded state
     private View mExpandedView;
 
     private NotificationEntry mEntry;
     private PackageManager mPm;
     private String mAppName;
+    private Drawable mAppIcon;
+
+    private INotificationManager mNotificationManagerService;
 
     // Need reference to let it know to collapse when new task is launched
     private BubbleStackView mStackView;
+
+    private OnBubbleBlockedListener mOnBubbleBlockedListener;
 
     public BubbleExpandedViewContainer(Context context) {
         this(context, null);
@@ -80,6 +97,12 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mPm = context.getPackageManager();
+        try {
+            mNotificationManagerService = INotificationManager.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow(Context.NOTIFICATION_SERVICE));
+        } catch (ServiceManager.ServiceNotFoundException e) {
+            Log.w(TAG, e);
+        }
     }
 
     @Override
@@ -101,11 +124,39 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
         triangleDrawable.setTint(bgColor);
         mPointerView.setBackground(triangleDrawable);
 
-        mHeaderView = findViewById(R.id.header_text);
+        FrameLayout viewWrapper = findViewById(R.id.header_permission_wrapper);
+        LayoutTransition transition = new LayoutTransition();
+        transition.setDuration(200);
+
+        ObjectAnimator appearAnimator = ObjectAnimator.ofFloat(null, View.ALPHA, 0f, 1f);
+        transition.setAnimator(LayoutTransition.APPEARING, appearAnimator);
+        transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.ALPHA_IN);
+
+        ObjectAnimator disappearAnimator = ObjectAnimator.ofFloat(null, View.ALPHA, 1f, 0f);
+        transition.setAnimator(LayoutTransition.DISAPPEARING, disappearAnimator);
+        transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
+
+        transition.setAnimateParentHierarchy(false);
+        viewWrapper.setLayoutTransition(transition);
+        viewWrapper.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
+        mHeaderView = findViewById(R.id.header_layout);
+        mHeaderTextView = findViewById(R.id.header_text);
         mDeepLinkIcon = findViewById(R.id.deep_link_button);
         mSettingsIcon = findViewById(R.id.settings_button);
         mDeepLinkIcon.setOnClickListener(this);
         mSettingsIcon.setOnClickListener(this);
+
+        mPermissionView = findViewById(R.id.permission_layout);
+        findViewById(R.id.no_bubbles_button).setOnClickListener(this);
+        findViewById(R.id.yes_bubbles_button).setOnClickListener(this);
+    }
+
+    /**
+     * Sets the listener to notify when a bubble has been blocked.
+     */
+    public void setOnBlockedListener(OnBubbleBlockedListener listener) {
+        mOnBubbleBlockedListener = listener;
     }
 
     /**
@@ -125,13 +176,17 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
                 mAppName = String.valueOf(mPm.getApplicationLabel(info));
+                mAppIcon = mPm.getApplicationIcon(info);
             }
         } catch (PackageManager.NameNotFoundException e) {
             // Ahh... just use package name
             mAppName = entry.notification.getPackageName();
         }
-
+        if (mAppIcon == null) {
+            mAppIcon = mPm.getDefaultActivityIcon();
+        }
         updateHeaderView();
+        updatePermissionView();
     }
 
     private void updateHeaderView() {
@@ -140,11 +195,31 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
         mDeepLinkIcon.setContentDescription(getResources().getString(
                 R.string.bubbles_deep_link_button_description, mAppName));
         if (mEntry != null && mEntry.getBubbleMetadata() != null) {
-            setHeaderText(mEntry.getBubbleMetadata().getTitle());
+            mHeaderTextView.setText(mEntry.getBubbleMetadata().getTitle());
         } else {
             // This should only happen if we're auto-bubbling notification content that isn't
             // explicitly a bubble
-            setHeaderText(mAppName);
+            mHeaderTextView.setText(mAppName);
+        }
+    }
+
+    private void updatePermissionView() {
+        boolean hasUserApprovedBubblesForPackage = false;
+        try {
+            hasUserApprovedBubblesForPackage =
+                    mNotificationManagerService.hasUserApprovedBubblesForPackage(
+                            mEntry.notification.getPackageName(), mEntry.notification.getUid());
+        } catch (RemoteException e) {
+            Log.w(TAG, e);
+        }
+        if (hasUserApprovedBubblesForPackage) {
+            mHeaderView.setVisibility(VISIBLE);
+            mPermissionView.setVisibility(GONE);
+        } else {
+            mHeaderView.setVisibility(GONE);
+            mPermissionView.setVisibility(VISIBLE);
+            ((ImageView) mPermissionView.findViewById(R.id.pkgicon)).setImageDrawable(mAppIcon);
+            ((TextView) mPermissionView.findViewById(R.id.pkgname)).setText(mAppName);
         }
     }
 
@@ -168,6 +243,27 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
             Intent intent = getSettingsIntent(mEntry.notification.getPackageName(),
                     mEntry.notification.getUid());
             mStackView.collapseStack(() -> mContext.startActivity(intent));
+        } else if (id == R.id.no_bubbles_button) {
+            setBubblesAllowed(false);
+        } else if (id == R.id.yes_bubbles_button) {
+            setBubblesAllowed(true);
+        }
+    }
+
+    private void setBubblesAllowed(boolean allowed) {
+        try {
+            mNotificationManagerService.setBubblesAllowed(
+                    mEntry.notification.getPackageName(),
+                    mEntry.notification.getUid(),
+                    allowed);
+            if (allowed) {
+                mPermissionView.setVisibility(GONE);
+                mHeaderView.setVisibility(VISIBLE);
+            } else if (mOnBubbleBlockedListener != null) {
+                mOnBubbleBlockedListener.onBubbleBlocked(mEntry);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, e);
         }
     }
 
@@ -178,14 +274,6 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
         // Adjust for the pointer size
         x -= (mPointerView.getWidth() / 2);
         mPointerView.setTranslationX(x);
-    }
-
-    /**
-     * Set the text displayed within the header.
-     */
-    private void setHeaderText(CharSequence text) {
-        mHeaderView.setText(text);
-        mHeaderView.setVisibility(TextUtils.isEmpty(text) ? GONE : VISIBLE);
     }
 
     /**
@@ -219,5 +307,15 @@ public class BubbleExpandedViewContainer extends LinearLayout implements View.On
         intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
+    }
+
+    /**
+     * Listener that is notified when a bubble is blocked.
+     */
+    public interface OnBubbleBlockedListener {
+        /**
+         * Called when a bubble is blocked for the provided entry.
+         */
+        void onBubbleBlocked(NotificationEntry entry);
     }
 }

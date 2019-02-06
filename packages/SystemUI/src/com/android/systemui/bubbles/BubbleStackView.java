@@ -224,6 +224,13 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     }
 
     /**
+     * Sets the listener to notify when a bubble is blocked.
+     */
+    public void setOnBlockedListener(BubbleExpandedViewContainer.OnBubbleBlockedListener listener) {
+        mExpandedViewContainer.setOnBlockedListener(listener);
+    }
+
+    /**
      * Whether the stack of bubbles is expanded or not.
      */
     public boolean isExpanded() {
