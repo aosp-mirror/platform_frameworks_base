@@ -2069,7 +2069,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
                 if (!provider.isUseableLocked()) {
                     if (isSettingsExemptLocked(record)) {
-                        providerRequest.forceLocation = true;
+                        providerRequest.locationSettingsIgnored = true;
                         providerRequest.lowPowerMode = false;
                     } else {
                         continue;
@@ -2079,8 +2079,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 LocationRequest locationRequest = record.mRealRequest;
                 long interval = locationRequest.getInterval();
 
+
                 // if we're forcing location, don't apply any throttling
-                if (!providerRequest.forceLocation && !isThrottlingExemptLocked(
+                if (!providerRequest.locationSettingsIgnored && !isThrottlingExemptLocked(
                         record.mReceiver.mCallerIdentity)) {
                     if (!record.mIsForegroundUid) {
                         interval = Math.max(interval, backgroundThrottleInterval);
