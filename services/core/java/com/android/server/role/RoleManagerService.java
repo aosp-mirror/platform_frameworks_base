@@ -455,7 +455,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         @Override
         public void addRoleHolderAsUser(@NonNull String roleName, @NonNull String packageName,
-                @UserIdInt int userId, @NonNull IRoleManagerCallback callback) {
+                @RoleManager.ManageHoldersFlags int flags, @UserIdInt int userId,
+                @NonNull IRoleManagerCallback callback) {
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
             Preconditions.checkNotNull(callback, "callback cannot be null");
@@ -467,12 +468,14 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "addRoleHolderAsUser");
 
-            getOrCreateControllerService(userId).onAddRoleHolder(roleName, packageName, callback);
+            getOrCreateControllerService(userId).onAddRoleHolder(roleName, packageName, flags,
+                    callback);
         }
 
         @Override
         public void removeRoleHolderAsUser(@NonNull String roleName, @NonNull String packageName,
-                @UserIdInt int userId, @NonNull IRoleManagerCallback callback) {
+                @RoleManager.ManageHoldersFlags int flags, @UserIdInt int userId,
+                @NonNull IRoleManagerCallback callback) {
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
             Preconditions.checkNotNull(callback, "callback cannot be null");
@@ -484,12 +487,13 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "removeRoleHolderAsUser");
 
-            getOrCreateControllerService(userId).onRemoveRoleHolder(roleName, packageName,
+            getOrCreateControllerService(userId).onRemoveRoleHolder(roleName, packageName, flags,
                     callback);
         }
 
         @Override
-        public void clearRoleHoldersAsUser(@NonNull String roleName, @UserIdInt int userId,
+        public void clearRoleHoldersAsUser(@NonNull String roleName,
+                @RoleManager.ManageHoldersFlags int flags, @UserIdInt int userId,
                 @NonNull IRoleManagerCallback callback) {
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkNotNull(callback, "callback cannot be null");
@@ -501,7 +505,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "clearRoleHoldersAsUser");
 
-            getOrCreateControllerService(userId).onClearRoleHolders(roleName, callback);
+            getOrCreateControllerService(userId).onClearRoleHolders(roleName, flags, callback);
         }
 
         @Override
@@ -723,9 +727,9 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             };
             if (packageName != null) {
                 getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_BROWSER,
-                        packageName, callback);
+                        packageName, 0, callback);
             } else {
-                getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER,
+                getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER, 0,
                         callback);
             }
             try {

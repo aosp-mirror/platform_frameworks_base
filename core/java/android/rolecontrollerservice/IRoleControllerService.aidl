@@ -23,13 +23,13 @@ import android.app.role.IRoleManagerCallback;
  */
 oneway interface IRoleControllerService {
 
-    void onAddRoleHolder(in String roleName, in String packageName,
+    void onAddRoleHolder(in String roleName, in String packageName, int flags,
                          in IRoleManagerCallback callback);
 
-    void onRemoveRoleHolder(in String roleName, in String packageName,
+    void onRemoveRoleHolder(in String roleName, in String packageName, int flags,
                            in IRoleManagerCallback callback);
 
-    void onClearRoleHolders(in String roleName, in IRoleManagerCallback callback);
+    void onClearRoleHolders(in String roleName, int flags, in IRoleManagerCallback callback);
 
     void onGrantDefaultRoles(in IRoleManagerCallback callback);
 

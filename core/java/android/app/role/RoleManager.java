@@ -18,6 +18,7 @@ package android.app.role;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -181,6 +182,22 @@ public final class RoleManager {
     public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
 
     /**
+     * @hide
+     */
+    @IntDef(flag = true, value = { MANAGE_HOLDERS_FLAG_DONT_KILL_APP })
+    public @interface ManageHoldersFlags {}
+
+    /**
+     * Flag parameter for {@link #addRoleHolderAsUser}, {@link #removeRoleHolderAsUser} and
+     * {@link #clearRoleHoldersAsUser} to indicate that apps should not be killed when changing
+     * their role holder status.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1;
+
+    /**
      * The action used to request user approval of a role for an application.
      *
      * @hide
@@ -305,9 +322,9 @@ public final class RoleManager {
      *
      * @return a list of package names of the role holders, or an empty list if none.
      *
-     * @see #addRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
-     * @see #removeRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
-     * @see #clearRoleHoldersAsUser(String, UserHandle, Executor, RoleManagerCallback)
+     * @see #addRoleHolderAsUser(String, String, int, UserHandle, Executor, RoleManagerCallback)
+     * @see #removeRoleHolderAsUser(String, String, int, UserHandle, Executor, RoleManagerCallback)
+     * @see #clearRoleHoldersAsUser(String, int, UserHandle, Executor, RoleManagerCallback)
      *
      * @hide
      */
@@ -335,13 +352,14 @@ public final class RoleManager {
      *
      * @param roleName the name of the role to add the role holder for
      * @param packageName the package name of the application to add to the role holders
+     * @param flags optional behavior flags
      * @param user the user to add the role holder for
      * @param executor the {@code Executor} to run the callback on.
      * @param callback the callback for whether this call is successful
      *
      * @see #getRoleHoldersAsUser(String, UserHandle)
-     * @see #removeRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
-     * @see #clearRoleHoldersAsUser(String, UserHandle, Executor, RoleManagerCallback)
+     * @see #removeRoleHolderAsUser(String, String, int, UserHandle, Executor, RoleManagerCallback)
+     * @see #clearRoleHoldersAsUser(String, int, UserHandle, Executor, RoleManagerCallback)
      *
      * @hide
      */
@@ -349,15 +367,15 @@ public final class RoleManager {
     @SystemApi
     @TestApi
     public void addRoleHolderAsUser(@NonNull String roleName, @NonNull String packageName,
-            @NonNull UserHandle user, @CallbackExecutor @NonNull Executor executor,
-            @NonNull RoleManagerCallback callback) {
+            @ManageHoldersFlags int flags, @NonNull UserHandle user,
+            @CallbackExecutor @NonNull Executor executor, @NonNull RoleManagerCallback callback) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
         Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
         Preconditions.checkNotNull(user, "user cannot be null");
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(callback, "callback cannot be null");
         try {
-            mService.addRoleHolderAsUser(roleName, packageName, user.getIdentifier(),
+            mService.addRoleHolderAsUser(roleName, packageName, flags, user.getIdentifier(),
                     new RoleManagerCallbackDelegate(executor, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -373,13 +391,14 @@ public final class RoleManager {
      *
      * @param roleName the name of the role to remove the role holder for
      * @param packageName the package name of the application to remove from the role holders
+     * @param flags optional behavior flags
      * @param user the user to remove the role holder for
      * @param executor the {@code Executor} to run the callback on.
      * @param callback the callback for whether this call is successful
      *
      * @see #getRoleHoldersAsUser(String, UserHandle)
-     * @see #addRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
-     * @see #clearRoleHoldersAsUser(String, UserHandle, Executor, RoleManagerCallback)
+     * @see #addRoleHolderAsUser(String, String, int, UserHandle, Executor, RoleManagerCallback)
+     * @see #clearRoleHoldersAsUser(String, int, UserHandle, Executor, RoleManagerCallback)
      *
      * @hide
      */
@@ -387,15 +406,15 @@ public final class RoleManager {
     @SystemApi
     @TestApi
     public void removeRoleHolderAsUser(@NonNull String roleName, @NonNull String packageName,
-            @NonNull UserHandle user, @CallbackExecutor @NonNull Executor executor,
-            @NonNull RoleManagerCallback callback) {
+            @ManageHoldersFlags int flags, @NonNull UserHandle user,
+            @CallbackExecutor @NonNull Executor executor, @NonNull RoleManagerCallback callback) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
         Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
         Preconditions.checkNotNull(user, "user cannot be null");
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(callback, "callback cannot be null");
         try {
-            mService.removeRoleHolderAsUser(roleName, packageName, user.getIdentifier(),
+            mService.removeRoleHolderAsUser(roleName, packageName, flags, user.getIdentifier(),
                     new RoleManagerCallbackDelegate(executor, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -410,27 +429,29 @@ public final class RoleManager {
      * {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
      *
      * @param roleName the name of the role to remove role holders for
+     * @param flags optional behavior flags
      * @param user the user to remove role holders for
      * @param executor the {@code Executor} to run the callback on.
      * @param callback the callback for whether this call is successful
      *
      * @see #getRoleHoldersAsUser(String, UserHandle)
-     * @see #addRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
-     * @see #removeRoleHolderAsUser(String, String, UserHandle, Executor, RoleManagerCallback)
+     * @see #addRoleHolderAsUser(String, String, int, UserHandle, Executor, RoleManagerCallback)
+     * @see #removeRoleHolderAsUser(String, String, int, UserHandle, Executor, RoleManagerCallback)
      *
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
     @TestApi
-    public void clearRoleHoldersAsUser(@NonNull String roleName, @NonNull UserHandle user,
-            @CallbackExecutor @NonNull Executor executor, @NonNull RoleManagerCallback callback) {
+    public void clearRoleHoldersAsUser(@NonNull String roleName, @ManageHoldersFlags int flags,
+            @NonNull UserHandle user, @CallbackExecutor @NonNull Executor executor,
+            @NonNull RoleManagerCallback callback) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
         Preconditions.checkNotNull(user, "user cannot be null");
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(callback, "callback cannot be null");
         try {
-            mService.clearRoleHoldersAsUser(roleName, user.getIdentifier(),
+            mService.clearRoleHoldersAsUser(roleName, flags, user.getIdentifier(),
                     new RoleManagerCallbackDelegate(executor, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
