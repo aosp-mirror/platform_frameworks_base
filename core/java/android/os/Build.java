@@ -1120,11 +1120,9 @@ public class Build {
         /** The name identifying the system partition. */
         public static final String PARTITION_NAME_SYSTEM = "system";
 
-        private String mName;
-        private String mFingerprint;
-        private long mTimeMs;
-
-        public Partition() {}
+        private final String mName;
+        private final String mFingerprint;
+        private final long mTimeMs;
 
         private Partition(String name, String fingerprint, long timeMs) {
             mName = name;
