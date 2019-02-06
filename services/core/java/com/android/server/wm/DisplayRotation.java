@@ -329,6 +329,15 @@ public class DisplayRotation {
         return mFixedToUserRotation;
     }
 
+    /**
+     * Returns {@code true} if this display rotation takes app requested orientation into
+     * consideration; {@code false} otherwise. For the time being the only case where this is {@code
+     * false} is when {@link #isFixedToUserRotation()} is {@code true}.
+     */
+    boolean respectAppRequestedOrientation() {
+        return !mFixedToUserRotation;
+    }
+
     public int getLandscapeRotation() {
         return mLandscapeRotation;
     }

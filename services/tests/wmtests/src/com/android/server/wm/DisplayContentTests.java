@@ -59,7 +59,6 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
-import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -585,17 +584,15 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testOnDescendantOrientationRequestChanged() {
-        final DisplayInfo info = new DisplayInfo();
-        info.logicalWidth = 1080;
-        info.logicalHeight = 1920;
-        info.logicalDensityDpi = 240;
-        final DisplayContent dc = createNewDisplay(info);
-        dc.configureDisplayPolicy();
+        final DisplayContent dc = createNewDisplay();
         mWm.mAtmService.mRootActivityContainer = mock(RootActivityContainer.class);
+        final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
+                ? SCREEN_ORIENTATION_PORTRAIT
+                : SCREEN_ORIENTATION_LANDSCAPE;
 
         final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
         window.getTask().mTaskRecord = mock(TaskRecord.class, ExtendedMockito.RETURNS_DEEP_STUBS);
-        window.mAppToken.mOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+        window.mAppToken.setOrientation(newOrientation);
 
         ActivityRecord activityRecord = mock(ActivityRecord.class);
 
@@ -606,22 +603,21 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mWm.mAtmService).updateDisplayOverrideConfigurationLocked(captor.capture(),
                 same(activityRecord), anyBoolean(), eq(dc.getDisplayId()));
         final Configuration newDisplayConfig = captor.getValue();
-        assertEquals(Configuration.ORIENTATION_LANDSCAPE, newDisplayConfig.orientation);
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, newDisplayConfig.orientation);
     }
 
     @Test
     public void testOnDescendantOrientationRequestChanged_FrozenToUserRotation() {
-        final DisplayInfo info = new DisplayInfo();
-        info.logicalWidth = 1080;
-        info.logicalHeight = 1920;
-        info.logicalDensityDpi = 240;
-        final DisplayContent dc = createNewDisplay(info);
+        final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(true);
         mWm.mAtmService.mRootActivityContainer = mock(RootActivityContainer.class);
+        final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
+                ? SCREEN_ORIENTATION_PORTRAIT
+                : SCREEN_ORIENTATION_LANDSCAPE;
 
         final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
         window.getTask().mTaskRecord = mock(TaskRecord.class, ExtendedMockito.RETURNS_DEEP_STUBS);
-        window.mAppToken.mOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+        window.mAppToken.setOrientation(newOrientation);
 
         ActivityRecord activityRecord = mock(ActivityRecord.class);
 
