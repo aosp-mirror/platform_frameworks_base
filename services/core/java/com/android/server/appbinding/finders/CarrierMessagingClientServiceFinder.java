@@ -19,8 +19,6 @@ package com.android.server.appbinding.finders;
 import static android.provider.Telephony.Sms.Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL;
 
 import android.Manifest.permission;
-import android.app.ISmsAppService;
-import android.app.SmsAppService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,6 +28,8 @@ import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
+import android.service.carrier.CarrierMessagingClientService;
+import android.service.carrier.ICarrierMessagingClientService;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -41,10 +41,11 @@ import com.android.server.appbinding.AppBindingConstants;
 import java.util.function.BiConsumer;
 
 /**
- * Find the SmsAppService service within the default SMS app.
+ * Find the CarrierMessagingClientService service within the default SMS app.
  */
-public class SmsAppServiceFinder extends AppServiceFinder<SmsAppService, ISmsAppService> {
-    public SmsAppServiceFinder(Context context,
+public class CarrierMessagingClientServiceFinder
+        extends AppServiceFinder<CarrierMessagingClientService, ICarrierMessagingClientService> {
+    public CarrierMessagingClientServiceFinder(Context context,
             BiConsumer<AppServiceFinder, Integer> listener,
             Handler callbackHandler) {
         super(context, listener, callbackHandler);
@@ -62,23 +63,23 @@ public class SmsAppServiceFinder extends AppServiceFinder<SmsAppService, ISmsApp
     }
 
     @Override
-    protected Class<SmsAppService> getServiceClass() {
-        return SmsAppService.class;
+    protected Class<CarrierMessagingClientService> getServiceClass() {
+        return CarrierMessagingClientService.class;
     }
 
     @Override
-    public ISmsAppService asInterface(IBinder obj) {
-        return ISmsAppService.Stub.asInterface(obj);
+    public ICarrierMessagingClientService asInterface(IBinder obj) {
+        return ICarrierMessagingClientService.Stub.asInterface(obj);
     }
 
     @Override
     protected String getServiceAction() {
-        return TelephonyManager.ACTION_SMS_APP_SERVICE;
+        return TelephonyManager.ACTION_CARRIER_MESSAGING_CLIENT_SERVICE;
     }
 
     @Override
     protected String getServicePermission() {
-        return permission.BIND_SMS_APP_SERVICE;
+        return permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE;
     }
 
     @Override
@@ -121,7 +122,7 @@ public class SmsAppServiceFinder extends AppServiceFinder<SmsAppService, ISmsApp
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL.equals(intent.getAction())) {
-                mListener.accept(SmsAppServiceFinder.this, getSendingUserId());
+                mListener.accept(CarrierMessagingClientServiceFinder.this, getSendingUserId());
             }
         }
     };

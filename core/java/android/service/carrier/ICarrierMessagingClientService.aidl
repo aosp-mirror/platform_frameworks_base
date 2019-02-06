@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.service.carrier;
 
 /**
  * @hide
  */
-interface ISmsAppService {
+interface ICarrierMessagingClientService {
 }
