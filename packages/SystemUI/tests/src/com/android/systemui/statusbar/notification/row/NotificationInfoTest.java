@@ -738,7 +738,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         guts.setGutsContent(mNotificationInfo);
         mNotificationInfo.setGutsParent(guts);
 
-        mNotificationInfo.findViewById(R.id.keep).performClick();
+        mNotificationInfo.findViewById(R.id.done).performClick();
 
         verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
         mTestableLooper.processAllMessages();
@@ -766,7 +766,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         guts.setGutsContent(mNotificationInfo);
         mNotificationInfo.setGutsParent(guts);
 
-        mNotificationInfo.findViewById(R.id.keep).performClick();
+        mNotificationInfo.findViewById(R.id.done).performClick();
 
         verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
         mTestableLooper.processAllMessages();
@@ -959,6 +959,41 @@ public class NotificationInfoTest extends SysuiTestCase {
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
         assertEquals(IMPORTANCE_MIN, updated.getValue().getImportance());
+    }
+
+    @Test
+    public void testSilentlyChangedCallsUpdateNotificationChannel_blockingHelper()
+            throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                1 /* numChannels */,
+                mSbn,
+                null /* checkSaveListener */,
+                null /* onSettingsClick */,
+                null /* onAppSettingsClick */,
+                true /*provisioned */,
+                false /* isNonblockable */,
+                true /* isForBlockingHelper */,
+                true /* isUserSentimentNegative */,
+                IMPORTANCE_DEFAULT,
+                false);
+
+        mNotificationInfo.findViewById(R.id.deliver_silently).performClick();
+        waitForUndoButton();
+        mNotificationInfo.handleCloseControls(true, false);
+
+        mTestableLooper.processAllMessages();
+        ArgumentCaptor<NotificationChannel> updated =
+                ArgumentCaptor.forClass(NotificationChannel.class);
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), updated.capture());
+        assertTrue((updated.getValue().getUserLockedFields()
+                & USER_LOCKED_IMPORTANCE) != 0);
+        assertEquals(IMPORTANCE_LOW, updated.getValue().getImportance());
     }
 
     @Test

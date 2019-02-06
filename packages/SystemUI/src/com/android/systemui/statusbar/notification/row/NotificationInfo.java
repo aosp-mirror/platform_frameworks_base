@@ -84,6 +84,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     public static final int ACTION_UNDO = 1;
     public static final int ACTION_TOGGLE_SILENT = 2;
     public static final int ACTION_BLOCK = 3;
+    public static final int ACTION_DELIVER_SILENTLY = 4;
 
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
@@ -135,30 +136,26 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     };
 
     private OnClickListener mOnToggleSilent = v -> {
-        Runnable saveImportance = () -> {
-            swapContent(ACTION_TOGGLE_SILENT, true /* animate */);
-            if (mIsForBlockingHelper) {
-                mMetricsLogger.write(getLogMaker()
-                        .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
-                        .setType(MetricsEvent.TYPE_ACTION)
-                        .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_ALERT_ME));
-            }
-        };
-        if (mCheckSaveListener != null) {
-            mCheckSaveListener.checkSave(saveImportance, mSbn);
-        } else {
-            saveImportance.run();
-        }
+        handleSaveImportance(ACTION_TOGGLE_SILENT, MetricsEvent.BLOCKING_HELPER_CLICK_ALERT_ME);
+    };
+
+    private OnClickListener mOnDeliverSilently = v -> {
+        handleSaveImportance(
+                ACTION_DELIVER_SILENTLY, MetricsEvent.BLOCKING_HELPER_CLICK_STAY_SILENT);
     };
 
     private OnClickListener mOnStopOrMinimizeNotifications = v -> {
+        handleSaveImportance(ACTION_BLOCK, MetricsEvent.BLOCKING_HELPER_CLICK_BLOCKED);
+    };
+
+    private void handleSaveImportance(int action, int metricsSubtype) {
         Runnable saveImportance = () -> {
-            swapContent(ACTION_BLOCK, true /* animate */);
+            swapContent(action, true /* animate */);
             if (mIsForBlockingHelper) {
                 mMetricsLogger.write(getLogMaker()
                         .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
                         .setType(MetricsEvent.TYPE_ACTION)
-                        .setSubtype(MetricsEvent.BLOCKING_HELPER_CLICK_BLOCKED));
+                        .setSubtype(metricsSubtype));
             }
         };
         if (mCheckSaveListener != null) {
@@ -166,7 +163,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         } else {
             saveImportance.run();
         }
-    };
+    }
 
     private OnClickListener mOnUndo = v -> {
         // Reset exit counter that we'll log and record an undo event separately (not an exit event)
@@ -282,8 +279,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         mMetricsLogger.write(notificationControlsLogMaker());
     }
-
-
 
     private void bindHeader() throws RemoteException {
         // Package name
@@ -479,17 +474,21 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             findViewById(R.id.block_or_minimize).setVisibility(VISIBLE);
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
             View block = findViewById(R.id.block);
-            TextView keep = findViewById(R.id.keep);
+            TextView done = findViewById(R.id.done);
             View minimize = findViewById(R.id.minimize);
+            View deliverSilently = findViewById(R.id.deliver_silently);
+
 
             block.setOnClickListener(mOnStopOrMinimizeNotifications);
-            keep.setOnClickListener(mOnKeepShowing);
+            done.setOnClickListener(mOnKeepShowing);
             minimize.setOnClickListener(mOnStopOrMinimizeNotifications);
+            deliverSilently.setOnClickListener(mOnDeliverSilently);
 
             if (mIsNonblockable) {
-                keep.setText(android.R.string.ok);
+                done.setText(android.R.string.ok);
                 block.setVisibility(GONE);
                 minimize.setVisibility(GONE);
+                deliverSilently.setVisibility(GONE);
             } else if (mIsForeground) {
                 block.setVisibility(GONE);
                 minimize.setVisibility(VISIBLE);
@@ -499,7 +498,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             }
 
             // Set up app settings link (i.e. Customize)
-            TextView settingsLinkView = findViewById(R.id.app_settings);
+            View settingsLinkView = findViewById(R.id.app_settings);
             Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName,
                     mSingleNotificationChannel,
                     mSbn.getId(), mSbn.getTag());
@@ -507,7 +506,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                     && settingsIntent != null
                     && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
                 settingsLinkView.setVisibility(VISIBLE);
-                settingsLinkView.setText(mContext.getString(R.string.notification_app_settings));
                 settingsLinkView.setOnClickListener((View view) -> {
                     mAppSettingsClickListener.onClick(view, settingsIntent);
                 });
@@ -530,6 +528,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         switch (action) {
             case ACTION_UNDO:
                 mChosenImportance = mStartingChannelImportance;
+                break;
+            case ACTION_DELIVER_SILENTLY:
+                mExitReason = NotificationCounters.BLOCKING_HELPER_DELIVER_SILENTLY;
+                mChosenImportance = IMPORTANCE_LOW;
+                confirmationText.setText(R.string.notification_channel_silenced);
                 break;
             case ACTION_TOGGLE_SILENT:
                 mExitReason = NotificationCounters.BLOCKING_HELPER_TOGGLE_SILENT;
