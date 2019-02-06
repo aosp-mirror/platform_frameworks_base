@@ -190,6 +190,16 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for all media native related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface MediaNative {
+        String NAMESPACE = "media_native";
+    }
+
+    /**
      * Namespace for all activity manager related features that are used at the native level.
      * These features are applied at reboot.
      *
