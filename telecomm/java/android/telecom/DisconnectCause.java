@@ -16,9 +16,9 @@
 
 package android.telecom;
 
+import android.media.ToneGenerator;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.media.ToneGenerator;
 import android.text.TextUtils;
 
 import java.util.Objects;
@@ -90,6 +90,12 @@ public final class DisconnectCause implements Parcelable {
      * @hide
      */
     public static final String REASON_IMS_ACCESS_BLOCKED = "REASON_IMS_ACCESS_BLOCKED";
+
+    /**
+     * Reason code, which indicates that the conference call is simulating single party conference.
+     * @hide
+     */
+    public static final String REASON_EMULATING_SINGLE_CALL = "EMULATING_SINGLE_CALL";
 
     private int mDisconnectCode;
     private CharSequence mDisconnectLabel;
