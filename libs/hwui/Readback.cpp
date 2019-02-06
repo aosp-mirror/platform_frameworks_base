@@ -164,14 +164,15 @@ bool Readback::copyLayerInto(Layer* layer, const SkRect* srcRect, const SkRect* 
      * with reading incorrect data from EGLImage backed SkImage (likely a driver bug).
      */
     sk_sp<SkSurface> tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                              SkBudgeted::kYes, bitmap->info());
+                                                              SkBudgeted::kYes, bitmap->info(), 0,
+                                                              kTopLeft_GrSurfaceOrigin, nullptr);
 
     // if we can't generate a GPU surface that matches the destination bitmap (e.g. 565) then we
     // attempt to do the intermediate rendering step in 8888
     if (!tmpSurface.get()) {
         SkImageInfo tmpInfo = bitmap->info().makeColorType(SkColorType::kN32_SkColorType);
         tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
-                                                 tmpInfo);
+                                                 tmpInfo, 0, kTopLeft_GrSurfaceOrigin, nullptr);
         if (!tmpSurface.get()) {
             ALOGW("Unable to generate GPU buffer in a format compatible with the provided bitmap");
             return false;
