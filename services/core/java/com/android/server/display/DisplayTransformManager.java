@@ -87,7 +87,7 @@ public class DisplayTransformManager {
      * Map of level -> color transformation matrix.
      */
     @GuardedBy("mColorMatrix")
-    private final SparseArray<float[]> mColorMatrix = new SparseArray<>(3);
+    private final SparseArray<float[]> mColorMatrix = new SparseArray<>(5);
     /**
      * Temporary matrix used internally by {@link #computeColorMatrixLocked()}.
      */
@@ -148,6 +148,21 @@ public class DisplayTransformManager {
     }
 
     /**
+     * Sets the current Daltonization mode. This adjusts the color space to correct for or simulate
+     * various types of color blindness.
+     *
+     * @param mode the new Daltonization mode, or -1 to disable
+     */
+    public void setDaltonizerMode(int mode) {
+        synchronized (mDaltonizerModeLock) {
+            if (mDaltonizerMode != mode) {
+                mDaltonizerMode = mode;
+                applyDaltonizerMode(mode);
+            }
+        }
+    }
+
+    /**
      * Returns the composition of all current color matrices, or {@code null} if there are none.
      */
     @GuardedBy("mColorMatrix")
@@ -164,30 +179,6 @@ public class DisplayTransformManager {
             Matrix.multiplyMM(result[(i + 1) % 2], 0, result[i % 2], 0, rhs, 0);
         }
         return result[count % 2];
-    }
-
-    /**
-     * Returns the current Daltonization mode.
-     */
-    public int getDaltonizerMode() {
-        synchronized (mDaltonizerModeLock) {
-            return mDaltonizerMode;
-        }
-    }
-
-    /**
-     * Sets the current Daltonization mode. This adjusts the color space to correct for or simulate
-     * various types of color blindness.
-     *
-     * @param mode the new Daltonization mode, or -1 to disable
-     */
-    public void setDaltonizerMode(int mode) {
-        synchronized (mDaltonizerModeLock) {
-            if (mDaltonizerMode != mode) {
-                mDaltonizerMode = mode;
-                applyDaltonizerMode(mode);
-            }
-        }
     }
 
     /**
