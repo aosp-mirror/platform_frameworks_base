@@ -16195,7 +16195,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if the View subclass handles alpha (the return value for onSetAlpha()) and
      *         the new value for the alpha property is different from the old value
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk  = Build.VERSION_CODES.P, trackingBug = 123768435)
     boolean setAlphaNoInvalidation(float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
