@@ -180,7 +180,7 @@ final class AutofillManagerServiceImpl
         mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(master.getContext(),
                 com.android.internal.R.string.config_defaultAugmentedAutofillService);
         mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
-                (u, s) -> updateRemoteAugmentedAutofillService());
+                (u, s) -> updateRemoteAugmentedAutofillService(s));
 
         updateLocked(disabled);
     }
@@ -1048,8 +1048,12 @@ final class AutofillManagerServiceImpl
                     componentName, mUserId, new RemoteAugmentedAutofillServiceCallbacks() {
                         @Override
                         public void onServiceDied(@NonNull RemoteAugmentedAutofillService service) {
-                            // TODO(b/123100811): properly implement
                             Slog.w(TAG, "remote augmented autofill service died");
+                            final RemoteAugmentedAutofillService remoteService =
+                                    mRemoteAugmentedAutofillService;
+                            if (remoteService != null) {
+                                remoteService.destroy();
+                            }
                         }
                     }, mMaster.isInstantServiceAllowed(), mMaster.verbose);
         }
@@ -1060,8 +1064,7 @@ final class AutofillManagerServiceImpl
     /**
      * Called when the {@link #mAugmentedAutofillResolver} changed (among other places).
      */
-    private void updateRemoteAugmentedAutofillService() {
-        final String serviceName = mAugmentedAutofillResolver.getServiceName(mUserId);
+    private void updateRemoteAugmentedAutofillService(@Nullable String serviceName) {
         if (serviceName == null) {
             if (sVerbose) Slog.v(TAG, "updateRemoteAugmentedAutofillService(): time's up!");
             if (mRemoteAugmentedAutofillService != null) {
