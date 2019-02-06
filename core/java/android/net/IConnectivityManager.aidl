@@ -188,6 +188,9 @@ interface IConnectivityManager
             int intervalSeconds, in Messenger messenger, in IBinder binder, String srcAddr,
             String dstAddr);
 
+    void startTcpKeepalive(in Network network, in FileDescriptor fd, int intervalSeconds,
+            in Messenger messenger, in IBinder binder);
+
     void stopKeepalive(in Network network, int slot);
 
     String getCaptivePortalServerUrl();

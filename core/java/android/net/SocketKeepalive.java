@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -155,7 +156,7 @@ public abstract class SocketKeepalive implements AutoCloseable {
     @NonNull private final SocketKeepalive.Callback mCallback;
     @NonNull private final Looper mLooper;
     @NonNull final Messenger mMessenger;
-    @NonNull Integer mSlot;
+    @Nullable Integer mSlot;
 
     SocketKeepalive(@NonNull IConnectivityManager service, @NonNull Network network,
             @NonNull Executor executor, @NonNull Callback callback) {
