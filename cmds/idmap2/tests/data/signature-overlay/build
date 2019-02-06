@@ -20,7 +20,7 @@ aapt2 link \
     --no-resource-removal \
     -I "$FRAMEWORK_RES_APK" \
     --manifest AndroidManifest.xml \
-    -o system-overlay-invalid.apk \
+    -o signature-overlay.apk \
     compiled.flata
 
 rm compiled.flata

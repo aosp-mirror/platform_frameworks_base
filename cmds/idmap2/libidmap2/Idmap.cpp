@@ -284,7 +284,7 @@ std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
 
 bool CheckOverlayable(const LoadedPackage& target_package,
                       const utils::OverlayManifestInfo& overlay_info,
-                      const PolicyBitmask& fulfilled_polices, const ResourceId& resid) {
+                      const PolicyBitmask& fulfilled_policies, const ResourceId& resid) {
   const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(resid);
   if (overlayable_info == nullptr) {
     // If the resource does not have an overlayable definition, allow the resource to be overlaid.
@@ -299,7 +299,7 @@ bool CheckOverlayable(const LoadedPackage& target_package,
   }
 
   // Enforce policy restrictions if the resource is declared as overlayable.
-  return (overlayable_info->policy_flags & fulfilled_polices) != 0;
+  return (overlayable_info->policy_flags & fulfilled_policies) != 0;
 }
 
 std::unique_ptr<const Idmap> Idmap::FromApkAssets(

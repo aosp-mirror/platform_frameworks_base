@@ -129,28 +129,31 @@ TEST(BinaryStreamVisitorTests, CreateIdmapFromApkAssetsInteropWithLoadedIdmap) {
   success = LoadedIdmap::Lookup(header, 0x0008, &entry);  // string/policy_system_vendor
   ASSERT_FALSE(success);
 
-  success = LoadedIdmap::Lookup(header, 0x0009, &entry);  // string/str1
+  success = LoadedIdmap::Lookup(header, 0x0009, &entry);  // string/policy_signature
+  ASSERT_FALSE(success);
+
+  success = LoadedIdmap::Lookup(header, 0x000a, &entry);  // string/str1
   ASSERT_TRUE(success);
   ASSERT_EQ(entry, 0x0000);
 
-  success = LoadedIdmap::Lookup(header, 0x000a, &entry);  // string/str2
+  success = LoadedIdmap::Lookup(header, 0x000b, &entry);  // string/str2
   ASSERT_FALSE(success);
 
-  success = LoadedIdmap::Lookup(header, 0x000b, &entry);  // string/str3
+  success = LoadedIdmap::Lookup(header, 0x000c, &entry);  // string/str3
   ASSERT_TRUE(success);
   ASSERT_EQ(entry, 0x0001);
 
-  success = LoadedIdmap::Lookup(header, 0x000c, &entry);  // string/str4
+  success = LoadedIdmap::Lookup(header, 0x000d, &entry);  // string/str4
   ASSERT_TRUE(success);
   ASSERT_EQ(entry, 0x0002);
 
-  success = LoadedIdmap::Lookup(header, 0x000d, &entry);  // string/x
+  success = LoadedIdmap::Lookup(header, 0x000e, &entry);  // string/x
   ASSERT_FALSE(success);
 
-  success = LoadedIdmap::Lookup(header, 0x000e, &entry);  // string/y
+  success = LoadedIdmap::Lookup(header, 0x000f, &entry);  // string/y
   ASSERT_FALSE(success);
 
-  success = LoadedIdmap::Lookup(header, 0x000f, &entry);  // string/z
+  success = LoadedIdmap::Lookup(header, 0x0010, &entry);  // string/z
   ASSERT_FALSE(success);
 }
 

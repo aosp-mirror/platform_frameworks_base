@@ -35,6 +35,7 @@ const std::map<android::StringPiece, PolicyFlags> kStringToFlag = {
     {"product", PolicyFlags::POLICY_PRODUCT_PARTITION},
     {"system", PolicyFlags::POLICY_SYSTEM_PARTITION},
     {"vendor", PolicyFlags::POLICY_VENDOR_PARTITION},
+    {"signature", PolicyFlags::POLICY_SIGNATURE},
 };
 }  // namespace
 

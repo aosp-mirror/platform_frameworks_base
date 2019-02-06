@@ -191,8 +191,8 @@ TEST(IdmapTests, CreateIdmapFromApkAssets) {
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
   ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x01U);
-  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0xdd53ca29);
-  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0xa71ccd77);
+  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0xd513ca1b);
+  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0x8635c2ed);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), target_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
@@ -217,7 +217,7 @@ TEST(IdmapTests, CreateIdmapFromApkAssets) {
   ASSERT_EQ(types[1]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 9U);
+  ASSERT_EQ(types[1]->GetEntryOffset(), 10U);
   ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);
   ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);
   ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);
@@ -254,11 +254,76 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublic) {
 
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 3U);
+  ASSERT_EQ(types[0]->GetEntryCount(), 4U);
   ASSERT_EQ(types[0]->GetEntryOffset(), 6U);
   ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_system_vendor
+  ASSERT_EQ(types[0]->GetEntry(1), kNoEntry); // string/policy_signature
+  ASSERT_EQ(types[0]->GetEntry(2), 0x0001U);  // string/policy_system
+  ASSERT_EQ(types[0]->GetEntry(3), 0x0002U);  // string/policy_system_vendor
+}
+
+TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySignature) {
+  const std::string target_apk_path(GetTestDataPath() + "/target/target.apk");
+  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
+  ASSERT_THAT(target_apk, NotNull());
+
+  const std::string overlay_apk_path(GetTestDataPath() + "/signature-overlay/signature-overlay.apk");
+  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
+  ASSERT_THAT(overlay_apk, NotNull());
+
+  uint32_t policy_flags = PolicyFlags::POLICY_PUBLIC | PolicyFlags::POLICY_SIGNATURE;
+
+  std::stringstream error;
+  std::unique_ptr<const Idmap> idmap =
+      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
+                           policy_flags, /* enforce_overlayable */ true, error);
+  ASSERT_THAT(idmap, NotNull());
+
+  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
+  ASSERT_EQ(dataBlocks.size(), 1U);
+
+  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
+
+  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
+  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 1U);
+
+  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
+  ASSERT_EQ(types.size(), 1U);
+
+  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
+  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
+  ASSERT_EQ(types[0]->GetEntryCount(), 1U);
+  ASSERT_EQ(types[0]->GetEntryOffset(), 7U);
+  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U); // string/policy_signature
+}
+
+TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySignatureNotFulfilled) {
+  const std::string target_apk_path(GetTestDataPath() + "/target/target.apk");
+  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
+  ASSERT_THAT(target_apk, NotNull());
+
+  const std::string overlay_apk_path(GetTestDataPath() + "/signature-overlay/signature-overlay.apk");
+  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
+  ASSERT_THAT(overlay_apk, NotNull());
+
+  uint32_t policy_flags = PolicyFlags::POLICY_PUBLIC;
+
+  std::stringstream error;
+  std::unique_ptr<const Idmap> idmap =
+      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
+                           policy_flags, /* enforce_overlayable */ true, error);
+  ASSERT_THAT(idmap, NotNull());
+
+  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
+  ASSERT_EQ(dataBlocks.size(), 1U);
+
+  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
+
+  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
+  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 0U);
+
+  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
+  ASSERT_EQ(types.size(), 0U); // can't overlay, so contains nothing
 }
 
 // Overlays should abide by all overlayable restrictions if enforcement of overlayable is enabled.
@@ -292,11 +357,12 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalid) {
 
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 3U);
+  ASSERT_EQ(types[0]->GetEntryCount(), 4U);
   ASSERT_EQ(types[0]->GetEntryOffset(), 6U);
   ASSERT_EQ(types[0]->GetEntry(0), 0x0003U);  // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(1), 0x0004U);  // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(2), 0x0005U);  // string/policy_system_vendor
+  ASSERT_EQ(types[0]->GetEntry(1), kNoEntry); // string/policy_signature
+  ASSERT_EQ(types[0]->GetEntry(2), 0x0005U);  // string/policy_system
+  ASSERT_EQ(types[0]->GetEntry(3), 0x0006U);  // string/policy_system_vendor
 }
 
 // Overlays should ignore all overlayable restrictions if enforcement of overlayable is disabled.
@@ -330,14 +396,15 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalidIgn
 
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 6U);
+  ASSERT_EQ(types[0]->GetEntryCount(), 7U);
   ASSERT_EQ(types[0]->GetEntryOffset(), 3U);
   ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/not_overlayable
   ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/other
   ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_product
-  ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_system_vendor
+  ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/policy_signature
+  ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_public
+  ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_system
+  ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_system_vendor
 }
 
 // The resources of APKs that do not include an overlayable declaration should not restrict what
@@ -371,14 +438,15 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsNoDefinedOverlayable) {
 
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 6U);
+  ASSERT_EQ(types[0]->GetEntryCount(), 7U);
   ASSERT_EQ(types[0]->GetEntryOffset(), 3U);
   ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/not_overlayable
   ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/other
   ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_product
   ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_system_vendor
+  ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/string/policy_signature
+  ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_system
+  ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_system_vendor
 }
 
 // The resources of APKs that do not include an overlayable declaration should not restrict what
@@ -418,7 +486,7 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsNoDefinedOverlayableAndNoTar
   ASSERT_EQ(types[1]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 9U);
+  ASSERT_EQ(types[1]->GetEntryOffset(), 10U);
   ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);
   ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);
   ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);
