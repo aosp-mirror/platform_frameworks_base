@@ -647,6 +647,23 @@ static void MountPkgSpecificDir(const std::string& mntSourceRoot,
 static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
                                    const std::vector<std::string>& volumeLabels,
                                    bool mountAllObbs, userid_t userId, fail_fn_t fail_fn) {
+    if (volumeLabels.size() > 0) {
+        std::string sandboxDataDir = StringPrintf("/storage/%s", volumeLabels[0].c_str());
+        if (volumeLabels[0] == "emulated") {
+            StringAppendF(&sandboxDataDir, "/%d", userId);
+        }
+        StringAppendF(&sandboxDataDir, "/Android/data/%s", packageNames[0].c_str());
+        struct stat sb;
+        if (TEMP_FAILURE_RETRY(lstat(sandboxDataDir.c_str(), &sb)) == -1) {
+            if (errno == ENOENT) {
+                ALOGD("Sandbox not fully prepared for %s", sandboxDataDir.c_str());
+                return;
+            } else {
+                fail_fn(CREATE_ERROR("Failed to lstat %s: %s",
+                                     sandboxDataDir.c_str(), strerror(errno)));
+            }
+        }
+    }
     for (auto& label : volumeLabels) {
         std::string mntSource = StringPrintf("/mnt/runtime/write/%s", label.c_str());
         std::string mntTarget = StringPrintf("/storage/%s", label.c_str());
