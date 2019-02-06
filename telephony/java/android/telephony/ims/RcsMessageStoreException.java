@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (c) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.telephony.ims;
 
-import android.annotation.SystemService;
-import android.content.Context;
-
 /**
- * The manager class for RCS related utilities.
- * @hide
+ * An exception that happened on {@link RcsMessageStore} or one of the derived storage classes in
+ * {@link android.telephony.ims}
+ *
+ * @hide TODO: make public
  */
-@SystemService(Context.TELEPHONY_RCS_SERVICE)
-public class RcsManager {
-
-    private static final RcsMessageStore sRcsMessageStoreInstance = new RcsMessageStore();
+public class RcsMessageStoreException extends Exception {
 
     /**
-     * Returns an instance of {@link RcsMessageStore}
+     * Constructs an {@link RcsMessageStoreException} with the specified detail message.
+     * @param message The detail message
+     * @see Throwable#getMessage()
      */
-    public RcsMessageStore getRcsMessageStore() {
-        return sRcsMessageStoreInstance;
+    public RcsMessageStoreException(String message) {
+        super(message);
     }
 }
