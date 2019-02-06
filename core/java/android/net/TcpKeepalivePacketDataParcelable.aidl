@@ -16,5 +16,11 @@
 
 package android.net;
 
-parcelable TcpKeepalivePacketData;
-
+parcelable TcpKeepalivePacketDataParcelable {
+    byte[] srcAddress;
+    int srcPort;
+    byte[] dstAddress;
+    int dstPort;
+    int seq;
+    int ack;
+}
