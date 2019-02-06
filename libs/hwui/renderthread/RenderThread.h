@@ -75,7 +75,7 @@ struct VsyncSource {
 
 class DummyVsyncSource;
 
-typedef void (*JVMAttachHook)();
+typedef void (*JVMAttachHook)(const char* name);
 
 class RenderThread : private ThreadBase {
     PREVENT_COPY_AND_ASSIGN(RenderThread);
