@@ -179,8 +179,19 @@ public:
         mBucketSizeNs = bucketSize;
     }
 
-    inline const int64_t& getMetricId() {
+    inline const int64_t& getMetricId() const {
         return mMetricId;
+    }
+
+    int64_t getRemainingTtlNs(int64_t currentTimeNs) const {
+        std::lock_guard<std::mutex> lock(mMutex);
+        return getRemainingTtlNsLocked(currentTimeNs);
+    }
+
+    // Set metric to active for ttlNs.
+    void setActive(int64_t currentTimeNs, int64_t remainingTtlNs) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        setActiveLocked(currentTimeNs, remainingTtlNs);
     }
 
     // Let MetricProducer drop in-memory data to save memory.
@@ -200,6 +211,11 @@ public:
     void activate(int activationTrackerIndex, int64_t elapsedTimestampNs) {
         std::lock_guard<std::mutex> lock(mMutex);
         activateLocked(activationTrackerIndex, elapsedTimestampNs);
+    }
+
+    bool isActive() const {
+        std::lock_guard<std::mutex> lock(mMutex);
+        return isActiveLocked();
     }
 
     void addActivation(int activationTrackerIndex, int64_t ttl_seconds);
@@ -226,6 +242,10 @@ protected:
     inline bool isActiveLocked() const {
         return mIsActive;
     }
+
+    int64_t getRemainingTtlNsLocked(int64_t currentTimeNs) const;
+
+    void setActiveLocked(int64_t currentTimeNs, int64_t remainingTtlNs);
 
     /**
      * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
@@ -348,6 +368,8 @@ protected:
     bool mIsActive;
 
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
+
+    FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
 };
 
 }  // namespace statsd

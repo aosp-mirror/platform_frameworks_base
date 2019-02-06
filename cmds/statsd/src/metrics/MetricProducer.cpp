@@ -112,6 +112,28 @@ void MetricProducer::activateLocked(int activationTrackerIndex, int64_t elapsedT
     mIsActive = true;
 }
 
+void MetricProducer::setActiveLocked(int64_t currentTimeNs, int64_t remainingTtlNs) {
+    if (mEventActivationMap.size() == 0) {
+        return;
+    }
+    auto& activation = mEventActivationMap.begin()->second;
+    activation.activation_ns = currentTimeNs + remainingTtlNs - activation.ttl_ns;
+    activation.state = kActive;
+    mIsActive = true;
+    VLOG("setting new activation time to %lld, %lld, %lld", (long long)activation.activation_ns,
+         (long long)currentTimeNs, (long long)remainingTtlNs);
+}
+
+int64_t MetricProducer::getRemainingTtlNsLocked(int64_t currentTimeNs) const {
+    int64_t maxTtl = 0;
+    for (const auto& activation : mEventActivationMap) {
+        if (activation.second.state == kActive) {
+            maxTtl = std::max(maxTtl, activation.second.ttl_ns + activation.second.activation_ns -
+                                              currentTimeNs);
+        }
+    }
+    return maxTtl;
+}
 
 }  // namespace statsd
 }  // namespace os
