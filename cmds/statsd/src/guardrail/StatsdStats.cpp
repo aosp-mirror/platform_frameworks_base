@@ -443,6 +443,11 @@ void StatsdStats::noteBadValueType(int metricId) {
     getAtomMetricStats(metricId).badValueType++;
 }
 
+void StatsdStats::noteBucketDropped(int metricId) {
+    lock_guard<std::mutex> lock(mLock);
+    getAtomMetricStats(metricId).bucketDropped++;
+}
+
 void StatsdStats::noteConditionChangeInNextBucket(int metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).conditionChangeInNextBucket++;

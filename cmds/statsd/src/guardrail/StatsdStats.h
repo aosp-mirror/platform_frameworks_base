@@ -360,6 +360,11 @@ public:
     void noteBadValueType(int atomId);
 
     /**
+     * Buckets were dropped due to reclaim memory.
+     */
+    void noteBucketDropped(int metricId);
+
+    /**
      * A condition change was too late, arrived in the wrong bucket and was skipped
      */
     void noteConditionChangeInNextBucket(int atomId);
@@ -414,6 +419,7 @@ public:
         long badValueType = 0;
         long conditionChangeInNextBucket = 0;
         long invalidatedBucket = 0;
+        long bucketDropped = 0;
     } AtomMetricStats;
 
 private:

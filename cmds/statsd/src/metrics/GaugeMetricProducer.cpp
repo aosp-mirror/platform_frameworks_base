@@ -510,6 +510,7 @@ void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
 
 void GaugeMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
+    StatsdStats::getInstance().noteBucketDropped(mMetricId);
     mPastBuckets.clear();
 }
 
