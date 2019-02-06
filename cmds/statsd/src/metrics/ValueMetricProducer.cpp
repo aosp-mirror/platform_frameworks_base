@@ -104,6 +104,7 @@ ValueMetricProducer::ValueMetricProducer(
       mSkipZeroDiffOutput(metric.skip_zero_diff_output()),
       mUseZeroDefaultBase(metric.use_zero_default_base()),
       mHasGlobalBase(false),
+      mCurrentBucketIsInvalid(false),
       mMaxPullDelayNs(metric.max_pull_delay_sec() > 0 ? metric.max_pull_delay_sec() * NS_PER_SEC
                                                       : StatsdStats::kPullMaxDelayNs),
       mSplitBucketForAppUpgrade(metric.split_bucket_for_app_upgrade()) {
@@ -308,6 +309,15 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     }
 }
 
+void ValueMetricProducer::invalidateCurrentBucket() {
+    if (!mCurrentBucketIsInvalid) {
+        // Only report once per invalid bucket.
+        StatsdStats::getInstance().noteInvalidatedBucket(mMetricId);
+    }
+    mCurrentBucketIsInvalid = true;
+    resetBase();
+}
+
 void ValueMetricProducer::resetBase() {
     for (auto& slice : mCurrentSlicedBucket) {
         for (auto& interval : slice.second) {
@@ -323,6 +333,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
         StatsdStats::getInstance().noteConditionChangeInNextBucket(mMetricId);
+        invalidateCurrentBucket();
         return;
     }
 
@@ -346,19 +357,20 @@ void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
     if (!mPullerManager->Pull(mPullTagId, &allData)) {
         ALOGE("Gauge Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
-        resetBase();
+        invalidateCurrentBucket();
         return;
     }
     const int64_t pullDelayNs = getElapsedRealtimeNs() - timestampNs;
+    StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
     if (pullDelayNs > mMaxPullDelayNs) {
         ALOGE("Pull finish too late for atom %d, longer than %lld", mPullTagId,
               (long long)mMaxPullDelayNs);
         StatsdStats::getInstance().notePullExceedMaxDelay(mPullTagId);
-        StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
-        resetBase();
+        // We are missing one pull from the bucket which means we will not have a complete view of
+        // what's going on.
+        invalidateCurrentBucket();
         return;
     }
-    StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
 
     if (timestampNs < mCurrentBucketStartTimeNs) {
         // The data will be skipped in onMatchedLogEventInternalLocked, but we don't want to report
@@ -382,9 +394,16 @@ int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTime
     return mTimeBaseNs + ((currentTimeNs - mTimeBaseNs) / mBucketSizeNs) * mBucketSizeNs;
 }
 
-void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
+void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData,
+                                       bool pullSuccess) {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mCondition) {
+        if (!pullSuccess) {
+            // If the pull failed, we won't be able to compute a diff.
+            invalidateCurrentBucket();
+            return;
+        }
+
         if (allData.size() == 0) {
             VLOG("Data pulled is empty");
             StatsdStats::getInstance().noteEmptyData(mPullTagId);
@@ -399,12 +418,13 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         // if the diff base will be cleared and this new data will serve as new diff base.
         int64_t realEventTime = allData.at(0)->GetElapsedTimestampNs();
         int64_t bucketEndTime = calcPreviousBucketEndTime(realEventTime) - 1;
-        if (bucketEndTime < mCurrentBucketStartTimeNs) {
+        bool isEventLate = bucketEndTime < mCurrentBucketStartTimeNs;
+        if (isEventLate) {
             VLOG("Skip bucket end pull due to late arrival: %lld vs %lld", (long long)bucketEndTime,
                  (long long)mCurrentBucketStartTimeNs);
             StatsdStats::getInstance().noteLateLogEventSkipped(mMetricId);
-            return;
         }
+
         for (const auto& data : allData) {
             LogEvent localCopy = data->makeCopy();
             if (mEventMatcherWizard->matchLogEvent(localCopy, mWhatMatcherIndex) ==
@@ -679,31 +699,13 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
     VLOG("finalizing bucket for %ld, dumping %d slices", (long)mCurrentBucketStartTimeNs,
          (int)mCurrentSlicedBucket.size());
     int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
-
     int64_t bucketEndTime = eventTimeNs < fullBucketEndTimeNs ? eventTimeNs : fullBucketEndTimeNs;
 
-    if (bucketEndTime - mCurrentBucketStartTimeNs >= mMinBucketSizeNs) {
+    bool isBucketLargeEnough = bucketEndTime - mCurrentBucketStartTimeNs >= mMinBucketSizeNs;
+    if (isBucketLargeEnough && !mCurrentBucketIsInvalid) {
         // The current bucket is large enough to keep.
         for (const auto& slice : mCurrentSlicedBucket) {
-            ValueBucket bucket;
-            bucket.mBucketStartNs = mCurrentBucketStartTimeNs;
-            bucket.mBucketEndNs = bucketEndTime;
-            for (const auto& interval : slice.second) {
-                if (interval.hasValue) {
-                    // skip the output if the diff is zero
-                    if (mSkipZeroDiffOutput && mUseDiff && interval.value.isZero()) {
-                        continue;
-                    }
-                    bucket.valueIndex.push_back(interval.valueIndex);
-                    if (mAggregationType != ValueMetric::AVG) {
-                        bucket.values.push_back(interval.value);
-                    } else {
-                        double sum = interval.value.type == LONG ? (double)interval.value.long_value
-                                                                 : interval.value.double_value;
-                        bucket.values.push_back(Value((double)sum / interval.sampleSize));
-                    }
-                }
-            }
+            ValueBucket bucket = buildPartialBucket(bucketEndTime, slice.second);
             // it will auto create new vector of ValuebucketInfo if the key is not found.
             if (bucket.valueIndex.size() > 0) {
                 auto& bucketList = mPastBuckets[slice.first];
@@ -714,6 +716,58 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
         mSkippedBuckets.emplace_back(mCurrentBucketStartTimeNs, bucketEndTime);
     }
 
+    if (!mCurrentBucketIsInvalid) {
+        appendToFullBucket(eventTimeNs, fullBucketEndTimeNs);
+    }
+    initCurrentSlicedBucket();
+    mCurrentBucketIsInvalid = false;
+}
+
+ValueBucket ValueMetricProducer::buildPartialBucket(int64_t bucketEndTime,
+                                                    const std::vector<Interval>& intervals) {
+    ValueBucket bucket;
+    bucket.mBucketStartNs = mCurrentBucketStartTimeNs;
+    bucket.mBucketEndNs = bucketEndTime;
+    for (const auto& interval : intervals) {
+        if (interval.hasValue) {
+            // skip the output if the diff is zero
+            if (mSkipZeroDiffOutput && mUseDiff && interval.value.isZero()) {
+                continue;
+            }
+            bucket.valueIndex.push_back(interval.valueIndex);
+            if (mAggregationType != ValueMetric::AVG) {
+                bucket.values.push_back(interval.value);
+            } else {
+                double sum = interval.value.type == LONG ? (double)interval.value.long_value
+                                                         : interval.value.double_value;
+                bucket.values.push_back(Value((double)sum / interval.sampleSize));
+            }
+        }
+    }
+    return bucket;
+}
+
+void ValueMetricProducer::initCurrentSlicedBucket() {
+    for (auto it = mCurrentSlicedBucket.begin(); it != mCurrentSlicedBucket.end();) {
+        bool obsolete = true;
+        for (auto& interval : it->second) {
+            interval.hasValue = false;
+            interval.sampleSize = 0;
+            if (interval.seenNewData) {
+                obsolete = false;
+            }
+            interval.seenNewData = false;
+        }
+
+        if (obsolete) {
+            it = mCurrentSlicedBucket.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
+void ValueMetricProducer::appendToFullBucket(int64_t eventTimeNs, int64_t fullBucketEndTimeNs) {
     if (eventTimeNs > fullBucketEndTimeNs) {  // If full bucket, send to anomaly tracker.
         // Accumulate partial buckets with current value and then send to anomaly tracker.
         if (mCurrentFullBucket.size() > 0) {
@@ -749,24 +803,6 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
         for (const auto& slice : mCurrentSlicedBucket) {
             // TODO: fix this when anomaly can accept double values
             mCurrentFullBucket[slice.first] += slice.second[0].value.long_value;
-        }
-    }
-
-    for (auto it = mCurrentSlicedBucket.begin(); it != mCurrentSlicedBucket.end();) {
-        bool obsolete = true;
-        for (auto& interval : it->second) {
-            interval.hasValue = false;
-            interval.sampleSize = 0;
-            if (interval.seenNewData) {
-                obsolete = false;
-            }
-            interval.seenNewData = false;
-        }
-
-        if (obsolete) {
-            it = mCurrentSlicedBucket.erase(it);
-        } else {
-            it++;
         }
     }
 }

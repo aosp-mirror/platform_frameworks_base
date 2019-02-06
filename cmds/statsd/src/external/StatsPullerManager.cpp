@@ -358,12 +358,13 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
 
     for (const auto& pullInfo : needToPull) {
         vector<shared_ptr<LogEvent>> data;
-        if (!Pull(pullInfo.first, &data)) {
+        bool pullSuccess = Pull(pullInfo.first, &data);
+        if (pullSuccess) {
+            StatsdStats::getInstance().notePullDelay(
+                    pullInfo.first, getElapsedRealtimeNs() - elapsedTimeNs);
+        } else {
             VLOG("pull failed at %lld, will try again later", (long long)elapsedTimeNs);
-            continue;
         }
-        StatsdStats::getInstance().notePullDelay(pullInfo.first,
-                                                 getElapsedRealtimeNs() - elapsedTimeNs);
 
         // Convention is to mark pull atom timestamp at request time.
         // If we pull at t0, puller starts at t1, finishes at t2, and send back
@@ -380,8 +381,8 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
         for (const auto& receiverInfo : pullInfo.second) {
             sp<PullDataReceiver> receiverPtr = receiverInfo->receiver.promote();
             if (receiverPtr != nullptr) {
-                receiverPtr->onDataPulled(data);
-                // we may have just come out of a coma, compute next pull time
+                receiverPtr->onDataPulled(data, pullSuccess);
+                // We may have just come out of a coma, compute next pull time.
                 int numBucketsAhead =
                         (elapsedTimeNs - receiverInfo->nextPullTimeNs) / receiverInfo->intervalNs;
                 receiverInfo->nextPullTimeNs += (numBucketsAhead + 1) * receiverInfo->intervalNs;

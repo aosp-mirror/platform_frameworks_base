@@ -406,9 +406,10 @@ std::shared_ptr<vector<FieldValue>> GaugeMetricProducer::getGaugeFields(const Lo
     return gaugeFields;
 }
 
-void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
+void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData,
+                                       bool pullSuccess) {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (allData.size() == 0) {
+    if (!pullSuccess || allData.size() == 0) {
         return;
     }
     for (const auto& data : allData) {
