@@ -442,8 +442,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     /**
      * Handles one frame of a fling
+     *
+     * To interrupt a fling early you should use smoothScrollBy(0,0) instead
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private FlingRunnable mFlingRunnable;
 
     /**
@@ -4688,7 +4690,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mScroller = new OverScroller(getContext());
         }
 
-        @UnsupportedAppUsage
+        // Use AbsListView#fling(int) instead
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         void start(int initialVelocity) {
             int initialY = initialVelocity < 0 ? Integer.MAX_VALUE : 0;
             mLastFlingY = initialY;
@@ -4766,7 +4769,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             postOnAnimation(this);
         }
 
-        @UnsupportedAppUsage
+        // To interrupt a fling early you should use smoothScrollBy(0,0) instead
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         void endFling() {
             mTouchMode = TOUCH_MODE_REST;
 
