@@ -10099,6 +10099,29 @@ public class TelephonyManager {
         return false;
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SET_OPPORTUNISTIC_SUB"}, value = {
+            SET_OPPORTUNISTIC_SUB_SUCCESS,
+            SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED,
+            SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER})
+    public @interface SetOpportunisticSubscriptionResult {}
+
+    /**
+     * No error. Operation succeeded.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_SUCCESS = 0;
+
+    /**
+     * Validation failed when trying to switch to preferred subscription.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED = 1;
+
+    /**
+     * The parameter passed in is invalid.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER = 2;
+
     /**
      * Set preferred opportunistic data subscription id.
      *

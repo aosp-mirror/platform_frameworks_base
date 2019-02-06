@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.telephony.SubscriptionInfo;
+import com.android.internal.telephony.ISetOpportunisticDataCallback;
 
 interface ISub {
     /**
@@ -217,10 +218,14 @@ interface ISub {
      * designed to overwrite default data subscription temporarily.
      *
      * @param subId which subscription is preferred to for cellular data.
+     * @param needValidation whether validation is needed before switching.
+     * @param callback callback upon request completion.
+     *
      * @hide
      *
      */
-    void setPreferredDataSubscriptionId(int subId);
+    void setPreferredDataSubscriptionId(int subId, boolean needValidation,
+                     ISetOpportunisticDataCallback callback);
 
     /**
      * Get which subscription is preferred for cellular data.
