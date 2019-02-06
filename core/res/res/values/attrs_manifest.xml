@@ -164,6 +164,15 @@
          provider.-->
     <attr name="grantUriPermissions" format="boolean" />
 
+    <!-- If true, the system will always create URI permission grants
+         in the cases where {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+         or {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} would apply.
+         This is useful for a content provider that dynamically enforces permissions
+         on calls in to the provider, instead of through the manifest: the system
+         needs to know that it should always apply permission grants, even if it
+         looks like the target of the grant would already have access to the URI. -->
+    <attr name="forceUriPermissions" format="boolean" />
+
     <!-- Characterizes the potential risk implied in a permission and
          indicates the procedure the system should follow when determining
          whether to grant the permission to an application requesting it. {@link
@@ -2199,6 +2208,7 @@
         <attr name="readPermission" />
         <attr name="writePermission" />
         <attr name="grantUriPermissions" />
+        <attr name="forceUriPermissions" />
         <attr name="permission" />
         <attr name="multiprocess" />
         <attr name="initOrder" />

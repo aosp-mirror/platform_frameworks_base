@@ -1067,8 +1067,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         // Figure out the value returned when access is allowed
         final int allowedResult;
-        if ((modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0) {
-            // If we're extending a persistable grant, then we need to return
+        if ((modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0
+                || pi.forceUriPermissions) {
+            // If we're extending a persistable grant or need to force, then we need to return
             // "targetUid" so that we always create a grant data structure to
             // support take/release APIs
             allowedResult = targetUid;
