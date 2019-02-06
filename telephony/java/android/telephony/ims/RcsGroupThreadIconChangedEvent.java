@@ -19,14 +19,16 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * An event that indicates an {@link RcsGroupThread}'s icon was changed. Please see R6-2-5 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
-public class RcsGroupThreadIconChangedEvent extends RcsGroupThreadEvent {
+public final class RcsGroupThreadIconChangedEvent extends RcsGroupThreadEvent implements
+        Parcelable {
     private final Uri mNewIcon;
 
     /**
@@ -91,7 +93,7 @@ public class RcsGroupThreadIconChangedEvent extends RcsGroupThreadEvent {
                 }
             };
 
-    protected RcsGroupThreadIconChangedEvent(Parcel in) {
+    private RcsGroupThreadIconChangedEvent(Parcel in) {
         super(in);
         mNewIcon = in.readParcelable(Uri.class.getClassLoader());
     }

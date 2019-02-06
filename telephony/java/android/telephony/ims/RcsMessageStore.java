@@ -27,7 +27,7 @@ import java.util.List;
  * RcsMessageStore is the application interface to RcsProvider and provides access methods to
  * RCS related database tables.
  *
- * @hide - TODO make this public
+ * @hide - TODO: make public
  */
 public class RcsMessageStore {
     /**
@@ -39,7 +39,7 @@ public class RcsMessageStore {
      */
     @WorkerThread
     @NonNull
-    public RcsThreadQueryResult getRcsThreads(@Nullable RcsThreadQueryParameters queryParameters)
+    public RcsThreadQueryResult getRcsThreads(@Nullable RcsThreadQueryParams queryParameters)
             throws RcsMessageStoreException {
         return RcsControllerCall.call(iRcs -> iRcs.getRcsThreads(queryParameters));
     }
@@ -68,7 +68,7 @@ public class RcsMessageStore {
     @WorkerThread
     @NonNull
     public RcsParticipantQueryResult getRcsParticipants(
-            @Nullable RcsParticipantQueryParameters queryParameters)
+            @Nullable RcsParticipantQueryParams queryParameters)
             throws RcsMessageStoreException {
         return RcsControllerCall.call(iRcs -> iRcs.getParticipants(queryParameters));
     }
@@ -99,7 +99,7 @@ public class RcsMessageStore {
     @WorkerThread
     @NonNull
     public RcsMessageQueryResult getRcsMessages(
-            @Nullable RcsMessageQueryParameters queryParameters) throws RcsMessageStoreException {
+            @Nullable RcsMessageQueryParams queryParameters) throws RcsMessageStoreException {
         return RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters));
     }
 
@@ -127,7 +127,7 @@ public class RcsMessageStore {
     @WorkerThread
     @NonNull
     public RcsEventQueryResult getRcsEvents(
-            @Nullable RcsEventQueryParameters queryParameters) throws RcsMessageStoreException {
+            @Nullable RcsEventQueryParams queryParameters) throws RcsMessageStoreException {
         return RcsControllerCall.call(iRcs -> iRcs.getEvents(queryParameters));
     }
 

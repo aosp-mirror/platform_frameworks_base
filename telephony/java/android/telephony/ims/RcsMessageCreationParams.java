@@ -21,18 +21,16 @@ import static android.telephony.ims.RcsMessage.LOCATION_NOT_SET;
 import android.annotation.CheckResult;
 import android.annotation.Nullable;
 import android.os.Parcel;
-import android.os.Parcelable;
-import android.telephony.SubscriptionInfo;
 
 /**
  * The collection of parameters to be passed into
- * {@link RcsThread#addIncomingMessage(RcsIncomingMessageCreationParameters)} and
- * {@link RcsThread#addOutgoingMessage(RcsMessageCreationParameters)} to create and persist
+ * {@link RcsThread#addIncomingMessage(RcsIncomingMessageCreationParams)} and
+ * {@link RcsThread#addOutgoingMessage(RcsOutgoingMessageCreationParams)} to create and persist
  * {@link RcsMessage}s on an {@link RcsThread}
  *
- * @hide TODO - make public
+ * @hide - TODO: make public
  */
-public class RcsMessageCreationParameters implements Parcelable {
+public class RcsMessageCreationParams {
     // The globally unique id of the RcsMessage to be created.
     private final String mRcsMessageGlobalId;
 
@@ -110,7 +108,7 @@ public class RcsMessageCreationParameters implements Parcelable {
     /**
      * The base builder for creating {@link RcsMessage}s on {@link RcsThread}s.
      *
-     * @see RcsIncomingMessageCreationParameters
+     * @see RcsIncomingMessageCreationParams
      */
     public static class Builder {
         private String mRcsMessageGlobalId;
@@ -122,15 +120,7 @@ public class RcsMessageCreationParameters implements Parcelable {
         private double mLongitude = LOCATION_NOT_SET;
 
         /**
-         * Creates a new {@link Builder} to create an instance of
-         * {@link RcsMessageCreationParameters}.
-         *
-         * @param originationTimestamp The timestamp of {@link RcsMessage} creation. The origination
-         *                             timestamp value in milliseconds passed after midnight,
-         *                             January 1, 1970 UTC
-         * @param subscriptionId The subscription ID that was used to send or receive this
-         *                       {@link RcsMessage}
-         * @see SubscriptionInfo#getSubscriptionId()
+         * @hide
          */
         public Builder(long originationTimestamp, int subscriptionId) {
             mOriginationTimestamp = originationTimestamp;
@@ -207,14 +197,14 @@ public class RcsMessageCreationParameters implements Parcelable {
         }
 
         /**
-         * @hide
+         * @return Builds and returns a newly created {@link RcsMessageCreationParams}
          */
-        public RcsMessageCreationParameters build() {
-            return new RcsMessageCreationParameters(this);
+        public RcsMessageCreationParams build() {
+            return new RcsMessageCreationParams(this);
         }
     }
 
-    protected RcsMessageCreationParameters(Builder builder) {
+    protected RcsMessageCreationParams(Builder builder) {
         mRcsMessageGlobalId = builder.mRcsMessageGlobalId;
         mSubId = builder.mSubId;
         mMessageStatus = builder.mMessageStatus;
@@ -224,7 +214,10 @@ public class RcsMessageCreationParameters implements Parcelable {
         mLongitude = builder.mLongitude;
     }
 
-    protected RcsMessageCreationParameters(Parcel in) {
+    /**
+     * @hide
+     */
+    RcsMessageCreationParams(Parcel in) {
         mRcsMessageGlobalId = in.readString();
         mSubId = in.readInt();
         mMessageStatus = in.readInt();
@@ -234,26 +227,10 @@ public class RcsMessageCreationParameters implements Parcelable {
         mLongitude = in.readDouble();
     }
 
-    public static final Creator<RcsMessageCreationParameters> CREATOR =
-            new Creator<RcsMessageCreationParameters>() {
-                @Override
-                public RcsMessageCreationParameters createFromParcel(Parcel in) {
-                    return new RcsMessageCreationParameters(in);
-                }
-
-                @Override
-                public RcsMessageCreationParameters[] newArray(int size) {
-                    return new RcsMessageCreationParameters[size];
-                }
-            };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    /**
+     * @hide
+     */
+    public void writeToParcel(Parcel dest) {
         dest.writeString(mRcsMessageGlobalId);
         dest.writeInt(mSubId);
         dest.writeInt(mMessageStatus);

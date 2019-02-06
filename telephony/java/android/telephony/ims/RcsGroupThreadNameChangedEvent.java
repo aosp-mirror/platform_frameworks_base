@@ -18,15 +18,17 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * An event that indicates an {@link RcsGroupThread}'s name was changed. Please see R6-2-5 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
-public class RcsGroupThreadNameChangedEvent extends RcsGroupThreadEvent {
-    private String mNewName;
+public final class RcsGroupThreadNameChangedEvent extends RcsGroupThreadEvent implements
+        Parcelable {
+    private final String mNewName;
 
     /**
      * Creates a new {@link RcsGroupThreadNameChangedEvent}. This event is not persisted into
@@ -89,7 +91,7 @@ public class RcsGroupThreadNameChangedEvent extends RcsGroupThreadEvent {
                 }
             };
 
-    protected RcsGroupThreadNameChangedEvent(Parcel in) {
+    private RcsGroupThreadNameChangedEvent(Parcel in) {
         super(in);
         mNewName = in.readString();
     }

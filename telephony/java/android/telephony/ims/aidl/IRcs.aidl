@@ -17,18 +17,18 @@
 package android.telephony.ims.aidl;
 
 import android.net.Uri;
-import android.telephony.ims.RcsEventQueryParameters;
+import android.telephony.ims.RcsEventQueryParams;
 import android.telephony.ims.RcsEventQueryResult;
-import android.telephony.ims.RcsFileTransferCreationParameters;
-import android.telephony.ims.RcsIncomingMessageCreationParameters;
-import android.telephony.ims.RcsMessageCreationParameters;
+import android.telephony.ims.RcsFileTransferCreationParams;
+import android.telephony.ims.RcsIncomingMessageCreationParams;
 import android.telephony.ims.RcsMessageSnippet;
-import android.telephony.ims.RcsMessageQueryParameters;
+import android.telephony.ims.RcsMessageQueryParams;
 import android.telephony.ims.RcsMessageQueryResult;
-import android.telephony.ims.RcsParticipantQueryParameters;
+import android.telephony.ims.RcsOutgoingMessageCreationParams;
+import android.telephony.ims.RcsParticipantQueryParams;
 import android.telephony.ims.RcsParticipantQueryResult;
 import android.telephony.ims.RcsQueryContinuationToken;
-import android.telephony.ims.RcsThreadQueryParameters;
+import android.telephony.ims.RcsThreadQueryParams;
 import android.telephony.ims.RcsThreadQueryResult;
 
 /**
@@ -39,22 +39,22 @@ interface IRcs {
     /////////////////////////
     // RcsMessageStore APIs
     /////////////////////////
-    RcsThreadQueryResult getRcsThreads(in RcsThreadQueryParameters queryParameters);
+    RcsThreadQueryResult getRcsThreads(in RcsThreadQueryParams queryParams);
 
     RcsThreadQueryResult getRcsThreadsWithToken(
         in RcsQueryContinuationToken continuationToken);
 
-    RcsParticipantQueryResult getParticipants(in RcsParticipantQueryParameters queryParameters);
+    RcsParticipantQueryResult getParticipants(in RcsParticipantQueryParams queryParams);
 
     RcsParticipantQueryResult getParticipantsWithToken(
         in RcsQueryContinuationToken continuationToken);
 
-    RcsMessageQueryResult getMessages(in RcsMessageQueryParameters queryParameters);
+    RcsMessageQueryResult getMessages(in RcsMessageQueryParams queryParams);
 
     RcsMessageQueryResult getMessagesWithToken(
         in RcsQueryContinuationToken continuationToken);
 
-    RcsEventQueryResult getEvents(in RcsEventQueryParameters queryParameters);
+    RcsEventQueryResult getEvents(in RcsEventQueryParams queryParams);
 
     RcsEventQueryResult getEventsWithToken(
         in RcsQueryContinuationToken continuationToken);
@@ -74,11 +74,11 @@ interface IRcs {
 
     // Creates a new RcsIncomingMessage on the given thread and returns its row ID
     int addIncomingMessage(int rcsThreadId,
-            in RcsIncomingMessageCreationParameters rcsIncomingMessageCreationParameters);
+            in RcsIncomingMessageCreationParams rcsIncomingMessageCreationParams);
 
     // Creates a new RcsOutgoingMessage on the given thread and returns its row ID
     int addOutgoingMessage(int rcsThreadId,
-            in RcsMessageCreationParameters rcsMessageCreationParameters);
+            in RcsOutgoingMessageCreationParams rcsOutgoingMessageCreationParams);
 
     // TODO: modify RcsProvider URI's to allow deleting a message without specifying its thread
     void deleteMessage(int rcsMessageId, boolean isIncoming, int rcsThreadId, boolean isGroup);
@@ -203,7 +203,7 @@ interface IRcs {
 
     // Performs the initial write to storage and returns the row ID.
     int storeFileTransfer(int messageId, boolean isIncoming,
-            in RcsFileTransferCreationParameters fileTransferCreationParameters);
+            in RcsFileTransferCreationParams fileTransferCreationParams);
 
     void deleteFileTransfer(int partId);
 
