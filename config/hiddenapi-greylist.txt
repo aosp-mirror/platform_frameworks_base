@@ -828,7 +828,6 @@ Landroid/os/IPowerManager;->isInteractive()Z
 Landroid/os/IPowerManager;->reboot(ZLjava/lang/String;Z)V
 Landroid/os/IPowerManager;->releaseWakeLock(Landroid/os/IBinder;I)V
 Landroid/os/IPowerManager;->userActivity(JII)V
-Landroid/os/IPowerManager;->wakeUp(JLjava/lang/String;Ljava/lang/String;)V
 Landroid/os/IRecoverySystem$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IRecoverySystem;
 Landroid/os/IRemoteCallback$Stub;-><init>()V
 Landroid/os/IRemoteCallback;->sendResult(Landroid/os/Bundle;)V

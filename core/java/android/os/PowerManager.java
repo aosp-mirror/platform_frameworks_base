@@ -435,6 +435,106 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = { "WAKE_REASON_" }, value = {
+            WAKE_REASON_UNKNOWN,
+            WAKE_REASON_POWER_BUTTON,
+            WAKE_REASON_APPLICATION,
+            WAKE_REASON_PLUGGED_IN,
+            WAKE_REASON_GESTURE,
+            WAKE_REASON_CAMERA_LAUNCH,
+            WAKE_REASON_WAKE_KEY,
+            WAKE_REASON_WAKE_MOTION,
+            WAKE_REASON_HDMI,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WakeReason{}
+
+    /**
+     * Wake up reason code: Waking for an unknown reason.
+     * @hide
+     */
+    public static final int WAKE_REASON_UNKNOWN = 0;
+
+    /**
+     * Wake up reason code: Waking up due to power button press.
+     * @hide
+     */
+    public static final int WAKE_REASON_POWER_BUTTON = 1;
+
+    /**
+     * Wake up reason code: Waking up because an application requested it.
+     * @hide
+     */
+    public static final int WAKE_REASON_APPLICATION = 2;
+
+    /**
+     * Wake up reason code: Waking up due to being plugged in or docked on a wireless charger.
+     * @hide
+     */
+    public static final int WAKE_REASON_PLUGGED_IN = 3;
+
+    /**
+     * Wake up reason code: Waking up due to a user performed gesture (e.g. douple tapping on the
+     * screen).
+     * @hide
+     */
+    public static final int WAKE_REASON_GESTURE = 4;
+
+    /**
+     * Wake up reason code: Waking up due to the camera being launched.
+     * @hide
+     */
+    public static final int WAKE_REASON_CAMERA_LAUNCH = 5;
+
+    /**
+     * Wake up reason code: Waking up because a wake key other than power was pressed.
+     * @hide
+     */
+    public static final int WAKE_REASON_WAKE_KEY = 6;
+
+    /**
+     * Wake up reason code: Waking up because a wake motion was performed.
+     *
+     * For example, a trackball that was set to wake the device up was spun.
+     * @hide
+     */
+    public static final int WAKE_REASON_WAKE_MOTION = 7;
+
+    /**
+     * Wake up reason code: Waking due to HDMI.
+     * @hide
+     */
+    public static final int WAKE_REASON_HDMI = 8;
+
+    /**
+     * Wake up reason code: Waking due to the lid being opened.
+     * @hide
+     */
+    public static final int WAKE_REASON_LID = 9;
+
+    /**
+     * Convert the wake reason to a string for debugging purposes.
+     * @hide
+     */
+    public static String wakeReasonToString(@WakeReason int wakeReason) {
+        switch (wakeReason) {
+            case WAKE_REASON_UNKNOWN: return "WAKE_REASON_UNKNOWN";
+            case WAKE_REASON_POWER_BUTTON: return "WAKE_REASON_POWER_BUTTON";
+            case WAKE_REASON_APPLICATION: return "WAKE_REASON_APPLICATION";
+            case WAKE_REASON_PLUGGED_IN: return "WAKE_REASON_PLUGGED_IN";
+            case WAKE_REASON_GESTURE: return "WAKE_REASON_GESTURE";
+            case WAKE_REASON_CAMERA_LAUNCH: return "WAKE_REASON_CAMERA_LAUNCH";
+            case WAKE_REASON_WAKE_KEY: return "WAKE_REASON_WAKE_KEY";
+            case WAKE_REASON_WAKE_MOTION: return "WAKE_REASON_WAKE_MOTION";
+            case WAKE_REASON_HDMI: return "WAKE_REASON_HDMI";
+            case WAKE_REASON_LID: return "WAKE_REASON_LID";
+            default: return Integer.toString(wakeReason);
+        }
+    }
+
+    /**
      * The value to pass as the 'reason' argument to reboot() to reboot into
      * recovery mode for tasks other than applying system updates, such as
      * doing factory resets.
@@ -975,22 +1075,68 @@ public final class PowerManager {
      * @see #userActivity
      * @see #goToSleep
      *
+     * @deprecated Use {@link #wakeUp(long, int, String)} instead.
      * @removed Requires signature permission.
      */
+    @Deprecated
     public void wakeUp(long time) {
-        try {
-            mService.wakeUp(time, "wakeUp", mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        wakeUp(time, WAKE_REASON_UNKNOWN, "wakeUp");
     }
 
     /**
+     * Forces the device to wake up from sleep.
+     * <p>
+     * If the device is currently asleep, wakes it up, otherwise does nothing.
+     * This is what happens when the power key is pressed to turn on the screen.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * @param time The time when the request to wake up was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
+     * order the wake up request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to wake up.
+     *
+     * @param details A free form string to explain the specific details behind the wake up for
+     *                debugging purposes.
+     *
+     * @see #userActivity
+     * @see #goToSleep
+     *
+     * @deprecated Use {@link #wakeUp(long, int, String)} instead.
      * @hide
      */
-    public void wakeUp(long time, String reason) {
+    @Deprecated
+    public void wakeUp(long time, String details) {
+        wakeUp(time, WAKE_REASON_UNKNOWN, details);
+    }
+
+    /**
+     * Forces the device to wake up from sleep.
+     * <p>
+     * If the device is currently asleep, wakes it up, otherwise does nothing.
+     * This is what happens when the power key is pressed to turn on the screen.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * @param time The time when the request to wake up was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
+     * order the wake up request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to wake up.
+     *
+     * @param reason The reason for the wake up.
+     *
+     * @param details A free form string to explain the specific details behind the wake up for
+     *                debugging purposes.
+     *
+     * @see #userActivity
+     * @see #goToSleep
+     * @hide
+     */
+    public void wakeUp(long time, @WakeReason int reason, String details) {
         try {
-            mService.wakeUp(time, reason, mContext.getOpPackageName());
+            mService.wakeUp(time, reason, details, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -344,7 +344,7 @@ package android.os {
   public final class PowerManager {
     method public void goToSleep(long);
     method @Deprecated public void userActivity(long, boolean);
-    method public void wakeUp(long);
+    method @Deprecated public void wakeUp(long);
   }
 
   public class RecoverySystem {

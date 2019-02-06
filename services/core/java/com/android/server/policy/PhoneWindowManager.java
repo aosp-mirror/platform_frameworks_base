@@ -148,6 +148,7 @@ import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeReason;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
@@ -189,6 +190,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
+import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -809,7 +811,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false,
                             "Wake Up");
                     wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromWakeGesture,
-                            "android.policy:GESTURE");
+                            PowerManager.WAKE_REASON_GESTURE, "android.policy:GESTURE");
                 }
             }
         }
@@ -3527,7 +3529,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (lidOpen) {
             wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromLidSwitch,
-                    "android.policy:LID");
+                    PowerManager.WAKE_REASON_LID, "android.policy:LID");
         } else if (!mLidControlsSleep) {
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
         }
@@ -3550,7 +3552,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
             }
             wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromCameraLens,
-                    "android.policy:CAMERA_COVER");
+                    PowerManager.WAKE_REASON_CAMERA_LAUNCH, "android.policy:CAMERA_COVER");
             startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
         }
         mCameraLensCoverState = lensCoverState;
@@ -3679,7 +3681,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
             if (isWakeKey) {
-                wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey, "android.policy:KEY");
+                wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
+                        PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY");
             }
             return result;
         }
@@ -4025,7 +4028,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (isWakeKey) {
-            wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey, "android.policy:KEY");
+            wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
+                    PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY");
         }
 
         return result;
@@ -4125,7 +4129,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
         if ((policyFlags & FLAG_WAKE) != 0) {
             if (wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotion,
-                    "android.policy:MOTION")) {
+                    PowerManager.WAKE_REASON_WAKE_MOTION, "android.policy:MOTION")) {
                 return 0;
             }
         }
@@ -4139,7 +4143,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // wake up in this case.
         if (isTheaterModeEnabled() && (policyFlags & FLAG_WAKE) != 0) {
             wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotionWhenNotDreaming,
-                    "android.policy:MOTION");
+                    PowerManager.WAKE_REASON_WAKE_MOTION, "android.policy:MOTION");
         }
 
         return 0;
@@ -4371,7 +4375,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Called on the PowerManager's Notifier thread.
     @Override
     public void startedGoingToSleep(int why) {
-        if (DEBUG_WAKEUP) Slog.i(TAG, "Started going to sleep... (why=" + why + ")");
+        if (DEBUG_WAKEUP) {
+            Slog.i(TAG, "Started going to sleep... (why="
+                    + WindowManagerPolicyConstants.offReasonToString(why) + ")");
+        }
 
         mGoingToSleep = true;
         mRequestedOrGoingToSleep = true;
@@ -4385,7 +4392,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void finishedGoingToSleep(int why) {
         EventLog.writeEvent(70000, 0);
-        if (DEBUG_WAKEUP) Slog.i(TAG, "Finished going to sleep... (why=" + why + ")");
+        if (DEBUG_WAKEUP) {
+            Slog.i(TAG, "Finished going to sleep... (why="
+                    + WindowManagerPolicyConstants.offReasonToString(why) + ")");
+        }
         MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
         mGoingToSleep = false;
@@ -4409,9 +4419,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void startedWakingUp() {
+    public void startedWakingUp(@OnReason int why) {
         EventLog.writeEvent(70000, 1);
-        if (DEBUG_WAKEUP) Slog.i(TAG, "Started waking up...");
+        if (DEBUG_WAKEUP) {
+            Slog.i(TAG, "Started waking up... (why="
+                    + WindowManagerPolicyConstants.onReasonToString(why) + ")");
+        }
 
         mDefaultDisplayPolicy.setAwake(true);
 
@@ -4432,8 +4445,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void finishedWakingUp() {
-        if (DEBUG_WAKEUP) Slog.i(TAG, "Finished waking up...");
+    public void finishedWakingUp(@OnReason int why) {
+        if (DEBUG_WAKEUP) {
+            Slog.i(TAG, "Finished waking up... (why="
+                    + WindowManagerPolicyConstants.onReasonToString(why) + ")");
+        }
 
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onFinishedWakingUp();
@@ -4441,10 +4457,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void wakeUpFromPowerKey(long eventTime) {
-        wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey, "android.policy:POWER");
+        wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey,
+                PowerManager.WAKE_REASON_POWER_BUTTON, "android.policy:POWER");
     }
 
-    private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode, String reason) {
+    private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode, @WakeReason int reason,
+            String details) {
         final boolean theaterModeEnabled = isTheaterModeEnabled();
         if (!wakeInTheaterMode && theaterModeEnabled) {
             return false;
@@ -4455,7 +4473,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.THEATER_MODE_ON, 0);
         }
 
-        mPowerManager.wakeUp(wakeTime, reason);
+        mPowerManager.wakeUp(wakeTime, reason, details);
         return true;
     }
 
@@ -4786,7 +4804,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mKeyguardDelegate.onBootCompleted();
             }
         }
-        startedWakingUp();
+        startedWakingUp(ON_BECAUSE_OF_UNKNOWN);
         screenTurningOn(null);
         screenTurnedOn();
     }
