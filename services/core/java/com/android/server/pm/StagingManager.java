@@ -20,12 +20,12 @@ import android.annotation.NonNull;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
-import android.apex.IApexService;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
@@ -41,7 +41,6 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.apk.ApkSignatureVerifier;
@@ -68,14 +67,16 @@ public class StagingManager {
 
     private final PackageInstallerService mPi;
     private final PackageManagerService mPm;
+    private final ApexManager mApexManager;
     private final Handler mBgHandler;
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
-    StagingManager(PackageManagerService pm, PackageInstallerService pi) {
+    StagingManager(PackageManagerService pm, PackageInstallerService pi, ApexManager am) {
         mPm = pm;
         mPi = pi;
+        mApexManager = am;
         mBgHandler = BackgroundThread.getHandler();
     }
 
@@ -100,7 +101,7 @@ public class StagingManager {
         return new ParceledListSlice<>(result);
     }
 
-    private static boolean validateApexSignature(String apexPath, String packageName) {
+    private boolean validateApexSignature(String apexPath, String packageName) {
         final SigningDetails signingDetails;
         try {
             signingDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
@@ -109,17 +110,9 @@ public class StagingManager {
             return false;
         }
 
-        final IApexService apex = IApexService.Stub.asInterface(
-                ServiceManager.getService("apexservice"));
-        final ApexInfo apexInfo;
-        try {
-            apexInfo = apex.getActivePackage(packageName);
-        } catch (RemoteException re) {
-            Slog.e(TAG, "Unable to contact APEXD", re);
-            return false;
-        }
+        final PackageInfo packageInfo = mApexManager.getActivePackage(packageName);
 
-        if (apexInfo == null || TextUtils.isEmpty(apexInfo.packageName)) {
+        if (packageInfo == null) {
             // TODO: What is the right thing to do here ? This implies there's no active package
             // with the given name. This should never be the case in production (where we only
             // accept updates to existing APEXes) but may be required for testing.
@@ -129,9 +122,10 @@ public class StagingManager {
         final SigningDetails existingSigningDetails;
         try {
             existingSigningDetails = ApkSignatureVerifier.verify(
-                apexInfo.packagePath, SignatureSchemeVersion.JAR);
+                packageInfo.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
-            Slog.e(TAG, "Unable to parse APEX package: " + apexInfo.packagePath, e);
+            Slog.e(TAG, "Unable to parse APEX package: "
+                    + packageInfo.applicationInfo.sourceDir, e);
             return false;
         }
 
@@ -143,42 +137,15 @@ public class StagingManager {
         return false;
     }
 
-    private static boolean submitSessionToApexService(@NonNull PackageInstallerSession session,
-                                                      List<PackageInstallerSession> childSessions,
-                                                      ApexInfoList apexInfoList) {
-        return sendSubmitStagedSessionRequest(
+    private boolean submitSessionToApexService(@NonNull PackageInstallerSession session,
+                                               List<PackageInstallerSession> childSessions,
+                                               ApexInfoList apexInfoList) {
+        return mApexManager.submitStagedSession(
                 session.sessionId,
                 childSessions != null
                         ? childSessions.stream().mapToInt(s -> s.sessionId).toArray() :
                         new int[]{},
                 apexInfoList);
-    }
-
-    private static boolean sendSubmitStagedSessionRequest(
-            int sessionId, int[] childSessionIds, ApexInfoList apexInfoList) {
-        final IApexService apex = IApexService.Stub.asInterface(
-                ServiceManager.getService("apexservice"));
-        boolean success;
-        try {
-            success = apex.submitStagedSession(sessionId, childSessionIds, apexInfoList);
-        } catch (RemoteException re) {
-            Slog.e(TAG, "Unable to contact apexservice", re);
-            return false;
-        }
-        return success;
-    }
-
-    private static boolean sendMarkStagedSessionReadyRequest(int sessionId) {
-        final IApexService apex = IApexService.Stub.asInterface(
-                ServiceManager.getService("apexservice"));
-        boolean success;
-        try {
-            success = apex.markStagedSessionReady(sessionId);
-        } catch (RemoteException re) {
-            Slog.e(TAG, "Unable to contact apexservice", re);
-            return false;
-        }
-        return success;
     }
 
     private static boolean isApexSession(@NonNull PackageInstallerSession session) {
@@ -260,7 +227,7 @@ public class StagingManager {
         }
 
         session.setStagedSessionReady();
-        if (!sendMarkStagedSessionReadyRequest(session.sessionId)) {
+        if (!mApexManager.markStagedSessionReady(session.sessionId)) {
             session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "APEX staging failed, check logcat messages from apexd for more "
                             + "details.");
@@ -284,16 +251,12 @@ public class StagingManager {
 
     private void resumeSession(@NonNull PackageInstallerSession session) {
         if (sessionContainsApex(session)) {
-            // Check with apexservice whether the apex
-            // packages have been activated.
-            final IApexService apex = IApexService.Stub.asInterface(
-                    ServiceManager.getService("apexservice"));
-            ApexSessionInfo apexSessionInfo;
-            try {
-                apexSessionInfo = apex.getStagedSessionInfo(session.sessionId);
-            } catch (RemoteException re) {
-                Slog.e(TAG, "Unable to contact apexservice", re);
-                // TODO should we retry here? Mark the session as failed?
+            // Check with apexservice whether the apex packages have been activated.
+            ApexSessionInfo apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId);
+            if (apexSessionInfo == null) {
+                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "apexd did not know anything about a staged session supposed to be"
+                        + "activated");
                 return;
             }
             if (apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown) {
@@ -323,8 +286,8 @@ public class StagingManager {
         // The APEX part of the session is activated, proceed with the installation of APKs.
         if (!installApksInSession(session)) {
             session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                    "APEX activation failed. Check logcat messages from apexd for "
-                            + "more information.");
+                    "Staged installation of APKs failed. Check logcat messages for"
+                        + "more information.");
             return;
         }
         session.setStagedSessionApplied();
