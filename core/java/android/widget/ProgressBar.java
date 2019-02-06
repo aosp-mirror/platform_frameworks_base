@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.InterpolatorRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -170,12 +171,24 @@ public class ProgressBar extends View {
     /** Duration of smooth progress animations. */
     private static final int PROGRESS_ANIM_DURATION = 80;
 
-    @UnsupportedAppUsage
+    /**
+     * Outside the framework, please use {@link ProgressBar#getMinWidth()} and
+     * {@link ProgressBar#setMinWidth(int)} instead of accessing these directly.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     int mMinWidth;
     int mMaxWidth;
-    @UnsupportedAppUsage
+    /**
+     * Outside the framework, please use {@link ProgressBar#getMinHeight()} and
+     * {@link ProgressBar#setMinHeight(int)} instead of accessing these directly.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     int mMinHeight;
-    @UnsupportedAppUsage
+    /**
+     * Outside the framework, please use {@link ProgressBar#getMaxHeight()} ()} and
+     * {@link ProgressBar#setMaxHeight(int)} (int)} instead of accessing these directly.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     int mMaxHeight;
 
     private int mProgress;
@@ -390,6 +403,74 @@ public class ProgressBar extends View {
         if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
+    }
+
+    /**
+     * Sets the minimum width the progress bar can have.
+     * @param minWidth the minimum width to be set, in pixels
+     * @attr ref android.R.styleable#ProgressBar_minWidth
+     */
+    public void setMinWidth(@Px int minWidth) {
+        mMinWidth = minWidth;
+        requestLayout();
+    }
+
+    /**
+     * @return the minimum width the progress bar can have, in pixels
+     */
+    @Px public int getMinWidth() {
+        return mMinWidth;
+    }
+
+    /**
+     * Sets the maximum width the progress bar can have.
+     * @param maxWidth the maximum width to be set, in pixels
+     * @attr ref android.R.styleable#ProgressBar_maxWidth
+     */
+    public void setMaxWidth(@Px int maxWidth) {
+        mMaxWidth = maxWidth;
+        requestLayout();
+    }
+
+    /**
+     * @return the maximum width the progress bar can have, in pixels
+     */
+    @Px public int getMaxWidth() {
+        return mMaxWidth;
+    }
+
+    /**
+     * Sets the minimum height the progress bar can have.
+     * @param minHeight the minimum height to be set, in pixels
+     * @attr ref android.R.styleable#ProgressBar_minHeight
+     */
+    public void setMinHeight(@Px int minHeight) {
+        mMinHeight = minHeight;
+        requestLayout();
+    }
+
+    /**
+     * @return the minimum height the progress bar can have, in pixels
+     */
+    @Px public int getMinHeight() {
+        return mMinHeight;
+    }
+
+    /**
+     * Sets the maximum height the progress bar can have.
+     * @param maxHeight the maximum height to be set, in pixels
+     * @attr ref android.R.styleable#ProgressBar_maxHeight
+     */
+    public void setMaxHeight(@Px int maxHeight) {
+        mMaxHeight = maxHeight;
+        requestLayout();
+    }
+
+    /**
+     * @return the maximum height the progress bar can have, in pixels
+     */
+    @Px public int getMaxHeight() {
+        return mMaxHeight;
     }
 
     /**
