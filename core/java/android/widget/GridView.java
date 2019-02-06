@@ -123,7 +123,7 @@ public class GridView extends AbsListView {
     private int mColumnWidth;
     @UnsupportedAppUsage
     private int mRequestedColumnWidth;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769395)
     private int mRequestedNumColumns;
 
     private View mReferenceView = null;
