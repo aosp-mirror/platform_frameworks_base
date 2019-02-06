@@ -611,18 +611,43 @@ public class Installer extends SystemService {
         }
     }
 
-    public boolean snapshotAppData(String pkg, @UserIdInt int userId, int storageFlags)
+    /**
+     * Snapshots user data of the given package.
+     *
+     * @param pkg name of the package to snapshot user data for.
+     * @param userId id of the user whose data to snapshot.
+     * @param storageFlags flags controlling which data (CE or DE) to snapshot.
+     *
+     * @return inode of the snapshot of users CE package data, or {@code 0} if a remote calls
+     *  shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to snapshot user data.
+     */
+    public long snapshotAppData(String pkg, @UserIdInt int userId, int storageFlags)
             throws InstallerException {
-        if (!checkBeforeRemote()) return false;
+        if (!checkBeforeRemote()) return 0;
 
         try {
-            mInstalld.snapshotAppData(null, pkg, userId, storageFlags);
-            return true;
+            return mInstalld.snapshotAppData(null, pkg, userId, storageFlags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
+    /**
+     * Restores user data snapshot of the given package.
+     *
+     * @param pkg name of the package to restore user data for.
+     * @param appId id of the package to restore user data for.
+     * @param ceDataInode inode of CE user data folder of this app.
+     * @param userId id of the user whose data to restore.
+     * @param storageFlags flags controlling which data (CE or DE) to restore.
+     *
+     * @return {@code true} if user data restore was successful, or {@code false} if a remote call
+     *  shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to restore user data.
+     */
     public boolean restoreAppDataSnapshot(String pkg, @AppIdInt  int appId, long ceDataInode,
             String seInfo, @UserIdInt int userId, int storageFlags) throws InstallerException {
         if (!checkBeforeRemote()) return false;
@@ -630,6 +655,31 @@ public class Installer extends SystemService {
         try {
             mInstalld.restoreAppDataSnapshot(null, pkg, appId, ceDataInode, seInfo, userId,
                     storageFlags);
+            return true;
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Deletes user data snapshot of the given package.
+     *
+     * @param pkg name of the package to delete user data snapshot for.
+     * @param userId id of the user whose user data snapshot to delete.
+     * @param ceSnapshotInode inode of CE user data snapshot.
+     * @param storageFlags flags controlling which user data snapshot (CE or DE) to delete.
+     *
+     * @return {@code true} if user data snapshot was successfully deleted, or {@code false} if a
+     *  remote call shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to delete user data snapshot.
+     */
+    public boolean destroyAppDataSnapshot(String pkg, @UserIdInt int userId, long ceSnapshotInode,
+            int storageFlags) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+
+        try {
+            mInstalld.destroyAppDataSnapshot(null, pkg, userId, ceSnapshotInode, storageFlags);
             return true;
         } catch (Exception e) {
             throw InstallerException.from(e);
