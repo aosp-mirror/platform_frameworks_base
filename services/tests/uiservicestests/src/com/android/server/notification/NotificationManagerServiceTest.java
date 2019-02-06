@@ -275,11 +275,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        // most tests assume badging is enabled
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.NOTIFICATION_BADGING, 1,
-                UserHandle.getUserHandleForUid(mUid).getIdentifier());
-
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
@@ -432,6 +427,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         answers.put("badging", invocationOnMock -> {
             NotificationRecord r = (NotificationRecord) invocationOnMock.getArguments()[0];
             r.setShowBadge(!r.canShowBadge());
+            return null;
+        });
+        answers.put("bubbles", invocationOnMock -> {
+            NotificationRecord r = (NotificationRecord) invocationOnMock.getArguments()[0];
+            r.setAllowBubble(!r.canBubble());
             return null;
         });
         answers.put("package visibility", invocationOnMock -> {

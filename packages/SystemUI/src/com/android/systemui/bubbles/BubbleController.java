@@ -460,20 +460,9 @@ public class BubbleController implements BubbleExpandedViewContainer.OnBubbleBlo
     @VisibleForTesting
     protected boolean shouldBubble(NotificationEntry entry) {
         StatusBarNotification n = entry.notification;
-        boolean canAppOverlay = false;
-        try {
-            canAppOverlay = mNotificationManagerService.areBubblesAllowedForPackage(
-                    n.getPackageName(), n.getUid());
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error calling NoMan to determine if app can overlay", e);
-        }
-
-        NotificationChannel channel = mNotificationEntryManager.getNotificationData().getChannel(
-                entry.key);
-        boolean canChannelOverlay = channel != null && channel.canBubble();
         boolean hasOverlayIntent = n.getNotification().getBubbleMetadata() != null
                 && n.getNotification().getBubbleMetadata().getIntent() != null;
-        return hasOverlayIntent && canChannelOverlay && canAppOverlay;
+        return hasOverlayIntent && entry.canBubble;
     }
 
     /**

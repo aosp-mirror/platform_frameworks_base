@@ -161,6 +161,7 @@ public final class NotificationRecord {
     private ArrayList<String> mPeopleOverride;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
     private boolean mShowBadge;
+    private boolean mAllowBubble;
     private Light mLight;
     /**
      * This list contains system generated smart actions from NAS, app-generated smart actions are
@@ -992,6 +993,14 @@ public final class NotificationRecord {
 
     public void setShowBadge(boolean showBadge) {
         mShowBadge = showBadge;
+    }
+
+    public boolean canBubble() {
+        return mAllowBubble;
+    }
+
+    public void setAllowBubble(boolean allow) {
+        mAllowBubble = allow;
     }
 
     public boolean canShowBadge() {

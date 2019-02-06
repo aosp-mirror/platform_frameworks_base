@@ -149,6 +149,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         contentResolver.setFallbackToExisting(false);
         Secure.putIntForUser(contentResolver,
                 Secure.NOTIFICATION_BADGING, 1, UserHandle.getUserId(UID_N_MR1));
+        Secure.putIntForUser(contentResolver,
+                Secure.NOTIFICATION_BUBBLES, 1, UserHandle.getUserId(UID_N_MR1));
 
         ContentProvider testContentProvider = mock(ContentProvider.class);
         when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);
@@ -1898,6 +1900,46 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.updateBadgingEnabled(); // would be called by settings observer
         assertFalse(mHelper.badgingEnabled(USER));
         assertTrue(mHelper.badgingEnabled(USER2));
+    }
+
+    @Test
+    public void testBubblesOverrideTrue() {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 1,
+                USER.getIdentifier());
+        mHelper.updateBubblesEnabled(); // would be called by settings observer
+        assertTrue(mHelper.bubblesEnabled(USER));
+    }
+
+    @Test
+    public void testBubblesOverrideFalse() {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 0,
+                USER.getIdentifier());
+        mHelper.updateBubblesEnabled(); // would be called by settings observer
+        assertFalse(mHelper.bubblesEnabled(USER));
+    }
+
+    @Test
+    public void testBubblesForUserAll() {
+        try {
+            mHelper.bubblesEnabled(UserHandle.ALL);
+        } catch (Exception e) {
+            fail("just don't throw");
+        }
+    }
+
+    @Test
+    public void testBubblesOverrideUserIsolation() {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 0,
+                USER.getIdentifier());
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 1,
+                USER2.getIdentifier());
+        mHelper.updateBubblesEnabled(); // would be called by settings observer
+        assertFalse(mHelper.bubblesEnabled(USER));
+        assertTrue(mHelper.bubblesEnabled(USER2));
     }
 
     @Test

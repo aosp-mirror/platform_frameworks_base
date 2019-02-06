@@ -151,6 +151,12 @@ public final class NotificationEntry {
     private boolean mIsBubble;
 
     /**
+     * Whether this notification has been approved globally, at the app level, and at the channel
+     * level for bubbling.
+     */
+    public boolean canBubble;
+
+    /**
      * Whether this notification should be shown in the shade when it is also displayed as a bubble.
      *
      * <p>When a notification is a bubble we don't show it in the shade once the bubble has been
@@ -197,6 +203,7 @@ public final class NotificationEntry {
                 : ranking.getSmartReplies().toArray(new CharSequence[0]);
         suppressedVisualEffects = ranking.getSuppressedVisualEffects();
         suspended = ranking.isSuspended();
+        canBubble = ranking.canBubble();
     }
 
     public void setInterruption() {

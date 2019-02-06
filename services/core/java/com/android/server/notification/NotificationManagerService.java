@@ -1305,6 +1305,8 @@ public class NotificationManagerService extends SystemService {
     private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_BADGING_URI
                 = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
+        private final Uri NOTIFICATION_BUBBLES_URI
+                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BUBBLES);
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
@@ -1321,6 +1323,8 @@ public class NotificationManagerService extends SystemService {
             resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(NOTIFICATION_BUBBLES_URI,
                     false, this, UserHandle.USER_ALL);
             update(null);
         }
@@ -1346,6 +1350,9 @@ public class NotificationManagerService extends SystemService {
             }
             if (uri == null || NOTIFICATION_BADGING_URI.equals(uri)) {
                 mPreferencesHelper.updateBadgingEnabled();
+            }
+            if (uri == null || NOTIFICATION_BUBBLES_URI.equals(uri)) {
+                mPreferencesHelper.updateBubblesEnabled();
             }
         }
     }
@@ -5862,6 +5869,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<String> orderBefore = new ArrayList<>(N);
             int[] visibilities = new int[N];
             boolean[] showBadges = new boolean[N];
+            boolean[] allowBubbles = new boolean[N];
             ArrayList<NotificationChannel> channelBefore = new ArrayList<>(N);
             ArrayList<String> groupKeyBefore = new ArrayList<>(N);
             ArrayList<ArrayList<String>> overridePeopleBefore = new ArrayList<>(N);
@@ -5876,6 +5884,7 @@ public class NotificationManagerService extends SystemService {
                 orderBefore.add(r.getKey());
                 visibilities[i] = r.getPackageVisibilityOverride();
                 showBadges[i] = r.canShowBadge();
+                allowBubbles[i] = r.canBubble();
                 channelBefore.add(r.getChannel());
                 groupKeyBefore.add(r.getGroupKey());
                 overridePeopleBefore.add(r.getPeopleOverride());
@@ -5893,6 +5902,7 @@ public class NotificationManagerService extends SystemService {
                 if (!orderBefore.get(i).equals(r.getKey())
                         || visibilities[i] != r.getPackageVisibilityOverride()
                         || showBadges[i] != r.canShowBadge()
+                        || allowBubbles[i] != r.canBubble()
                         || !Objects.equals(channelBefore.get(i), r.getChannel())
                         || !Objects.equals(groupKeyBefore.get(i), r.getGroupKey())
                         || !Objects.equals(overridePeopleBefore.get(i), r.getPeopleOverride())
@@ -6935,6 +6945,7 @@ public class NotificationManagerService extends SystemService {
         Bundle smartReplies = new Bundle();
         Bundle lastAudiblyAlerted = new Bundle();
         Bundle noisy = new Bundle();
+        ArrayList<Boolean> canBubble = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -6967,18 +6978,22 @@ public class NotificationManagerService extends SystemService {
             smartReplies.putCharSequenceArrayList(key, record.getSmartReplies());
             lastAudiblyAlerted.putLong(key, record.getLastAudiblyAlertedMs());
             noisy.putBoolean(key, record.getSound() != null || record.getVibration() != null);
+            canBubble.add(record.canBubble());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
         String[] interceptedKeysAr = interceptedKeys.toArray(new String[interceptedKeys.size()]);
         int[] importanceAr = new int[M];
+        boolean[] canBubbleAr = new boolean[M];
         for (int i = 0; i < M; i++) {
             importanceAr[i] = importance.get(i);
+            canBubbleAr[i] = canBubble.get(i);
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
-                systemGeneratedSmartActions, smartReplies, lastAudiblyAlerted, noisy);
+                systemGeneratedSmartActions, smartReplies, lastAudiblyAlerted, noisy,
+                canBubbleAr);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {

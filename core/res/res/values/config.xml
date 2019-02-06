@@ -2632,6 +2632,7 @@
         extractor must come first -->
         <item>com.android.server.notification.NotificationChannelExtractor</item>
         <item>com.android.server.notification.NotificationAdjustmentExtractor</item>
+        <item>com.android.server.notification.BubbleExtractor</item>
         <!-- depends on AdjustmentExtractor-->
         <item>com.android.server.notification.ValidateNotificationPeople</item>
         <item>com.android.server.notification.PriorityExtractor</item>
