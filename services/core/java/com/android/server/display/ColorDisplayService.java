@@ -129,240 +129,9 @@ public final class ColorDisplayService extends SystemService {
     private final NightDisplayTintController mNightDisplayTintController =
             new NightDisplayTintController();
 
-    private final TintController mDisplayWhiteBalanceTintController = new TintController() {
-        // Three chromaticity coordinates per color: X, Y, and Z
-        private final int NUM_VALUES_PER_PRIMARY = 3;
-        // Four colors: red, green, blue, and white
-        private final int NUM_DISPLAY_PRIMARIES_VALS = 4 * NUM_VALUES_PER_PRIMARY;
-
-        private final Object mLock = new Object();
-        private int mTemperatureMin;
-        private int mTemperatureMax;
-        private int mTemperatureDefault;
-        private float[] mDisplayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
-        private ColorSpace.Rgb mDisplayColorSpaceRGB;
-        private float[] mChromaticAdaptationMatrix;
-        private int mCurrentColorTemperature;
-        private float[] mCurrentColorTemperatureXYZ;
-        private boolean mSetUp = false;
-        private float[] mMatrixDisplayWhiteBalance = new float[16];
-        private Boolean mIsAvailable;
-
-        @Override
-        public void setUp(Context context, boolean needsLinear) {
-            mSetUp = false;
-            final Resources res = context.getResources();
-
-            ColorSpace.Rgb displayColorSpaceRGB = getDisplayColorSpaceFromSurfaceControl();
-            if (displayColorSpaceRGB == null) {
-                Slog.w(TAG, "Failed to get display color space from SurfaceControl, trying res");
-                displayColorSpaceRGB = getDisplayColorSpaceFromResources(res);
-                if (displayColorSpaceRGB == null) {
-                    Slog.e(TAG, "Failed to get display color space from resources");
-                    return;
-                }
-            }
-
-            final String[] nominalWhiteValues = res.getStringArray(
-                    R.array.config_displayWhiteBalanceDisplayNominalWhite);
-            float[] displayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
-            for (int i = 0; i < nominalWhiteValues.length; i++) {
-                displayNominalWhiteXYZ[i] = Float.parseFloat(nominalWhiteValues[i]);
-            }
-
-            final int colorTemperatureMin = res.getInteger(
-                    R.integer.config_displayWhiteBalanceColorTemperatureMin);
-            if (colorTemperatureMin <= 0) {
-                Slog.e(TAG, "Display white balance minimum temperature must be greater than 0");
-                return;
-            }
-
-            final int colorTemperatureMax = res.getInteger(
-                    R.integer.config_displayWhiteBalanceColorTemperatureMax);
-            if (colorTemperatureMax < colorTemperatureMin) {
-                Slog.e(TAG, "Display white balance max temp must be greater or equal to min");
-                return;
-            }
-
-            final int colorTemperature = res.getInteger(
-                    R.integer.config_displayWhiteBalanceColorTemperatureDefault);
-
-            synchronized (mLock) {
-                mDisplayColorSpaceRGB = displayColorSpaceRGB;
-                mDisplayNominalWhiteXYZ = displayNominalWhiteXYZ;
-                mTemperatureMin = colorTemperatureMin;
-                mTemperatureMax = colorTemperatureMax;
-                mTemperatureDefault = colorTemperature;
-                mSetUp = true;
-            }
-
-            setMatrix(mTemperatureDefault);
-        }
-
-        @Override
-        public float[] getMatrix() {
-            return mSetUp && isActivated() ? mMatrixDisplayWhiteBalance : MATRIX_IDENTITY;
-        }
-
-        @Override
-        public void setMatrix(int cct) {
-            if (!mSetUp) {
-                Slog.w(TAG, "Can't set display white balance temperature: uninitialized");
-                return;
-            }
-
-            if (cct < mTemperatureMin) {
-                Slog.w(TAG, "Requested display color temperature is below allowed minimum");
-                cct = mTemperatureMin;
-            } else if (cct > mTemperatureMax) {
-                Slog.w(TAG, "Requested display color temperature is above allowed maximum");
-                cct = mTemperatureMax;
-            }
-
-            Slog.d(TAG, "setDisplayWhiteBalanceTemperatureMatrix: cct = " + cct);
-
-            synchronized (mLock) {
-                mCurrentColorTemperature = cct;
-
-                // Adapt the display's nominal white point to match the requested CCT value
-                mCurrentColorTemperatureXYZ = ColorSpace.cctToIlluminantdXyz(cct);
-
-                mChromaticAdaptationMatrix =
-                        ColorSpace.chromaticAdaptation(ColorSpace.Adaptation.BRADFORD,
-                                mDisplayNominalWhiteXYZ, mCurrentColorTemperatureXYZ);
-
-                // Convert the adaptation matrix to RGB space
-                float[] result = ColorSpace.mul3x3(mChromaticAdaptationMatrix,
-                        mDisplayColorSpaceRGB.getTransform());
-                result = ColorSpace.mul3x3(mDisplayColorSpaceRGB.getInverseTransform(), result);
-
-                // Normalize the transform matrix to peak white value in RGB space
-                final float adaptedMaxR = result[0] + result[3] + result[6];
-                final float adaptedMaxG = result[1] + result[4] + result[7];
-                final float adaptedMaxB = result[2] + result[5] + result[8];
-                final float denum = Math.max(Math.max(adaptedMaxR, adaptedMaxG), adaptedMaxB);
-                for (int i = 0; i < result.length; i++) {
-                    result[i] /= denum;
-                }
-
-                Matrix.setIdentityM(mMatrixDisplayWhiteBalance, 0);
-                java.lang.System.arraycopy(result, 0, mMatrixDisplayWhiteBalance, 0, 3);
-                java.lang.System.arraycopy(result, 3, mMatrixDisplayWhiteBalance, 4, 3);
-                java.lang.System.arraycopy(result, 6, mMatrixDisplayWhiteBalance, 8, 3);
-            }
-        }
-
-        @Override
-        public int getLevel() {
-            return LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
-        }
-
-        @Override
-        public boolean isAvailable(Context context) {
-            if (mIsAvailable == null) {
-                mIsAvailable = ColorDisplayManager.isDisplayWhiteBalanceAvailable(context);
-            }
-            return mIsAvailable;
-        }
-
-        /**
-         * Format a given matrix into a string.
-         *
-         * @param matrix the matrix to format
-         * @param cols number of columns in the matrix
-         */
-        private String matrixToString(float[] matrix, int cols) {
-            if (matrix == null || cols <= 0) {
-                Slog.e(TAG, "Invalid arguments when formatting matrix to string");
-                return "";
-            }
-
-            StringBuilder sb = new StringBuilder("");
-            for (int i = 0; i < matrix.length; i++) {
-                if (i % cols == 0) {
-                    sb.append("\n    ");
-                }
-                sb.append(String.format("%9.6f ", matrix[i]));
-            }
-            return sb.toString();
-        }
-
-        @Override
-        public void dump(PrintWriter pw) {
-            synchronized (mLock) {
-                pw.println("  mSetUp = " + mSetUp);
-                if (!mSetUp) {
-                    return;
-                }
-
-                pw.println("  isActivated = " + isActivated());
-                pw.println("  mTemperatureMin = " + mTemperatureMin);
-                pw.println("  mTemperatureMax = " + mTemperatureMax);
-                pw.println("  mTemperatureDefault = " + mTemperatureDefault);
-                pw.println("  mCurrentColorTemperature = " + mCurrentColorTemperature);
-                pw.println("  mCurrentColorTemperatureXYZ = " +
-                        matrixToString(mCurrentColorTemperatureXYZ, 3));
-                pw.println("  mDisplayColorSpaceRGB RGB-to-XYZ = " +
-                        matrixToString(mDisplayColorSpaceRGB.getTransform(), 3));
-                pw.println("  mChromaticAdaptationMatrix = " +
-                        matrixToString(mChromaticAdaptationMatrix, 3));
-                pw.println("  mDisplayColorSpaceRGB XYZ-to-RGB = " +
-                        matrixToString(mDisplayColorSpaceRGB.getInverseTransform(), 3));
-                pw.println("  mMatrixDisplayWhiteBalance = " +
-                        matrixToString(mMatrixDisplayWhiteBalance, 4));
-            }
-        }
-
-        private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {
-            return new ColorSpace.Rgb(
-                "Display Color Space",
-                redGreenBlueXYZ,
-                whiteXYZ,
-                2.2f // gamma, unused for display white balance
-            );
-        }
-
-        private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
-            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-            if (displayToken == null) {
-                return null;
-            }
-
-            DisplayPrimaries primaries = SurfaceControl.getDisplayNativePrimaries(displayToken);
-            if (primaries == null || primaries.red == null || primaries.green == null ||
-                primaries.blue == null || primaries.white == null) {
-                return null;
-            }
-
-            return makeRgbColorSpaceFromXYZ(
-                    new float[] {
-                        primaries.red.X, primaries.red.Y, primaries.red.Z,
-                        primaries.green.X, primaries.green.Y, primaries.green.Z,
-                        primaries.blue.X, primaries.blue.Y, primaries.blue.Z,
-                    },
-                    new float[] { primaries.white.X, primaries.white.Y, primaries.white.Z }
-                    );
-        }
-
-        private ColorSpace.Rgb getDisplayColorSpaceFromResources(Resources res) {
-            final String[] displayPrimariesValues = res.getStringArray(
-                    R.array.config_displayWhiteBalanceDisplayPrimaries);
-            float[] displayRedGreenBlueXYZ =
-                    new float[NUM_DISPLAY_PRIMARIES_VALS - NUM_VALUES_PER_PRIMARY];
-            float[] displayWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
-
-            for (int i = 0; i < displayRedGreenBlueXYZ.length; i++) {
-                displayRedGreenBlueXYZ[i] = Float.parseFloat(displayPrimariesValues[i]);
-            }
-
-            for (int i = 0; i < displayWhiteXYZ.length; i++) {
-                displayWhiteXYZ[i] = Float.parseFloat(
-                        displayPrimariesValues[displayRedGreenBlueXYZ.length + i]);
-            }
-
-            return makeRgbColorSpaceFromXYZ(displayRedGreenBlueXYZ, displayWhiteXYZ);
-        }
-    };
+    @VisibleForTesting
+    final DisplayWhiteBalanceTintController mDisplayWhiteBalanceTintController =
+            new DisplayWhiteBalanceTintController();
 
     private final TintController mGlobalSaturationTintController = new TintController() {
 
@@ -860,7 +629,8 @@ public final class ColorDisplayService extends SystemService {
         return ldt.isBefore(compareTime) ? ldt.plusDays(1) : ldt;
     }
 
-    private void updateDisplayWhiteBalanceStatus() {
+    @VisibleForTesting
+    void updateDisplayWhiteBalanceStatus() {
         boolean oldActivated = mDisplayWhiteBalanceTintController.isActivated();
         mDisplayWhiteBalanceTintController.setActivated(isDisplayWhiteBalanceSettingEnabled() &&
                 !mNightDisplayTintController.isActivated() &&
@@ -1101,6 +871,7 @@ public final class ColorDisplayService extends SystemService {
         pw.println("Display white balance:");
         if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
             pw.println("    Activated: " + mDisplayWhiteBalanceTintController.isActivated());
+            mDisplayWhiteBalanceTintController.dump(pw);
         } else {
             pw.println("    Not available");
         }
@@ -1532,6 +1303,244 @@ public final class ColorDisplayService extends SystemService {
             return colorTemperature;
         }
     }
+
+    final class DisplayWhiteBalanceTintController extends TintController {
+        // Three chromaticity coordinates per color: X, Y, and Z
+        private final int NUM_VALUES_PER_PRIMARY = 3;
+        // Four colors: red, green, blue, and white
+        private final int NUM_DISPLAY_PRIMARIES_VALS = 4 * NUM_VALUES_PER_PRIMARY;
+
+        private final Object mLock = new Object();
+        @VisibleForTesting
+        int mTemperatureMin;
+        @VisibleForTesting
+        int mTemperatureMax;
+        private int mTemperatureDefault;
+        private float[] mDisplayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
+        @VisibleForTesting
+        ColorSpace.Rgb mDisplayColorSpaceRGB;
+        private float[] mChromaticAdaptationMatrix;
+        @VisibleForTesting
+        int mCurrentColorTemperature;
+        private float[] mCurrentColorTemperatureXYZ;
+        private boolean mSetUp = false;
+        private float[] mMatrixDisplayWhiteBalance = new float[16];
+        private Boolean mIsAvailable;
+
+        @Override
+        public void setUp(Context context, boolean needsLinear) {
+            mSetUp = false;
+            final Resources res = context.getResources();
+
+            ColorSpace.Rgb displayColorSpaceRGB = getDisplayColorSpaceFromSurfaceControl();
+            if (displayColorSpaceRGB == null) {
+                Slog.w(TAG, "Failed to get display color space from SurfaceControl, trying res");
+                displayColorSpaceRGB = getDisplayColorSpaceFromResources(res);
+                if (displayColorSpaceRGB == null) {
+                    Slog.e(TAG, "Failed to get display color space from resources");
+                    return;
+                }
+            }
+
+            final String[] nominalWhiteValues = res.getStringArray(
+                    R.array.config_displayWhiteBalanceDisplayNominalWhite);
+            float[] displayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
+            for (int i = 0; i < nominalWhiteValues.length; i++) {
+                displayNominalWhiteXYZ[i] = Float.parseFloat(nominalWhiteValues[i]);
+            }
+
+            final int colorTemperatureMin = res.getInteger(
+                    R.integer.config_displayWhiteBalanceColorTemperatureMin);
+            if (colorTemperatureMin <= 0) {
+                Slog.e(TAG, "Display white balance minimum temperature must be greater than 0");
+                return;
+            }
+
+            final int colorTemperatureMax = res.getInteger(
+                    R.integer.config_displayWhiteBalanceColorTemperatureMax);
+            if (colorTemperatureMax < colorTemperatureMin) {
+                Slog.e(TAG, "Display white balance max temp must be greater or equal to min");
+                return;
+            }
+
+            final int colorTemperature = res.getInteger(
+                    R.integer.config_displayWhiteBalanceColorTemperatureDefault);
+
+            synchronized (mLock) {
+                mDisplayColorSpaceRGB = displayColorSpaceRGB;
+                mDisplayNominalWhiteXYZ = displayNominalWhiteXYZ;
+                mTemperatureMin = colorTemperatureMin;
+                mTemperatureMax = colorTemperatureMax;
+                mTemperatureDefault = colorTemperature;
+                mSetUp = true;
+            }
+
+            setMatrix(mTemperatureDefault);
+        }
+
+        @Override
+        public float[] getMatrix() {
+            return mSetUp && isActivated() ? mMatrixDisplayWhiteBalance : MATRIX_IDENTITY;
+        }
+
+        @Override
+        public void setMatrix(int cct) {
+            if (!mSetUp) {
+                Slog.w(TAG, "Can't set display white balance temperature: uninitialized");
+                return;
+            }
+
+            if (cct < mTemperatureMin) {
+                Slog.w(TAG, "Requested display color temperature is below allowed minimum");
+                cct = mTemperatureMin;
+            } else if (cct > mTemperatureMax) {
+                Slog.w(TAG, "Requested display color temperature is above allowed maximum");
+                cct = mTemperatureMax;
+            }
+
+            Slog.d(TAG, "setDisplayWhiteBalanceTemperatureMatrix: cct = " + cct);
+
+            synchronized (mLock) {
+                mCurrentColorTemperature = cct;
+
+                // Adapt the display's nominal white point to match the requested CCT value
+                mCurrentColorTemperatureXYZ = ColorSpace.cctToIlluminantdXyz(cct);
+
+                mChromaticAdaptationMatrix =
+                        ColorSpace.chromaticAdaptation(ColorSpace.Adaptation.BRADFORD,
+                                mDisplayNominalWhiteXYZ, mCurrentColorTemperatureXYZ);
+
+                // Convert the adaptation matrix to RGB space
+                float[] result = ColorSpace.mul3x3(mChromaticAdaptationMatrix,
+                        mDisplayColorSpaceRGB.getTransform());
+                result = ColorSpace.mul3x3(mDisplayColorSpaceRGB.getInverseTransform(), result);
+
+                // Normalize the transform matrix to peak white value in RGB space
+                final float adaptedMaxR = result[0] + result[3] + result[6];
+                final float adaptedMaxG = result[1] + result[4] + result[7];
+                final float adaptedMaxB = result[2] + result[5] + result[8];
+                final float denum = Math.max(Math.max(adaptedMaxR, adaptedMaxG), adaptedMaxB);
+                for (int i = 0; i < result.length; i++) {
+                    result[i] /= denum;
+                }
+
+                Matrix.setIdentityM(mMatrixDisplayWhiteBalance, 0);
+                java.lang.System.arraycopy(result, 0, mMatrixDisplayWhiteBalance, 0, 3);
+                java.lang.System.arraycopy(result, 3, mMatrixDisplayWhiteBalance, 4, 3);
+                java.lang.System.arraycopy(result, 6, mMatrixDisplayWhiteBalance, 8, 3);
+            }
+        }
+
+        @Override
+        public int getLevel() {
+            return LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
+        }
+
+        @Override
+        public boolean isAvailable(Context context) {
+            if (mIsAvailable == null) {
+                mIsAvailable = ColorDisplayManager.isDisplayWhiteBalanceAvailable(context);
+            }
+            return mIsAvailable;
+        }
+
+        /**
+         * Format a given matrix into a string.
+         *
+         * @param matrix the matrix to format
+         * @param cols number of columns in the matrix
+         */
+        private String matrixToString(float[] matrix, int cols) {
+            if (matrix == null || cols <= 0) {
+                Slog.e(TAG, "Invalid arguments when formatting matrix to string");
+                return "";
+            }
+
+            StringBuilder sb = new StringBuilder("");
+            for (int i = 0; i < matrix.length; i++) {
+                if (i % cols == 0) {
+                    sb.append("\n      ");
+                }
+                sb.append(String.format("%9.6f ", matrix[i]));
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public void dump(PrintWriter pw) {
+            synchronized (mLock) {
+                pw.println("    mSetUp = " + mSetUp);
+                if (!mSetUp) {
+                    return;
+                }
+
+                pw.println("    mTemperatureMin = " + mTemperatureMin);
+                pw.println("    mTemperatureMax = " + mTemperatureMax);
+                pw.println("    mTemperatureDefault = " + mTemperatureDefault);
+                pw.println("    mCurrentColorTemperature = " + mCurrentColorTemperature);
+                pw.println("    mCurrentColorTemperatureXYZ = " +
+                        matrixToString(mCurrentColorTemperatureXYZ, 3));
+                pw.println("    mDisplayColorSpaceRGB RGB-to-XYZ = " +
+                        matrixToString(mDisplayColorSpaceRGB.getTransform(), 3));
+                pw.println("    mChromaticAdaptationMatrix = " +
+                        matrixToString(mChromaticAdaptationMatrix, 3));
+                pw.println("    mDisplayColorSpaceRGB XYZ-to-RGB = " +
+                        matrixToString(mDisplayColorSpaceRGB.getInverseTransform(), 3));
+                pw.println("    mMatrixDisplayWhiteBalance = " +
+                        matrixToString(mMatrixDisplayWhiteBalance, 4));
+            }
+        }
+
+        private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {
+            return new ColorSpace.Rgb(
+                "Display Color Space",
+                redGreenBlueXYZ,
+                whiteXYZ,
+                2.2f // gamma, unused for display white balance
+            );
+        }
+
+        private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
+            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+            if (displayToken == null) {
+                return null;
+            }
+
+            DisplayPrimaries primaries = SurfaceControl.getDisplayNativePrimaries(displayToken);
+            if (primaries == null || primaries.red == null || primaries.green == null ||
+                primaries.blue == null || primaries.white == null) {
+                return null;
+            }
+
+            return makeRgbColorSpaceFromXYZ(
+                    new float[] {
+                        primaries.red.X, primaries.red.Y, primaries.red.Z,
+                        primaries.green.X, primaries.green.Y, primaries.green.Z,
+                        primaries.blue.X, primaries.blue.Y, primaries.blue.Z,
+                    },
+                    new float[] { primaries.white.X, primaries.white.Y, primaries.white.Z }
+                    );
+        }
+
+        private ColorSpace.Rgb getDisplayColorSpaceFromResources(Resources res) {
+            final String[] displayPrimariesValues = res.getStringArray(
+                    R.array.config_displayWhiteBalanceDisplayPrimaries);
+            float[] displayRedGreenBlueXYZ =
+                    new float[NUM_DISPLAY_PRIMARIES_VALS - NUM_VALUES_PER_PRIMARY];
+            float[] displayWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
+
+            for (int i = 0; i < displayRedGreenBlueXYZ.length; i++) {
+                displayRedGreenBlueXYZ[i] = Float.parseFloat(displayPrimariesValues[i]);
+            }
+
+            for (int i = 0; i < displayWhiteXYZ.length; i++) {
+                displayWhiteXYZ[i] = Float.parseFloat(
+                        displayPrimariesValues[displayRedGreenBlueXYZ.length + i]);
+            }
+
+            return makeRgbColorSpaceFromXYZ(displayRedGreenBlueXYZ, displayWhiteXYZ);
+        }
+    };
 
     /**
      * Local service that allows color transforms to be enabled from other system services.
