@@ -37,8 +37,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
 
+    <!-- TODO: Remove largeHeap hack when memory leak is fixed (b/123984854) -->
     <application android:debuggable="true"
-                 android:testOnly="true">
+                 android:testOnly="true"
+                 android:largeHeap="true">
         <uses-library android:name="android.test.mock" android:required="true" />
 
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityA" />
