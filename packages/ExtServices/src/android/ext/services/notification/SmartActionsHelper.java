@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.Person;
 import android.app.RemoteAction;
 import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Process;
@@ -230,8 +231,11 @@ public class SmartActionsHelper {
 
     private Notification.Action createNotificationAction(
             RemoteAction remoteAction, String actionType) {
+        Icon icon = remoteAction.shouldShowIcon()
+                ? remoteAction.getIcon()
+                : Icon.createWithResource(mContext, com.android.internal.R.drawable.ic_action_open);
         return new Notification.Action.Builder(
-                remoteAction.getIcon(),
+                icon,
                 remoteAction.getTitle(),
                 remoteAction.getActionIntent())
                 .setContextual(true)
