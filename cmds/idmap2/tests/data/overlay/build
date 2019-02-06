@@ -26,6 +26,20 @@ aapt2 link \
 aapt2 link \
     --no-resource-removal \
     -I "$FRAMEWORK_RES_APK" \
+    --manifest AndroidManifestNoName.xml \
+    -o overlay-no-name.apk \
+    compiled.flata
+
+aapt2 link \
+    --no-resource-removal \
+    -I "$FRAMEWORK_RES_APK" \
+    --manifest AndroidManifestNoNameStatic.xml \
+    -o overlay-no-name-static.apk \
+    compiled.flata
+
+aapt2 link \
+    --no-resource-removal \
+    -I "$FRAMEWORK_RES_APK" \
     --manifest AndroidManifestStatic1.xml \
     -o overlay-static-1.apk \
     compiled.flata

@@ -40,9 +40,14 @@ TEST(FileUtilsTests, FindFilesFindEverythingNonRecursive) {
                                const std::string& path ATTRIBUTE_UNUSED) -> bool { return true; });
   ASSERT_THAT(v, NotNull());
   ASSERT_EQ(v->size(), 6U);
-  ASSERT_EQ(std::set<std::string>(v->begin(), v->end()),
-            std::set<std::string>({root + "/.", root + "/..", root + "/overlay", root + "/target",
-                                   root + "/system-overlay", root + "/system-overlay-invalid"}));
+  ASSERT_EQ(std::set<std::string>(v->begin(), v->end()), std::set<std::string>({
+                                                             root + "/.",
+                                                             root + "/..",
+                                                             root + "/overlay",
+                                                             root + "/target",
+                                                             root + "/system-overlay",
+                                                             root + "/system-overlay-invalid",
+                                                         }));
 }
 
 TEST(FileUtilsTests, FindFilesFindApkFilesRecursive) {
@@ -51,13 +56,15 @@ TEST(FileUtilsTests, FindFilesFindApkFilesRecursive) {
     return type == DT_REG && path.size() > 4 && path.compare(path.size() - 4, 4, ".apk") == 0;
   });
   ASSERT_THAT(v, NotNull());
-  ASSERT_EQ(v->size(), 6U);
-  ASSERT_EQ(std::set<std::string>(v->begin(), v->end()),
-            std::set<std::string>({root + "/target/target.apk", root + "/overlay/overlay.apk",
-                                   root + "/overlay/overlay-static-1.apk",
-                                   root + "/overlay/overlay-static-2.apk",
-                                   root + "/system-overlay/system-overlay.apk",
-                                   root + "/system-overlay-invalid/system-overlay-invalid.apk"}));
+  ASSERT_EQ(v->size(), 9U);
+  ASSERT_EQ(
+      std::set<std::string>(v->begin(), v->end()),
+      std::set<std::string>(
+          {root + "/target/target.apk", root + "/target/target-no-overlayable.apk",
+           root + "/overlay/overlay.apk", root + "/overlay/overlay-no-name.apk",
+           root + "/overlay/overlay-no-name-static.apk", root + "/overlay/overlay-static-1.apk",
+           root + "/overlay/overlay-static-2.apk", root + "/system-overlay/system-overlay.apk",
+           root + "/system-overlay-invalid/system-overlay-invalid.apk"}));
 }
 
 TEST(FileUtilsTests, ReadFile) {
