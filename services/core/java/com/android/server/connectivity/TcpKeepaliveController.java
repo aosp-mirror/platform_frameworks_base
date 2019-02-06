@@ -15,7 +15,6 @@
  */
 package com.android.server.connectivity;
 
-import static android.net.NetworkAgent.EVENT_SOCKET_KEEPALIVE;
 import static android.net.SocketKeepalive.DATA_RECEIVED;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
 import static android.net.SocketKeepalive.ERROR_SOCKET_NOT_IDLE;
@@ -31,10 +30,8 @@ import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData.TcpSocketInfo;
 import android.net.TcpRepairWindow;
 import android.os.Handler;
-import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.system.ErrnoException;
 import android.system.Int32Ref;
 import android.system.Os;
@@ -42,6 +39,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.connectivity.KeepaliveTracker.KeepaliveInfo;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
@@ -111,7 +109,7 @@ public class TcpKeepaliveController {
      * tcp/ip information.
      */
     // TODO : make this private. It's far too confusing that this gets called from outside
-    // at a time that nobody can understand, but the switch out is in this class only.
+    // at a time that nobody can understand.
     public static TcpSocketInfo switchToRepairMode(FileDescriptor fd)
             throws InvalidSocketException {
         if (DBG) Log.i(TAG, "switchToRepairMode to start tcp keepalive : " + fd);
@@ -199,7 +197,13 @@ public class TcpKeepaliveController {
                 trw.rcvWndScale);
     }
 
-    private static void switchOutOfRepairMode(@NonNull final FileDescriptor fd)
+    /**
+     * Switch the tcp socket out of repair mode.
+     *
+     * @param fd the fd of socket to switch back to normal.
+     */
+    // TODO : make this private.
+    public static void switchOutOfRepairMode(@NonNull final FileDescriptor fd)
             throws ErrnoException {
         Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_OFF);
     }
@@ -212,7 +216,7 @@ public class TcpKeepaliveController {
      * @param slot keepalive slot.
      */
     public void startSocketMonitor(@NonNull final FileDescriptor fd,
-            @NonNull final Messenger messenger, final int slot) {
+            @NonNull final KeepaliveInfo ki, final int slot) {
         synchronized (mListeners) {
             if (null != mListeners.get(slot)) {
                 throw new IllegalArgumentException("This slot is already taken");
@@ -226,31 +230,13 @@ public class TcpKeepaliveController {
                 // This can't be called twice because the queue guarantees that once the listener
                 // is unregistered it can't be called again, even for a message that arrived
                 // before it was unregistered.
-                int result;
-                try {
-                    // First move the socket out of repair mode.
-                    if (DBG) Log.d(TAG, "Moving socket out of repair mode for event : " + readyFd);
-                    switchOutOfRepairMode(readyFd);
-                    result = (0 != (events & EVENT_ERROR)) ? ERROR_INVALID_SOCKET : DATA_RECEIVED;
-                } catch (ErrnoException e) {
-                    // Could not move the socket out of repair mode. Still continue with notifying
-                    // the client
-                    Log.e(TAG, "Cannot switch socket out of repair mode", e);
-                    result = ERROR_INVALID_SOCKET;
+                final int reason;
+                if (0 != (events & EVENT_ERROR)) {
+                    reason = ERROR_INVALID_SOCKET;
+                } else {
+                    reason = DATA_RECEIVED;
                 }
-                // Prepare and send the message to the receiver.
-                final Message message = Message.obtain();
-                message.what = EVENT_SOCKET_KEEPALIVE;
-                message.arg1 = slot;
-                message.arg2 = result;
-                try {
-                    messenger.send(message);
-                } catch (RemoteException e) {
-                    // Remote process died
-                }
-                synchronized (mListeners) {
-                    mListeners.remove(slot);
-                }
+                ki.onFileDescriptorInitiatedStop(reason);
                 // The listener returns the new set of events to listen to. Because 0 means no
                 // event, the listener gets unregistered.
                 return 0;
