@@ -655,13 +655,19 @@ public class StatusBarTest extends SysuiTestCase {
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
                         DozeLog.REASON_SENSOR_TAP));
 
+        doAnswer(invocation -> {
+            DozeHost.PulseCallback callback = invocation.getArgument(0);
+            callback.onPulseStarted();
+            return null;
+        }).when(mDozeScrimController).pulse(any(), anyInt());
+
         for (int i = 0; i < DozeLog.REASONS; i++) {
             reset(mKeyguardUpdateMonitor);
             mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class), i);
             if (reasonsWantingAuth.contains(i)) {
-                verify(mKeyguardUpdateMonitor).onAuthInterruptDetected();
+                verify(mKeyguardUpdateMonitor).onAuthInterruptDetected(eq(true));
             } else if (reasonsSkippingAuth.contains(i) || reasonsThatDontPulse.contains(i)) {
-                verify(mKeyguardUpdateMonitor, never()).onAuthInterruptDetected();
+                verify(mKeyguardUpdateMonitor, never()).onAuthInterruptDetected(eq(true));
             } else {
                 throw new AssertionError("Reason " + i + " isn't specified as wanting or skipping"
                         + " passive auth. Please consider how this pulse reason should behave.");
