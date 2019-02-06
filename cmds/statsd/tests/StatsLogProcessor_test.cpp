@@ -574,6 +574,127 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     EXPECT_EQ(timeBase2 + ttl6 - activation1006.ttl_ns, activation1003.activation_ns);
 }
 
+TEST(StatsLogProcessorTest, TestActivationOnBoot) {
+    int uid = 1111;
+
+    // Setup a simple config, no activation
+    StatsdConfig config1;
+    config1.set_id(12341);
+    config1.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+    auto wakelockAcquireMatcher = CreateAcquireWakelockAtomMatcher();
+    *config1.add_atom_matcher() = wakelockAcquireMatcher;
+
+    long metricId1 = 1234561;
+    long metricId2 = 1234562;
+    auto countMetric1 = config1.add_count_metric();
+    countMetric1->set_id(metricId1);
+    countMetric1->set_what(wakelockAcquireMatcher.id());
+    countMetric1->set_bucket(FIVE_MINUTES);
+
+    auto countMetric2 = config1.add_count_metric();
+    countMetric2->set_id(metricId2);
+    countMetric2->set_what(wakelockAcquireMatcher.id());
+    countMetric2->set_bucket(FIVE_MINUTES);
+
+    auto metric1Activation = config1.add_metric_activation();
+    metric1Activation->set_metric_id(metricId1);
+    metric1Activation->set_activation_type(MetricActivation::ACTIVATE_ON_BOOT);
+    auto metric1ActivationTrigger = metric1Activation->add_event_activation();
+    metric1ActivationTrigger->set_atom_matcher_id(wakelockAcquireMatcher.id());
+    metric1ActivationTrigger->set_ttl_seconds(100);
+
+    ConfigKey cfgKey1(uid, 12341);
+    long timeBase1 = 1;
+    sp<StatsLogProcessor> processor =
+            CreateStatsLogProcessor(timeBase1, timeBase1, config1, cfgKey1);
+
+    EXPECT_EQ(1, processor->mMetricsManagers.size());
+    auto it = processor->mMetricsManagers.find(cfgKey1);
+    EXPECT_TRUE(it != processor->mMetricsManagers.end());
+    auto& metricsManager1 = it->second;
+    EXPECT_TRUE(metricsManager1->isActive());
+
+    auto metricIt = metricsManager1->mAllMetricProducers.begin();
+    for (; metricIt != metricsManager1->mAllMetricProducers.end(); metricIt++) {
+        if ((*metricIt)->getMetricId() == metricId1) {
+            break;
+        }
+    }
+    EXPECT_TRUE(metricIt != metricsManager1->mAllMetricProducers.end());
+    auto& metricProducer1 = *metricIt;
+    EXPECT_FALSE(metricProducer1->isActive());
+
+    metricIt = metricsManager1->mAllMetricProducers.begin();
+    for (; metricIt != metricsManager1->mAllMetricProducers.end(); metricIt++) {
+        if ((*metricIt)->getMetricId() == metricId2) {
+            break;
+        }
+    }
+    EXPECT_TRUE(metricIt != metricsManager1->mAllMetricProducers.end());
+    auto& metricProducer2 = *metricIt;
+    EXPECT_TRUE(metricProducer2->isActive());
+
+    const auto& activation1 = metricProducer1->mEventActivationMap.begin()->second;
+    EXPECT_EQ(100 * NS_PER_SEC, activation1.ttl_ns);
+    EXPECT_EQ(0, activation1.activation_ns);
+    EXPECT_EQ(kNotActive, activation1.state);
+
+    std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1")};
+    auto event = CreateAcquireWakelockEvent(attributions1, "wl1", 100 + timeBase1);
+    processor->OnLogEvent(event.get());
+
+    EXPECT_FALSE(metricProducer1->isActive());
+    EXPECT_EQ(0, activation1.activation_ns);
+    EXPECT_EQ(kActiveOnBoot, activation1.state);
+
+    int64_t shutDownTime = timeBase1 + 100 * NS_PER_SEC;
+
+    processor->WriteMetricsActivationToDisk(shutDownTime);
+    EXPECT_TRUE(metricProducer1->isActive());
+    int64_t ttl1 = metricProducer1->getRemainingTtlNs(shutDownTime);
+    EXPECT_EQ(100 * NS_PER_SEC, ttl1);
+
+    long timeBase2 = 1000;
+    sp<StatsLogProcessor> processor2 =
+            CreateStatsLogProcessor(timeBase2, timeBase2, config1, cfgKey1);
+
+    EXPECT_EQ(1, processor2->mMetricsManagers.size());
+    it = processor2->mMetricsManagers.find(cfgKey1);
+    EXPECT_TRUE(it != processor2->mMetricsManagers.end());
+    auto& metricsManager1001 = it->second;
+    EXPECT_TRUE(metricsManager1001->isActive());
+
+    metricIt = metricsManager1001->mAllMetricProducers.begin();
+    for (; metricIt != metricsManager1001->mAllMetricProducers.end(); metricIt++) {
+        if ((*metricIt)->getMetricId() == metricId1) {
+            break;
+        }
+    }
+    EXPECT_TRUE(metricIt != metricsManager1001->mAllMetricProducers.end());
+    auto& metricProducer1001 = *metricIt;
+    EXPECT_FALSE(metricProducer1001->isActive());
+
+    metricIt = metricsManager1001->mAllMetricProducers.begin();
+    for (; metricIt != metricsManager1001->mAllMetricProducers.end(); metricIt++) {
+        if ((*metricIt)->getMetricId() == metricId2) {
+            break;
+        }
+    }
+    EXPECT_TRUE(metricIt != metricsManager1001->mAllMetricProducers.end());
+    auto& metricProducer1002 = *metricIt;
+    EXPECT_TRUE(metricProducer1002->isActive());
+
+    const auto& activation1001 = metricProducer1001->mEventActivationMap.begin()->second;
+    EXPECT_EQ(100 * NS_PER_SEC, activation1001.ttl_ns);
+    EXPECT_EQ(0, activation1001.activation_ns);
+    EXPECT_EQ(kNotActive, activation1001.state);
+
+    processor2->LoadMetricsActivationFromDisk();
+
+    EXPECT_TRUE(metricProducer1001->isActive());
+    EXPECT_EQ(timeBase2 + ttl1 - activation1001.ttl_ns, activation1001.activation_ns);
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

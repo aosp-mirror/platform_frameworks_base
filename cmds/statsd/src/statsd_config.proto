@@ -379,6 +379,13 @@ message EventActivation {
 message MetricActivation {
   optional int64 metric_id = 1;
 
+  enum ActivationType {
+      UNKNOWN = 0;
+      ACTIVATE_IMMEDIATELY = 1;
+      ACTIVATE_ON_BOOT = 2;
+  }
+  optional ActivationType activation_type = 3;
+
   repeated EventActivation event_activation = 2;
 }
 
