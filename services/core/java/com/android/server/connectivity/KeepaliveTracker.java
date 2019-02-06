@@ -381,8 +381,7 @@ public class KeepaliveTracker {
         }
         KeepaliveInfo ki = new KeepaliveInfo(messenger, binder, nai, packet, intervalSeconds);
         Log.d(TAG, "Created keepalive: " + ki.toString());
-        mConnectivityServiceHandler.obtainMessage(
-                CMD_START_SOCKET_KEEPALIVE, ki).sendToTarget();
+        mConnectivityServiceHandler.obtainMessage(CMD_START_SOCKET_KEEPALIVE, ki).sendToTarget();
     }
 
    /**
