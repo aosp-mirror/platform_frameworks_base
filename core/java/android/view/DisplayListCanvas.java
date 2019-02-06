@@ -37,7 +37,7 @@ public abstract class DisplayListCanvas extends BaseRecordingCanvas {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
     public abstract void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
             CanvasProperty<Float> right, CanvasProperty<Float> bottom, CanvasProperty<Float> rx,
             CanvasProperty<Float> ry, CanvasProperty<Paint> paint);
