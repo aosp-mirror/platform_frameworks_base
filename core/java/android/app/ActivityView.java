@@ -29,12 +29,17 @@ import android.content.Intent;
 import android.graphics.Insets;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.hardware.input.InputManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IWindowManager;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceSession;
@@ -344,6 +349,32 @@ public class ActivityView extends ViewGroup {
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         mSurfaceView.setVisibility(visibility);
+    }
+
+    /**
+     * Injects a pair of down/up key events with keycode {@link KeyEvent#KEYCODE_BACK} to the
+     * virtual display.
+     */
+    public void performBackPress() {
+        if (mVirtualDisplay == null) {
+            return;
+        }
+        final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
+        final InputManager im = InputManager.getInstance();
+        im.injectInputEvent(createKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, displayId),
+                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        im.injectInputEvent(createKeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK, displayId),
+                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    private static KeyEvent createKeyEvent(int action, int code, int displayId) {
+        long when = SystemClock.uptimeMillis();
+        final KeyEvent ev = new KeyEvent(when, when, action, code, 0 /* repeat */,
+                0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
+                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                InputDevice.SOURCE_KEYBOARD);
+        ev.setDisplayId(displayId);
+        return ev;
     }
 
     private void initVirtualDisplay(SurfaceSession surfaceSession) {
