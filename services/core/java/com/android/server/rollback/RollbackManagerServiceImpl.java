@@ -486,6 +486,47 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         });
     }
 
+    void onBootCompleted() {
+        getHandler().post(() -> {
+            // Check to see if any staged sessions with rollback enabled have
+            // been applied.
+            List<RollbackData> staged = new ArrayList<>();
+            synchronized (mLock) {
+                ensureRollbackDataLoadedLocked();
+                for (RollbackData data : mAvailableRollbacks) {
+                    if (data.stagedSessionId != -1) {
+                        staged.add(data);
+                    }
+                }
+            }
+
+            for (RollbackData data : staged) {
+                PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
+                PackageInstaller.SessionInfo session = installer.getSessionInfo(
+                        data.stagedSessionId);
+                if (session != null) {
+                    if (session.isSessionApplied()) {
+                        synchronized (mLock) {
+                            data.isAvailable = true;
+                        }
+                        try {
+                            mRollbackStore.saveAvailableRollback(data);
+                        } catch (IOException ioe) {
+                            Log.e(TAG, "Unable to save rollback info for : "
+                                    + data.rollbackId, ioe);
+                        }
+                    } else if (session.isSessionFailed()) {
+                        // TODO: Do we need to remove this from
+                        // mAvailableRollbacks, or is it okay to leave as
+                        // unavailable until the next reboot when it will go
+                        // away on its own?
+                        mRollbackStore.deleteAvailableRollback(data);
+                    }
+                }
+            }
+        });
+    }
+
     /**
      * Load rollback data from storage if it has not already been loaded.
      * After calling this funciton, mAvailableRollbacks and
@@ -725,6 +766,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // ourselves.
         PackageInstaller.SessionInfo session = null;
 
+        int parentSessionId = -1;
         PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
         for (PackageInstaller.SessionInfo info : installer.getAllSessions()) {
             if (info.isMultiPackage()) {
@@ -732,12 +774,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     PackageInstaller.SessionInfo child = installer.getSessionInfo(childId);
                     if (sessionMatchesForEnableRollback(child, installFlags, newPackageCodePath)) {
                         // TODO: Check we only have one matching session?
+                        parentSessionId = info.getSessionId();
                         session = child;
                         break;
                     }
                 }
             } else if (sessionMatchesForEnableRollback(info, installFlags, newPackageCodePath)) {
                 // TODO: Check we only have one matching session?
+                parentSessionId = info.getSessionId();
                 session = info;
                 break;
             }
@@ -745,6 +789,54 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         if (session == null) {
             Log.e(TAG, "Unable to find session id for enabled rollback.");
+            return false;
+        }
+
+        // Check to see if this is the apk session for a staged session with
+        // rollback enabled.
+        // TODO: This check could be made more efficient.
+        RollbackData rd = null;
+        synchronized (mLock) {
+            ensureRollbackDataLoadedLocked();
+            for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                RollbackData data = mAvailableRollbacks.get(i);
+                if (data.apkSessionId == parentSessionId) {
+                    rd = data;
+                    break;
+                }
+            }
+        }
+
+        if (rd != null) {
+            // This is the apk session for a staged session. We have already
+            // backed up the apks, we just need to do user data backup.
+            PackageParser.PackageLite newPackage = null;
+            try {
+                newPackage = PackageParser.parsePackageLite(
+                        new File(session.resolvedBaseCodePath), 0);
+            } catch (PackageParser.PackageParserException e) {
+                Log.e(TAG, "Unable to parse new package", e);
+                return false;
+            }
+            String packageName = newPackage.packageName;
+            for (PackageRollbackInfo info : rd.packages) {
+                if (info.getPackageName().equals(packageName)) {
+                    IntArray pendingBackups = mUserdataHelper.snapshotAppData(
+                            packageName, installedUsers);
+                    info.getPendingBackups().addAll(pendingBackups);
+                    try {
+                        mRollbackStore.saveAvailableRollback(rd);
+                    } catch (IOException ioe) {
+                        // TODO: Hopefully this is okay because we will try
+                        // again to save the rollback when the staged session
+                        // is applied. Just so long as the device doesn't
+                        // reboot before then.
+                        Log.e(TAG, "Unable to save rollback info for : " + rd.rollbackId, ioe);
+                    }
+                    return true;
+                }
+            }
+            Log.e(TAG, "Unable to find package in apk session");
             return false;
         }
 
@@ -926,6 +1018,32 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Log.e(TAG, "Interrupted while waiting for notifyStagedSession response");
             return false;
         }
+    }
+
+    @Override
+    public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
+        getHandler().post(() -> {
+            RollbackData rd = null;
+            synchronized (mLock) {
+                ensureRollbackDataLoadedLocked();
+                for (int i = 0; i < mAvailableRollbacks.size(); ++i) {
+                    RollbackData data = mAvailableRollbacks.get(i);
+                    if (data.stagedSessionId == originalSessionId) {
+                        data.apkSessionId = apkSessionId;
+                        rd = data;
+                        break;
+                    }
+                }
+            }
+
+            if (rd != null) {
+                try {
+                    mRollbackStore.saveAvailableRollback(rd);
+                } catch (IOException ioe) {
+                    Log.e(TAG, "Unable to save rollback info for : " + rd.rollbackId, ioe);
+                }
+            }
+        });
     }
 
     /**

@@ -64,6 +64,11 @@ class RollbackData {
     public boolean isAvailable;
 
     /**
+     * The id of the post-reboot apk session for a staged install, if any.
+     */
+    public int apkSessionId = -1;
+
+    /**
      * Whether this Rollback is currently in progress. This field is true from the point
      * we commit a {@code PackageInstaller} session containing these packages to the point the
      * {@code PackageInstaller} calls into the {@code onFinished} callback.
