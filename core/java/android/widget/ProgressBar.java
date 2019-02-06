@@ -211,7 +211,12 @@ public class ProgressBar extends View {
 
     private Drawable mIndeterminateDrawable;
     private Drawable mProgressDrawable;
-    @UnsupportedAppUsage
+    /**
+     * Outside the framework, instead of accessing this directly, please use
+     * {@link #getCurrentDrawable()}, {@link #setProgressDrawable(Drawable)},
+     * {@link #setIndeterminateDrawable(Drawable)} and their tiled versions.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private Drawable mCurrentDrawable;
     private ProgressTintInfo mProgressTintInfo;
 
@@ -1298,9 +1303,14 @@ public class ProgressBar extends View {
     }
 
     /**
-     * @return The drawable currently used to draw the progress bar
+     * Returns the drawable currently used to draw the progress bar. This will be
+     * either {@link #getProgressDrawable()} or {@link #getIndeterminateDrawable()}
+     * depending on whether the progress bar is in determinate or indeterminate mode.
+     *
+     * @return the drawable currently used to draw the progress bar
      */
-    Drawable getCurrentDrawable() {
+    @Nullable
+    public Drawable getCurrentDrawable() {
         return mCurrentDrawable;
     }
 
