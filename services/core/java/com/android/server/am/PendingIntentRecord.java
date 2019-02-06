@@ -384,6 +384,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             final boolean allowTrampoline = uid != callingUid
                     && controller.mAtmInternal.isUidForeground(callingUid);
 
+            // note: we on purpose don't pass in the information about the PendingIntent's creator,
+            // like pid or ProcessRecord, to the ActivityTaskManagerInternal calls below, because
+            // it's not unusual for the creator's process to not be alive at this time
             switch (key.type) {
                 case ActivityManager.INTENT_SENDER_ACTIVITY:
                     try {

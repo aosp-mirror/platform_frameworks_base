@@ -14997,7 +14997,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId);
+                                false, false, oldRecord.userId, oldRecord);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
                                 + queue.mQueueName + "] sending broadcast result of "

@@ -5666,6 +5666,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
+    WindowProcessController getProcessController(int pid, int uid) {
+        final ArrayMap<String, SparseArray<WindowProcessController>> pmap = mProcessNames.getMap();
+        for (int i = pmap.size()-1; i >= 0; i--) {
+            final SparseArray<WindowProcessController> procs = pmap.valueAt(i);
+            for (int j = procs.size() - 1; j >= 0; j--) {
+                final WindowProcessController proc = procs.valueAt(j);
+                if (UserHandle.isApp(uid) && proc.getPid() == pid && proc.mUid == uid) {
+                    return proc;
+                }
+            }
+        }
+        return null;
+    }
+
     int getUidStateLocked(int uid) {
         return mActiveUids.get(uid, PROCESS_STATE_NONEXISTENT);
     }
