@@ -4040,11 +4040,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }, formatToHexString = true)
 
     /* @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769414)
     public int mPrivateFlags;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768943)
     int mPrivateFlags2;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 129147060)
     int mPrivateFlags3;
 
     private int mPrivateFlags4;
