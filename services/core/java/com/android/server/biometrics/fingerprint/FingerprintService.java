@@ -192,6 +192,7 @@ public class FingerprintService extends BiometricServiceBase {
                 IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName,
                 int cookie, int callingUid, int callingPid, int callingUserId) {
             checkPermission(MANAGE_BIOMETRIC);
+            updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token,
