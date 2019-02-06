@@ -848,6 +848,7 @@ public class AppOpsManager {
     /** @hide Has a legacy (non-isolated) view of storage. */
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
     /** @hide Interact with accessibility. */
+    @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
 
     // Warning: If an permission is added here it also has to be added to

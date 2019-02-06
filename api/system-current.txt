@@ -306,6 +306,7 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(String, int, String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
+    field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
     field public static final String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
