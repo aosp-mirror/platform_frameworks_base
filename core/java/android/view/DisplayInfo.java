@@ -27,6 +27,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -281,7 +282,7 @@ public final class DisplayInfo implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769467)
     public DisplayInfo() {
     }
 
