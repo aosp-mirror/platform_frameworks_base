@@ -133,7 +133,7 @@ public final class Choreographer {
             };
 
     // Enable/disable vsync for animations and drawing.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769497)
     private static final boolean USE_VSYNC = SystemProperties.getBoolean(
             "debug.choreographer.vsync", true);
 
