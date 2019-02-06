@@ -103,6 +103,7 @@ import android.view.WindowInsetsAnimationListener.InsetsAnimation;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeIdManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -19041,6 +19042,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         jumpDrawablesToCurrentState();
 
+        AccessibilityNodeIdManager.getInstance().registerViewWithId(this, getAccessibilityViewId());
         resetSubtreeAccessibilityStateChanged();
 
         // rebuild, since Outline not maintained while View is detached
@@ -19433,6 +19435,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mViewFlags & TOOLTIP) == TOOLTIP) {
             hideTooltip();
         }
+
+        AccessibilityNodeIdManager.getInstance().unregisterViewWithId(getAccessibilityViewId());
     }
 
     private void cleanupDraw() {
@@ -23944,24 +23948,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             throw new IllegalArgumentException("ID does not reference a View inside this View");
         }
         return view;
-    }
-
-    /**
-     * Finds a view by its unuque and stable accessibility id.
-     *
-     * @param accessibilityId The searched accessibility id.
-     * @return The found view.
-     */
-    @UnsupportedAppUsage
-    final <T extends View> T findViewByAccessibilityId(int accessibilityId) {
-        if (accessibilityId < 0) {
-            return null;
-        }
-        T view = findViewByAccessibilityIdTraversal(accessibilityId);
-        if (view != null) {
-            return view.includeForAccessibility() ? view : null;
-        }
-        return null;
     }
 
     /**
