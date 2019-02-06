@@ -481,7 +481,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Optional callback to notify client when scroll position has changed
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769353)
     private OnScrollListener mOnScrollListener;
 
     /**
