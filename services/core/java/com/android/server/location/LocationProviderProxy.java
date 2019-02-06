@@ -183,12 +183,17 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(" service=" + mServiceWatcher);
+        pw.println("  service=" + mServiceWatcher);
+        synchronized (mProviderPackagesLock) {
+            if (mProviderPackages.size() > 1) {
+                pw.println("  additional packages=" + mProviderPackages);
+            }
+        }
         mServiceWatcher.runOnBinderBlocking(binder -> {
             try {
                 TransferPipe.dumpAsync(binder, fd, args);
             } catch (IOException | RemoteException e) {
-                pw.println(" failed to dump location provider");
+                pw.println("  <failed to dump location provider: " + e + ">");
             }
             return null;
         }, null);
