@@ -58,8 +58,6 @@ cc_library_static {
         "util.cc",
         "layout_validation.cc",
     ],
-    // b/123880763, clang-tidy analyzer has segmentation fault with dex_builder.cc
-    tidy_checks: ["-clang-analyzer-*"],
     host_supported: true,
 }
 
