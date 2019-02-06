@@ -780,7 +780,7 @@ public class ListView extends AbsListView {
      * @return The view that is currently selected, if it happens to be in the
      *         range that we draw.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private View fillDown(int pos, int nextTop) {
         View selectedView = null;
 
@@ -815,7 +815,7 @@ public class ListView extends AbsListView {
      *
      * @return The view that is currently selected
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private View fillUp(int pos, int nextBottom) {
         View selectedView = null;
 
@@ -1488,7 +1488,7 @@ public class ListView extends AbsListView {
      * @return The selected view, or null if the selected view is outside the
      *         visible area.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private View fillSpecific(int position, int top) {
         boolean tempIsSelected = position == mSelectedPosition;
         View temp = makeAndAddView(position, top, true, mListPadding.left, tempIsSelected);
