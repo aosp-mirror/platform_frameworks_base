@@ -19,10 +19,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
-import android.telephony.ims.RcsParticipant;
 import android.telephony.ims.RcsParticipantAliasChangedEvent;
+import android.telephony.ims.RcsParticipantAliasChangedEventDescriptor;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,27 +29,27 @@ import org.junit.runner.RunWith;
 public class RcsParticipantAliasChangedEventTest {
     private static final String OLD_ALIAS = "old alias";
     private static final String NEW_ALIAS = "new alias";
-    private RcsParticipant mParticipant;
-
-    @Before
-    public void setUp() {
-        mParticipant = new RcsParticipant(3);
-    }
+    private int mParticipantId = 3;
 
     @Test
     public void testCanUnparcel() {
-        RcsParticipantAliasChangedEvent aliasChangedEvent =
-                new RcsParticipantAliasChangedEvent(1234567890, mParticipant, NEW_ALIAS);
+        RcsParticipantAliasChangedEventDescriptor aliasChangedEventDescriptor =
+                new RcsParticipantAliasChangedEventDescriptor(
+                        1234567890, mParticipantId, NEW_ALIAS);
 
         Parcel parcel = Parcel.obtain();
-        aliasChangedEvent.writeToParcel(parcel, aliasChangedEvent.describeContents());
+        aliasChangedEventDescriptor.writeToParcel(
+                parcel, aliasChangedEventDescriptor.describeContents());
 
         parcel.setDataPosition(0);
 
-        aliasChangedEvent = RcsParticipantAliasChangedEvent.CREATOR.createFromParcel(
-                parcel);
+        aliasChangedEventDescriptor = RcsParticipantAliasChangedEventDescriptor.CREATOR
+                .createFromParcel(parcel);
 
-        assertThat(aliasChangedEvent.getParticipantId().getId()).isEqualTo(3);
+        RcsParticipantAliasChangedEvent aliasChangedEvent =
+                aliasChangedEventDescriptor.createRcsEvent();
+
+        assertThat(aliasChangedEvent.getParticipant().getId()).isEqualTo(mParticipantId);
         assertThat(aliasChangedEvent.getNewAlias()).isEqualTo(NEW_ALIAS);
         assertThat(aliasChangedEvent.getTimestamp()).isEqualTo(1234567890);
     }
