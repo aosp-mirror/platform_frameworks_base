@@ -1594,7 +1594,7 @@
     <integer-array name="config_screenBrighteningThresholds">
         <item>100</item>
     </integer-array>
- 
+
     <!-- Array of hysteresis constraint values for darkening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than
          config_screenThresholdLevels. The darkening threshold is calculated as
@@ -3424,8 +3424,10 @@
     <!-- Flag indicates that whether non-system apps can be installed on internal storage. -->
     <bool name="config_allow3rdPartyAppOnInternal">true</bool>
 
-    <!-- Package name of the default cell broadcast receiver -->
-    <string name="config_defaultCellBroadcastReceiverPkg" translatable="false">com.android.cellbroadcastreceiver</string>
+    <!-- Package names of the default cell broadcast receivers -->
+    <string-array name="config_defaultCellBroadcastReceiverPkgs" translatable="false">
+        <item>com.android.cellbroadcastreceiver</item>
+    </string-array>
 
     <!-- Specifies the path that is used by AdaptiveIconDrawable class to crop launcher icons. -->
     <string name="config_icon_mask" translatable="false">"M50,0L92,0C96.42,0 100,4.58 100 8L100,92C100, 96.42 96.42 100 92 100L8 100C4.58, 100 0 96.42 0 92L0 8 C 0 4.42 4.42 0 8 0L50 0Z"</string>
