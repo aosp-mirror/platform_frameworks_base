@@ -87,7 +87,7 @@ status_t TaskManager::WorkerThread::readyToRun() {
     setpriority(PRIO_PROCESS, 0, PRIORITY_FOREGROUND);
     auto onStartHook = renderthread::RenderThread::getOnStartHook();
     if (onStartHook) {
-        onStartHook();
+        onStartHook(mName.c_str());
     }
 
     return NO_ERROR;
