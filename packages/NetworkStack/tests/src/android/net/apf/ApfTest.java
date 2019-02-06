@@ -39,13 +39,14 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.SocketKeepalive;
+import android.net.TcpKeepalivePacketData;
+import android.net.TcpKeepalivePacketData.TcpSocketInfo;
 import android.net.apf.ApfFilter.ApfConfiguration;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IIpClientCallbacks;
-import android.net.ip.IpClient;
 import android.net.ip.IpClient.IpClientCallbacksWrapper;
-import android.net.ip.IpClientCallbacks;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.RaEvent;
 import android.net.util.InterfaceParams;
@@ -1003,15 +1004,31 @@ public class ApfTest {
     private static final byte[] ETH_BROADCAST_MAC_ADDRESS =
             {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
 
+    private static final int IPV4_HEADER_LEN = 20;
     private static final int IPV4_VERSION_IHL_OFFSET = ETH_HEADER_LEN + 0;
+    private static final int IPV4_TOTAL_LENGTH_OFFSET  = ETH_HEADER_LEN + 2;
     private static final int IPV4_PROTOCOL_OFFSET = ETH_HEADER_LEN + 9;
+    private static final int IPV4_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 12;
     private static final int IPV4_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 16;
+    private static final int IPV4_TCP_HEADER_LEN = 20;
+    private static final int IPV4_TCP_HEADER_OFFSET = ETH_HEADER_LEN + IPV4_HEADER_LEN;
+    private static final int IPV4_TCP_SRC_PORT_OFFSET = IPV4_TCP_HEADER_OFFSET + 0;
+    private static final int IPV4_TCP_DEST_PORT_OFFSET = IPV4_TCP_HEADER_OFFSET + 2;
+    private static final int IPV4_TCP_SEQ_NUM_OFFSET = IPV4_TCP_HEADER_OFFSET + 4;
+    private static final int IPV4_TCP_ACK_NUM_OFFSET = IPV4_TCP_HEADER_OFFSET + 8;
+    private static final int IPV4_TCP_HEADER_LENGTH_OFFSET = IPV4_TCP_HEADER_OFFSET + 12;
     private static final byte[] IPV4_BROADCAST_ADDRESS =
             {(byte) 255, (byte) 255, (byte) 255, (byte) 255};
 
     private static final int IPV6_NEXT_HEADER_OFFSET = ETH_HEADER_LEN + 6;
     private static final int IPV6_HEADER_LEN = 40;
+    private static final int IPV6_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 8;
     private static final int IPV6_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 24;
+    private static final int IPV6_TCP_HEADER_OFFSET = ETH_HEADER_LEN + IPV6_HEADER_LEN;
+    private static final int IPV6_TCP_SRC_PORT_OFFSET = IPV6_TCP_HEADER_OFFSET + 0;
+    private static final int IPV6_TCP_DEST_PORT_OFFSET = IPV6_TCP_HEADER_OFFSET + 2;
+    private static final int IPV6_TCP_SEQ_NUM_OFFSET = IPV6_TCP_HEADER_OFFSET + 4;
+    private static final int IPV6_TCP_ACK_NUM_OFFSET = IPV6_TCP_HEADER_OFFSET + 8;
     // The IPv6 all nodes address ff02::1
     private static final byte[] IPV6_ALL_NODES_ADDRESS =
             { (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
@@ -1488,6 +1505,200 @@ public class ApfTest {
         put(packet, ETH_DEST_ADDR_OFFSET, ETH_BROADCAST_MAC_ADDRESS);
         put(packet, ARP_HEADER_OFFSET, ARP_IPV4_REPLY_HEADER);
         put(packet, ARP_TARGET_IP_ADDRESS_OFFSET, IPV4_ANY_HOST_ADDR);
+        return packet.array();
+    }
+
+    private static final byte[] IPV4_KEEPALIVE_SRC_ADDR = {10, 0, 0, 5};
+    private static final byte[] IPV4_KEEPALIVE_DST_ADDR = {10, 0, 0, 6};
+    private static final byte[] IPV4_ANOTHER_ADDR = {10, 0 , 0, 7};
+    private static final byte[] IPV6_KEEPALIVE_SRC_ADDR =
+            {(byte) 0x24, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xfa, (byte) 0xf1};
+    private static final byte[] IPV6_KEEPALIVE_DST_ADDR =
+            {(byte) 0x24, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xfa, (byte) 0xf2};
+    private static final byte[] IPV6_ANOTHER_ADDR =
+            {(byte) 0x24, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xfa, (byte) 0xf5};
+
+    @Test
+    public void testApfFilterKeepaliveAck() throws Exception {
+        final MockIpClientCallback cb = new MockIpClientCallback();
+        final ApfConfiguration config = getDefaultConfig();
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        final TestApfFilter apfFilter = new TestApfFilter(mContext, config, cb, mLog);
+        byte[] program;
+        final int srcPort = 12345;
+        final int dstPort = 54321;
+        final int seqNum = 2123456789;
+        final int ackNum = 1234567890;
+        final int anotherSrcPort = 23456;
+        final int anotherDstPort = 65432;
+        final int anotherSeqNum = 2123456780;
+        final int anotherAckNum = 1123456789;
+        final int slot1 = 1;
+        final int slot2 = 2;
+        final int window = 14480;
+        final int windowScale = 4;
+
+        // src: 10.0.0.5, port: 12345
+        // dst: 10.0.0.6, port: 54321
+        InetAddress srcAddr = InetAddress.getByAddress(IPV4_KEEPALIVE_SRC_ADDR);
+        InetAddress dstAddr = InetAddress.getByAddress(IPV4_KEEPALIVE_DST_ADDR);
+
+        final TcpSocketInfo v4Tsi = new TcpSocketInfo(
+                srcAddr, srcPort, dstAddr, dstPort, seqNum, ackNum, window, windowScale);
+        final TcpKeepalivePacketData ipv4TcpKeepalivePacket =
+                TcpKeepalivePacketData.tcpKeepalivePacket(v4Tsi);
+
+        apfFilter.addKeepalivePacketFilter(slot1, ipv4TcpKeepalivePacket.toStableParcelable());
+        program = cb.getApfProgram();
+
+        // Verify IPv4 keepalive ack packet is dropped
+        // src: 10.0.0.6, port: 54321
+        // dst: 10.0.0.5, port: 12345
+        assertDrop(program,
+                ipv4Packet(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                        dstPort, srcPort, ackNum, seqNum + 1, 0 /* dataLength */));
+        // Verify IPv4 non-keepalive ack packet from the same source address is passed
+        assertPass(program,
+                ipv4Packet(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                        dstPort, srcPort, ackNum + 100, seqNum, 0 /* dataLength */));
+        assertPass(program,
+                ipv4Packet(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                        dstPort, srcPort, ackNum, seqNum + 1, 10 /* dataLength */));
+        // Verify IPv4 packet from another address is passed
+        assertPass(program,
+                ipv4Packet(IPV4_ANOTHER_ADDR, IPV4_KEEPALIVE_SRC_ADDR, anotherSrcPort,
+                        anotherDstPort, anotherSeqNum, anotherAckNum));
+
+        // Remove IPv4 keepalive filter
+        apfFilter.removeKeepalivePacketFilter(slot1);
+
+        try {
+            // src: 2404:0:0:0:0:0:faf1, port: 12345
+            // dst: 2404:0:0:0:0:0:faf2, port: 54321
+            srcAddr = InetAddress.getByAddress(IPV6_KEEPALIVE_SRC_ADDR);
+            dstAddr = InetAddress.getByAddress(IPV6_KEEPALIVE_DST_ADDR);
+            final TcpSocketInfo v6Tsi = new TcpSocketInfo(
+                    srcAddr, srcPort, dstAddr, dstPort, seqNum, ackNum, window, windowScale);
+            final TcpKeepalivePacketData ipv6TcpKeepalivePacket =
+                    TcpKeepalivePacketData.tcpKeepalivePacket(v6Tsi);
+            apfFilter.addKeepalivePacketFilter(slot1, ipv6TcpKeepalivePacket.toStableParcelable());
+            program = cb.getApfProgram();
+
+            // Verify IPv6 keepalive ack packet is dropped
+            // src: 2404:0:0:0:0:0:faf2, port: 54321
+            // dst: 2404:0:0:0:0:0:faf1, port: 12345
+            assertDrop(program,
+                    ipv6Packet(IPV6_KEEPALIVE_DST_ADDR, IPV6_KEEPALIVE_SRC_ADDR,
+                            dstPort, srcPort, ackNum, seqNum + 1));
+            // Verify IPv6 non-keepalive ack packet from the same source address is passed
+            assertPass(program,
+                    ipv6Packet(IPV6_KEEPALIVE_DST_ADDR, IPV6_KEEPALIVE_SRC_ADDR,
+                            dstPort, srcPort, ackNum + 100, seqNum));
+            // Verify IPv6 packet from another address is passed
+            assertPass(program,
+                    ipv6Packet(IPV6_ANOTHER_ADDR, IPV6_KEEPALIVE_SRC_ADDR, anotherSrcPort,
+                            anotherDstPort, anotherSeqNum, anotherAckNum));
+
+            // Remove IPv6 keepalive filter
+            apfFilter.removeKeepalivePacketFilter(slot1);
+
+            // Verify multiple filters
+            apfFilter.addKeepalivePacketFilter(slot1, ipv4TcpKeepalivePacket.toStableParcelable());
+            apfFilter.addKeepalivePacketFilter(slot2, ipv6TcpKeepalivePacket.toStableParcelable());
+            program = cb.getApfProgram();
+
+            // Verify IPv4 keepalive ack packet is dropped
+            // src: 10.0.0.6, port: 54321
+            // dst: 10.0.0.5, port: 12345
+            assertDrop(program,
+                    ipv4Packet(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                            dstPort, srcPort, ackNum, seqNum + 1));
+            // Verify IPv4 non-keepalive ack packet from the same source address is passed
+            assertPass(program,
+                    ipv4Packet(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                            dstPort, srcPort, ackNum + 100, seqNum));
+            // Verify IPv4 packet from another address is passed
+            assertPass(program,
+                    ipv4Packet(IPV4_ANOTHER_ADDR, IPV4_KEEPALIVE_SRC_ADDR, anotherSrcPort,
+                            anotherDstPort, anotherSeqNum, anotherAckNum));
+
+            // Verify IPv6 keepalive ack packet is dropped
+            // src: 2404:0:0:0:0:0:faf2, port: 54321
+            // dst: 2404:0:0:0:0:0:faf1, port: 12345
+            assertDrop(program,
+                    ipv6Packet(IPV6_KEEPALIVE_DST_ADDR, IPV6_KEEPALIVE_SRC_ADDR,
+                            dstPort, srcPort, ackNum, seqNum + 1));
+            // Verify IPv6 non-keepalive ack packet from the same source address is passed
+            assertPass(program,
+                    ipv6Packet(IPV6_KEEPALIVE_DST_ADDR, IPV6_KEEPALIVE_SRC_ADDR,
+                            dstPort, srcPort, ackNum + 100, seqNum));
+            // Verify IPv6 packet from another address is passed
+            assertPass(program,
+                    ipv6Packet(IPV6_ANOTHER_ADDR, IPV6_KEEPALIVE_SRC_ADDR, anotherSrcPort,
+                            anotherDstPort, anotherSeqNum, anotherAckNum));
+
+            // Remove keepalive filters
+            apfFilter.removeKeepalivePacketFilter(slot1);
+            apfFilter.removeKeepalivePacketFilter(slot2);
+        } catch (SocketKeepalive.InvalidPacketException e) {
+            // TODO: support V6 packets
+        }
+
+        program = cb.getApfProgram();
+
+        // Verify IPv4, IPv6 packets are passed
+        assertPass(program,
+                ipv4Packet(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                        dstPort, srcPort, ackNum, seqNum + 1));
+        assertPass(program,
+                ipv6Packet(IPV6_KEEPALIVE_DST_ADDR, IPV6_KEEPALIVE_SRC_ADDR,
+                        dstPort, srcPort, ackNum, seqNum + 1));
+        assertPass(program,
+                ipv4Packet(IPV4_ANOTHER_ADDR, IPV4_KEEPALIVE_SRC_ADDR, srcPort,
+                        dstPort, anotherSeqNum, anotherAckNum));
+        assertPass(program,
+                ipv6Packet(IPV6_ANOTHER_ADDR, IPV6_KEEPALIVE_SRC_ADDR, srcPort,
+                        dstPort, anotherSeqNum, anotherAckNum));
+
+        apfFilter.shutdown();
+    }
+
+    private static byte[] ipv4Packet(byte[] sip, byte[] tip, int sport,
+            int dport, int seq, int ack) {
+        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
+        packet.putShort(ETH_ETHERTYPE_OFFSET, (short) ETH_P_IP);
+        packet.put(IPV4_VERSION_IHL_OFFSET, (byte) 0x45);
+        put(packet, IPV4_SRC_ADDR_OFFSET, sip);
+        put(packet, IPV4_DEST_ADDR_OFFSET, tip);
+        packet.putShort(IPV4_TCP_SRC_PORT_OFFSET, (short) sport);
+        packet.putShort(IPV4_TCP_DEST_PORT_OFFSET, (short) dport);
+        packet.putInt(IPV4_TCP_SEQ_NUM_OFFSET, seq);
+        packet.putInt(IPV4_TCP_ACK_NUM_OFFSET, ack);
+        return packet.array();
+    }
+
+    private static byte[] ipv4Packet(byte[] sip, byte[] tip, int sport,
+            int dport, int seq, int ack, int dataLength) {
+        final int totalLength = dataLength + IPV4_HEADER_LEN + IPV4_TCP_HEADER_LEN;
+
+        ByteBuffer packet = ByteBuffer.wrap(ipv4Packet(sip, tip, sport, dport, seq, ack));
+        packet.putShort(IPV4_TOTAL_LENGTH_OFFSET, (short) totalLength);
+        // TCP header length 5, reserved 3 bits, NS=0
+        packet.put(IPV4_TCP_HEADER_LENGTH_OFFSET, (byte) 0x50);
+        return packet.array();
+    }
+
+    private static byte[] ipv6Packet(byte[] sip, byte[] tip, int sport,
+            int dport, int seq, int ack) {
+        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
+        packet.putShort(ETH_ETHERTYPE_OFFSET, (short) ETH_P_IPV6);
+        put(packet, IPV6_SRC_ADDR_OFFSET, sip);
+        put(packet, IPV6_DEST_ADDR_OFFSET, tip);
+        packet.putShort(IPV6_TCP_SRC_PORT_OFFSET, (short) sport);
+        packet.putShort(IPV6_TCP_DEST_PORT_OFFSET, (short) dport);
+        packet.putInt(IPV6_TCP_SEQ_NUM_OFFSET, seq);
+        packet.putInt(IPV6_TCP_ACK_NUM_OFFSET, ack);
         return packet.array();
     }
 
