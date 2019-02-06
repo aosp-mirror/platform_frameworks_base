@@ -4020,8 +4020,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * {@hide}
+     *
+     * Not available for general use. If you need help, hang up and then dial one of the following
+     * public APIs:
+     *
+     * @see #isAttachedToWindow() for current attach state
+     * @see #onAttachedToWindow() for subclasses performing work when becoming attached
+     * @see #onDetachedFromWindow() for subclasses performing work when becoming detached
+     * @see OnAttachStateChangeListener for other code performing work on attach/detach
+     * @see #getHandler() for posting messages to this view's UI thread/looper
+     * @see #getParent() for interacting with the parent chain
+     * @see #getWindowToken() for the current window token
+     * @see #getRootView() for the view at the root of the attached hierarchy
+     * @see #getDisplay() for the Display this view is presented on
+     * @see #getRootWindowInsets() for the current insets applied to the whole attached window
+     * @see #hasWindowFocus() for whether the attached window is currently focused
+     * @see #getWindowVisibility() for checking the visibility of the attached window
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     AttachInfo mAttachInfo;
 
     /**
@@ -28065,18 +28081,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * requestLayout() is called during layout.
          */
         View mViewRequestingLayout;
-
-        /**
-         * Used to track views that need (at least) a partial relayout at their current size
-         * during the next traversal.
-         */
-        List<View> mPartialLayoutViews = new ArrayList<>();
-
-        /**
-         * Swapped with mPartialLayoutViews during layout to avoid concurrent
-         * modification. Lazily assigned during ViewRootImpl layout.
-         */
-        List<View> mEmptyPartialLayoutViews;
 
         /**
          * Used to track the identity of the current drag operation.
