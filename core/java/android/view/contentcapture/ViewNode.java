@@ -600,7 +600,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
     /** @hide */
     public static @Nullable ViewNode readFromParcel(@NonNull Parcel parcel) {
         final long nodeFlags = parcel.readLong();
-        return nodeFlags == 0 ? new ViewNode() : new ViewNode(nodeFlags, parcel);
+        return nodeFlags == 0 ? null : new ViewNode(nodeFlags, parcel);
     }
 
     /** @hide */
