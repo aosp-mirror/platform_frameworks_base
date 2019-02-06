@@ -314,7 +314,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769647)
     protected static final int FLAG_SUPPORT_STATIC_TRANSFORMATIONS = 0x800;
 
     // UNUSED FLAG VALUE: 0x1000;
