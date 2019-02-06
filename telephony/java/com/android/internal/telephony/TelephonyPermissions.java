@@ -29,6 +29,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
@@ -319,9 +320,10 @@ public final class TelephonyPermissions {
         // The new Q restrictions for device identifier access will be enforced for all apps with
         // settings to individually disable the new restrictions for privileged, preloaded
         // non-privileged, and 3P apps.
-        if ((!is3PApp && !isNonPrivApp && !relaxPrivDeviceIdentifierCheck)
-                || (is3PApp && !relax3PDeviceIdentifierCheck)
-                || (isNonPrivApp && !relaxNonPrivDeviceIdentifierCheck)) {
+        if (!isIdentifierCheckDisabled() && (
+                (!is3PApp && !isNonPrivApp && !relaxPrivDeviceIdentifierCheck)
+                        || (is3PApp && !relax3PDeviceIdentifierCheck)
+                        || (isNonPrivApp && !relaxNonPrivDeviceIdentifierCheck))) {
             Log.wtf(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message
                     + ":is3PApp=" + is3PApp + ":isNonPrivApp=" + isNonPrivApp);
             // if the target SDK is pre-Q then check if the calling package would have previously
@@ -345,6 +347,14 @@ public final class TelephonyPermissions {
         } else {
             return checkReadPhoneState(context, subId, pid, uid, callingPackage, message);
         }
+    }
+
+    /**
+     * Returns true if the new device identifier access restrictions are disabled.
+     */
+    private static boolean isIdentifierCheckDisabled() {
+        return Boolean.parseBoolean(DeviceConfig.getProperty(DeviceConfig.Privacy.NAMESPACE,
+                DeviceConfig.Privacy.PROPERTY_DEVICE_IDENTIFIER_ACCESS_RESTRICTIONS_DISABLED));
     }
 
     /**

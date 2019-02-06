@@ -239,6 +239,14 @@ public final class DeviceConfig {
          * Whether to show location access check notifications.
          */
         String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
+
+        /**
+         * Whether to disable the new device identifier access restrictions.
+         *
+         * @hide
+         */
+        String PROPERTY_DEVICE_IDENTIFIER_ACCESS_RESTRICTIONS_DISABLED =
+                "device_identifier_access_restrictions_disabled";
     }
 
     /**
