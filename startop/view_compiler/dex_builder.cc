@@ -426,7 +426,7 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruct
     // Some of the registers don't fit in the four bit short form of the invoke
     // instruction, so we need to do an invoke/range. To do this, we need to
     // first move all the arguments into contiguous temporary registers.
-    std::array<Value, kMaxArgs> scratch{GetScratchRegisters<kMaxArgs>()};
+    std::array<Value, kMaxArgs> scratch = GetScratchRegisters<kMaxArgs>();
 
     const auto& prototype = dex_->GetPrototypeByMethodId(instruction.method_id());
     CHECK(prototype.has_value());
