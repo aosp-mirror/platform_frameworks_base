@@ -1,0 +1,30 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// This is a cc_test just because it supports test_suites. This should be converted to something
+// like cc_binary_test_helper once supported.
+cc_test {
+    // Depending on how the test runs, the executable may be uploaded to different location.
+    // Before the bug in the file pusher is fixed, workaround by making the name unique.
+    // See b/124718249#comment12.
+    name: "block_device_writer_module",
+    stem: "block_device_writer",
+
+    srcs: ["block_device_writer.cpp"],
+    cflags: ["-Wall", "-Werror", "-Wextra", "-g"],
+    shared_libs: ["libbase", "libutils"],
+
+    test_suites: ["general-tests"],
+    gtest: false,
+}
