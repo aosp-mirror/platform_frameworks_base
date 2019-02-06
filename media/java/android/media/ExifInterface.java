@@ -31,6 +31,8 @@ import android.system.OsConstants;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.util.ArrayUtils;
+
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -395,6 +397,12 @@ public class ExifInterface {
      * http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html
      */
     public static final String TAG_RW2_JPG_FROM_RAW = "JpgFromRaw";
+    /**
+     * Type is byte[]. See <a href=
+     * "https://en.wikipedia.org/wiki/Extensible_Metadata_Platform">Extensible
+     * Metadata Platform (XMP)</a> for details on contents.
+     */
+    public static final String TAG_XMP = "Xmp";
 
     /**
      * Private tags used for pointing the other IFD offsets.
@@ -1012,7 +1020,8 @@ public class ExifInterface {
             new ExifTag(TAG_RW2_SENSOR_BOTTOM_BORDER, 6, IFD_FORMAT_ULONG),
             new ExifTag(TAG_RW2_SENSOR_RIGHT_BORDER, 7, IFD_FORMAT_ULONG),
             new ExifTag(TAG_RW2_ISO, 23, IFD_FORMAT_USHORT),
-            new ExifTag(TAG_RW2_JPG_FROM_RAW, 46, IFD_FORMAT_UNDEFINED)
+            new ExifTag(TAG_RW2_JPG_FROM_RAW, 46, IFD_FORMAT_UNDEFINED),
+            new ExifTag(TAG_XMP, 700, IFD_FORMAT_BYTE),
     };
 
     // Primary image IFD Exif Private tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
@@ -1243,6 +1252,8 @@ public class ExifInterface {
     private static final Charset ASCII = Charset.forName("US-ASCII");
     // Identifier for EXIF APP1 segment in JPEG
     private static final byte[] IDENTIFIER_EXIF_APP1 = "Exif\0\0".getBytes(ASCII);
+    // Identifier for XMP APP1 segment in JPEG
+    private static final byte[] IDENTIFIER_XMP_APP1 = "http://ns.adobe.com/xap/1.0/\0".getBytes(ASCII);
     // JPEG segment markers, that each marker consumes two bytes beginning with 0xff and ending with
     // the indicator. There is no SOF4, SOF8, SOF16 markers in JPEG and SOFx markers indicates start
     // of frame(baseline DCT) and the image size info exists in its beginning part.
@@ -2046,6 +2057,22 @@ public class ExifInterface {
     }
 
     /**
+     * Returns the raw bytes for the value of the requested tag inside the image
+     * file, or {@code null} if the tag is not contained.
+     *
+     * @return raw bytes for the value of the requested tag, or {@code null} if
+     *         no tag was found.
+     */
+    public @Nullable byte[] getAttributeBytes(@NonNull String tag) {
+        final ExifAttribute attribute = getExifAttribute(tag);
+        if (attribute != null) {
+            return attribute.bytes;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Stores the latitude and longitude value in a float array. The first element is
      * the latitude, and the second element is the longitude. Returns false if the
      * Exif tags are not available.
@@ -2432,40 +2459,32 @@ public class ExifInterface {
             }
             switch (marker) {
                 case MARKER_APP1: {
-                    if (DEBUG) {
-                        Log.d(TAG, "MARKER_APP1");
-                    }
-                    if (length < 6) {
-                        // Skip if it's not an EXIF APP1 segment.
-                        break;
-                    }
-                    byte[] identifier = new byte[6];
-                    if (in.read(identifier) != 6) {
-                        throw new IOException("Invalid exif");
-                    }
-                    bytesRead += 6;
-                    length -= 6;
-                    if (!Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
-                        // Skip if it's not an EXIF APP1 segment.
-                        break;
-                    }
-                    if (length <= 0) {
-                        throw new IOException("Invalid exif");
-                    }
-                    if (DEBUG) {
-                        Log.d(TAG, "readExifSegment with a byte array (length: " + length + ")");
-                    }
-                    // Save offset values for createJpegThumbnailBitmap() function
-                    mExifOffset = bytesRead;
-
-                    byte[] bytes = new byte[length];
-                    if (in.read(bytes) != length) {
-                        throw new IOException("Invalid exif");
-                    }
+                    final int start = bytesRead;
+                    final byte[] bytes = new byte[length];
+                    in.readFully(bytes);
                     bytesRead += length;
                     length = 0;
 
-                    readExifSegment(bytes, imageType);
+                    if (ArrayUtils.startsWith(bytes, IDENTIFIER_EXIF_APP1)) {
+                        final long offset = start + IDENTIFIER_EXIF_APP1.length;
+                        final byte[] value = Arrays.copyOfRange(bytes,
+                                IDENTIFIER_EXIF_APP1.length, bytes.length);
+
+                        readExifSegment(value, imageType);
+
+                        // Save offset values for createJpegThumbnailBitmap() function
+                        mExifOffset = (int) offset;
+                    } else if (ArrayUtils.startsWith(bytes, IDENTIFIER_XMP_APP1)) {
+                        // See XMP Specification Part 3: Storage in Files, 1.1.3 JPEG, Table 6
+                        final long offset = start + IDENTIFIER_XMP_APP1.length;
+                        final byte[] value = Arrays.copyOfRange(bytes,
+                                IDENTIFIER_XMP_APP1.length, bytes.length);
+
+                        if (getAttribute(TAG_XMP) == null) {
+                            mAttributes[IFD_TYPE_PRIMARY].put(TAG_XMP, new ExifAttribute(
+                                    IFD_FORMAT_BYTE, value.length, offset, value));
+                        }
+                    }
                     break;
                 }
 
