@@ -342,7 +342,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
 
         assertRunOnServiceThread();
-        if (!initiatedByCec && mIsActiveSource) {
+        if (!initiatedByCec && mIsActiveSource && mService.isControlEnabled()) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
                     mAddress, mService.getPhysicalAddress()));
         }
