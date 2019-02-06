@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_MEDIA_MIDI_H_
-#define ANDROID_MEDIA_MIDI_H_
+#ifndef ANDROID_MEDIA_AMIDI_H_
+#define ANDROID_MEDIA_AMIDI_H_
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -66,9 +66,9 @@ enum {
  * @param outDevicePtrPtr  Points to the pointer to receive the AMidiDevice
  *
  * @return AMEDIA_OK on success, or a negative error value:
- *  @see AMEDIA_ERROR_INVALID_OBJECT {@link AMEDIA_ERROR_INVALID_OBJECT} - the midiDeviceObj
+ *  @see AMEDIA_ERROR_INVALID_OBJECT - the midiDeviceObj
  *    is null or already connected to a native AMidiDevice
-  *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN} - an unknown error occurred.
+  *  @see AMEDIA_ERROR_UNKNOWN - an unknown error occurred.
  */
 media_status_t AMIDI_API AMidiDevice_fromJava(
         JNIEnv *env, jobject midiDeviceObj, AMidiDevice **outDevicePtrPtr) __INTRODUCED_IN(29);
@@ -80,13 +80,10 @@ media_status_t AMIDI_API AMidiDevice_fromJava(
  *
  * @return AMEDIA_OK on success,
  * or a negative error value:
- *  @see AMEDIA_ERROR_INVALID_PARAMETER {@link AMEDIA_ERROR_INVALID_PARAMETER}
- *  - the device parameter is NULL.
- *  @see AMEDIA_ERROR_INVALID_OBJECT {@link AMEDIA_ERROR_INVALID_OBJECT}
- *  - the device is not consistent with the associated Java MidiDevice.
- *  @see AMEDIA_ERROR_INVALID_OBJECT {@link AMEDIA_ERROR_INVALID_OBJECT}
- *  - the JNI interface initialization to the associated java MidiDevice failed.
- *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN} - couldn't retrieve the device info.
+ *  @see AMEDIA_ERROR_INVALID_PARAMETER - the device parameter is NULL.
+ *  @see AMEDIA_ERROR_INVALID_OBJECT - the device is not consistent with the associated Java MidiDevice.
+ *  @see AMEDIA_ERROR_INVALID_OBJECT - the JNI interface initialization to the associated java MidiDevice failed.
+ *  @see AMEDIA_ERROR_UNKNOWN - couldn't retrieve the device info.
  */
 media_status_t AMIDI_API AMidiDevice_release(const AMidiDevice *midiDevice) __INTRODUCED_IN(29);
 
@@ -100,9 +97,8 @@ media_status_t AMIDI_API AMidiDevice_release(const AMidiDevice *midiDevice) __IN
  *  AMIDI_DEVICE_TYPE_VIRTUAL
  *  AMIDI_DEVICE_TYPE_BLUETOOTH
  * or a negative error value:
- *  @see AMEDIA_ERROR_INVALID_PARAMETER {@link AMEDIA_ERROR_INVALID_PARAMETER} - the device
- *  parameter is NULL.
- *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN} - Unknown error.
+ *  @see AMEDIA_ERROR_INVALID_PARAMETER - the device parameter is NULL.
+ *  @see AMEDIA_ERROR_UNKNOWN - Unknown error.
  */
 int32_t AMIDI_API AMidiDevice_getType(const AMidiDevice *device) __INTRODUCED_IN(29);
 
@@ -113,9 +109,8 @@ int32_t AMIDI_API AMidiDevice_getType(const AMidiDevice *device) __INTRODUCED_IN
  *
  * @return If successful, returns the number of MIDI input (sending) ports available on the
  * device. If an error occurs, returns a negative value indicating the error:
- *  @see AMEDIA_ERROR_INVALID_PARAMETER {@link AMEDIA_ERROR_INVALID_PARAMETER} - the device
- *  parameter is NULL.
- *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN} - couldn't retrieve the device info.
+ *  @see AMEDIA_ERROR_INVALID_PARAMETER - the device parameter is NULL.
+ *  @see AMEDIA_ERROR_UNKNOWN - couldn't retrieve the device info.
  */
 ssize_t AMIDI_API AMidiDevice_getNumInputPorts(const AMidiDevice *device) __INTRODUCED_IN(29);
 
@@ -126,9 +121,8 @@ ssize_t AMIDI_API AMidiDevice_getNumInputPorts(const AMidiDevice *device) __INTR
  *
  * @return If successful, returns the number of MIDI output (receiving) ports available on the
  * device. If an error occurs, returns a negative value indicating the error:
- *  @see AMEDIA_ERROR_INVALID_PARAMETER {@link AMEDIA_ERROR_INVALID_PARAMETER} - the device
- *  parameter is NULL.
- *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN}- couldn't retrieve the device info.
+ *  @see AMEDIA_ERROR_INVALID_PARAMETER - the device parameter is NULL.
+ *  @see AMEDIA_ERROR_UNKNOWN - couldn't retrieve the device info.
  */
 ssize_t AMIDI_API AMidiDevice_getNumOutputPorts(const AMidiDevice *device) __INTRODUCED_IN(29);
 
@@ -146,7 +140,7 @@ ssize_t AMIDI_API AMidiDevice_getNumOutputPorts(const AMidiDevice *device) __INT
  * @param outOutputPortPtr Receives the native API port identifier of the opened port.
  *
  * @return AMEDIA_OK, or a negative error code:
- *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN} - Unknown Error.
+ *  @see AMEDIA_ERROR_UNKNOWN - Unknown Error.
  */
 media_status_t AMIDI_API AMidiOutputPort_open(const AMidiDevice *device, int32_t portNumber,
                              AMidiOutputPort **outOutputPortPtr) __INTRODUCED_IN(29);
@@ -174,7 +168,7 @@ void AMIDI_API AMidiOutputPort_close(const AMidiOutputPort *outputPort) __INTROD
  *  (the current value of the running Java Virtual Machine's high-resolution time source,
  *  in nanoseconds)
  * @return the number of messages received (either 0 or 1), or a negative error code:
- *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN} - Unknown Error.
+ *  @see AMEDIA_ERROR_UNKNOWN - Unknown Error.
  */
 ssize_t AMIDI_API AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int32_t *opcodePtr,
          uint8_t *buffer, size_t maxBytes, size_t* numBytesReceivedPtr, int64_t *outTimestampPtr) __INTRODUCED_IN(29);
@@ -193,7 +187,7 @@ ssize_t AMIDI_API AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int
  * @param outInputPortPtr Receives the native API port identifier of the opened port.
  *
  * @return AMEDIA_OK, or a negative error code:
- *  @see AMEDIA_ERROR_UNKNOWN {@link AMEDIA_ERROR_UNKNOWN} - Unknown Error.
+ *  @see AMEDIA_ERROR_UNKNOWN - Unknown Error.
  */
 media_status_t AMIDI_API AMidiInputPort_open(const AMidiDevice *device, int32_t portNumber,
                             AMidiInputPort **outInputPortPtr) __INTRODUCED_IN(29);
@@ -206,8 +200,7 @@ media_status_t AMIDI_API AMidiInputPort_open(const AMidiDevice *device, int32_t 
  * @param numBytes     Specifies the number of bytes to write.
  *
  * @return The number of bytes sent, which could be less than specified or a negative error code:
- * @see AMEDIA_ERROR_INVALID_PARAMETER {@link AMEDIA_ERROR_INVALID_PARAMETER} The specified port
- *   was NULL, the specified buffer was NULL.
+ * @see AMEDIA_ERROR_INVALID_PARAMETER - The specified port was NULL, the specified buffer was NULL.
  */
 ssize_t AMIDI_API AMidiInputPort_send(const AMidiInputPort *inputPort, const uint8_t *buffer,
                    size_t numBytes) __INTRODUCED_IN(29);
@@ -221,8 +214,7 @@ ssize_t AMIDI_API AMidiInputPort_send(const AMidiInputPort *inputPort, const uin
  * @param timestamp    The CLOCK_MONOTONIC time in nanoseconds to associate with the sent data.
  *
  * @return The number of bytes sent, which could be less than specified or a negative error code:
- * @see AMEDIA_ERROR_INVALID_PARAMETER {@link AMEDIA_ERROR_INVALID_PARAMETER} The specified port
- *   was NULL, the specified buffer was NULL.
+ * @see AMEDIA_ERROR_INVALID_PARAMETER - The specified port was NULL, the specified buffer was NULL.
  */
 ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPort,
         const uint8_t *buffer, size_t numBytes, int64_t timestamp) __INTRODUCED_IN(29);
@@ -233,10 +225,9 @@ ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPo
  *
  * @param inputPort The identifier of the port to send the flush command to.
  *
- * @returns @see AMEDIA_OK {@link AMEDIA_OK} if successful, otherwise a negative error code:
- * @see AMEDIA_ERROR_INVALID_PARAMETER {@link AMEDIA_ERROR_INVALID_PARAMETER} The specified port
- *   was NULL
- * @see AMEDIA_ERROR_UNSUPPORTED {@link AMEDIA_ERROR_UNSUPPORTED} The FLUSH command couldn't
+ * @returns @see AMEDIA_OK if successful, otherwise a negative error code:
+ * @see AMEDIA_ERROR_INVALID_PARAMETER - The specified port was NULL
+ * @see AMEDIA_ERROR_UNSUPPORTED - The FLUSH command couldn't
  * be sent.
  */
 media_status_t AMIDI_API AMidiInputPort_sendFlush(const AMidiInputPort *inputPort) __INTRODUCED_IN(29);
@@ -252,4 +243,4 @@ void AMIDI_API AMidiInputPort_close(const AMidiInputPort *inputPort) __INTRODUCE
 }
 #endif
 
-#endif /* ANDROID_MEDIA_MIDI_H_ */
+#endif /* ANDROID_MEDIA_AMIDI_H_ */
