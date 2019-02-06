@@ -2521,6 +2521,14 @@
   <java-symbol type="string" name="face_acquired_too_left" />
   <java-symbol type="string" name="face_acquired_poor_gaze" />
   <java-symbol type="string" name="face_acquired_not_detected" />
+  <java-symbol type="string" name="face_acquired_too_much_motion" />
+  <java-symbol type="string" name="face_acquired_recalibrate" />
+  <java-symbol type="string" name="face_acquired_too_different" />
+  <java-symbol type="string" name="face_acquired_too_similar" />
+  <java-symbol type="string" name="face_acquired_pan_too_extreme" />
+  <java-symbol type="string" name="face_acquired_tilt_too_extreme" />
+  <java-symbol type="string" name="face_acquired_roll_too_extreme" />
+  <java-symbol type="string" name="face_acquired_obscured" />
   <java-symbol type="array" name="face_acquired_vendor" />
   <java-symbol type="string" name="face_name_template" />
   <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
