@@ -17,13 +17,9 @@
 package com.android.systemui.bubbles;
 
 import android.annotation.Nullable;
-import android.app.ActivityView;
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -31,16 +27,10 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowInsets;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.graphics.ColorUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -62,11 +52,6 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
     private int mIconInset;
 
     private NotificationEntry mEntry;
-    private PendingIntent mAppOverlayIntent;
-    private BubbleController mBubbleController;
-    private ActivityView mActivityView;
-    private boolean mActivityViewReady;
-    private boolean mActivityViewStarted;
 
     public BubbleView(Context context) {
         this(context, null);
@@ -86,7 +71,6 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
         // XXX: can this padding just be on the view and we look it up?
         mPadding = getResources().getDimensionPixelSize(R.dimen.bubble_view_padding);
         mIconInset = getResources().getDimensionPixelSize(R.dimen.bubble_icon_inset);
-        mBubbleController = Dependency.get(BubbleController.class);
     }
 
     @Override
@@ -168,7 +152,6 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
         updateViews();
     }
 
-
     /**
      * @return the {@link ExpandableNotificationRow} view to display notification content when the
      * bubble is expanded.
@@ -235,88 +218,6 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
         return ColorUtils.blendARGB(defaultTint, Color.WHITE, WHITE_SCRIM_ALPHA);
     }
 
-    /**
-     * @return a view used to display app overlay content when expanded.
-     */
-    public ActivityView getActivityView() {
-        if (mActivityView == null) {
-            mActivityView = new ActivityView(mContext, null /* attrs */, 0 /* defStyle */,
-                    true /* singleTaskInstance */);
-            Log.d(TAG, "[getActivityView] created: " + mActivityView);
-            mActivityView.setCallback(new ActivityView.StateCallback() {
-                @Override
-                public void onActivityViewReady(ActivityView view) {
-                    mActivityViewReady = true;
-                    mActivityView.startActivity(mAppOverlayIntent);
-                }
-
-                @Override
-                public void onActivityViewDestroyed(ActivityView view) {
-                    mActivityViewReady = false;
-                }
-
-                /**
-                 * This is only called for tasks on this ActivityView, which is also set to
-                 * single-task mode -- meaning never more than one task on this display. If a task
-                 * is being removed, it's the top Activity finishing and this bubble should
-                 * be removed or collapsed.
-                 */
-                @Override
-                public void onTaskRemovalStarted(int taskId) {
-                    if (mEntry != null) {
-                        // Must post because this is called from a binder thread.
-                        post(() -> mBubbleController.removeBubble(mEntry.key));
-                    }
-                }
-            });
-            mActivityView.setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
-                ActivityView activityView = (ActivityView) view;
-                // Here we assume that the position of the ActivityView on the screen
-                // remains regardless of IME status. When we move ActivityView, the
-                // forwardedInsets should be computed not against the current location
-                // and size, but against the post-moved location and size.
-                Point displaySize = new Point();
-                view.getContext().getDisplay().getSize(displaySize);
-                int[] windowLocation = view.getLocationOnScreen();
-                final int windowBottom = windowLocation[1] + view.getHeight();
-                final int keyboardHeight = insets.getSystemWindowInsetBottom()
-                        - insets.getStableInsetBottom();
-                final int insetsBottom = Math.max(0,
-                        windowBottom + keyboardHeight - displaySize.y);
-                activityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
-                return view.onApplyWindowInsets(insets);
-            });
-
-        }
-        return mActivityView;
-    }
-
-    /**
-     * Removes and releases an ActivityView if one was previously created for this bubble.
-     */
-    public void destroyActivityView(ViewGroup tmpParent) {
-        if (mActivityView == null) {
-            return;
-        }
-        if (!mActivityViewReady) {
-            // release not needed, never initialized?
-            mActivityView = null;
-            return;
-        }
-        // HACK: release() will crash if the view is not attached.
-        if (!mActivityView.isAttachedToWindow()) {
-            mActivityView.setVisibility(View.GONE);
-            tmpParent.addView(mActivityView, new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT));
-        }
-
-        mActivityView.release();
-
-        ((ViewGroup) mActivityView.getParent()).removeView(mActivityView);
-        mActivityView = null;
-    }
-
     @Override
     public void setPosition(float x, float y) {
         setPositionX(x);
@@ -336,21 +237,5 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
     @Override
     public PointF getPosition() {
         return new PointF(getTranslationX(), getTranslationY());
-    }
-
-    /**
-     * @return whether an ActivityView should be used to display the content of this Bubble
-     */
-    public boolean hasAppOverlayIntent() {
-        return mAppOverlayIntent != null;
-    }
-
-    public PendingIntent getAppOverlayIntent() {
-        return mAppOverlayIntent;
-
-    }
-
-    public void setBubbleIntent(PendingIntent intent) {
-        mAppOverlayIntent = intent;
     }
 }
