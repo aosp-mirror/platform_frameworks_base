@@ -16,6 +16,9 @@
 
 package android.net;
 
+import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
+import static android.net.SocketKeepalive.ERROR_INVALID_PORT;
+
 import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.util.IpUtils;
 import android.system.OsConstants;
@@ -44,11 +47,11 @@ public final class NattKeepalivePacketData extends KeepalivePacketData {
             throws InvalidPacketException {
 
         if (!(srcAddress instanceof Inet4Address) || !(dstAddress instanceof Inet4Address)) {
-            throw new InvalidPacketException(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+            throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
         }
 
         if (dstPort != NattSocketKeepalive.NATT_PORT) {
-            throw new InvalidPacketException(SocketKeepalive.ERROR_INVALID_PORT);
+            throw new InvalidPacketException(ERROR_INVALID_PORT);
         }
 
         int length = IPV4_HEADER_LENGTH + UDP_HEADER_LENGTH + 1;
