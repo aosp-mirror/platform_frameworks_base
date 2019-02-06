@@ -328,17 +328,12 @@ Landroid/content/om/IOverlayManager;->getAllOverlays(I)Ljava/util/Map;
 Landroid/content/om/IOverlayManager;->getOverlayInfo(Ljava/lang/String;I)Landroid/content/om/OverlayInfo;
 Landroid/content/pm/IPackageDataObserver$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDataObserver$Stub$Proxy;->mRemote:Landroid/os/IBinder;
-Landroid/content/pm/IPackageDataObserver$Stub$Proxy;->onRemoveCompleted(Ljava/lang/String;Z)V
 Landroid/content/pm/IPackageDataObserver$Stub;-><init>()V
 Landroid/content/pm/IPackageDataObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDataObserver;
-Landroid/content/pm/IPackageDataObserver$Stub;->DESCRIPTOR:Ljava/lang/String;
-Landroid/content/pm/IPackageDataObserver$Stub;->TRANSACTION_onRemoveCompleted:I
 Landroid/content/pm/IPackageDataObserver;->onRemoveCompleted(Ljava/lang/String;Z)V
 Landroid/content/pm/IPackageDeleteObserver$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDeleteObserver$Stub;-><init>()V
 Landroid/content/pm/IPackageDeleteObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver;
-Landroid/content/pm/IPackageDeleteObserver$Stub;->DESCRIPTOR:Ljava/lang/String;
-Landroid/content/pm/IPackageDeleteObserver$Stub;->TRANSACTION_packageDeleted:I
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageDeleteObserver2$Stub;-><init>()V
@@ -437,8 +432,6 @@ Landroid/content/pm/IPackageStatsObserver$Stub$Proxy;-><init>(Landroid/os/IBinde
 Landroid/content/pm/IPackageStatsObserver$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageStatsObserver$Stub;-><init>()V
 Landroid/content/pm/IPackageStatsObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageStatsObserver;
-Landroid/content/pm/IPackageStatsObserver$Stub;->DESCRIPTOR:Ljava/lang/String;
-Landroid/content/pm/IPackageStatsObserver$Stub;->TRANSACTION_onGetStatsCompleted:I
 Landroid/content/pm/IPackageStatsObserver;->onGetStatsCompleted(Landroid/content/pm/PackageStats;Z)V
 Landroid/content/pm/IShortcutService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IShortcutService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IShortcutService;
