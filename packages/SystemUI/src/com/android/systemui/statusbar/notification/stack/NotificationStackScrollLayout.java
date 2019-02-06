@@ -599,6 +599,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateFooter();
     }
 
+    @Override
+    public void onOverlayChanged() {
+        int newRadius = mContext.getResources().getDimensionPixelSize(
+                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
+        if (mCornerRadius != newRadius) {
+            mCornerRadius = newRadius;
+            invalidate();
+        }
+    }
+
     @VisibleForTesting
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooter() {
