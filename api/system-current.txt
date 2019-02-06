@@ -3409,13 +3409,13 @@ package android.media {
 
   public final class AudioFocusInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public android.media.AudioAttributes getAttributes();
-    method public String getClientId();
+    method @NonNull public android.media.AudioAttributes getAttributes();
+    method @NonNull public String getClientId();
     method public int getClientUid();
     method public int getFlags();
     method public int getGainRequest();
     method public int getLossReceived();
-    method public String getPackageName();
+    method @NonNull public String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.media.AudioFocusInfo> CREATOR;
   }
