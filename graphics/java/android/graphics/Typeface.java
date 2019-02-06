@@ -163,7 +163,12 @@ public class Typeface {
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 
-    @UnsupportedAppUsage
+    /**
+     * Please use font in xml and also your application global theme to change the default Typeface.
+     * android:textViewStyle and its attribute android:textAppearance can be used in order to change
+     * typeface and other text related properties.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static void setDefault(Typeface t) {
         sDefaultTypeface = t;
         nativeSetDefault(t.native_instance);
