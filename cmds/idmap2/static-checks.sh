@@ -73,6 +73,7 @@ function _cpplint()
     local output="$($cpplint --quiet $cpp_files 2>&1 >/dev/null | grep -v \
         -e 'Found C system header after C++ system header.' \
         -e 'Unknown NOLINT error category: misc-non-private-member-variables-in-classes' \
+        -e 'Unknown NOLINT error category: performance-unnecessary-copy-initialization' \
     )"
     if [[ "$output" ]]; then
         echo "$output"
