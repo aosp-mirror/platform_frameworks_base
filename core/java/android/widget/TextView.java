@@ -712,7 +712,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @UnsupportedAppUsage
     private ChangeWatcher mChangeWatcher;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 123769451)
     private ArrayList<TextWatcher> mListeners;
 
     // display attributes
