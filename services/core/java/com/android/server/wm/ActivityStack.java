@@ -108,6 +108,7 @@ import static com.android.server.wm.RootActivityContainer.FindTaskResult;
 
 import static java.lang.Integer.MAX_VALUE;
 
+import android.annotation.IntDef;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -222,6 +223,22 @@ class ActivityStack extends ConfigurationContainer {
 
     // How many activities have to be scheduled to stop to force a stop pass.
     private static final int MAX_STOPPING_TO_FORCE = 3;
+
+    @IntDef(prefix = {"STACK_VISIBILITY"}, value = {
+            STACK_VISIBILITY_VISIBLE,
+            STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+            STACK_VISIBILITY_INVISIBLE,
+    })
+    @interface StackVisibility {}
+
+    /** Stack is visible. No other stacks on top that fully or partially occlude it. */
+    static final int STACK_VISIBILITY_VISIBLE = 0;
+
+    /** Stack is partially occluded by other translucent stack(s) on top of it. */
+    static final int STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT = 1;
+
+    /** Stack is completely invisible. */
+    static final int STACK_VISIBILITY_INVISIBLE = 2;
 
     @Override
     protected int getChildCount() {
@@ -1959,14 +1976,28 @@ class ActivityStack extends ConfigurationContainer {
      * @param starting The currently starting activity or null if there is none.
      */
     boolean shouldBeVisible(ActivityRecord starting) {
+        return getVisibility(starting) != STACK_VISIBILITY_INVISIBLE;
+    }
+
+    /**
+     * Returns true if the stack should be visible.
+     *
+     * @param starting The currently starting activity or null if there is none.
+     */
+    @StackVisibility
+    int getVisibility(ActivityRecord starting) {
         if (!isAttached() || mForceHidden) {
-            return false;
+            return STACK_VISIBILITY_INVISIBLE;
         }
 
         final ActivityDisplay display = getDisplay();
         boolean gotSplitScreenStack = false;
         boolean gotOpaqueSplitScreenPrimary = false;
         boolean gotOpaqueSplitScreenSecondary = false;
+        boolean gotTranslucentFullscreen = false;
+        boolean gotTranslucentSplitScreenPrimary = false;
+        boolean gotTranslucentSplitScreenSecondary = false;
+        boolean shouldBeVisible = true;
         final int windowingMode = getWindowingMode();
         final boolean isAssistantType = isActivityTypeAssistant();
         for (int i = display.getChildCount() - 1; i >= 0; --i) {
@@ -1975,8 +2006,9 @@ class ActivityStack extends ConfigurationContainer {
             if (other == this) {
                 // Should be visible if there is no other stack occluding it, unless it doesn't
                 // have any running activities, not starting one and not home stack.
-                return hasRunningActivities || isInStackLocked(starting) != null
+                shouldBeVisible = hasRunningActivities || isInStackLocked(starting) != null
                         || isActivityTypeHome();
+                break;
             }
 
             if (!hasRunningActivities) {
@@ -1996,51 +2028,79 @@ class ActivityStack extends ConfigurationContainer {
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                     if (activityType == ACTIVITY_TYPE_HOME
                             || (activityType == ACTIVITY_TYPE_ASSISTANT
-                                    && mWindowManager.getRecentsAnimationController() != null)) {
-                       return true;
+                                && mWindowManager.getRecentsAnimationController() != null)) {
+                        break;
                     }
                 }
                 if (other.isStackTranslucent(starting)) {
                     // Can be visible behind a translucent fullscreen stack.
+                    gotTranslucentFullscreen = true;
                     continue;
                 }
-                return false;
+                return STACK_VISIBILITY_INVISIBLE;
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && !gotOpaqueSplitScreenPrimary) {
                 gotSplitScreenStack = true;
-                gotOpaqueSplitScreenPrimary =
-                        !other.isStackTranslucent(starting);
+                gotTranslucentSplitScreenPrimary = other.isStackTranslucent(starting);
+                gotOpaqueSplitScreenPrimary = !gotTranslucentSplitScreenPrimary;
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                         && gotOpaqueSplitScreenPrimary) {
                     // Can not be visible behind another opaque stack in split-screen-primary mode.
-                    return false;
+                    return STACK_VISIBILITY_INVISIBLE;
                 }
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                     && !gotOpaqueSplitScreenSecondary) {
                 gotSplitScreenStack = true;
-                gotOpaqueSplitScreenSecondary =
-                        !other.isStackTranslucent(starting);
+                gotTranslucentSplitScreenSecondary = other.isStackTranslucent(starting);
+                gotOpaqueSplitScreenSecondary = !gotTranslucentSplitScreenSecondary;
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         && gotOpaqueSplitScreenSecondary) {
                     // Can not be visible behind another opaque stack in split-screen-secondary mode.
-                    return false;
+                    return STACK_VISIBILITY_INVISIBLE;
                 }
             }
             if (gotOpaqueSplitScreenPrimary && gotOpaqueSplitScreenSecondary) {
                 // Can not be visible if we are in split-screen windowing mode and both halves of
                 // the screen are opaque.
-                return false;
+                return STACK_VISIBILITY_INVISIBLE;
             }
             if (isAssistantType && gotSplitScreenStack) {
                 // Assistant stack can't be visible behind split-screen. In addition to this not
                 // making sense, it also works around an issue here we boost the z-order of the
                 // assistant window surfaces in window manager whenever it is visible.
-                return false;
+                return STACK_VISIBILITY_INVISIBLE;
             }
         }
 
-        // Well, nothing is stopping you from being visible...
-        return true;
+        if (!shouldBeVisible) {
+            return STACK_VISIBILITY_INVISIBLE;
+        }
+
+        // Handle cases when there can be a translucent split-screen stack on top.
+        switch (windowingMode) {
+            case WINDOWING_MODE_FULLSCREEN:
+                if (gotTranslucentSplitScreenPrimary || gotTranslucentSplitScreenSecondary) {
+                    // At least one of the split-screen stacks that covers this one is translucent.
+                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                }
+                break;
+            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+                if (gotTranslucentSplitScreenPrimary) {
+                    // Covered by translucent primary split-screen on top.
+                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                }
+                break;
+            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
+                if (gotTranslucentSplitScreenSecondary) {
+                    // Covered by translucent secondary split-screen on top.
+                    return STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                }
+                break;
+        }
+
+        // Lastly - check if there is a translucent fullscreen stack on top.
+        return gotTranslucentFullscreen ? STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
+                : STACK_VISIBILITY_VISIBLE;
     }
 
     final int rankTaskLayers(int baseLayer) {

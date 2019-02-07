@@ -40,6 +40,7 @@ import static com.android.server.am.ActivityDisplayProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityDisplayProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
@@ -575,7 +576,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             final ActivityStack stack = mStacks.get(stackNdx);
             final ActivityRecord resumedActivity = stack.getResumedActivity();
             if (resumedActivity != null
-                    && (!stack.shouldBeVisible(resuming) || !stack.isFocusable())) {
+                    && (stack.getVisibility(resuming) != STACK_VISIBILITY_VISIBLE
+                        || !stack.isFocusable())) {
                 if (DEBUG_STATES) Slog.d(TAG_STATES, "pauseBackStacks: stack=" + stack +
                         " mResumedActivity=" + resumedActivity);
                 someActivityPaused |= stack.startPausingLocked(userLeaving, false, resuming,

@@ -24,6 +24,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
@@ -34,6 +35,9 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -378,6 +382,21 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         mSupervisor.endDeferResume();
         assertEquals(true, mActivity.shouldMakeActive(null /* activeActivity */));
+    }
+
+    @Test
+    public void testShouldResume_stackVisibility() {
+        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        spyOn(mStack);
+
+        doReturn(STACK_VISIBILITY_VISIBLE).when(mStack).getVisibility(null);
+        assertEquals(true, mActivity.shouldResumeActivity(null /* activeActivity */));
+
+        doReturn(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT).when(mStack).getVisibility(null);
+        assertEquals(false, mActivity.shouldResumeActivity(null /* activeActivity */));
+
+        doReturn(STACK_VISIBILITY_INVISIBLE).when(mStack).getVisibility(null);
+        assertEquals(false, mActivity.shouldResumeActivity(null /* activeActivity */));
     }
 
     @Test
