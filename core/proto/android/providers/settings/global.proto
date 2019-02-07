@@ -399,6 +399,9 @@ message GlobalSettingsProto {
         optional SettingProto game_driver_blacklist = 11;
         // Game Driver - List of Apps that are allowed to use Game Driver
         optional SettingProto game_driver_whitelist = 12;
+        // Game Driver - List of blacklists, each blacklist is a blacklist for
+        // a specific Game Driver version
+        optional SettingProto game_driver_blacklists = 14;
     }
     optional Gpu gpu = 59;
 
