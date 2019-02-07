@@ -339,7 +339,11 @@ public final class InputMethodManager {
 
     // For scheduling work on the main thread.  This also serves as our
     // global lock.
-    @UnsupportedAppUsage
+    // Remark on @UnsupportedAppUsage: there were context leaks on old versions
+    // of android (b/37043700), so developers used this field to perform manual clean up.
+    // Leaks were fixed, hacks were backported to AppCompatActivity,
+    // so an access to the field is closed.
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final H mH;
 
     // Our generic input connection if the current target does not have its own.
@@ -375,13 +379,15 @@ public final class InputMethodManager {
      * This is the view that should currently be served by an input method,
      * regardless of the state of setting that up.
      */
-    @UnsupportedAppUsage
+    // See comment to mH field in regard to @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     View mServedView;
     /**
      * This is then next view that will be served by the input method, when
      * we get around to updating things.
      */
-    @UnsupportedAppUsage
+    // See comment to mH field in regard to @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     View mNextServedView;
     /**
      * This is set when we are in the process of connecting, to determine
