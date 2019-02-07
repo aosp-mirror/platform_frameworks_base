@@ -708,15 +708,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     /**
      * Tracks the state of the top edge glow.
+     *
+     * Even though this field is practically final, we cannot make it final because there are apps
+     * setting it via reflection and they need to keep working until they target Q.
      */
-    @UnsupportedAppUsage
-    private EdgeEffect mEdgeGlowTop;
+    @NonNull
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769408)
+    private EdgeEffect mEdgeGlowTop = new EdgeEffect(mContext);
 
     /**
      * Tracks the state of the bottom edge glow.
+     *
+     * Even though this field is practically final, we cannot make it final because there are apps
+     * setting it via reflection and they need to keep working until they target Q.
      */
-    @UnsupportedAppUsage
-    private EdgeEffect mEdgeGlowBottom;
+    @NonNull
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768444)
+    private EdgeEffect mEdgeGlowBottom = new EdgeEffect(mContext);
 
     /**
      * An estimate of how many pixels are between the top of the list and
@@ -921,21 +929,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mOverflingDistance = configuration.getScaledOverflingDistance();
 
         mDensityScale = getContext().getResources().getDisplayMetrics().density;
-    }
-
-    @Override
-    public void setOverScrollMode(int mode) {
-        if (mode != OVER_SCROLL_NEVER) {
-            if (mEdgeGlowTop == null) {
-                Context context = getContext();
-                mEdgeGlowTop = new EdgeEffect(context);
-                mEdgeGlowBottom = new EdgeEffect(context);
-            }
-        } else {
-            mEdgeGlowTop = null;
-            mEdgeGlowBottom = null;
-        }
-        super.setOverScrollMode(mode);
     }
 
     /**
@@ -3772,7 +3765,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void invalidateTopGlow() {
-        if (mEdgeGlowTop == null) {
+        if (!shouldDisplayEdgeEffects()) {
             return;
         }
         final boolean clipToPadding = getClipToPadding();
@@ -3783,7 +3776,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void invalidateBottomGlow() {
-        if (mEdgeGlowBottom == null) {
+        if (!shouldDisplayEdgeEffects()) {
             return;
         }
         final boolean clipToPadding = getClipToPadding();
@@ -4208,7 +4201,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         setPressed(false);
 
-        if (mEdgeGlowTop != null) {
+        if (shouldDisplayEdgeEffects()) {
             mEdgeGlowTop.onRelease();
             mEdgeGlowBottom.onRelease();
         }
@@ -4231,6 +4224,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mScrollStrictSpan.finish();
             mScrollStrictSpan = null;
         }
+    }
+
+    private boolean shouldDisplayEdgeEffects() {
+        return getOverScrollMode() != OVER_SCROLL_NEVER;
     }
 
     private void onTouchCancel() {
@@ -4258,7 +4255,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             recycleVelocityTracker();
         }
 
-        if (mEdgeGlowTop != null) {
+        if (shouldDisplayEdgeEffects()) {
             mEdgeGlowTop.onRelease();
             mEdgeGlowBottom.onRelease();
         }
@@ -4379,7 +4376,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        if (mEdgeGlowTop != null) {
+        if (shouldDisplayEdgeEffects()) {
             final int scrollY = mScrollY;
             final boolean clipToPadding = getClipToPadding();
             final int width;
@@ -6371,7 +6368,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void finishGlows() {
-        if (mEdgeGlowTop != null) {
+        if (shouldDisplayEdgeEffects()) {
             mEdgeGlowTop.finish();
             mEdgeGlowBottom.finish();
         }
@@ -6475,6 +6472,76 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mRemoteAdapter != null) {
             mRemoteAdapter.setVisibleRangeHint(start, end);
         }
+    }
+
+    /**
+     * Sets the edge effect color for both top and bottom edge effects.
+     *
+     * @param color The color for the edge effects.
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     * @see #getBottomEdgeEffectColor()
+     */
+    public void setEdgeEffectColor(@ColorInt int color) {
+        setTopEdgeEffectColor(color);
+        setBottomEdgeEffectColor(color);
+    }
+
+    /**
+     * Sets the bottom edge effect color.
+     *
+     * @param color The color for the bottom edge effect.
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     * @see #getBottomEdgeEffectColor()
+     */
+    public void setBottomEdgeEffectColor(@ColorInt int color) {
+        mEdgeGlowBottom.setColor(color);
+        invalidateBottomGlow();
+    }
+
+    /**
+     * Sets the top edge effect color.
+     *
+     * @param color The color for the top edge effect.
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #setEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     * @see #getBottomEdgeEffectColor()
+     */
+    public void setTopEdgeEffectColor(@ColorInt int color) {
+        mEdgeGlowTop.setColor(color);
+        invalidateTopGlow();
+    }
+
+    /**
+     * Returns the top edge effect color.
+     *
+     * @return The top edge effect color.
+     * @see #setEdgeEffectColor(int)
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #getBottomEdgeEffectColor()
+     */
+    @ColorInt
+    public int getTopEdgeEffectColor() {
+        return mEdgeGlowTop.getColor();
+    }
+
+    /**
+     * Returns the bottom edge effect color.
+     *
+     * @return The bottom edge effect color.
+     * @see #setEdgeEffectColor(int)
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     */
+    @ColorInt
+    public int getBottomEdgeEffectColor() {
+        return mEdgeGlowBottom.getColor();
     }
 
     /**
