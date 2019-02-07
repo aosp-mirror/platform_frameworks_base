@@ -92,6 +92,9 @@ public final class ConversationAction implements Parcelable {
      */
     public static final String TYPE_SHARE_LOCATION = "share_location";
 
+    /** @hide **/
+    public static final String TYPE_ADD_CONTACT = "add_contact";
+
     public static final Creator<ConversationAction> CREATOR =
             new Creator<ConversationAction>() {
                 @Override
