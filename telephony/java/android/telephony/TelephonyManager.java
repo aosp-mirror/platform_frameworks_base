@@ -10310,4 +10310,28 @@ public class TelephonyManager {
         }
         return false;
     }
+
+    /**
+     * Retrieve the Radio HAL Version for this device.
+     *
+     * Get the HAL version for the IRadio interface for test purposes.
+     *
+     * @return a Pair of (major version, minor version) or (-1,-1) if unknown.
+     *
+     * @hide
+     */
+    @TestApi
+    public Pair<Integer, Integer> getRadioHalVersion() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                int version = service.getRadioHalVersion();
+                if (version == -1) return new Pair<Integer, Integer>(-1, -1);
+                return new Pair<Integer, Integer>(version / 100, version % 100);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "getRadioHalVersion() RemoteException", e);
+        }
+        return new Pair<Integer, Integer>(-1, -1);
+    }
 }

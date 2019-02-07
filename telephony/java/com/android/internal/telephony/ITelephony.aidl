@@ -1852,4 +1852,9 @@ interface ITelephony {
      * Get the mapping from logical slots to physical slots.
      */
     int[] getSlotsMapping();
+
+    /**
+     * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
+     */
+     int getRadioHalVersion();
 }
