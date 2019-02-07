@@ -156,8 +156,6 @@ public class AodMaskView extends ImageView implements StatusBarStateController.S
 
     private boolean checkIfNeedMask() {
         // We need mask for ImageWallpaper / LockScreen Wallpaper (Music album art).
-        // Because of conflicting with another wallpaper feature,
-        // we only support LockScreen wallpaper currently.
         return mWallpaperManager.getWallpaperInfo() == null || ScrimState.AOD.hasBackdrop();
     }
 

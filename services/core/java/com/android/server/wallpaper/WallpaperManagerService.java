@@ -2243,9 +2243,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         synchronized (mLock) {
             mInAmbientMode = inAmbientMode;
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            final boolean hasConnection = data != null && data.connection != null;
+            final WallpaperInfo info = hasConnection ? data.connection.mInfo : null;
+
             // The wallpaper info is null for image wallpaper, also use the engine in this case.
-            if (data != null && data.connection != null && (data.connection.mInfo == null
-                    || data.connection.mInfo.supportsAmbientMode())) {
+            if (hasConnection && (info == null && isAodImageWallpaperEnabled()
+                    || info != null && info.supportsAmbientMode())) {
                 // TODO(multi-display) Extends this method with specific display.
                 engine = data.connection.getDisplayConnectorOrCreate(DEFAULT_DISPLAY).mEngine;
             } else {
