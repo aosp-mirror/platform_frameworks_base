@@ -5002,10 +5002,11 @@ package android.os {
     method public boolean getEnableAdjustBrightness();
     method public boolean getEnableDataSaver();
     method public boolean getEnableFirewall();
+    method public boolean getEnableNightMode();
     method public boolean getEnableQuickDoze();
     method public boolean getForceAllAppsStandby();
     method public boolean getForceBackgroundCheck();
-    method public int getGpsMode();
+    method public int getLocationMode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.os.BatterySaverPolicyConfig> CREATOR;
   }
@@ -5027,10 +5028,11 @@ package android.os {
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableAdjustBrightness(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableDataSaver(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableFirewall(boolean);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableNightMode(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableQuickDoze(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceAllAppsStandby(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceBackgroundCheck(boolean);
-    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setGpsMode(int);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setLocationMode(int);
   }
 
   public class Binder implements android.os.IBinder {

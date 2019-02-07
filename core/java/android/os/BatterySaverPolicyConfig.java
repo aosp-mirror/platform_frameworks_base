@@ -47,10 +47,11 @@ public final class BatterySaverPolicyConfig implements Parcelable {
     private final boolean mEnableAdjustBrightness;
     private final boolean mEnableDataSaver;
     private final boolean mEnableFirewall;
+    private final boolean mEnableNightMode;
     private final boolean mEnableQuickDoze;
     private final boolean mForceAllAppsStandby;
     private final boolean mForceBackgroundCheck;
-    private final int mGpsMode;
+    private final int mLocationMode;
 
     private BatterySaverPolicyConfig(Builder in) {
         mAdjustBrightnessFactor = Math.max(0, Math.min(in.mAdjustBrightnessFactor, 1f));
@@ -67,11 +68,12 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         mEnableAdjustBrightness = in.mEnableAdjustBrightness;
         mEnableDataSaver = in.mEnableDataSaver;
         mEnableFirewall = in.mEnableFirewall;
+        mEnableNightMode = in.mEnableNightMode;
         mEnableQuickDoze = in.mEnableQuickDoze;
         mForceAllAppsStandby = in.mForceAllAppsStandby;
         mForceBackgroundCheck = in.mForceBackgroundCheck;
-        mGpsMode = Math.max(PowerManager.MIN_LOCATION_MODE,
-                Math.min(in.mGpsMode, PowerManager.MAX_LOCATION_MODE));
+        mLocationMode = Math.max(PowerManager.MIN_LOCATION_MODE,
+                Math.min(in.mLocationMode, PowerManager.MAX_LOCATION_MODE));
     }
 
     private BatterySaverPolicyConfig(Parcel in) {
@@ -101,10 +103,11 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         mEnableAdjustBrightness = in.readBoolean();
         mEnableDataSaver = in.readBoolean();
         mEnableFirewall = in.readBoolean();
+        mEnableNightMode = in.readBoolean();
         mEnableQuickDoze = in.readBoolean();
         mForceAllAppsStandby = in.readBoolean();
         mForceBackgroundCheck = in.readBoolean();
-        mGpsMode = Math.max(PowerManager.MIN_LOCATION_MODE,
+        mLocationMode = Math.max(PowerManager.MIN_LOCATION_MODE,
                 Math.min(in.readInt(), PowerManager.MAX_LOCATION_MODE));
     }
 
@@ -150,10 +153,11 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         dest.writeBoolean(mEnableAdjustBrightness);
         dest.writeBoolean(mEnableDataSaver);
         dest.writeBoolean(mEnableFirewall);
+        dest.writeBoolean(mEnableNightMode);
         dest.writeBoolean(mEnableQuickDoze);
         dest.writeBoolean(mForceAllAppsStandby);
         dest.writeBoolean(mForceBackgroundCheck);
-        dest.writeInt(mGpsMode);
+        dest.writeInt(mLocationMode);
     }
 
     @Override
@@ -168,11 +172,12 @@ public final class BatterySaverPolicyConfig implements Parcelable {
                 + "animation_disabled=" + mDisableAnimation + ","
                 + "aod_disabled=" + mDisableAod + ","
                 + "datasaver_disabled=" + !mEnableDataSaver + ","
+                + "enable_night_mode=" + mEnableNightMode + ","
                 + "firewall_disabled=" + !mEnableFirewall + ","
                 + "force_all_apps_standby=" + mForceAllAppsStandby + ","
                 + "force_background_check=" + mForceBackgroundCheck + ","
                 + "fullbackup_deferred=" + mDeferFullBackup + ","
-                + "gps_mode=" + mGpsMode + ","
+                + "gps_mode=" + mLocationMode + ","
                 + "keyvaluebackup_deferred=" + mDeferKeyValueBackup + ","
                 + "launch_boost_disabled=" + mDisableLaunchBoost + ","
                 + "optional_sensors_disabled=" + mDisableOptionalSensors + ","
@@ -260,6 +265,11 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         return mEnableFirewall;
     }
 
+    /** Whether or not to enable night mode while in Battery Saver. */
+    public boolean getEnableNightMode() {
+        return mEnableNightMode;
+    }
+
     /** Whether or not to enable Quick Doze while in Battery Saver. */
     public boolean getEnableQuickDoze() {
         return mEnableQuickDoze;
@@ -275,9 +285,9 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         return mForceBackgroundCheck;
     }
 
-    /** The GPS mode while in Battery Saver. */
-    public int getGpsMode() {
-        return mGpsMode;
+    /** The location mode while in Battery Saver. */
+    public int getLocationMode() {
+        return mLocationMode;
     }
 
     /** Builder class for constructing {@link BatterySaverPolicyConfig} objects. */
@@ -297,10 +307,11 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         private boolean mEnableAdjustBrightness = false;
         private boolean mEnableDataSaver = false;
         private boolean mEnableFirewall = false;
+        private boolean mEnableNightMode = false;
         private boolean mEnableQuickDoze = false;
         private boolean mForceAllAppsStandby = false;
         private boolean mForceBackgroundCheck = false;
-        private int mGpsMode = PowerManager.LOCATION_MODE_NO_CHANGE;
+        private int mLocationMode = PowerManager.LOCATION_MODE_NO_CHANGE;
 
         public Builder() {
         }
@@ -424,6 +435,13 @@ public final class BatterySaverPolicyConfig implements Parcelable {
             return this;
         }
 
+        /** Set whether or not to enable night mode while in Battery Saver. */
+        @NonNull
+        public Builder setEnableNightMode(boolean enableNightMode) {
+            mEnableNightMode = enableNightMode;
+            return this;
+        }
+
         /** Set whether or not to enable Quick Doze while in Battery Saver. */
         @NonNull
         public Builder setEnableQuickDoze(boolean enableQuickDoze) {
@@ -445,10 +463,10 @@ public final class BatterySaverPolicyConfig implements Parcelable {
             return this;
         }
 
-        /** Set the GPS mode while in Battery Saver. */
+        /** Set the location mode while in Battery Saver. */
         @NonNull
-        public Builder setGpsMode(@PowerManager.LocationPowerSaveMode int gpsMode) {
-            mGpsMode = gpsMode;
+        public Builder setLocationMode(@PowerManager.LocationPowerSaveMode int locationMode) {
+            mLocationMode = locationMode;
             return this;
         }
 

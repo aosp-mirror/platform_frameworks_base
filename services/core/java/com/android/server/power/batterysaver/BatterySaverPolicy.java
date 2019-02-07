@@ -665,8 +665,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     config.getEnableAdjustBrightness(),
                     config.getEnableDataSaver(),
                     config.getEnableFirewall(),
-                    // TODO: add option to config
-                    config.getAdvertiseIsEnabled(),
+                    config.getEnableNightMode(),
                     config.getEnableQuickDoze(),
                     /* filesForInteractive */
                     (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
@@ -674,7 +673,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     config.getForceAllAppsStandby(),
                     config.getForceBackgroundCheck(),
-                    config.getGpsMode()
+                    config.getLocationMode()
             );
         }
 
