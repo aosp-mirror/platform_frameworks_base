@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "idmap2/Result.h"
+
 namespace android::idmap2 {
 
 /*
@@ -46,7 +48,7 @@ class CommandLineOptions {
                                      std::string* value);
   CommandLineOptions& OptionalOption(const std::string& name, const std::string& description,
                                      std::vector<std::string>* value);
-  bool Parse(const std::vector<std::string>& argv, std::ostream& outError) const;
+  Result<Unit> Parse(const std::vector<std::string>& argv) const;
   void Usage(std::ostream& out) const;
 
  private:

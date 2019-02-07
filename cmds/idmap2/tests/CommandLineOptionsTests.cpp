@@ -46,14 +46,13 @@ TEST(CommandLineOptionsTests, Flag) {
   CommandLineOptions opts =
       CommandLineOptions("test").OptionalFlag("--foo", "", &foo).OptionalFlag("--bar", "", &bar);
 
-  std::ostream fakeStdErr(nullptr);
-  bool success = opts.Parse({"--foo", "--bar"}, fakeStdErr);
+  auto success = opts.Parse({"--foo", "--bar"});
   ASSERT_TRUE(success);
   ASSERT_TRUE(foo);
   ASSERT_TRUE(bar);
 
   foo = bar = false;
-  success = opts.Parse({"--foo"}, fakeStdErr);
+  success = opts.Parse({"--foo"});
   ASSERT_TRUE(success);
   ASSERT_TRUE(foo);
   ASSERT_FALSE(bar);
@@ -65,21 +64,19 @@ TEST(CommandLineOptionsTests, MandatoryOption) {
   CommandLineOptions opts = CommandLineOptions("test")
                                 .MandatoryOption("--foo", "", &foo)
                                 .MandatoryOption("--bar", "", &bar);
-  std::ostream fakeStdErr(nullptr);
-  bool success = opts.Parse({"--foo", "FOO", "--bar", "BAR"}, fakeStdErr);
+  auto success = opts.Parse({"--foo", "FOO", "--bar", "BAR"});
   ASSERT_TRUE(success);
   ASSERT_EQ(foo, "FOO");
   ASSERT_EQ(bar, "BAR");
 
-  success = opts.Parse({"--foo"}, fakeStdErr);
+  success = opts.Parse({"--foo"});
   ASSERT_FALSE(success);
 }
 
 TEST(CommandLineOptionsTests, MandatoryOptionMultipleArgsButExpectedOnce) {
   std::string foo;
   CommandLineOptions opts = CommandLineOptions("test").MandatoryOption("--foo", "", &foo);
-  std::ostream fakeStdErr(nullptr);
-  bool success = opts.Parse({"--foo", "FIRST", "--foo", "SECOND"}, fakeStdErr);
+  auto success = opts.Parse({"--foo", "FIRST", "--foo", "SECOND"});
   ASSERT_TRUE(success);
   ASSERT_EQ(foo, "SECOND");
 }
@@ -87,8 +84,7 @@ TEST(CommandLineOptionsTests, MandatoryOptionMultipleArgsButExpectedOnce) {
 TEST(CommandLineOptionsTests, MandatoryOptionMultipleArgsAndExpectedOnceOrMore) {
   std::vector<std::string> args;
   CommandLineOptions opts = CommandLineOptions("test").MandatoryOption("--foo", "", &args);
-  std::ostream fakeStdErr(nullptr);
-  bool success = opts.Parse({"--foo", "FOO", "--foo", "BAR"}, fakeStdErr);
+  auto success = opts.Parse({"--foo", "FOO", "--foo", "BAR"});
   ASSERT_TRUE(success);
   ASSERT_EQ(args.size(), 2U);
   ASSERT_EQ(args[0], "FOO");
@@ -101,23 +97,22 @@ TEST(CommandLineOptionsTests, OptionalOption) {
   CommandLineOptions opts = CommandLineOptions("test")
                                 .OptionalOption("--foo", "", &foo)
                                 .OptionalOption("--bar", "", &bar);
-  std::ostream fakeStdErr(nullptr);
-  bool success = opts.Parse({"--foo", "FOO", "--bar", "BAR"}, fakeStdErr);
+  auto success = opts.Parse({"--foo", "FOO", "--bar", "BAR"});
   ASSERT_TRUE(success);
   ASSERT_EQ(foo, "FOO");
   ASSERT_EQ(bar, "BAR");
 
-  success = opts.Parse({"--foo", "BAZ"}, fakeStdErr);
+  success = opts.Parse({"--foo", "BAZ"});
   ASSERT_TRUE(success);
   ASSERT_EQ(foo, "BAZ");
 
-  success = opts.Parse({"--foo"}, fakeStdErr);
+  success = opts.Parse({"--foo"});
   ASSERT_FALSE(success);
 
-  success = opts.Parse({"--foo", "--bar", "BAR"}, fakeStdErr);
+  success = opts.Parse({"--foo", "--bar", "BAR"});
   ASSERT_FALSE(success);
 
-  success = opts.Parse({"--foo", "FOO", "--bar"}, fakeStdErr);
+  success = opts.Parse({"--foo", "FOO", "--bar"});
   ASSERT_FALSE(success);
 }
 
@@ -127,8 +122,7 @@ TEST(CommandLineOptionsTests, OptionalOptionList) {
   CommandLineOptions opts = CommandLineOptions("test")
                                 .OptionalOption("--foo", "", &foo)
                                 .OptionalOption("--bar", "", &bar);
-  std::ostream fakeStdErr(nullptr);
-  bool success = opts.Parse({"--foo", "FOO", "--bar", "BAR"}, fakeStdErr);
+  auto success = opts.Parse({"--foo", "FOO", "--bar", "BAR"});
   ASSERT_TRUE(success);
   ASSERT_EQ(foo.size(), 1U);
   ASSERT_EQ(foo[0], "FOO");
@@ -137,7 +131,7 @@ TEST(CommandLineOptionsTests, OptionalOptionList) {
 
   foo.clear();
   bar.clear();
-  success = opts.Parse({"--foo", "BAZ"}, fakeStdErr);
+  success = opts.Parse({"--foo", "BAZ"});
   ASSERT_TRUE(success);
   ASSERT_EQ(foo.size(), 1U);
   ASSERT_EQ(foo[0], "BAZ");
@@ -145,8 +139,7 @@ TEST(CommandLineOptionsTests, OptionalOptionList) {
 
   foo.clear();
   bar.clear();
-  success =
-      opts.Parse({"--foo", "BAZ", "--foo", "BIZ", "--bar", "FIZ", "--bar", "FUZZ"}, fakeStdErr);
+  success = opts.Parse({"--foo", "BAZ", "--foo", "BIZ", "--bar", "FIZ", "--bar", "FUZZ"});
   ASSERT_TRUE(success);
   ASSERT_EQ(foo.size(), 2U);
   ASSERT_EQ(foo[0], "BAZ");
@@ -157,17 +150,17 @@ TEST(CommandLineOptionsTests, OptionalOptionList) {
 
   foo.clear();
   bar.clear();
-  success = opts.Parse({"--foo"}, fakeStdErr);
+  success = opts.Parse({"--foo"});
   ASSERT_FALSE(success);
 
   foo.clear();
   bar.clear();
-  success = opts.Parse({"--foo", "--bar", "BAR"}, fakeStdErr);
+  success = opts.Parse({"--foo", "--bar", "BAR"});
   ASSERT_FALSE(success);
 
   foo.clear();
   bar.clear();
-  success = opts.Parse({"--foo", "FOO", "--bar"}, fakeStdErr);
+  success = opts.Parse({"--foo", "FOO", "--bar"});
   ASSERT_FALSE(success);
 }
 
@@ -179,14 +172,13 @@ TEST(CommandLineOptionsTests, CornerCases) {
                                 .MandatoryOption("--foo", "", &foo)
                                 .OptionalFlag("--baz", "", &baz)
                                 .OptionalOption("--bar", "", &bar);
-  std::ostream fakeStdErr(nullptr);
-  bool success = opts.Parse({"--unexpected"}, fakeStdErr);
+  auto success = opts.Parse({"--unexpected"});
   ASSERT_FALSE(success);
 
-  success = opts.Parse({"--bar", "BAR"}, fakeStdErr);
+  success = opts.Parse({"--bar", "BAR"});
   ASSERT_FALSE(success);
 
-  success = opts.Parse({"--baz", "--foo", "FOO"}, fakeStdErr);
+  success = opts.Parse({"--baz", "--foo", "FOO"});
   ASSERT_TRUE(success);
   ASSERT_TRUE(baz);
   ASSERT_EQ(foo, "FOO");
