@@ -134,7 +134,7 @@ public class Typeface {
     /**
      * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 123768928)
     @Deprecated
     static final Map<String, android.graphics.FontFamily[]> sSystemFallbackMap =
             Collections.emptyMap();
@@ -1003,7 +1003,7 @@ public class Typeface {
      * @deprecated
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 123768928)
     private static Typeface createFromFamilies(android.graphics.FontFamily[] families) {
         long[] ptrArray = new long[families.length];
         for (int i = 0; i < families.length; i++) {
@@ -1054,7 +1054,7 @@ public class Typeface {
      *
      * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 123768928)
     @Deprecated
     private static Typeface createFromFamiliesWithDefault(android.graphics.FontFamily[] families,
                 String fallbackName, int weight, int italic) {
