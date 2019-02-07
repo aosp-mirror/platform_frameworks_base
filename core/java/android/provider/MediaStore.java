@@ -543,7 +543,9 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @removed
      */
+    @Deprecated
     public static @NonNull Uri setIncludeTrashed(@NonNull Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_TRASHED, "1").build();
     }
@@ -797,7 +799,9 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @removed
      */
+    @Deprecated
     public static void trash(@NonNull Context context, @NonNull Uri uri) {
         trash(context, uri, 48 * DateUtils.HOUR_IN_MILLIS);
     }
@@ -815,7 +819,9 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @removed
      */
+    @Deprecated
     public static void trash(@NonNull Context context, @NonNull Uri uri,
             @DurationMillisLong long timeoutMillis) {
         if (timeoutMillis < 0) {
@@ -837,7 +843,9 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @removed
      */
+    @Deprecated
     public static void untrash(@NonNull Context context, @NonNull Uri uri) {
         final ContentValues values = new ContentValues();
         values.put(MediaColumns.IS_TRASHED, 0);
@@ -884,7 +892,9 @@ public final class MediaStore {
          * hash is calculated.
          * <p>
          * Type: BLOB
+         * @removed
          */
+        @Deprecated
         public static final String HASH = "_hash";
 
         /**
@@ -921,8 +931,22 @@ public final class MediaStore {
         public static final String DATE_MODIFIED = "date_modified";
 
         /**
-         * The MIME type of the file
-         * <P>Type: TEXT</P>
+         * The MIME type of the media item.
+         * <p>
+         * This is typically defined based on the file extension of the media
+         * item. However, it may be the value of the {@code format} attribute
+         * defined by the <em>Dublin Core Media Initiative</em> standard,
+         * extracted from any XMP metadata contained within this media item.
+         * <p class="note">
+         * Note: the {@code format} attribute may be ignored if the top-level
+         * MIME type disagrees with the file extension. For example, it's
+         * reasonable for an {@code image/jpeg} file to declare a {@code format}
+         * of {@code image/vnd.google.panorama360+jpg}, but declaring a
+         * {@code format} of {@code audio/ogg} would be ignored.
+         * <p>
+         * This is a read-only column that is automatically computed.
+         * <p>
+         * Type: TEXT
          */
         public static final String MIME_TYPE = "mime_type";
 
@@ -965,7 +989,9 @@ public final class MediaStore {
          * @see MediaStore#setIncludeTrashed(Uri)
          * @see MediaStore#trash(Context, Uri)
          * @see MediaStore#untrash(Context, Uri)
+         * @removed
          */
+        @Deprecated
         public static final String IS_TRASHED = "is_trashed";
 
         /**
@@ -974,7 +1000,9 @@ public final class MediaStore {
          * {@link #IS_PENDING} or {@link #IS_TRASHED}.
          * <p>
          * Type: INTEGER
+         * @removed
          */
+        @Deprecated
         public static final String DATE_EXPIRES = "date_expires";
 
         /**
@@ -990,6 +1018,8 @@ public final class MediaStore {
         /**
          * Package name that contributed this media. The value may be
          * {@code NULL} if ownership cannot be reliably determined.
+         * <p>
+         * This is a read-only column that is automatically computed.
          * <p>
          * Type: TEXT
          */
@@ -1014,6 +1044,52 @@ public final class MediaStore {
          * @see PendingParams#setSecondaryDirectory(String)
          */
         public static final String SECONDARY_DIRECTORY = "secondary_directory";
+
+        /**
+         * The "document ID" GUID as defined by the <em>XMP Media
+         * Management</em> standard, extracted from any XMP metadata contained
+         * within this media item. The value is {@code null} when no metadata
+         * was found.
+         * <p>
+         * Each "document ID" is created once for each new resource. Different
+         * renditions of that resource are expected to have different IDs.
+         * <p>
+         * This is a read-only column that is automatically computed.
+         * <p>
+         * Type: TEXT
+         */
+        public static final String DOCUMENT_ID = "document_id";
+
+        /**
+         * The "instance ID" GUID as defined by the <em>XMP Media
+         * Management</em> standard, extracted from any XMP metadata contained
+         * within this media item. The value is {@code null} when no metadata
+         * was found.
+         * <p>
+         * This "instance ID" changes with each save operation of a specific
+         * "document ID".
+         * <p>
+         * This is a read-only column that is automatically computed.
+         * <p>
+         * Type: TEXT
+         */
+        public static final String INSTANCE_ID = "instance_id";
+
+        /**
+         * The "original document ID" GUID as defined by the <em>XMP Media
+         * Management</em> standard, extracted from any XMP metadata contained
+         * within this media item.
+         * <p>
+         * This "original document ID" links a resource to its original source.
+         * For example, when you save a PSD document as a JPEG, then convert the
+         * JPEG to GIF format, the "original document ID" of both the JPEG and
+         * GIF files is the "document ID" of the original PSD file.
+         * <p>
+         * This is a read-only column that is automatically computed.
+         * <p>
+         * Type: TEXT
+         */
+        public static final String ORIGINAL_DOCUMENT_ID = "original_document_id";
     }
 
     /**
