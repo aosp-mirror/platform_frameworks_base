@@ -969,7 +969,8 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * Returns MAC address set to be the local randomized MAC address.
-     * Does not guarantee that the returned address is valid for use.
+     * Depending on user preference, the device may or may not use the returned MAC address for
+     * connections to this network.
      * <p>
      * Information is restricted to Device Owner, Profile Owner, and Carrier apps
      * (which will only obtain addresses for configurations which they create). Other callers
