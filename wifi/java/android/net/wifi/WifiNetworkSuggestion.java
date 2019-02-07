@@ -413,17 +413,17 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * final WifiNetworkSuggestion suggestion1 =
          *      new Builder()
          *      .setSsid("test111111")
-         *      .buildNetworkSuggestion()
+         *      .build()
          * final WifiNetworkSuggestion suggestion2 =
          *      new Builder()
          *      .setSsid("test222222")
          *      .setWpa2Passphrase("test123456")
-         *      .buildNetworkSuggestion()
+         *      .build()
          * final WifiNetworkSuggestion suggestion3 =
          *      new Builder()
          *      .setSsid("test333333")
          *      .setWpa3Passphrase("test6789")
-         *      .buildNetworkSuggestion()
+         *      .build()
          * final List<WifiNetworkSuggestion> suggestionsList =
          *      new ArrayList<WifiNetworkSuggestion> {{
          *          add(suggestion1);
