@@ -36,7 +36,6 @@ cc_library_shared {
 
     srcs: [
         ":libincident_aidl",
-        "proto/android/os/header.proto",
         "proto/android/os/metadata.proto",
         "src/IncidentReportArgs.cpp",
     ],
