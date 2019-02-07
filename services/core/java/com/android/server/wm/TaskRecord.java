@@ -341,6 +341,9 @@ class TaskRecord extends ConfigurationContainer {
     // TODO: remove after unification
     Task mTask;
 
+    /** Used by fillTaskInfo */
+    final TaskActivitiesReport mReuseActivitiesReport = new TaskActivitiesReport();
+
     /**
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
      * ActivityInfo, Intent, TaskDescription)} instead.
@@ -2319,31 +2322,38 @@ class TaskRecord extends ConfigurationContainer {
     /**
      * Fills in a {@link TaskInfo} with information from this task.
      * @param info the {@link TaskInfo} to fill in
-     * @param reuseActivitiesReport a temporary activities report that we can reuse to fetch the
-     *                              running activities
      */
-    void fillTaskInfo(TaskInfo info, TaskActivitiesReport reuseActivitiesReport) {
-        getNumRunningActivities(reuseActivitiesReport);
+    void fillTaskInfo(TaskInfo info) {
+        getNumRunningActivities(mReuseActivitiesReport);
         info.userId = userId;
         info.stackId = getStackId();
         info.taskId = taskId;
         info.displayId = mStack == null ? Display.INVALID_DISPLAY : mStack.mDisplayId;
         info.isRunning = getTopActivity() != null;
         info.baseIntent = new Intent(getBaseIntent());
-        info.baseActivity = reuseActivitiesReport.base != null
-                ? reuseActivitiesReport.base.intent.getComponent()
+        info.baseActivity = mReuseActivitiesReport.base != null
+                ? mReuseActivitiesReport.base.intent.getComponent()
                 : null;
-        info.topActivity = reuseActivitiesReport.top != null
-                ? reuseActivitiesReport.top.mActivityComponent
+        info.topActivity = mReuseActivitiesReport.top != null
+                ? mReuseActivitiesReport.top.mActivityComponent
                 : null;
         info.origActivity = origActivity;
         info.realActivity = realActivity;
-        info.numActivities = reuseActivitiesReport.numActivities;
+        info.numActivities = mReuseActivitiesReport.numActivities;
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(lastTaskDescription);
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.resizeMode = mResizeMode;
         info.configuration.setTo(getConfiguration());
+    }
+
+    /**
+     * Returns a  {@link TaskInfo} with information from this task.
+     */
+    ActivityManager.RunningTaskInfo getTaskInfo() {
+        ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
+        fillTaskInfo(info);
+        return info;
     }
 
     void dump(PrintWriter pw, String prefix) {

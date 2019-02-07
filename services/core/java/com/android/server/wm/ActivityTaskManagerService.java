@@ -2763,7 +2763,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 r.setTaskDescription(td);
                 final TaskRecord task = r.getTaskRecord();
                 task.updateTaskDescription();
-                mTaskChangeNotificationController.notifyTaskDescriptionChanged(task.taskId, td);
+                mTaskChangeNotificationController.notifyTaskDescriptionChanged(task.getTaskInfo());
             }
         }
     }

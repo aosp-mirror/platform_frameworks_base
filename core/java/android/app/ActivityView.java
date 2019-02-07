@@ -487,9 +487,10 @@ public class ActivityView extends ViewGroup {
     private class TaskStackListenerImpl extends TaskStackListener {
 
         @Override
-        public void onTaskDescriptionChanged(int taskId, ActivityManager.TaskDescription td)
+        public void onTaskDescriptionChanged(ActivityManager.RunningTaskInfo taskInfo)
                 throws RemoteException {
-            if (mVirtualDisplay == null) {
+            if (mVirtualDisplay == null
+                    || taskInfo.displayId != mVirtualDisplay.getDisplay().getDisplayId()) {
                 return;
             }
 
@@ -499,14 +500,17 @@ public class ActivityView extends ViewGroup {
             }
             // Found the topmost stack on target display. Now check if the topmost task's
             // description changed.
-            if (taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                mSurfaceView.setResizeBackgroundColor(td.getBackgroundColor());
+            if (taskInfo.taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                mSurfaceView.setResizeBackgroundColor(
+                        taskInfo.taskDescription.getBackgroundColor());
             }
         }
 
         @Override
-        public void onTaskMovedToFront(int taskId) throws RemoteException {
-            if (mActivityViewCallback  == null) {
+        public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo)
+                throws RemoteException {
+            if (mActivityViewCallback  == null || mVirtualDisplay == null
+                    || taskInfo.displayId != mVirtualDisplay.getDisplay().getDisplayId()) {
                 return;
             }
 
@@ -514,14 +518,14 @@ public class ActivityView extends ViewGroup {
             // if StackInfo was null or unrelated to the "move to front" then there's no use
             // notifying the callback
             if (stackInfo != null
-                    && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                    && taskInfo.taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
                 mActivityViewCallback.onTaskMovedToFront(stackInfo);
             }
         }
 
         @Override
         public void onTaskCreated(int taskId, ComponentName componentName) throws RemoteException {
-            if (mActivityViewCallback  == null) {
+            if (mActivityViewCallback == null || mVirtualDisplay == null) {
                 return;
             }
 
@@ -535,17 +539,13 @@ public class ActivityView extends ViewGroup {
         }
 
         @Override
-        public void onTaskRemovalStarted(int taskId) throws RemoteException {
-            if (mActivityViewCallback  == null) {
+        public void onTaskRemovalStarted(ActivityManager.RunningTaskInfo taskInfo)
+                throws RemoteException {
+            if (mActivityViewCallback == null || mVirtualDisplay == null
+                    || taskInfo.displayId != mVirtualDisplay.getDisplay().getDisplayId()) {
                 return;
             }
-            StackInfo stackInfo = getTopMostStackInfo();
-            // if StackInfo was null or task is on a different display then there's no use
-            // notifying the callback
-            if (stackInfo != null
-                    && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                mActivityViewCallback.onTaskRemovalStarted(taskId);
-            }
+            mActivityViewCallback.onTaskRemovalStarted(taskInfo.taskId);
         }
 
         private StackInfo getTopMostStackInfo() throws RemoteException {

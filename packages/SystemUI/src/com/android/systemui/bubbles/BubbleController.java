@@ -25,6 +25,7 @@ import static com.android.systemui.statusbar.notification.NotificationAlertingMa
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.INotificationManager;
@@ -481,15 +482,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         }
 
         @Override
-        public void onTaskMovedToFront(int taskId) {
-            ActivityManager.StackInfo stackInfo = null;
-            try {
-                stackInfo = findStackInfo(taskId);
-            } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
-            }
-            if (stackInfo != null && stackInfo.displayId == Display.DEFAULT_DISPLAY
-                    && mStackView != null) {
+        public void onTaskMovedToFront(RunningTaskInfo taskInfo) {
+            if (mStackView != null && taskInfo.displayId == Display.DEFAULT_DISPLAY) {
                 mStackView.collapseStack();
             }
         }
@@ -500,9 +494,9 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
          * ultimately ended up, displays an error message toast, and calls this method instead of
          * onTaskMovedToFront.
          */
-        // TODO(b/124058588): add requestedDisplayId to this callback, ignore unless matches
         @Override
-        public void onActivityLaunchOnSecondaryDisplayFailed() {
+        public void onActivityLaunchOnSecondaryDisplayFailed(RunningTaskInfo taskInfo) {
+            // TODO(b/124058588): move to ActivityView.StateCallback, filter on virtualDisplay ID
             if (mStackView != null) {
                 mStackView.collapseStack();
             }

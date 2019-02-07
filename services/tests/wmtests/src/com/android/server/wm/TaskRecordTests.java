@@ -37,6 +37,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
+import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -108,8 +109,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testCopyBaseIntentForTaskInfo() {
         final TaskRecord task = createTaskRecord(1);
         task.lastTaskDescription = new ActivityManager.TaskDescription();
-        final ActivityManager.RecentTaskInfo info = new ActivityManager.RecentTaskInfo();
-        task.fillTaskInfo(info, new TaskRecord.TaskActivitiesReport());
+        final TaskInfo info = task.getTaskInfo();
 
         // The intent of info should be a copy so assert that they are different instances.
         assertThat(info.baseIntent, not(sameInstance(task.getBaseIntent())));

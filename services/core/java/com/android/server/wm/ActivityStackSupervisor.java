@@ -2336,7 +2336,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 Slog.w(TAG, "Failed to put " + task + " on display " + preferredDisplayId);
                 // Display a warning toast that we failed to put a task on a secondary display.
                 mService.getTaskChangeNotificationController()
-                        .notifyActivityLaunchOnSecondaryDisplayFailed();
+                        .notifyActivityLaunchOnSecondaryDisplayFailed(task.getTaskInfo(),
+                                preferredDisplayId);
                 return;
             } else if (!forceNonResizable && handleForcedResizableTask(task,
                     FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY)) {

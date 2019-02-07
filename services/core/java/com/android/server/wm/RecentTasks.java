@@ -70,7 +70,6 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.wm.TaskRecord.TaskActivitiesReport;
 
 import com.google.android.collect.Sets;
 
@@ -180,7 +179,6 @@ class RecentTasks {
     private final HashMap<ComponentName, ActivityInfo> mTmpAvailActCache = new HashMap<>();
     private final HashMap<String, ApplicationInfo> mTmpAvailAppCache = new HashMap<>();
     private final SparseBooleanArray mTmpQuietProfileUserIds = new SparseBooleanArray();
-    private final TaskActivitiesReport mTmpReport = new TaskActivitiesReport();
 
     @VisibleForTesting
     RecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister) {
@@ -1587,7 +1585,7 @@ class RecentTasks {
      */
     ActivityManager.RecentTaskInfo createRecentTaskInfo(TaskRecord tr) {
         ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
-        tr.fillTaskInfo(rti, mTmpReport);
+        tr.fillTaskInfo(rti);
         // Fill in some deprecated values
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
