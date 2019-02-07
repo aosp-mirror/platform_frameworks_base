@@ -238,6 +238,8 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullDelayExceeded);
+    FRIEND_TEST(ValueMetricProducerTest, TestBaseSetOnConditionChange);
 };
 
 }  // namespace statsd
