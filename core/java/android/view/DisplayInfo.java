@@ -27,6 +27,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -157,8 +158,9 @@ public final class DisplayInfo implements Parcelable {
      *
      * @hide
      */
+    // Remark on @UnsupportedAppUsage: Display.getCutout should be used instead
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public DisplayCutout displayCutout;
 
     /**

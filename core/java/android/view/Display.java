@@ -32,6 +32,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -495,7 +496,7 @@ public final class Display {
      * @return True if the display is still valid.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean getDisplayInfo(DisplayInfo outDisplayInfo) {
         synchronized (this) {
             updateDisplayInfoLocked();
