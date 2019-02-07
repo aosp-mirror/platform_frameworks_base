@@ -1833,14 +1833,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
-    private void enforceAnyPermissionOf(String... permissions) {
+    private boolean checkAnyPermissionOf(String... permissions) {
         for (String permission : permissions) {
             if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
-                return;
+                return true;
             }
         }
-        throw new SecurityException(
-            "Requires one of the following permissions: " + String.join(", ", permissions) + ".");
+        return false;
+    }
+
+    private void enforceAnyPermissionOf(String... permissions) {
+        if (!checkAnyPermissionOf(permissions)) {
+            throw new SecurityException("Requires one of the following permissions: "
+                    + String.join(", ", permissions) + ".");
+        }
     }
 
     private void enforceInternetPermission() {
@@ -1860,19 +1866,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceSettingsPermission() {
-        mContext.enforceCallingOrSelfPermission(
+        enforceAnyPermissionOf(
                 android.Manifest.permission.NETWORK_SETTINGS,
-                "ConnectivityService");
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private boolean checkSettingsPermission() {
-        return PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.NETWORK_SETTINGS);
+        return checkAnyPermissionOf(
+                android.Manifest.permission.NETWORK_SETTINGS,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private boolean checkSettingsPermission(int pid, int uid) {
         return PERMISSION_GRANTED == mContext.checkPermission(
-                android.Manifest.permission.NETWORK_SETTINGS, pid, uid);
+                android.Manifest.permission.NETWORK_SETTINGS, pid, uid)
+                || PERMISSION_GRANTED == mContext.checkPermission(
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, pid, uid);
     }
 
     private void enforceTetherAccessPermission() {
@@ -1882,9 +1891,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceConnectivityInternalPermission() {
-        mContext.enforceCallingOrSelfPermission(
+        enforceAnyPermissionOf(
                 android.Manifest.permission.CONNECTIVITY_INTERNAL,
-                "ConnectivityService");
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private void enforceControlAlwaysOnVpnPermission() {
@@ -1895,20 +1904,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void enforceNetworkStackSettingsOrSetup() {
         enforceAnyPermissionOf(
-            android.Manifest.permission.NETWORK_SETTINGS,
-            android.Manifest.permission.NETWORK_SETUP_WIZARD,
-            android.Manifest.permission.NETWORK_STACK);
-    }
-
-    private void enforceNetworkStackPermission() {
-        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.NETWORK_SETTINGS,
+                android.Manifest.permission.NETWORK_SETUP_WIZARD,
                 android.Manifest.permission.NETWORK_STACK,
-                "ConnectivityService");
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private boolean checkNetworkStackPermission() {
-        return PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.NETWORK_STACK);
+        return checkAnyPermissionOf(
+                android.Manifest.permission.NETWORK_STACK,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private void enforceConnectivityRestrictedNetworksPermission() {
