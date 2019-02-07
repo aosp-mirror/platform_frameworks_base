@@ -38,7 +38,6 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
-import static android.net.NetworkStack.NETWORKSTACK_PACKAGE_NAME;
 import static android.net.shared.NetworkMonitorUtils.isValidationRequired;
 import static android.net.shared.NetworkParcelableUtil.toStableParcelable;
 import static android.os.Process.INVALID_UID;
@@ -2661,9 +2660,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         @Override
-        public void showProvisioningNotification(String action) {
+        public void showProvisioningNotification(String action, String packageName) {
             final Intent intent = new Intent(action);
-            intent.setPackage(NETWORKSTACK_PACKAGE_NAME);
+            intent.setPackage(packageName);
 
             final PendingIntent pendingIntent;
             // Only the system server can register notifications with package "android"

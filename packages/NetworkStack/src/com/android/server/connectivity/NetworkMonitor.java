@@ -499,7 +499,7 @@ public class NetworkMonitor extends StateMachine {
 
     private void showProvisioningNotification(String action) {
         try {
-            mCallback.showProvisioningNotification(action);
+            mCallback.showProvisioningNotification(action, mContext.getPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error showing provisioning notification", e);
         }
