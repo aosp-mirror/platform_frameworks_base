@@ -858,11 +858,11 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.userData = userData;
 
         byte[] encodedBearerData = BearerData.encode(bearerData);
+        if (encodedBearerData == null) return null;
         if (Rlog.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
             Rlog.d(LOG_TAG, "MO (encoded) BearerData = " + bearerData);
             Rlog.d(LOG_TAG, "MO raw BearerData = '" + HexDump.toHexString(encodedBearerData) + "'");
         }
-        if (encodedBearerData == null) return null;
 
         int teleservice = bearerData.hasUserDataHeader ?
                 SmsEnvelope.TELESERVICE_WEMT : SmsEnvelope.TELESERVICE_WMT;
