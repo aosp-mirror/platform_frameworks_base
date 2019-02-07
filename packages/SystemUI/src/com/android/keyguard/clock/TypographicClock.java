@@ -43,7 +43,7 @@ public class TypographicClock extends TextView {
     private final Resources mResources;
     private final String[] mHours;
     private final String[] mMinutes;
-    private final int mAccentColor;
+    private int mAccentColor;
     private Calendar mTime;
     private String mDescFormat;
     private TimeZone mTimeZone;
@@ -104,6 +104,13 @@ public class TypographicClock extends TextView {
     public void onTimeZoneChanged(TimeZone timeZone) {
         mTimeZone = timeZone;
         mTime.setTimeZone(timeZone);
+    }
+
+    /**
+     * Sets the accent color used on the clock face.
+     */
+    public void setClockColor(int color) {
+        mAccentColor = color;
     }
 
     @Override
