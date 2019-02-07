@@ -2426,6 +2426,8 @@
         </attr>
 
         <attr name="__removed3" />
+        <attr name="__removed4" />
+        <attr name="__removed5" />
 
         <!-- Describes the content of a view so that a autofill service can fill in the appropriate
              data. Multiple hints can be combined in a comma separated list or an array of strings

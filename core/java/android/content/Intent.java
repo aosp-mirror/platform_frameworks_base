@@ -817,28 +817,6 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.action.SHOW_APP_INFO";
 
     /**
-     * Activity Action: Start an activity to show the app's detailed usage information for
-     * permission protected data.
-     *
-     * The Intent contains an extra {@link #EXTRA_PERMISSION_USAGE_PERMISSIONS} that is of
-     * type {@code String[]} and contains the specific permissions to show information for.
-     *
-     * Apps should handle this intent if they want to provide more information about permission
-     * usage to users beyond the information provided in the manifest.
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_PERMISSION_USAGE_DETAILS =
-            "android.intent.action.PERMISSION_USAGE_DETAILS";
-
-    /**
-     * The name of the extra used to contain the permissions in
-     * {@link #ACTION_PERMISSION_USAGE_DETAILS}.
-     * @see #ACTION_PERMISSION_USAGE_DETAILS
-     */
-    public static final String EXTRA_PERMISSION_USAGE_PERMISSIONS =
-            "android.intent.extra.PERMISSION_USAGE_PERMISSIONS";
-
-    /**
      * Represents a shortcut/live folder icon resource.
      *
      * @see Intent#ACTION_CREATE_SHORTCUT

@@ -2925,11 +2925,11 @@
         <public name="importantForContentCapture" />
         <public name="supportsMultipleDisplays" />
         <public name="useAppZygote" />
-        <public name="usageInfoRequired" />
-        <public name="dataSentOffDevice" />
-        <public name="dataSharedWithThirdParty" />
-        <public name="dataUsedForMonetization" />
-        <public name="dataRetentionTime" />
+        <public name="__removed1" />
+        <public name="__removed2" />
+        <public name="__removed3" />
+        <public name="__removed4" />
+        <public name="__removed5" />
         <public name="selectionDividerHeight" />
         <public name="foregroundServiceType" />
         <public name="hasFragileUserData" />

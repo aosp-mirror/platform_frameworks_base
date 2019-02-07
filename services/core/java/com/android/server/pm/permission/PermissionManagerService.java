@@ -2737,12 +2737,5 @@ public class PermissionManagerService {
                 return mSettings.getPermissionLocked(permName);
             }
         }
-        @Override
-        public boolean isPermissionUsageInfoRequired(String permName) {
-            synchronized (PermissionManagerService.this.mLock) {
-                BasePermission bp = mSettings.getPermissionLocked(permName);
-                return bp != null && bp.usageInfoRequired;
-            }
-        }
     }
 }
