@@ -21,13 +21,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * {@link RcsIncomingMessageCreationParameters} is a collection of parameters that should be passed
- * into {@link RcsThread#addIncomingMessage(RcsIncomingMessageCreationParameters)} to generate an
+ * {@link RcsIncomingMessageCreationParams} is a collection of parameters that should be passed
+ * into {@link RcsThread#addIncomingMessage(RcsIncomingMessageCreationParams)} to generate an
  * {@link RcsIncomingMessage} on that {@link RcsThread}
  *
- * @hide TODO:make public
+ * @hide - TODO: make public
  */
-public class RcsIncomingMessageCreationParameters extends RcsMessageCreationParameters implements
+public final class RcsIncomingMessageCreationParams extends RcsMessageCreationParams implements
         Parcelable {
     // The arrival timestamp for the RcsIncomingMessage to be created
     private final long mArrivalTimestamp;
@@ -37,18 +37,18 @@ public class RcsIncomingMessageCreationParameters extends RcsMessageCreationPara
     private final int mSenderParticipantId;
 
     /**
-     * Builder to help create an {@link RcsIncomingMessageCreationParameters}
+     * Builder to help create an {@link RcsIncomingMessageCreationParams}
      *
-     * @see RcsThread#addIncomingMessage(RcsIncomingMessageCreationParameters)
+     * @see RcsThread#addIncomingMessage(RcsIncomingMessageCreationParams)
      */
-    public static class Builder extends RcsMessageCreationParameters.Builder {
+    public static class Builder extends RcsMessageCreationParams.Builder {
         private RcsParticipant mSenderParticipant;
         private long mArrivalTimestamp;
         private long mSeenTimestamp;
 
         /**
          * Creates a {@link Builder} to create an instance of
-         * {@link RcsIncomingMessageCreationParameters}
+         * {@link RcsIncomingMessageCreationParams}
          *
          * @param originationTimestamp The timestamp of {@link RcsMessage} creation. The origination
          *                             timestamp value in milliseconds passed after midnight,
@@ -103,22 +103,22 @@ public class RcsIncomingMessageCreationParameters extends RcsMessageCreationPara
 
         /**
          * Creates parameters for creating a new incoming message.
-         * @return A new instance of {@link RcsIncomingMessageCreationParameters} to create a new
+         * @return A new instance of {@link RcsIncomingMessageCreationParams} to create a new
          * {@link RcsIncomingMessage}
          */
-        public RcsIncomingMessageCreationParameters build() {
-            return new RcsIncomingMessageCreationParameters(this);
+        public RcsIncomingMessageCreationParams build() {
+            return new RcsIncomingMessageCreationParams(this);
         }
     }
 
-    private RcsIncomingMessageCreationParameters(Builder builder) {
+    private RcsIncomingMessageCreationParams(Builder builder) {
         super(builder);
         mArrivalTimestamp = builder.mArrivalTimestamp;
         mSeenTimestamp = builder.mSeenTimestamp;
         mSenderParticipantId = builder.mSenderParticipant.getId();
     }
 
-    protected RcsIncomingMessageCreationParameters(Parcel in) {
+    private RcsIncomingMessageCreationParams(Parcel in) {
         super(in);
         mArrivalTimestamp = in.readLong();
         mSeenTimestamp = in.readLong();
@@ -152,16 +152,16 @@ public class RcsIncomingMessageCreationParameters extends RcsMessageCreationPara
         return mSenderParticipantId;
     }
 
-    public static final Creator<RcsIncomingMessageCreationParameters> CREATOR =
-            new Creator<RcsIncomingMessageCreationParameters>() {
+    public static final Creator<RcsIncomingMessageCreationParams> CREATOR =
+            new Creator<RcsIncomingMessageCreationParams>() {
                 @Override
-                public RcsIncomingMessageCreationParameters createFromParcel(Parcel in) {
-                    return new RcsIncomingMessageCreationParameters(in);
+                public RcsIncomingMessageCreationParams createFromParcel(Parcel in) {
+                    return new RcsIncomingMessageCreationParams(in);
                 }
 
                 @Override
-                public RcsIncomingMessageCreationParameters[] newArray(int size) {
-                    return new RcsIncomingMessageCreationParameters[size];
+                public RcsIncomingMessageCreationParams[] newArray(int size) {
+                    return new RcsIncomingMessageCreationParams[size];
                 }
             };
 
@@ -172,7 +172,7 @@ public class RcsIncomingMessageCreationParameters extends RcsMessageCreationPara
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        super.writeToParcel(dest);
         dest.writeLong(mArrivalTimestamp);
         dest.writeLong(mSeenTimestamp);
         dest.writeInt(mSenderParticipantId);

@@ -18,18 +18,19 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * An event that indicates an {@link RcsParticipant}'s alias was changed. Please see US18-2 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
-public class RcsParticipantAliasChangedEvent extends RcsEvent {
+public final class RcsParticipantAliasChangedEvent extends RcsEvent implements Parcelable {
     // The ID of the participant that changed their alias
-    private int mParticipantId;
+    private final int mParticipantId;
     // The new alias of the above participant
-    private String mNewAlias;
+    private final String mNewAlias;
 
     /**
      * Creates a new {@link RcsParticipantAliasChangedEvent}. This event is not persisted into
@@ -98,7 +99,7 @@ public class RcsParticipantAliasChangedEvent extends RcsEvent {
                 }
             };
 
-    protected RcsParticipantAliasChangedEvent(Parcel in) {
+    private RcsParticipantAliasChangedEvent(Parcel in) {
         super(in);
         mNewAlias = in.readString();
         mParticipantId = in.readInt();

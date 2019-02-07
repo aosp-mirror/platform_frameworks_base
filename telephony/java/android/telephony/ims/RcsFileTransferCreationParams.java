@@ -22,12 +22,12 @@ import android.os.Parcelable;
 
 /**
  * Pass an instance of this class to
- * {@link RcsMessage#insertFileTransfer(RcsFileTransferCreationParameters)} create an
+ * {@link RcsMessage#insertFileTransfer(RcsFileTransferCreationParams)} create an
  * {@link RcsFileTransferPart} and save it into storage.
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
-public class RcsFileTransferCreationParameters implements Parcelable {
+public final class RcsFileTransferCreationParams implements Parcelable {
     private String mRcsFileTransferSessionId;
     private Uri mContentUri;
     private String mContentMimeType;
@@ -128,7 +128,7 @@ public class RcsFileTransferCreationParameters implements Parcelable {
     /**
      * @hide
      */
-    RcsFileTransferCreationParameters(Builder builder) {
+    RcsFileTransferCreationParams(Builder builder) {
         mRcsFileTransferSessionId = builder.mRcsFileTransferSessionId;
         mContentUri = builder.mContentUri;
         mContentMimeType = builder.mContentMimeType;
@@ -143,7 +143,7 @@ public class RcsFileTransferCreationParameters implements Parcelable {
     }
 
     /**
-     * A builder to create instances of {@link RcsFileTransferCreationParameters}
+     * A builder to create instances of {@link RcsFileTransferCreationParams}
      */
     public class Builder {
         private String mRcsFileTransferSessionId;
@@ -300,18 +300,18 @@ public class RcsFileTransferCreationParameters implements Parcelable {
         }
 
         /**
-         * Creates an instance of {@link RcsFileTransferCreationParameters} with the given
+         * Creates an instance of {@link RcsFileTransferCreationParams} with the given
          * parameters.
          *
          * @return The same instance of {@link Builder} to chain methods
-         * @see RcsMessage#insertFileTransfer(RcsFileTransferCreationParameters)
+         * @see RcsMessage#insertFileTransfer(RcsFileTransferCreationParams)
          */
-        public RcsFileTransferCreationParameters build() {
-            return new RcsFileTransferCreationParameters(this);
+        public RcsFileTransferCreationParams build() {
+            return new RcsFileTransferCreationParams(this);
         }
     }
 
-    protected RcsFileTransferCreationParameters(Parcel in) {
+    private RcsFileTransferCreationParams(Parcel in) {
         mRcsFileTransferSessionId = in.readString();
         mContentUri = in.readParcelable(Uri.class.getClassLoader());
         mContentMimeType = in.readString();
@@ -325,16 +325,16 @@ public class RcsFileTransferCreationParameters implements Parcelable {
         mFileTransferStatus = in.readInt();
     }
 
-    public static final Creator<RcsFileTransferCreationParameters> CREATOR =
-            new Creator<RcsFileTransferCreationParameters>() {
+    public static final Creator<RcsFileTransferCreationParams> CREATOR =
+            new Creator<RcsFileTransferCreationParams>() {
                 @Override
-                public RcsFileTransferCreationParameters createFromParcel(Parcel in) {
-                    return new RcsFileTransferCreationParameters(in);
+                public RcsFileTransferCreationParams createFromParcel(Parcel in) {
+                    return new RcsFileTransferCreationParams(in);
                 }
 
                 @Override
-                public RcsFileTransferCreationParameters[] newArray(int size) {
-                    return new RcsFileTransferCreationParameters[size];
+                public RcsFileTransferCreationParams[] newArray(int size) {
+                    return new RcsFileTransferCreationParams[size];
                 }
             };
 

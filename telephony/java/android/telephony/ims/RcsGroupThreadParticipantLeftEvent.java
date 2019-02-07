@@ -17,15 +17,17 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * An event that indicates an RCS participant has left an {@link RcsThread}. Please see US6-23 -
  * GSMA RCC.71 (RCS Universal Profile Service Definition Document)
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
-public class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEvent {
-    private int mLeavingParticipantId;
+public final class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEvent implements
+        Parcelable {
+    private final int mLeavingParticipantId;
 
     /**
      * Creates a new {@link RcsGroupThreadParticipantLeftEvent}. his event is not persisted into
@@ -88,7 +90,7 @@ public class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEvent {
                 }
             };
 
-    protected RcsGroupThreadParticipantLeftEvent(Parcel in) {
+    private RcsGroupThreadParticipantLeftEvent(Parcel in) {
         super(in);
         mLeavingParticipantId = in.readInt();
     }

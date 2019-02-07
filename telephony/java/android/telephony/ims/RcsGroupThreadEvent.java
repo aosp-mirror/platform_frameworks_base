@@ -21,7 +21,7 @@ import android.os.Parcel;
 /**
  * An event that happened on an {@link RcsGroupThread}.
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
 public abstract class RcsGroupThreadEvent extends RcsEvent {
     private final int mRcsGroupThreadId;
@@ -50,13 +50,18 @@ public abstract class RcsGroupThreadEvent extends RcsEvent {
         return new RcsParticipant(mOriginatingParticipantId);
     }
 
+    /**
+     * @hide
+     */
     RcsGroupThreadEvent(Parcel in) {
         super(in);
         mRcsGroupThreadId = in.readInt();
         mOriginatingParticipantId = in.readInt();
     }
 
-    @Override
+    /**
+     * @hide
+     */
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mRcsGroupThreadId);
