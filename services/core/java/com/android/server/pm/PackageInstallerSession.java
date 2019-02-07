@@ -44,7 +44,6 @@ import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.apex.IApexService;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -80,7 +79,6 @@ import android.os.ParcelableException;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
@@ -1084,6 +1082,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
+        if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+            throw new PackageManagerException(
+                PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                "APEX packages can only be installed using staged sessions.");
+        }
         final PackageManagerService.ActiveInstallSession committingSession =
                 makeSessionActiveLocked();
         if (committingSession == null) {
@@ -1101,12 +1104,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final PackageManagerService.ActiveInstallSession activeSession =
                             session.makeSessionActiveLocked();
                     if (activeSession != null) {
-                        if ((activeSession.getSessionParams().installFlags
-                                & PackageManager.INSTALL_APEX) != 0) {
-                            throw new PackageManagerException(
-                                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
-                                    "Atomic install is not supported for APEX packages.");
-                        }
                         childSessions.add(activeSession);
                     }
                 } catch (PackageManagerException e) {
@@ -1124,27 +1121,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             mPm.installStage(childSessions);
         } else {
-            if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
-                commitApexLocked();
-            } else {
-                mPm.installStage(committingSession);
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void commitApexLocked() throws PackageManagerException {
-        try {
-            IApexService apex = IApexService.Stub.asInterface(
-                    ServiceManager.getService("apexservice"));
-            apex.stagePackage(mResolvedBaseFile.toString());
-        } catch (Throwable e) {
-            // Convert all exceptions into package manager exceptions as only those are handled
-            // in the code above
-            throw new PackageManagerException(e);
-        } finally {
-            destroyInternal();
-            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "APEX installed", null);
+            mPm.installStage(committingSession);
         }
     }
 
