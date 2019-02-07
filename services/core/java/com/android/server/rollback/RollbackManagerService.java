@@ -44,4 +44,11 @@ public final class RollbackManagerService extends SystemService {
     public void onUnlockUser(int user) {
         mService.onUnlockUser(user);
     }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            mService.onBootCompleted();
+        }
+    }
 }

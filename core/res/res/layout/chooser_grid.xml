@@ -25,11 +25,24 @@
     android:maxCollapsedHeightSmall="56dp"
     android:id="@id/contentPanel">
 
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
-        android:background="?attr/colorBackgroundFloating">
+        android:background="@drawable/bottomsheet_background">
+
+        <ImageView
+            android:id="@+id/drag"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_drag_handle"
+            android:clickable="true"
+            android:paddingTop="@dimen/chooser_edge_margin_normal"
+            android:tint="?android:attr/textColorSecondary"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true" />
+
         <TextView android:id="@+id/profile_button"
                   android:layout_width="wrap_content"
                   android:layout_height="48dp"
@@ -41,7 +54,7 @@
                   android:textAppearance="?attr/textAppearanceButton"
                   android:textColor="?attr/colorAccent"
                   android:gravity="center_vertical"
-                  android:layout_alignParentTop="true"
+                  android:layout_below="@id/drag"
                   android:layout_alignParentRight="true"
                   android:singleLine="true"/>
 
@@ -207,7 +220,6 @@
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
         android:background="?attr/colorBackgroundFloating"
-        android:elevation="8dp"
         android:listSelector="@color/transparent"
         android:divider="@null"
         android:scrollIndicators="top"
@@ -219,7 +231,7 @@
               android:layout_alwaysShow="true"
               android:background="?attr/colorBackgroundFloating"
               android:text="@string/noApplications"
-              android:padding="32dp"
+              android:padding="@dimen/chooser_edge_margin_normal"
               android:gravity="center"
               android:visibility="gone"/>
 

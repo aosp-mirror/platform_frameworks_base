@@ -15,3 +15,7 @@
 aapt2 compile --dir res -o compiled.flata
 aapt2 link --manifest AndroidManifest.xml -A assets -o target.apk compiled.flata
 rm compiled.flata
+
+aapt2 compile res/values/values.xml -o .
+aapt2 link --manifest AndroidManifest.xml -A assets -o target_no_overlayable.apk values_values.arsc.flat
+rm values_values.arsc.flat

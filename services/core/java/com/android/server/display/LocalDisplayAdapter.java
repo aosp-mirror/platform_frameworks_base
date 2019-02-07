@@ -17,12 +17,8 @@
 package com.android.server.display;
 
 import android.app.ActivityThread;
-import android.content.res.Resources;
-import com.android.server.LocalServices;
-import com.android.server.lights.Light;
-import com.android.server.lights.LightsManager;
-
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
@@ -31,6 +27,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -38,6 +35,11 @@ import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import com.android.server.LocalServices;
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,13 +60,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
-    private static final int[] BUILT_IN_DISPLAY_IDS_TO_SCAN = new int[] {
-            SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN,
-            SurfaceControl.BUILT_IN_DISPLAY_ID_HDMI,
-    };
+    private final LongSparseArray<LocalDisplayDevice> mDevices =
+            new LongSparseArray<LocalDisplayDevice>();
 
-    private final SparseArray<LocalDisplayDevice> mDevices =
-            new SparseArray<LocalDisplayDevice>();
     @SuppressWarnings("unused")  // Becomes active at instantiation time.
     private HotplugDisplayEventReceiver mHotplugReceiver;
 
@@ -80,28 +78,26 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         mHotplugReceiver = new HotplugDisplayEventReceiver(getHandler().getLooper());
 
-        for (int builtInDisplayId : BUILT_IN_DISPLAY_IDS_TO_SCAN) {
-            tryConnectDisplayLocked(builtInDisplayId);
+        for (long physicalDisplayId : SurfaceControl.getPhysicalDisplayIds()) {
+            tryConnectDisplayLocked(physicalDisplayId);
         }
     }
 
-    private void tryConnectDisplayLocked(int builtInDisplayId) {
-        IBinder displayToken = SurfaceControl.getBuiltInDisplay(builtInDisplayId);
+    private void tryConnectDisplayLocked(long physicalDisplayId) {
+        final IBinder displayToken = SurfaceControl.getPhysicalDisplayToken(physicalDisplayId);
         if (displayToken != null) {
             SurfaceControl.PhysicalDisplayInfo[] configs =
                     SurfaceControl.getDisplayConfigs(displayToken);
             if (configs == null) {
                 // There are no valid configs for this device, so we can't use it
-                Slog.w(TAG, "No valid configs found for display device " +
-                        builtInDisplayId);
+                Slog.w(TAG, "No valid configs found for display device " + physicalDisplayId);
                 return;
             }
             int activeConfig = SurfaceControl.getActiveConfig(displayToken);
             if (activeConfig < 0) {
                 // There is no active config, and for now we don't have the
                 // policy to set one.
-                Slog.w(TAG, "No active config found for display device " +
-                        builtInDisplayId);
+                Slog.w(TAG, "No active config found for display device " + physicalDisplayId);
                 return;
             }
             int activeColorMode = SurfaceControl.getActiveColorMode(displayToken);
@@ -110,16 +106,17 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 // configuration pass we'll go ahead and set it to whatever it was set to last (or
                 // COLOR_MODE_NATIVE if this is the first configuration).
                 Slog.w(TAG, "Unable to get active color mode for display device " +
-                        builtInDisplayId);
+                        physicalDisplayId);
                 activeColorMode = Display.COLOR_MODE_INVALID;
             }
             int[] colorModes = SurfaceControl.getDisplayColorModes(displayToken);
-            LocalDisplayDevice device = mDevices.get(builtInDisplayId);
+            LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
-                device = new LocalDisplayDevice(displayToken, builtInDisplayId,
-                        configs, activeConfig, colorModes, activeColorMode);
-                mDevices.put(builtInDisplayId, device);
+                final boolean isInternal = mDevices.size() == 0;
+                device = new LocalDisplayDevice(displayToken, physicalDisplayId,
+                        configs, activeConfig, colorModes, activeColorMode, isInternal);
+                mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
             } else if (device.updatePhysicalDisplayInfoLocked(configs, activeConfig,
                         colorModes, activeColorMode)) {
@@ -133,11 +130,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
     }
 
-    private void tryDisconnectDisplayLocked(int builtInDisplayId) {
-        LocalDisplayDevice device = mDevices.get(builtInDisplayId);
+    private void tryDisconnectDisplayLocked(long physicalDisplayId) {
+        LocalDisplayDevice device = mDevices.get(physicalDisplayId);
         if (device != null) {
             // Display was removed.
-            mDevices.remove(builtInDisplayId);
+            mDevices.remove(physicalDisplayId);
             sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
         }
     }
@@ -158,10 +155,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     }
 
     private final class LocalDisplayDevice extends DisplayDevice {
-        private final int mBuiltInDisplayId;
+        private final long mPhysicalDisplayId;
         private final Light mBacklight;
         private final SparseArray<DisplayModeRecord> mSupportedModes = new SparseArray<>();
         private final ArrayList<Integer> mSupportedColorModes = new ArrayList<>();
+        private final boolean mIsInternal;
 
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
@@ -179,16 +177,17 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         private  SurfaceControl.PhysicalDisplayInfo mDisplayInfos[];
 
-        public LocalDisplayDevice(IBinder displayToken, int builtInDisplayId,
+        LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                 SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo,
-                int[] colorModes, int activeColorMode) {
-            super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + builtInDisplayId);
-            mBuiltInDisplayId = builtInDisplayId;
+                int[] colorModes, int activeColorMode, boolean isInternal) {
+            super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId);
+            mPhysicalDisplayId = physicalDisplayId;
+            mIsInternal = isInternal;
             updatePhysicalDisplayInfoLocked(physicalDisplayInfos, activeDisplayInfo,
                     colorModes, activeColorMode);
             updateColorModesLocked(colorModes, activeColorMode);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
-            if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
+            if (mIsInternal) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
                 mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
             } else {
@@ -392,7 +391,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
 
                 final Resources res = getOverlayContext().getResources();
-                if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
+                if (mIsInternal) {
                     mInfo.name = res.getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
@@ -455,7 +454,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             final boolean stateChanged = (mState != state);
             final boolean brightnessChanged = (mBrightness != brightness) && mBacklight != null;
             if (stateChanged || brightnessChanged) {
-                final int displayId = mBuiltInDisplayId;
+                final long physicalDisplayId = mPhysicalDisplayId;
                 final IBinder token = getDisplayTokenLocked();
                 final int oldState = mState;
 
@@ -519,7 +518,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     private void setVrMode(boolean isVrEnabled) {
                         if (DEBUG) {
                             Slog.d(TAG, "setVrMode("
-                                    + "id=" + displayId
+                                    + "id=" + physicalDisplayId
                                     + ", state=" + Display.stateToString(state) + ")");
                         }
                         mBacklight.setVrMode(isVrEnabled);
@@ -528,7 +527,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     private void setDisplayState(int state) {
                         if (DEBUG) {
                             Slog.d(TAG, "setDisplayState("
-                                    + "id=" + displayId
+                                    + "id=" + physicalDisplayId
                                     + ", state=" + Display.stateToString(state) + ")");
                         }
 
@@ -546,7 +545,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         }
                         final int mode = getPowerModeForState(state);
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayState("
-                                + "id=" + displayId
+                                + "id=" + physicalDisplayId
                                 + ", state=" + Display.stateToString(state) + ")");
                         try {
                             SurfaceControl.setDisplayPowerMode(token, mode);
@@ -571,11 +570,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     private void setDisplayBrightness(int brightness) {
                         if (DEBUG) {
                             Slog.d(TAG, "setDisplayBrightness("
-                                    + "id=" + displayId + ", brightness=" + brightness + ")");
+                                    + "id=" + physicalDisplayId
+                                    + ", brightness=" + brightness + ")");
                         }
 
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
-                                + "id=" + displayId + ", brightness=" + brightness + ")");
+                                + "id=" + physicalDisplayId + ", brightness=" + brightness + ")");
                         try {
                             mBacklight.setBrightness(brightness);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
@@ -646,7 +646,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public void dumpLocked(PrintWriter pw) {
             super.dumpLocked(pw);
-            pw.println("mBuiltInDisplayId=" + mBuiltInDisplayId);
+            pw.println("mPhysicalDisplayId=" + mPhysicalDisplayId);
             pw.println("mActivePhysIndex=" + mActivePhysIndex);
             pw.println("mActiveModeId=" + mActiveModeId);
             pw.println("mActiveColorMode=" + mActiveColorMode);
@@ -731,12 +731,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void onHotplug(long timestampNanos, int builtInDisplayId, boolean connected) {
+        public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
             synchronized (getSyncRoot()) {
                 if (connected) {
-                    tryConnectDisplayLocked(builtInDisplayId);
+                    tryConnectDisplayLocked(physicalDisplayId);
                 } else {
-                    tryDisconnectDisplayLocked(builtInDisplayId);
+                    tryDisconnectDisplayLocked(physicalDisplayId);
                 }
             }
         }

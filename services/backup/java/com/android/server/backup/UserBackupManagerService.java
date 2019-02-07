@@ -244,6 +244,8 @@ public class UserBackupManagerService {
     private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
     private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
+    private static final String SERIAL_ID_FILE = "serial_id";
+
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
@@ -360,6 +362,8 @@ public class UserBackupManagerService {
     private Set<String> mAncestralPackages = null;
     private long mAncestralToken = 0;
     private long mCurrentToken = 0;
+    @Nullable private File mAncestralSerialNumberFile;
+
 
     /**
      * Creates an instance of {@link UserBackupManagerService} and initializes state for it. This
@@ -2307,6 +2311,55 @@ public class UserBackupManagerService {
             Binder.restoreCallingIdentity(oldId);
         }
     }
+
+    /**
+     * Sets the work profile serial number of the ancestral work profile.
+     */
+    public void setAncestralSerialNumber(long ancestralSerialNumber) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+                "setAncestralSerialNumber");
+        Slog.v(TAG, "Setting ancestral work profile id to " + ancestralSerialNumber);
+        try (RandomAccessFile af = getAncestralSerialNumberFile()) {
+            af.writeLong(ancestralSerialNumber);
+        } catch (IOException e) {
+            Slog.w(TAG, "Unable to write to work profile serial mapping file:", e);
+        }
+    }
+
+    /**
+     * Returns the work profile serial number of the ancestral device. This will be set by
+     * {@link #setAncestralSerialNumber(long)}. Will return {@code -1} if not set.
+     */
+    public long getAncestralSerialNumber() {
+        try (RandomAccessFile af = getAncestralSerialNumberFile()) {
+            return af.readLong();
+        } catch (IOException e) {
+            Slog.w(TAG, "Unable to write to work profile serial number file:", e);
+            return -1;
+        }
+    }
+
+    private RandomAccessFile getAncestralSerialNumberFile() throws FileNotFoundException {
+        if (mAncestralSerialNumberFile == null) {
+            mAncestralSerialNumberFile = new File(
+                UserBackupManagerFiles.getBaseStateDir(getUserId()),
+                SERIAL_ID_FILE);
+            if (!mAncestralSerialNumberFile.exists()) {
+                try {
+                    mAncestralSerialNumberFile.createNewFile();
+                } catch (IOException e) {
+                    Slog.w(TAG, "serial number mapping file creation failed", e);
+                }
+            }
+        }
+        return new RandomAccessFile(mAncestralSerialNumberFile, "rwd");
+    }
+
+    @VisibleForTesting
+    void setAncestralSerialNumberFile(File ancestralSerialNumberFile) {
+        mAncestralSerialNumberFile = ancestralSerialNumberFile;
+    }
+
 
     /** Clear the given package's backup data from the current transport. */
     public void clearBackupData(String transportName, String packageName) {

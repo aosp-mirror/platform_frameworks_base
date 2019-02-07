@@ -281,10 +281,10 @@ bool CheckOverlayable(const LoadedPackage& target_package,
   if (overlayable_info == nullptr) {
     // If the resource does not have an overlayable definition, allow the resource to be overlaid.
     // Once overlayable enforcement is turned on, this check will return false.
-    return true;
+    return !target_package.DefinesOverlayable();
   }
 
-  if (!overlay_info.target_name.empty() && overlay_info.target_name != overlayable_info->name) {
+  if (overlay_info.target_name != overlayable_info->name) {
     // If the overlay supplies a target overlayable name, the resource must belong to the
     // overlayable defined with the specified name to be overlaid.
     return false;

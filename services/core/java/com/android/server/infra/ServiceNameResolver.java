@@ -108,6 +108,36 @@ public interface ServiceNameResolver {
     }
 
     /**
+     * Sets whether the default service should be used when the temporary service is not set.
+     *
+     * <p>Typically used during CTS tests to make sure only the default service doesn't interfere
+     * with the test results.
+     *
+     * @param userId user handle
+     * @param enabled whether the default service should be used when the temporary service is not
+     * set
+     *
+     * @throws UnsupportedOperationException if not implemented.
+     */
+    default void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
+        throw new UnsupportedOperationException("changing default service not supported");
+    }
+
+    /**
+     * Checks whether the default service should be used when the temporary service is not set.
+     *
+     * <p>Typically used during CTS tests to make sure only the default service doesn't interfere
+     * with the test results.
+     *
+     * @param userId user handle
+     *
+     * @throws UnsupportedOperationException if not implemented.
+     */
+    default boolean isDefaultServiceEnabled(@UserIdInt int userId) {
+        throw new UnsupportedOperationException("checking default service not supported");
+    }
+
+    /**
      * Dumps the generic info in just one line (without calling {@code println}.
      */
     // TODO(b/117779333): support proto

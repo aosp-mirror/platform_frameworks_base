@@ -123,6 +123,7 @@ import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
+import com.android.server.pm.UserManagerService;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -206,15 +207,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     UriGrantsManagerInternal mUgmInternal;
     @Mock
     AppOpsManager mAppOpsManager;
+    @Mock
+    private UserManagerService mUserMangerService;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
         boolean isSystemUid = true;
         int countLogSmartSuggestionsVisible = 0;
+        UserManagerService mUserManagerService;
 
-        public TestableNotificationManagerService(Context context) {
+        TestableNotificationManagerService(Context context, UserManagerService userManagerService) {
             super(context);
+            mUserManagerService = userManagerService;
         }
 
         @Override
@@ -250,7 +255,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             countLogSmartSuggestionsVisible++;
         }
 
-
+        @Override
+        UserManagerService getUserManagerService() {
+            return mUserManagerService;
+        }
     }
 
     private class TestableToastCallback extends ITransientNotification.Stub {
@@ -267,17 +275,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        // most tests assume badging is enabled
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.NOTIFICATION_BADGING, 1,
-                UserHandle.getUserHandleForUid(mUid).getIdentifier());
-
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
 
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mUserMangerService);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
@@ -424,6 +427,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         answers.put("badging", invocationOnMock -> {
             NotificationRecord r = (NotificationRecord) invocationOnMock.getArguments()[0];
             r.setShowBadge(!r.canShowBadge());
+            return null;
+        });
+        answers.put("bubbles", invocationOnMock -> {
+            NotificationRecord r = (NotificationRecord) invocationOnMock.getArguments()[0];
+            r.setAllowBubble(!r.canBubble());
             return null;
         });
         answers.put("package visibility", invocationOnMock -> {
@@ -1847,7 +1855,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testHasCompanionDevice_noService() throws Exception {
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mUserMangerService);
 
         assertFalse(mService.hasCompanionDevice(mListener));
     }
@@ -2500,10 +2508,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "</dnd_apps>"
                 + "</notification-policy>";
         mService.readPolicyXml(
-                new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())), false);
-        verify(mListeners, times(1)).readXml(any(), any());
-        verify(mConditionProviders, times(1)).readXml(any(), any());
-        verify(mAssistants, times(1)).readXml(any(), any());
+                new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())),
+                false,
+                UserHandle.USER_ALL);
+        verify(mListeners, times(1)).readXml(any(), any(), anyBoolean(), anyInt());
+        verify(mConditionProviders, times(1)).readXml(any(), any(), anyBoolean(), anyInt());
+        verify(mAssistants, times(1)).readXml(any(), any(), anyBoolean(), anyInt());
 
         // numbers are inflated for setup
         verify(mListeners, times(1)).migrateToXml();
@@ -2518,10 +2528,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "<ranking></ranking>"
                 + "</notification-policy>";
         mService.readPolicyXml(
-                new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())), false);
-        verify(mListeners, never()).readXml(any(), any());
-        verify(mConditionProviders, never()).readXml(any(), any());
-        verify(mAssistants, never()).readXml(any(), any());
+                new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())),
+                false,
+                UserHandle.USER_ALL);
+        verify(mListeners, never()).readXml(any(), any(), anyBoolean(), anyInt());
+        verify(mConditionProviders, never()).readXml(any(), any(), anyBoolean(), anyInt());
+        verify(mAssistants, never()).readXml(any(), any(), anyBoolean(), anyInt());
 
         // numbers are inflated for setup
         verify(mListeners, times(2)).migrateToXml();
@@ -2530,6 +2542,53 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mAssistants, times(2)).ensureAssistant();
     }
 
+    @Test
+    public void testReadPolicyXml_doesNotRestoreManagedServicesForManagedUser() throws Exception {
+        final String policyXml = "<notification-policy version=\"1\">"
+                + "<ranking></ranking>"
+                + "<enabled_listeners>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_listeners>"
+                + "<enabled_assistants>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_assistants>"
+                + "<dnd_apps>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</dnd_apps>"
+                + "</notification-policy>";
+        when(mUserMangerService.isManagedProfile(10)).thenReturn(true);
+        mService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
+                true,
+                10);
+        verify(mListeners, never()).readXml(any(), any(), eq(true), eq(10));
+        verify(mConditionProviders, never()).readXml(any(), any(), eq(true), eq(10));
+        verify(mAssistants, never()).readXml(any(), any(), eq(true), eq(10));
+    }
+
+    @Test
+    public void testReadPolicyXml_restoresManagedServicesForNonManagedUser() throws Exception {
+        final String policyXml = "<notification-policy version=\"1\">"
+                + "<ranking></ranking>"
+                + "<enabled_listeners>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_listeners>"
+                + "<enabled_assistants>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_assistants>"
+                + "<dnd_apps>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</dnd_apps>"
+                + "</notification-policy>";
+        when(mUserMangerService.isManagedProfile(10)).thenReturn(false);
+        mService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
+                true,
+                10);
+        verify(mListeners, times(1)).readXml(any(), any(), eq(true), eq(10));
+        verify(mConditionProviders, times(1)).readXml(any(), any(), eq(true), eq(10));
+        verify(mAssistants, times(1)).readXml(any(), any(), eq(true), eq(10));
+    }
 
     @Test
     public void testLocaleChangedCallsUpdateDefaultZenModeRules() throws Exception {

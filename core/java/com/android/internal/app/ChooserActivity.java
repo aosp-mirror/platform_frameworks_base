@@ -54,6 +54,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -186,9 +187,12 @@ public class ChooserActivity extends ResolverActivity {
     private @interface ContentPreviewType {
     }
 
-    private static final int CONTENT_PREVIEW_IMAGE = 0;
-    private static final int CONTENT_PREVIEW_FILE = 1;
-    private static final int CONTENT_PREVIEW_TEXT = 2;
+    // Starting at 1 since 0 is considered "undefined" for some of the database transformations
+    // of tron logs.
+    private static final int CONTENT_PREVIEW_IMAGE = 1;
+    private static final int CONTENT_PREVIEW_FILE = 2;
+    private static final int CONTENT_PREVIEW_TEXT = 3;
+    protected MetricsLogger mMetricsLogger;
 
     private final Handler mChooserHandler = new Handler() {
         @Override
@@ -413,11 +417,12 @@ public class ChooserActivity extends ResolverActivity {
             }
         });
 
-        MetricsLogger.action(this, MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN);
-
         mChooserShownTime = System.currentTimeMillis();
         final long systemCost = mChooserShownTime - intentReceivedTime;
-        MetricsLogger.histogram(null, "system_cost_for_smart_sharing", (int) systemCost);
+
+        getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN)
+                .addTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE, target.getType())
+                .addTaggedData(MetricsEvent.FIELD_TIME_TO_APP_TARGETS, systemCost));
 
         if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
             final IntentFilter filter = getTargetIntentFilter();
@@ -470,6 +475,9 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
+
+        getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_SHARE_WITH_PREVIEW)
+                .setSubtype(previewType));
         displayContentPreview(previewType, targetIntent);
     }
 
@@ -1180,6 +1188,13 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    protected MetricsLogger getMetricsLogger() {
+        if (mMetricsLogger == null) {
+            mMetricsLogger = new MetricsLogger();
+        }
+        return mMetricsLogger;
+    }
+
     public class ChooserListController extends ResolverListController {
         public ChooserListController(Context context,
                 PackageManager pm,
@@ -1726,6 +1741,8 @@ public class ChooserActivity extends ResolverActivity {
             if (show != mShowServiceTargets) {
                 mShowServiceTargets = show;
                 notifyDataSetChanged();
+                getMetricsLogger().write(
+                        new LogMaker(MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN_DIRECT_TARGET));
             }
         }
 
@@ -1884,8 +1901,6 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             if (startType == ChooserListAdapter.TARGET_SERVICE) {
-                holder.row.setBackgroundColor(
-                        getColor(R.color.chooser_service_row_background_color));
                 int nextStartType = mChooserListAdapter.getPositionTargetType(
                         getFirstRowPosition(rowPosition + 1));
                 int serviceSpacing = holder.row.getContext().getResources()

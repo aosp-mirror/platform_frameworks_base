@@ -28,7 +28,7 @@ public class RcsManager {
     private static final RcsMessageStore sRcsMessageStoreInstance = new RcsMessageStore();
 
     /**
-     * Returns an instance of RcsMessageStore.
+     * Returns an instance of {@link RcsMessageStore}
      */
     public RcsMessageStore getRcsMessageStore() {
         return sRcsMessageStoreInstance;

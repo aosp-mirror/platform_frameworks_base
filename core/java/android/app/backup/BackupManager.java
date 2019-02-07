@@ -751,6 +751,47 @@ public class BackupManager {
     }
 
     /**
+     * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the
+     * serial number of the its ancestral work profile or {@code null} if there is none.
+     *
+     * <p> The ancestral serial number will have a corresponding {@link UserHandle} if the device
+     * has a work profile that was restored from another work profile with serial number
+     * {@code ancestralSerialNumber}.
+     *
+     * @see UserManager#getSerialNumberForUser(UserHandle)
+     */
+    @Nullable
+    public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
+        if (sService != null) {
+            try {
+                return sService.getUserForAncestralSerialNumber(ancestralSerialNumber);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getUserForAncestralSerialNumber() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sets the ancestral work profile for the calling user.
+     *
+     * <p> The ancestral work profile corresponds to the profile that was used to restore to the
+     * callers profile.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public void setAncestralSerialNumber(long ancestralSerialNumber) {
+        if (sService != null) {
+            try {
+                sService.setAncestralSerialNumber(ancestralSerialNumber);
+            } catch (RemoteException e) {
+                Log.e(TAG, "setAncestralSerialNumber() couldn't connect");
+            }
+        }
+    }
+
+    /**
      * Returns an {@link Intent} for the specified transport's configuration UI.
      * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
      * Intent, String)}.

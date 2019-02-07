@@ -112,7 +112,7 @@ public class StatusBarWindowView extends FrameLayout {
         mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         mFalsingManager = FalsingManager.getInstance(context);
         mDoubleTapHelper = new DoubleTapHelper(this, active -> {}, () -> {
-            mService.wakeUpIfDozing(SystemClock.uptimeMillis(), this);
+            mService.wakeUpIfDozing(SystemClock.uptimeMillis(), this, "DOUBLE_TAP");
             return true;
         }, null, null);
     }

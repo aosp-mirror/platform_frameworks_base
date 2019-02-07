@@ -122,6 +122,13 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     StatsdStats::getInstance().noteConfigReceived(
             key, mAllMetricProducers.size(), mAllConditionTrackers.size(), mAllAtomMatchers.size(),
             mAllAnomalyTrackers.size(), mAnnotations, mConfigValid);
+    // Check active
+    for (const auto& metric : mAllMetricProducers) {
+        if (metric->isActive()) {
+            mIsActive = true;
+            break;
+        }
+    }
 }
 
 MetricsManager::~MetricsManager() {
@@ -304,8 +311,10 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     int tagId = event.GetTagId();
     int64_t eventTimeNs = event.GetElapsedTimestampNs();
 
+    bool isActive = false;
     for (int metric : mMetricIndexesWithActivation) {
         mAllMetricProducers[metric]->flushIfExpire(eventTimeNs);
+        isActive |= mAllMetricProducers[metric]->isActive();
     }
 
     if (mTagIds.find(tagId) == mTagIds.end()) {
@@ -323,9 +332,12 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         if (matcherCache[it.first] == MatchingState::kMatched) {
             for (int metricIndex : it.second) {
                 mAllMetricProducers[metricIndex]->activate(it.first, eventTimeNs);
+                isActive |= mAllMetricProducers[metricIndex]->isActive();
             }
         }
     }
+
+    mIsActive = isActive;
 
     // A bitmap to see which ConditionTracker needs to be re-evaluated.
     vector<bool> conditionToBeEvaluated(mAllConditionTrackers.size(), false);
@@ -416,6 +428,25 @@ size_t MetricsManager::byteSize() {
         totalSize += metricProducer->byteSize();
     }
     return totalSize;
+}
+
+void MetricsManager::setActiveMetrics(ActiveConfig config, int64_t currentTimeNs) {
+    if (config.active_metric_size() == 0) {
+        ALOGW("No active metric for config %s", mConfigKey.ToString().c_str());
+        return;
+    }
+
+    for (int i = 0; i < config.active_metric_size(); i++) {
+        for (int metric : mMetricIndexesWithActivation) {
+            if (mAllMetricProducers[metric]->getMetricId() == config.active_metric(i).metric_id()) {
+                VLOG("Setting active metric: %lld",
+                     (long long)mAllMetricProducers[metric]->getMetricId());
+                mAllMetricProducers[metric]->setActive(
+                        currentTimeNs, config.active_metric(i).time_to_live_nanos());
+                mIsActive = true;
+            }
+        }
+    }
 }
 
 }  // namespace statsd

@@ -94,7 +94,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     private StackAnimationController mStackAnimationController;
     private ExpandedAnimationController mExpandedAnimationController;
 
-    private BubbleExpandedViewContainer mExpandedViewContainer;
+    private BubbleExpandedView mExpandedViewContainer;
 
     private int mBubbleSize;
     private int mBubblePadding;
@@ -173,7 +173,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
-        mExpandedViewContainer = (BubbleExpandedViewContainer)
+        mExpandedViewContainer = (BubbleExpandedView)
                 LayoutInflater.from(context).inflate(R.layout.bubble_expanded_view,
                         this /* parent */, false /* attachToRoot */);
         mExpandedViewContainer.setElevation(elevation);
@@ -221,6 +221,13 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      */
     public void setExpandListener(BubbleController.BubbleExpandListener listener) {
         mExpandListener = listener;
+    }
+
+    /**
+     * Sets the listener to notify when a bubble is blocked.
+     */
+    public void setOnBlockedListener(BubbleExpandedView.OnBubbleBlockedListener listener) {
+        mExpandedViewContainer.setOnBlockedListener(listener);
     }
 
     /**

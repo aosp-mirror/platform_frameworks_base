@@ -213,6 +213,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -538,30 +539,49 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void readPolicyXml(InputStream stream, boolean forRestore)
+    UserManagerService getUserManagerService() {
+        return UserManagerService.getInstance();
+    }
+
+    void readPolicyXml(InputStream stream, boolean forRestore, int userId)
             throws XmlPullParserException, NumberFormatException, IOException {
         final XmlPullParser parser = Xml.newPullParser();
         parser.setInput(stream, StandardCharsets.UTF_8.name());
         XmlUtils.beginDocument(parser, TAG_NOTIFICATION_POLICY);
         boolean migratedManagedServices = false;
+        boolean ineligibleForManagedServices = forRestore
+                && getUserManagerService().isManagedProfile(userId);
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (ZenModeConfig.ZEN_TAG.equals(parser.getName())) {
-                mZenModeHelper.readXml(parser, forRestore);
+                mZenModeHelper.readXml(parser, forRestore, userId);
             } else if (PreferencesHelper.TAG_RANKING.equals(parser.getName())){
-                mPreferencesHelper.readXml(parser, forRestore);
+                mPreferencesHelper.readXml(parser, forRestore, userId);
             }
             if (mListeners.getConfig().xmlTag.equals(parser.getName())) {
-                mListeners.readXml(parser, mAllowedManagedServicePackages);
+                if (ineligibleForManagedServices) {
+                    continue;
+                }
+                mListeners.readXml(parser, mAllowedManagedServicePackages, forRestore, userId);
                 migratedManagedServices = true;
             } else if (mAssistants.getConfig().xmlTag.equals(parser.getName())) {
-                mAssistants.readXml(parser, mAllowedManagedServicePackages);
+                if (ineligibleForManagedServices) {
+                    continue;
+                }
+                mAssistants.readXml(parser, mAllowedManagedServicePackages, forRestore, userId);
                 migratedManagedServices = true;
             } else if (mConditionProviders.getConfig().xmlTag.equals(parser.getName())) {
-                mConditionProviders.readXml(parser, mAllowedManagedServicePackages);
+                if (ineligibleForManagedServices) {
+                    continue;
+                }
+                mConditionProviders.readXml(
+                        parser, mAllowedManagedServicePackages, forRestore, userId);
                 migratedManagedServices = true;
             }
             if (LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG.equals(parser.getName())) {
+                if (forRestore && userId != UserHandle.USER_SYSTEM) {
+                    continue;
+                }
                 mLockScreenAllowSecureNotifications =
                         safeBoolean(parser.getAttributeValue(null,
                                         LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE), true);
@@ -584,7 +604,7 @@ public class NotificationManagerService extends SystemService {
             InputStream infile = null;
             try {
                 infile = mPolicyFile.openRead();
-                readPolicyXml(infile, false /*forRestore*/);
+                readPolicyXml(infile, false /*forRestore*/, UserHandle.USER_ALL);
             } catch (FileNotFoundException e) {
                 // No data yet
                 // Load default managed services approvals
@@ -615,7 +635,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 try {
-                    writePolicyXml(stream, false /*forBackup*/);
+                    writePolicyXml(stream, false /*forBackup*/, UserHandle.USER_ALL);
                     mPolicyFile.finishWrite(stream);
                 } catch (IOException e) {
                     Slog.w(TAG, "Failed to save policy file, restoring backup", e);
@@ -626,18 +646,21 @@ public class NotificationManagerService extends SystemService {
         });
     }
 
-    private void writePolicyXml(OutputStream stream, boolean forBackup) throws IOException {
+    private void writePolicyXml(OutputStream stream, boolean forBackup, int userId)
+            throws IOException {
         final XmlSerializer out = new FastXmlSerializer();
         out.setOutput(stream, StandardCharsets.UTF_8.name());
         out.startDocument(null, true);
         out.startTag(null, TAG_NOTIFICATION_POLICY);
         out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
-        mZenModeHelper.writeXml(out, forBackup, null);
-        mPreferencesHelper.writeXml(out, forBackup);
-        mListeners.writeXml(out, forBackup);
-        mAssistants.writeXml(out, forBackup);
-        mConditionProviders.writeXml(out, forBackup);
-        writeSecureNotificationsPolicy(out);
+        mZenModeHelper.writeXml(out, forBackup, null, userId);
+        mPreferencesHelper.writeXml(out, forBackup, userId);
+        mListeners.writeXml(out, forBackup, userId);
+        mAssistants.writeXml(out, forBackup, userId);
+        mConditionProviders.writeXml(out, forBackup, userId);
+        if (!forBackup || userId == UserHandle.USER_SYSTEM) {
+            writeSecureNotificationsPolicy(out);
+        }
         out.endTag(null, TAG_NOTIFICATION_POLICY);
         out.endDocument();
     }
@@ -1282,6 +1305,8 @@ public class NotificationManagerService extends SystemService {
     private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_BADGING_URI
                 = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
+        private final Uri NOTIFICATION_BUBBLES_URI
+                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BUBBLES);
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
@@ -1298,6 +1323,8 @@ public class NotificationManagerService extends SystemService {
             resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(NOTIFICATION_BUBBLES_URI,
                     false, this, UserHandle.USER_ALL);
             update(null);
         }
@@ -1323,6 +1350,9 @@ public class NotificationManagerService extends SystemService {
             }
             if (uri == null || NOTIFICATION_BADGING_URI.equals(uri)) {
                 mPreferencesHelper.updateBadgingEnabled();
+            }
+            if (uri == null || NOTIFICATION_BUBBLES_URI.equals(uri)) {
+                mPreferencesHelper.updateBubblesEnabled();
             }
         }
     }
@@ -3507,14 +3537,9 @@ public class NotificationManagerService extends SystemService {
         public byte[] getBackupPayload(int user) {
             checkCallerIsSystem();
             if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
-            //TODO: http://b/22388012
-            if (user != USER_SYSTEM) {
-                Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
-                return null;
-            }
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
-                writePolicyXml(baos, true /*forBackup*/);
+                writePolicyXml(baos, true /*forBackup*/, user);
                 return baos.toByteArray();
             } catch (IOException e) {
                 Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
@@ -3531,14 +3556,9 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "applyRestore: no payload to restore for user " + user);
                 return;
             }
-            //TODO: http://b/22388012
-            if (user != USER_SYSTEM) {
-                Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
-                return;
-            }
             final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
             try {
-                readPolicyXml(bais, true /*forRestore*/);
+                readPolicyXml(bais, true /*forRestore*/, user);
                 handleSavePolicyFile();
             } catch (NumberFormatException | XmlPullParserException | IOException e) {
                 Slog.w(TAG, "applyRestore: error reading payload", e);
@@ -5849,6 +5869,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<String> orderBefore = new ArrayList<>(N);
             int[] visibilities = new int[N];
             boolean[] showBadges = new boolean[N];
+            boolean[] allowBubbles = new boolean[N];
             ArrayList<NotificationChannel> channelBefore = new ArrayList<>(N);
             ArrayList<String> groupKeyBefore = new ArrayList<>(N);
             ArrayList<ArrayList<String>> overridePeopleBefore = new ArrayList<>(N);
@@ -5863,6 +5884,7 @@ public class NotificationManagerService extends SystemService {
                 orderBefore.add(r.getKey());
                 visibilities[i] = r.getPackageVisibilityOverride();
                 showBadges[i] = r.canShowBadge();
+                allowBubbles[i] = r.canBubble();
                 channelBefore.add(r.getChannel());
                 groupKeyBefore.add(r.getGroupKey());
                 overridePeopleBefore.add(r.getPeopleOverride());
@@ -5880,6 +5902,7 @@ public class NotificationManagerService extends SystemService {
                 if (!orderBefore.get(i).equals(r.getKey())
                         || visibilities[i] != r.getPackageVisibilityOverride()
                         || showBadges[i] != r.canShowBadge()
+                        || allowBubbles[i] != r.canBubble()
                         || !Objects.equals(channelBefore.get(i), r.getChannel())
                         || !Objects.equals(groupKeyBefore.get(i), r.getGroupKey())
                         || !Objects.equals(overridePeopleBefore.get(i), r.getPeopleOverride())
@@ -6922,6 +6945,7 @@ public class NotificationManagerService extends SystemService {
         Bundle smartReplies = new Bundle();
         Bundle lastAudiblyAlerted = new Bundle();
         Bundle noisy = new Bundle();
+        ArrayList<Boolean> canBubble = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -6954,18 +6978,22 @@ public class NotificationManagerService extends SystemService {
             smartReplies.putCharSequenceArrayList(key, record.getSmartReplies());
             lastAudiblyAlerted.putLong(key, record.getLastAudiblyAlertedMs());
             noisy.putBoolean(key, record.getSound() != null || record.getVibration() != null);
+            canBubble.add(record.canBubble());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
         String[] interceptedKeysAr = interceptedKeys.toArray(new String[interceptedKeys.size()]);
         int[] importanceAr = new int[M];
+        boolean[] canBubbleAr = new boolean[M];
         for (int i = 0; i < M; i++) {
             importanceAr[i] = importance.get(i);
+            canBubbleAr[i] = canBubble.get(i);
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
-                systemGeneratedSmartActions, smartReplies, lastAudiblyAlerted, noisy);
+                systemGeneratedSmartActions, smartReplies, lastAudiblyAlerted, noisy,
+                canBubbleAr);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {

@@ -59,8 +59,8 @@ private:
     sp<MessageQueue> mMessageQueue;
     DisplayEventReceiver mReceiver;
 
-    virtual void dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count);
-    virtual void dispatchHotplug(nsecs_t timestamp, int32_t id, bool connected);
+    void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count) override;
+    void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
 };
 
 
@@ -84,28 +84,30 @@ void NativeDisplayEventReceiver::dispose() {
     DisplayEventDispatcher::dispose();
 }
 
-void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count) {
+void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId,
+                                               uint32_t count) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
     ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking vsync handler.", this);
         env->CallVoidMethod(receiverObj.get(),
-                gDisplayEventReceiverClassInfo.dispatchVsync, timestamp, id, count);
+                gDisplayEventReceiverClassInfo.dispatchVsync, timestamp, displayId, count);
         ALOGV("receiver %p ~ Returned from vsync handler.", this);
     }
 
     mMessageQueue->raiseAndClearException(env, "dispatchVsync");
 }
 
-void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, int32_t id, bool connected) {
+void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId,
+                                                 bool connected) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
     ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking hotplug handler.", this);
         env->CallVoidMethod(receiverObj.get(),
-                gDisplayEventReceiverClassInfo.dispatchHotplug, timestamp, id, connected);
+                gDisplayEventReceiverClassInfo.dispatchHotplug, timestamp, displayId, connected);
         ALOGV("receiver %p ~ Returned from hotplug handler.", this);
     }
 
@@ -175,9 +177,9 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
     gDisplayEventReceiverClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
     gDisplayEventReceiverClassInfo.dispatchVsync = GetMethodIDOrDie(env,
-            gDisplayEventReceiverClassInfo.clazz, "dispatchVsync", "(JII)V");
+            gDisplayEventReceiverClassInfo.clazz, "dispatchVsync", "(JJI)V");
     gDisplayEventReceiverClassInfo.dispatchHotplug = GetMethodIDOrDie(env,
-            gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JIZ)V");
+            gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JJZ)V");
 
     return res;
 }

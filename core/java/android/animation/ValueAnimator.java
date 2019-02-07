@@ -20,6 +20,7 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
@@ -76,7 +77,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * Internal constants
      */
-    @UnsupportedAppUsage
+
+    /**
+     * System-wide animation scale.
+     *
+     * <p>To check whether animations are enabled system-wise use {@link #areAnimatorsEnabled()}.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static float sDurationScale = 1.0f;
 
     /**

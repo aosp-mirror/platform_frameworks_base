@@ -37,7 +37,6 @@ import org.junit.Test;
  *  atest WmTests:RotationCacheTest
  */
 @SmallTest
-@FlakyTest(bugId = 74078662)
 @Presubmit
 public class RotationCacheTest {
 

@@ -417,6 +417,7 @@ message StatsdStatsReport {
       optional int64 skipped_forward_buckets = 4;
       optional int64 bad_value_type = 5;
       optional int64 condition_change_in_next_bucket = 6;
+      optional int64 invalidated_bucket = 7;
     }
     repeated AtomMetricStats atom_metric_stats = 17;
 

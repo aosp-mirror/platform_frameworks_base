@@ -5260,6 +5260,10 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestProvider_grantUriPermissions,
                 false);
 
+        p.info.forceUriPermissions = sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestProvider_forceUriPermissions,
+                false);
+
         p.info.multiprocess = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestProvider_multiprocess,
                 false);

@@ -115,6 +115,7 @@ public final class ColorDisplayService extends SystemService {
     private static final int MSG_APPLY_NIGHT_DISPLAY_IMMEDIATE = 0;
     private static final int MSG_APPLY_NIGHT_DISPLAY_ANIMATED = 1;
     private static final int MSG_APPLY_GLOBAL_SATURATION = 2;
+    private static final int MSG_APPLY_DISPLAY_WHITE_BALANCE = 3;
 
     /**
      * Return value if a setting has not been set.
@@ -323,8 +324,7 @@ public final class ColorDisplayService extends SystemService {
         }
 
         private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
-            IBinder displayToken = SurfaceControl.getBuiltInDisplay(
-                    SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
             if (displayToken == null) {
                 return null;
             }
@@ -871,7 +871,7 @@ public final class ColorDisplayService extends SystemService {
         // If disabled, clear the tint. If enabled, do nothing more here and let the next
         // temperature update set the correct tint.
         if (!activated) {
-            applyTint(mDisplayWhiteBalanceTintController, false);
+            mHandler.sendEmptyMessage(MSG_APPLY_DISPLAY_WHITE_BALANCE);
         }
     }
 
@@ -1543,7 +1543,7 @@ public final class ColorDisplayService extends SystemService {
             mDisplayWhiteBalanceTintController.setMatrix(cct);
 
             if (mDisplayWhiteBalanceTintController.isActivated()) {
-                applyTint(mDisplayWhiteBalanceTintController, false);
+                mHandler.sendEmptyMessage(MSG_APPLY_DISPLAY_WHITE_BALANCE);
                 return true;
             }
             return false;
@@ -1602,6 +1602,9 @@ public final class ColorDisplayService extends SystemService {
                     break;
                 case MSG_APPLY_NIGHT_DISPLAY_ANIMATED:
                     applyTint(mNightDisplayTintController, false);
+                    break;
+                case MSG_APPLY_DISPLAY_WHITE_BALANCE:
+                    applyTint(mDisplayWhiteBalanceTintController, false);
                     break;
             }
         }

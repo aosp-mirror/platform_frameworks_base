@@ -161,7 +161,8 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     mConfigManager = new ConfigManager();
     mProcessor = new StatsLogProcessor(
             mUidMap, mPullerManager, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
-            getElapsedRealtimeNs(), [this](const ConfigKey& key) {
+            getElapsedRealtimeNs(),
+            [this](const ConfigKey& key) {
                 sp<IStatsCompanionService> sc = getStatsCompanionService();
                 auto receiver = mConfigManager->GetConfigReceiver(key);
                 if (sc == nullptr) {
@@ -867,6 +868,7 @@ Status StatsService::informDeviceShutdown() {
     ENFORCE_UID(AID_SYSTEM);
     VLOG("StatsService::informDeviceShutdown");
     mProcessor->WriteDataToDisk(DEVICE_SHUTDOWN);
+    mProcessor->WriteMetricsActivationToDisk(getElapsedRealtimeNs());
     return Status::ok();
 }
 
@@ -901,6 +903,7 @@ Status StatsService::statsCompanionReady() {
 
 void StatsService::Startup() {
     mConfigManager->Startup();
+    mProcessor->LoadMetricsActivationFromDisk();
 }
 
 void StatsService::Terminate() {

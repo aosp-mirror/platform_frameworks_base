@@ -234,7 +234,12 @@ public abstract class AugmentedAutofillService extends Service {
     }
 
     /**
-     * Implementation specific {@code dump}.
+     * Implementation specific {@code dump}. The child class can override the method to provide
+     * additional information about the Service's state into the dumpsys output.
+     *
+     * @param pw The PrintWriter to which you should dump your state.  This will be closed for
+     * you after you return.
+     * @param args additional arguments to the dump request.
      */
     protected void dump(@NonNull PrintWriter pw,
             @SuppressWarnings("unused") @NonNull String[] args) {

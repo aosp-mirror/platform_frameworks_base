@@ -734,10 +734,13 @@ public class UserManager {
     public static final String DISALLOW_SYSTEM_ERROR_DIALOGS = "no_system_error_dialogs";
 
     /**
-     * Specifies if what is copied in the clipboard of this profile can
-     * be pasted in related profiles. Does not restrict if the clipboard of related profiles can be
-     * pasted in this profile.
-     * The default value is <code>false</code>.
+     * Specifies if the clipboard contents can be exported by pasting the data into other users or
+     * profiles. This restriction doesn't prevent import, such as someone pasting clipboard data
+     * from other profiles or users. The default value is {@code false}.
+     *
+     * <p><strong>Note</strong>: Because it's possible to extract data from screenshots using
+     * optical character recognition (OCR), we strongly recommend combining this user restriction
+     * with {@link DevicePolicyManager#setScreenCaptureDisabled(ComponentName, boolean)}.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean

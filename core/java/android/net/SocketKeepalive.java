@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -110,14 +111,42 @@ public abstract class SocketKeepalive implements AutoCloseable {
     public static final int MAX_INTERVAL_SEC = 3600;
 
     /**
+     * An exception that embarks an error code.
+     * @hide
+     */
+    public static class ErrorCodeException extends Exception {
+        public final int error;
+        public ErrorCodeException(final int error, final Throwable e) {
+            super(e);
+            this.error = error;
+        }
+        public ErrorCodeException(final int error) {
+            this.error = error;
+        }
+    }
+
+    /**
+     * This socket is invalid.
+     * See the error code for details, and the optional cause.
+     * @hide
+     */
+    public static class InvalidSocketException extends ErrorCodeException {
+        public InvalidSocketException(final int error, final Throwable e) {
+            super(error, e);
+        }
+        public InvalidSocketException(final int error) {
+            super(error);
+        }
+    }
+
+    /**
      * This packet is invalid.
      * See the error code for details.
      * @hide
      */
-    public static class InvalidPacketException extends Exception {
-        public final int error;
-        public InvalidPacketException(int error) {
-            this.error = error;
+    public static class InvalidPacketException extends ErrorCodeException {
+        public InvalidPacketException(final int error) {
+            super(error);
         }
     }
 
@@ -127,7 +156,7 @@ public abstract class SocketKeepalive implements AutoCloseable {
     @NonNull private final SocketKeepalive.Callback mCallback;
     @NonNull private final Looper mLooper;
     @NonNull final Messenger mMessenger;
-    @NonNull Integer mSlot;
+    @Nullable Integer mSlot;
 
     SocketKeepalive(@NonNull IConnectivityManager service, @NonNull Network network,
             @NonNull Executor executor, @NonNull Callback callback) {

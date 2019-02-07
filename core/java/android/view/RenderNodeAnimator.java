@@ -24,6 +24,7 @@ import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
+import android.os.Build;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.VirtualRefBasePtr;
@@ -282,7 +283,7 @@ public class RenderNodeAnimator extends Animator {
         throw new UnsupportedOperationException();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
     public void setTarget(View view) {
         mViewTarget = view;
         setTarget(mViewTarget.mRenderNode);

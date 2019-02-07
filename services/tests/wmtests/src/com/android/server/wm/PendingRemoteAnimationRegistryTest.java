@@ -40,7 +40,6 @@ import org.mockito.MockitoAnnotations;
  *  atest WmTests:PendingRemoteAnimationRegistryTest
  */
 @SmallTest
-@FlakyTest
 @Presubmit
 public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
 

@@ -47,7 +47,6 @@ import java.util.function.Predicate;
  *  atest WmTests:PersisterQueueTests
  */
 @MediumTest
-@FlakyTest(detail = "Confirm stable in post-submit before removing")
 @Presubmit
 public class PersisterQueueTests implements PersisterQueue.Listener {
     private static final long INTER_WRITE_DELAY_MS = 50;

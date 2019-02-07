@@ -150,7 +150,7 @@ public class PowerManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testGetDesiredScreenPolicy_WithVR() throws Exception {
         // Brighten up the screen
-        mService.setWakefulnessLocked(WAKEFULNESS_AWAKE, 0);
+        mService.setWakefulnessLocked(WAKEFULNESS_AWAKE, PowerManager.WAKE_REASON_UNKNOWN, 0);
         assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
                 DisplayPowerRequest.POLICY_BRIGHT);
 
@@ -160,12 +160,13 @@ public class PowerManagerServiceTest extends AndroidTestCase {
                 DisplayPowerRequest.POLICY_VR);
 
         // Then take a nap
-        mService.setWakefulnessLocked(WAKEFULNESS_ASLEEP, 0);
+        mService.setWakefulnessLocked(WAKEFULNESS_ASLEEP, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
+                0);
         assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
                 DisplayPowerRequest.POLICY_OFF);
 
         // Wake up to VR
-        mService.setWakefulnessLocked(WAKEFULNESS_AWAKE, 0);
+        mService.setWakefulnessLocked(WAKEFULNESS_AWAKE, PowerManager.WAKE_REASON_UNKNOWN, 0);
         assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
                 DisplayPowerRequest.POLICY_VR);
 

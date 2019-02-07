@@ -238,6 +238,8 @@ message Atom {
         ProcessStartTime process_start_time = 169;
         PermissionGrantRequestResultReported permission_grant_request_result_reported = 170;
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
+        DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
+        BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
     }
 
     // Pulled events will start at field 10000.
@@ -5343,6 +5345,27 @@ message BubbleUIChanged {
 }
 
 /**
+  * Logs System UI bubbles developer errors.
+  *
+  * Logged from:
+  *   frameworks/base/packages/SystemUI/src/com/android/systemui/bubbles/BubbleController.java
+  */
+message BubbleDeveloperErrorReported {
+
+    // The app package that is posting the bubble.
+    optional string package_name = 1;
+
+    // Bubble developer error type enums.
+    enum Error {
+        UNKNOWN = 0;
+        ACTIVITY_INFO_MISSING = 1;
+        ACTIVITY_INFO_NOT_RESIZABLE = 2;
+        DOCUMENT_LAUNCH_NOT_ALWAYS = 3;
+    }
+    optional Error error = 2 [default = UNKNOWN];
+}
+
+/**
  * Logs that a constraint for a scheduled job has changed.
  *
  * Logged from:
@@ -5447,3 +5470,22 @@ message DangerousPermissionState {
     optional bool is_granted = 4;
 }
 
+/**
+ * Logs when a package is denied access to a device identifier based on the new access requirements.
+ *
+ * Logged from:
+ *     frameworks/base/telephony/java/com/android/internal/telephony/TelephonyPermissions.java
+ */
+message DeviceIdentifierAccessDenied {
+    // The name of the package denied access to the requested device identifier.
+    optional string package_name = 1;
+
+    // The name of the device identifier method the package attempted to invoke.
+    optional string method_name = 2;
+
+    // True if the package is preinstalled.
+    optional bool is_preinstalled = 3;
+
+    // True if the package is privileged.
+    optional bool is_priv_app = 4;
+}

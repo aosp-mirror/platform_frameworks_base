@@ -476,7 +476,7 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to load 16-bits from the packet into
-     * {@code register}. The offset of the loaded 16-bits from the begining of the packet is
+     * {@code register}. The offset of the loaded 16-bits from the beginning of the packet is
      * the sum of {@code offset} and the value in register R1.
      */
     public ApfGenerator addLoad16Indexed(Register register, int offset) {
@@ -488,7 +488,7 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to load 32-bits from the packet into
-     * {@code register}. The offset of the loaded 32-bits from the begining of the packet is
+     * {@code register}. The offset of the loaded 32-bits from the beginning of the packet is
      * the sum of {@code offset} and the value in register R1.
      */
     public ApfGenerator addLoad32Indexed(Register register, int offset) {

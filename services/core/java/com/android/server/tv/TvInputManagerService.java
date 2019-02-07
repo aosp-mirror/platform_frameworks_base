@@ -128,6 +128,8 @@ public final class TvInputManagerService extends SystemService {
 
     private final WatchLogHandler mWatchLogHandler;
 
+    private IBinder.DeathRecipient mDeathRecipient;
+
     public TvInputManagerService(Context context) {
         super(context);
 
@@ -674,6 +676,7 @@ public final class TvInputManagerService extends SystemService {
                 if (sessionToken == userState.mainSessionToken) {
                     setMainLocked(sessionToken, false, callingUid, userId);
                 }
+                sessionState.session.asBinder().unlinkToDeath(sessionState, 0);
                 sessionState.session.release();
             }
         } catch (RemoteException | SessionNotFoundException e) {
@@ -709,6 +712,7 @@ public final class TvInputManagerService extends SystemService {
             clientState.sessionTokens.remove(sessionToken);
             if (clientState.isEmpty()) {
                 userState.clientStateMap.remove(sessionState.client.asBinder());
+                sessionState.client.asBinder().unlinkToDeath(clientState, 0);
             }
         }
 
@@ -1002,17 +1006,19 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     final UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.callbackSet.add(callback);
-                    try {
-                        callback.asBinder().linkToDeath(new IBinder.DeathRecipient() {
-                            @Override
-                            public void binderDied() {
-                                synchronized (mLock) {
-                                    if (userState.callbackSet != null) {
-                                        userState.callbackSet.remove(callback);
-                                    }
+                    mDeathRecipient = new IBinder.DeathRecipient() {
+                        @Override
+                        public void binderDied() {
+                            synchronized (mLock) {
+                                if (userState.callbackSet != null) {
+                                    userState.callbackSet.remove(callback);
                                 }
                             }
-                        }, 0);
+                        }
+                    };
+
+                    try {
+                        callback.asBinder().linkToDeath(mDeathRecipient, 0);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "client process has already died", e);
                     }
@@ -1031,6 +1037,7 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.callbackSet.remove(callback);
+                    callback.asBinder().unlinkToDeath(mDeathRecipient, 0);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);

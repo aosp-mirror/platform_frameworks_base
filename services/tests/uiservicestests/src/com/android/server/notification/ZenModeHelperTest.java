@@ -25,6 +25,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -56,6 +57,7 @@ import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.VolumePolicy;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
@@ -158,17 +160,56 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         return new XmlResourceParserImpl(parser);
     }
 
-    private ByteArrayOutputStream writeXmlAndPurge(boolean forBackup, Integer version)
+    private ByteArrayOutputStream writeXmlAndPurge(Integer version) throws Exception {
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mZenModeHelperSpy.writeXml(serializer, false, version, UserHandle.USER_ALL);
+        serializer.endDocument();
+        serializer.flush();
+        mZenModeHelperSpy.setConfig(new ZenModeConfig(), null, "writing xml");
+        return baos;
+    }
+
+    private ByteArrayOutputStream writeXmlAndPurgeForUser(Integer version, int userId)
             throws Exception {
         XmlSerializer serializer = new FastXmlSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
-        mZenModeHelperSpy.writeXml(serializer, forBackup, version);
+        mZenModeHelperSpy.writeXml(serializer, true, version, userId);
         serializer.endDocument();
         serializer.flush();
-        mZenModeHelperSpy.setConfig(new ZenModeConfig(), null, "writing xml");
+        ZenModeConfig newConfig = new ZenModeConfig();
+        newConfig.user = userId;
+        mZenModeHelperSpy.setConfig(newConfig, null, "writing xml");
         return baos;
+    }
+
+    private XmlPullParser getParserForByteStream(ByteArrayOutputStream baos) throws Exception {
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(
+                new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        return parser;
+    }
+
+    private ArrayMap<String, ZenModeConfig.ZenRule> getCustomAutomaticRules() {
+        ArrayMap<String, ZenModeConfig.ZenRule> automaticRules = new ArrayMap<>();
+        ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
+        final ScheduleInfo customRuleInfo = new ScheduleInfo();
+        customRule.enabled = true;
+        customRule.creationTime = 0;
+        customRule.id = "customRule";
+        customRule.name = "Custom Rule";
+        customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
+        customRule.configurationActivity =
+                new ComponentName("android", "ScheduleConditionProvider");
+        customRule.pkg = customRule.configurationActivity.getPackageName();
+        automaticRules.put("customRule", customRule);
+        return automaticRules;
     }
 
     @Test
@@ -639,48 +680,84 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, null);
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new BufferedInputStream(
-                new ByteArrayInputStream(baos.toByteArray())), null);
-        parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        ByteArrayOutputStream baos = writeXmlAndPurge(null);
+        XmlPullParser parser = getParserForByteStream(baos);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals("Config mismatch: current vs expected: "
                 + mZenModeHelperSpy.mConfig.diff(expected), expected, mZenModeHelperSpy.mConfig);
     }
 
     @Test
-    public void testReadXmlRestore() throws Exception {
+    public void testWriteXml_onlyBackupsTargetUser() throws Exception {
+        // Setup configs for user 10 and 11.
         setupZenConfig();
+        ZenModeConfig config10 = mZenModeHelperSpy.mConfig.copy();
+        config10.user = 10;
+        config10.allowAlarms = true;
+        config10.allowMedia = true;
+        mZenModeHelperSpy.setConfig(config10, null, "writeXml");
+        ZenModeConfig config11 = mZenModeHelperSpy.mConfig.copy();
+        config11.user = 11;
+        config11.allowAlarms = false;
+        config11.allowMedia = false;
+        mZenModeHelperSpy.setConfig(config11, null, "writeXml");
 
+        // Backup user 10 and reset values.
+        ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, 10);
+        ZenModeConfig newConfig11 = new ZenModeConfig();
+        newConfig11.user = 11;
+        mZenModeHelperSpy.mConfigs.put(11, newConfig11);
+
+        // Parse backup data.
+        XmlPullParser parser = getParserForByteStream(baos);
+        mZenModeHelperSpy.readXml(parser, true, 10);
+        mZenModeHelperSpy.readXml(parser, true, 11);
+
+        ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
+        assertEquals(
+                "Config mismatch: current vs expected: " + actual.diff(config10), config10, actual);
+        assertNotEquals("Expected config mismatch", config11, mZenModeHelperSpy.mConfigs.get(11));
+    }
+
+    @Test
+    public void testReadXmlRestore_forSystemUser() throws Exception {
+        setupZenConfig();
         // one enabled automatic rule
-        ArrayMap<String, ZenModeConfig.ZenRule> automaticRules = new ArrayMap<>();
-        ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
-        final ScheduleInfo customRuleInfo = new ScheduleInfo();
-        customRule.enabled = true;
-        customRule.creationTime = 0;
-        customRule.id = "customRule";
-        customRule.name = "Custom Rule";
-        customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
-        customRule.configurationActivity
-                = new ComponentName("android", "ScheduleConditionProvider");
-        customRule.pkg = customRule.configurationActivity.getPackageName();
-        automaticRules.put("customRule", customRule);
-        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
-
+        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
         ZenModeConfig original = mZenModeHelperSpy.mConfig.copy();
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, null);
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new BufferedInputStream(
-                new ByteArrayInputStream(baos.toByteArray())), null);
-        parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, true);
+        ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
+        XmlPullParser parser = getParserForByteStream(baos);
+        mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
+
         assertEquals("Config mismatch: current vs original: "
                 + mZenModeHelperSpy.mConfig.diff(original), original, mZenModeHelperSpy.mConfig);
         assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
+    }
+
+    /** Restore should ignore the data's user id and restore for the target user. */
+    @Test
+    public void testReadXmlRestore_forNonSystemUser() throws Exception {
+        // Setup config.
+        setupZenConfig();
+        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
+        ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
+
+        // Backup data for user 0.
+        ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
+
+        // Restore data for user 10.
+        XmlPullParser parser = getParserForByteStream(baos);
+        mZenModeHelperSpy.readXml(parser, true, 10);
+
+        ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
+        expected.user = 10;
+        assertEquals(
+                "Config mismatch: current vs original: " + actual.diff(expected), expected, actual);
+        assertEquals(expected.hashCode(), actual.hashCode());
+        expected.user = 0;
+        assertNotEquals(expected, mZenModeHelperSpy.mConfig);
     }
 
     @Test
@@ -715,12 +792,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, null);
+        ByteArrayOutputStream baos = writeXmlAndPurge(null);
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         ZenModeConfig.ZenRule original = expected.automaticRules.get(ruleId);
         ZenModeConfig.ZenRule current = mZenModeHelperSpy.mConfig.automaticRules.get(ruleId);
@@ -729,7 +806,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testReadXmlRestoreWithZenPolicy() throws Exception {
+    public void testReadXmlRestoreWithZenPolicy_forSystemUser() throws Exception {
         final String ruleId = "customRule";
         setupZenConfig();
 
@@ -756,12 +833,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, null);
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new BufferedInputStream(
-                new ByteArrayInputStream(baos.toByteArray())), null);
-        parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, true);
+        ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
+        XmlPullParser parser = getParserForByteStream(baos);
+        mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
 
         ZenModeConfig.ZenRule original = expected.automaticRules.get(ruleId);
         ZenModeConfig.ZenRule current = mZenModeHelperSpy.mConfig.automaticRules.get(ruleId);
@@ -786,12 +860,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.automaticRules = enabledAutoRule;
 
         // set previous version
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
+        ByteArrayOutputStream baos = writeXmlAndPurge(5);
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertTrue(mZenModeHelperSpy.mConfig.automaticRules.containsKey("customRule"));
         setupZenConfigMaintained();
@@ -811,7 +885,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
 
@@ -827,7 +901,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
     }
@@ -846,7 +920,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
     }
@@ -865,7 +939,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                         | SUPPRESSED_EFFECT_LIGHTS
@@ -884,7 +958,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(SUPPRESSED_EFFECT_PEEK, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
 
@@ -900,7 +974,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT | SUPPRESSED_EFFECT_LIGHTS,
                 mZenModeHelperSpy.mConfig.suppressedVisualEffects);
@@ -915,12 +989,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.automaticRules = new ArrayMap<>();
 
         // set previous version
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
+        ByteArrayOutputStream baos = writeXmlAndPurge(5);
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
         ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
@@ -951,12 +1025,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.automaticRules = disabledAutoRule;
 
         // set previous version
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
+        ByteArrayOutputStream baos = writeXmlAndPurge(5);
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
         ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
@@ -1003,12 +1077,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
 
         // set previous version
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
+        ByteArrayOutputStream baos = writeXmlAndPurge(5);
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
         ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
@@ -1072,12 +1146,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
 
         // set previous version
-        ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
+        ByteArrayOutputStream baos = writeXmlAndPurge(5);
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false);
+        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
         ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;

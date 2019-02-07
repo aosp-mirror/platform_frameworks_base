@@ -1503,6 +1503,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mNoisy;
         private ArrayList<Notification.Action> mSmartActions;
         private ArrayList<CharSequence> mSmartReplies;
+        private boolean mCanBubble;
 
         public Ranking() {}
 
@@ -1677,6 +1678,17 @@ public abstract class NotificationListenerService extends Service {
             return mLastAudiblyAlertedMs;
         }
 
+        /**
+         * Returns whether the user has allowed bubbles globally, at the app level, and at the
+         * channel level for this notification.
+         *
+         * <p>This does not take into account the current importance of the notification, the
+         * current DND state, or whether the posting app is foreground.</p>
+         */
+        public boolean canBubble() {
+            return mCanBubble;
+        }
+
         /** @hide */
         public boolean isNoisy() {
             return mNoisy;
@@ -1693,7 +1705,7 @@ public abstract class NotificationListenerService extends Service {
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
                 int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
-                ArrayList<CharSequence> smartReplies) {
+                ArrayList<CharSequence> smartReplies, boolean canBubble) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1713,6 +1725,7 @@ public abstract class NotificationListenerService extends Service {
             mNoisy = noisy;
             mSmartActions = smartActions;
             mSmartReplies = smartReplies;
+            mCanBubble = canBubble;
         }
 
         /**
@@ -1766,6 +1779,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Boolean> mNoisy;
         private ArrayMap<String, ArrayList<Notification.Action>> mSmartActions;
         private ArrayMap<String, ArrayList<CharSequence>> mSmartReplies;
+        private boolean[] mCanBubble;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1796,7 +1810,7 @@ public abstract class NotificationListenerService extends Service {
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
                     getShowBadge(key), getUserSentiment(key), getHidden(key),
                     getLastAudiblyAlerted(key), getNoisy(key), getSmartActions(key),
-                    getSmartReplies(key));
+                    getSmartReplies(key), canBubble(key));
             return rank >= 0;
         }
 
@@ -1970,6 +1984,19 @@ public abstract class NotificationListenerService extends Service {
                 }
             }
             return mSmartReplies.get(key);
+        }
+
+        private boolean canBubble(String key) {
+            synchronized (this) {
+                if (mRanks == null) {
+                    buildRanksLocked();
+                }
+                if (mCanBubble == null) {
+                    mCanBubble = mRankingUpdate.getCanBubble();
+                }
+            }
+            int keyIndex = mRanks.getOrDefault(key, -1);
+            return keyIndex >= 0 ? mCanBubble[keyIndex] : false;
         }
 
         // Locked by 'this'

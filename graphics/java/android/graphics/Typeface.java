@@ -92,7 +92,13 @@ public class Typeface {
     /** The NORMAL style of the default monospace typeface. */
     public static final Typeface MONOSPACE;
 
-    @UnsupportedAppUsage
+    /**
+     * The default {@link Typeface}s for different text styles.
+     * Call {@link #defaultFromStyle(int)} to get the default typeface for the given text style.
+     * It shouldn't be changed for app wide typeface settings. Please use theme and font XML for
+     * the same purpose.
+     */
+    @UnsupportedAppUsage(trackingBug = 123769446)
     static Typeface[] sDefaults;
 
     /**
@@ -125,7 +131,11 @@ public class Typeface {
     static final Map<String, Typeface> sSystemFontMap;
 
     // We cannot support sSystemFallbackMap since we will migrate to public FontFamily API.
+    /**
+     * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
+     */
     @UnsupportedAppUsage
+    @Deprecated
     static final Map<String, android.graphics.FontFamily[]> sSystemFallbackMap =
             Collections.emptyMap();
 
@@ -1019,8 +1029,11 @@ public class Typeface {
 
     /**
      * This method is used by supportlib-v27.
+     *
+     * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
      */
     @UnsupportedAppUsage(trackingBug = 123768395)
+    @Deprecated
     private static Typeface createFromFamiliesWithDefault(
             android.graphics.FontFamily[] families, int weight, int italic) {
         return createFromFamiliesWithDefault(families, DEFAULT_FAMILY, weight, italic);
@@ -1038,8 +1051,11 @@ public class Typeface {
      *               the first family's font is used. If the first family has multiple fonts, the
      *               closest to the regular weight and upright font is used.
      * @param families array of font families
+     *
+     * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     private static Typeface createFromFamiliesWithDefault(android.graphics.FontFamily[] families,
                 String fallbackName, int weight, int italic) {
         android.graphics.fonts.FontFamily[] fallback = SystemFonts.getSystemFallback(fallbackName);

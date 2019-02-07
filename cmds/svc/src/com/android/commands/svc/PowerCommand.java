@@ -19,6 +19,7 @@ package com.android.commands.svc;
 import android.content.Context;
 import android.os.BatteryManager;
 import android.os.IPowerManager;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -71,7 +72,8 @@ public class PowerCommand extends Svc.Command {
                         if (val != 0) {
                             // if the request is not to set it to false, wake up the screen so that
                             // it can stay on as requested
-                            pm.wakeUp(SystemClock.uptimeMillis(), "PowerCommand", null);
+                            pm.wakeUp(SystemClock.uptimeMillis(),
+                                    PowerManager.WAKE_REASON_UNKNOWN, "PowerCommand", null);
                         }
                         pm.setStayOnSetting(val);
                     }

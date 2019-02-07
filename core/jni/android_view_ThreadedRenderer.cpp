@@ -1202,12 +1202,12 @@ static const JNINativeMethod gMethods[] = {
 
 static JavaVM* mJvm = nullptr;
 
-static void attachRenderThreadToJvm() {
+static void attachRenderThreadToJvm(const char* name) {
     LOG_ALWAYS_FATAL_IF(!mJvm, "No jvm but we set the hook??");
 
     JavaVMAttachArgs args;
     args.version = JNI_VERSION_1_4;
-    args.name = NULL;
+    args.name = name;
     args.group = NULL;
     JNIEnv* env;
     mJvm->AttachCurrentThreadAsDaemon(&env, (void*) &args);

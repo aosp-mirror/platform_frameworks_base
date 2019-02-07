@@ -27,7 +27,9 @@ import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +45,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.metrics.LogMaker;
 import android.net.Uri;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -51,11 +54,14 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -66,6 +72,11 @@ import java.util.List;
  */
 @RunWith(AndroidJUnit4.class)
 public class ChooserActivityTest {
+
+    private static final int CONTENT_PREVIEW_IMAGE = 1;
+    private static final int CONTENT_PREVIEW_FILE = 2;
+    private static final int CONTENT_PREVIEW_TEXT = 3;
+
     @Rule
     public ActivityTestRule<ChooserWrapperActivity> mActivityRule =
             new ActivityTestRule<>(ChooserWrapperActivity.class, false,
@@ -402,16 +413,15 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTestWithOtherProfile(1);
 
         when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
-                Mockito.anyBoolean(),
-                Mockito.anyBoolean(),
-                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+            Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
+            Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ChooserWrapperActivity activity = mActivityRule
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
 
         onView(withId(R.id.copy_button)).perform(click());
-
         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(
                 Context.CLIPBOARD_SERVICE);
         ClipData clipData = clipboard.getPrimaryClip();
@@ -488,14 +498,101 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
-                Mockito.anyBoolean(),
-                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+            Mockito.anyBoolean(),
+            Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
         onView(withId(R.id.content_preview_image_1_large)).check(matches(isDisplayed()));
         onView(withId(R.id.content_preview_image_2_large)).check(matches(not(isDisplayed())));
         onView(withId(R.id.content_preview_image_2_small)).check(matches(isDisplayed()));
         onView(withId(R.id.content_preview_image_3_small)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testOnCreateLogging() {
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+
+        MetricsLogger mockLogger = sOverrides.metricsLogger;
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "logger test"));
+        waitForIdle();
+        verify(mockLogger, atLeastOnce()).write(logMakerCaptor.capture());
+        assertThat(logMakerCaptor.getAllValues().get(0).getCategory(),
+                is(MetricsProto.MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN));
+        assertThat(logMakerCaptor
+                .getAllValues().get(0)
+                .getTaggedData(MetricsProto.MetricsEvent.FIELD_TIME_TO_APP_TARGETS),
+                is(notNullValue()));
+        assertThat(logMakerCaptor
+                .getAllValues().get(0)
+                .getTaggedData(MetricsProto.MetricsEvent.FIELD_SHARESHEET_MIMETYPE),
+                is("TestType"));
+    }
+
+    @Test
+    public void testEmptyPreviewLogging() {
+        Intent sendIntent = createSendTextIntentWithPreview(null, null);
+
+        MetricsLogger mockLogger = sOverrides.metricsLogger;
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "empty preview logger test"));
+        waitForIdle();
+        verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
+        // First invocation is from onCreate
+        assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
+                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
+        assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
+                is(CONTENT_PREVIEW_TEXT));
+    }
+
+    @Test
+    public void testTitlePreviewLogging() {
+        Intent sendIntent = createSendTextIntentWithPreview("TestTitle", null);
+
+        MetricsLogger mockLogger = sOverrides.metricsLogger;
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
+        // First invocation is from onCreate
+        assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
+                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
+        assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
+                is(CONTENT_PREVIEW_TEXT));
+    }
+
+    @Test
+    public void testImagePreviewLogging() {
+        Uri uri = Uri.parse("android.resource://com.android.frameworks.coretests/"
+                + com.android.frameworks.coretests.R.drawable.test320x240);
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+
+        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        sOverrides.previewThumbnail = createBitmap();
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
+            Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        MetricsLogger mockLogger = sOverrides.metricsLogger;
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        verify(mockLogger, Mockito.times(3)).write(logMakerCaptor.capture());
+        // First invocation is from onCreate
+        assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
+                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
+        assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
+                is(CONTENT_PREVIEW_IMAGE));
+        assertThat(logMakerCaptor.getAllValues().get(2).getCategory(),
+                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
+        assertThat(logMakerCaptor.getAllValues().get(2).getSubtype(),
+                is(CONTENT_PREVIEW_IMAGE));
     }
 
     private Intent createSendTextIntent() {

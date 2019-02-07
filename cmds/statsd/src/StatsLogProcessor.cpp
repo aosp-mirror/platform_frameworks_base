@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-#define DEBUG false // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 #include "statslog.h"
 
 #include <android-base/file.h>
 #include <dirent.h>
+#include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
 #include "StatsLogProcessor.h"
-#include "stats_log_util.h"
 #include "android-base/stringprintf.h"
+#include "external/StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"
-#include "external/StatsPullerManager.h"
+#include "stats_log_util.h"
 #include "stats_util.h"
 #include "storage/StorageManager.h"
 
@@ -67,9 +68,17 @@ const int FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS = 6;
 const int FIELD_ID_DUMP_REPORT_REASON = 8;
 const int FIELD_ID_STRINGS = 9;
 
+const int FIELD_ID_ACTIVE_CONFIG_LIST = 1;
+const int FIELD_ID_CONFIG_ID = 1;
+const int FIELD_ID_CONFIG_UID = 2;
+const int FIELD_ID_ACTIVE_METRIC = 3;
+const int FIELD_ID_METRIC_ID = 1;
+const int FIELD_ID_TIME_TO_LIVE_NANOS = 2;
+
 #define NS_PER_HOUR 3600 * NS_PER_SEC
 
 #define STATS_DATA_DIR "/data/misc/stats-data"
+#define STATS_ACTIVE_METRIC_DIR "/data/misc/stats-active-metric"
 
 // Cool down period for writing data to disk to avoid overwriting files.
 #define WRITE_DATA_COOL_DOWN_SEC 5
@@ -505,6 +514,70 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
     proto.flush(fd.get());
     // We were able to write the ConfigMetricsReport to disk, so we should trigger collection ASAP.
     mOnDiskDataConfigs.insert(key);
+}
+
+void StatsLogProcessor::WriteMetricsActivationToDisk(int64_t currentTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    ProtoOutputStream proto;
+
+    for (const auto& pair : mMetricsManagers) {
+        uint64_t activeConfigListToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                     FIELD_ID_ACTIVE_CONFIG_LIST);
+        proto.write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_ID, (long long)pair.first.GetId());
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_UID, pair.first.GetUid());
+
+        vector<const MetricProducer*> acrtiveMetrics;
+        pair.second->getActiveMetrics(acrtiveMetrics);
+        for (const MetricProducer* metric : acrtiveMetrics) {
+            if (metric->isActive()) {
+                uint64_t metricToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                   FIELD_ID_ACTIVE_METRIC);
+                proto.write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_ID,
+                            (long long)metric->getMetricId());
+                proto.write(FIELD_TYPE_INT64 | FIELD_ID_TIME_TO_LIVE_NANOS,
+                            (long long)metric->getRemainingTtlNs(currentTimeNs));
+                proto.end(metricToken);
+            }
+        }
+        proto.end(activeConfigListToken);
+    }
+
+    string file_name = StringPrintf("%s/active_metrics", STATS_ACTIVE_METRIC_DIR);
+    StorageManager::deleteFile(file_name.c_str());
+    android::base::unique_fd fd(
+            open(file_name.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR));
+    if (fd == -1) {
+        ALOGE("Attempt to write %s but failed", file_name.c_str());
+        return;
+    }
+    proto.flush(fd.get());
+}
+
+void StatsLogProcessor::LoadMetricsActivationFromDisk() {
+    string file_name = StringPrintf("%s/active_metrics", STATS_ACTIVE_METRIC_DIR);
+    int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd != -1) {
+        string content;
+        if (android::base::ReadFdToString(fd, &content)) {
+            ActiveConfigList activeConfigList;
+            if (activeConfigList.ParseFromString(content)) {
+                for (int i = 0; i < activeConfigList.active_config_size(); i++) {
+                    const auto& config = activeConfigList.active_config(i);
+                    ConfigKey key(config.uid(), config.config_id());
+                    auto it = mMetricsManagers.find(key);
+                    if (it == mMetricsManagers.end()) {
+                        ALOGE("No config found for config %s", key.ToString().c_str());
+                        continue;
+                    }
+                    VLOG("Setting active config %s", key.ToString().c_str());
+                    it->second->setActiveMetrics(config, mTimeBaseNs);
+                }
+            }
+            VLOG("Successfully loaded %d active configs.", activeConfigList.active_config_size());
+        }
+        close(fd);
+    }
+    StorageManager::deleteFile(file_name.c_str());
 }
 
 void StatsLogProcessor::WriteDataToDiskLocked(const DumpReportReason dumpReportReason) {

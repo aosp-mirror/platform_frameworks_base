@@ -125,11 +125,8 @@ public class RankingHelperTest extends UiServiceTestCase {
                 InstrumentationRegistry.getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getApplicationInfo()).thenReturn(legacy);
-        // most tests assume badging is enabled
         TestableContentResolver contentResolver = getContext().getContentResolver();
         contentResolver.setFallbackToExisting(false);
-        Secure.putIntForUser(contentResolver,
-                Secure.NOTIFICATION_BADGING, 1, UserHandle.getUserId(UID));
 
         ContentProvider testContentProvider = mock(ContentProvider.class);
         when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);

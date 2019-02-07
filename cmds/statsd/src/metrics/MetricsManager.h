@@ -16,12 +16,13 @@
 
 #pragma once
 
-#include "external/StatsPullerManager.h"
+#include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
 #include "anomaly/AlarmMonitor.h"
 #include "anomaly/AlarmTracker.h"
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionTracker.h"
 #include "config/ConfigKey.h"
+#include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
@@ -123,6 +124,20 @@ public:
     // Does not change the state.
     virtual size_t byteSize();
 
+    inline bool isActive() const {
+        return mIsActive;
+    }
+
+    inline void getActiveMetrics(std::vector<const MetricProducer*>& metrics) const {
+        for (const auto& metric : mAllMetricProducers) {
+            if (metric->isActive()) {
+                metrics.push_back(metric.get());
+            }
+        }
+    }
+
+    void setActiveMetrics(ActiveConfig config, int64_t currentTimeNs);
+
 private:
     // For test only.
     inline int64_t getTtlEndNs() const { return mTtlEndNs; }
@@ -216,6 +231,9 @@ private:
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;
 
+    // Any metric active means the config is active.
+    bool mIsActive;
+
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid);
@@ -247,6 +265,8 @@ private:
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
+
+    FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
 };
 
 }  // namespace statsd

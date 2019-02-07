@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.systemui.bubbles.BubbleExpandedViewContainer
+<com.android.systemui.bubbles.BubbleExpandedView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
@@ -27,48 +27,70 @@
         android:layout_height="@dimen/bubble_pointer_height"
     />
 
-    <LinearLayout
-        android:id="@+id/header_layout"
-        android:layout_height="@dimen/bubble_expanded_header_height"
-        android:layout_width="match_parent"
-        android:orientation="horizontal"
+    <FrameLayout
+        android:id="@+id/header_permission_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
         android:background="@drawable/bubble_expanded_header_bg">
 
-        <TextView
-            android:id="@+id/header_text"
-            android:textAppearance="@*android:style/TextAppearance.Material.Title"
-            android:textSize="18sp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:gravity="start|center_vertical"
-            android:singleLine="true"
-            android:paddingLeft="@dimen/bubble_expanded_header_horizontal_padding"
-            android:paddingRight="@dimen/bubble_expanded_header_horizontal_padding"
+        <LinearLayout
+            android:id="@+id/header_layout"
+            android:layout_height="@dimen/bubble_expanded_header_height"
+            android:layout_width="match_parent"
+            android:animateLayoutChanges="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/header_text"
+                android:textAppearance="@*android:style/TextAppearance.Material.Title"
+                android:textSize="18sp"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:singleLine="true"
+                android:paddingLeft="@dimen/bubble_expanded_header_horizontal_padding"
+                android:paddingRight="@dimen/bubble_expanded_header_horizontal_padding"
+            />
+
+            <ImageButton
+                android:id="@+id/deep_link_button"
+                android:layout_width="@dimen/bubble_header_icon_size"
+                android:layout_height="@dimen/bubble_header_icon_size"
+                android:gravity="end|center_vertical"
+                android:src="@drawable/ic_open_in_new"
+                android:scaleType="center"
+                android:tint="?android:attr/colorForeground"
+                android:background="?android:attr/selectableItemBackground"
+            />
+
+            <ImageButton
+                android:id="@id/settings_button"
+                android:layout_width="@dimen/bubble_header_icon_size"
+                android:layout_height="@dimen/bubble_header_icon_size"
+                android:src="@drawable/ic_settings"
+                android:gravity="end|center_vertical"
+                android:scaleType="center"
+                android:tint="?android:attr/colorForeground"
+                android:background="?android:attr/selectableItemBackground"
+            />
+
+        </LinearLayout>
+
+        <include layout="@layout/bubble_permission_view"
+                 android:id="@+id/permission_layout"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
         />
 
-        <ImageButton
-            android:id="@+id/deep_link_button"
-            android:layout_width="@dimen/bubble_header_icon_size"
-            android:layout_height="@dimen/bubble_header_icon_size"
-            android:gravity="end|center_vertical"
-            android:src="@drawable/ic_open_in_new"
-            android:scaleType="center"
-            android:tint="?android:attr/colorForeground"
-            android:background="?android:attr/selectableItemBackground"
-        />
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="?android:attr/dividerHorizontal"/>
 
-        <ImageButton
-            android:id="@id/settings_button"
-            android:layout_width="@dimen/bubble_header_icon_size"
-            android:layout_height="@dimen/bubble_header_icon_size"
-            android:src="@drawable/ic_settings"
-            android:gravity="end|center_vertical"
-            android:scaleType="center"
-            android:tint="?android:attr/colorForeground"
-            android:background="?android:attr/selectableItemBackground"
-        />
+    </FrameLayout>
 
-    </LinearLayout>
-
-</com.android.systemui.bubbles.BubbleExpandedViewContainer>
+</com.android.systemui.bubbles.BubbleExpandedView>

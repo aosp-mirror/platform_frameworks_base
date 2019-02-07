@@ -435,8 +435,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private ColorStateList mHintTextColor;
     private ColorStateList mLinkTextColor;
     @ViewDebug.ExportedProperty(category = "text")
-    @UnsupportedAppUsage
+
+    /**
+     * {@link #setTextColor(int)} or {@link #getCurrentTextColor()} should be used instead.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mCurTextColor;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mCurHintTextColor;
     private boolean mFreezesText;
@@ -707,7 +712,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @UnsupportedAppUsage
     private ChangeWatcher mChangeWatcher;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 123769451)
     private ArrayList<TextWatcher> mListeners;
 
     // display attributes
@@ -11231,6 +11236,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .getSystemService(TextServicesManager.class);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
+        }
+    }
+
+    /**
+     * Starts {@link Activity} as a text-operation user if it is specified with
+     * {@link #setTextOperationUser(UserHandle)}.
+     *
+     * <p>Otherwise, just starts {@link Activity} with {@link Context#startActivity(Intent)}.</p>
+     *
+     * @param intent The description of the activity to start.
+     */
+    void startActivityAsTextOperationUserIfNecessary(@NonNull Intent intent) {
+        if (mTextOperationUser != null) {
+            getContext().startActivityAsUser(intent, mTextOperationUser);
+        } else {
+            getContext().startActivity(intent);
         }
     }
 

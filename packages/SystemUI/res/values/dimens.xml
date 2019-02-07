@@ -1041,4 +1041,6 @@
     <dimen name="bubble_stack_starting_offset_y">100dp</dimen>
     <!-- Size of image buttons in the bubble header -->
     <dimen name="bubble_header_icon_size">48dp</dimen>
+    <!-- Size of the app icon shown in the bubble permission view -->
+    <dimen name="bubble_permission_icon_size">24dp</dimen>
 </resources>

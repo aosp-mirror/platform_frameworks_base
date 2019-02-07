@@ -16,16 +16,39 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := frameworks-base-overlays
+LOCAL_REQUIRED_MODULES := \
+	AccentColorBlackOverlay \
+	AccentColorGreenOverlay \
+	AccentColorPurpleOverlay \
+	DisplayCutoutEmulationCornerOverlay \
+	DisplayCutoutEmulationDoubleOverlay \
+	DisplayCutoutEmulationTallOverlay \
+	FontNotoSerifSourceOverlay \
+	IconPackCircularAndroidOverlay \
+	IconPackCircularSettingsOverlay \
+	IconPackCircularSystemUIOverlay \
+	IconPackFilledAndroidOverlay \
+	IconPackFilledSettingsOverlay \
+	IconPackFilledSystemUIOverlay \
+	IconPackRoundedAndroidOverlay \
+	IconPackRoundedSettingsOverlay \
+	IconPackRoundedSystemUIOverlay \
+	IconShapeRoundedRectOverlay \
+	IconShapeSquareOverlay \
+	IconShapeSquircleOverlay \
+	IconShapeTeardropOverlay
 
+include $(BUILD_PHONY_PACKAGE)
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := frameworks-base-overlays-debug
 LOCAL_REQUIRED_MODULES := \
 	ExperimentNavigationBarFloatingOverlay \
 	ExperimentNavigationBarDefaultOverlay \
 	ExperimentNavigationBarSlimOverlay32 \
 	ExperimentNavigationBarSlimOverlay40 \
 	ExperimentNavigationBarLargeOverlay56 \
-	ExperimentNavigationBarLargeOverlay64 \
-	IconShapeSquareOverlay \
+	ExperimentNavigationBarLargeOverlay64
 
 include $(BUILD_PHONY_PACKAGE)
-
 include $(call first-makefiles-under,$(LOCAL_PATH))

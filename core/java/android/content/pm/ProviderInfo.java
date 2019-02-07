@@ -47,7 +47,13 @@ public final class ProviderInfo extends ComponentInfo
      * grantUriPermissions} attribute.
      */
     public boolean grantUriPermissions = false;
-    
+
+    /** If true, always apply URI permission grants, as per the
+     * {@link android.R.styleable#AndroidManifestProvider_forceUriPermissions
+     * forceUriPermissions} attribute.
+     */
+    public boolean forceUriPermissions = false;
+
     /**
      * If non-null, these are the patterns that are allowed for granting URI
      * permissions.  Any URI that does not match one of these patterns will not
@@ -112,6 +118,7 @@ public final class ProviderInfo extends ComponentInfo
         readPermission = orig.readPermission;
         writePermission = orig.writePermission;
         grantUriPermissions = orig.grantUriPermissions;
+        forceUriPermissions = orig.forceUriPermissions;
         uriPermissionPatterns = orig.uriPermissionPatterns;
         pathPermissions = orig.pathPermissions;
         multiprocess = orig.multiprocess;
@@ -142,6 +149,7 @@ public final class ProviderInfo extends ComponentInfo
         out.writeString(readPermission);
         out.writeString(writePermission);
         out.writeInt(grantUriPermissions ? 1 : 0);
+        out.writeInt(forceUriPermissions ? 1 : 0);
         out.writeTypedArray(uriPermissionPatterns, parcelableFlags);
         out.writeTypedArray(pathPermissions, parcelableFlags);
         out.writeInt(multiprocess ? 1 : 0);
@@ -171,6 +179,7 @@ public final class ProviderInfo extends ComponentInfo
         readPermission = in.readString();
         writePermission = in.readString();
         grantUriPermissions = in.readInt() != 0;
+        forceUriPermissions = in.readInt() != 0;
         uriPermissionPatterns = in.createTypedArray(PatternMatcher.CREATOR);
         pathPermissions = in.createTypedArray(PathPermission.CREATOR);
         multiprocess = in.readInt() != 0;

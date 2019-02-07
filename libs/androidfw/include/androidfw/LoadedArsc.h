@@ -223,7 +223,7 @@ class LoadedPackage {
     }
   }
 
-  // Retrieve the overlayable properties of the specified resource. If the resource is not
+  // Retrieves the overlayable properties of the specified resource. If the resource is not
   // overlayable, this will return a null pointer.
   const OverlayableInfo* GetOverlayableInfo(uint32_t resid) const {
     for (const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>& overlayable_info_ids
@@ -233,6 +233,13 @@ class LoadedPackage {
       }
     }
     return nullptr;
+  }
+
+  // Retrieves whether or not the package defines overlayable resources.
+  // TODO(123905379): Remove this when the enforcement of overlayable is turned on for all APK and
+  // not just those that defined overlayable resources.
+  bool DefinesOverlayable() const {
+    return defines_overlayable_;
   }
 
  private:
@@ -248,6 +255,7 @@ class LoadedPackage {
   bool dynamic_ = false;
   bool system_ = false;
   bool overlay_ = false;
+  bool defines_overlayable_ = false;
 
   ByteBucketArray<TypeSpecPtr> type_specs_;
   ByteBucketArray<uint32_t> resource_ids_;

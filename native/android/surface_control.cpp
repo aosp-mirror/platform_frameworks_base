@@ -46,7 +46,13 @@ using Transaction = SurfaceComposerClient::Transaction;
 
 static bool getWideColorSupport(const sp<SurfaceControl>& surfaceControl) {
     sp<SurfaceComposerClient> client = surfaceControl->getClient();
-    sp<IBinder> display(client->getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
+
+    const sp<IBinder> display = client->getInternalDisplayToken();
+    if (display == nullptr) {
+        ALOGE("unable to get wide color support for disconnected internal display");
+        return false;
+    }
+
     bool isWideColorDisplay = false;
     status_t err = client->isWideColorDisplay(display, &isWideColorDisplay);
     if (err) {
@@ -58,7 +64,12 @@ static bool getWideColorSupport(const sp<SurfaceControl>& surfaceControl) {
 
 static bool getHdrSupport(const sp<SurfaceControl>& surfaceControl) {
     sp<SurfaceComposerClient> client = surfaceControl->getClient();
-    sp<IBinder> display(client->getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
+
+    const sp<IBinder> display = client->getInternalDisplayToken();
+    if (display == nullptr) {
+        ALOGE("unable to get hdr capabilities for disconnected internal display");
+        return false;
+    }
 
     HdrCapabilities hdrCapabilities;
     status_t err = client->getHdrCapabilities(display, &hdrCapabilities);

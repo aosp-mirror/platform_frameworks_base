@@ -412,14 +412,14 @@ public final class OomAdjuster {
                         mNumCachedHiddenProcs++;
                         numCached++;
                         if (app.connectionGroup != 0) {
-                            if (lastCachedGroupUid == app.uid
+                            if (lastCachedGroupUid == app.info.uid
                                     && lastCachedGroup == app.connectionGroup) {
                                 // If this process is the next in the same group, we don't
                                 // want it to count against our limit of the number of cached
                                 // processes, so bump up the group count to account for it.
                                 numCachedExtraGroup++;
                             } else {
-                                lastCachedGroupUid = app.uid;
+                                lastCachedGroupUid = app.info.uid;
                                 lastCachedGroup = app.connectionGroup;
                             }
                         } else {
@@ -1709,8 +1709,9 @@ public final class OomAdjuster {
                         (app.curAdj == ProcessList.PREVIOUS_APP_ADJ ||
                                 app.curAdj == ProcessList.HOME_APP_ADJ)) {
                     mAppCompact.compactAppSome(app);
-                } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ &&
-                        app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+                } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ
+                        && app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ
+                        && app.curAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
                     mAppCompact.compactAppFull(app);
                 }
             }

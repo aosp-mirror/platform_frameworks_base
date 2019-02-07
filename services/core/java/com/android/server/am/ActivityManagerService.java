@@ -3495,7 +3495,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!app.killedByAm) {
                 reportUidInfoMessageLocked(TAG,
                         "Process " + app.processName + " (pid " + pid + ") has died: "
-                                + ProcessList.makeOomAdjString(app.setAdj)
+                                + ProcessList.makeOomAdjString(app.setAdj, true) + " "
                                 + ProcessList.makeProcStateString(app.setProcState), app.info.uid);
                 mAllowLowerMemLevel = true;
             } else {
@@ -10029,7 +10029,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.print("    #");
         pw.print(index);
         pw.print(": ");
-        pw.print(ProcessList.makeOomAdjString(proc.setAdj));
+        pw.print(ProcessList.makeOomAdjString(proc.setAdj, false));
         pw.print(" ");
         pw.print(ProcessList.makeProcStateString(proc.getCurProcState()));
         pw.print(" ");
@@ -11334,7 +11334,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int i = list.size() - 1; i >= 0; i--) {
             ProcessRecord r = list.get(i).first;
             long token = proto.start(fieldId);
-            String oomAdj = ProcessList.makeOomAdjString(r.setAdj);
+            String oomAdj = ProcessList.makeOomAdjString(r.setAdj, true);
             proto.write(ProcessOomProto.PERSISTENT, r.isPersistent());
             proto.write(ProcessOomProto.NUM, (origList.size()-1)-list.get(i).second);
             proto.write(ProcessOomProto.OOM_ADJ, oomAdj);
@@ -11434,7 +11434,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         for (int i=list.size()-1; i>=0; i--) {
             ProcessRecord r = list.get(i).first;
-            String oomAdj = ProcessList.makeOomAdjString(r.setAdj);
+            String oomAdj = ProcessList.makeOomAdjString(r.setAdj, false);
             char schedGroup;
             switch (r.setSchedGroup) {
                 case ProcessList.SCHED_GROUP_BACKGROUND:
@@ -12871,7 +12871,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void appendBasicMemEntry(StringBuilder sb, int oomAdj, int procState, long pss,
             long memtrack, String name) {
         sb.append("  ");
-        sb.append(ProcessList.makeOomAdjString(oomAdj));
+        sb.append(ProcessList.makeOomAdjString(oomAdj, false));
         sb.append(' ');
         sb.append(ProcessList.makeProcStateString(procState));
         sb.append(' ');
@@ -14997,7 +14997,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId);
+                                false, false, oldRecord.userId, oldRecord);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
                                 + queue.mQueueName + "] sending broadcast result of "

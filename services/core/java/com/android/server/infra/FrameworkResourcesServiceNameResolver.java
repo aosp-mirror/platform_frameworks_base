@@ -27,6 +27,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -59,6 +60,15 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
      */
     @GuardedBy("mLock")
     private final SparseArray<String> mTemporaryServiceNames = new SparseArray<>();
+
+    /**
+     * Map of default services that have been disabled by
+     * {@link #setDefaultServiceEnabled(int, boolean)},keyed by {@code userId}.
+     *
+     * <p>Typically used by Shell command and/or CTS tests.
+     */
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mDefaultServicesDisabled = new SparseBooleanArray();
 
     /**
      * When the temporary service will expire (and reset back to the default).
@@ -99,12 +109,18 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
             final String temporaryName = mTemporaryServiceNames.get(userId);
             if (temporaryName != null) {
                 // Always log it, as it should only be used on CTS or during development
-                Slog.w(TAG, "getComponentName(): using temporary name " + temporaryName
+                Slog.w(TAG, "getServiceName(): using temporary name " + temporaryName
                         + " for user " + userId);
                 return temporaryName;
-            } else {
-                return getDefaultServiceName(userId);
             }
+            final boolean disabled = mDefaultServicesDisabled.get(userId);
+            if (disabled) {
+                // Always log it, as it should only be used on CTS or during development
+                Slog.w(TAG, "getServiceName(): temporary name not set and default disabled for "
+                        + "user " + userId);
+                return null;
+            }
+            return getDefaultServiceName(userId);
         }
     }
 
@@ -158,6 +174,24 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     }
 
     @Override
+    public void setDefaultServiceEnabled(int userId, boolean enabled) {
+        synchronized (mLock) {
+            if (enabled) {
+                mDefaultServicesDisabled.removeAt(userId);
+            } else {
+                mDefaultServicesDisabled.put(userId, true);
+            }
+        }
+    }
+
+    @Override
+    public boolean isDefaultServiceEnabled(int userId) {
+        synchronized (mLock) {
+            return mDefaultServicesDisabled.get(userId);
+        }
+    }
+
+    @Override
     public String toString() {
         return "FrameworkResourcesServiceNamer[temps=" + mTemporaryServiceNames + "]";
     }
@@ -168,6 +202,7 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
         synchronized (mLock) {
             pw.print("FrameworkResourcesServiceNamer: resId="); pw.print(mResourceId);
             pw.print(", numberTemps="); pw.print(mTemporaryServiceNames.size());
+            pw.print(", enabledDefaults="); pw.print(mDefaultServicesDisabled.size());
         }
     }
 
@@ -181,7 +216,9 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
                 final long ttl = mTemporaryServiceExpiration - SystemClock.elapsedRealtime();
                 pw.print(" (expires in "); TimeUtils.formatDuration(ttl, pw); pw.print("), ");
             }
-            pw.print("defaultName="); pw.println(getDefaultServiceName(userId));
+            pw.print("defaultName="); pw.print(getDefaultServiceName(userId));
+            final boolean disabled = mDefaultServicesDisabled.get(userId);
+            pw.println(disabled ? " (disabled)" : " (enabled)");
         }
     }
 

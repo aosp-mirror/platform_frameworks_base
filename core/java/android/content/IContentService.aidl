@@ -126,6 +126,7 @@ interface IContentService {
      * @param syncable, >0 denotes syncable, 0 means not syncable, <0 means unknown
      */
     void setIsSyncable(in Account account, String providerName, int syncable);
+    void setIsSyncableAsUser(in Account account, String providerName, int syncable, int userId);
 
     void setMasterSyncAutomatically(boolean flag);
     void setMasterSyncAutomaticallyAsUser(boolean flag, int userId);

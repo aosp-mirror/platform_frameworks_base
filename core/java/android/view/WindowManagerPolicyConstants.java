@@ -16,6 +16,11 @@
 
 package android.view;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Constants for interfacing with WindowManagerService and WindowManagerPolicyInternal.
  * @hide
@@ -88,6 +93,35 @@ public interface WindowManagerPolicyConstants {
     int OFF_BECAUSE_OF_USER = 2;
     /** Screen turned off because of timeout */
     int OFF_BECAUSE_OF_TIMEOUT = 3;
+
+    @IntDef(prefix = { "ON_BECAUSE_OF_" }, value = {
+            ON_BECAUSE_OF_USER,
+            ON_BECAUSE_OF_APPLICATION,
+            ON_BECAUSE_OF_UNKNOWN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OnReason{}
+
+    /** Convert the on reason to a human readable format */
+    static String onReasonToString(@OnReason int why) {
+        switch (why) {
+            case ON_BECAUSE_OF_USER:
+                return "ON_BECAUSE_OF_USER";
+            case ON_BECAUSE_OF_APPLICATION:
+                return "ON_BECAUSE_OF_APPLICATION";
+            case ON_BECAUSE_OF_UNKNOWN:
+                return "ON_BECAUSE_OF_UNKNOWN";
+            default:
+                return Integer.toString(why);
+        }
+    }
+
+    /** Screen turned on because of a user-initiated action. */
+    int ON_BECAUSE_OF_USER = 1;
+    /** Screen turned on because of an application request or event */
+    int ON_BECAUSE_OF_APPLICATION = 2;
+    /** Screen turned on for an unknown reason */
+    int ON_BECAUSE_OF_UNKNOWN = 3;
 
     int APPLICATION_LAYER = 2;
     int APPLICATION_MEDIA_SUBLAYER = -2;

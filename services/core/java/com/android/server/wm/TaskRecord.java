@@ -2197,11 +2197,15 @@ class TaskRecord extends ConfigurationContainer {
             // In FULLSCREEN mode, always start with empty bounds to indicate "fill parent"
             outOverrideBounds.setEmpty();
 
+            final boolean parentHandlesOrientationChange = mTask != null
+                    && mTask.getParent() != null
+                    && mTask.getParent().handlesOrientationChangeFromDescendant();
             // If the task or its top activity requires a different orientation, make it fit the
             // available bounds by scaling down its bounds.
             int forcedOrientation = getTopActivityRequestedOrientation();
             if (forcedOrientation != ORIENTATION_UNDEFINED
-                    && forcedOrientation != newParentConfig.orientation) {
+                    && forcedOrientation != newParentConfig.orientation
+                    && !parentHandlesOrientationChange) {
                 final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
                 final int parentWidth = parentBounds.width();
                 final int parentHeight = parentBounds.height();

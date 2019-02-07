@@ -103,6 +103,7 @@ import android.view.WindowInsetsAnimationListener.InsetsAnimation;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeIdManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -4258,47 +4259,51 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * The offset, in pixels, by which the content of this view is scrolled
      * horizontally.
+     * Please use {@link View#getScrollX()} and {@link View#setScrollX(int)} instead of
+     * accessing these directly.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "scrolling")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mScrollX;
     /**
      * The offset, in pixels, by which the content of this view is scrolled
      * vertically.
+     * Please use {@link View#getScrollY()} and {@link View#setScrollY(int)} instead of
+     * accessing these directly.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "scrolling")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mScrollY;
 
     /**
-     * The left padding in pixels, that is the distance in pixels between the
-     * left edge of this view and the left edge of its content.
+     * The final computed left padding in pixels that is used for drawing. This is the distance in
+     * pixels between the left edge of this view and the left edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingLeft = 0;
     /**
-     * The right padding in pixels, that is the distance in pixels between the
-     * right edge of this view and the right edge of its content.
+     * The final computed right padding in pixels that is used for drawing. This is the distance in
+     * pixels between the right edge of this view and the right edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingRight = 0;
     /**
-     * The top padding in pixels, that is the distance in pixels between the
-     * top edge of this view and the top edge of its content.
+     * The final computed top padding in pixels that is used for drawing. This is the distance in
+     * pixels between the top edge of this view and the top edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingTop;
     /**
-     * The bottom padding in pixels, that is the distance in pixels between the
-     * bottom edge of this view and the bottom edge of its content.
+     * The final computed bottom padding in pixels that is used for drawing. This is the distance in
+     * pixels between the bottom edge of this view and the bottom edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
@@ -4350,7 +4355,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private MatchIdPredicate mMatchIdPredicate;
 
     /**
-     * Cache the paddingRight set by the user to append to the scrollbar's size.
+     * The right padding after RTL resolution, but before taking account of scroll bars.
      *
      * @hide
      */
@@ -4358,7 +4363,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected int mUserPaddingRight;
 
     /**
-     * Cache the paddingBottom set by the user to append to the scrollbar's size.
+     * The resolved bottom padding before taking account of scroll bars.
      *
      * @hide
      */
@@ -4366,7 +4371,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected int mUserPaddingBottom;
 
     /**
-     * Cache the paddingLeft set by the user to append to the scrollbar's size.
+     * The left padding after RTL resolution, but before taking account of scroll bars.
      *
      * @hide
      */
@@ -4388,14 +4393,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mUserPaddingEnd;
 
     /**
-     * Cache initial left padding.
+     * The left padding as set by a setter method, a background's padding, or via XML property
+     * resolution. This value is the padding before LTR resolution or taking account of scrollbars.
      *
      * @hide
      */
     int mUserPaddingLeftInitial;
 
     /**
-     * Cache initial right padding.
+     * The right padding as set by a setter method, a background's padding, or via XML property
+     * resolution. This value is the padding before LTR resolution or taking account of scrollbars.
      *
      * @hide
      */
@@ -4407,12 +4414,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int UNDEFINED_PADDING = Integer.MIN_VALUE;
 
     /**
-     * Cache if a left padding has been defined
+     * Cache if a left padding has been defined explicitly via padding, horizontal padding,
+     * or leftPadding in XML, or by setPadding(...) or setRelativePadding(...)
      */
     private boolean mLeftPaddingDefined = false;
 
     /**
-     * Cache if a right padding has been defined
+     * Cache if a right padding has been defined explicitly via padding, horizontal padding,
+     * or rightPadding in XML, or by setPadding(...) or setRelativePadding(...)
      */
     private boolean mRightPaddingDefined = false;
 
@@ -5321,7 +5330,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case com.android.internal.R.styleable.View_paddingVertical:
                     paddingVertical = a.getDimensionPixelSize(attr, -1);
                     break;
-                 case com.android.internal.R.styleable.View_paddingLeft:
+                case com.android.internal.R.styleable.View_paddingLeft:
                     leftPadding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingLeftInitial = leftPadding;
                     leftPaddingDefined = true;
@@ -5787,7 +5796,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         setOverScrollMode(overScrollMode);
 
-        // Cache start/end user padding as we cannot fully resolve padding here (we dont have yet
+        // Cache start/end user padding as we cannot fully resolve padding here (we don't have yet
         // the resolved layout direction). Those cached values will be used later during padding
         // resolution.
         mUserPaddingStart = startPadding;
@@ -5802,6 +5811,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mLeftPaddingDefined = leftPaddingDefined;
         mRightPaddingDefined = rightPaddingDefined;
 
+        // Valid paddingHorizontal/paddingVertical beats leftPadding, rightPadding, topPadding,
+        // bottomPadding, and padding set by background.  Valid padding beats everything.
         if (padding >= 0) {
             leftPadding = padding;
             topPadding = padding;
@@ -5854,6 +5865,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
+        // mPaddingTop and mPaddingBottom may have been set by setBackground(Drawable) so must pass
+        // them on if topPadding or bottomPadding are not valid.
         internalSetPadding(
                 mUserPaddingLeftInitial,
                 topPadding >= 0 ? topPadding : mPaddingTop,
@@ -16183,7 +16196,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if the View subclass handles alpha (the return value for onSetAlpha()) and
      *         the new value for the alpha property is different from the old value
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk  = Build.VERSION_CODES.P, trackingBug = 123768435)
     boolean setAlphaNoInvalidation(float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
@@ -19029,6 +19042,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         jumpDrawablesToCurrentState();
 
+        AccessibilityNodeIdManager.getInstance().registerViewWithId(this, getAccessibilityViewId());
         resetSubtreeAccessibilityStateChanged();
 
         // rebuild, since Outline not maintained while View is detached
@@ -19421,6 +19435,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mViewFlags & TOOLTIP) == TOOLTIP) {
             hideTooltip();
         }
+
+        AccessibilityNodeIdManager.getInstance().unregisterViewWithId(getAccessibilityViewId());
     }
 
     private void cleanupDraw() {
@@ -23932,24 +23948,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             throw new IllegalArgumentException("ID does not reference a View inside this View");
         }
         return view;
-    }
-
-    /**
-     * Finds a view by its unuque and stable accessibility id.
-     *
-     * @param accessibilityId The searched accessibility id.
-     * @return The found view.
-     */
-    @UnsupportedAppUsage
-    final <T extends View> T findViewByAccessibilityId(int accessibilityId) {
-        if (accessibilityId < 0) {
-            return null;
-        }
-        T view = findViewByAccessibilityIdTraversal(accessibilityId);
-        if (view != null) {
-            return view.includeForAccessibility() ? view : null;
-        }
-        return null;
     }
 
     /**

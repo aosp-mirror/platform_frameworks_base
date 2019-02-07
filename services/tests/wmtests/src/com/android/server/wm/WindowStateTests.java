@@ -48,6 +48,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -263,12 +264,12 @@ public class WindowStateTests extends WindowTestsBase {
 
         reset(sPowerManagerWrapper);
         first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
         assertTrue(appWindowToken.canTurnScreenOn());
 
         reset(sPowerManagerWrapper);
         second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
         assertFalse(appWindowToken.canTurnScreenOn());
 
         // Call prepareWindowToDisplayDuringRelayout for two window that have FLAG_TURN_SCREEN_ON
@@ -279,12 +280,12 @@ public class WindowStateTests extends WindowTestsBase {
 
         reset(sPowerManagerWrapper);
         first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
         assertFalse(appWindowToken.canTurnScreenOn());
 
         reset(sPowerManagerWrapper);
         second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
         assertFalse(appWindowToken.canTurnScreenOn());
 
         // Call prepareWindowToDisplayDuringRelayout for a windows that are not children of an
@@ -300,11 +301,11 @@ public class WindowStateTests extends WindowTestsBase {
 
         reset(sPowerManagerWrapper);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
 
         reset(sPowerManagerWrapper);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     @Test
@@ -435,6 +436,6 @@ public class WindowStateTests extends WindowTestsBase {
         root.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
         root.prepareWindowToDisplayDuringRelayout(wasVisible /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
     }
 }

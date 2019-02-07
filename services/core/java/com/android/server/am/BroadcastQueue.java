@@ -74,6 +74,9 @@ public final class BroadcastQueue {
     static final int MAX_BROADCAST_SUMMARY_HISTORY
             = ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
 
+    // For how long after a whitelisted receiver's start its process can start a background activity
+    private static final int RECEIVER_BG_ACTIVITY_START_TIMEOUT_MS = 10_000;
+
     final ActivityManagerService mService;
 
     /**
@@ -551,13 +554,23 @@ public final class BroadcastQueue {
 
     void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
-            boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
+            boolean ordered, boolean sticky, int sendingUser, BroadcastRecord br)
+            throws RemoteException {
         // Send the intent to the receiver asynchronously using one-way binder calls.
         if (app != null) {
             if (app.thread != null) {
                 // If we have an app thread, do the call through that so it is
                 // correctly ordered with other one-way calls.
                 try {
+                    if (br.allowBackgroundActivityStarts) {
+                        app.addAllowBackgroundActivityStartsToken(br);
+                        // schedule removal of the whitelisting token after the timeout
+                        mHandler.postDelayed(() -> {
+                            if (app != null) {
+                                app.removeAllowBackgroundActivityStartsToken(br);
+                            }
+                        }, RECEIVER_BG_ACTIVITY_START_TIMEOUT_MS);
+                    }
                     app.thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
                             data, extras, ordered, sticky, sendingUser, app.getReportedProcState());
                 // TODO: Uncomment this when (b/28322359) is fixed and we aren't getting
@@ -783,7 +796,7 @@ public final class BroadcastQueue {
             } else {
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
-                        r.resultExtras, r.ordered, r.initialSticky, r.userId);
+                        r.resultExtras, r.ordered, r.initialSticky, r.userId, r);
             }
             if (ordered) {
                 r.state = BroadcastRecord.CALL_DONE_RECEIVE;
@@ -1082,7 +1095,7 @@ public final class BroadcastQueue {
                             }
                             performReceiveLocked(r.callerApp, r.resultTo,
                                     new Intent(r.intent), r.resultCode,
-                                    r.resultData, r.resultExtras, false, false, r.userId);
+                                    r.resultData, r.resultExtras, false, false, r.userId, r);
                             // Set this to null so that the reference
                             // (local and remote) isn't kept in the mBroadcastHistory.
                             r.resultTo = null;

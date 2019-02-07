@@ -753,8 +753,8 @@ class ActivityStarter {
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                         "shouldAbortBackgroundActivityStart");
                 abortBackgroundStart = shouldAbortBackgroundActivityStart(callingUid, callingPid,
-                        callingPackage, realCallingUid, callerApp, originatingPendingIntent,
-                        allowBackgroundActivityStart, intent);
+                        callingPackage, realCallingUid, realCallingPid, callerApp,
+                        originatingPendingIntent, allowBackgroundActivityStart, intent);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
@@ -914,20 +914,12 @@ class ActivityStarter {
     }
 
     private boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
-            final String callingPackage, int realCallingUid, WindowProcessController callerApp,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart,
-            Intent intent) {
+            final String callingPackage, int realCallingUid, int realCallingPid,
+            WindowProcessController callerApp, PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart, Intent intent) {
         // don't abort for the most important UIDs
         if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID
                 || callingUid == Process.NFC_UID) {
-            return false;
-        }
-        // don't abort if the callerApp has any visible activity
-        if (callerApp != null && callerApp.hasForegroundActivities()) {
-            return false;
-        }
-        // don't abort if the callerApp is instrumenting with background activity starts privileges
-        if (callerApp != null && callerApp.isInstrumentingWithBackgroundActivityStartPrivileges()) {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
@@ -967,9 +959,26 @@ class ActivityStarter {
                 return false;
             }
         }
-        // don't abort if the caller is currently temporarily whitelisted
-        if (callerApp != null && callerApp.areBackgroundActivityStartsAllowed()) {
-            return false;
+        // If we don't have callerApp at this point, no caller was provided to startActivity().
+        // That's the case for PendingIntent-based starts, since the creator's process might not be
+        // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
+        // caller, so that we can make the decision based on its foreground/whitelisted state.
+        if (callerApp == null) {
+            callerApp = mService.getProcessController(realCallingPid, realCallingUid);
+        }
+        if (callerApp != null) {
+            // don't abort if the callerApp has any visible activity
+            if (callerApp.hasForegroundActivities()) {
+                return false;
+            }
+            // don't abort if the callerApp is instrumenting with background activity starts privs
+            if (callerApp.isInstrumentingWithBackgroundActivityStartPrivileges()) {
+                return false;
+            }
+            // don't abort if the caller is currently temporarily whitelisted
+            if (callerApp.areBackgroundActivityStartsAllowed()) {
+                return false;
+            }
         }
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
         if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
@@ -996,6 +1005,7 @@ class ActivityStarter {
                 + "; originatingPendingIntent: " + originatingPendingIntent
                 + "; isBgStartWhitelisted: " + allowBackgroundActivityStart
                 + "; intent: " + intent
+                + "; callerApp: " + callerApp
                 + "]");
         // log aborted activity start to TRON
         if (mService.isActivityStartsLoggingEnabled()) {

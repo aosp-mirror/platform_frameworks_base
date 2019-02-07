@@ -333,7 +333,8 @@ public final class ActiveServices {
                 }
                 r.delayed = false;
                 try {
-                    startServiceInnerLocked(this, r.pendingStarts.get(0).intent, r, false, true);
+                    startServiceInnerLocked(this, r.pendingStarts.get(0).intent, r, false, true,
+                            false);
                 } catch (TransactionTooLargeException e) {
                     // Ignore, nobody upstack cares.
                 }
@@ -643,7 +644,8 @@ public final class ActiveServices {
                         SERVICE_BG_ACTIVITY_START_TIMEOUT_MS);
             }
         }
-        ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
+        ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting,
+                allowBackgroundActivityStarts);
         return cmp;
     }
 
@@ -702,7 +704,8 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceInnerLocked(ServiceMap smap, Intent service, ServiceRecord r,
-            boolean callerFg, boolean addToStarting) throws TransactionTooLargeException {
+            boolean callerFg, boolean addToStarting, boolean allowBackgroundActivityStarts)
+            throws TransactionTooLargeException {
         ServiceState stracker = r.getTracker();
         if (stracker != null) {
             stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
@@ -713,7 +716,8 @@ public final class ActiveServices {
         synchronized (r.stats.getBatteryStats()) {
             r.stats.startRunningLocked();
         }
-        String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false, false);
+        String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false, false,
+                allowBackgroundActivityStarts);
         if (error != null) {
             return new ComponentName("!!", error);
         }
@@ -1645,7 +1649,7 @@ public final class ActiveServices {
                                 try {
                                     bringUpServiceLocked(serviceRecord,
                                             serviceIntent.getFlags(),
-                                            callerFg, false, false);
+                                            callerFg, false, false, false);
                                 } catch (RemoteException e) {
                                     /* ignore - local call */
                                 }
@@ -1748,7 +1752,7 @@ public final class ActiveServices {
             if ((flags&Context.BIND_AUTO_CREATE) != 0) {
                 s.lastActivity = SystemClock.uptimeMillis();
                 if (bringUpServiceLocked(s, service.getFlags(), callerFg, false,
-                        permissionsReviewRequired) != null) {
+                        permissionsReviewRequired, false) != null) {
                     return 0;
                 }
             }
@@ -2418,7 +2422,8 @@ public final class ActiveServices {
             return;
         }
         try {
-            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false);
+            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false,
+                    false);
         } catch (TransactionTooLargeException e) {
             // Ignore, it's been logged and nothing upstack cares.
         }
@@ -2463,8 +2468,8 @@ public final class ActiveServices {
     }
 
     private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
-            boolean whileRestarting, boolean permissionsReviewRequired)
-            throws TransactionTooLargeException {
+            boolean whileRestarting, boolean permissionsReviewRequired,
+            boolean allowBackgroundActivityStarts) throws TransactionTooLargeException {
         //Slog.i(TAG, "Bring up service:");
         //r.dump("  ");
 
@@ -2573,6 +2578,13 @@ public final class ActiveServices {
             if (isolated) {
                 r.isolatedProc = app;
             }
+        }
+
+        if (app != null && allowBackgroundActivityStarts) {
+            app.addAllowBackgroundActivityStartsToken(r);
+            // schedule removal of the whitelisting token after the timeout
+            removeAllowBackgroundActivityStartsServiceToken(app, r,
+                    SERVICE_BG_ACTIVITY_START_TIMEOUT_MS);
         }
 
         if (r.fgRequired) {

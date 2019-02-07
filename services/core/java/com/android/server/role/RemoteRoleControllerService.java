@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.role.IRoleManagerCallback;
+import android.app.role.RoleManager;
 import android.app.role.RoleManagerCallback;
 import android.content.ComponentName;
 import android.content.Context;
@@ -61,34 +62,35 @@ public class RemoteRoleControllerService {
      * Add a specific application to the holders of a role. If the role is exclusive, the previous
      * holder will be replaced.
      *
-     * @see RoleControllerService#onAddRoleHolder(String, String, RoleManagerCallback)
+     * @see RoleControllerService#onAddRoleHolder(String, String, int, RoleManagerCallback)
      */
     public void onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @NonNull IRoleManagerCallback callback) {
+            @RoleManager.ManageHoldersFlags int flags, @NonNull IRoleManagerCallback callback) {
         mConnection.enqueueCall(new Connection.Call((service, callbackDelegate) ->
-                service.onAddRoleHolder(roleName, packageName, callbackDelegate), callback));
+                service.onAddRoleHolder(roleName, packageName, flags, callbackDelegate), callback));
     }
 
     /**
      * Remove a specific application from the holders of a role.
      *
-     * @see RoleControllerService#onRemoveRoleHolder(String, String, RoleManagerCallback)
+     * @see RoleControllerService#onRemoveRoleHolder(String, String, int, RoleManagerCallback)
      */
     public void onRemoveRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @NonNull IRoleManagerCallback callback) {
+            @RoleManager.ManageHoldersFlags int flags, @NonNull IRoleManagerCallback callback) {
         mConnection.enqueueCall(new Connection.Call((service, callbackDelegate) ->
-                service.onRemoveRoleHolder(roleName, packageName, callbackDelegate), callback));
+                service.onRemoveRoleHolder(roleName, packageName, flags, callbackDelegate),
+                callback));
     }
 
     /**
      * Remove all holders of a role.
      *
-     * @see RoleControllerService#onClearRoleHolders(String, RoleManagerCallback)
+     * @see RoleControllerService#onClearRoleHolders(String, int, RoleManagerCallback)
      */
     public void onClearRoleHolders(@NonNull String roleName,
-            @NonNull IRoleManagerCallback callback) {
+            @RoleManager.ManageHoldersFlags int flags, @NonNull IRoleManagerCallback callback) {
         mConnection.enqueueCall(new Connection.Call((service, callbackDelegate) ->
-                service.onClearRoleHolders(roleName, callbackDelegate), callback));
+                service.onClearRoleHolders(roleName, flags, callbackDelegate), callback));
     }
 
     /**

@@ -1070,12 +1070,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     /**
      * Called when the device has started waking up.
      */
-    public void startedWakingUp();
+    void startedWakingUp(@OnReason int reason);
 
     /**
      * Called when the device has finished waking up.
      */
-    public void finishedWakingUp();
+    void finishedWakingUp(@OnReason int reason);
 
     /**
      * Called when the device has started going to sleep.

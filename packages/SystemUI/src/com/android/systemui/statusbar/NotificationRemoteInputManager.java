@@ -132,7 +132,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         @Override
         public boolean onClickHandler(
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
-            mShadeController.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view);
+            mShadeController.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view,
+                    "NOTIFICATION_CLICK");
 
             if (handleRemoteInput(view, pendingIntent)) {
                 return true;

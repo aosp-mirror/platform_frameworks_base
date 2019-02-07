@@ -52,7 +52,7 @@ public final class NotificationClicker implements View.OnClickListener {
             return;
         }
 
-        mShadeController.wakeUpIfDozing(SystemClock.uptimeMillis(), v);
+        mShadeController.wakeUpIfDozing(SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK");
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
         final StatusBarNotification sbn = row.getStatusBarNotification();

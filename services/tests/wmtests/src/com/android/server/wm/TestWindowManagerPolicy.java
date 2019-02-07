@@ -28,6 +28,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager.WakeReason;
 import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
 import android.view.IWindow;
@@ -182,11 +183,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void startedWakingUp() {
+    public void startedWakingUp(@WakeReason int reason) {
     }
 
     @Override
-    public void finishedWakingUp() {
+    public void finishedWakingUp(@WakeReason int reason) {
     }
 
     @Override

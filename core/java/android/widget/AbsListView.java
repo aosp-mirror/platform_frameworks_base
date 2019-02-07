@@ -483,7 +483,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Optional callback to notify client when scroll position has changed
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769353)
     private OnScrollListener mOnScrollListener;
 
     /**
@@ -1609,15 +1609,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } return false;
         }
         return false;
-    }
-
-    /** @hide */
-    @Override
-    public View findViewByAccessibilityIdTraversal(int accessibilityId) {
-        if (accessibilityId == getAccessibilityViewId()) {
-            return this;
-        }
-        return super.findViewByAccessibilityIdTraversal(accessibilityId);
     }
 
     /**

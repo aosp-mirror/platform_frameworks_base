@@ -61,32 +61,33 @@ public abstract class RoleControllerService extends Service {
         return new IRoleControllerService.Stub() {
 
             @Override
-            public void onAddRoleHolder(String roleName, String packageName,
+            public void onAddRoleHolder(String roleName, String packageName, int flags,
                     IRoleManagerCallback callback) {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onAddRoleHolder(roleName, packageName,
+                RoleControllerService.this.onAddRoleHolder(roleName, packageName, flags,
                         new RoleManagerCallbackDelegate(callback));
             }
 
             @Override
-            public void onRemoveRoleHolder(String roleName, String packageName,
+            public void onRemoveRoleHolder(String roleName, String packageName, int flags,
                     IRoleManagerCallback callback) {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onRemoveRoleHolder(roleName, packageName,
+                RoleControllerService.this.onRemoveRoleHolder(roleName, packageName, flags,
                         new RoleManagerCallbackDelegate(callback));
             }
 
             @Override
-            public void onClearRoleHolders(String roleName, IRoleManagerCallback callback) {
+            public void onClearRoleHolders(String roleName, int flags,
+                    IRoleManagerCallback callback) {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onClearRoleHolders(roleName,
+                RoleControllerService.this.onClearRoleHolders(roleName, flags,
                         new RoleManagerCallbackDelegate(callback));
             }
 
@@ -113,37 +114,41 @@ public abstract class RoleControllerService extends Service {
      *
      * @param roleName the name of the role to add the role holder for
      * @param packageName the package name of the application to add to the role holders
+     * @param flags optional behavior flags
      * @param callback the callback for whether this call is successful
      *
-     * @see RoleManager#addRoleHolderAsUser(String, String, UserHandle, Executor,
+     * @see RoleManager#addRoleHolderAsUser(String, String, int, UserHandle, Executor,
      *      RoleManagerCallback)
      */
     public abstract void onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @NonNull RoleManagerCallback callback);
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RoleManagerCallback callback);
 
     /**
      * Remove a specific application from the holders of a role.
      *
      * @param roleName the name of the role to remove the role holder for
      * @param packageName the package name of the application to remove from the role holders
+     * @param flags optional behavior flags
      * @param callback the callback for whether this call is successful
      *
-     * @see RoleManager#removeRoleHolderAsUser(String, String, UserHandle, Executor,
+     * @see RoleManager#removeRoleHolderAsUser(String, String, int, UserHandle, Executor,
      *      RoleManagerCallback)
      */
     public abstract void onRemoveRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @NonNull RoleManagerCallback callback);
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RoleManagerCallback callback);
 
     /**
      * Remove all holders of a role.
      *
      * @param roleName the name of the role to remove role holders for
+     * @param flags optional behavior flags
      * @param callback the callback for whether this call is successful
      *
-     * @see RoleManager#clearRoleHoldersAsUser(String, UserHandle, Executor, RoleManagerCallback)
+     * @see RoleManager#clearRoleHoldersAsUser(String, int, UserHandle, Executor,
+     *      RoleManagerCallback)
      */
     public abstract void onClearRoleHolders(@NonNull String roleName,
-            @NonNull RoleManagerCallback callback);
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RoleManagerCallback callback);
 
     /**
      * Cleanup appop/permissions state in response to sms kill switch toggle

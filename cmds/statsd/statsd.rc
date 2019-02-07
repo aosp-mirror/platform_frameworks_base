@@ -26,3 +26,4 @@ on post-fs-data
     # Create directory for statsd
     mkdir /data/misc/stats-data/ 0770 statsd system
     mkdir /data/misc/stats-service/ 0770 statsd system
+    mkdir /data/misc/stats-active-metric/ 0770 statsd system

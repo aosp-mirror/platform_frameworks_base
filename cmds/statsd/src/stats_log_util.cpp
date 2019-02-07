@@ -78,6 +78,7 @@ const int FIELD_ID_LATE_LOG_EVENT_SKIPPED = 3;
 const int FIELD_ID_SKIPPED_FORWARD_BUCKETS = 4;
 const int FIELD_ID_BAD_VALUE_TYPE = 5;
 const int FIELD_ID_CONDITION_CHANGE_IN_NEXT_BUCKET = 6;
+const int FIELD_ID_INVALIDATED_BUCKET = 7;
 
 namespace {
 
@@ -494,6 +495,8 @@ void writeAtomMetricStatsToStream(const std::pair<int, StatsdStats::AtomMetricSt
                        (long long)pair.second.badValueType);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_CONDITION_CHANGE_IN_NEXT_BUCKET,
                        (long long)pair.second.conditionChangeInNextBucket);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_INVALIDATED_BUCKET,
+                       (long long)pair.second.invalidatedBucket);
     protoOutput->end(token);
 }
 

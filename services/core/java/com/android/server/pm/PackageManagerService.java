@@ -14613,6 +14613,13 @@ public class PackageManagerService extends IPackageManager.Stub
                             PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+                    // Allow the broadcast to be sent before boot complete.
+                    // This is needed when committing the apk part of a staged
+                    // session in early boot. The rollback manager registers
+                    // its receiver early enough during the boot process that
+                    // it will not miss the broadcast.
+                    enableRollbackIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+
                     mContext.sendOrderedBroadcastAsUser(enableRollbackIntent, getUser(),
                             android.Manifest.permission.PACKAGE_ROLLBACK_AGENT,
                             new BroadcastReceiver() {

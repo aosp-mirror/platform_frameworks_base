@@ -31,7 +31,6 @@ import org.junit.Test;
  *  atest WmTests:SafeActivityOptionsTest
  */
 @MediumTest
-@FlakyTest
 @Presubmit
 public class SafeActivityOptionsTest {
 

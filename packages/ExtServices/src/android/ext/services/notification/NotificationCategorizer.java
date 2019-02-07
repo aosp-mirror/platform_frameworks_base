@@ -15,6 +15,7 @@
  */
 package android.ext.services.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
@@ -91,7 +92,7 @@ public class NotificationCategorizer {
         }
         // TODO: is from signature app
         if (entry.getSbn().getUid() < Process.FIRST_APPLICATION_UID) {
-            if (entry.getImportance() >= IMPORTANCE_HIGH) {
+            if (entry.getImportance() >= IMPORTANCE_DEFAULT) {
                 return CATEGORY_SYSTEM;
             } else {
                 return CATEGORY_SYSTEM_LOW;

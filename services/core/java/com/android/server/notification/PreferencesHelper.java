@@ -127,6 +127,7 @@ public class PreferencesHelper implements RankingConfig {
     private final ZenModeHelper mZenModeHelper;
 
     private SparseBooleanArray mBadgingEnabled;
+    private SparseBooleanArray mBubblesEnabled;
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons;
 
@@ -138,10 +139,11 @@ public class PreferencesHelper implements RankingConfig {
         mPm = pm;
 
         updateBadgingEnabled();
+        updateBubblesEnabled();
         syncChannelsBypassingDnd(mContext.getUserId());
     }
 
-    public void readXml(XmlPullParser parser, boolean forRestore)
+    public void readXml(XmlPullParser parser, boolean forRestore, int userId)
             throws XmlPullParserException, IOException {
         int type = parser.getEventType();
         if (type != XmlPullParser.START_TAG) return;
@@ -158,6 +160,9 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 if (type == XmlPullParser.START_TAG) {
                     if (TAG_STATUS_ICONS.equals(tag)) {
+                        if (forRestore && userId != UserHandle.USER_SYSTEM) {
+                            continue;
+                        }
                         mHideSilentStatusBarIcons = XmlUtils.readBooleanAttribute(
                                 parser, ATT_HIDE_SILENT, DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS);
                     } else if (TAG_PACKAGE.equals(tag)) {
@@ -166,9 +171,7 @@ public class PreferencesHelper implements RankingConfig {
                         if (!TextUtils.isEmpty(name)) {
                             if (forRestore) {
                                 try {
-                                    //TODO: http://b/22388012
-                                    uid = mPm.getPackageUidAsUser(name,
-                                            UserHandle.USER_SYSTEM);
+                                    uid = mPm.getPackageUidAsUser(name, userId);
                                 } catch (PackageManager.NameNotFoundException e) {
                                     // noop
                                 }
@@ -379,10 +382,11 @@ public class PreferencesHelper implements RankingConfig {
         r.channels.put(channel.getId(), channel);
     }
 
-    public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
+    public void writeXml(XmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, TAG_RANKING);
         out.attribute(null, ATT_VERSION, Integer.toString(XML_VERSION));
-        if (mHideSilentStatusBarIcons != DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS) {
+        if (mHideSilentStatusBarIcons != DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS
+                && (!forBackup || userId == UserHandle.USER_SYSTEM)) {
             out.startTag(null, TAG_STATUS_ICONS);
             out.attribute(null, ATT_HIDE_SILENT, String.valueOf(mHideSilentStatusBarIcons));
             out.endTag(null, TAG_STATUS_ICONS);
@@ -392,8 +396,7 @@ public class PreferencesHelper implements RankingConfig {
             final int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
-                //TODO: http://b/22388012
-                if (forBackup && UserHandle.getUserId(r.uid) != UserHandle.USER_SYSTEM) {
+                if (forBackup && UserHandle.getUserId(r.uid) != userId) {
                     continue;
                 }
                 final boolean hasNonDefaultSettings =
@@ -485,6 +488,7 @@ public class PreferencesHelper implements RankingConfig {
      * @param uid the uid to check if bubbles are allowed for.
      * @return whether bubbles are allowed.
      */
+    @Override
     public boolean areBubblesAllowed(String pkg, int uid) {
         return getOrCreatePackagePreferences(pkg, uid).allowBubble;
     }
@@ -1266,7 +1270,7 @@ public class PreferencesHelper implements RankingConfig {
         if (original.canShowBadge() != update.canShowBadge()) {
             update.lockFields(NotificationChannel.USER_LOCKED_SHOW_BADGE);
         }
-        if (original.isBubbleAllowed() != update.isBubbleAllowed()) {
+        if (original.canBubble() != update.canBubble()) {
             update.lockFields(NotificationChannel.USER_LOCKED_ALLOW_BUBBLE);
         }
     }
@@ -1636,6 +1640,40 @@ public class PreferencesHelper implements RankingConfig {
                                 .FIELD_NOTIFICATION_CHANNEL_GROUP_ID,
                         groupId)
                 .setPackageName(pkg);
+    }
+
+    public void updateBubblesEnabled() {
+        if (mBubblesEnabled == null) {
+            mBubblesEnabled = new SparseBooleanArray();
+        }
+        boolean changed = false;
+        // update the cached values
+        for (int index = 0; index < mBubblesEnabled.size(); index++) {
+            int userId = mBubblesEnabled.keyAt(index);
+            final boolean oldValue = mBubblesEnabled.get(userId);
+            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NOTIFICATION_BUBBLES,
+                    DEFAULT_ALLOW_BUBBLE ? 1 : 0, userId) != 0;
+            mBubblesEnabled.put(userId, newValue);
+            changed |= oldValue != newValue;
+        }
+        if (changed) {
+            updateConfig();
+        }
+    }
+
+    public boolean bubblesEnabled(UserHandle userHandle) {
+        int userId = userHandle.getIdentifier();
+        if (userId == UserHandle.USER_ALL) {
+            return false;
+        }
+        if (mBubblesEnabled.indexOfKey(userId) < 0) {
+            mBubblesEnabled.put(userId,
+                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                            Settings.Secure.NOTIFICATION_BUBBLES,
+                            DEFAULT_ALLOW_BUBBLE ? 1 : 0, userId) != 0);
+        }
+        return mBubblesEnabled.get(userId, DEFAULT_ALLOW_BUBBLE);
     }
 
 

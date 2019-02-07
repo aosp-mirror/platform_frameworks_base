@@ -294,11 +294,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mRow.getEntry().showInShadeWhenBubble());
     }
 
-    @Test
-    public void testNotificationWithoutChannel() {
-        assertFalse(mBubbleController.shouldBubble(mNoChannelRow.getEntry()));
-    }
-
     static class TestableBubbleController extends BubbleController {
 
         TestableBubbleController(Context context,

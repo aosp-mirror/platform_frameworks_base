@@ -18,6 +18,7 @@ package android.ext.services.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.os.Process.FIRST_APPLICATION_UID;
 
@@ -172,23 +173,23 @@ public class NotificationCategorizerTest {
     public void testSystemCategory() {
         NotificationCategorizer nc = new NotificationCategorizer();
 
-        when(mEntry.getChannel()).thenReturn(new NotificationChannel("", "", IMPORTANCE_HIGH));
-        when(mEntry.getImportance()).thenReturn(IMPORTANCE_HIGH);
+        when(mEntry.getChannel()).thenReturn(new NotificationChannel("", "", IMPORTANCE_DEFAULT));
+        when(mEntry.getImportance()).thenReturn(IMPORTANCE_DEFAULT);
         when(mSbn.getUid()).thenReturn(FIRST_APPLICATION_UID - 1);
 
         assertEquals(NotificationCategorizer.CATEGORY_SYSTEM, nc.getCategory(mEntry));
         assertFalse(nc.shouldSilence(NotificationCategorizer.CATEGORY_SYSTEM));
 
         when(mSbn.getUid()).thenReturn(FIRST_APPLICATION_UID);
-        assertEquals(NotificationCategorizer.CATEGORY_HIGH, nc.getCategory(mEntry));
+        assertEquals(NotificationCategorizer.CATEGORY_EVERYTHING_ELSE, nc.getCategory(mEntry));
     }
 
     @Test
     public void testSystemLowCategory() {
         NotificationCategorizer nc = new NotificationCategorizer();
 
-        when(mEntry.getChannel()).thenReturn(new NotificationChannel("", "", IMPORTANCE_DEFAULT));
-        when(mEntry.getImportance()).thenReturn(IMPORTANCE_DEFAULT);
+        when(mEntry.getChannel()).thenReturn(new NotificationChannel("", "", IMPORTANCE_LOW));
+        when(mEntry.getImportance()).thenReturn(IMPORTANCE_LOW);
         when(mSbn.getUid()).thenReturn(FIRST_APPLICATION_UID - 1);
 
         assertEquals(NotificationCategorizer.CATEGORY_SYSTEM_LOW, nc.getCategory(mEntry));
