@@ -34,6 +34,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayedContentSample;
@@ -57,7 +58,6 @@ import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.RingBuffer;
@@ -382,9 +382,8 @@ public class BrightnessTracker {
             return;
         }
 
-        builder.setNightMode(mInjector.isNightModeActive(mContext, UserHandle.USER_CURRENT));
-        builder.setColorTemperature(mInjector.getColorTemperature(mContext,
-                UserHandle.USER_CURRENT));
+        builder.setNightMode(mInjector.isNightDisplayActivated(mContext));
+        builder.setColorTemperature(mInjector.getNightDisplayColorTemperature(mContext));
 
         if (mColorSamplingEnabled) {
             DisplayedContentSample sample = mInjector.sampleColor(mNoFramesToSample);
@@ -1096,12 +1095,13 @@ public class BrightnessTracker {
             return context.getSystemService(PowerManager.class).isInteractive();
         }
 
-        public int getColorTemperature(Context context, int userId) {
-            return new ColorDisplayController(context, userId).getColorTemperature();
+        public int getNightDisplayColorTemperature(Context context) {
+            return context.getSystemService(ColorDisplayManager.class)
+                    .getNightDisplayColorTemperature();
         }
 
-        public boolean isNightModeActive(Context context, int userId) {
-            return new ColorDisplayController(context, userId).isActivated();
+        public boolean isNightDisplayActivated(Context context) {
+            return context.getSystemService(ColorDisplayManager.class).isNightDisplayActivated();
         }
 
         public DisplayedContentSample sampleColor(int noFramesToSample) {

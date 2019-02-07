@@ -962,13 +962,13 @@ public class BrightnessTrackerTest {
         }
 
         @Override
-        public int getColorTemperature(Context context, int userId) {
+        public int getNightDisplayColorTemperature(Context context) {
           return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
                   mDefaultNightModeColorTemperature);
         }
 
         @Override
-        public boolean isNightModeActive(Context context, int userId) {
+        public boolean isNightDisplayActivated(Context context) {
             return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
                     0) == 1;
         }

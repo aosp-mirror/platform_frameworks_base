@@ -16,11 +16,11 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.provider.Settings.Secure;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.Dependency;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
@@ -50,7 +50,7 @@ public class AutoTileManager {
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
     private final ManagedProfileController mManagedProfileController;
-    private final ColorDisplayController mColorDisplayController;
+    private final NightDisplayListener mNightDisplayListener;
 
     @Inject
     public AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
@@ -58,7 +58,7 @@ public class AutoTileManager {
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
-            ColorDisplayController colorDisplayController) {
+            NightDisplayListener nightDisplayListener) {
         mAutoTracker = autoAddTracker;
         mContext = context;
         mHost = host;
@@ -66,7 +66,7 @@ public class AutoTileManager {
         mHotspotController = hotspotController;
         mDataSaverController = dataSaverController;
         mManagedProfileController = managedProfileController;
-        mColorDisplayController = colorDisplayController;
+        mNightDisplayListener = nightDisplayListener;
         if (!mAutoTracker.isAdded(HOTSPOT)) {
             hotspotController.addCallback(mHotspotCallback);
         }
@@ -93,7 +93,7 @@ public class AutoTileManager {
         }
         if (!mAutoTracker.isAdded(NIGHT)
                 && ColorDisplayManager.isNightDisplayAvailable(mContext)) {
-            colorDisplayController.setListener(mColorDisplayCallback);
+            nightDisplayListener.setCallback(mNightDisplayCallback);
         }
     }
 
@@ -106,7 +106,7 @@ public class AutoTileManager {
         mDataSaverController.removeCallback(mDataSaverListener);
         mManagedProfileController.removeCallback(mProfileCallback);
         if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
-            mColorDisplayController.setListener(null);
+            mNightDisplayListener.setCallback(null);
         }
     }
 
@@ -157,8 +157,8 @@ public class AutoTileManager {
     };
 
     @VisibleForTesting
-    final ColorDisplayController.Callback mColorDisplayCallback =
-            new ColorDisplayController.Callback() {
+    final NightDisplayListener.Callback mNightDisplayCallback =
+            new NightDisplayListener.Callback() {
         @Override
         public void onActivated(boolean activated) {
             if (activated) {
@@ -178,7 +178,7 @@ public class AutoTileManager {
             if (mAutoTracker.isAdded(NIGHT)) return;
             mHost.addTile(NIGHT);
             mAutoTracker.setTileAdded(NIGHT);
-            mHandler.post(() -> mColorDisplayController.setListener(null));
+            mHandler.post(() -> mNightDisplayListener.setCallback(null));
         }
     };
 }

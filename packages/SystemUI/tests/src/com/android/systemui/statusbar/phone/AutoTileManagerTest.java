@@ -21,13 +21,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
@@ -58,7 +58,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 mock(HotspotController.class),
                 mock(DataSaverController.class),
                 mock(ManagedProfileController.class),
-                mock(ColorDisplayController.class));
+                mock(NightDisplayListener.class));
     }
 
     @Test
@@ -66,7 +66,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mColorDisplayCallback.onActivated(true);
+        mAutoTileManager.mNightDisplayCallback.onActivated(true);
         verify(mQsTileHost).addTile("night");
     }
 
@@ -75,7 +75,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mColorDisplayCallback.onActivated(false);
+        mAutoTileManager.mNightDisplayCallback.onActivated(false);
         verify(mQsTileHost, never()).addTile("night");
     }
 
@@ -84,7 +84,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
+        mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
                 ColorDisplayManager.AUTO_MODE_TWILIGHT);
         verify(mQsTileHost).addTile("night");
     }
@@ -94,7 +94,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
+        mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
                 ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
         verify(mQsTileHost).addTile("night");
     }
@@ -104,7 +104,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         if (!ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             return;
         }
-        mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
+        mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
                 ColorDisplayManager.AUTO_MODE_DISABLED);
         verify(mQsTileHost, never()).addTile("night");
     }

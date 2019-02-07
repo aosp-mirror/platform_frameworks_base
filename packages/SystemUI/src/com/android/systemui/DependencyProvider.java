@@ -24,6 +24,7 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -34,7 +35,6 @@ import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -152,8 +152,8 @@ public class DependencyProvider {
 
     @Singleton
     @Provides
-    public ColorDisplayController provideColorDisplayController(Context context) {
-        return new ColorDisplayController(context);
+    public NightDisplayListener provideNightDisplayListener(Context context) {
+        return new NightDisplayListener(context);
     }
 
     @Singleton
