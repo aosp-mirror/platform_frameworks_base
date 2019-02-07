@@ -387,8 +387,10 @@ public final class ColorDisplayService extends SystemService {
             Slog.d(TAG, "Setting saturation level: " + saturationLevel);
 
             if (saturationLevel == 100) {
+                setActivated(false);
                 Matrix.setIdentityM(mMatrixGlobalSaturation, 0);
             } else {
+                setActivated(true);
                 float saturation = saturationLevel * 0.1f;
                 float desaturation = 1.0f - saturation;
                 float[] luminance = {0.231f * desaturation, 0.715f * desaturation,
@@ -673,6 +675,10 @@ public final class ColorDisplayService extends SystemService {
 
         if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
             mDisplayWhiteBalanceTintController.endAnimator();
+        }
+
+        if (mGlobalSaturationTintController.isAvailable(getContext())) {
+            mGlobalSaturationTintController.setActivated(null);
         }
     }
 
@@ -1668,6 +1674,20 @@ public final class ColorDisplayService extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
             return true;
+        }
+
+        @Override
+        public boolean isSaturationActivated() {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to get display saturation level");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return !mGlobalSaturationTintController.isActivatedStateNotSet()
+                        && mGlobalSaturationTintController.isActivated();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
