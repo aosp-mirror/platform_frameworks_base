@@ -153,7 +153,7 @@ public class BlackFrame {
                 if (mBlackSurfaces[i] != null) {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
                             "  BLACK " + mBlackSurfaces[i].surface + ": DESTROY");
-                    mBlackSurfaces[i].surface.destroy();
+                    mBlackSurfaces[i].surface.remove();
                     mBlackSurfaces[i] = null;
                 }
             }

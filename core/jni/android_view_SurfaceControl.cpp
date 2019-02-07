@@ -178,12 +178,13 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
 
 static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
+    ctrl->release();
     ctrl->decStrong((void *)nativeCreate);
 }
 
 static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
-    ctrl->clear();
+    ctrl->destroy();
     ctrl->decStrong((void *)nativeCreate);
 }
 
