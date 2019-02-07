@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
@@ -1067,7 +1066,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 anyString(), eq(TEST_UID), updated.capture());
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
-        assertEquals(IMPORTANCE_HIGH, updated.getValue().getImportance());
+        assertEquals(IMPORTANCE_DEFAULT, updated.getValue().getImportance());
     }
 
     @Test
@@ -1111,7 +1110,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 anyString(), eq(TEST_UID), updated.capture());
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
-        assertEquals(IMPORTANCE_HIGH, updated.getValue().getImportance());
+        assertEquals(IMPORTANCE_DEFAULT, updated.getValue().getImportance());
     }
 
     @Test

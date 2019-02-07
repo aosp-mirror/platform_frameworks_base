@@ -537,7 +537,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                     mChosenImportance = IMPORTANCE_LOW;
                     confirmationText.setText(R.string.notification_channel_silenced);
                 } else {
-                    mChosenImportance = IMPORTANCE_HIGH;
+                    mChosenImportance = IMPORTANCE_DEFAULT;
                     confirmationText.setText(R.string.notification_channel_unsilenced);
                 }
                 break;
