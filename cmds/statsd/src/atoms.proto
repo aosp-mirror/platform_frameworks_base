@@ -41,12 +41,13 @@ import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
+import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
+import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
-import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
-import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
+import "frameworks/base/core/proto/android/wifi/enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -994,6 +995,9 @@ message WifiLockStateChanged {
         ON = 1;
     }
     optional State state = 2;
+
+    // WifiLock type, from frameworks/base/core/proto/android/wifi/enums.proto.
+    optional android.net.wifi.WifiModeEnum mode = 3;
 }
 
 /**
