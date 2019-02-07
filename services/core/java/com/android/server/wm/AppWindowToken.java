@@ -1657,8 +1657,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final ActivityManager.TaskSnapshot snapshot = snapshotCtrl.getSnapshot(
                     getTask().mTaskId, getTask().mUserId, false /* restoreFromDisk */,
                     false /* reducedResolution */);
-            mThumbnail = new AppWindowThumbnail(t, this, snapshot.getSnapshot(),
-                    true /* relative */);
+            if (snapshot != null) {
+                mThumbnail = new AppWindowThumbnail(t, this, snapshot.getSnapshot(),
+                        true /* relative */);
+            }
         }
     }
 

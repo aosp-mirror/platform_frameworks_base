@@ -61,7 +61,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.quality.Strictness;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A Test utility class to create a mock {@link WindowManagerService} instance for tests.
@@ -70,6 +70,8 @@ class TestSystemServices {
     private static StaticMockitoSession sMockitoSession;
     private static WindowManagerService sService;
     private static TestWindowManagerPolicy sPolicy;
+
+    static AtomicBoolean sCurrentMessagesProcessed = new AtomicBoolean(false);
 
     static void setUpWindowManagerService() {
         sMockitoSession = mockitoSession()
@@ -195,21 +197,23 @@ class TestSystemServices {
     }
 
     private static void waitHandlerIdle(Handler handler) {
-        if (!handler.hasMessagesOrCallbacks()) {
-            return;
-        }
-        final CountDownLatch latch = new CountDownLatch(1);
-        // Wait for delayed messages are processed.
-        handler.getLooper().getQueue().addIdleHandler(() -> {
-            if (handler.hasMessagesOrCallbacks()) {
-                return true; // keep idle handler.
+        synchronized (sCurrentMessagesProcessed) {
+            // Add a message to the handler queue and make sure it is fully processed before we move
+            // on. This makes sure all previous messages in the handler are fully processed vs. just
+            // popping them from the message queue.
+            sCurrentMessagesProcessed.set(false);
+            handler.post(() -> {
+                synchronized (sCurrentMessagesProcessed) {
+                    sCurrentMessagesProcessed.set(true);
+                    sCurrentMessagesProcessed.notifyAll();
+                }
+            });
+            while (!sCurrentMessagesProcessed.get()) {
+                try {
+                    sCurrentMessagesProcessed.wait();
+                } catch (InterruptedException e) {
+                }
             }
-            latch.countDown();
-            return false; // remove idle handler.
-        });
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
         }
     }
 }

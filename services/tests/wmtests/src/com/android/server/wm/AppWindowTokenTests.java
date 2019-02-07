@@ -62,7 +62,6 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:AppWindowTokenTests
  */
-@FlakyTest(bugId = 68267650)
 @SmallTest
 @Presubmit
 public class AppWindowTokenTests extends WindowTestsBase {
@@ -79,6 +78,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mTask = createTaskInStack(mStack, 0 /* userId */);
         mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
 
+        mToken.mSkipOnParentChanged = false;
         mTask.addChild(mToken, 0);
     }
 
@@ -303,6 +303,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertNoStartingWindow(mToken);
     }
 
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     @Test
     public void testAddRemoveRace() {
         // There was once a race condition between adding and removing starting windows
@@ -387,6 +388,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // bottom one.
         tokenTop.setVisibility(false, false);
         tokenBottom.transferStartingWindowFromHiddenAboveTokenIfNeeded();
+        waitUntilHandlersIdle();
 
         // Assert that the bottom window now has the starting window.
         assertNoStartingWindow(tokenTop);
