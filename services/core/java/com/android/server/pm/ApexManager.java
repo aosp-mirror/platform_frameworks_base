@@ -205,6 +205,21 @@ class ApexManager {
     }
 
     /**
+     * Abandons the (only) active session previously submitted.
+     *
+     * @return {@code true} upon success, {@code false} if any remote exception occurs
+     */
+    boolean abortActiveSession() {
+        try {
+            mApexService.abortActiveSession();
+            return true;
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Unable to contact apexservice", re);
+            return false;
+        }
+    }
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
