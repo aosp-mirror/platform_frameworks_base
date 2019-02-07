@@ -896,7 +896,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession).setOpaque(true);
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
+                .setOpaque(true)
+                .setContainerLayer();
         mWindowingLayer = b.setName("Display Root").build();
         mOverlayLayer = b.setName("Display Overlays").build();
 
@@ -4639,7 +4641,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     SurfaceControl.Builder makeChildSurface(WindowContainer child) {
         SurfaceSession s = child != null ? child.getSession() : getSession();
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(s);
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(s).setContainerLayer();
         if (child == null) {
             return b;
         }

@@ -33,7 +33,6 @@ import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -588,7 +587,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     mBackgroundControl = new SurfaceControl.Builder(mSurfaceSession)
                         .setName("Background for -" + name)
                         .setOpaque(true)
-                        .setColorLayer(true)
+                        .setColorLayer()
                         .setParent(mSurfaceControl)
                         .build();
 

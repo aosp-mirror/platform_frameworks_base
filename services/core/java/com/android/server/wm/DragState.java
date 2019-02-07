@@ -164,7 +164,7 @@ class DragState {
 
         if (mInputSurface == null) {
             mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId)
-                    .getSession()).setContainerLayer(true)
+                    .getSession()).setContainerLayer()
                     .setName("Drag and Drop Input Consumer").build();
         }
         final InputWindowHandle h = getInputWindowHandle();
