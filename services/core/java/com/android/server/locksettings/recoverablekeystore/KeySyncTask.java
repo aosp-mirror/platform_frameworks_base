@@ -20,6 +20,7 @@ import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_L
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.RemoteException;
 import android.security.Scrypt;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
@@ -162,7 +163,7 @@ public class KeySyncTask implements Runnable {
         }
     }
 
-    private void syncKeys() {
+    private void syncKeys() throws RemoteException {
         if (mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             // Application keys for the user will not be available for sync.
             Log.w(TAG, "Credentials are not set for user " + mUserId);
@@ -195,7 +196,7 @@ public class KeySyncTask implements Runnable {
             && mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
     }
 
-    private void syncKeysForAgent(int recoveryAgentUid) throws IOException {
+    private void syncKeysForAgent(int recoveryAgentUid) throws IOException, RemoteException {
         boolean shouldRecreateCurrentVersion = false;
         if (!shouldCreateSnapshot(recoveryAgentUid)) {
             shouldRecreateCurrentVersion =
@@ -412,7 +413,7 @@ public class KeySyncTask implements Runnable {
     private Map<String, Pair<SecretKey, byte[]>> getKeysToSync(int recoveryAgentUid)
             throws InsecureUserException, KeyStoreException, UnrecoverableKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException,
-            InvalidKeyException, InvalidAlgorithmParameterException, IOException {
+            InvalidKeyException, InvalidAlgorithmParameterException, IOException, RemoteException {
         PlatformDecryptionKey decryptKey = mPlatformKeyManager.getDecryptKey(mUserId);;
         Map<String, WrappedKey> wrappedKeys = mRecoverableKeyStoreDb.getAllKeys(
                 mUserId, recoveryAgentUid, decryptKey.getGenerationId());
