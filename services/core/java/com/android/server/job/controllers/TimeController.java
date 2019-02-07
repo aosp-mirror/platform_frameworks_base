@@ -149,8 +149,8 @@ public final class TimeController extends StateController {
 
     @Override
     public void onConstantsUpdatedLocked() {
-        checkExpiredDelaysAndResetAlarm();
         checkExpiredDeadlinesAndResetAlarm();
+        checkExpiredDelaysAndResetAlarm();
     }
 
     @Override
@@ -159,20 +159,47 @@ public final class TimeController extends StateController {
             return;
         }
 
-        if (job.hasTimingDelayConstraint()
-                && job.getEarliestRunTime() <= mNextDelayExpiredElapsedMillis) {
-            checkExpiredDelaysAndResetAlarm();
-        }
+        final long nowElapsedMillis = sElapsedRealtimeClock.millis();
+
+        // Check deadline constraint first because if it's satisfied, we avoid a little bit of
+        // unnecessary processing of the timing delay.
         if (job.hasDeadlineConstraint()
+                && !job.isConstraintSatisfied(JobStatus.CONSTRAINT_DEADLINE)
                 && job.getLatestRunTimeElapsed() <= mNextJobExpiredElapsedMillis) {
-            checkExpiredDeadlinesAndResetAlarm();
+            if (evaluateDeadlineConstraint(job, nowElapsedMillis)) {
+                checkExpiredDeadlinesAndResetAlarm();
+                checkExpiredDelaysAndResetAlarm();
+            } else {
+                final boolean isAlarmForJob =
+                        job.getLatestRunTimeElapsed() == mNextJobExpiredElapsedMillis;
+                final boolean wouldBeReady = wouldBeReadyWithConstraintLocked(
+                        job, JobStatus.CONSTRAINT_DEADLINE);
+                if ((isAlarmForJob && !wouldBeReady) || (!isAlarmForJob && wouldBeReady)) {
+                    checkExpiredDeadlinesAndResetAlarm();
+                }
+            }
+        }
+        if (job.hasTimingDelayConstraint()
+                && !job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY)
+                && job.getEarliestRunTime() <= mNextDelayExpiredElapsedMillis) {
+            if (evaluateTimingDelayConstraint(job, nowElapsedMillis)) {
+                checkExpiredDelaysAndResetAlarm();
+            } else {
+                final boolean isAlarmForJob =
+                        job.getEarliestRunTime() == mNextDelayExpiredElapsedMillis;
+                final boolean wouldBeReady = wouldBeReadyWithConstraintLocked(
+                        job, JobStatus.CONSTRAINT_TIMING_DELAY);
+                if ((isAlarmForJob && !wouldBeReady) || (!isAlarmForJob && wouldBeReady)) {
+                    checkExpiredDelaysAndResetAlarm();
+                }
+            }
         }
     }
 
     @Override
     public void reevaluateStateLocked(int uid) {
-        checkExpiredDelaysAndResetAlarm();
         checkExpiredDeadlinesAndResetAlarm();
+        checkExpiredDelaysAndResetAlarm();
     }
 
     /**
@@ -182,10 +209,10 @@ public final class TimeController extends StateController {
      * back and forth.
      */
     private boolean canStopTrackingJobLocked(JobStatus job) {
-        return (!job.hasTimingDelayConstraint() ||
-                (job.satisfiedConstraints&JobStatus.CONSTRAINT_TIMING_DELAY) != 0) &&
-                (!job.hasDeadlineConstraint() ||
-                        (job.satisfiedConstraints&JobStatus.CONSTRAINT_DEADLINE) != 0);
+        return (!job.hasTimingDelayConstraint()
+                        || job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY))
+                && (!job.hasDeadlineConstraint()
+                        || job.isConstraintSatisfied(JobStatus.CONSTRAINT_DEADLINE));
     }
 
     private void ensureAlarmServiceLocked() {
@@ -241,6 +268,7 @@ public final class TimeController extends StateController {
         }
     }
 
+    /** @return true if the job's deadline constraint is satisfied */
     private boolean evaluateDeadlineConstraint(JobStatus job, long nowElapsedMillis) {
         final long jobDeadline = job.getLatestRunTimeElapsed();
 
@@ -279,7 +307,7 @@ public final class TimeController extends StateController {
                     if (job.isReady()) {
                         ready = true;
                     }
-                } else if (!job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY)) {
+                } else {
                     if (mConstants.TIME_CONTROLLER_SKIP_NOT_READY_JOBS
                             && !wouldBeReadyWithConstraintLocked(
                             job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
@@ -319,6 +347,7 @@ public final class TimeController extends StateController {
         }
     }
 
+    /** @return true if the job's delay constraint is satisfied */
     private boolean evaluateTimingDelayConstraint(JobStatus job, long nowElapsedMillis) {
         final long jobDelayTime = job.getEarliestRunTime();
         if (jobDelayTime <= nowElapsedMillis) {
@@ -347,6 +376,9 @@ public final class TimeController extends StateController {
      */
     private void setDelayExpiredAlarmLocked(long alarmTimeElapsedMillis, WorkSource ws) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
+        if (mNextDelayExpiredElapsedMillis == alarmTimeElapsedMillis) {
+            return;
+        }
         mNextDelayExpiredElapsedMillis = alarmTimeElapsedMillis;
         updateAlarmWithListenerLocked(DELAY_TAG, mNextDelayExpiredListener,
                 mNextDelayExpiredElapsedMillis, ws);
@@ -359,6 +391,9 @@ public final class TimeController extends StateController {
      */
     private void setDeadlineExpiredAlarmLocked(long alarmTimeElapsedMillis, WorkSource ws) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
+        if (mNextJobExpiredElapsedMillis == alarmTimeElapsedMillis) {
+            return;
+        }
         mNextJobExpiredElapsedMillis = alarmTimeElapsedMillis;
         updateAlarmWithListenerLocked(DEADLINE_TAG, mDeadlineExpiredListener,
                 mNextJobExpiredElapsedMillis, ws);
