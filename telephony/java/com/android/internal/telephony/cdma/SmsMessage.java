@@ -21,7 +21,6 @@ import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsCbLocation;
 import android.telephony.SmsCbMessage;
-import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.telephony.Rlog;
 import android.util.Log;
@@ -746,8 +745,10 @@ public class SmsMessage extends SmsMessageBase {
 
     /**
      * Parses a broadcast SMS, possibly containing a CMAS alert.
+     *
+     * @param plmn the PLMN for a broadcast SMS
      */
-    public SmsCbMessage parseBroadcastSms() {
+    public SmsCbMessage parseBroadcastSms(String plmn) {
         BearerData bData = BearerData.decode(mEnvelope.bearerData, mEnvelope.serviceCategory);
         if (bData == null) {
             Rlog.w(LOG_TAG, "BearerData.decode() returned null");
@@ -758,7 +759,6 @@ public class SmsMessage extends SmsMessageBase {
             Rlog.d(LOG_TAG, "MT raw BearerData = " + HexDump.toHexString(mEnvelope.bearerData));
         }
 
-        String plmn = TelephonyManager.getDefault().getNetworkOperator();
         SmsCbLocation location = new SmsCbLocation(plmn);
 
         return new SmsCbMessage(SmsCbMessage.MESSAGE_FORMAT_3GPP2,
