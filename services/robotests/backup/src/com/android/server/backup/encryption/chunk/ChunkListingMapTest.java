@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.backup.encryption.chunk;
@@ -36,7 +36,7 @@ import java.util.Arrays;
 
 @RunWith(RobolectricTestRunner.class)
 @Presubmit
-public class ChunkListingTest {
+public class ChunkListingMapTest {
     private static final String CHUNK_A = "CHUNK_A";
     private static final String CHUNK_B = "CHUNK_B";
     private static final String CHUNK_C = "CHUNK_C";
@@ -62,13 +62,13 @@ public class ChunkListingTest {
                 createChunkListingProto(
                         new ChunkHash[] {mChunkHashA, mChunkHashB, mChunkHashC},
                         new int[] {CHUNK_A_LENGTH, CHUNK_B_LENGTH, CHUNK_C_LENGTH});
-        ChunkListing chunkListing =
-                ChunkListing.readFromProto(
+        ChunkListingMap chunkListingMap =
+                ChunkListingMap.readFromProto(
                         new ProtoInputStream(new ByteArrayInputStream(chunkListingProto)));
 
-        boolean chunkAInList = chunkListing.hasChunk(mChunkHashA);
-        boolean chunkBInList = chunkListing.hasChunk(mChunkHashB);
-        boolean chunkCInList = chunkListing.hasChunk(mChunkHashC);
+        boolean chunkAInList = chunkListingMap.hasChunk(mChunkHashA);
+        boolean chunkBInList = chunkListingMap.hasChunk(mChunkHashB);
+        boolean chunkCInList = chunkListingMap.hasChunk(mChunkHashC);
 
         assertThat(chunkAInList).isTrue();
         assertThat(chunkBInList).isTrue();
@@ -81,13 +81,13 @@ public class ChunkListingTest {
                 createChunkListingProto(
                         new ChunkHash[] {mChunkHashA, mChunkHashB},
                         new int[] {CHUNK_A_LENGTH, CHUNK_B_LENGTH});
-        ChunkListing chunkListing =
-                ChunkListing.readFromProto(
+        ChunkListingMap chunkListingMap =
+                ChunkListingMap.readFromProto(
                         new ProtoInputStream(new ByteArrayInputStream(chunkListingProto)));
         ChunkHash chunkHashEmpty = getHash("");
 
-        boolean chunkCInList = chunkListing.hasChunk(mChunkHashC);
-        boolean emptyChunkInList = chunkListing.hasChunk(chunkHashEmpty);
+        boolean chunkCInList = chunkListingMap.hasChunk(mChunkHashC);
+        boolean emptyChunkInList = chunkListingMap.hasChunk(chunkHashEmpty);
 
         assertThat(chunkCInList).isFalse();
         assertThat(emptyChunkInList).isFalse();
@@ -99,13 +99,13 @@ public class ChunkListingTest {
                 createChunkListingProto(
                         new ChunkHash[] {mChunkHashA, mChunkHashB, mChunkHashC},
                         new int[] {CHUNK_A_LENGTH, CHUNK_B_LENGTH, CHUNK_C_LENGTH});
-        ChunkListing chunkListing =
-                ChunkListing.readFromProto(
+        ChunkListingMap chunkListingMap =
+                ChunkListingMap.readFromProto(
                         new ProtoInputStream(new ByteArrayInputStream(chunkListingProto)));
 
-        ChunkListing.Entry entryA = chunkListing.getChunkEntry(mChunkHashA);
-        ChunkListing.Entry entryB = chunkListing.getChunkEntry(mChunkHashB);
-        ChunkListing.Entry entryC = chunkListing.getChunkEntry(mChunkHashC);
+        ChunkListingMap.Entry entryA = chunkListingMap.getChunkEntry(mChunkHashA);
+        ChunkListingMap.Entry entryB = chunkListingMap.getChunkEntry(mChunkHashB);
+        ChunkListingMap.Entry entryC = chunkListingMap.getChunkEntry(mChunkHashC);
 
         assertThat(entryA.getLength()).isEqualTo(CHUNK_A_LENGTH);
         assertThat(entryB.getLength()).isEqualTo(CHUNK_B_LENGTH);
@@ -118,13 +118,13 @@ public class ChunkListingTest {
                 createChunkListingProto(
                         new ChunkHash[] {mChunkHashA, mChunkHashB, mChunkHashC},
                         new int[] {CHUNK_A_LENGTH, CHUNK_B_LENGTH, CHUNK_C_LENGTH});
-        ChunkListing chunkListing =
-                ChunkListing.readFromProto(
+        ChunkListingMap chunkListingMap =
+                ChunkListingMap.readFromProto(
                         new ProtoInputStream(new ByteArrayInputStream(chunkListingProto)));
 
-        ChunkListing.Entry entryA = chunkListing.getChunkEntry(mChunkHashA);
-        ChunkListing.Entry entryB = chunkListing.getChunkEntry(mChunkHashB);
-        ChunkListing.Entry entryC = chunkListing.getChunkEntry(mChunkHashC);
+        ChunkListingMap.Entry entryA = chunkListingMap.getChunkEntry(mChunkHashA);
+        ChunkListingMap.Entry entryB = chunkListingMap.getChunkEntry(mChunkHashB);
+        ChunkListingMap.Entry entryC = chunkListingMap.getChunkEntry(mChunkHashC);
 
         assertThat(entryA.getStart()).isEqualTo(0);
         assertThat(entryB.getStart()).isEqualTo(CHUNK_A_LENGTH);
@@ -137,22 +137,24 @@ public class ChunkListingTest {
                 createChunkListingProto(
                         new ChunkHash[] {mChunkHashA, mChunkHashB},
                         new int[] {CHUNK_A_LENGTH, CHUNK_B_LENGTH});
-        ChunkListing chunkListing =
-                ChunkListing.readFromProto(
+        ChunkListingMap chunkListingMap =
+                ChunkListingMap.readFromProto(
                         new ProtoInputStream(new ByteArrayInputStream(chunkListingProto)));
 
-        ChunkListing.Entry chunkEntryNonexistentChunk = chunkListing.getChunkEntry(mChunkHashC);
+        ChunkListingMap.Entry chunkEntryNonexistentChunk =
+                chunkListingMap.getChunkEntry(mChunkHashC);
 
         assertThat(chunkEntryNonexistentChunk).isNull();
     }
 
     @Test
-    public void testReadFromProto_whenEmptyProto_returnsChunkListingWith0Chunks() throws Exception {
+    public void testReadFromProto_whenEmptyProto_returnsChunkListingMapWith0Chunks()
+            throws Exception {
         ProtoInputStream emptyProto = new ProtoInputStream(new ByteArrayInputStream(new byte[] {}));
 
-        ChunkListing chunkListing = ChunkListing.readFromProto(emptyProto);
+        ChunkListingMap chunkListingMap = ChunkListingMap.readFromProto(emptyProto);
 
-        assertThat(chunkListing.getChunkCount()).isEqualTo(0);
+        assertThat(chunkListingMap.getChunkCount()).isEqualTo(0);
     }
 
     @Test
@@ -162,11 +164,11 @@ public class ChunkListingTest {
                         new ChunkHash[] {mChunkHashA, mChunkHashB, mChunkHashC},
                         new int[] {CHUNK_A_LENGTH, CHUNK_B_LENGTH, CHUNK_C_LENGTH});
 
-        ChunkListing chunkListing =
-                ChunkListing.readFromProto(
+        ChunkListingMap chunkListingMap =
+                ChunkListingMap.readFromProto(
                         new ProtoInputStream(new ByteArrayInputStream(chunkListingProto)));
 
-        assertThat(chunkListing.getChunkCount()).isEqualTo(3);
+        assertThat(chunkListingMap.getChunkCount()).isEqualTo(3);
     }
 
     private byte[] createChunkListingProto(ChunkHash[] hashes, int[] lengths) {
