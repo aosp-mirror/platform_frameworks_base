@@ -948,22 +948,25 @@ public class UsbPortManager {
         }
     }
 
+    private void handlePortLocked(PortInfo portInfo, IndentingPrintWriter pw) {
+        sendPortChangedBroadcastLocked(portInfo);
+        logToStatsd(portInfo);
+        updateContaminantNotification();
+    }
+
     private void handlePortAddedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port added: " + portInfo);
-        sendPortChangedBroadcastLocked(portInfo);
-        updateContaminantNotification();
+        handlePortLocked(portInfo, pw);
     }
 
     private void handlePortChangedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port changed: " + portInfo);
-        sendPortChangedBroadcastLocked(portInfo);
-        updateContaminantNotification();
+        handlePortLocked(portInfo, pw);
     }
 
     private void handlePortRemovedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port removed: " + portInfo);
-        sendPortChangedBroadcastLocked(portInfo);
-        updateContaminantNotification();
+        handlePortLocked(portInfo, pw);
     }
 
     // Constants have to be converted between USB HAL V1.2 ContaminantDetectionStatus
@@ -996,9 +999,9 @@ public class UsbPortManager {
         // instead of from within the critical section.
         mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 Manifest.permission.MANAGE_USB));
+    }
 
-        // Log to statsd
-
+    private void logToStatsd(PortInfo portInfo) {
         // Port is removed
         if (portInfo.mUsbPortStatus == null) {
             if (mConnected.containsKey(portInfo.mUsbPort.getId())) {
