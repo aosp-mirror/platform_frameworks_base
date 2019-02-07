@@ -69,6 +69,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
@@ -399,6 +400,7 @@ public final class DeviceConfig {
      * @see #removeOnPropertyChangedListener(OnPropertyChangedListener)
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static void addOnPropertyChangedListener(
             @NonNull String namespace,
@@ -432,6 +434,7 @@ public final class DeviceConfig {
      * @see #addOnPropertyChangedListener(String, Executor, OnPropertyChangedListener)
      */
     @SystemApi
+    @TestApi
     public static void removeOnPropertyChangedListener(
             OnPropertyChangedListener onPropertyChangedListener) {
         synchronized (sLock) {
@@ -528,6 +531,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     public interface OnPropertyChangedListener {
         /**
          * Called when a property has changed.

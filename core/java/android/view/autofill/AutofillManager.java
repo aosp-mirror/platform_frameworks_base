@@ -337,6 +337,14 @@ public final class AutofillManager {
     public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
 
     /**
+     * Disables Augmented Autofill.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_SMART_SUGGESTION_OFF = 0x0;
+
+    /**
      * Displays the Augment Autofill window using the same mechanism (such as a popup-window
      * attached to the focused view) as the standard autofill.
      *
@@ -346,14 +354,13 @@ public final class AutofillManager {
     public static final int FLAG_SMART_SUGGESTION_SYSTEM = 0x1;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "FLAG_SMART_SUGGESTION_" }, value = {
-            FLAG_SMART_SUGGESTION_SYSTEM
-    })
+    @IntDef(flag = false, value = { FLAG_SMART_SUGGESTION_OFF, FLAG_SMART_SUGGESTION_SYSTEM })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SmartSuggestionMode {}
 
     /**
-     * Used to emulate Smart Suggestion for Augmented Autofill during development
+     * {@code DeviceConfig} property used to set which Smart Suggestion modes for Augmented Autofill
+     * are available.
      *
      * @hide
      */
@@ -2355,7 +2362,14 @@ public final class AutofillManager {
 
     /** @hide */
     public static String getSmartSuggestionModeToString(@SmartSuggestionMode int flags) {
-        return (flags == FLAG_SMART_SUGGESTION_SYSTEM) ? "1-SYSTEM" : flags + "-UNSUPPORTED";
+        switch (flags) {
+            case FLAG_SMART_SUGGESTION_OFF:
+                return "OFF";
+            case FLAG_SMART_SUGGESTION_SYSTEM:
+                return "SYSTEM";
+            default:
+                return "INVALID:" + flags;
+        }
     }
 
     @GuardedBy("mLock")
