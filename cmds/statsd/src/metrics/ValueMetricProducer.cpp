@@ -435,6 +435,10 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
             }
         }
         mHasGlobalBase = true;
+
+        // We can probably flush the bucket. Since we used bucketEndTime when calling
+        // #onMatchedLogEventInternalLocked, the current bucket will not have been flushed.
+        flushIfNeededLocked(realEventTime);
     } else {
         VLOG("No need to commit data on condition false.");
     }
