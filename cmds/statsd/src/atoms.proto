@@ -110,7 +110,7 @@ message Atom {
         PacketWakeupOccurred packet_wakeup_occurred = 44;
         WallClockTimeShifted wall_clock_time_shifted = 45;
         AnomalyDetected anomaly_detected = 46;
-        AppBreadcrumbReported app_breadcrumb_reported = 47;
+        AppBreadcrumbReported app_breadcrumb_reported = 47 [(allow_from_any_uid) = true];
         AppStartOccurred app_start_occurred = 48;
         AppStartCanceled app_start_canceled = 49;
         AppStartFullyDrawn app_start_fully_drawn = 50;
@@ -121,7 +121,7 @@ message Atom {
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         ShutdownSequenceReported shutdown_sequence_reported = 56;
         BootSequenceReported boot_sequence_reported = 57;
-        DaveyOccurred davey_occurred = 58;
+        DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true];
         OverlayStateChanged overlay_state_changed = 59;
         ForegroundServiceStateChanged foreground_service_state_changed = 60;
         CallStateChanged call_state_changed = 61;

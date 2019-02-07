@@ -196,3 +196,21 @@ message GoodStateAtom3 {
     optional int32 state = 3
             [(android.os.statsd.state_field_option).option = EXCLUSIVE];
 }
+
+message WhitelistedAtom {
+  optional int32 field = 1;
+}
+
+message NonWhitelistedAtom {
+  optional int32 field = 1;
+}
+
+message ListedAtoms {
+  oneof event {
+    // Atoms can be whitelisted i.e. they can be triggered by any source
+    WhitelistedAtom whitelisted_atom = 1 [(android.os.statsd.allow_from_any_uid) = true];
+    // Atoms are not whitelisted by default, so they can only be triggered
+    // by whitelisted sources
+    NonWhitelistedAtom non_whitelisted_atom = 2;
+  }
+}

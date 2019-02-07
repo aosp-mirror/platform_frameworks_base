@@ -89,6 +89,8 @@ struct AtomDecl {
 
     int uidField = 0;
 
+    bool whitelisted = false;
+
     vector<int> binaryFields;
 
     AtomDecl();
