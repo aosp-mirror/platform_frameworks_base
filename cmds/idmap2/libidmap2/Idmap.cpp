@@ -117,6 +117,12 @@ const LoadedPackage* GetPackageAtIndex0(const LoadedArsc& loaded_arsc) {
   return loaded_arsc.GetPackageById(id);
 }
 
+Result<uint32_t> GetCrc(const ZipFile& zip) {
+  const Result<uint32_t> a = zip.Crc("resources.arsc");
+  const Result<uint32_t> b = zip.Crc("AndroidManifest.xml");
+  return a && b ? Result<uint32_t>(*a ^ *b) : kResultError;
+}
+
 }  // namespace
 
 std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& stream) {
@@ -153,7 +159,7 @@ bool IdmapHeader::IsUpToDate(std::ostream& out_error) const {
     return false;
   }
 
-  Result<uint32_t> target_crc = target_zip->Crc("resources.arsc");
+  Result<uint32_t> target_crc = GetCrc(*target_zip);
   if (!target_crc) {
     out_error << "error: failed to get target crc" << std::endl;
     return false;
@@ -173,7 +179,7 @@ bool IdmapHeader::IsUpToDate(std::ostream& out_error) const {
     return false;
   }
 
-  Result<uint32_t> overlay_crc = overlay_zip->Crc("resources.arsc");
+  Result<uint32_t> overlay_crc = GetCrc(*overlay_zip);
   if (!overlay_crc) {
     out_error << "error: failed to get overlay crc" << std::endl;
     return false;
@@ -356,14 +362,14 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
   header->magic_ = kIdmapMagic;
   header->version_ = kIdmapCurrentVersion;
 
-  Result<uint32_t> crc = target_zip->Crc("resources.arsc");
+  Result<uint32_t> crc = GetCrc(*target_zip);
   if (!crc) {
     out_error << "error: failed to get zip crc for target" << std::endl;
     return nullptr;
   }
   header->target_crc_ = *crc;
 
-  crc = overlay_zip->Crc("resources.arsc");
+  crc = GetCrc(*overlay_zip);
   if (!crc) {
     out_error << "error: failed to get zip crc for overlay" << std::endl;
     return nullptr;

@@ -52,8 +52,8 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
 
   ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000004: 00000001  version\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000008: ab7cf70d  target crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000000c: d470336b  overlay crc\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000008: dd53ca29  target crc\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000000c: a71ccd77  overlay crc\n"), std::string::npos);
   ASSERT_NE(stream.str().find("0000021c: 00000000  0x7f010000 -> 0x7f010000 integer/int1\n"),
             std::string::npos);
 }
