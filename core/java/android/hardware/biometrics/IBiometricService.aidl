@@ -54,7 +54,7 @@ interface IBiometricService {
 
     // TODO(b/123378871): Remove when moved.
     // CDCA needs to send results to BiometricService if it was invoked using BiometricPrompt's
-    // setEnableFallback method, since there's no way for us to intercept onActivityResult.
+    // setAllowDeviceCredential method, since there's no way for us to intercept onActivityResult.
     // CDCA is launched from BiometricService (startActivityAsUser) instead of *ForResult.
     void onConfirmDeviceCredentialSuccess();
     // TODO(b/123378871): Remove when moved.

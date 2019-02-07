@@ -17,6 +17,7 @@
 package android.hardware.biometrics;
 
 import android.annotation.UnsupportedAppUsage;
+import android.app.KeyguardManager;
 
 
 /**
@@ -124,6 +125,13 @@ public interface BiometricConstants {
      * @hide
      */
     int BIOMETRIC_ERROR_NEGATIVE_BUTTON = 13;
+
+    /**
+     * The device does not have pin, pattern, or password set up. See
+     * {@link BiometricPrompt.Builder#setAllowDeviceCredential(boolean)} and
+     * {@link KeyguardManager#isDeviceSecure()}
+     */
+    int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
 
     /**
      * @hide

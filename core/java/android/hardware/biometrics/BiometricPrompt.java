@@ -23,6 +23,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Binder;
@@ -80,7 +81,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
-    public static final String KEY_ENABLE_FALLBACK = "enable_fallback";
+    public static final String KEY_ALLOW_DEVICE_CREDENTIAL = "allow_device_credential";
 
     /**
      * Error/help message will show for this amount of time.
@@ -203,7 +204,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * "Cancel" button, but may be also used to show an alternative method for authentication,
          * such as screen that asks for a backup password.
          *
-         * Note that this should not be set if {@link #setEnableFallback(boolean)} is set to true.
+         * Note that this should not be set if {@link #setAllowDeviceCredential(boolean)
+         * is set to true.
          *
          * @param text
          * @return
@@ -250,7 +252,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
         /**
          * The user will first be prompted to authenticate with biometrics, but also given the
-         * option to authenticate with their device PIN, pattern, or password.
+         * option to authenticate with their device PIN, pattern, or password. Developers should
+         * first check {@link KeyguardManager#isDeviceSecure()} before enabling this. If the device
+         * is not secure, {@link BiometricPrompt#BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL} will be
+         * returned in {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}}
          *
          * Note that {@link #setNegativeButton(CharSequence, Executor,
          * DialogInterface.OnClickListener)} should not be set if this is set to true.
@@ -259,8 +264,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *               credentials (PIN, pattern, or password).
          * @return
          */
-        public Builder setEnableFallback(boolean enable) {
-            mBundle.putBoolean(KEY_ENABLE_FALLBACK, enable);
+        public Builder setAllowDeviceCredential(boolean enable) {
+            mBundle.putBoolean(KEY_ALLOW_DEVICE_CREDENTIAL, enable);
             return this;
         }
 
@@ -273,7 +278,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             final CharSequence title = mBundle.getCharSequence(KEY_TITLE);
             final CharSequence negative = mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
             final boolean useDefaultTitle = mBundle.getBoolean(KEY_USE_DEFAULT_TITLE);
-            final boolean enableFallback = mBundle.getBoolean(KEY_ENABLE_FALLBACK);
+            final boolean enableFallback = mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL);
 
             if (TextUtils.isEmpty(title) && !useDefaultTitle) {
                 throw new IllegalArgumentException("Title must be set and non-empty");
@@ -281,7 +286,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 throw new IllegalArgumentException("Negative text must be set and non-empty");
             } else if (!TextUtils.isEmpty(negative) && enableFallback) {
                 throw new IllegalArgumentException("Can't have both negative button behavior"
-                        + " and fallback enabled");
+                        + " and device credential enabled");
             }
             return new BiometricPrompt(mContext, mBundle, mPositiveButtonInfo, mNegativeButtonInfo);
         }
@@ -541,8 +546,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        if (mBundle.getBoolean(KEY_ENABLE_FALLBACK)) {
-            throw new IllegalArgumentException("Fallback not supported with crypto");
+        if (mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL)) {
+            throw new IllegalArgumentException("Device credential not supported with crypto");
         }
         authenticateInternal(crypto, cancel, executor, callback, mContext.getUserId());
     }
