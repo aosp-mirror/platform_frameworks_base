@@ -41,7 +41,6 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest WmTests:TaskPersisterTest
  */
-@FlakyTest(detail = "Promote to presubmit if stable")
 @Presubmit
 public class TaskPersisterTest {
     private static final String TEST_USER_NAME = "AM-Test-User";

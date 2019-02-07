@@ -39,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 @SmallTest
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 @Presubmit
 public class InsetsSourceProviderTest extends WindowTestsBase {
 

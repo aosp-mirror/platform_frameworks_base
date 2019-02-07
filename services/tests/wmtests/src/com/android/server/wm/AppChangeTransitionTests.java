@@ -42,7 +42,6 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest WmTests:AppChangeTransitionTests
  */
-@FlakyTest(detail = "Promote when shown to be stable.")
 @SmallTest
 public class AppChangeTransitionTests extends WindowTestsBase {
 

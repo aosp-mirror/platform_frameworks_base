@@ -39,7 +39,6 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:WindowTokenTests
  */
-@FlakyTest(bugId = 74078662)
 @SmallTest
 @Presubmit
 public class WindowTokenTests extends WindowTestsBase {

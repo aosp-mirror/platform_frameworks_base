@@ -179,7 +179,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(detail = "Promote once confirmed non-flaky")
     public void testDeferFinish() {
 
         // Start animation
