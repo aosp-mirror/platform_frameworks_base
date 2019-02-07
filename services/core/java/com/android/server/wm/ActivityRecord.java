@@ -109,6 +109,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.LAUNCH_TICK;
 import static com.android.server.wm.ActivityStack.LAUNCH_TICK_MSG;
 import static com.android.server.wm.ActivityStack.PAUSE_TIMEOUT_MSG;
+import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
@@ -2054,8 +2055,10 @@ final class ActivityRecord extends ConfigurationContainer {
      * @param activeActivity the activity that is active or just completed pause action. We won't
      *                       resume if this activity is active.
      */
-    private boolean shouldResumeActivity(ActivityRecord activeActivity) {
-        return shouldMakeActive(activeActivity) && isFocusable() && !isState(RESUMED);
+    @VisibleForTesting
+    boolean shouldResumeActivity(ActivityRecord activeActivity) {
+        return shouldMakeActive(activeActivity) && isFocusable() && !isState(RESUMED)
+                && getActivityStack().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE;
     }
 
     /**
