@@ -36,6 +36,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsLog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.utils.FlagNamespaceUtils;
 
@@ -51,20 +52,34 @@ import java.io.File;
  * @hide
  */
 public class RescueParty {
-    private static final String TAG = "RescueParty";
+    @VisibleForTesting
+    static final String PROP_ENABLE_RESCUE = "persist.sys.enable_rescue";
+    @VisibleForTesting
+    static final int TRIGGER_COUNT = 5;
+    @VisibleForTesting
+    static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
+    @VisibleForTesting
+    static final int LEVEL_NONE = 0;
+    @VisibleForTesting
+    static final int LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS = 1;
+    @VisibleForTesting
+    static final int LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES = 2;
+    @VisibleForTesting
+    static final int LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS = 3;
+    @VisibleForTesting
+    static final int LEVEL_FACTORY_RESET = 4;
+    @VisibleForTesting
+    static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
+    @VisibleForTesting
+    static final long BOOT_TRIGGER_WINDOW_MILLIS = 300 * DateUtils.SECOND_IN_MILLIS;
+    @VisibleForTesting
+    static final long PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
+    @VisibleForTesting
+    static final String TAG = "RescueParty";
 
-    private static final String PROP_ENABLE_RESCUE = "persist.sys.enable_rescue";
     private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
-    private static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
-    private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
     private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
     private static final String PROP_VIRTUAL_DEVICE = "ro.hardware.virtual_device";
-
-    private static final int LEVEL_NONE = 0;
-    private static final int LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS = 1;
-    private static final int LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES = 2;
-    private static final int LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS = 3;
-    private static final int LEVEL_FACTORY_RESET = 4;
 
     /** Threshold for boot loops */
     private static final Threshold sBoot = new BootThreshold();
@@ -139,6 +154,29 @@ public class RescueParty {
     }
 
     /**
+     * Called when {@code SettingsProvider} has been published, which is a good
+     * opportunity to reset any settings depending on our rescue level.
+     */
+    public static void onSettingsProviderPublished(Context context) {
+        executeRescueLevel(context);
+    }
+
+    @VisibleForTesting
+    static void resetAllThresholds() {
+        sBoot.reset();
+
+        for (int i = 0; i < sApps.size(); i++) {
+            Threshold appThreshold = sApps.get(sApps.keyAt(i));
+            appThreshold.reset();
+        }
+    }
+
+    @VisibleForTesting
+    static long getElapsedRealtime() {
+        return SystemClock.elapsedRealtime();
+    }
+
+    /**
      * Escalate to the next rescue level. After incrementing the level you'll
      * probably want to call {@link #executeRescueLevel(Context)}.
      */
@@ -151,14 +189,6 @@ public class RescueParty {
         EventLogTags.writeRescueLevel(level, triggerUid);
         logCriticalInfo(Log.WARN, "Incremented rescue level to "
                 + levelToString(level) + " triggered by UID " + triggerUid);
-    }
-
-    /**
-     * Called when {@code SettingsProvider} has been published, which is a good
-     * opportunity to reset any settings depending on our rescue level.
-     */
-    public static void onSettingsProviderPublished(Context context) {
-        executeRescueLevel(context);
     }
 
     private static void executeRescueLevel(Context context) {
@@ -255,7 +285,7 @@ public class RescueParty {
          * @return if this threshold has been triggered
          */
         public boolean incrementAndTest() {
-            final long now = SystemClock.elapsedRealtime();
+            final long now = getElapsedRealtime();
             final long window = now - getStart();
             if (window > triggerWindow) {
                 setCount(1);
@@ -278,10 +308,10 @@ public class RescueParty {
      */
     private static class BootThreshold extends Threshold {
         public BootThreshold() {
-            // We're interested in 5 events in any 300 second period; this
-            // window is super relaxed because booting can take a long time if
-            // forced to dexopt things.
-            super(android.os.Process.ROOT_UID, 5, 300 * DateUtils.SECOND_IN_MILLIS);
+            // We're interested in TRIGGER_COUNT events in any
+            // BOOT_TRIGGER_WINDOW_MILLIS second period; this window is super relaxed because
+            // booting can take a long time if forced to dexopt things.
+            super(android.os.Process.ROOT_UID, TRIGGER_COUNT, BOOT_TRIGGER_WINDOW_MILLIS);
         }
 
         @Override
@@ -314,9 +344,10 @@ public class RescueParty {
         private long start;
 
         public AppThreshold(int uid) {
-            // We're interested in 5 events in any 30 second period; apps crash
-            // pretty quickly so we can keep a tight leash on them.
-            super(uid, 5, 30 * DateUtils.SECOND_IN_MILLIS);
+            // We're interested in TRIGGER_COUNT events in any
+            // PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS second period; apps crash pretty quickly
+            // so we can keep a tight leash on them.
+            super(uid, TRIGGER_COUNT, PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS);
         }
 
         @Override public int getCount() { return count; }
