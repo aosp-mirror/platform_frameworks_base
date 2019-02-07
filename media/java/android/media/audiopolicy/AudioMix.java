@@ -353,11 +353,6 @@ public class AudioMix {
                 // no route flags set, use default as described in Builder.setRouteFlags(int)
                 mRouteFlags = ROUTE_FLAG_LOOP_BACK;
             }
-            // can't do loop back AND render at same time in this implementation
-            if (mRouteFlags == (ROUTE_FLAG_RENDER | ROUTE_FLAG_LOOP_BACK)) {
-                throw new IllegalArgumentException("Unsupported route behavior combination 0x" +
-                        Integer.toHexString(mRouteFlags));
-            }
             if (mFormat == null) {
                 // FIXME Can we eliminate this?  Will AudioMix work with an unspecified sample rate?
                 int rate = AudioSystem.getPrimaryOutputSamplingRate();
@@ -377,11 +372,11 @@ public class AudioMix {
                     throw new IllegalArgumentException("Unsupported device on non-playback mix");
                 }
             } else {
-                if ((mRouteFlags & ROUTE_FLAG_RENDER) == ROUTE_FLAG_RENDER) {
+                if ((mRouteFlags & ROUTE_FLAG_SUPPORTED) == ROUTE_FLAG_RENDER) {
                     throw new IllegalArgumentException(
                             "Can't have flag ROUTE_FLAG_RENDER without an audio device");
                 }
-                if ((mRouteFlags & ROUTE_FLAG_SUPPORTED) == ROUTE_FLAG_LOOP_BACK) {
+                if ((mRouteFlags & ROUTE_FLAG_LOOP_BACK) == ROUTE_FLAG_LOOP_BACK) {
                     if (mRule.getTargetMixType() == MIX_TYPE_PLAYERS) {
                         mDeviceSystemType = AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
                     } else if (mRule.getTargetMixType() == MIX_TYPE_RECORDERS) {
