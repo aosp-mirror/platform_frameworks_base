@@ -457,6 +457,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.DEBUG_VIEW_ATTRIBUTES,
                 GlobalSettingsProto.Debug.VIEW_ATTRIBUTES);
+        dumpSetting(s, p,
+                Settings.Global.DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE,
+                GlobalSettingsProto.Debug.VIEW_ATTRIBUTES_APPLICATION_PACKAGE);
         p.end(debugToken);
 
         final long defaultToken = p.start(GlobalSettingsProto.DEFAULT);

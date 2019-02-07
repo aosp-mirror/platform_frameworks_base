@@ -210,6 +210,7 @@ public class SettingsBackupTest {
                     Settings.Global.DATA_STALL_VALID_DNS_TIME_THRESHOLD,
                     Settings.Global.DEBUG_APP,
                     Settings.Global.DEBUG_VIEW_ATTRIBUTES,
+                    Settings.Global.DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE,
                     Settings.Global.DEFAULT_DNS_SERVER,
                     Settings.Global.DEFAULT_INSTALL_LOCATION,
                     Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA,

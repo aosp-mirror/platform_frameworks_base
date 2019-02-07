@@ -704,9 +704,29 @@ ApkAssetsCookie AssetManager2::ResolveReference(ApkAssetsCookie cookie, Res_valu
   return cookie;
 }
 
+const std::vector<uint32_t> AssetManager2::GetBagResIdStack(uint32_t resid) {
+  auto cached_iter = cached_bag_resid_stacks_.find(resid);
+  if (cached_iter != cached_bag_resid_stacks_.end()) {
+    return cached_iter->second;
+  } else {
+    auto found_resids = std::vector<uint32_t>();
+    GetBag(resid, found_resids);
+    // Cache style stacks if they are not already cached.
+    cached_bag_resid_stacks_[resid] = found_resids;
+    return found_resids;
+  }
+}
+
 const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   auto found_resids = std::vector<uint32_t>();
-  return GetBag(resid, found_resids);
+  auto bag = GetBag(resid, found_resids);
+
+  // Cache style stacks if they are not already cached.
+  auto cached_iter = cached_bag_resid_stacks_.find(resid);
+  if (cached_iter == cached_bag_resid_stacks_.end()) {
+    cached_bag_resid_stacks_[resid] = found_resids;
+  }
+  return bag;
 }
 
 const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& child_resids) {

@@ -9300,6 +9300,13 @@ public final class Settings {
         public static final String DEBUG_VIEW_ATTRIBUTES = "debug_view_attributes";
 
         /**
+         * Which application package is allowed to save View attribute data.
+         * @hide
+         */
+        public static final String DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE =
+                "debug_view_attributes_application_package";
+
+        /**
          * Whether assisted GPS should be enabled or not.
          * @hide
          */
@@ -14022,6 +14029,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(TRANSITION_ANIMATION_SCALE);
             INSTANT_APP_SETTINGS.add(ANIMATOR_DURATION_SCALE);
             INSTANT_APP_SETTINGS.add(DEBUG_VIEW_ATTRIBUTES);
+            INSTANT_APP_SETTINGS.add(DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE);
             INSTANT_APP_SETTINGS.add(WTF_IS_FATAL);
             INSTANT_APP_SETTINGS.add(SEND_ACTION_APP_ERROR);
             INSTANT_APP_SETTINGS.add(ZEN_MODE);
