@@ -40,7 +40,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -99,7 +99,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mEntry.setRow(mRow);
 
         mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),
-                mEntryManager, mock(StatusBarStateController.class), mBarService,
+                mEntryManager, mock(StatusBarStateControllerImpl.class), mBarService,
                 mExpansionStateLogger);
         mLogger.setUpWithContainer(mListContainer);
         verify(mEntryManager).addNotificationEntryListener(mEntryListenerCaptor.capture());
@@ -167,7 +167,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         TestableNotificationLogger(NotificationListener notificationListener,
                 UiOffloadThread uiOffloadThread,
                 NotificationEntryManager entryManager,
-                StatusBarStateController statusBarStateController,
+                StatusBarStateControllerImpl statusBarStateController,
                 IStatusBarService barService,
                 ExpansionStateLogger expansionStateLogger) {
             super(notificationListener, uiOffloadThread, entryManager, statusBarStateController,

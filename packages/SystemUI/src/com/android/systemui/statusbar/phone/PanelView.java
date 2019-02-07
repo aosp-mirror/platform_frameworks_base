@@ -44,9 +44,10 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
@@ -142,8 +143,8 @@ public abstract class PanelView extends FrameLayout {
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
     protected final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
-    protected final StatusBarStateController mStatusBarStateController =
-            Dependency.get(StatusBarStateController.class);
+    protected final SysuiStatusBarStateController mStatusBarStateController =
+            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();

@@ -44,8 +44,8 @@ import androidx.slice.core.SliceQuery;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.StatusBarStateController;
 
 import org.junit.Assert;
 import org.junit.Before;

@@ -26,7 +26,6 @@ import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.MathUtils;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +37,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -118,8 +118,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(StatusBarStateController.class)
-                .addCallback(this, StatusBarStateController.RANK_SHELF);
+        ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
+                .addCallback(this, SysuiStatusBarStateController.RANK_SHELF);
     }
 
     @Override
