@@ -33,22 +33,22 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The parameters to pass into {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParameters)} in
+ * The parameters to pass into {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParams)} in
  * order to select a subset of {@link RcsThread}s present in the message store.
  *
- * @hide TODO - make the Builder and builder() public. The rest should stay internal only.
+ * @hide - TODO: make public
  */
-public class RcsThreadQueryParameters implements Parcelable {
+public final class RcsThreadQueryParams implements Parcelable {
     /**
      * Bitmask flag to be used with {@link Builder#setThreadType(int)} to make
-     * {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParameters)} return
+     * {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParams)} return
      * {@link RcsGroupThread}s.
      */
     public static final int THREAD_TYPE_GROUP = 0x0001;
 
     /**
      * Bitmask flag to be used with {@link Builder#setThreadType(int)} to make
-     * {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParameters)} return
+     * {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParams)} return
      * {@link Rcs1To1Thread}s.
      */
     public static final int THREAD_TYPE_1_TO_1 = 0x0002;
@@ -86,7 +86,7 @@ public class RcsThreadQueryParameters implements Parcelable {
      */
     public static final String THREAD_QUERY_PARAMETERS_KEY = "thread_query_parameters";
 
-    RcsThreadQueryParameters(int threadType, Set<RcsParticipant> participants,
+    RcsThreadQueryParams(int threadType, Set<RcsParticipant> participants,
             int limit, int sortingProperty, boolean isAscending) {
         mThreadType = threadType;
         mRcsParticipantIds = convertParticipantSetToIdList(participants);
@@ -148,7 +148,7 @@ public class RcsThreadQueryParameters implements Parcelable {
     }
 
     /**
-     * A helper class to build the {@link RcsThreadQueryParameters}.
+     * A helper class to build the {@link RcsThreadQueryParams}.
      */
     public static class Builder {
         private int mThreadType;
@@ -158,8 +158,8 @@ public class RcsThreadQueryParameters implements Parcelable {
         private boolean mIsAscending;
 
         /**
-         * Constructs a {@link RcsThreadQueryParameters.Builder} to help build an
-         * {@link RcsThreadQueryParameters}
+         * Constructs a {@link RcsThreadQueryParams.Builder} to help build an
+         * {@link RcsThreadQueryParams}
          */
         public Builder() {
             mParticipants = new HashSet<>();
@@ -170,8 +170,8 @@ public class RcsThreadQueryParameters implements Parcelable {
          *
          * @param threadType Whether to limit the query result to group threads.
          * @return The same instance of the builder to chain parameters.
-         * @see RcsThreadQueryParameters#THREAD_TYPE_GROUP
-         * @see RcsThreadQueryParameters#THREAD_TYPE_1_TO_1
+         * @see RcsThreadQueryParams#THREAD_TYPE_GROUP
+         * @see RcsThreadQueryParams#THREAD_TYPE_1_TO_1
          */
         @CheckResult
         public Builder setThreadType(int threadType) {
@@ -253,13 +253,13 @@ public class RcsThreadQueryParameters implements Parcelable {
         }
 
         /**
-         * Builds the {@link RcsThreadQueryParameters} to use in
-         * {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParameters)}
+         * Builds the {@link RcsThreadQueryParams} to use in
+         * {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParams)}
          *
-         * @return An instance of {@link RcsThreadQueryParameters} to use with the thread query.
+         * @return An instance of {@link RcsThreadQueryParams} to use with the thread query.
          */
-        public RcsThreadQueryParameters build() {
-            return new RcsThreadQueryParameters(mThreadType, mParticipants, mLimit,
+        public RcsThreadQueryParams build() {
+            return new RcsThreadQueryParams(mThreadType, mParticipants, mLimit,
                     mSortingProperty, mIsAscending);
         }
     }
@@ -267,7 +267,7 @@ public class RcsThreadQueryParameters implements Parcelable {
     /**
      * Parcelable boilerplate below.
      */
-    protected RcsThreadQueryParameters(Parcel in) {
+    private RcsThreadQueryParams(Parcel in) {
         mThreadType = in.readInt();
         mRcsParticipantIds = new ArrayList<>();
         in.readList(mRcsParticipantIds, Integer.class.getClassLoader());
@@ -276,16 +276,16 @@ public class RcsThreadQueryParameters implements Parcelable {
         mIsAscending = in.readByte() == 1;
     }
 
-    public static final Creator<RcsThreadQueryParameters> CREATOR =
-            new Creator<RcsThreadQueryParameters>() {
+    public static final Creator<RcsThreadQueryParams> CREATOR =
+            new Creator<RcsThreadQueryParams>() {
                 @Override
-                public RcsThreadQueryParameters createFromParcel(Parcel in) {
-                    return new RcsThreadQueryParameters(in);
+                public RcsThreadQueryParams createFromParcel(Parcel in) {
+                    return new RcsThreadQueryParams(in);
                 }
 
                 @Override
-                public RcsThreadQueryParameters[] newArray(int size) {
-                    return new RcsThreadQueryParameters[size];
+                public RcsThreadQueryParams[] newArray(int size) {
+                    return new RcsThreadQueryParams[size];
                 }
             };
 

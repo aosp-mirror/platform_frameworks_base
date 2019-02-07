@@ -24,9 +24,9 @@ import android.telephony.ims.RcsMessage.RcsMessageStatus;
 /**
  * An immutable summary of the latest {@link RcsMessage} on an {@link RcsThread}
  *
- * @hide TODO: make public
+ * @hide - TODO: make public
  */
-public class RcsMessageSnippet implements Parcelable {
+public final class RcsMessageSnippet implements Parcelable {
     private final String mText;
     private final @RcsMessageStatus int mStatus;
     private final long mTimestamp;
@@ -65,7 +65,7 @@ public class RcsMessageSnippet implements Parcelable {
         return mTimestamp;
     }
 
-    protected RcsMessageSnippet(Parcel in) {
+    private RcsMessageSnippet(Parcel in) {
         mText = in.readString();
         mStatus = in.readInt();
         mTimestamp = in.readLong();

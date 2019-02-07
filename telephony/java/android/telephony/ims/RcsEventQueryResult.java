@@ -22,13 +22,13 @@ import android.os.Parcelable;
 import java.util.List;
 
 /**
- * The result of a {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)}
+ * The result of a {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)}
  * call. This class allows getting the token for querying the next batch of events in order to
  * prevent handling large amounts of data at once.
  *
- * @hide
+ * @hide - TODO: make public
  */
-public class RcsEventQueryResult implements Parcelable {
+public final class RcsEventQueryResult implements Parcelable {
     private RcsQueryContinuationToken mContinuationToken;
     private List<RcsEvent> mEvents;
 
@@ -63,7 +63,8 @@ public class RcsEventQueryResult implements Parcelable {
         return mEvents;
     }
 
-    protected RcsEventQueryResult(Parcel in) {
+    private RcsEventQueryResult(Parcel in) {
+        mContinuationToken = in.readParcelable(RcsQueryContinuationToken.class.getClassLoader());
     }
 
     public static final Creator<RcsEventQueryResult> CREATOR = new Creator<RcsEventQueryResult>() {
