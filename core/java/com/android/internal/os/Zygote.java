@@ -93,6 +93,11 @@ public final class Zygote {
      */
     public static final int PROFILE_SYSTEM_SERVER = 1 << 14;
 
+    /*
+     * Enable using the ART app image startup cache
+     */
+    public static final int USE_APP_IMAGE_STARTUP_CACHE = 1 << 16;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
