@@ -5120,7 +5120,7 @@ public class AudioService extends IAudioService.Stub
                 if (mUserSwitchedReceived) {
                     // attempt to stop music playback for background user except on first user
                     // switch (i.e. first boot)
-                    mDeviceBroker.broadcastBecomingNoisy();
+                    mDeviceBroker.postBroadcastBecomingNoisy();
                 }
                 mUserSwitchedReceived = true;
                 // the current audio focus owner is no longer valid

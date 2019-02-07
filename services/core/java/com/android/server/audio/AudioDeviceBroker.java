@@ -381,11 +381,11 @@ import java.util.ArrayList;
 
     //---------------------------------------------------------------------
     // Message handling on behalf of helper classes
-    /*package*/ void broadcastScoConnectionState(int state) {
+    /*package*/ void postBroadcastScoConnectionState(int state) {
         sendIMsgNoDelay(MSG_I_BROADCAST_BT_CONNECTION_STATE, SENDMSG_QUEUE, state);
     }
 
-    /*package*/ void broadcastBecomingNoisy() {
+    /*package*/ void postBroadcastBecomingNoisy() {
         sendMsgNoDelay(MSG_BROADCAST_AUDIO_BECOMING_NOISY, SENDMSG_REPLACE);
     }
 
@@ -413,6 +413,22 @@ import java.util.ArrayList;
                 state,
                 device,
                 delay);
+    }
+
+    /*package*/ void postDisconnectA2dp() {
+        sendMsgNoDelay(MSG_DISCONNECT_A2DP, SENDMSG_QUEUE);
+    }
+
+    /*package*/ void postDisconnectA2dpSink() {
+        sendMsgNoDelay(MSG_DISCONNECT_A2DP_SINK, SENDMSG_QUEUE);
+    }
+
+    /*package*/ void postDisconnectHearingAid() {
+        sendMsgNoDelay(MSG_DISCONNECT_HEARING_AID, SENDMSG_QUEUE);
+    }
+
+    /*package*/ void postDisconnectHeadset() {
+        sendMsgNoDelay(MSG_DISCONNECT_HEADSET, SENDMSG_QUEUE);
     }
 
     //---------------------------------------------------------------------
@@ -444,23 +460,6 @@ import java.util.ArrayList;
         }
     }
 
-    /*package*/ void handleDisconnectA2dp() {
-        synchronized (mDeviceStateLock) {
-            mDeviceInventory.disconnectA2dp();
-        }
-    }
-    /*package*/ void handleDisconnectA2dpSink() {
-        synchronized (mDeviceStateLock) {
-            mDeviceInventory.disconnectA2dpSink();
-        }
-    }
-
-    /*package*/ void handleDisconnectHearingAid() {
-        synchronized (mDeviceStateLock) {
-            mDeviceInventory.disconnectHearingAid();
-        }
-    }
-
     /*package*/ void handleSetA2dpSinkConnectionState(@BluetoothProfile.BtProfileState int state,
                 @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
         final int intState = (state == BluetoothA2dp.STATE_CONNECTED)
@@ -482,7 +481,7 @@ import java.util.ArrayList;
                 state, btDeviceInfo, delay);
     }
 
-    /*package*/ void handleSetA2dpSourceConnectionState(@BluetoothProfile.BtProfileState int state,
+    /*package*/ void postSetA2dpSourceConnectionState(@BluetoothProfile.BtProfileState int state,
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
         final int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
         sendILMsgNoDelay(MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE, SENDMSG_QUEUE, state,
@@ -710,6 +709,26 @@ import java.util.ArrayList;
                                 (BtHelper.BluetoothA2dpDeviceInfo) msg.obj);
                     }
                     break;
+                case MSG_DISCONNECT_A2DP:
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.disconnectA2dp();
+                    }
+                    break;
+                case MSG_DISCONNECT_A2DP_SINK:
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.disconnectA2dpSink();
+                    }
+                    break;
+                case MSG_DISCONNECT_HEARING_AID:
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.disconnectHearingAid();
+                    }
+                    break;
+                case MSG_DISCONNECT_HEADSET:
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.disconnectHeadset();
+                    }
+                    break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -745,6 +764,10 @@ import java.util.ArrayList;
     private static final int MSG_I_DISCONNECT_BT_SCO = 16;
     private static final int MSG_TOGGLE_HDMI = 17;
     private static final int MSG_L_A2DP_ACTIVE_DEVICE_CHANGE = 18;
+    private static final int MSG_DISCONNECT_A2DP = 19;
+    private static final int MSG_DISCONNECT_A2DP_SINK = 20;
+    private static final int MSG_DISCONNECT_HEARING_AID = 21;
+    private static final int MSG_DISCONNECT_HEADSET = 22;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
