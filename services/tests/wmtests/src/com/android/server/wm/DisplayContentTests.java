@@ -25,6 +25,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -57,12 +59,15 @@ import android.annotation.SuppressLint;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.metrics.LogMaker;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
+import android.util.MutableBoolean;
 import android.view.DisplayCutout;
 import android.view.Gravity;
+import android.view.ISystemGestureExclusionListener;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewRootImpl;
@@ -670,6 +675,60 @@ public class DisplayContentTests extends WindowTestsBase {
             dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "statusBar");
             assertEquals(dc.getWindowingLayer(), dc.computeImeParent());
         }
+    }
+
+    @Test
+    public void testUpdateSystemGestureExclusion() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
+        win.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win.setSystemGestureExclusion(Collections.singletonList(new Rect(10, 20, 30, 40)));
+
+        dc.setLayoutNeeded();
+        dc.performLayout(true /* initial */, false /* updateImeWindows */);
+
+        win.setHasSurface(true);
+        dc.updateSystemGestureExclusion();
+
+        final MutableBoolean invoked = new MutableBoolean(false);
+        final ISystemGestureExclusionListener.Stub verifier =
+                new ISystemGestureExclusionListener.Stub() {
+            @Override
+            public void onSystemGestureExclusionChanged(int displayId, Region actual) {
+                Region expected = Region.obtain();
+                expected.set(10, 20, 30, 40);
+                assertEquals(expected, actual);
+                invoked.value = true;
+            }
+        };
+        try {
+            dc.registerSystemGestureExclusionListener(verifier);
+        } finally {
+            dc.unregisterSystemGestureExclusionListener(verifier);
+        }
+        assertTrue("SystemGestureExclusionListener was not invoked", invoked.value);
+    }
+
+    @Test
+    public void testCalculateSystemGestureExclusion() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
+        win.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win.setSystemGestureExclusion(Collections.singletonList(new Rect(10, 20, 30, 40)));
+
+        final WindowState win2 = createWindow(null, TYPE_APPLICATION, dc, "win2");
+        win2.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win2.setSystemGestureExclusion(Collections.singletonList(new Rect(20, 30, 40, 50)));
+
+        dc.setLayoutNeeded();
+        dc.performLayout(true /* initial */, false /* updateImeWindows */);
+
+        win.setHasSurface(true);
+        win2.setHasSurface(true);
+
+        final Region expected = Region.obtain();
+        expected.set(20, 30, 40, 50);
+        assertEquals(expected, dc.calculateSystemGestureExclusion());
     }
 
     @Test

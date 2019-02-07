@@ -40,6 +40,7 @@ import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
+import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
@@ -278,6 +279,18 @@ interface IWindowManager
      * Remove a visibility watcher that was added using registerWallpaperVisibilityListener.
      */
     void unregisterWallpaperVisibilityListener(IWallpaperVisibilityListener listener,
+        int displayId);
+
+    /**
+     * Registers a system gesture exclusion listener for a given display.
+     */
+    void registerSystemGestureExclusionListener(ISystemGestureExclusionListener listener,
+        int displayId);
+
+    /**
+     * Unregisters a system gesture exclusion listener for a given display.
+     */
+    void unregisterSystemGestureExclusionListener(ISystemGestureExclusionListener listener,
         int displayId);
 
     /**

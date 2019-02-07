@@ -383,6 +383,7 @@ java_defaults {
         "core/java/android/view/IRecentsAnimationRunner.aidl",
         "core/java/android/view/IRemoteAnimationFinishedCallback.aidl",
         "core/java/android/view/IRotationWatcher.aidl",
+        "core/java/android/view/ISystemGestureExclusionListener.aidl",
         "core/java/android/view/IWallpaperVisibilityListener.aidl",
         "core/java/android/view/IWindow.aidl",
         "core/java/android/view/IWindowFocusObserver.aidl",

@@ -202,6 +202,7 @@ import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
+import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -274,6 +275,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -3784,6 +3786,42 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             mWallpaperVisibilityListeners
                     .unregisterWallpaperVisibilityListener(listener, displayId);
+        }
+    }
+
+    @Override
+    public void registerSystemGestureExclusionListener(ISystemGestureExclusionListener listener,
+            int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to register visibility event "
+                        + "for invalid display: " + displayId);
+            }
+            displayContent.registerSystemGestureExclusionListener(listener);
+        }
+    }
+
+    @Override
+    public void unregisterSystemGestureExclusionListener(ISystemGestureExclusionListener listener,
+            int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to register visibility event "
+                        + "for invalid display: " + displayId);
+            }
+            displayContent.unregisterSystemGestureExclusionListener(listener);
+        }
+    }
+
+    void reportSystemGestureExclusionChanged(Session session, IWindow window,
+            List<Rect> exclusionRects) {
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, window, true);
+            if (win.setSystemGestureExclusion(exclusionRects)) {
+                win.getDisplayContent().updateSystemGestureExclusion();
+            }
         }
     }
 

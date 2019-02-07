@@ -57,6 +57,7 @@ import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -309,6 +310,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         long ident = Binder.clearCallingIdentity();
         try {
             return mService.mTaskPositioningController.startMovingTask(window, startX, startY);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void reportSystemGestureExclusionChanged(IWindow window, List<Rect> exclusionRects) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mService.reportSystemGestureExclusionChanged(this, window, exclusionRects);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

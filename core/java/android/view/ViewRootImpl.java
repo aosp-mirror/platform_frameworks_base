@@ -3990,7 +3990,11 @@ public final class ViewRootImpl implements ViewParent,
     void systemGestureExclusionChanged() {
         final List<Rect> rectsForWindowManager = mGestureExclusionTracker.computeChangedRects();
         if (rectsForWindowManager != null) {
-            // TODO Send to WM
+            try {
+                mWindowSession.reportSystemGestureExclusionChanged(mWindow, rectsForWindowManager);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
             mAttachInfo.mTreeObserver
                     .dispatchOnSystemGestureExclusionRectsChanged(rectsForWindowManager);
         }
