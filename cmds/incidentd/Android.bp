@@ -94,10 +94,8 @@ cc_test {
 
     data: ["testdata/**/*"],
 
-    static_libs: [
-        "libgmock",
-        "libplatformprotos",
-    ],
+    static_libs: ["libgmock"],
+
     shared_libs: [
         "libbase",
         "libbinder",

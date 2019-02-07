@@ -161,9 +161,15 @@ IncidentReportArgs::addSection(int section)
 }
 
 void
-IncidentReportArgs::addHeader(const vector<uint8_t>& headerProto)
+IncidentReportArgs::addHeader(const IncidentHeaderProto& headerProto)
 {
-    mHeaders.push_back(headerProto);
+    vector<uint8_t> header;
+    auto serialized = headerProto.SerializeAsString();
+    if (serialized.empty()) return;
+    for (auto it = serialized.begin(); it != serialized.end(); it++) {
+        header.push_back((uint8_t)*it);
+    }
+    mHeaders.push_back(header);
 }
 
 bool
