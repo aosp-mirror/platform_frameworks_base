@@ -2126,6 +2126,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Setting a location object in a request will include the GPS coordinates of the location
      * into any JPEG images captured based on the request. These coordinates can then be
      * viewed by anyone who receives the JPEG image.</p>
+     * <p>This tag is also used for HEIC image capture.</p>
      * <p>This key is available on all devices.</p>
      */
     @PublicKey
@@ -2136,6 +2137,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>GPS coordinates to include in output JPEG
      * EXIF.</p>
+     * <p>This tag is also used for HEIC image capture.</p>
      * <p><b>Range of valid values:</b><br>
      * (-180 - 180], [-90,90], [-inf, inf]</p>
      * <p>This key is available on all devices.</p>
@@ -2147,6 +2149,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>32 characters describing GPS algorithm to
      * include in EXIF.</p>
+     * <p>This tag is also used for HEIC image capture.</p>
      * <p>This key is available on all devices.</p>
      * @hide
      */
@@ -2156,6 +2159,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Time GPS fix was made to include in
      * EXIF.</p>
+     * <p>This tag is also used for HEIC image capture.</p>
      * <p><b>Units</b>: UTC in seconds since January 1, 1970</p>
      * <p>This key is available on all devices.</p>
      * @hide
@@ -2195,6 +2199,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * </code></pre>
      * <p>For EXTERNAL cameras the sensor orientation will always be set to 0 and the facing will
      * also be set to EXTERNAL. The above code is not relevant in such case.</p>
+     * <p>This tag is also used to describe the orientation of the HEIC image capture, in which
+     * case the rotation is reflected by
+     * {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}, and not by
+     * rotating the image data itself.</p>
      * <p><b>Units</b>: Degrees in multiples of 90</p>
      * <p><b>Range of valid values:</b><br>
      * 0, 90, 180, 270</p>
@@ -2209,7 +2217,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Compression quality of the final JPEG
      * image.</p>
-     * <p>85-95 is typical usage range.</p>
+     * <p>85-95 is typical usage range. This tag is also used to describe the quality
+     * of the HEIC image capture.</p>
      * <p><b>Range of valid values:</b><br>
      * 1-100; larger is higher quality</p>
      * <p>This key is available on all devices.</p>
@@ -2221,6 +2230,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Compression quality of JPEG
      * thumbnail.</p>
+     * <p>This tag is also used to describe the quality of the HEIC image capture.</p>
      * <p><b>Range of valid values:</b><br>
      * 1-100; larger is higher quality</p>
      * <p>This key is available on all devices.</p>
@@ -2253,6 +2263,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   orientation is requested. LEGACY device will always report unrotated thumbnail
      *   size.</li>
      * </ul>
+     * <p>The tag is also used as thumbnail size for HEIC image format capture, in which case the
+     * the thumbnail rotation is reflected by
+     * {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}, and not by
+     * rotating the thumbnail data itself.</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#JPEG_AVAILABLE_THUMBNAIL_SIZES android.jpeg.availableThumbnailSizes}</p>
      * <p>This key is available on all devices.</p>

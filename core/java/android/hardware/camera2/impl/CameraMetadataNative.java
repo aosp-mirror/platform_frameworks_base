@@ -1133,6 +1133,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*dynamicDepthConfigurations*/ null,
                             /*dynamicDepthMinFrameDurations*/ null,
                             /*dynamicDepthStallDurations*/ null,
+                            /*heicconfiguration*/ null,
+                            /*heicminduration*/ null,
+                            /*heicstallduration*/ null,
                             /*highspeedvideoconfigurations*/ null,
                             /*inputoutputformatsmap*/ null, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1144,6 +1147,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*dynamicDepthConfigurations*/ null,
                             /*dynamicDepthMinFrameDurations*/ null,
                             /*dynamicDepthStallDurations*/ null,
+                            /*heicconfiguration*/ null,
+                            /*heicminduration*/ null,
+                            /*heicstallduration*/ null,
                             highSpeedVideoConfigurations,
                             /*inputoutputformatsmap*/ null, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1155,6 +1161,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*dynamicDepthConfigurations*/ null,
                             /*dynamicDepthMinFrameDurations*/ null,
                             /*dynamicDepthStallDurations*/ null,
+                            /*heicconfiguration*/ null,
+                            /*heicminduration*/ null,
+                            /*heicstallduration*/ null,
                             /*highSpeedVideoConfigurations*/ null,
                             inputOutputFormatsMap, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1166,6 +1175,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*dynamicDepthConfigurations*/ null,
                             /*dynamicDepthMinFrameDurations*/ null,
                             /*dynamicDepthStallDurations*/ null,
+                            /*heicconfiguration*/ null,
+                            /*heicminduration*/ null,
+                            /*heicstallduration*/ null,
                             /*highSpeedVideoConfigurations*/ null,
                             /*inputOutputFormatsMap*/ null, listHighResolution, supportsPrivate[i]);
             }
@@ -1230,6 +1242,12 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.DEPTH_AVAILABLE_DYNAMIC_DEPTH_MIN_FRAME_DURATIONS);
         StreamConfigurationDuration[] dynamicDepthStallDurations = getBase(
                 CameraCharacteristics.DEPTH_AVAILABLE_DYNAMIC_DEPTH_STALL_DURATIONS);
+        StreamConfiguration[] heicConfigurations = getBase(
+                CameraCharacteristics.HEIC_AVAILABLE_HEIC_STREAM_CONFIGURATIONS);
+        StreamConfigurationDuration[] heicMinFrameDurations = getBase(
+                CameraCharacteristics.HEIC_AVAILABLE_HEIC_MIN_FRAME_DURATIONS);
+        StreamConfigurationDuration[] heicStallDurations = getBase(
+                CameraCharacteristics.HEIC_AVAILABLE_HEIC_STALL_DURATIONS);
         HighSpeedVideoConfiguration[] highSpeedVideoConfigurations = getBase(
                 CameraCharacteristics.CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
         ReprocessFormatsMap inputOutputFormatsMap = getBase(
@@ -1239,7 +1257,9 @@ public class CameraMetadataNative implements Parcelable {
                 configurations, minFrameDurations, stallDurations,
                 depthConfigurations, depthMinFrameDurations, depthStallDurations,
                 dynamicDepthConfigurations, dynamicDepthMinFrameDurations,
-                dynamicDepthStallDurations, highSpeedVideoConfigurations, inputOutputFormatsMap,
+                dynamicDepthStallDurations, heicConfigurations,
+                heicMinFrameDurations, heicStallDurations,
+                highSpeedVideoConfigurations, inputOutputFormatsMap,
                 listHighResolution);
     }
 
