@@ -767,6 +767,7 @@ package android.location {
     method public void setCodeType(int);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
+    method public void setOtherCodeTypeName(@NonNull String);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
