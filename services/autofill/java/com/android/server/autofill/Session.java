@@ -2595,8 +2595,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int mode;
         if ((supportedModes & FLAG_SMART_SUGGESTION_SYSTEM) != 0) {
             mode = FLAG_SMART_SUGGESTION_SYSTEM;
-        } else if ((supportedModes & AutofillManager.FLAG_SMART_SUGGESTION_LEGACY) != 0) {
-            mode = AutofillManager.FLAG_SMART_SUGGESTION_LEGACY;
         } else {
             Slog.w(TAG, "Unsupported Smart Suggestion mode: " + supportedModes);
             return null;
