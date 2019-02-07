@@ -5138,7 +5138,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @param incrementalDeltaY Change in deltaY from the previous event.
      * @return true if we're already at the beginning/end of the list and have nothing to do.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124051739)
     boolean trackMotionScroll(int deltaY, int incrementalDeltaY) {
         final int childCount = getChildCount();
         if (childCount == 0) {
