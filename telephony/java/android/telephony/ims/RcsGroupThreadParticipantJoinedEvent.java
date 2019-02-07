@@ -17,15 +17,17 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * An event that indicates an RCS participant has joined an {@link RcsThread}. Please see US6-3 -
  * GSMA RCC.71 (RCS Universal Profile Service Definition Document)
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
-public class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEvent {
-    private int mJoinedParticipantId;
+public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEvent implements
+        Parcelable {
+    private final int mJoinedParticipantId;
 
     /**
      * Creates a new {@link RcsGroupThreadParticipantJoinedEvent}. This event is not persisted into
@@ -89,7 +91,7 @@ public class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEvent {
                 }
             };
 
-    protected RcsGroupThreadParticipantJoinedEvent(Parcel in) {
+    private RcsGroupThreadParticipantJoinedEvent(Parcel in) {
         super(in);
         mJoinedParticipantId = in.readInt();
     }

@@ -19,39 +19,39 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
-import android.telephony.ims.RcsParticipantQueryParameters;
+import android.telephony.ims.RcsParticipantQueryParams;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class RcsParticipantQueryParametersTest {
+public class RcsParticipantQueryParamsTest {
 
     @Test
     public void testCanUnparcel() {
-        RcsParticipantQueryParameters rcsParticipantQueryParameters =
-                new RcsParticipantQueryParameters.Builder()
+        RcsParticipantQueryParams rcsParticipantQueryParams =
+                new RcsParticipantQueryParams.Builder()
                         .setAliasLike("%alias_")
                         .setCanonicalAddressLike("_canonical%")
-                        .setSortProperty(RcsParticipantQueryParameters.SORT_BY_CANONICAL_ADDRESS)
+                        .setSortProperty(RcsParticipantQueryParams.SORT_BY_CANONICAL_ADDRESS)
                         .setSortDirection(true)
                         .setResultLimit(432)
                         .build();
 
 
         Parcel parcel = Parcel.obtain();
-        rcsParticipantQueryParameters.writeToParcel(parcel,
-                rcsParticipantQueryParameters.describeContents());
+        rcsParticipantQueryParams.writeToParcel(parcel,
+                rcsParticipantQueryParams.describeContents());
 
         parcel.setDataPosition(0);
-        rcsParticipantQueryParameters = RcsParticipantQueryParameters.CREATOR.createFromParcel(
+        rcsParticipantQueryParams = RcsParticipantQueryParams.CREATOR.createFromParcel(
                 parcel);
 
-        assertThat(rcsParticipantQueryParameters.getAliasLike()).isEqualTo("%alias_");
-        assertThat(rcsParticipantQueryParameters.getCanonicalAddressLike()).contains("_canonical%");
-        assertThat(rcsParticipantQueryParameters.getLimit()).isEqualTo(432);
-        assertThat(rcsParticipantQueryParameters.getSortingProperty()).isEqualTo(
-                RcsParticipantQueryParameters.SORT_BY_CANONICAL_ADDRESS);
-        assertThat(rcsParticipantQueryParameters.getSortDirection()).isTrue();
+        assertThat(rcsParticipantQueryParams.getAliasLike()).isEqualTo("%alias_");
+        assertThat(rcsParticipantQueryParams.getCanonicalAddressLike()).contains("_canonical%");
+        assertThat(rcsParticipantQueryParams.getLimit()).isEqualTo(432);
+        assertThat(rcsParticipantQueryParams.getSortingProperty()).isEqualTo(
+                RcsParticipantQueryParams.SORT_BY_CANONICAL_ADDRESS);
+        assertThat(rcsParticipantQueryParams.getSortDirection()).isTrue();
     }
 }
