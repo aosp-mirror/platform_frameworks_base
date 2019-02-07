@@ -66,6 +66,25 @@ public final class ContentCaptureManager {
      */
     private static final int SYNC_CALLS_TIMEOUT_MS = 5000;
 
+    /**
+     * DeviceConfig property used by {@code com.android.server.SystemServer} on start to decide
+     * whether the Content Capture service should be created or not
+     *
+     * <p>By default it should *NOT* be set (or set to {@code "default"}, so the decision is based
+     * on whether the OEM provides an implementation for the service), but it can be overridden to:
+     *
+     * <ul>
+     *   <li>Provide a "kill switch" so OEMs can disable it remotely in case of emergency (when
+     *   it's set to {@code "false"}).
+     *   <li>Enable the CTS tests to be run on AOSP builds (when it's set to {@code "true"}).
+     * </ul>
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED =
+            "service_explicitly_enabled";
+
     private final Object mLock = new Object();
 
     @NonNull

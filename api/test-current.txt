@@ -1787,11 +1787,7 @@ package android.provider {
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getProperty(String, String);
     method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static boolean setProperty(String, String, String, boolean);
-  }
-
-  public static interface DeviceConfig.ContentCapture {
-    field public static final String NAMESPACE = "content_capture";
-    field public static final String PROPERTY_CONTENTCAPTURE_ENABLED = "enable_contentcapture";
+    field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
   }
 
   public static interface DeviceConfig.Privacy {
@@ -2723,6 +2719,7 @@ package android.view.contentcapture {
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
     method public void setContentCaptureFeatureEnabled(boolean);
+    field public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED = "service_explicitly_enabled";
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {

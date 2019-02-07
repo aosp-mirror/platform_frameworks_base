@@ -93,7 +93,7 @@ public final class ContentCaptureManagerService extends
 
     /**
      * Global kill-switch based on value defined by
-     * {@link android.provider.DeviceConfig.ContentCapture#PROPERTY_CONTENTCAPTURE_ENABLED}.
+     * {@link ContentCaptureManager#DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED}.
      */
     @GuardedBy("mLock")
     @Nullable
@@ -103,9 +103,16 @@ public final class ContentCaptureManagerService extends
         super(context, new FrameworkResourcesServiceNameResolver(context,
                 com.android.internal.R.string.config_defaultContentCaptureService),
                 UserManager.DISALLOW_CONTENT_CAPTURE);
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.ContentCapture.NAMESPACE,
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ActivityThread.currentApplication().getMainExecutor(),
-                (namespace, name, value) -> setDisabledByDeviceConfig(value));
+                (namespace, key, value) -> {
+                    if (!ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED
+                            .equals(key)) {
+                        Slog.i(mTag, "Ignoring change on " + key);
+                        return;
+                    }
+                    setDisabledByDeviceConfig(value);
+                });
         setDisabledByDeviceConfig();
 
         // Sets which services are disabled
@@ -207,8 +214,8 @@ public final class ContentCaptureManagerService extends
     }
 
     private void setDisabledByDeviceConfig() {
-        final String value = DeviceConfig.getProperty(DeviceConfig.ContentCapture.NAMESPACE,
-                DeviceConfig.ContentCapture.PROPERTY_CONTENTCAPTURE_ENABLED);
+        final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED);
         setDisabledByDeviceConfig(value);
     }
 
@@ -219,11 +226,10 @@ public final class ContentCaptureManagerService extends
 
         final boolean newDisabledValue;
 
-        if (value != null && (value.equals("default") || value.equals("always"))) {
-            newDisabledValue = false;
-            if (debug) Slog.d(mTag, "setDisabledByDeviceConfig(): set to false on '" + value + "'");
-        } else {
+        if (value != null && value.equalsIgnoreCase("false")) {
             newDisabledValue = true;
+        } else {
+            newDisabledValue = false;
         }
 
         synchronized (mLock) {
