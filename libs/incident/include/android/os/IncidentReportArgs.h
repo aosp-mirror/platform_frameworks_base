@@ -24,8 +24,6 @@
 #include <set>
 #include <vector>
 
-#include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
-
 namespace android {
 namespace os {
 
@@ -49,7 +47,7 @@ public:
     void setAll(bool all);
     void setDest(int dest);
     void addSection(int section);
-    void addHeader(const IncidentHeaderProto& headerProto);
+    void addHeader(const vector<uint8_t>& headerProto);
 
     inline bool all() const { return mAll; }
     bool containsSection(int section) const;
