@@ -1813,7 +1813,6 @@ package android.provider {
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
-    field public static final String AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS = "autofill_smart_suggestion_emulation_flags";
     field public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
     field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
     field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
@@ -2694,6 +2693,7 @@ package android.view.autofill {
 
   public final class AutofillManager {
     method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    field public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES = "smart_suggestion_supported_modes";
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
   }

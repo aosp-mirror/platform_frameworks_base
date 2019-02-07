@@ -17,7 +17,6 @@
 package android.view.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
-import static android.util.DebugUtils.flagsToString;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 
@@ -352,6 +351,15 @@ public final class AutofillManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SmartSuggestionMode {}
+
+    /**
+     * Used to emulate Smart Suggestion for Augmented Autofill during development
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES =
+            "smart_suggestion_supported_modes";
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -2347,7 +2355,7 @@ public final class AutofillManager {
 
     /** @hide */
     public static String getSmartSuggestionModeToString(@SmartSuggestionMode int flags) {
-        return flagsToString(AutofillManager.class, "FLAG_SMART_SUGGESTION_", flags);
+        return (flags == FLAG_SMART_SUGGESTION_SYSTEM) ? "1-SYSTEM" : flags + "-UNSUPPORTED";
     }
 
     @GuardedBy("mLock")
