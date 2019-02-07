@@ -61,6 +61,7 @@ import android.net.util.SharedLog;
 import android.net.util.Stopwatch;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -674,11 +675,11 @@ public class NetworkMonitor extends StateMachine {
         public boolean processMessage(Message message) {
             switch (message.what) {
                 case CMD_LAUNCH_CAPTIVE_PORTAL_APP:
-                    final Intent intent = new Intent(
-                            ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
+                    final Bundle appExtras = new Bundle();
                     // OneAddressPerFamilyNetwork is not parcelable across processes.
-                    intent.putExtra(ConnectivityManager.EXTRA_NETWORK, new Network(mNetwork));
-                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL,
+                    appExtras.putParcelable(
+                            ConnectivityManager.EXTRA_NETWORK, new Network(mNetwork));
+                    appExtras.putParcelable(ConnectivityManager.EXTRA_CAPTIVE_PORTAL,
                             new CaptivePortal(new ICaptivePortal.Stub() {
                                 @Override
                                 public void appResponse(int response) {
@@ -700,16 +701,14 @@ public class NetworkMonitor extends StateMachine {
                                 }
                             }));
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
-                    intent.putExtra(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
+                    appExtras.putString(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
                     if (probeRes.probeSpec != null) {
                         final String encodedSpec = probeRes.probeSpec.getEncodedSpec();
-                        intent.putExtra(EXTRA_CAPTIVE_PORTAL_PROBE_SPEC, encodedSpec);
+                        appExtras.putString(EXTRA_CAPTIVE_PORTAL_PROBE_SPEC, encodedSpec);
                     }
-                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT,
+                    appExtras.putString(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT,
                             mCaptivePortalUserAgent);
-                    intent.setFlags(
-                            Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    mCm.startCaptivePortalApp(appExtras);
                     return HANDLED;
                 default:
                     return NOT_HANDLED;

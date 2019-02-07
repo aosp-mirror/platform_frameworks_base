@@ -3907,6 +3907,25 @@ public class ConnectivityManager {
     }
 
     /**
+     * Requests that the system open the captive portal app with the specified extras.
+     *
+     * <p>This endpoint is exclusively for use by the NetworkStack and is protected by the
+     * corresponding permission.
+     * @param appExtras Extras to include in the app start intent.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    public void startCaptivePortalApp(Bundle appExtras) {
+        try {
+            mService.startCaptivePortalAppInternal(appExtras);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Determine whether the device is configured to avoid bad wifi.
      * @hide
      */
