@@ -444,6 +444,7 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
 
 void DurationMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
+    StatsdStats::getInstance().noteBucketDropped(mMetricId);
     mPastBuckets.clear();
 }
 

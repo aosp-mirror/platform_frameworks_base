@@ -175,6 +175,7 @@ void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
 
 void ValueMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
+    StatsdStats::getInstance().noteBucketDropped(mMetricId);
     mPastBuckets.clear();
 }
 
