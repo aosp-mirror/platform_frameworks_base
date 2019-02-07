@@ -338,7 +338,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The data set used to store unused views that should be reused during the next layout
      * to avoid creating new ones
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769398)
     final RecycleBin mRecycler = new RecycleBin();
 
     /**
@@ -421,7 +421,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * One of TOUCH_MODE_REST, TOUCH_MODE_DOWN, TOUCH_MODE_TAP, TOUCH_MODE_SCROLL, or
      * TOUCH_MODE_DONE_WAITING
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769413)
     int mTouchMode = TOUCH_MODE_REST;
 
     /**
@@ -632,7 +632,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Helper object that renders and controls the fast scroll thumb.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768941)
     private FastScroller mFastScroll;
 
     /**
@@ -698,7 +698,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Maximum distance to overfling during edge effects
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769379)
     int mOverflingDistance;
 
     // These two EdgeGlows are always set and used together.
@@ -4623,7 +4623,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @param newState The new scroll state.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769710)
     void reportScrollStateChange(int newState) {
         if (newState != mLastScrollState) {
             if (mOnScrollListener != null) {
