@@ -18,7 +18,6 @@ package android.view;
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 
@@ -145,7 +144,7 @@ public class ScaleGestureDetector {
     private boolean mInProgress;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768938)
     private int mSpanSlop;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768938)
     private int mMinSpan;
 
     private final Handler mHandler;
@@ -200,10 +199,9 @@ public class ScaleGestureDetector {
                                 Handler handler) {
         mContext = context;
         mListener = listener;
-        mSpanSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 2;
-
-        final Resources res = context.getResources();
-        mMinSpan = res.getDimensionPixelSize(com.android.internal.R.dimen.config_minScalingSpan);
+        final ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
+        mSpanSlop = viewConfiguration.getScaledTouchSlop() * 2;
+        mMinSpan = viewConfiguration.getScaledMinScalingSpan();
         mHandler = handler;
         // Quick scale is enabled by default after JB_MR2
         final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
