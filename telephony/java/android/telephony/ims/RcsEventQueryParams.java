@@ -35,29 +35,29 @@ import java.security.InvalidParameterException;
 
 /**
  * The parameters to pass into
- * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} in order to select a
+ * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} in order to select a
  * subset of {@link RcsEvent}s present in the message store.
  *
- * @hide TODO - make the Builder and builder() public. The rest should stay internal only.
+ * @hide - TODO: make public
  */
-public class RcsEventQueryParameters implements Parcelable {
+public final class RcsEventQueryParams implements Parcelable {
     /**
      * Flag to be used with {@link Builder#setEventType(int)} to make
-     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} return all types of
+     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} return all types of
      * {@link RcsEvent}s
      */
     public static final int ALL_EVENTS = -1;
 
     /**
      * Flag to be used with {@link Builder#setEventType(int)} to make
-     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} return sub-types of
+     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} return sub-types of
      * {@link RcsGroupThreadEvent}s
      */
     public static final int ALL_GROUP_THREAD_EVENTS = 0;
 
     /**
      * Flag to be used with {@link Builder#setEventType(int)} to make
-     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} return only
+     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} return only
      * {@link RcsParticipantAliasChangedEvent}s
      */
     public static final int PARTICIPANT_ALIAS_CHANGED_EVENT =
@@ -65,7 +65,7 @@ public class RcsEventQueryParameters implements Parcelable {
 
     /**
      * Flag to be used with {@link Builder#setEventType(int)} to make
-     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} return only
+     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} return only
      * {@link RcsGroupThreadParticipantJoinedEvent}s
      */
     public static final int GROUP_THREAD_PARTICIPANT_JOINED_EVENT =
@@ -73,7 +73,7 @@ public class RcsEventQueryParameters implements Parcelable {
 
     /**
      * Flag to be used with {@link Builder#setEventType(int)} to make
-     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} return only
+     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} return only
      * {@link RcsGroupThreadParticipantLeftEvent}s
      */
     public static final int GROUP_THREAD_PARTICIPANT_LEFT_EVENT =
@@ -81,14 +81,14 @@ public class RcsEventQueryParameters implements Parcelable {
 
     /**
      * Flag to be used with {@link Builder#setEventType(int)} to make
-     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} return only
+     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} return only
      * {@link RcsGroupThreadNameChangedEvent}s
      */
     public static final int GROUP_THREAD_NAME_CHANGED_EVENT = NAME_CHANGED_EVENT_TYPE;
 
     /**
      * Flag to be used with {@link Builder#setEventType(int)} to make
-     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)} return only
+     * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} return only
      * {@link RcsGroupThreadIconChangedEvent}s
      */
     public static final int GROUP_THREAD_ICON_CHANGED_EVENT = ICON_CHANGED_EVENT_TYPE;
@@ -134,7 +134,7 @@ public class RcsEventQueryParameters implements Parcelable {
     // The thread that the results are limited to
     private int mThreadId;
 
-    RcsEventQueryParameters(@EventType int eventType, int threadId,
+    RcsEventQueryParams(@EventType int eventType, int threadId,
             @SortingProperty int sortingProperty, boolean isAscending, int limit) {
         mEventType = eventType;
         mSortingProperty = sortingProperty;
@@ -144,7 +144,7 @@ public class RcsEventQueryParameters implements Parcelable {
     }
 
     /**
-     * @return Returns the type of {@link RcsEvent}s that this {@link RcsEventQueryParameters} is
+     * @return Returns the type of {@link RcsEvent}s that this {@link RcsEventQueryParams} is
      * set to query for.
      */
     public @EventType int getEventType() {
@@ -152,7 +152,7 @@ public class RcsEventQueryParameters implements Parcelable {
     }
 
     /**
-     * @return Returns the type of {@link RcsEvent}s that this {@link RcsEventQueryParameters} is
+     * @return Returns the type of {@link RcsEvent}s that this {@link RcsEventQueryParams} is
      * set to query for.
      */
     public int getLimit() {
@@ -186,7 +186,7 @@ public class RcsEventQueryParameters implements Parcelable {
     }
 
     /**
-     * A helper class to build the {@link RcsEventQueryParameters}.
+     * A helper class to build the {@link RcsEventQueryParams}.
      */
     public static class Builder {
         private @EventType int mEventType;
@@ -196,8 +196,8 @@ public class RcsEventQueryParameters implements Parcelable {
         private int mThreadId;
 
         /**
-         * Creates a new builder for {@link RcsEventQueryParameters} to be used in
-         * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)}
+         * Creates a new builder for {@link RcsEventQueryParams} to be used in
+         * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)}
          */
         public Builder() {
             // empty implementation
@@ -236,7 +236,7 @@ public class RcsEventQueryParameters implements Parcelable {
 
         /**
          * Sets the property where the results should be sorted against. Defaults to
-         * {@link RcsEventQueryParameters.SortingProperty#SORT_BY_CREATION_ORDER}
+         * {@link RcsEventQueryParams.SortingProperty#SORT_BY_CREATION_ORDER}
          *
          * @param sortingProperty against which property the results should be sorted
          * @return The same instance of the builder to chain parameters.
@@ -273,18 +273,18 @@ public class RcsEventQueryParameters implements Parcelable {
         }
 
         /**
-         * Builds the {@link RcsEventQueryParameters} to use in
-         * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParameters)}
+         * Builds the {@link RcsEventQueryParams} to use in
+         * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)}
          *
-         * @return An instance of {@link RcsEventQueryParameters} to use with the event query.
+         * @return An instance of {@link RcsEventQueryParams} to use with the event query.
          */
-        public RcsEventQueryParameters build() {
-            return new RcsEventQueryParameters(mEventType, mThreadId, mSortingProperty,
+        public RcsEventQueryParams build() {
+            return new RcsEventQueryParams(mEventType, mThreadId, mSortingProperty,
                     mIsAscending, mLimit);
         }
     }
 
-    protected RcsEventQueryParameters(Parcel in) {
+    private RcsEventQueryParams(Parcel in) {
         mEventType = in.readInt();
         mThreadId = in.readInt();
         mSortingProperty = in.readInt();
@@ -292,19 +292,18 @@ public class RcsEventQueryParameters implements Parcelable {
         mLimit = in.readInt();
     }
 
-    public static final Creator<RcsEventQueryParameters> CREATOR =
-            new Creator<RcsEventQueryParameters>() {
+    public static final Creator<RcsEventQueryParams> CREATOR =
+            new Creator<RcsEventQueryParams>() {
                 @Override
-                public RcsEventQueryParameters createFromParcel(Parcel in) {
-                    return new RcsEventQueryParameters(in);
+                public RcsEventQueryParams createFromParcel(Parcel in) {
+                    return new RcsEventQueryParams(in);
                 }
 
                 @Override
-                public RcsEventQueryParameters[] newArray(int size) {
-                    return new RcsEventQueryParameters[size];
+                public RcsEventQueryParams[] newArray(int size) {
+                    return new RcsEventQueryParams[size];
                 }
             };
-
 
     @Override
     public int describeContents() {

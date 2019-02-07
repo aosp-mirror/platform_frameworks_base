@@ -29,12 +29,12 @@ import java.security.InvalidParameterException;
 
 /**
  * The parameters to pass into
- * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)} in order to select a
+ * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)} in order to select a
  * subset of {@link RcsMessage}s present in the message store.
  *
- * @hide TODO - make the Builder and builder() public. The rest should stay internal only.
+ * @hide - TODO: make public
  */
-public class RcsMessageQueryParameters implements Parcelable {
+public final class RcsMessageQueryParams implements Parcelable {
     /**
      * @hide - not meant for public use
      */
@@ -60,28 +60,28 @@ public class RcsMessageQueryParameters implements Parcelable {
 
     /**
      * Bitmask flag to be used with {@link Builder#setMessageType(int)} to make
-     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)} return
+     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)} return
      * {@link RcsIncomingMessage}s.
      */
     public static final int MESSAGE_TYPE_INCOMING = 0x0001;
 
     /**
      * Bitmask flag to be used with {@link Builder#setMessageType(int)} to make
-     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)} return
+     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)} return
      * {@link RcsOutgoingMessage}s.
      */
     public static final int MESSAGE_TYPE_OUTGOING = 0x0002;
 
     /**
      * Bitmask flag to be used with {@link Builder#setFileTransferPresence(int)} to make
-     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)} return {@link RcsMessage}s
+     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)} return {@link RcsMessage}s
      * that have an {@link RcsFileTransferPart} attached.
      */
     public static final int MESSAGES_WITH_FILE_TRANSFERS = 0x0004;
 
     /**
      * Bitmask flag to be used with {@link Builder#setFileTransferPresence(int)} to make
-     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)} return {@link RcsMessage}s
+     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)} return {@link RcsMessage}s
      * that don't have an {@link RcsFileTransferPart} attached.
      */
     public static final int MESSAGES_WITHOUT_FILE_TRANSFERS = 0x0008;
@@ -106,7 +106,7 @@ public class RcsMessageQueryParameters implements Parcelable {
     // The thread that the results should be limited to
     private int mThreadId;
 
-    RcsMessageQueryParameters(int messageType, int fileTransferPresence, String messageLike,
+    RcsMessageQueryParams(int messageType, int fileTransferPresence, String messageLike,
             int threadId, @SortingProperty int sortingProperty, boolean isAscending, int limit) {
         mMessageType = messageType;
         mFileTransferPresence = fileTransferPresence;
@@ -118,7 +118,7 @@ public class RcsMessageQueryParameters implements Parcelable {
     }
 
     /**
-     * @return Returns the type of {@link RcsMessage}s that this {@link RcsMessageQueryParameters}
+     * @return Returns the type of {@link RcsMessage}s that this {@link RcsMessageQueryParams}
      * is set to query for.
      */
     public int getMessageType() {
@@ -177,7 +177,7 @@ public class RcsMessageQueryParameters implements Parcelable {
     }
 
     /**
-     * A helper class to build the {@link RcsMessageQueryParameters}.
+     * A helper class to build the {@link RcsMessageQueryParams}.
      */
     public static class Builder {
         private @SortingProperty int mSortingProperty;
@@ -189,8 +189,8 @@ public class RcsMessageQueryParameters implements Parcelable {
         private int mThreadId = THREAD_ID_NOT_SET;
 
         /**
-         * Creates a new builder for {@link RcsMessageQueryParameters} to be used in
-         * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)}
+         * Creates a new builder for {@link RcsMessageQueryParams} to be used in
+         * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)}
          *
          */
         public Builder() {
@@ -221,8 +221,8 @@ public class RcsMessageQueryParameters implements Parcelable {
          *
          * @param messageType The type of message to be returned.
          * @return The same instance of the builder to chain parameters.
-         * @see RcsMessageQueryParameters#MESSAGE_TYPE_INCOMING
-         * @see RcsMessageQueryParameters#MESSAGE_TYPE_OUTGOING
+         * @see RcsMessageQueryParams#MESSAGE_TYPE_INCOMING
+         * @see RcsMessageQueryParams#MESSAGE_TYPE_OUTGOING
          */
         @CheckResult
         public Builder setMessageType(int messageType) {
@@ -235,8 +235,8 @@ public class RcsMessageQueryParameters implements Parcelable {
          *
          * @param fileTransferPresence Whether file transfers should be included in the result
          * @return The same instance of the builder to chain parameters.
-         * @see RcsMessageQueryParameters#MESSAGES_WITH_FILE_TRANSFERS
-         * @see RcsMessageQueryParameters#MESSAGES_WITHOUT_FILE_TRANSFERS
+         * @see RcsMessageQueryParams#MESSAGES_WITH_FILE_TRANSFERS
+         * @see RcsMessageQueryParams#MESSAGES_WITHOUT_FILE_TRANSFERS
          */
         @CheckResult
         public Builder setFileTransferPresence(int fileTransferPresence) {
@@ -264,7 +264,7 @@ public class RcsMessageQueryParameters implements Parcelable {
 
         /**
          * Sets the property where the results should be sorted against. Defaults to
-         * {@link RcsMessageQueryParameters.SortingProperty#SORT_BY_CREATION_ORDER}
+         * {@link RcsMessageQueryParams.SortingProperty#SORT_BY_CREATION_ORDER}
          *
          * @param sortingProperty against which property the results should be sorted
          * @return The same instance of the builder to chain parameters.
@@ -305,14 +305,14 @@ public class RcsMessageQueryParameters implements Parcelable {
         }
 
         /**
-         * Builds the {@link RcsMessageQueryParameters} to use in
-         * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)}
+         * Builds the {@link RcsMessageQueryParams} to use in
+         * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)}
          *
-         * @return An instance of {@link RcsMessageQueryParameters} to use with the message
+         * @return An instance of {@link RcsMessageQueryParams} to use with the message
          * query.
          */
-        public RcsMessageQueryParameters build() {
-            return new RcsMessageQueryParameters(mMessageType, mFileTransferPresence, mMessageLike,
+        public RcsMessageQueryParams build() {
+            return new RcsMessageQueryParams(mMessageType, mFileTransferPresence, mMessageLike,
                     mThreadId, mSortingProperty, mIsAscending, mLimit);
         }
     }
@@ -320,7 +320,7 @@ public class RcsMessageQueryParameters implements Parcelable {
     /**
      * Parcelable boilerplate below.
      */
-    protected RcsMessageQueryParameters(Parcel in) {
+    private RcsMessageQueryParams(Parcel in) {
         mMessageType = in.readInt();
         mFileTransferPresence = in.readInt();
         mMessageLike = in.readString();
@@ -330,16 +330,16 @@ public class RcsMessageQueryParameters implements Parcelable {
         mThreadId = in.readInt();
     }
 
-    public static final Creator<RcsMessageQueryParameters> CREATOR =
-            new Creator<RcsMessageQueryParameters>() {
+    public static final Creator<RcsMessageQueryParams> CREATOR =
+            new Creator<RcsMessageQueryParams>() {
                 @Override
-                public RcsMessageQueryParameters createFromParcel(Parcel in) {
-                    return new RcsMessageQueryParameters(in);
+                public RcsMessageQueryParams createFromParcel(Parcel in) {
+                    return new RcsMessageQueryParams(in);
                 }
 
                 @Override
-                public RcsMessageQueryParameters[] newArray(int size) {
-                    return new RcsMessageQueryParameters[size];
+                public RcsMessageQueryParams[] newArray(int size) {
+                    return new RcsMessageQueryParams[size];
                 }
             };
 

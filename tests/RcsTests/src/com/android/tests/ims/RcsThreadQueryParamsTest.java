@@ -15,26 +15,26 @@
  */
 package com.android.tests.ims;
 
-import static android.telephony.ims.RcsThreadQueryParameters.SORT_BY_TIMESTAMP;
-import static android.telephony.ims.RcsThreadQueryParameters.THREAD_TYPE_GROUP;
+import static android.telephony.ims.RcsThreadQueryParams.SORT_BY_TIMESTAMP;
+import static android.telephony.ims.RcsThreadQueryParams.THREAD_TYPE_GROUP;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.ims.RcsParticipant;
-import android.telephony.ims.RcsThreadQueryParameters;
+import android.telephony.ims.RcsThreadQueryParams;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class RcsThreadQueryParametersTest {
+public class RcsThreadQueryParamsTest {
 
     @Test
     public void testCanUnparcel() {
         RcsParticipant rcsParticipant = new RcsParticipant(1);
-        RcsThreadQueryParameters rcsThreadQueryParameters = new RcsThreadQueryParameters.Builder()
+        RcsThreadQueryParams rcsThreadQueryParams = new RcsThreadQueryParams.Builder()
                 .setThreadType(THREAD_TYPE_GROUP)
                 .setParticipant(rcsParticipant)
                 .setResultLimit(50)
@@ -43,16 +43,16 @@ public class RcsThreadQueryParametersTest {
                 .build();
 
         Parcel parcel = Parcel.obtain();
-        rcsThreadQueryParameters.writeToParcel(parcel, rcsThreadQueryParameters.describeContents());
+        rcsThreadQueryParams.writeToParcel(parcel, rcsThreadQueryParams.describeContents());
 
         parcel.setDataPosition(0);
-        rcsThreadQueryParameters = RcsThreadQueryParameters.CREATOR.createFromParcel(parcel);
+        rcsThreadQueryParams = RcsThreadQueryParams.CREATOR.createFromParcel(parcel);
 
-        assertThat(rcsThreadQueryParameters.getThreadType()).isEqualTo(THREAD_TYPE_GROUP);
-        assertThat(rcsThreadQueryParameters.getRcsParticipantsIds())
+        assertThat(rcsThreadQueryParams.getThreadType()).isEqualTo(THREAD_TYPE_GROUP);
+        assertThat(rcsThreadQueryParams.getRcsParticipantsIds())
                 .contains(rcsParticipant.getId());
-        assertThat(rcsThreadQueryParameters.getLimit()).isEqualTo(50);
-        assertThat(rcsThreadQueryParameters.getSortingProperty()).isEqualTo(SORT_BY_TIMESTAMP);
-        assertThat(rcsThreadQueryParameters.getSortDirection()).isTrue();
+        assertThat(rcsThreadQueryParams.getLimit()).isEqualTo(50);
+        assertThat(rcsThreadQueryParams.getSortingProperty()).isEqualTo(SORT_BY_TIMESTAMP);
+        assertThat(rcsThreadQueryParams.getSortDirection()).isTrue();
     }
 }

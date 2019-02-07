@@ -28,12 +28,12 @@ import java.security.InvalidParameterException;
 
 /**
  * The parameters to pass into
- * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParameters)} in order to select a
+ * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParams)} in order to select a
  * subset of {@link RcsThread}s present in the message store.
  *
- * @hide TODO - make the Builder and builder() public. The rest should stay internal only.
+ * @hide - TODO: make public
  */
-public class RcsParticipantQueryParameters implements Parcelable {
+public final class RcsParticipantQueryParams implements Parcelable {
     /**
      * Flag to set with {@link Builder#setSortProperty(int)} to sort the results in the order of
      * creation time for faster query results
@@ -75,7 +75,7 @@ public class RcsParticipantQueryParameters implements Parcelable {
      */
     public static final String PARTICIPANT_QUERY_PARAMETERS_KEY = "participant_query_parameters";
 
-    RcsParticipantQueryParameters(int rcsThreadId, String aliasLike, String canonicalAddressLike,
+    RcsParticipantQueryParams(int rcsThreadId, String aliasLike, String canonicalAddressLike,
             @SortingProperty int sortingProperty, boolean isAscending,
             int limit) {
         mThreadId = rcsThreadId;
@@ -143,7 +143,7 @@ public class RcsParticipantQueryParameters implements Parcelable {
     }
 
     /**
-     * A helper class to build the {@link RcsParticipantQueryParameters}.
+     * A helper class to build the {@link RcsParticipantQueryParams}.
      */
     public static class Builder {
         private String mAliasLike;
@@ -154,8 +154,8 @@ public class RcsParticipantQueryParameters implements Parcelable {
         private int mThreadId;
 
         /**
-         * Creates a new builder for {@link RcsParticipantQueryParameters} to be used in
-         * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParameters)}
+         * Creates a new builder for {@link RcsParticipantQueryParams} to be used in
+         * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParams)}
          */
         public Builder() {
             // empty implementation
@@ -231,7 +231,7 @@ public class RcsParticipantQueryParameters implements Parcelable {
 
         /**
          * Sets the property where the results should be sorted against. Defaults to
-         * {@link RcsParticipantQueryParameters.SortingProperty#SORT_BY_CREATION_ORDER}
+         * {@link RcsParticipantQueryParams.SortingProperty#SORT_BY_CREATION_ORDER}
          *
          * @param sortingProperty against which property the results should be sorted
          * @return The same instance of the builder to chain parameters.
@@ -255,14 +255,14 @@ public class RcsParticipantQueryParameters implements Parcelable {
         }
 
         /**
-         * Builds the {@link RcsParticipantQueryParameters} to use in
-         * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParameters)}
+         * Builds the {@link RcsParticipantQueryParams} to use in
+         * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParams)}
          *
-         * @return An instance of {@link RcsParticipantQueryParameters} to use with the participant
+         * @return An instance of {@link RcsParticipantQueryParams} to use with the participant
          * query.
          */
-        public RcsParticipantQueryParameters build() {
-            return new RcsParticipantQueryParameters(mThreadId, mAliasLike, mCanonicalAddressLike,
+        public RcsParticipantQueryParams build() {
+            return new RcsParticipantQueryParams(mThreadId, mAliasLike, mCanonicalAddressLike,
                     mSortingProperty, mIsAscending, mLimit);
         }
     }
@@ -270,7 +270,7 @@ public class RcsParticipantQueryParameters implements Parcelable {
     /**
      * Parcelable boilerplate below.
      */
-    protected RcsParticipantQueryParameters(Parcel in) {
+    private RcsParticipantQueryParams(Parcel in) {
         mAliasLike = in.readString();
         mCanonicalAddressLike = in.readString();
         mSortingProperty = in.readInt();
@@ -279,16 +279,16 @@ public class RcsParticipantQueryParameters implements Parcelable {
         mThreadId = in.readInt();
     }
 
-    public static final Creator<RcsParticipantQueryParameters> CREATOR =
-            new Creator<RcsParticipantQueryParameters>() {
+    public static final Creator<RcsParticipantQueryParams> CREATOR =
+            new Creator<RcsParticipantQueryParams>() {
                 @Override
-                public RcsParticipantQueryParameters createFromParcel(Parcel in) {
-                    return new RcsParticipantQueryParameters(in);
+                public RcsParticipantQueryParams createFromParcel(Parcel in) {
+                    return new RcsParticipantQueryParams(in);
                 }
 
                 @Override
-                public RcsParticipantQueryParameters[] newArray(int size) {
-                    return new RcsParticipantQueryParameters[size];
+                public RcsParticipantQueryParams[] newArray(int size) {
+                    return new RcsParticipantQueryParams[size];
                 }
             };
 
