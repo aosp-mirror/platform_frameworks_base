@@ -94,7 +94,8 @@ public class TextLine {
     private final DecorationInfo mDecorationInfo = new DecorationInfo();
     private final ArrayList<DecorationInfo> mDecorations = new ArrayList<>();
 
-    @UnsupportedAppUsage
+    /** Not allowed to access. If it's for memory leak workaround, it was already fixed M. */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static final TextLine[] sCached = new TextLine[3];
 
     /**
