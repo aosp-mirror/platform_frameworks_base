@@ -340,12 +340,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 // for apex?
                 if (!info.isApex()) {
                     String installerPackageName = pm.getInstallerPackageName(info.getPackageName());
-                    if (installerPackageName == null) {
-                        sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
-                                "Cannot find installer package");
-                        return;
+                    if (installerPackageName != null) {
+                        params.setInstallerPackageName(installerPackageName);
                     }
-                    params.setInstallerPackageName(installerPackageName);
                 }
                 params.setAllowDowngrade(true);
                 if (data.isStaged()) {
