@@ -165,6 +165,12 @@
     <!-- Message of USB contaminant presence dialog [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_message">To protect your device from liquid or debris, the USB port is disabled and won\u2019t detect any accessories.\n\nYou\u2019ll be notified when it\u2019s safe to use the USB port again.</string>
 
+    <!-- Toast for enabling ports from USB contaminant dialog [CHAR LIMIT=NONE] -->
+    <string name="usb_port_enabled">USB port enabled to detect chargers and accessories</string>
+
+    <!-- Button text to disable contaminant detection [CHAR LIMIT=NONE] -->
+    <string name="usb_disable_contaminant_detection">Enable USB</string>
+
     <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
          on a phone).  [CHAR LIMIT=25] -->
     <string name="compat_mode_on">Zoom to fill screen</string>
