@@ -35,16 +35,6 @@ using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;
 
-namespace {
-void getHeaderData(const IncidentHeaderProto& headerProto, vector<uint8_t>* out) {
-    out->clear();
-    auto serialized = headerProto.SerializeAsString();
-    if (serialized.empty()) return;
-    out->resize(serialized.length());
-    std::copy(serialized.begin(), serialized.end(), out->begin());
-}
-}
-
 class TestListener : public IIncidentReportStatusListener {
 public:
     int startInvoked;
@@ -153,10 +143,7 @@ TEST_F(ReporterTest, RunReportWithHeaders) {
     args2.addSection(2);
     IncidentHeaderProto header;
     header.set_alert_id(12);
-
-    vector<uint8_t> out;
-    getHeaderData(header, &out);
-    args2.addHeader(out);
+    args2.addHeader(header);
     sp<ReportRequest> r1 = new ReportRequest(args1, l, tf.fd);
     sp<ReportRequest> r2 = new ReportRequest(args2, l, tf.fd);
 
@@ -182,12 +169,8 @@ TEST_F(ReporterTest, RunReportToGivenDirectory) {
     IncidentHeaderProto header1, header2;
     header1.set_alert_id(12);
     header2.set_reason("abcd");
-
-    vector<uint8_t> out;
-    getHeaderData(header1, &out);
-    args.addHeader(out);
-    getHeaderData(header2, &out);
-    args.addHeader(out);
+    args.addHeader(header1);
+    args.addHeader(header2);
     sp<ReportRequest> r = new ReportRequest(args, l, -1);
     reporter->batch.add(r);
 

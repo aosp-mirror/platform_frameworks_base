@@ -82,16 +82,6 @@ protected:
     virtual IBinder* onAsBinder() override { return nullptr; };
 };
 
-namespace {
-void getHeaderData(const IncidentHeaderProto& headerProto, vector<uint8_t>* out) {
-    out->clear();
-    auto serialized = headerProto.SerializeAsString();
-    if (serialized.empty()) return;
-    out->resize(serialized.length());
-    std::copy(serialized.begin(), serialized.end(), out->begin());
-}
-}
-
 TEST_F(SectionTest, HeaderSection) {
     HeaderSection hs;
 
@@ -104,15 +94,9 @@ TEST_F(SectionTest, HeaderSection) {
     head1.set_reason("axe");
     head2.set_reason("pup");
 
-    vector<uint8_t> out;
-    getHeaderData(head1, &out);
-    args1.addHeader(out);
-
-    getHeaderData(head2, &out);
-    args1.addHeader(out);
-
-    getHeaderData(head2, &out);
-    args2.addHeader(out);
+    args1.addHeader(head1);
+    args1.addHeader(head2);
+    args2.addHeader(head2);
 
     requests.add(new ReportRequest(args1, new SimpleListener(), -1));
     requests.add(new ReportRequest(args2, new SimpleListener(), tf.fd));
