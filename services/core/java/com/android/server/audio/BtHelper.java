@@ -393,6 +393,84 @@ public class BtHelper {
         mBluetoothHeadset = null;
     }
 
+    /*package*/ synchronized void onA2dpProfileConnected(BluetoothA2dp a2dp) {
+        mA2dp = a2dp;
+        final List<BluetoothDevice> deviceList = mA2dp.getConnectedDevices();
+        if (deviceList.isEmpty()) {
+            return;
+        }
+        final BluetoothDevice btDevice = deviceList.get(0);
+        final @BluetoothProfile.BtProfileState int state = mA2dp.getConnectionState(btDevice);
+        mDeviceBroker.handleSetA2dpSinkConnectionState(
+                state, new BluetoothA2dpDeviceInfo(btDevice));
+    }
+
+    /*package*/ synchronized void onA2dpSinkProfileConnected(BluetoothProfile profile) {
+        final List<BluetoothDevice> deviceList = profile.getConnectedDevices();
+        if (deviceList.isEmpty()) {
+            return;
+        }
+        final BluetoothDevice btDevice = deviceList.get(0);
+        final @BluetoothProfile.BtProfileState int state =
+                profile.getConnectionState(btDevice);
+        mDeviceBroker.postSetA2dpSourceConnectionState(
+                state, new BluetoothA2dpDeviceInfo(btDevice));
+    }
+
+    /*package*/ synchronized void onHearingAidProfileConnected(BluetoothHearingAid hearingAid) {
+        mHearingAid = hearingAid;
+        final List<BluetoothDevice> deviceList = mHearingAid.getConnectedDevices();
+        if (deviceList.isEmpty()) {
+            return;
+        }
+        final BluetoothDevice btDevice = deviceList.get(0);
+        final @BluetoothProfile.BtProfileState int state =
+                mHearingAid.getConnectionState(btDevice);
+        mDeviceBroker.setBluetoothHearingAidDeviceConnectionState(
+                btDevice, state,
+                /*suppressNoisyIntent*/ false,
+                /*musicDevice*/ android.media.AudioSystem.DEVICE_NONE,
+                /*eventSource*/ "mBluetoothProfileServiceListener");
+    }
+
+    /*package*/ synchronized void onHeadsetProfileConnected(BluetoothHeadset headset) {
+        // Discard timeout message
+        mDeviceBroker.handleCancelFailureToConnectToBtHeadsetService();
+        mBluetoothHeadset = headset;
+        setBtScoActiveDevice(mBluetoothHeadset.getActiveDevice());
+        // Refresh SCO audio state
+        checkScoAudioState();
+        if (mScoAudioState != SCO_STATE_ACTIVATE_REQ
+                && mScoAudioState != SCO_STATE_DEACTIVATE_REQ) {
+            return;
+        }
+        boolean status = false;
+        if (mBluetoothHeadsetDevice != null) {
+            switch (mScoAudioState) {
+                case SCO_STATE_ACTIVATE_REQ:
+                    status = connectBluetoothScoAudioHelper(
+                            mBluetoothHeadset,
+                            mBluetoothHeadsetDevice, mScoAudioMode);
+                    if (status) {
+                        mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
+                    }
+                    break;
+                case SCO_STATE_DEACTIVATE_REQ:
+                    status = disconnectBluetoothScoAudioHelper(
+                            mBluetoothHeadset,
+                            mBluetoothHeadsetDevice, mScoAudioMode);
+                    if (status) {
+                        mScoAudioState = SCO_STATE_DEACTIVATING;
+                    }
+                    break;
+            }
+        }
+        if (!status) {
+            mScoAudioState = SCO_STATE_INACTIVE;
+            broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
+        }
+    }
+
     //----------------------------------------------------------------------
     private void broadcastScoConnectionState(int state) {
         mDeviceBroker.postBroadcastScoConnectionState(state);
@@ -462,99 +540,36 @@ public class BtHelper {
         }
     }
 
+    // NOTE this listener is NOT called from AudioDeviceBroker event thread, only call async
+    //      methods inside listener.
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
             new BluetoothProfile.ServiceListener() {
                 public void onServiceConnected(int profile, BluetoothProfile proxy) {
-                    final BluetoothDevice btDevice;
-                    List<BluetoothDevice> deviceList;
                     switch(profile) {
                         case BluetoothProfile.A2DP:
-                            synchronized (BtHelper.this) {
-                                mA2dp = (BluetoothA2dp) proxy;
-                                deviceList = mA2dp.getConnectedDevices();
-                                if (deviceList.size() > 0) {
-                                    btDevice = deviceList.get(0);
-                                    if (btDevice == null) {
-                                        Log.e(TAG, "Invalid null device in BT profile listener");
-                                        return;
-                                    }
-                                    final @BluetoothProfile.BtProfileState int state =
-                                            mA2dp.getConnectionState(btDevice);
-                                    mDeviceBroker.handleSetA2dpSinkConnectionState(
-                                            state, new BluetoothA2dpDeviceInfo(btDevice));
-                                }
-                            }
+                            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                                    "BT profile service: connecting A2DP profile"));
+                            mDeviceBroker.postBtA2dpProfileConnected((BluetoothA2dp) proxy);
                             break;
 
                         case BluetoothProfile.A2DP_SINK:
-                            deviceList = proxy.getConnectedDevices();
-                            if (deviceList.size() > 0) {
-                                btDevice = deviceList.get(0);
-                                final @BluetoothProfile.BtProfileState int state =
-                                        proxy.getConnectionState(btDevice);
-                                mDeviceBroker.postSetA2dpSourceConnectionState(
-                                        state, new BluetoothA2dpDeviceInfo(btDevice));
-                            }
+                            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                                    "BT profile service: connecting A2DP_SINK profile"));
+                            mDeviceBroker.postBtA2dpSinkProfileConnected(proxy);
                             break;
 
                         case BluetoothProfile.HEADSET:
-                            synchronized (BtHelper.this) {
-                                // Discard timeout message
-                                mDeviceBroker.handleCancelFailureToConnectToBtHeadsetService();
-                                mBluetoothHeadset = (BluetoothHeadset) proxy;
-                                setBtScoActiveDevice(mBluetoothHeadset.getActiveDevice());
-                                // Refresh SCO audio state
-                                checkScoAudioState();
-                                // Continue pending action if any
-                                if (mScoAudioState == SCO_STATE_ACTIVATE_REQ
-                                        || mScoAudioState == SCO_STATE_DEACTIVATE_REQ) {
-                                    boolean status = false;
-                                    if (mBluetoothHeadsetDevice != null) {
-                                        switch (mScoAudioState) {
-                                            case SCO_STATE_ACTIVATE_REQ:
-                                                status = connectBluetoothScoAudioHelper(
-                                                        mBluetoothHeadset,
-                                                        mBluetoothHeadsetDevice, mScoAudioMode);
-                                                if (status) {
-                                                    mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
-                                                }
-                                                break;
-                                            case SCO_STATE_DEACTIVATE_REQ:
-                                                status = disconnectBluetoothScoAudioHelper(
-                                                        mBluetoothHeadset,
-                                                        mBluetoothHeadsetDevice, mScoAudioMode);
-                                                if (status) {
-                                                    mScoAudioState = SCO_STATE_DEACTIVATING;
-                                                }
-                                                break;
-                                        }
-                                    }
-                                    if (!status) {
-                                        mScoAudioState = SCO_STATE_INACTIVE;
-                                        broadcastScoConnectionState(
-                                                AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
-                                    }
-                                }
-                            }
+                            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                                    "BT profile service: connecting HEADSET profile"));
+                            mDeviceBroker.postBtHeasetProfileConnected((BluetoothHeadset) proxy);
                             break;
 
                         case BluetoothProfile.HEARING_AID:
-                            synchronized (BtHelper.this) {
-                                mHearingAid = (BluetoothHearingAid) proxy;
-                                deviceList = mHearingAid.getConnectedDevices();
-                                if (deviceList.size() > 0) {
-                                    btDevice = deviceList.get(0);
-                                    final @BluetoothProfile.BtProfileState int state =
-                                            mHearingAid.getConnectionState(btDevice);
-                                    mDeviceBroker.setBluetoothHearingAidDeviceConnectionState(
-                                            btDevice, state,
-                                            /*suppressNoisyIntent*/ false,
-                                            /*musicDevice*/ android.media.AudioSystem.DEVICE_NONE,
-                                            /*eventSource*/ "mBluetoothProfileServiceListener");
-                                }
-                            }
+                            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                                    "BT profile service: connecting HEARING_AID profile"));
+                            mDeviceBroker.postBtHearingAidProfileConnected(
+                                    (BluetoothHearingAid) proxy);
                             break;
-
                         default:
                             break;
                     }
