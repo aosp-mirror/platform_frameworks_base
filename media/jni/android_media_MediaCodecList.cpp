@@ -24,6 +24,10 @@
 #include <media/IMediaCodecList.h>
 #include <media/MediaCodecInfo.h>
 
+#include <utils/Vector.h>
+
+#include <vector>
+
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
@@ -31,25 +35,91 @@
 
 using namespace android;
 
-static sp<IMediaCodecList> getCodecList(JNIEnv *env) {
-    sp<IMediaCodecList> mcl = MediaCodecList::getInstance();
-    if (mcl == NULL) {
-        // This should never happen unless something is really wrong
-        jniThrowException(
-                    env, "java/lang/RuntimeException", "cannot get MediaCodecList");
+/**
+ * This object unwraps codec aliases into individual codec infos as the Java interface handles
+ * aliases in this way.
+ */
+class JavaMediaCodecListWrapper {
+public:
+    struct Info {
+        sp<MediaCodecInfo> info;
+        AString alias;
+    };
+
+    const Info getCodecInfo(size_t index) const {
+        if (index < mInfoList.size()) {
+            return mInfoList[index];
+        }
+        // return
+        return Info { nullptr /* info */, "(none)" /* alias */ };
     }
-    return mcl;
+
+    size_t countCodecs() const {
+        return mInfoList.size();
+    }
+
+    sp<IMediaCodecList> getCodecList() const {
+        return mCodecList;
+    }
+
+    size_t findCodecByName(AString name) const {
+        auto it = mInfoIndex.find(name);
+        return it == mInfoIndex.end() ? -ENOENT : it->second;
+    }
+
+    JavaMediaCodecListWrapper(sp<IMediaCodecList> mcl)
+            : mCodecList(mcl) {
+        size_t numCodecs = mcl->countCodecs();
+        for (size_t ix = 0; ix < numCodecs; ++ix) {
+            sp<MediaCodecInfo> info = mcl->getCodecInfo(ix);
+            Vector<AString> namesAndAliases;
+            info->getAliases(&namesAndAliases);
+            namesAndAliases.insertAt(0);
+            namesAndAliases.editItemAt(0) = info->getCodecName();
+            for (const AString &nameOrAlias : namesAndAliases) {
+                if (mInfoIndex.count(nameOrAlias) > 0) {
+                    // skip duplicate names or aliases
+                    continue;
+                }
+                mInfoIndex.emplace(nameOrAlias, mInfoList.size());
+                mInfoList.emplace_back(Info { info, nameOrAlias });
+            }
+        }
+    }
+
+private:
+    sp<IMediaCodecList> mCodecList;
+    std::vector<Info> mInfoList;
+    std::map<AString, size_t> mInfoIndex;
+};
+
+static std::mutex sMutex;
+static std::unique_ptr<JavaMediaCodecListWrapper> sListWrapper;
+
+static const JavaMediaCodecListWrapper *getCodecList(JNIEnv *env) {
+    std::lock_guard<std::mutex> lock(sMutex);
+    if (sListWrapper == nullptr) {
+        sp<IMediaCodecList> mcl = MediaCodecList::getInstance();
+        if (mcl == NULL) {
+            // This should never happen unless something is really wrong
+            jniThrowException(
+                        env, "java/lang/RuntimeException", "cannot get MediaCodecList");
+        }
+
+        sListWrapper.reset(new JavaMediaCodecListWrapper(mcl));
+    }
+    return sListWrapper.get();
 }
 
-static sp<MediaCodecInfo> getCodecInfo(JNIEnv *env, jint index) {
-    sp<IMediaCodecList> mcl = getCodecList(env);
-    if (mcl == NULL) {
+static JavaMediaCodecListWrapper::Info getCodecInfo(JNIEnv *env, jint index) {
+    const JavaMediaCodecListWrapper *mcl = getCodecList(env);
+    if (mcl == nullptr) {
         // Runtime exception already pending.
-        return NULL;
+        return JavaMediaCodecListWrapper::Info { nullptr /* info */, "(none)" /* alias */ };
     }
 
-    sp<MediaCodecInfo> info = mcl->getCodecInfo(index);
-    if (info == NULL) {
+    JavaMediaCodecListWrapper::Info info = mcl->getCodecInfo(index);
+    if (info.info == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
     }
 
@@ -58,36 +128,36 @@ static sp<MediaCodecInfo> getCodecInfo(JNIEnv *env, jint index) {
 
 static jint android_media_MediaCodecList_getCodecCount(
         JNIEnv *env, jobject /* thiz */) {
-    sp<IMediaCodecList> mcl = getCodecList(env);
+    const JavaMediaCodecListWrapper *mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
         return 0;
     }
+
     return mcl->countCodecs();
 }
 
 static jstring android_media_MediaCodecList_getCodecName(
         JNIEnv *env, jobject /* thiz */, jint index) {
-    sp<MediaCodecInfo> info = getCodecInfo(env, index);
-    if (info == NULL) {
+    JavaMediaCodecListWrapper::Info info = getCodecInfo(env, index);
+    if (info.info == NULL) {
         // Runtime exception already pending.
         return NULL;
     }
 
-    // TODO: support aliases
-    const char *name = info->getCodecName();
+    const char *name = info.alias.c_str();
     return env->NewStringUTF(name);
 }
 
 static jstring android_media_MediaCodecList_getCanonicalName(
         JNIEnv *env, jobject /* thiz */, jint index) {
-    sp<MediaCodecInfo> info = getCodecInfo(env, index);
-    if (info == NULL) {
+    JavaMediaCodecListWrapper::Info info = getCodecInfo(env, index);
+    if (info.info == NULL) {
         // Runtime exception already pending.
         return NULL;
     }
 
-    const char *name = info->getCodecName();
+    const char *name = info.info->getCodecName();
     return env->NewStringUTF(name);
 }
 
@@ -104,7 +174,7 @@ static jint android_media_MediaCodecList_findCodecByName(
         return -ENOENT;
     }
 
-    sp<IMediaCodecList> mcl = getCodecList(env);
+    const JavaMediaCodecListWrapper *mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
         env->ReleaseStringUTFChars(name, nameStr);
@@ -118,25 +188,25 @@ static jint android_media_MediaCodecList_findCodecByName(
 
 static jboolean android_media_MediaCodecList_getAttributes(
         JNIEnv *env, jobject /* thiz */, jint index) {
-    sp<MediaCodecInfo> info = getCodecInfo(env, index);
-    if (info == NULL) {
+    JavaMediaCodecListWrapper::Info info = getCodecInfo(env, index);
+    if (info.info == NULL) {
         // Runtime exception already pending.
         return 0;
     }
 
-    return info->getAttributes();
+    return info.info->getAttributes();
 }
 
 static jarray android_media_MediaCodecList_getSupportedTypes(
         JNIEnv *env, jobject /* thiz */, jint index) {
-    sp<MediaCodecInfo> info = getCodecInfo(env, index);
-    if (info == NULL) {
+    JavaMediaCodecListWrapper::Info info = getCodecInfo(env, index);
+    if (info.info == NULL) {
         // Runtime exception already pending.
         return NULL;
     }
 
     Vector<AString> types;
-    info->getSupportedMediaTypes(&types);
+    info.info->getSupportedMediaTypes(&types);
 
     jclass clazz = env->FindClass("java/lang/String");
     CHECK(clazz != NULL);
@@ -160,8 +230,8 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         return NULL;
     }
 
-    sp<MediaCodecInfo> info = getCodecInfo(env, index);
-    if (info == NULL) {
+    JavaMediaCodecListWrapper::Info info = getCodecInfo(env, index);
+    if (info.info == NULL) {
         // Runtime exception already pending.
         return NULL;
     }
@@ -181,7 +251,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
 
     // TODO query default-format also from codec/codec list
     const sp<MediaCodecInfo::Capabilities> &capabilities =
-        info->getCapabilitiesFor(typeStr);
+        info.info->getCapabilitiesFor(typeStr);
     env->ReleaseStringUTFChars(type, typeStr);
     typeStr = NULL;
     if (capabilities == NULL) {
@@ -192,7 +262,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     capabilities->getSupportedColorFormats(&colorFormats);
     capabilities->getSupportedProfileLevels(&profileLevels);
     sp<AMessage> details = capabilities->getDetails();
-    bool isEncoder = info->isEncoder();
+    bool isEncoder = info.info->isEncoder();
 
     jobject defaultFormatObj = NULL;
     if (ConvertMessageToMap(env, defaultFormat, &defaultFormatObj)) {
@@ -267,13 +337,13 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
 }
 
 static jobject android_media_MediaCodecList_getGlobalSettings(JNIEnv *env, jobject /* thiz */) {
-    sp<IMediaCodecList> mcl = getCodecList(env);
+    const JavaMediaCodecListWrapper *mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
         return NULL;
     }
 
-    const sp<AMessage> settings = mcl->getGlobalSettings();
+    const sp<AMessage> settings = mcl->getCodecList()->getGlobalSettings();
     if (settings == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "cannot get global settings");
         return NULL;

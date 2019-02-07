@@ -155,6 +155,7 @@ private:
 
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
+    AString mNameAtCreation;
 
     sp<AMessage> mCallbackNotification;
     sp<AMessage> mOnFrameRenderedNotification;
