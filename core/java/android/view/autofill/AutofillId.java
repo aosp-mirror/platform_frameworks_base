@@ -52,11 +52,13 @@ public final class AutofillId implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public AutofillId(int parentId, int virtualChildId) {
         this(FLAG_IS_VIRTUAL_INT, parentId, virtualChildId, NO_SESSION);
     }
 
     /** @hide */
+    @TestApi
     public AutofillId(@NonNull AutofillId parent, long virtualChildId, int sessionId) {
         this(FLAG_IS_VIRTUAL_LONG | FLAG_HAS_SESSION, parent.mViewId, virtualChildId, sessionId);
     }
