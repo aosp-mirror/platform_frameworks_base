@@ -93,7 +93,12 @@ public abstract class LayoutInflater {
     protected final Context mContext;
 
     // these are optional, set by the caller
-    @UnsupportedAppUsage
+    /**
+     * If any developer has desire to change this value, they should instead use
+     * {@link #cloneInContext(Context)} and set the new factory in thew newly-created
+     * LayoutInflater.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mFactorySet;
     @UnsupportedAppUsage
     private Factory mFactory;
