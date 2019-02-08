@@ -1307,13 +1307,15 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 List<String> roleHolders = mRm.getRoleHoldersAsUser(roleName, user);
 
+                int userId = user.getIdentifier();
                 if (roleHolders.isEmpty()) {
-                    Settings.Secure.putString(getContext().getContentResolver(),
-                            Settings.Secure.ASSISTANT, "");
-                    Settings.Secure.putString(getContext().getContentResolver(),
-                            Settings.Secure.VOICE_INTERACTION_SERVICE, "");
-                    Settings.Secure.putString(getContext().getContentResolver(),
-                            Settings.Secure.VOICE_RECOGNITION_SERVICE, getDefaultRecognizer(user));
+                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                            Settings.Secure.ASSISTANT, "", userId);
+                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                            Settings.Secure.VOICE_INTERACTION_SERVICE, "", userId);
+                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                            Settings.Secure.VOICE_RECOGNITION_SERVICE, getDefaultRecognizer(user),
+                            userId);
                 } else {
                     // Assistant is singleton role
                     String pkg = roleHolders.get(0);
@@ -1321,7 +1323,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     // Try to set role holder as VoiceInteractionService
                     List<ResolveInfo> services = mPm.queryIntentServicesAsUser(
                             new Intent(VoiceInteractionService.SERVICE_INTERFACE).setPackage(pkg),
-                            PackageManager.GET_META_DATA, user.getIdentifier());
+                            PackageManager.GET_META_DATA, userId);
 
                     for (ResolveInfo resolveInfo : services) {
                         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
@@ -1339,12 +1341,14 @@ public class VoiceInteractionManagerService extends SystemService {
                                 voiceInteractionServiceInfo.getRecognitionService())
                                 .flattenToShortString();
 
-                        Settings.Secure.putString(getContext().getContentResolver(),
-                                Settings.Secure.ASSISTANT, serviceComponentName);
-                        Settings.Secure.putString(getContext().getContentResolver(),
-                                Settings.Secure.VOICE_INTERACTION_SERVICE, serviceComponentName);
-                        Settings.Secure.putString(getContext().getContentResolver(),
-                                Settings.Secure.VOICE_RECOGNITION_SERVICE, serviceRecognizerName);
+                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                                Settings.Secure.ASSISTANT, serviceComponentName, userId);
+                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                                Settings.Secure.VOICE_INTERACTION_SERVICE, serviceComponentName,
+                                userId);
+                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                                Settings.Secure.VOICE_RECOGNITION_SERVICE, serviceRecognizerName,
+                                userId);
 
                         return;
                     }
@@ -1352,19 +1356,19 @@ public class VoiceInteractionManagerService extends SystemService {
                     // If no service could be found try to set assist activity
                     final List<ResolveInfo> activities = mPm.queryIntentActivitiesAsUser(
                             new Intent(Intent.ACTION_ASSIST).setPackage(pkg),
-                            PackageManager.MATCH_DEFAULT_ONLY, user.getIdentifier());
+                            PackageManager.MATCH_DEFAULT_ONLY, userId);
 
                     for (ResolveInfo resolveInfo : activities) {
                         ActivityInfo activityInfo = resolveInfo.activityInfo;
 
-                        Settings.Secure.putString(getContext().getContentResolver(),
+                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.ASSISTANT,
-                                activityInfo.getComponentName().flattenToShortString());
-                        Settings.Secure.putString(getContext().getContentResolver(),
-                                Settings.Secure.VOICE_INTERACTION_SERVICE, "");
-                        Settings.Secure.putString(getContext().getContentResolver(),
+                                activityInfo.getComponentName().flattenToShortString(), userId);
+                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                                Settings.Secure.VOICE_INTERACTION_SERVICE, "", userId);
+                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.VOICE_RECOGNITION_SERVICE,
-                                getDefaultRecognizer(user));
+                                getDefaultRecognizer(user), userId);
                     }
                 }
             }
