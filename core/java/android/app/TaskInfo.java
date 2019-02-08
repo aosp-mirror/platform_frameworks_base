@@ -97,6 +97,12 @@ public class TaskInfo {
     public long lastActiveTime;
 
     /**
+     * The id of the display this task is associated with.
+     * @hide
+     */
+    public int displayId;
+
+    /**
      * The recent activity values for the highest activity in the stack to have set the values.
      * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
      */
@@ -152,6 +158,7 @@ public class TaskInfo {
         userId = source.readInt();
         stackId = source.readInt();
         taskId = source.readInt();
+        displayId = source.readInt();
         isRunning = source.readBoolean();
         baseIntent = source.readInt() != 0
                 ? Intent.CREATOR.createFromParcel(source)
@@ -179,6 +186,7 @@ public class TaskInfo {
         dest.writeInt(userId);
         dest.writeInt(stackId);
         dest.writeInt(taskId);
+        dest.writeInt(displayId);
         dest.writeBoolean(isRunning);
 
         if (baseIntent != null) {
@@ -209,6 +217,7 @@ public class TaskInfo {
     @Override
     public String toString() {
         return "TaskInfo{userId=" + userId + " stackId=" + stackId + " taskId=" + taskId
+                + " displayId=" + displayId
                 + " isRunning=" + isRunning
                 + " baseIntent=" + baseIntent + " baseActivity=" + baseActivity
                 + " topActivity=" + topActivity + " origActivity=" + origActivity
