@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.os.Build;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -152,7 +153,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * True if the data has changed since the last layout
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768524)
     boolean mDataChanged;
 
     /**
