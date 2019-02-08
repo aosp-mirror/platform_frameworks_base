@@ -23,7 +23,6 @@
 
 #include "external/Perfetto.h"
 #include "external/Perfprofd.h"
-#include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"
 
