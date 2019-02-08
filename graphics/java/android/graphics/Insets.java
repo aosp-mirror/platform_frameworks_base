@@ -18,6 +18,8 @@ package android.graphics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * An Insets instance holds four integer offsets which describe changes to the four
@@ -27,7 +29,7 @@ import android.annotation.Nullable;
  * Insets are immutable so may be treated as values.
  *
  */
-public final class Insets {
+public final class Insets implements Parcelable {
     public static final Insets NONE = new Insets(0, 0, 0, 0);
 
     public final int left;
@@ -73,7 +75,7 @@ public final class Insets {
     }
 
     /**
-     * Returns a Rect intance with the appropriate values.
+     * Returns a Rect instance with the appropriate values.
      *
      * @hide
      */
@@ -168,4 +170,29 @@ public final class Insets {
                 ", bottom=" + bottom +
                 '}';
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(left);
+        out.writeInt(top);
+        out.writeInt(right);
+        out.writeInt(bottom);
+    }
+
+    public static final Parcelable.Creator<Insets> CREATOR = new Parcelable.Creator<Insets>() {
+        @Override
+        public Insets createFromParcel(Parcel in) {
+            return new Insets(in.readInt(), in.readInt(), in.readInt(), in.readInt());
+        }
+
+        @Override
+        public Insets[] newArray(int size) {
+            return new Insets[size];
+        }
+    };
 }

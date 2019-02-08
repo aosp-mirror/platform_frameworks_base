@@ -26,6 +26,7 @@ import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Insets;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.os.RemoteException;
@@ -83,6 +84,8 @@ public class ActivityView extends ViewGroup {
 
     /** The ActivityView is only allowed to contain one task. */
     private final boolean mSingleTaskInstance;
+
+    private Insets mForwardedInsets;
 
     @UnsupportedAppUsage
     public ActivityView(Context context) {
@@ -369,11 +372,13 @@ public class ActivityView extends ViewGroup {
                 .build();
 
         try {
+            // TODO: Find a way to consolidate these calls to the server.
             wm.reparentDisplayContent(displayId, mRootSurfaceControl);
             wm.dontOverrideDisplayInfo(displayId);
             if (mSingleTaskInstance) {
                 mActivityTaskManager.setDisplayToSingleTaskInstance(displayId);
             }
+            wm.setForwardedInsets(displayId, mForwardedInsets);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -450,6 +455,24 @@ public class ActivityView extends ViewGroup {
             }
         } finally {
             super.finalize();
+        }
+    }
+
+    /**
+     * Set forwarded insets on the virtual display.
+     *
+     * @see IWindowManager#setForwardedInsets
+     */
+    public void setForwardedInsets(Insets insets) {
+        mForwardedInsets = insets;
+        if (mVirtualDisplay == null) {
+            return;
+        }
+        try {
+            final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+            wm.setForwardedInsets(mVirtualDisplay.getDisplay().getDisplayId(), mForwardedInsets);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
