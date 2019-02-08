@@ -1193,7 +1193,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void setTranscription(IVoiceInteractionService service, String transcription) {
+        public void setUiHints(IVoiceInteractionService service, Bundle hints) {
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService(service);
 
@@ -1202,47 +1202,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     final IVoiceInteractionSessionListener listener =
                             mVoiceInteractionSessionListeners.getBroadcastItem(i);
                     try {
-                        listener.onTranscriptionUpdate(transcription);
+                        listener.onSetUiHints(hints);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "Error delivering voice transcription.", e);
-                    }
-                }
-                mVoiceInteractionSessionListeners.finishBroadcast();
-            }
-        }
-
-        @Override
-        public void clearTranscription(IVoiceInteractionService service, boolean immediate) {
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService(service);
-
-                final int size = mVoiceInteractionSessionListeners.beginBroadcast();
-                for (int i = 0; i < size; ++i) {
-                    final IVoiceInteractionSessionListener listener =
-                            mVoiceInteractionSessionListeners.getBroadcastItem(i);
-                    try {
-                        listener.onTranscriptionComplete(immediate);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Error delivering transcription complete event.", e);
-                    }
-                }
-                mVoiceInteractionSessionListeners.finishBroadcast();
-            }
-        }
-
-        @Override
-        public void setVoiceState(IVoiceInteractionService service, int state) {
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService(service);
-
-                final int size = mVoiceInteractionSessionListeners.beginBroadcast();
-                for (int i = 0; i < size; ++i) {
-                    final IVoiceInteractionSessionListener listener =
-                            mVoiceInteractionSessionListeners.getBroadcastItem(i);
-                    try {
-                        listener.onVoiceStateChange(state);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Error delivering voice state change.", e);
+                        Slog.e(TAG, "Error delivering UI hints.", e);
                     }
                 }
                 mVoiceInteractionSessionListeners.finishBroadcast();
