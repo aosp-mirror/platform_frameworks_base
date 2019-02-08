@@ -10166,11 +10166,14 @@ public class TelephonyManager {
 
     /**
      * Get whether reboot is required or not after making changes to modem configurations.
-     * @Return {@code True} if reboot is required after making changes to modem configurations,
-     * otherwise return {@code False}.
+     * The modem configuration change refers to switching from single SIM configuration to DSDS
+     * or the other way around.
+     * @Return {@code true} if reboot is required after making changes to modem configurations,
+     * otherwise return {@code false}.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isRebootRequiredForModemConfigChange() {
         try {
