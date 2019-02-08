@@ -1613,4 +1613,32 @@ public class WifiAwareManagerTest {
         assertEquals(cap, rereadCap);
         assertEquals(cap.hashCode(), rereadCap.hashCode());
     }
+
+    // ParcelablePeerHandle tests
+
+    /**
+     * Verify parceling of ParcelablePeerHandle and interoperability with PeerHandle.
+     */
+    @Test
+    public void testParcelablePeerHandleParcel() {
+        final PeerHandle peerHandle = new PeerHandle(5);
+        final ParcelablePeerHandle parcelablePeerHandle = new ParcelablePeerHandle(peerHandle);
+
+        Parcel parcelW = Parcel.obtain();
+        parcelablePeerHandle.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        ParcelablePeerHandle rereadParcelablePeerHandle =
+                ParcelablePeerHandle.CREATOR.createFromParcel(parcelR);
+
+        assertEquals(peerHandle, rereadParcelablePeerHandle);
+        assertEquals(peerHandle.hashCode(), rereadParcelablePeerHandle.hashCode());
+        assertEquals(parcelablePeerHandle, rereadParcelablePeerHandle);
+        assertEquals(parcelablePeerHandle.hashCode(), rereadParcelablePeerHandle.hashCode());
+
+    }
 }
