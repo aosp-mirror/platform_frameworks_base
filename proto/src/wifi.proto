@@ -668,6 +668,9 @@ message ConnectionEvent {
 
   // Has bug report been taken.
   optional bool automatic_bug_report_taken = 9;
+
+  // Connection is using locally generated random MAC address.
+  optional bool use_randomized_mac = 10 [default = false];
 }
 
 // Number of occurrences of a specific RSSI poll rssi value
