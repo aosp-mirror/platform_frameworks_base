@@ -16,9 +16,6 @@
 
 package android.net.wifi.aware;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Opaque object used to represent a Wi-Fi Aware peer. Obtained from discovery sessions in
  * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)} or
@@ -36,7 +33,7 @@ import android.os.Parcelable;
  * {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])}, or match filter,
  * {@link PublishConfig.Builder#setMatchFilter(java.util.List)}.
  */
-public final class PeerHandle implements Parcelable {
+public class PeerHandle {
     /** @hide */
     public PeerHandle(int peerId) {
         this.peerId = peerId;
@@ -62,29 +59,4 @@ public final class PeerHandle implements Parcelable {
     public int hashCode() {
         return peerId;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(peerId);
-    }
-
-    public static final Creator<PeerHandle> CREATOR = new Creator<PeerHandle>() {
-        @Override
-        public PeerHandle[] newArray(int size) {
-            return new PeerHandle[size];
-        }
-
-        @Override
-        public PeerHandle createFromParcel(Parcel in) {
-            int peerHandle = in.readInt();
-
-            return new PeerHandle(peerHandle);
-        }
-    };
-
 }
