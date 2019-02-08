@@ -16,13 +16,22 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import android.annotation.ColorInt;
+import android.app.Notification;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
@@ -50,6 +59,11 @@ public abstract class NotificationViewWrapper implements TransformableView {
             } else if ("messaging".equals(v.getTag())) {
                 return new NotificationMessagingTemplateViewWrapper(ctx, v, row);
             }
+            Class<? extends Notification.Style> style =
+                    row.getEntry().notification.getNotification().getNotificationStyle();
+            if (Notification.DecoratedCustomViewStyle.class.equals(style)) {
+                return new NotificationDecoratedCustomViewWrapper(ctx, v, row);
+            }
             return new NotificationTemplateViewWrapper(ctx, v, row);
         } else if (v instanceof NotificationHeaderView) {
             return new NotificationHeaderViewWrapper(ctx, v, row);
@@ -75,14 +89,110 @@ public abstract class NotificationViewWrapper implements TransformableView {
         if (shouldClearBackgroundOnReapply()) {
             mBackgroundColor = 0;
         }
-        Drawable background = mView.getBackground();
-        if (background instanceof ColorDrawable) {
-            int backgroundColor = ((ColorDrawable) background).getColor();
-            if (backgroundColor != Color.TRANSPARENT) {
-                mBackgroundColor = backgroundColor;
-                mView.setBackground(new ColorDrawable(Color.TRANSPARENT));
+        int backgroundColor = getBackgroundColor(mView);
+        if (backgroundColor != Color.TRANSPARENT) {
+            mBackgroundColor = backgroundColor;
+            mView.setBackground(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    protected boolean needsInversion(int defaultBackgroundColor, View view) {
+        if (view == null) {
+            return false;
+        }
+
+        Configuration configuration = mView.getResources().getConfiguration();
+        boolean nightMode = (configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+        if (!nightMode) {
+            return false;
+        }
+
+        int background = getBackgroundColor(view);
+        if (background == Color.TRANSPARENT) {
+            background = defaultBackgroundColor;
+        }
+        if (background == Color.TRANSPARENT) {
+            background = resolveBackgroundColor();
+        }
+
+        float[] hsl = new float[] {0f, 0f, 0f};
+        ColorUtils.colorToHSL(background, hsl);
+
+        // Notifications with colored backgrounds should not be inverted
+        if (hsl[1] != 0) {
+            return false;
+        }
+
+        // Invert white or light gray backgrounds.
+        boolean isLightGrayOrWhite = hsl[1] == 0 && hsl[2] > 0.5;
+        if (isLightGrayOrWhite) {
+            return true;
+        }
+
+        // Now let's check if there's unprotected text somewhere, and invert if we find it.
+        if (view instanceof ViewGroup) {
+            return childrenNeedInversion(background, (ViewGroup) view);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean childrenNeedInversion(@ColorInt int parentBackground, ViewGroup viewGroup) {
+        if (viewGroup == null) {
+            return false;
+        }
+
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            View child = viewGroup.getChildAt(i);
+            int backgroundColor = getBackgroundColor(viewGroup);
+            if (backgroundColor == Color.TRANSPARENT) {
+                backgroundColor = parentBackground;
+            }
+            if (child instanceof TextView) {
+                int foreground = ((TextView) child).getCurrentTextColor();
+                if (ColorUtils.calculateContrast(foreground, backgroundColor) < 3) {
+                    return true;
+                }
+            } else if (child instanceof ViewGroup) {
+                if (childrenNeedInversion(backgroundColor, (ViewGroup) child)) {
+                    return true;
+                }
             }
         }
+
+        return false;
+    }
+
+    protected int getBackgroundColor(View view) {
+        if (view == null) {
+            return Color.TRANSPARENT;
+        }
+        Drawable background = view.getBackground();
+        if (background instanceof ColorDrawable) {
+            return ((ColorDrawable) background).getColor();
+        }
+        return Color.TRANSPARENT;
+    }
+
+    protected void invertViewLuminosity(View view) {
+        Paint paint = new Paint();
+        ColorMatrix matrix = new ColorMatrix();
+        ColorMatrix tmp = new ColorMatrix();
+        // Inversion should happen on Y'UV space to conserve the colors and
+        // only affect the luminosity.
+        matrix.setRGB2YUV();
+        tmp.set(new float[]{
+                -1f, 0f, 0f, 0f, 255f,
+                0f, 1f, 0f, 0f, 0f,
+                0f, 0f, 1f, 0f, 0f,
+                0f, 0f, 0f, 1f, 0f
+        });
+        matrix.postConcat(tmp);
+        tmp.setYUV2RGB();
+        matrix.postConcat(tmp);
+        paint.setColorFilter(new ColorMatrixColorFilter(matrix));
+        view.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
     }
 
     protected boolean shouldClearBackgroundOnReapply() {
