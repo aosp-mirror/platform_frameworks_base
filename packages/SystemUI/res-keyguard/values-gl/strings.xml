@@ -150,7 +150,7 @@
       <item quantity="other">A SIM está desactivada. Introduce o código PUK para continuar. Quédanche <xliff:g id="_NUMBER_1">%d</xliff:g> intentos antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.</item>
       <item quantity="one">A SIM está desactivada. Introduce o código PUK para continuar. Quédache <xliff:g id="_NUMBER_0">%d</xliff:g> intento antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Hora:"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Doce"</item>
     <item msgid="7389464214252023751">"Unha"</item>

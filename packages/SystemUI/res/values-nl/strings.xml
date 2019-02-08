@@ -792,7 +792,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"Scherm vergrendelen"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Vergrendelingsscherm"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>
@@ -879,8 +879,7 @@
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> app gebruikt je <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Privacyinstellingen"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App die je <xliff:g id="TYPES_LIST">%s</xliff:g> gebruikt"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apps die je <xliff:g id="TYPES_LIST">%s</xliff:g> gebruiken"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -895,8 +894,12 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensoren uit"</string>
     <string name="device_services" msgid="1191212554435440592">"Apparaatservices"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Geen titel"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> openen"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Instellingen voor meldingen voor <xliff:g id="APP_NAME">%1$s</xliff:g> openen"</string>
+    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
     <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <!-- no translation found for no_bubbles (7173621233904687258) -->
+    <skip />
+    <!-- no translation found for yes_bubbles (668809525728633841) -->
     <skip />
 </resources>

@@ -150,7 +150,7 @@
       <item quantity="other">A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még <xliff:g id="_NUMBER_1">%d</xliff:g> próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.</item>
       <item quantity="one">A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még <xliff:g id="_NUMBER_0">%d</xliff:g> próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Az idő:"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Tizenkettő"</item>
     <item msgid="7389464214252023751">"Egy"</item>

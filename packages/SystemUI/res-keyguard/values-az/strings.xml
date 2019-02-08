@@ -150,7 +150,7 @@
       <item quantity="other">SIM indi deaktivdir. Davam etmək üçün PUK kodunu daxil edin. SIM birdəfəlik yararsız olmadan öncə <xliff:g id="_NUMBER_1">%d</xliff:g> cəhdiniz qalır. Ətraflı məlumat üçün operatorla əlaqə saxlayın.</item>
       <item quantity="one">SIM indi deaktivdir. Davam etmək üçün PUK kodunu daxil edin. SIM birdəfəlik yararsız olmadan öncə <xliff:g id="_NUMBER_0">%d</xliff:g> cəhdiniz qalır. Ətraflı məlumat üçün operatorla əlaqə saxlayın.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Saat"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"On iki"</item>
     <item msgid="7389464214252023751">"Bir"</item>

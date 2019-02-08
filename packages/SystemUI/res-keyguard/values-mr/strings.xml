@@ -150,7 +150,7 @@
       <item quantity="one">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहे. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
       <item quantity="other">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"हे आहे"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"बारा"</item>
     <item msgid="7389464214252023751">"एक"</item>

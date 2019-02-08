@@ -150,7 +150,7 @@
       <item quantity="one">SIM քարտն անջատված է: Շարունակելու համար մուտքագրեք PUK կոդը: Մնացել է <xliff:g id="_NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել: Մանրամասների համար դիմեք օպերատորին:</item>
       <item quantity="other">SIM քարտն անջատված է: Շարունակելու համար մուտքագրեք PUK կոդը: Մնացել է <xliff:g id="_NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել: Մանրամասների համար դիմեք օպերատորին:</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Ժամն է՝"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"տասներկու"</item>
     <item msgid="7389464214252023751">"մեկ"</item>

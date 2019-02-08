@@ -150,7 +150,7 @@
       <item quantity="other">O SIM encontra-se desativado. Introduza o código PUK para continuar. Tem mais <xliff:g id="_NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar permanentemente inutilizável. Contacte o operador para obter mais detalhes.</item>
       <item quantity="one">O SIM encontra-se desativado. Introduza o código PUK para continuar. Tem mais <xliff:g id="_NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar permanentemente inutilizável. Contacte o operador para obter mais detalhes.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"São"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Doze"</item>
     <item msgid="7389464214252023751">"Google One"</item>

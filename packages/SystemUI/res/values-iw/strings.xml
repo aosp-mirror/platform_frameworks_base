@@ -519,9 +519,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"כווץ"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"החלפת מכשיר פלט"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"המסך מוצמד"</string>
-    <string name="screen_pinning_description" msgid="8909878447196419623">"נשאר בתצוגה עד לביטול ההצמדה. גע בלחצנים \'הקודם\' ו\'סקירה\' והחזק כדי לבטל את ההצמדה."</string>
+    <string name="screen_pinning_description" msgid="8909878447196419623">"נשאר בתצוגה עד לביטול ההצמדה. יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'סקירה\' כדי לבטל את ההצמדה."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"נשאר בתצוגה עד לביטול ההצמדה. יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'דף הבית\' כדי לבטל את ההצמדה."</string>
-    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"נשאר בתצוגה עד לביטול ההצמדה. גע בלחצן \'סקירה\' והחזק כדי לבטל את ההצמדה."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"נשאר בתצוגה עד לביטול ההצמדה. יש ללחוץ לחיצה ארוכה על הלחצן \'סקירה\' כדי לבטל את ההצמדה."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"נשאר בתצוגה עד לביטול ההצמדה. יש ללחוץ לחיצה ארוכה על הלחצן \'דף הבית\' כדי לבטל את ההצמדה."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"כדי לבטל את ההצמדה של מסך זה, יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'סקירה\'"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"כדי לבטל את ההצמדה של מסך זה, יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'דף הבית\'"</string>
@@ -914,5 +914,11 @@
     <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
     <skip />
     <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <skip />
+    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
+    <skip />
+    <!-- no translation found for no_bubbles (7173621233904687258) -->
+    <skip />
+    <!-- no translation found for yes_bubbles (668809525728633841) -->
     <skip />
 </resources>

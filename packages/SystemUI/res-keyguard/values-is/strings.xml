@@ -150,7 +150,7 @@
       <item quantity="one">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það er <xliff:g id="_NUMBER_1">%d</xliff:g> tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
       <item quantity="other">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það eru <xliff:g id="_NUMBER_1">%d</xliff:g> tilraunir eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Hún er"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Tólf"</item>
     <item msgid="7389464214252023751">"Eitt"</item>

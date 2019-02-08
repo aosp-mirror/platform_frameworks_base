@@ -152,7 +152,7 @@
       <item quantity="other">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_1">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
       <item quantity="one">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_0">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Hozir"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Oʻn ikki"</item>
     <item msgid="7389464214252023751">"Bir"</item>

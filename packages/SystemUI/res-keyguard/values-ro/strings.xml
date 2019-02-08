@@ -158,7 +158,7 @@
       <item quantity="other">Cardul SIM este dezactivat acum. Introduceți codul PUK pentru a continua. V-au mai rămas <xliff:g id="_NUMBER_1">%d</xliff:g> de încercări până când cardul SIM va deveni inutilizabil definitiv. Contactați operatorul pentru detalii.</item>
       <item quantity="one">Cardul SIM este dezactivat acum. Introduceți codul PUK pentru a continua. V-a mai rămas <xliff:g id="_NUMBER_0">%d</xliff:g> încercare până când cardul SIM va deveni inutilizabil definitiv. Contactați operatorul pentru detalii.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Este"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Douăsprezece"</item>
     <item msgid="7389464214252023751">"Unu"</item>

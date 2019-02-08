@@ -166,7 +166,7 @@
       <item quantity="other">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותרו לך <xliff:g id="_NUMBER_1">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM ינעל לצמיתות. למידע נוסף, ניתן לפנות לספק שלך.</item>
       <item quantity="one">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותר לך <xliff:g id="_NUMBER_0">%d</xliff:g> ניסיון נוסף לפני שכרטיס ה-SIM ינעל לצמיתות. למידע נוסף, ניתן לפנות לספק שלך.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"השעה"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"שתים-עשרה"</item>
     <item msgid="7389464214252023751">"אחת"</item>

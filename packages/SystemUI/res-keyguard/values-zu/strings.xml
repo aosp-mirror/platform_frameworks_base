@@ -150,7 +150,7 @@
       <item quantity="one">I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-<xliff:g id="_NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasebenziseki unaphakade. Xhumana nenkampani yenethiwekhi ngemininingwane.</item>
       <item quantity="other">I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-<xliff:g id="_NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasebenziseki unaphakade. Xhumana nenkampani yenethiwekhi ngemininingwane.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Kuyi-"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Ishumi nambili"</item>
     <item msgid="7389464214252023751">"Kunye"</item>

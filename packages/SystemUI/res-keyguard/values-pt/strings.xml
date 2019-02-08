@@ -150,7 +150,7 @@
       <item quantity="one">O chip agora está desativado. Informe o código PUK para continuar. Você tem <xliff:g id="_NUMBER_1">%d</xliff:g> tentativa restante antes de o chip se tornar permanentemente inutilizável. Entre em contato com a operadora para saber mais detalhes.</item>
       <item quantity="other">O chip agora está desativado. Informe o código PUK para continuar. Você tem <xliff:g id="_NUMBER_1">%d</xliff:g> tentativas restantes antes de o chip se tornar permanentemente inutilizável. Entre em contato com a operadora para saber mais detalhes.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"São"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Doze"</item>
     <item msgid="7389464214252023751">"Uma"</item>

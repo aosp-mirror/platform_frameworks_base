@@ -158,7 +158,7 @@
       <item quantity="few">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Više informacija zatražite od mobilnog operatera.</item>
       <item quantity="other">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Više informacija zatražite od mobilnog operatera.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Sada je"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Dvanaest"</item>
     <item msgid="7389464214252023751">"Jedan"</item>

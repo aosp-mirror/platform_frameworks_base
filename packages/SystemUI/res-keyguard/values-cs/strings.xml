@@ -166,7 +166,7 @@
       <item quantity="other">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusů, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
       <item quantity="one">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_0">%d</xliff:g> pokus, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Je"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Dvanáct"</item>
     <item msgid="7389464214252023751">"Jedna"</item>

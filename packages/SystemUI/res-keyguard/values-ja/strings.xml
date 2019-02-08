@@ -150,7 +150,7 @@
       <item quantity="other">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_1">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>
       <item quantity="one">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_0">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"時刻:"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"12"</item>
     <item msgid="7389464214252023751">"1"</item>
