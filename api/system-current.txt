@@ -239,6 +239,8 @@ package android {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultBrowser = 17039394; // 0x1040022
     field public static final int config_defaultDialer = 17039395; // 0x1040023
+    field public static final int config_defaultGallery = 17039398; // 0x1040026
+    field public static final int config_defaultMusic = 17039397; // 0x1040025
     field public static final int config_defaultSms = 17039396; // 0x1040024
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
