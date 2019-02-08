@@ -299,8 +299,9 @@ public class CarrierTextController {
                 displayText.toString().split(mSeparator.toString()),
                 anySimReadyAndInService && !missingSimsWithSubs,
                 subsIds);
-        if (mCarrierTextCallback != null) {
-            handler.post(() -> mCarrierTextCallback.updateCarrierInfo(info));
+        final CarrierTextCallback callback = mCarrierTextCallback;
+        if (callback != null) {
+            handler.post(() -> callback.updateCarrierInfo(info));
         }
 
     }
