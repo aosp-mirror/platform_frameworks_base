@@ -39,6 +39,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.hamcrest.Matchers.is;
@@ -53,6 +54,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -65,11 +67,13 @@ import android.view.SurfaceControl;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -88,6 +92,7 @@ public class WindowStateTests extends WindowTestsBase {
 
     @BeforeClass
     public static void setUpOnce() {
+        // TODO: Make use of SettingsSession when it becomes feasible for this.
         sPreviousNewInsetsMode = ViewRootImpl.sNewInsetsMode;
         // To let the insets provider control the insets visibility, the insets mode has to be
         // NEW_INSETS_MODE_FULL.
@@ -97,6 +102,15 @@ public class WindowStateTests extends WindowTestsBase {
     @AfterClass
     public static void tearDownOnce() {
         ViewRootImpl.sNewInsetsMode = sPreviousNewInsetsMode;
+    }
+
+    @Before
+    public void setUp() {
+        // TODO: Let the insets source with new mode keep the visibility control, and remove this
+        // setup code. Now mTopFullscreenOpaqueWindowState will take back the control of insets
+        // visibility.
+        spyOn(mDisplayContent);
+        doNothing().when(mDisplayContent).layoutAndAssignWindowLayersIfNeeded();
     }
 
     @Test
@@ -345,6 +359,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
     }
 
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     @Test
     public void testVisibleWithInsetsProvider() throws Exception {
         final WindowState topBar = createWindow(null, TYPE_STATUS_BAR, "topBar");
@@ -356,6 +371,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.getInsetsStateController().onBarControllingWindowChanged(app);
         mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
                 .onInsetsModified(app, new InsetsSource(TYPE_TOP_BAR));
+        waitUntilHandlersIdle();
         assertFalse(topBar.isVisible());
     }
 
