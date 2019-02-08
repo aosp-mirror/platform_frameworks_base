@@ -1037,9 +1037,6 @@ public class WifiManager {
      * Example use cases are real time gaming or virtual reality applications where
      * low latency is a key factor for user experience.
      * <p>
-     * When there is no support from the hardware, the {@link #WIFI_MODE_FULL_LOW_LATENCY}
-     * lock will cause the device not to go power save.
-     * <p>
      * Note: For an app which acquires both {@link #WIFI_MODE_FULL_LOW_LATENCY} and
      * {@link #WIFI_MODE_FULL_HIGH_PERF} locks, {@link #WIFI_MODE_FULL_LOW_LATENCY}
      * lock will be effective when app is running in foreground and screen is on,
