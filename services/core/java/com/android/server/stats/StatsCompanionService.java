@@ -45,6 +45,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
@@ -1419,23 +1421,35 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullNumFingerprints(int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
+    private void pullNumBiometricsEnrolled(int modality, int tagId, long elapsedNanos,
+            long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         FingerprintManager fingerprintManager = mContext.getSystemService(FingerprintManager.class);
-        if (fingerprintManager == null) {
+        FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+        if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT && fingerprintManager == null) {
+            return;
+        }
+        if (modality == BiometricsProtoEnums.MODALITY_FACE && faceManager == null) {
             return;
         }
         UserManager userManager = mContext.getSystemService(UserManager.class);
         if (userManager == null) {
             return;
         }
+
         final long token = Binder.clearCallingIdentity();
         for (UserInfo user : userManager.getUsers()) {
             final int userId = user.getUserHandle().getIdentifier();
-            final int numFingerprints = fingerprintManager.getEnrolledFingerprints(userId).size();
+            int numEnrolled = 0;
+            if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT) {
+                numEnrolled = fingerprintManager.getEnrolledFingerprints(userId).size();
+            } else if (modality == BiometricsProtoEnums.MODALITY_FACE) {
+                numEnrolled = faceManager.getEnrolledFaces(userId).size();
+            } else {
+                return;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(userId);
-            e.writeInt(numFingerprints);
+            e.writeInt(numEnrolled);
             pulledData.add(e);
         }
         Binder.restoreCallingIdentity(token);
@@ -2027,7 +2041,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 break;
             }
             case StatsLog.NUM_FINGERPRINTS_ENROLLED: {
-                pullNumFingerprints(tagId, elapsedNanos, wallClockNanos, ret);
+                pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FINGERPRINT, tagId,
+                        elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.NUM_FACES_ENROLLED: {
+                pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FACE, tagId, elapsedNanos,
+                        wallClockNanos, ret);
                 break;
             }
             case StatsLog.PROC_STATS: {
