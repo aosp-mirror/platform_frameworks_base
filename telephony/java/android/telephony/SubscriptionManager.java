@@ -2047,6 +2047,8 @@ public class SubscriptionManager {
             putPhoneIdAndSubIdExtra(intent, phoneId, subIds[0]);
         } else {
             logd("putPhoneIdAndSubIdExtra: no valid subs");
+            intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
+            intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         }
     }
 
