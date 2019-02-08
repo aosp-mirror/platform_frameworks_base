@@ -311,8 +311,8 @@ interface IDevicePolicyManager {
 
     void setPermissionPolicy(in ComponentName admin, in String callerPackage, int policy);
     int  getPermissionPolicy(in ComponentName admin);
-    boolean setPermissionGrantState(in ComponentName admin, in String callerPackage, String packageName,
-            String permission, int grantState);
+    void setPermissionGrantState(in ComponentName admin, in String callerPackage, String packageName,
+            String permission, int grantState, in RemoteCallback resultReceiver);
     int getPermissionGrantState(in ComponentName admin, in String callerPackage, String packageName, String permission);
     boolean isProvisioningAllowed(String action, String packageName);
     int checkProvisioningPreCondition(String action, String packageName);

@@ -59,6 +59,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -115,6 +116,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
@@ -1574,6 +1577,19 @@ public class DevicePolicyManager {
      * Already granted or denied permissions are not affected by this.
      */
     public static final int PERMISSION_POLICY_AUTO_DENY = 2;
+
+    /**
+     * Possible policy values for permissions.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "PERMISSION_GRANT_STATE_" }, value = {
+            PERMISSION_GRANT_STATE_DEFAULT,
+            PERMISSION_GRANT_STATE_GRANTED,
+            PERMISSION_GRANT_STATE_DENIED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionGrantState {}
 
     /**
      * Runtime permission state: The user can manage the permission
@@ -8667,8 +8683,15 @@ public class DevicePolicyManager {
      * Setting the grant state to {@link #PERMISSION_GRANT_STATE_DEFAULT default} does not revoke
      * the permission. It retains the previous grant, if any.
      * <p/>
-     * Permissions can be granted or revoked only for applications built with a
-     * {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#M} or later.
+     * Device admins with a {@code targetSdkVersion} &lt; {@link android.os.Build.VERSION_CODES#Q}
+     * cannot grant and revoke permissions for applications built with a {@code targetSdkVersion}
+     * &lt; {@link android.os.Build.VERSION_CODES#M}.
+     * <p/>
+     * Admins with a {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#Q} can
+     * grant and revoke permissions of all apps. Similar to the user revoking a permission from a
+     * application built with a {@code targetSdkVersion} &lt;
+     * {@link android.os.Build.VERSION_CODES#M} the app-op matching the permission is set to
+     * {@link android.app.AppOpsManager#MODE_IGNORED}, but the permission stays granted.
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.
@@ -8684,14 +8707,21 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_PERMISSION_GRANT
      */
-    public boolean setPermissionGrantState(@NonNull ComponentName admin, String packageName,
-            String permission, int grantState) {
+    public boolean setPermissionGrantState(@NonNull ComponentName admin,
+            @NonNull String packageName, @NonNull String permission,
+            @PermissionGrantState int grantState) {
         throwIfParentInstance("setPermissionGrantState");
         try {
-            return mService.setPermissionGrantState(admin, mContext.getPackageName(), packageName,
-                    permission, grantState);
+            CompletableFuture<Boolean> result = new CompletableFuture<>();
+
+            mService.setPermissionGrantState(admin, mContext.getPackageName(), packageName,
+                    permission, grantState, new RemoteCallback((b) -> result.complete(b != null)));
+
+            return result.get();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -8719,8 +8749,8 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_PERMISSION_GRANT
      */
-    public int getPermissionGrantState(@Nullable ComponentName admin, String packageName,
-            String permission) {
+    public @PermissionGrantState int getPermissionGrantState(@Nullable ComponentName admin,
+            @NonNull String packageName, @NonNull String permission) {
         throwIfParentInstance("getPermissionGrantState");
         try {
             return mService.getPermissionGrantState(admin, mContext.getPackageName(), packageName,
