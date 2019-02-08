@@ -1935,7 +1935,7 @@ public class PermissionManagerService {
                     if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
                         updatePermissionFlags(permission, pkg.packageName,
                                 PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED, 0, callingUid,
-                                userId, callback);
+                                userId, false, callback);
                     }
                 }
             }
@@ -2441,7 +2441,8 @@ public class PermissionManagerService {
     }
 
     private void updatePermissionFlags(String permName, String packageName, int flagMask,
-            int flagValues, int callingUid, int userId, PermissionCallback callback) {
+            int flagValues, int callingUid, int userId, boolean overridePolicy,
+            PermissionCallback callback) {
         if (!mUserManagerInt.exists(userId)) {
             return;
         }
@@ -2453,6 +2454,11 @@ public class PermissionManagerService {
                 true,  // checkShell
                 false, // requirePermissionWhenSameUser
                 "updatePermissionFlags");
+
+        if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0 && !overridePolicy) {
+            throw new SecurityException("updatePermissionFlags requires "
+                    + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+        }
 
         // Only the system can change these flags and nothing else.
         if (callingUid != Process.SYSTEM_UID) {
@@ -2745,9 +2751,11 @@ public class PermissionManagerService {
         }
         @Override
         public void updatePermissionFlags(String permName, String packageName, int flagMask,
-                int flagValues, int callingUid, int userId, PermissionCallback callback) {
+                int flagValues, int callingUid, int userId, boolean overridePolicy,
+                PermissionCallback callback) {
             PermissionManagerService.this.updatePermissionFlags(
-                    permName, packageName, flagMask, flagValues, callingUid, userId, callback);
+                    permName, packageName, flagMask, flagValues, callingUid, userId,
+                    overridePolicy, callback);
         }
         @Override
         public boolean updatePermissionFlagsForAllApps(int flagMask, int flagValues, int callingUid,

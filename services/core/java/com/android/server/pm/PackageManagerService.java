@@ -4212,6 +4212,55 @@ public class PackageManagerService extends IPackageManager.Stub
         return -1;
     }
 
+    /**
+     * Check if any package sharing/holding a uid has a low enough target SDK.
+     *
+     * @param uid The uid of the packages
+     * @param higherTargetSDK The target SDK that might be higher than the searched package
+     *
+     * @return {@code true} if there is a package sharing/holding the uid with
+     * {@code package.targetSDK < higherTargetSDK}
+     */
+    private boolean hasTargetSdkInUidLowerThan(int uid, int higherTargetSDK) {
+        int userId = UserHandle.getUserId(uid);
+
+        synchronized (mPackages) {
+            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            if (obj == null) {
+                return false;
+            }
+
+            if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+
+                if (!ps.getInstalled(userId)) {
+                    return false;
+                }
+
+                return ps.pkg.applicationInfo.targetSdkVersion < higherTargetSDK;
+            } else if (obj instanceof SharedUserSetting) {
+                final SharedUserSetting sus = (SharedUserSetting) obj;
+
+                final int numPkgs = sus.packages.size();
+                for (int i = 0; i < numPkgs; i++) {
+                    final PackageSetting ps = sus.packages.valueAt(i);
+
+                    if (!ps.getInstalled(userId)) {
+                        continue;
+                    }
+
+                    if (ps.pkg.applicationInfo.targetSdkVersion < higherTargetSDK) {
+                        return true;
+                    }
+                }
+
+                return false;
+            } else {
+                return false;
+            }
+        }
+    }
+
     @Override
     public int[] getPackageGids(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
@@ -5280,13 +5329,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void grantRuntimePermission(String packageName, String permName, final int userId) {
-        mPermissionManager.grantRuntimePermission(permName, packageName, false /*overridePolicy*/,
+        boolean overridePolicy = (checkUidPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, Binder.getCallingUid())
+                == PackageManager.PERMISSION_GRANTED);
+
+        mPermissionManager.grantRuntimePermission(permName, packageName, overridePolicy,
                 getCallingUid(), userId, mPermissionCallback);
     }
 
     @Override
     public void revokeRuntimePermission(String packageName, String permName, int userId) {
-        mPermissionManager.revokeRuntimePermission(permName, packageName, false /*overridePolicy*/,
+        boolean overridePolicy = (checkUidPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, Binder.getCallingUid())
+                == PackageManager.PERMISSION_GRANTED);
+
+        mPermissionManager.revokeRuntimePermission(permName, packageName, overridePolicy,
                 getCallingUid(), userId, mPermissionCallback);
     }
 
@@ -5329,10 +5386,37 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void updatePermissionFlags(String permName, String packageName, int flagMask,
-            int flagValues, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
+        int callingUid = getCallingUid();
+        boolean overridePolicy = false;
+
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                    if (checkAdjustPolicyFlagPermission) {
+                        mContext.enforceCallingOrSelfPermission(
+                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                                "Need " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
+                                        + " to change policy flags");
+                    } else if (!hasTargetSdkInUidLowerThan(callingUid, Build.VERSION_CODES.Q)) {
+                        throw new IllegalArgumentException(
+                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " needs "
+                                        + " to be checked for packages targeting "
+                                        + Build.VERSION_CODES.Q + " or later when changing policy "
+                                        + "flags");
+                    }
+
+                    overridePolicy = true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
         mPermissionManager.updatePermissionFlags(
-                permName, packageName, flagMask, flagValues, getCallingUid(), userId,
-                mPermissionCallback);
+                permName, packageName, flagMask, flagValues, callingUid, userId,
+                overridePolicy, mPermissionCallback);
     }
 
     /**
@@ -22995,7 +23079,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void updatePermissionFlagsTEMP(String permName, String packageName, int flagMask,
                 int flagValues, int userId) {
             PackageManagerService.this.updatePermissionFlags(
-                    permName, packageName, flagMask, flagValues, userId);
+                    permName, packageName, flagMask, flagValues, true, userId);
         }
 
         @Override

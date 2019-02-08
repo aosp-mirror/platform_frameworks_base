@@ -147,7 +147,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      */
     public abstract void updatePermissionFlags(@NonNull String permName,
             @NonNull String packageName, int flagMask, int flagValues, int callingUid, int userId,
-            @Nullable PermissionCallback callback);
+            boolean overridePolicy, @Nullable PermissionCallback callback);
     /**
      * Updates the flags for all applications by replacing the flags in the specified mask
      * with the provided flag values.
