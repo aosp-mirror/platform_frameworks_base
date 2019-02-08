@@ -41,6 +41,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -384,7 +385,10 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
     /**
      * Collapses the stack of bubbles.
+     * <p>
+     * Must be called from the main thread.
      */
+    @MainThread
     public void collapseStack() {
         if (mIsExpanded) {
             // TODO: Save opened bubble & move it to top of stack
@@ -402,7 +406,10 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
     /**
      * Expands the stack fo bubbles.
+     * <p>
+     * Must be called from the main thread.
      */
+    @MainThread
     public void expandStack() {
         if (!mIsExpanded) {
             mExpandedBubble = getTopBubble();
