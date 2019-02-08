@@ -6807,8 +6807,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         pw.println("  mController=" + mController
                                 + " mControllerIsAMonkey=" + mControllerIsAMonkey);
                     }
-                    pw.println("  mGoingToSleep=" + mStackSupervisor.mGoingToSleep);
-                    pw.println("  mLaunchingActivity=" + mStackSupervisor.mLaunchingActivity);
+                    pw.println("  mGoingToSleepWakeLock=" + mStackSupervisor.mGoingToSleepWakeLock);
+                    pw.println("  mLaunchingActivityWakeLock="
+                            + mStackSupervisor.mLaunchingActivityWakeLock);
                 }
 
                 return needSep;
@@ -6840,8 +6841,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         proto.write(IS_A_MONKEY, mControllerIsAMonkey);
                         proto.end(token);
                     }
-                    mStackSupervisor.mGoingToSleep.writeToProto(proto, GOING_TO_SLEEP);
-                    mStackSupervisor.mLaunchingActivity.writeToProto(proto, LAUNCHING_ACTIVITY);
+                    mStackSupervisor.mGoingToSleepWakeLock.writeToProto(proto, GOING_TO_SLEEP);
+                    mStackSupervisor.mLaunchingActivityWakeLock.writeToProto(proto,
+                            LAUNCHING_ACTIVITY);
                 }
 
                 if (mHomeProcess != null && (dumpPackage == null

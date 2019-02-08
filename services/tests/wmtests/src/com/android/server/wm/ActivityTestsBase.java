@@ -598,7 +598,7 @@ class ActivityTestsBase {
             doNothing().when(this).acquireLaunchWakelock();
             doReturn(mKeyguardController).when(this).getKeyguardController();
 
-            mLaunchingActivity = mock(PowerManager.WakeLock.class);
+            mLaunchingActivityWakeLock = mock(PowerManager.WakeLock.class);
 
             initialize();
         }
