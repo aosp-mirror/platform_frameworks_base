@@ -176,6 +176,7 @@ public class TextClassifierTest {
 
         TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_URL));
+        assertThat(classification, containsIntentWithAction(Intent.ACTION_VIEW));
     }
 
     @Test
@@ -207,6 +208,7 @@ public class TextClassifierTest {
 
         TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_URL));
+        assertThat(classification, containsIntentWithAction(Intent.ACTION_VIEW));
     }
 
     @Test
@@ -513,6 +515,24 @@ public class TextClassifierTest {
             public void describeTo(Description description) {
                 description.appendText("text=").appendValue(text)
                         .appendText(", type=").appendValue(type);
+            }
+        };
+    }
+
+    private static Matcher<TextClassification> containsIntentWithAction(final String action) {
+        return new BaseMatcher<TextClassification>() {
+            @Override
+            public boolean matches(Object o) {
+                if (o instanceof TextClassification) {
+                    TextClassification result = (TextClassification) o;
+                    return ExtrasUtils.findAction(result, action) != null;
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("intent action=").appendValue(action);
             }
         };
     }

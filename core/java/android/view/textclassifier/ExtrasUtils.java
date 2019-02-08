@@ -85,20 +85,29 @@ public final class ExtrasUtils {
     }
 
     /**
-     * Returns the first "translate" action found in the {@code classification} object.
+     * Returns the first action found in the {@code classification} object with an intent
+     * action string, {@code intentAction}.
      */
     @Nullable
-    public static RemoteAction findTranslateAction(TextClassification classification) {
+    public static RemoteAction findAction(TextClassification classification, String intentAction) {
         final ArrayList<Intent> actionIntents = getActionsIntents(classification);
         if (actionIntents != null) {
             final int size = actionIntents.size();
             for (int i = 0; i < size; i++) {
-                if (Intent.ACTION_TRANSLATE.equals(actionIntents.get(i).getAction())) {
+                if (intentAction.equals(actionIntents.get(i).getAction())) {
                     return classification.getActions().get(i);
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the first "translate" action found in the {@code classification} object.
+     */
+    @Nullable
+    public static RemoteAction findTranslateAction(TextClassification classification) {
+        return findAction(classification, Intent.ACTION_TRANSLATE);
     }
 
     /**

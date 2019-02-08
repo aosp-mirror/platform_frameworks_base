@@ -91,8 +91,8 @@ public class TextClassifierEventTronLoggerTest {
                 .isEqualTo(ConversationAction.TYPE_CALL_PHONE);
         assertThat((float) logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_SCORE))
                 .isWithin(0.00001f).of(0.5f);
-        assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_EVENT_TIME))
-                .isEqualTo(EVENT_TIME);
+        // Never write event time.
+        assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_EVENT_TIME)).isNull();
         assertThat(logMaker.getPackageName()).isEqualTo(PACKAGE_NAME);
         assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_WIDGET_TYPE))
                 .isEqualTo(WIDGET_TYPE);

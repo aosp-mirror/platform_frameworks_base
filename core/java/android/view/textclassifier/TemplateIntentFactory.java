@@ -49,20 +49,18 @@ public final class TemplateIntentFactory {
         }
         final List<TextClassifierImpl.LabeledIntent> labeledIntents = new ArrayList<>();
         for (RemoteActionTemplate remoteActionTemplate : remoteActionTemplates) {
-            Intent intent = createIntent(remoteActionTemplate);
-            if (intent == null) {
+            if (!isValidTemplate(remoteActionTemplate)) {
+                Log.w(TAG, "Invalid RemoteActionTemplate skipped.");
                 continue;
             }
-            TextClassifierImpl.LabeledIntent
-                    labeledIntent = new TextClassifierImpl.LabeledIntent(
-                    remoteActionTemplate.title,
-                    remoteActionTemplate.description,
-                    intent,
-                    remoteActionTemplate.requestCode == null
-                            ? TextClassifierImpl.LabeledIntent.DEFAULT_REQUEST_CODE
-                            : remoteActionTemplate.requestCode
-            );
-            labeledIntents.add(labeledIntent);
+            labeledIntents.add(
+                    new TextClassifierImpl.LabeledIntent(
+                            remoteActionTemplate.title,
+                            remoteActionTemplate.description,
+                            createIntent(remoteActionTemplate),
+                            remoteActionTemplate.requestCode == null
+                                    ? TextClassifierImpl.LabeledIntent.DEFAULT_REQUEST_CODE
+                                    : remoteActionTemplate.requestCode));
         }
         labeledIntents.forEach(
                 action -> action.getIntent()
@@ -70,29 +68,43 @@ public final class TemplateIntentFactory {
         return labeledIntents;
     }
 
-    @Nullable
-    private static Intent createIntent(RemoteActionTemplate remoteActionTemplate) {
-        Intent intent = new Intent();
+    private static boolean isValidTemplate(@Nullable RemoteActionTemplate remoteActionTemplate) {
+        if (remoteActionTemplate == null) {
+            Log.w(TAG, "Invalid RemoteActionTemplate: is null");
+            return false;
+        }
+        if (TextUtils.isEmpty(remoteActionTemplate.title)) {
+            Log.w(TAG, "Invalid RemoteActionTemplate: title is null");
+            return false;
+        }
+        if (TextUtils.isEmpty(remoteActionTemplate.description)) {
+            Log.w(TAG, "Invalid RemoteActionTemplate: description is null");
+            return false;
+        }
         if (!TextUtils.isEmpty(remoteActionTemplate.packageName)) {
-            Log.w(TAG, "A RemoteActionTemplate is skipped as package name is set.");
-            return null;
+            Log.w(TAG, "Invalid RemoteActionTemplate: package name is set");
+            return false;
         }
-        if (!TextUtils.isEmpty(remoteActionTemplate.action)) {
-            intent.setAction(remoteActionTemplate.action);
+        if (TextUtils.isEmpty(remoteActionTemplate.action)) {
+            Log.w(TAG, "Invalid RemoteActionTemplate: intent action not set");
+            return false;
         }
-        Uri data = null;
-        if (!TextUtils.isEmpty(remoteActionTemplate.data)) {
-            data = Uri.parse(remoteActionTemplate.data);
-        }
-        if (data != null || !TextUtils.isEmpty(remoteActionTemplate.type)) {
-            intent.setDataAndType(data, remoteActionTemplate.type);
-        }
-        if (remoteActionTemplate.flags != null) {
-            intent.setFlags(remoteActionTemplate.flags);
-        }
+        return true;
+    }
+
+    private static Intent createIntent(RemoteActionTemplate remoteActionTemplate) {
+        final Intent intent = new Intent(remoteActionTemplate.action);
+        final Uri uri = TextUtils.isEmpty(remoteActionTemplate.data)
+                ? null : Uri.parse(remoteActionTemplate.data).normalizeScheme();
+        final String type = TextUtils.isEmpty(remoteActionTemplate.type)
+                ? null : Intent.normalizeMimeType(remoteActionTemplate.type);
+        intent.setDataAndType(uri, type);
+        intent.setFlags(remoteActionTemplate.flags == null ? 0 : remoteActionTemplate.flags);
         if (remoteActionTemplate.category != null) {
             for (String category : remoteActionTemplate.category) {
-                intent.addCategory(category);
+                if (category != null) {
+                    intent.addCategory(category);
+                }
             }
         }
         intent.putExtras(createExtras(remoteActionTemplate.extras));
@@ -105,6 +117,9 @@ public final class TemplateIntentFactory {
         }
         Bundle bundle = new Bundle();
         for (NamedVariant namedVariant : namedVariants) {
+            if (namedVariant == null) {
+                continue;
+            }
             switch (namedVariant.getType()) {
                 case NamedVariant.TYPE_INT:
                     bundle.putInt(namedVariant.getName(), namedVariant.getInt());
