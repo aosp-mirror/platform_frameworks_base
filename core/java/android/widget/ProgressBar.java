@@ -203,7 +203,7 @@ public class ProgressBar extends View {
     private int mDuration;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mIndeterminate;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 124049927)
     private boolean mOnlyIndeterminate;
     private Transformation mTransformation;
     private AlphaAnimation mAnimation;
