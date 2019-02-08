@@ -108,8 +108,7 @@ public final class PermissionChecker {
             packageName = packageNames[0];
         }
 
-        if (appOpsManager.noteProxyOpNoThrow(op, packageName)
-                != AppOpsManager.MODE_ALLOWED) {
+        if (appOpsManager.noteProxyOpNoThrow(op, packageName, uid) != AppOpsManager.MODE_ALLOWED) {
             return PERMISSION_DENIED_APP_OP;
         }
 
@@ -119,6 +118,9 @@ public final class PermissionChecker {
     /**
      * Checks whether your app has a given permission and whether the app op
      * that corresponds to this permission is allowed.
+     *
+     * <p>This API assumes the the {@link Binder#getCallingUid()} is the same as
+     * {@link Process#myUid()}.
      *
      * @param context Context for accessing resources.
      * @param permission The permission to check.
