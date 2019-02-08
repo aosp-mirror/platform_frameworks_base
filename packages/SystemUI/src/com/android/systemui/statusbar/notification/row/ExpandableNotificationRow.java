@@ -124,6 +124,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
     private boolean mUpdateBackgroundOnUpdate;
+    private boolean mNotificationTranslationFinished = false;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -1453,6 +1454,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mIsBlockingHelperShowing;
     }
 
+    public boolean isBlockingHelperShowingAndTranslationFinished() {
+        return mIsBlockingHelperShowing && mNotificationTranslationFinished;
+    }
+
     public void setOnDismissRunnable(Runnable onDismissRunnable) {
         mOnDismissRunnable = onDismissRunnable;
     }
@@ -1851,7 +1856,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     void onGutsOpened() {
-        resetTranslation();
         updateContentAccessibilityImportanceForGuts(false /* isEnabled */);
     }
 
@@ -1905,11 +1909,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public void setTranslation(float translationX) {
-        if (areGutsExposed()) {
-            // Don't translate if guts are showing.
+        if (isBlockingHelperShowingAndTranslationFinished()) {
+            mGuts.setTranslationX(translationX);
             return;
-        }
-        if (!mShouldTranslateContents) {
+        } else if (!mShouldTranslateContents) {
             setTranslationX(translationX);
         } else if (mTranslateableViews != null) {
             // Translate the group of views
@@ -1925,6 +1928,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             // positioning, so we can use the scrollX instead.
             getEntry().expandedIcon.setScrollX((int) -translationX);
         }
+
         if (mMenuRow.getMenuView() != null) {
             mMenuRow.onParentTranslationUpdate(translationX);
         }
@@ -1936,6 +1940,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return getTranslationX();
         }
 
+        if (isBlockingHelperShowingAndCanTranslate()) {
+            return mGuts.getTranslationX();
+        }
+
         if (mTranslateableViews != null && mTranslateableViews.size() > 0) {
             // All of the views in the list should have same translation, just use first one.
             return mTranslateableViews.get(0).getTranslationX();
@@ -1944,15 +1952,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return 0;
     }
 
+    private boolean isBlockingHelperShowingAndCanTranslate() {
+        return areGutsExposed() && mIsBlockingHelperShowing && mNotificationTranslationFinished;
+    }
+
     public Animator getTranslateViewAnimator(final float leftTarget,
             AnimatorUpdateListener listener) {
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
         }
-        if (areGutsExposed()) {
-            // No translation if guts are exposed.
-            return null;
-        }
+
         final ObjectAnimator translateAnim = ObjectAnimator.ofFloat(this, TRANSLATE_CONTENT,
                 leftTarget);
         if (listener != null) {
@@ -1968,6 +1977,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
             @Override
             public void onAnimationEnd(Animator anim) {
+                if (mIsBlockingHelperShowing) {
+                    mNotificationTranslationFinished = true;
+                }
                 if (!cancelled && leftTarget == 0) {
                     mMenuRow.resetMenu();
                     mTranslateAnim = null;
