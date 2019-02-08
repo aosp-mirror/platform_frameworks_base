@@ -58,6 +58,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -78,8 +79,6 @@ class WindowTestsBase {
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
     static int sNextStackId = 1000;
 
-    private static MockTracker sMockTracker;
-
     /** Non-default display. */
     DisplayContent mDisplayContent;
     DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -94,6 +93,8 @@ class WindowTestsBase {
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
 
+    private MockTracker mMockTracker;
+
     /**
      * To restore the original SurfaceControl.Transaction factory if any tests changed
      * {@link WindowManagerService#mTransactionFactory}.
@@ -103,6 +104,8 @@ class WindowTestsBase {
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+    @Rule
+    public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
 
     static WindowState.PowerManagerWrapper sPowerManagerWrapper;
 
@@ -110,25 +113,18 @@ class WindowTestsBase {
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
 
-        TestSystemServices.setUpWindowManagerService();
-
-        // MockTracker needs to be initialized after TestSystemServices because we don't want to
-        // track static mocks.
-        sMockTracker = new MockTracker();
-
         sPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
     }
 
     @AfterClass
-    public static void tearDownOnceBase() {
-        sMockTracker.close();
-        sMockTracker = null;
-
-        TestSystemServices.tearDownWindowManagerService();
+    public static void tearDownOnceBase() throws IOException {
+        sPowerManagerWrapper = null;
     }
 
     @Before
     public void setUpBase() {
+        mMockTracker = new MockTracker();
+
         // If @Before throws an exception, the error isn't logged. This will make sure any failures
         // in the set up are clear. This can be removed when b/37850063 is fixed.
         try {
@@ -136,7 +132,7 @@ class WindowTestsBase {
 
             final Context context = getInstrumentation().getTargetContext();
 
-            mWm = TestSystemServices.getWindowManagerService();
+            mWm = mSystemServicesTestRule.getWindowManagerService();
             mOriginalTransactionFactory = mWm.mTransactionFactory;
             beforeCreateDisplay();
 
@@ -216,11 +212,14 @@ class WindowTestsBase {
             }
 
             // Cleaned up everything in Handler.
-            TestSystemServices.cleanupWindowManagerHandlers();
+            mSystemServicesTestRule.cleanupWindowManagerHandlers();
         } catch (Exception e) {
             Log.e(TAG, "Failed to tear down test", e);
             throw e;
         }
+
+        mMockTracker.close();
+        mMockTracker = null;
     }
 
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
@@ -237,7 +236,7 @@ class WindowTestsBase {
      * Waits until the main handler for WM has processed all messages.
      */
     void waitUntilHandlersIdle() {
-        TestSystemServices.waitUntilWindowManagerHandlersIdle();
+        mSystemServicesTestRule.waitUntilWindowManagerHandlersIdle();
     }
 
     private WindowToken createWindowToken(
