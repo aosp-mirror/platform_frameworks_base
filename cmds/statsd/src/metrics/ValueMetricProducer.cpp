@@ -361,7 +361,55 @@ void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
         invalidateCurrentBucket();
         return;
     }
-    const int64_t pullDelayNs = getElapsedRealtimeNs() - timestampNs;
+
+    accumulateEvents(allData, timestampNs, timestampNs);
+}
+
+int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTimeNs) {
+    return mTimeBaseNs + ((currentTimeNs - mTimeBaseNs) / mBucketSizeNs) * mBucketSizeNs;
+}
+
+void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData,
+                                       bool pullSuccess, int64_t originalPullTimeNs) {
+    std::lock_guard<std::mutex> lock(mMutex);
+    if (mCondition) {
+        if (!pullSuccess) {
+            // If the pull failed, we won't be able to compute a diff.
+            invalidateCurrentBucket();
+            return;
+        }
+
+        // For scheduled pulled data, the effective event time is snap to the nearest
+        // bucket end. In the case of waking up from a deep sleep state, we will
+        // attribute to the previous bucket end. If the sleep was long but not very long, we
+        // will be in the immediate next bucket. Previous bucket may get a larger number as
+        // we pull at a later time than real bucket end.
+        // If the sleep was very long, we skip more than one bucket before sleep. In this case,
+        // if the diff base will be cleared and this new data will serve as new diff base.
+        int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
+        accumulateEvents(allData, originalPullTimeNs, bucketEndTime);
+
+        // We can probably flush the bucket. Since we used bucketEndTime when calling
+        // #onMatchedLogEventInternalLocked, the current bucket will not have been flushed.
+        flushIfNeededLocked(originalPullTimeNs);
+
+    } else {
+        VLOG("No need to commit data on condition false.");
+    }
+}
+
+void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData, 
+                                           int64_t originalPullTimeNs, int64_t eventElapsedTimeNs) {
+    bool isEventLate = eventElapsedTimeNs < mCurrentBucketStartTimeNs;
+    if (isEventLate) {
+        VLOG("Skip bucket end pull due to late arrival: %lld vs %lld",
+             (long long)eventElapsedTimeNs, (long long)mCurrentBucketStartTimeNs);
+        StatsdStats::getInstance().noteLateLogEventSkipped(mMetricId);
+        invalidateCurrentBucket();
+        return;
+    }
+
+    const int64_t pullDelayNs = getElapsedRealtimeNs() - originalPullTimeNs;
     StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
     if (pullDelayNs > mMaxPullDelayNs) {
         ALOGE("Pull finish too late for atom %d, longer than %lld", mPullTagId,
@@ -373,75 +421,33 @@ void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
         return;
     }
 
-    if (timestampNs < mCurrentBucketStartTimeNs) {
-        // The data will be skipped in onMatchedLogEventInternalLocked, but we don't want to report
-        // for every event, just the pull
-        StatsdStats::getInstance().noteLateLogEventSkipped(mMetricId);
+    if (allData.size() == 0) {
+        VLOG("Data pulled is empty");
+        StatsdStats::getInstance().noteEmptyData(mPullTagId);
     }
 
+    mMatchedMetricDimensionKeys.clear();
     for (const auto& data : allData) {
-        // make a copy before doing and changes
         LogEvent localCopy = data->makeCopy();
-        localCopy.setElapsedTimestampNs(timestampNs);
         if (mEventMatcherWizard->matchLogEvent(localCopy, mWhatMatcherIndex) ==
             MatchingState::kMatched) {
+            localCopy.setElapsedTimestampNs(eventElapsedTimeNs);
             onMatchedLogEventLocked(mWhatMatcherIndex, localCopy);
         }
     }
-    mHasGlobalBase = true;
-}
-
-int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTimeNs) {
-    return mTimeBaseNs + ((currentTimeNs - mTimeBaseNs) / mBucketSizeNs) * mBucketSizeNs;
-}
-
-void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData,
-                                       bool pullSuccess) {
-    std::lock_guard<std::mutex> lock(mMutex);
-    if (mCondition) {
-        if (!pullSuccess) {
-            // If the pull failed, we won't be able to compute a diff.
-            invalidateCurrentBucket();
-            return;
-        }
-
-        if (allData.size() == 0) {
-            VLOG("Data pulled is empty");
-            StatsdStats::getInstance().noteEmptyData(mPullTagId);
-            return;
-        }
-        // For scheduled pulled data, the effective event time is snap to the nearest
-        // bucket end. In the case of waking up from a deep sleep state, we will
-        // attribute to the previous bucket end. If the sleep was long but not very long, we
-        // will be in the immediate next bucket. Previous bucket may get a larger number as
-        // we pull at a later time than real bucket end.
-        // If the sleep was very long, we skip more than one bucket before sleep. In this case,
-        // if the diff base will be cleared and this new data will serve as new diff base.
-        int64_t realEventTime = allData.at(0)->GetElapsedTimestampNs();
-        int64_t bucketEndTime = calcPreviousBucketEndTime(realEventTime) - 1;
-        bool isEventLate = bucketEndTime < mCurrentBucketStartTimeNs;
-        if (isEventLate) {
-            VLOG("Skip bucket end pull due to late arrival: %lld vs %lld", (long long)bucketEndTime,
-                 (long long)mCurrentBucketStartTimeNs);
-            StatsdStats::getInstance().noteLateLogEventSkipped(mMetricId);
-        }
-
-        for (const auto& data : allData) {
-            LogEvent localCopy = data->makeCopy();
-            if (mEventMatcherWizard->matchLogEvent(localCopy, mWhatMatcherIndex) ==
-                MatchingState::kMatched) {
-                localCopy.setElapsedTimestampNs(bucketEndTime);
-                onMatchedLogEventLocked(mWhatMatcherIndex, localCopy);
+    // If the new pulled data does not contains some keys we track in our intervals, we need to
+    // reset the base.
+    for (auto& slice : mCurrentSlicedBucket) {
+        bool presentInPulledData = mMatchedMetricDimensionKeys.find(slice.first) 
+                != mMatchedMetricDimensionKeys.end();
+        if (!presentInPulledData) {
+            for (auto& interval : slice.second) {
+                interval.hasBase = false;
             }
         }
-        mHasGlobalBase = true;
-
-        // We can probably flush the bucket. Since we used bucketEndTime when calling
-        // #onMatchedLogEventInternalLocked, the current bucket will not have been flushed.
-        flushIfNeededLocked(realEventTime);
-    } else {
-        VLOG("No need to commit data on condition false.");
     }
+    mMatchedMetricDimensionKeys.clear();
+    mHasGlobalBase = true;
 }
 
 void ValueMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
@@ -539,6 +545,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
              (long long)mCurrentBucketStartTimeNs);
         return;
     }
+    mMatchedMetricDimensionKeys.insert(eventKey);
 
     flushIfNeededLocked(eventTimeNs);
 
