@@ -145,9 +145,9 @@ public class ScrollView extends FrameLayout {
     private int mMinimumVelocity;
     private int mMaximumVelocity;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.P, trackingBug = 124050903)
     private int mOverscrollDistance;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.P, trackingBug = 124050903)
     private int mOverflingDistance;
 
     private float mVerticalScrollFactor;
