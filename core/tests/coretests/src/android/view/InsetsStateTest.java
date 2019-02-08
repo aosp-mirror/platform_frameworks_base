@@ -25,6 +25,8 @@ import static android.view.InsetsState.TYPE_SIDE_BAR_2;
 import static android.view.InsetsState.TYPE_SIDE_BAR_3;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -37,6 +39,7 @@ import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
+import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -53,49 +56,70 @@ public class InsetsStateTest {
     private InsetsState mState2 = new InsetsState();
 
     @Test
-    public void testCalculateInsets() {
+    public void testCalculateInsets() throws Exception {
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
+            mState.getSource(TYPE_TOP_BAR).setVisible(true);
+            mState.getSource(TYPE_IME).setFrame(new Rect(0, 200, 100, 300));
+            mState.getSource(TYPE_IME).setVisible(true);
+            SparseIntArray typeSideMap = new SparseIntArray();
+            WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
+                    DisplayCutout.NO_CUTOUT, null, null, SOFT_INPUT_ADJUST_RESIZE, typeSideMap);
+            assertEquals(Insets.of(0, 100, 0, 100), insets.getSystemWindowInsets());
+            assertEquals(Insets.of(0, 100, 0, 100), insets.getInsets(Type.all()));
+            assertEquals(INSET_SIDE_TOP, typeSideMap.get(TYPE_TOP_BAR));
+            assertEquals(INSET_SIDE_BOTTOM, typeSideMap.get(TYPE_IME));
+            assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.topBar()));
+            assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(Type.ime()));
+        }
+    }
+
+    @Test
+    public void testCalculateInsets_imeAndNav() throws Exception{
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(TYPE_NAVIGATION_BAR).setFrame(new Rect(0, 200, 100, 300));
+            mState.getSource(TYPE_NAVIGATION_BAR).setVisible(true);
+            mState.getSource(TYPE_IME).setFrame(new Rect(0, 100, 100, 300));
+            mState.getSource(TYPE_IME).setVisible(true);
+            WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
+                    DisplayCutout.NO_CUTOUT, null, null, SOFT_INPUT_ADJUST_RESIZE, null);
+            assertEquals(100, insets.getStableInsetBottom());
+            assertEquals(Insets.of(0, 0, 0, 100), insets.getMaxInsets(Type.systemBars()));
+            assertEquals(Insets.of(0, 0, 0, 200), insets.getSystemWindowInsets());
+            assertEquals(Insets.of(0, 0, 0, 200), insets.getInsets(Type.all()));
+            assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(Type.sideBars()));
+            assertEquals(Insets.of(0, 0, 0, 200), insets.getInsets(Type.ime()));
+        }
+    }
+
+    @Test
+    public void testCalculateInsets_navRightStatusTop() throws Exception {
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
+            mState.getSource(TYPE_TOP_BAR).setVisible(true);
+            mState.getSource(TYPE_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
+            mState.getSource(TYPE_NAVIGATION_BAR).setVisible(true);
+            WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
+                    DisplayCutout.NO_CUTOUT, null, null, 0, null);
+            assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
+            assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.topBar()));
+            assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.sideBars()));
+        }
+    }
+
+    @Test
+    public void testCalculateInsets_imeIgnoredWithoutAdjustResize() {
         mState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
         mState.getSource(TYPE_TOP_BAR).setVisible(true);
         mState.getSource(TYPE_IME).setFrame(new Rect(0, 200, 100, 300));
         mState.getSource(TYPE_IME).setVisible(true);
-        SparseIntArray typeSideMap = new SparseIntArray();
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
-                DisplayCutout.NO_CUTOUT, null, null, typeSideMap);
-        assertEquals(Insets.of(0, 100, 0, 100), insets.getSystemWindowInsets());
-        assertEquals(Insets.of(0, 100, 0, 100), insets.getInsets(Type.all()));
-        assertEquals(INSET_SIDE_TOP, typeSideMap.get(TYPE_TOP_BAR));
-        assertEquals(INSET_SIDE_BOTTOM, typeSideMap.get(TYPE_IME));
-        assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.topBar()));
-        assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(Type.ime()));
-    }
-
-    @Test
-    public void testCalculateInsets_imeAndNav() {
-        mState.getSource(TYPE_NAVIGATION_BAR).setFrame(new Rect(0, 200, 100, 300));
-        mState.getSource(TYPE_NAVIGATION_BAR).setVisible(true);
-        mState.getSource(TYPE_IME).setFrame(new Rect(0, 100, 100, 300));
-        mState.getSource(TYPE_IME).setVisible(true);
-        WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
-                DisplayCutout.NO_CUTOUT, null, null, null);
-        assertEquals(100, insets.getStableInsetBottom());
-        assertEquals(Insets.of(0, 0, 0, 100), insets.getMaxInsets(Type.all()));
-        assertEquals(Insets.of(0, 0, 0, 200), insets.getSystemWindowInsets());
-        assertEquals(Insets.of(0, 0, 0, 200), insets.getInsets(Type.all()));
-        assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(Type.sideBars()));
-        assertEquals(Insets.of(0, 0, 0, 200), insets.getInsets(Type.ime()));
-    }
-
-    @Test
-    public void testCalculateInsets_navRightStatusTop() {
-        mState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
-        mState.getSource(TYPE_TOP_BAR).setVisible(true);
-        mState.getSource(TYPE_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
-        mState.getSource(TYPE_NAVIGATION_BAR).setVisible(true);
-        WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
-                DisplayCutout.NO_CUTOUT, null, null, null);
-        assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
-        assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.topBar()));
-        assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.sideBars()));
+                DisplayCutout.NO_CUTOUT, null, null, 0, null);
+        assertEquals(0, insets.getSystemWindowInsetBottom());
+        assertTrue(insets.isVisible(ime()));
     }
 
     @Test
@@ -106,7 +130,7 @@ public class InsetsStateTest {
         mState.getSource(TYPE_IME).setVisible(true);
         mState.removeSource(TYPE_IME);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), false, false,
-                DisplayCutout.NO_CUTOUT, null, null, null);
+                DisplayCutout.NO_CUTOUT, null, null, SOFT_INPUT_ADJUST_RESIZE, null);
         assertEquals(0, insets.getSystemWindowInsetBottom());
     }
 
@@ -114,14 +138,14 @@ public class InsetsStateTest {
     public void testEquals_differentRect() {
         mState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
         mState2.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 10, 10));
-        assertNotEquals(mState, mState2);
+        assertNotEqualsAndHashCode();
     }
 
     @Test
     public void testEquals_differentSource() {
         mState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
         mState2.getSource(TYPE_IME).setFrame(new Rect(0, 0, 100, 100));
-        assertNotEquals(mState, mState2);
+        assertNotEqualsAndHashCode();
     }
 
     @Test
@@ -130,7 +154,7 @@ public class InsetsStateTest {
         mState.getSource(TYPE_IME).setFrame(new Rect(0, 0, 100, 100));
         mState2.getSource(TYPE_IME).setFrame(new Rect(0, 0, 100, 100));
         mState2.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
-        assertEquals(mState, mState2);
+        assertEqualsAndHashCode();
     }
 
     @Test
@@ -138,7 +162,21 @@ public class InsetsStateTest {
         mState.getSource(TYPE_IME).setFrame(new Rect(0, 0, 100, 100));
         mState.getSource(TYPE_IME).setVisible(true);
         mState2.getSource(TYPE_IME).setFrame(new Rect(0, 0, 100, 100));
-        assertNotEquals(mState, mState2);
+        assertNotEqualsAndHashCode();
+    }
+
+    @Test
+    public void testEquals_differentFrame() {
+        mState.setDisplayFrame(new Rect(0, 1, 2, 3));
+        mState.setDisplayFrame(new Rect(4, 5, 6, 7));
+        assertNotEqualsAndHashCode();
+    }
+
+    @Test
+    public void testEquals_sameFrame() {
+        mState.setDisplayFrame(new Rect(0, 1, 2, 3));
+        mState2.setDisplayFrame(new Rect(0, 1, 2, 3));
+        assertEqualsAndHashCode();
     }
 
     @Test
@@ -148,6 +186,7 @@ public class InsetsStateTest {
         mState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 100, 100));
         Parcel p = Parcel.obtain();
         mState.writeToParcel(p, 0 /* flags */);
+        p.setDataPosition(0);
         mState2.readFromParcel(p);
         p.recycle();
         assertEquals(mState, mState2);
@@ -160,5 +199,15 @@ public class InsetsStateTest {
         assertTrue(InsetsState.getDefaultVisibility(TYPE_SIDE_BAR_2));
         assertTrue(InsetsState.getDefaultVisibility(TYPE_SIDE_BAR_3));
         assertFalse(InsetsState.getDefaultVisibility(TYPE_IME));
+    }
+
+    private void assertEqualsAndHashCode() {
+        assertEquals(mState, mState2);
+        assertEquals(mState.hashCode(), mState2.hashCode());
+    }
+
+    private void assertNotEqualsAndHashCode() {
+        assertNotEquals(mState, mState2);
+        assertNotEquals(mState.hashCode(), mState2.hashCode());
     }
 }

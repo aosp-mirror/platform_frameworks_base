@@ -112,6 +112,7 @@ class InsetsStateController {
      * Called when a layout pass has occurred.
      */
     void onPostLayout() {
+        mState.setDisplayFrame(mDisplayContent.getBounds());
         for (int i = mControllers.size() - 1; i>= 0; i--) {
             mControllers.valueAt(i).onPostLayout();
         }

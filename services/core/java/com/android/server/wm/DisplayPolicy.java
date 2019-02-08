@@ -27,6 +27,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
@@ -134,6 +135,7 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
@@ -1900,7 +1902,10 @@ public class DisplayPolicy {
                         if (win.isVoiceInteraction()) {
                             cf.set(displayFrames.mVoiceContent);
                         } else {
-                            if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+                            // IME Insets are handled on the client for ADJUST_RESIZE in the new
+                            // insets world
+                            if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_NONE
+                                    || adjust != SOFT_INPUT_ADJUST_RESIZE) {
                                 cf.set(displayFrames.mDock);
                             } else {
                                 cf.set(displayFrames.mContent);
@@ -1991,7 +1996,11 @@ public class DisplayPolicy {
                     of.set(displayFrames.mRestricted);
                     df.set(displayFrames.mRestricted);
                     pf.set(displayFrames.mRestricted);
-                    if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+
+                    // IME Insets are handled on the client for ADJUST_RESIZE in the new insets
+                    // world
+                    if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_NONE
+                            || adjust != SOFT_INPUT_ADJUST_RESIZE) {
                         cf.set(displayFrames.mDock);
                     } else {
                         cf.set(displayFrames.mContent);
