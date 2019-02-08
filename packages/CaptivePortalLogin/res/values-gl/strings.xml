@@ -13,7 +13,7 @@
     <string name="ssl_error_mismatch" msgid="3060364165934822383">"O nome do sitio non coincide co nome que aparece no certificado."</string>
     <string name="ssl_error_expired" msgid="1501588340716182495">"Este certificado caducou."</string>
     <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Este certificado aínda non é válido."</string>
-    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Este certificado ten unha data non-válida."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Este certificado ten unha data non válida."</string>
     <string name="ssl_error_invalid" msgid="2540546515565633432">"Este certificado non é válido."</string>
     <string name="ssl_error_unknown" msgid="4405203446079465859">"Produciuse un erro descoñecido relacionado co certificado."</string>
     <string name="ssl_security_warning_title" msgid="8768539813847504404">"Advertencia de seguranza"</string>
