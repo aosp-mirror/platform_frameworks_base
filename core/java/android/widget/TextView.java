@@ -664,7 +664,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @UnsupportedAppUsage
     private CharWrapper mCharWrapper;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 124050217)
     private Marquee mMarquee;
     @UnsupportedAppUsage
     private boolean mRestartMarquee;
