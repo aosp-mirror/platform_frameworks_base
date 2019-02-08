@@ -77,14 +77,11 @@ public final class ContentCaptureManagerServiceShellCommand extends ShellCommand
             pw.println("    Temporarily (for DURATION ms) changes the service implemtation.");
             pw.println("    To reset, call with just the USER_ID argument.");
             pw.println("");
-            pw.println("");
             pw.println("  set default-service-enabled USER_ID [true|false]");
             pw.println("    Enable / disable the default service for the user.");
             pw.println("");
-            pw.println("");
             pw.println("  get default-service-enabled USER_ID");
             pw.println("    Checks whether the default service is enabled for the user.");
-            pw.println("");
             pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
