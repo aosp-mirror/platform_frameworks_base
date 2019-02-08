@@ -1207,8 +1207,8 @@ public final class OomAdjuster {
                                     }
                                 } else if ((cr.flags & Context.BIND_ADJUST_BELOW_PERCEPTIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
-                                        && adj > ProcessList.PERCEPTIBLE_APP_ADJ + 1) {
-                                    newAdj = ProcessList.PERCEPTIBLE_APP_ADJ + 1;
+                                        && adj > ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+                                    newAdj = ProcessList.PERCEPTIBLE_LOW_APP_ADJ;
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -1593,7 +1593,7 @@ public final class OomAdjuster {
         //      " adj=" + adj + " curAdj=" + app.curAdj + " maxAdj=" + app.maxAdj);
         if (adj > app.maxAdj) {
             adj = app.maxAdj;
-            if (app.maxAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
+            if (app.maxAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             }
         }
