@@ -8289,6 +8289,7 @@ public final class Settings {
          * The value is boolean (1 or 0).
          * @hide
          */
+        @TestApi
         public static final String NOTIFICATION_BADGING = "notification_badging";
 
         private static final Validator NOTIFICATION_BADGING_VALIDATOR = BOOLEAN_VALIDATOR;
