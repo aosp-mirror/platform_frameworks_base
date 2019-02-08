@@ -6630,8 +6630,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 String msg;
                 if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
-                    throw new SecurityException("Content provider lookup "
-                            + cpr.name.flattenToShortString()
+                    throw new SecurityException("Content provider lookup " + name
                             + " failed: association not allowed with package " + msg);
                 }
                 checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
