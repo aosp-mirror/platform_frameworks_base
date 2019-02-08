@@ -2151,13 +2151,13 @@
         android:label="@string/permlab_disableKeyguard"
         android:protectionLevel="normal" />
 
-    <!-- Allows an application to get the screen lock complexity and prompt users to update the
+    <!-- Allows an application to request the screen lock complexity and prompt users to update the
      screen lock to a certain complexity level.
      <p>Protection level: normal
     -->
-    <permission android:name="android.permission.GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY"
-                android:label="@string/permlab_getAndRequestScreenLockComplexity"
-                android:description="@string/permdesc_getAndRequestScreenLockComplexity"
+    <permission android:name="android.permission.REQUEST_SCREEN_LOCK_COMPLEXITY"
+                android:label="@string/permlab_requestScreenLockComplexity"
+                android:description="@string/permdesc_requestScreenLockComplexity"
                 android:protectionLevel="normal" />
 
     <!-- ================================== -->
