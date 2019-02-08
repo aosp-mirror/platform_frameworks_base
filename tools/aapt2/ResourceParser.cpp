@@ -1084,7 +1084,7 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
   // Create a overlayable entry grouping that represents this <overlayable>
   auto overlayable = std::make_shared<Overlayable>(
       overlayable_name.value(), (overlayable_actor) ? overlayable_actor.value() : "",
-      out_resource->source);
+      source_);
 
   bool error = false;
   std::string comment;
