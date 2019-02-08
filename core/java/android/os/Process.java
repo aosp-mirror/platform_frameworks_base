@@ -526,11 +526,12 @@ public class Process {
                                   @Nullable String packageName,
                                   @Nullable String[] packagesForUid,
                                   @Nullable String[] visibleVols,
+                                  @Nullable String sandboxId,
                                   @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    packagesForUid, visibleVols, /*useBlastulaPool=*/ true, zygoteArgs);
+                    packagesForUid, visibleVols, sandboxId, /*useBlastulaPool=*/ true, zygoteArgs);
     }
 
     /** @hide */
@@ -547,11 +548,12 @@ public class Process {
                                   @Nullable String packageName,
                                   @Nullable String[] packagesForUid,
                                   @Nullable String[] visibleVols,
+                                  @Nullable String sandboxId,
                                   @Nullable String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    packagesForUid, visibleVols, /*useBlastulaPool=*/ false, zygoteArgs);
+                    packagesForUid, visibleVols, sandboxId, /*useBlastulaPool=*/ false, zygoteArgs);
     }
 
     /**

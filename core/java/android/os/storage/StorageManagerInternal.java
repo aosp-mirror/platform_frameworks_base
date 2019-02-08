@@ -132,4 +132,9 @@ public abstract class StorageManagerInternal {
      * @param listener The listener that will be notified on reset events.
      */
     public abstract void addResetListener(ResetListener listener);
+
+    /**
+     * Return the sandboxId for the given package on external storage.
+     */
+    public abstract String getSandboxId(String packageName);
 }

@@ -324,13 +324,15 @@ public class ZygoteProcess {
                                                   @Nullable String packageName,
                                                   @Nullable String[] packagesForUid,
                                                   @Nullable String[] visibleVols,
+                                                  @Nullable String sandboxId,
                                                   boolean useBlastulaPool,
                                                   @Nullable String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/false,
-                    packageName, packagesForUid, visibleVols, useBlastulaPool, zygoteArgs);
+                    packageName, packagesForUid, visibleVols, sandboxId,
+                    useBlastulaPool, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -541,6 +543,7 @@ public class ZygoteProcess {
                                                       @Nullable String packageName,
                                                       @Nullable String[] packagesForUid,
                                                       @Nullable String[] visibleVols,
+                                                      @Nullable String sandboxId,
                                                       boolean useBlastulaPool,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
@@ -637,6 +640,10 @@ public class ZygoteProcess {
                 sb.append(visibleVols[i]);
             }
             argsForZygote.add(sb.toString());
+        }
+
+        if (sandboxId != null) {
+            argsForZygote.add("--sandbox-id=" + sandboxId);
         }
 
         argsForZygote.add(processClass);
@@ -1014,7 +1021,7 @@ public class ZygoteProcess {
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
-                    null /* packagesForUid */, null /* visibleVolumes */,
+                    null /* packagesForUid */, null /* visibleVolumes */, null /* sandboxId */,
                     false /* useBlastulaPool */, extraArgs);
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
