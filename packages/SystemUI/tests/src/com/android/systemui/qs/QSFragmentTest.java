@@ -56,6 +56,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
+@Ignore
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;

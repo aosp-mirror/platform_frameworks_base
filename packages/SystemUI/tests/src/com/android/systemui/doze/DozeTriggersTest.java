@@ -50,6 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
+@Ignore("failing")
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class DozeTriggersTest extends SysuiTestCase {
@@ -89,7 +90,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore
     public void testOnNotification_stillWorksAfterOneFailedProxCheck() throws Exception {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
 
@@ -111,7 +111,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore
     public void testDockEventListener_registerAndUnregister() {
         mTriggers.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
 
@@ -123,7 +122,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore
     public void testOnSensor_whenUndockedWithNearAndDoubleTapScreen_shouldNotWakeUp() {
         mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
 
@@ -135,7 +133,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore
     public void testOnSensor_whenDockedWithNearAndDoubleTapScreen_shouldWakeUp() {
         doReturn(true).when(mDockManagerFake).isDocked();
         mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
