@@ -17,8 +17,9 @@ package android {
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 
-  public static final class R.array {
-    field public static final int config_defaultRoleHolders = 17235974; // 0x1070006
+  public static final class R.string {
+    field public static final int config_defaultAssistant = 17039393; // 0x1040021
+    field public static final int config_defaultDialer = 17039395; // 0x1040023
   }
 
 }
