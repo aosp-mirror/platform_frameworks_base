@@ -322,6 +322,9 @@ public class AdbDebuggingManager {
                             mConnectedKey = key;
                             mAdbKeyStore.setLastConnectionTime(key, System.currentTimeMillis());
                             scheduleJobToUpdateAdbKeyStore();
+                            // write this key to adb_keys as well so that subsequent connections can
+                            // go through the expected SIGNATURE interaction.
+                            writeKey(key);
                         }
                         logAdbConnectionChanged(key, AdbProtoEnums.USER_ALLOWED, alwaysAllow);
                     }
@@ -354,20 +357,9 @@ public class AdbDebuggingManager {
                         }
                         break;
                     }
-                    // Check if the key should be allowed without user interaction.
-                    if (mAdbKeyStore.isKeyAuthorized(key)) {
-                        if (mThread != null) {
-                            mThread.sendResponse("OK");
-                            mAdbKeyStore.setLastConnectionTime(key, System.currentTimeMillis());
-                            logAdbConnectionChanged(key, AdbProtoEnums.AUTOMATICALLY_ALLOWED, true);
-                            mConnectedKey = key;
-                            scheduleJobToUpdateAdbKeyStore();
-                        }
-                    } else {
-                        logAdbConnectionChanged(key, AdbProtoEnums.AWAITING_USER_APPROVAL, false);
-                        mFingerprints = fingerprints;
-                        startConfirmation(key, mFingerprints);
-                    }
+                    logAdbConnectionChanged(key, AdbProtoEnums.AWAITING_USER_APPROVAL, false);
+                    mFingerprints = fingerprints;
+                    startConfirmation(key, mFingerprints);
                     break;
                 }
 
