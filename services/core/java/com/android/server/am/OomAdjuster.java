@@ -127,18 +127,8 @@ public final class OomAdjuster {
     private final ActivityManagerService mService;
     private final ProcessList mProcessList;
 
-    /**
-     * Used to lock {@link #updateOomAdjImpl} for state consistency. It also reduces frequency lock
-     * and unlock when getting and setting value to {@link ProcessRecord#mWindowProcessController}.
-     * Note it is declared as Object type so the locked-region-code-injection won't wrap the
-     * unnecessary priority booster.
-     */
-    private final Object mAtmGlobalLock;
-
-    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
-            Object atmGlobalLock) {
+    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
         mService = service;
-        mAtmGlobalLock = atmGlobalLock;
         mProcessList = processList;
         mActiveUids = activeUids;
 
@@ -196,13 +186,6 @@ public final class OomAdjuster {
 
     @GuardedBy("mService")
     final void updateOomAdjLocked() {
-        synchronized (mAtmGlobalLock) {
-            updateOomAdjImpl();
-        }
-    }
-
-    @GuardedBy({"mService", "mAtmGlobalLock"})
-    private void updateOomAdjImpl() {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "updateOomAdj");
         mService.mOomAdjProfiler.oomAdjStarted();
         final ProcessRecord TOP_APP = mService.getTopAppLocked();
