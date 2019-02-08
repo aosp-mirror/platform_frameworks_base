@@ -35,7 +35,6 @@ import android.platform.test.annotations.Presubmit;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.util.proto.ProtoOutputStream;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.Preconditions;
@@ -58,7 +57,7 @@ import java.nio.charset.StandardCharsets;
  * Test class for {@link WindowTracing}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowTracingTest
+ *  atest WmTests:WindowTracingTest
  */
 @SmallTest
 @Presubmit

@@ -167,7 +167,6 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         verify(mMockAnimationSpec, atLeastOnce()).apply(any(), any(), eq(0L));
     }
 
-    @FlakyTest(bugId = 74780584)
     @Test
     public void testDeferStartingAnimations() throws Exception {
         mSurfaceAnimationRunner.deferStartingAnimations();

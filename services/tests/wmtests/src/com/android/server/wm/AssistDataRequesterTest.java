@@ -71,7 +71,6 @@ import java.util.concurrent.TimeUnit;
  *  atest WmTests:AssistDataRequesterTest
  */
 @MediumTest
-@FlakyTest(bugId = 113616538)
 public class AssistDataRequesterTest extends ActivityTestsBase {
 
     private static final String TAG = AssistDataRequesterTest.class.getSimpleName();
@@ -154,6 +153,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 .checkOpNoThrow(eq(OP_ASSIST_SCREENSHOT), anyInt(), anyString());
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testRequestData() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -174,6 +174,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertReceivedDataCount(0, 0, 0, 0);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testCurrentAppDisallow_expectNullCallbacks() throws Exception {
         setupMocks(!CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -184,6 +185,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertReceivedDataCount(0, 1, 0, 1);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testProcessPendingData() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -241,6 +243,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertReceivedDataCount(0, 1, 0, 1);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testDisallowAssistContextExtras_expectNullDataCallbacks() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -254,6 +257,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertReceivedDataCount(0, 1, 0, 1);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testNoFetchScreenshots_expectNoScreenshotCallbacks() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -264,6 +268,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         assertReceivedDataCount(5, 5, 0, 0);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testDisallowAssistScreenshot_expectNullScreenshotCallback() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
