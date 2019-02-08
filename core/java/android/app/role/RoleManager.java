@@ -131,20 +131,20 @@ public final class RoleManager {
      * TODO: STOPSHIP: Make name of required roles public API
      * @hide
      */
-    public static final String ROLE_CAR_MODE_DIALER_APP = "android.app.role.CAR_MODE_DIALER_APP";
+    public static final String ROLE_CAR_MODE_DIALER = "android.app.role.CAR_MODE_DIALER";
 
     /**
-     * The name of the proxy calling role.
+     * The name of the call redirection role.
      * <p>
-     * A proxy calling app provides a means to re-write the phone number for an outgoing call to
-     * place the call through a proxy calling service.
+     * A call redirection app provides a means to re-write the phone number for an outgoing call to
+     * place the call through a call redirection service.
      *
      * @see android.telecom.CallRedirectionService
      *
      * TODO: STOPSHIP: Make name of required roles public API
      * @hide
      */
-    public static final String ROLE_PROXY_CALLING_APP = "android.app.role.PROXY_CALLING_APP";
+    public static final String ROLE_CALL_REDIRECTION = "android.app.role.CALL_REDIRECTION";
 
     /**
      * The name of the call screening and caller id role.
@@ -154,7 +154,7 @@ public final class RoleManager {
      * TODO: STOPSHIP: Make name of required roles public API
      * @hide
      */
-    public static final String ROLE_CALL_SCREENING_APP = "android.app.role.CALL_SCREENING_APP";
+    public static final String ROLE_CALL_SCREENING = "android.app.role.CALL_SCREENING";
 
     /**
      * The name of the call companion app role.
@@ -170,7 +170,7 @@ public final class RoleManager {
      * TODO: STOPSHIP: Make name of required roles public API
      * @hide
      */
-    public static final String ROLE_CALL_COMPANION_APP = "android.app.role.CALL_COMPANION_APP";
+    public static final String ROLE_CALL_COMPANION = "android.app.role.CALL_COMPANION";
 
     /**
      * The name of the assistant app role.
