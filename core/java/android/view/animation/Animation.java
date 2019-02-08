@@ -23,15 +23,13 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 
 import dalvik.system.CloseGuard;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Abstraction for an Animation that can be applied to Views, Surfaces, or
@@ -187,13 +185,10 @@ public abstract class Animation implements Cloneable {
     /**
      * An animation listener to be notified when the animation starts, ends or repeats.
      */
-    @UnsupportedAppUsage
+    // If you need to chain the AnimationListener, wrap the existing Animation into an AnimationSet
+    // and add your new listener to that set
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117519981)
     private AnimationListener mListener;
-
-    /**
-     * A list of animation listeners to be notified when the animation starts, ends or repeats.
-     */
-    private List<AnimationListener> mListeners;
 
     /**
      * Desired Z order mode during animation.
@@ -833,7 +828,7 @@ public abstract class Animation implements Cloneable {
     }
 
     private boolean hasAnimationListener() {
-        return mListener != null || (mListeners != null && !mListeners.isEmpty());
+        return mListener != null;
     }
 
     /**
@@ -845,32 +840,6 @@ public abstract class Animation implements Cloneable {
      */
     public void setAnimationListener(AnimationListener listener) {
         mListener = listener;
-    }
-
-    /**
-     * <p>Adds an animation listener to this animation. The animation listener
-     * is notified of animation events such as the end of the animation or the
-     * repetition of the animation.</p>
-     *
-     * @param listener the animation listener to be notified
-     */
-    public void addAnimationListener(AnimationListener listener) {
-        if (mListeners == null) {
-            mListeners = new ArrayList<>(1);
-        }
-        mListeners.add(listener);
-    }
-
-    /**
-     * <p>Removes an animation listener that has been added with
-     * {@link #addAnimationListener(AnimationListener)}.</p>
-     *
-     * @param listener the animation listener to be removed
-     */
-    public void removeAnimationListener(AnimationListener listener) {
-        if (mListeners != null) {
-            mListeners.remove(listener);
-        }
     }
 
     /**
@@ -1003,32 +972,17 @@ public abstract class Animation implements Cloneable {
         if (mListener != null) {
             mListener.onAnimationStart(this);
         }
-        if (mListeners != null && !mListeners.isEmpty()) {
-            for (AnimationListener listener : mListeners) {
-                listener.onAnimationStart(this);
-            }
-        }
     }
 
     void dispatchAnimationRepeat() {
         if (mListener != null) {
             mListener.onAnimationRepeat(this);
         }
-        if (mListeners != null && !mListeners.isEmpty()) {
-            for (AnimationListener listener : mListeners) {
-                listener.onAnimationRepeat(this);
-            }
-        }
     }
 
     void dispatchAnimationEnd() {
         if (mListener != null) {
             mListener.onAnimationEnd(this);
-        }
-        if (mListeners != null && !mListeners.isEmpty()) {
-            for (AnimationListener listener : mListeners) {
-                listener.onAnimationEnd(this);
-            }
         }
     }
 
