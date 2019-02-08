@@ -49,6 +49,7 @@ import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -553,6 +554,8 @@ public class FingerprintService extends BiometricServiceBase {
                         + " " + f.getDeviceId());
                 FingerprintUtils.getInstance().removeBiometricForUser(getContext(),
                         getTargetUserId(), f.getBiometricId());
+                StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                        BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK);
             }
             mEnrolledList.clear();
         }
@@ -1002,6 +1005,8 @@ public class FingerprintService extends BiometricServiceBase {
                     mHalDeviceId, mToken, new ServiceListenerImpl(null), uf.f.getBiometricId(),
                     uf.f.getGroupId(), uf.userId, restricted, getContext().getOpPackageName());
             removeInternal(client);
+            StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED, statsModality(),
+                    BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
         } else {
             clearEnumerateState();
         }
