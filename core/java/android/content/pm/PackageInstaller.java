@@ -791,11 +791,6 @@ public class PackageInstaller {
      * individual session IDs can be added with {@link #addChildSessionId(int)}
      * and commit of the multi-package session will result in all child sessions
      * being committed atomically.
-     * <p>
-     * If a package requires to be installed only at reboot, the session should
-     * be marked as a staged session by calling {@link SessionParams#setStaged()}
-     * with {@code true}. This can also apply to a multi-package session, in
-     * which case all the packages in the session will be applied at reboot.
      */
     public static class Session implements Closeable {
         /** {@hide} */
@@ -1539,7 +1534,11 @@ public class PackageInstaller {
          * Staged sessions are scheduled to be installed at next reboot. Staged sessions can also be
          * multi-package. In that case, if any of the children sessions fail to install at reboot,
          * all the other children sessions are aborted as well.
+         *
+         * {@hide}
          */
+        @SystemApi
+        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setStaged() {
             this.isStaged = true;
         }
