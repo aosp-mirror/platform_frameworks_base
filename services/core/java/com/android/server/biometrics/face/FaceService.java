@@ -705,6 +705,8 @@ public class FaceService extends BiometricServiceBase {
     public void serviceDied(long cookie) {
         super.serviceDied(cookie);
         mDaemon = null;
+
+        mCurrentUserId = UserHandle.USER_NULL; // Force updateActiveGroup() to re-evaluate
     }
 
     @Override
