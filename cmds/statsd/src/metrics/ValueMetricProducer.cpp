@@ -387,6 +387,8 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         // If the sleep was very long, we skip more than one bucket before sleep. In this case,
         // if the diff base will be cleared and this new data will serve as new diff base.
         int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
+        StatsdStats::getInstance().noteBucketBoundaryDelayNs(
+                mMetricId, originalPullTimeNs - bucketEndTime);
         accumulateEvents(allData, originalPullTimeNs, bucketEndTime);
 
         // We can probably flush the bucket. Since we used bucketEndTime when calling

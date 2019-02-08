@@ -458,6 +458,15 @@ void StatsdStats::noteInvalidatedBucket(int64_t metricId) {
     getAtomMetricStats(metricId).invalidatedBucket++;
 }
 
+void StatsdStats::noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs) {
+    lock_guard<std::mutex> lock(mLock);
+    AtomMetricStats& pullStats = getAtomMetricStats(metricId);
+    pullStats.maxBucketBoundaryDelayNs =
+            std::max(pullStats.maxBucketBoundaryDelayNs, timeDelayNs);
+    pullStats.minBucketBoundaryDelayNs =
+            std::min(pullStats.minBucketBoundaryDelayNs, timeDelayNs);
+}
+
 StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int metricId) {
     auto atomMetricStatsIter = mAtomMetricStats.find(metricId);
     if (atomMetricStatsIter != mAtomMetricStats.end()) {
