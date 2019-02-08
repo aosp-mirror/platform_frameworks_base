@@ -194,6 +194,7 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
     if (obj == NULL){
         jniThrowException(_env, "java/lang/IllegalArgumentException",
                           "Object is set to null.");
+        return nullptr;
     }
 
     jlong handle = _env->CallLongMethod(obj, mid);
@@ -254,6 +255,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglsyncClass, eglsyncConstructor, _returnValue);
 }
@@ -335,6 +337,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return false;
     }
     return (jboolean)_returnValue;
 }
@@ -381,6 +384,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, egldisplayClass, egldisplayConstructor, _returnValue);
 }
@@ -448,6 +452,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, _returnValue);
 }
@@ -456,8 +461,11 @@ exit:
 static jobject
 android_eglCreatePlatformPixmapSurface
   (JNIEnv *_env, jobject _this, jobject dpy, jobject config, jobject native_pixmap_buf, jlongArray attrib_list_ref, jint offset) {
-    jniThrowException(_env, "java/lang/UnsupportedOperationException",
-        "eglCreatePlatformPixmapSurface");
+    if ((true)) {
+        jniThrowException(_env, "java/lang/UnsupportedOperationException",
+            "eglCreatePlatformPixmapSurface");
+        return nullptr;
+    }
     return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, (EGLSurface) 0);
 }
 
@@ -523,6 +531,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglimageClass, eglimageConstructor, _returnValue);
 }
