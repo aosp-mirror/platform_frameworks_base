@@ -766,7 +766,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     /**
      * @return the number of bubbles in the stack view.
      */
-    private int getBubbleCount() {
+    public int getBubbleCount() {
         return mBubbleContainer.getChildCount();
     }
 
@@ -777,14 +777,14 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      * @return the index of the bubble view within the bubble stack. The range of the position
      * is between 0 and the bubble count minus 1.
      */
-    private int getBubbleIndex(BubbleView bubbleView) {
+    public int getBubbleIndex(BubbleView bubbleView) {
         return mBubbleContainer.indexOfChild(bubbleView);
     }
 
     /**
      * @return the normalized x-axis position of the bubble stack rounded to 4 decimal places.
      */
-    private float getNormalizedXPosition() {
+    public float getNormalizedXPosition() {
         return new BigDecimal(getPosition().x / mDisplaySize.x)
                 .setScale(4, RoundingMode.CEILING.HALF_UP)
                 .floatValue();
@@ -793,7 +793,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     /**
      * @return the normalized y-axis position of the bubble stack rounded to 4 decimal places.
      */
-    private float getNormalizedYPosition() {
+    public float getNormalizedYPosition() {
         return new BigDecimal(getPosition().y / mDisplaySize.y)
                 .setScale(4, RoundingMode.CEILING.HALF_UP)
                 .floatValue();
