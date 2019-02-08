@@ -22,6 +22,8 @@ import android.content.res.Resources;
 import android.graphics.PointF;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 
@@ -63,15 +65,13 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     public void testExpansionAndCollapse() throws InterruptedException {
         Runnable afterExpand = Mockito.mock(Runnable.class);
         mExpandedController.expandFromStack(mExpansionPoint, afterExpand);
-
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
-        testExpanded();
+        testBubblesInCorrectExpandedPositions();
         Mockito.verify(afterExpand).run();
 
         Runnable afterCollapse = Mockito.mock(Runnable.class);
         mExpandedController.collapseBackToStack(afterCollapse);
-
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testStackedAtPosition(mExpansionPoint.x, mExpansionPoint.y, -1);
@@ -79,17 +79,70 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     @Test
-    public void testOnChildRemoved() throws InterruptedException {
-        Runnable afterExpand = Mockito.mock(Runnable.class);
-        mExpandedController.expandFromStack(mExpansionPoint, afterExpand);
+    public void testOnChildAdded() throws InterruptedException {
+        expand();
+
+        // Add another new view and wait for its animation.
+        final View newView = new FrameLayout(getContext());
+        mLayout.addView(newView, 0);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
-        testExpanded();
+
+        testBubblesInCorrectExpandedPositions();
+    }
+
+    @Test
+    public void testOnChildRemoved() throws InterruptedException {
+        expand();
 
         // Remove some views and see if the remaining child views still pass the expansion test.
         mLayout.removeView(mViews.get(0));
         mLayout.removeView(mViews.get(3));
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
-        testExpanded();
+        testBubblesInCorrectExpandedPositions();
+    }
+
+    @Test
+    public void testBubbleDraggedNotDismissedSnapsBack() throws InterruptedException {
+        expand();
+
+        final View draggedBubble = mViews.get(0);
+        mExpandedController.prepareForBubbleDrag(draggedBubble);
+        mExpandedController.dragBubbleOut(draggedBubble, 500f, 500f);
+
+        assertEquals(500f, draggedBubble.getTranslationX(), 1f);
+        assertEquals(500f, draggedBubble.getTranslationY(), 1f);
+
+        // Snap it back and make sure it made it back correctly.
+        mExpandedController.snapBubbleBack(draggedBubble, 0f, 0f);
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+        testBubblesInCorrectExpandedPositions();
+    }
+
+    @Test
+    public void testBubbleDismissed() throws InterruptedException {
+        expand();
+
+        final View draggedBubble = mViews.get(0);
+        mExpandedController.prepareForBubbleDrag(draggedBubble);
+        mExpandedController.dragBubbleOut(draggedBubble, 500f, 500f);
+
+        assertEquals(500f, draggedBubble.getTranslationX(), 1f);
+        assertEquals(500f, draggedBubble.getTranslationY(), 1f);
+
+        // Snap it back and make sure it made it back correctly.
+        mExpandedController.prepareForDismissalWithVelocity(draggedBubble, 0f, 0f);
+        mLayout.removeView(draggedBubble);
+        waitForLayoutMessageQueue();
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+
+        assertEquals(-1, mLayout.indexOfChild(draggedBubble));
+        testBubblesInCorrectExpandedPositions();
+    }
+
+    /** Expand the stack and wait for animations to finish. */
+    private void expand() throws InterruptedException {
+        mExpandedController.expandFromStack(mExpansionPoint, Mockito.mock(Runnable.class));
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
     }
 
     /** Check that children are in the correct positions for being stacked. */
@@ -108,7 +161,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     /** Check that children are in the correct positions for being expanded. */
-    private void testExpanded() {
+    private void testBubblesInCorrectExpandedPositions() {
         // Check all the visible bubbles to see if they're in the right place.
         for (int i = 0; i < Math.min(mLayout.getChildCount(), mMaxRenderedBubbles); i++) {
             assertEquals(mBubblePadding + (i * (mBubbleSize + mBubblePadding)),

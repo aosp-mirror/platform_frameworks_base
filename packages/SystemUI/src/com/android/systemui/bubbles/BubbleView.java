@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -39,7 +38,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 /**
  * A floating object on the screen that can post message updates.
  */
-public class BubbleView extends FrameLayout implements BubbleTouchHandler.FloatingView {
+public class BubbleView extends FrameLayout {
     private static final String TAG = "BubbleView";
 
     // Same value as Launcher3 badge code
@@ -216,26 +215,5 @@ public class BubbleView extends FrameLayout implements BubbleTouchHandler.Floati
     private int determineDominateColor(Drawable d, int defaultTint) {
         // XXX: should we pull from the drawable, app icon, notif tint?
         return ColorUtils.blendARGB(defaultTint, Color.WHITE, WHITE_SCRIM_ALPHA);
-    }
-
-    @Override
-    public void setPosition(float x, float y) {
-        setPositionX(x);
-        setPositionY(y);
-    }
-
-    @Override
-    public void setPositionX(float x) {
-        setTranslationX(x);
-    }
-
-    @Override
-    public void setPositionY(float y) {
-        setTranslationY(y);
-    }
-
-    @Override
-    public PointF getPosition() {
-        return new PointF(getTranslationX(), getTranslationY());
     }
 }

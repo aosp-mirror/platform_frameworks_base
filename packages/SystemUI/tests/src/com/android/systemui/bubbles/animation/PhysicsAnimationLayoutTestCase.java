@@ -155,6 +155,11 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         }
 
         @Override
+        public void cancelAnimationsOnView(View view) {
+            mMainThreadHandler.post(() -> super.cancelAnimationsOnView(view));
+        }
+
+        @Override
         protected void animateValueForChildAtIndex(DynamicAnimation.ViewProperty property,
                 int index, float value, float startVel, Runnable after) {
             mMainThreadHandler.post(() ->

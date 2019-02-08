@@ -58,7 +58,7 @@ import java.math.RoundingMode;
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
  */
-public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.FloatingView {
+public class BubbleStackView extends FrameLayout {
     private static final String TAG = "BubbleStackView";
 
     /**
@@ -145,8 +145,9 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
         mBubbleData = data;
         mInflater = LayoutInflater.from(context);
-        mTouchHandler = new BubbleTouchHandler(context);
+        mTouchHandler = new BubbleTouchHandler(context, this);
         setOnTouchListener(mTouchHandler);
+        mInflater = LayoutInflater.from(context);
 
         Resources res = getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
@@ -196,6 +197,8 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
 
         setClipChildren(false);
+
+        mBubbleContainer.bringToFront();
     }
 
     @Override
@@ -481,9 +484,10 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             if (shouldExpand) {
                 mBubbleContainer.setController(mExpandedAnimationController);
                 mExpandedAnimationController.expandFromStack(
-                                mStackAnimationController.getStackPosition(), () -> {
-                                updatePointerPosition();
-                                updateAfter.run();
+                        mStackAnimationController.getStackPosition(),
+                        () -> {
+                            updatePointerPosition();
+                            updateAfter.run();
                         });
             } else {
                 mBubbleContainer.cancelAllAnimations();
@@ -541,55 +545,49 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
                 : null;
     }
 
-    @Override
-    public void setPosition(float x, float y) {
-        mStackAnimationController.moveFirstBubbleWithStackFollowing(x, y);
-    }
-
-    @Override
-    public void setPositionX(float x) {
-        // Unsupported, use setPosition(x, y).
-    }
-
-    @Override
-    public void setPositionY(float y) {
-        // Unsupported, use setPosition(x, y).
-    }
-
-    @Override
-    public PointF getPosition() {
+    public PointF getStackPosition() {
         return mStackAnimationController.getStackPosition();
     }
 
     /** Called when a drag operation on an individual bubble has started. */
-    public void onBubbleDragStart(BubbleView bubble) {
-        // TODO: Save position and snap back if not dismissed.
+    public void onBubbleDragStart(View bubble) {
+        mExpandedAnimationController.prepareForBubbleDrag(bubble);
     }
 
     /** Called with the coordinates to which an individual bubble has been dragged. */
-    public void onBubbleDragged(BubbleView bubble, float x, float y) {
-        bubble.setTranslationX(x);
-        bubble.setTranslationY(y);
+    public void onBubbleDragged(View bubble, float x, float y) {
+        if (!mIsExpanded || mIsAnimating) {
+            return;
+        }
+
+        mExpandedAnimationController.dragBubbleOut(bubble, x, y);
     }
 
     /** Called when a drag operation on an individual bubble has finished. */
-    public void onBubbleDragFinish(BubbleView bubble, float x, float y, float velX, float velY) {
-        // TODO: Add fling to bottom to dismiss.
+    public void onBubbleDragFinish(
+            View bubble, float x, float y, float velX, float velY, boolean dismissed) {
+        if (!mIsExpanded || mIsAnimating) {
+            return;
+        }
+
+        if (dismissed) {
+            mExpandedAnimationController.prepareForDismissalWithVelocity(bubble, velX, velY);
+        } else {
+            mExpandedAnimationController.snapBubbleBack(bubble, velX, velY);
+        }
     }
 
     void onDragStart() {
-        if (mIsExpanded) {
+        if (mIsExpanded || mIsAnimating) {
             return;
         }
 
         mStackAnimationController.cancelStackPositionAnimations();
         mBubbleContainer.setController(mStackAnimationController);
-        mIsAnimating = false;
     }
 
     void onDragged(float x, float y) {
-        // TODO: We can drag if animating - just need to reroute inflight anims to drag point.
-        if (mIsExpanded) {
+        if (mIsExpanded || mIsAnimating) {
             return;
         }
 
@@ -741,9 +739,9 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
     private void updatePointerPosition() {
         if (mExpandedBubble != null) {
-            float pointerPosition = mExpandedBubble.iconView.getPosition().x
+            float pointerPosition = mExpandedBubble.iconView.getTranslationX()
                     + (mExpandedBubble.iconView.getWidth() / 2f);
-            mExpandedBubble.expandedView.setPointerPosition(pointerPosition);
+            mExpandedBubble.expandedView.setPointerPosition((int) pointerPosition);
         }
     }
 
@@ -769,7 +767,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      * @return the normalized x-axis position of the bubble stack rounded to 4 decimal places.
      */
     public float getNormalizedXPosition() {
-        return new BigDecimal(getPosition().x / mDisplaySize.x)
+        return new BigDecimal(getStackPosition().x / mDisplaySize.x)
                 .setScale(4, RoundingMode.CEILING.HALF_UP)
                 .floatValue();
     }
@@ -778,7 +776,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
      * @return the normalized y-axis position of the bubble stack rounded to 4 decimal places.
      */
     public float getNormalizedYPosition() {
-        return new BigDecimal(getPosition().y / mDisplaySize.y)
+        return new BigDecimal(getStackPosition().y / mDisplaySize.y)
                 .setScale(4, RoundingMode.CEILING.HALF_UP)
                 .floatValue();
     }
