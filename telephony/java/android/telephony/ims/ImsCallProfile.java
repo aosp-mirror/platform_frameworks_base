@@ -266,6 +266,11 @@ public final class ImsCallProfile implements Parcelable {
     public static final String EXTRA_DISPLAY_TEXT = "DisplayText";
     public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     public static final String EXTRA_IS_CALL_PULL = "CallPull";
+
+    /**
+     * String extra property
+     *  Containing fields from the SIP INVITE message for an IMS call
+     */
     public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS =
                                   "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
 
