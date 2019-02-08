@@ -36,7 +36,6 @@ android_test {
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
         // For ApfTest
-        "libartbase",
         "libbacktrace",
         "libbase",
         "libbinder",
@@ -45,7 +44,6 @@ android_test {
         "libcgrouprc",
         "libcrypto",
         "libcutils",
-        "libdexfile",
         "ld-android",
         "libdl_android",
         "libhidl-gen-utils",
