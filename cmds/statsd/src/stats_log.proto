@@ -419,6 +419,8 @@ message StatsdStatsReport {
       optional int64 condition_change_in_next_bucket = 6;
       optional int64 invalidated_bucket = 7;
       optional int64 bucket_dropped = 8;
+      optional int64 min_bucket_boundary_delay_ns = 9;
+      optional int64 max_bucket_boundary_delay_ns = 10;
     }
     repeated AtomMetricStats atom_metric_stats = 17;
 

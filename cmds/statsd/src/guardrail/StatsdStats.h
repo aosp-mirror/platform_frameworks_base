@@ -375,6 +375,12 @@ public:
     void noteInvalidatedBucket(int64_t metricId);
 
     /**
+     * For pulls at bucket boundaries, it represents the misalignment between the real timestamp and
+     * the end of the bucket.
+     */
+    void noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -420,6 +426,8 @@ public:
         long conditionChangeInNextBucket = 0;
         long invalidatedBucket = 0;
         long bucketDropped = 0;
+        int64_t minBucketBoundaryDelayNs = 0;
+        int64_t maxBucketBoundaryDelayNs = 0;
     } AtomMetricStats;
 
 private:
