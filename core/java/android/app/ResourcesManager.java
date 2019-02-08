@@ -1091,6 +1091,16 @@ public class ResourcesManager {
      */
     @UnsupportedAppUsage
     public void appendLibAssetForMainAssetPath(String assetPath, String libAsset) {
+        appendLibAssetsForMainAssetPath(assetPath, new String[] { libAsset });
+    }
+
+    /**
+     * Appends the library asset paths to any ResourcesImpl object that contains the main
+     * assetPath.
+     * @param assetPath The main asset path for which to add the library asset path.
+     * @param libAssets The library asset paths to add.
+     */
+    public void appendLibAssetsForMainAssetPath(String assetPath, String[] libAssets) {
         synchronized (this) {
             // Record which ResourcesImpl need updating
             // (and what ResourcesKey they should update to).
@@ -1102,15 +1112,13 @@ public class ResourcesManager {
                 final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
                 final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
                 if (impl != null && Objects.equals(key.mResDir, assetPath)) {
-                    if (!ArrayUtils.contains(key.mLibDirs, libAsset)) {
-                        final int newLibAssetCount = 1 +
-                                (key.mLibDirs != null ? key.mLibDirs.length : 0);
-                        final String[] newLibAssets = new String[newLibAssetCount];
-                        if (key.mLibDirs != null) {
-                            System.arraycopy(key.mLibDirs, 0, newLibAssets, 0, key.mLibDirs.length);
-                        }
-                        newLibAssets[newLibAssetCount - 1] = libAsset;
+                    String[] newLibAssets = key.mLibDirs;
+                    for (String libAsset : libAssets) {
+                        newLibAssets =
+                                ArrayUtils.appendElement(String.class, newLibAssets, libAsset);
+                    }
 
+                    if (newLibAssets != key.mLibDirs) {
                         updatedResourceKeys.put(impl, new ResourcesKey(
                                 key.mResDir,
                                 key.mSplitResDirs,
