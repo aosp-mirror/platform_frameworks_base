@@ -112,6 +112,8 @@ public class CalendarView extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.CalendarView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.CalendarView,
+                attrs, a, defStyleAttr, defStyleRes);
         final int mode = a.getInt(R.styleable.CalendarView_calendarViewMode, MODE_HOLO);
         a.recycle();
 

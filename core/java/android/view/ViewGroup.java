@@ -703,7 +703,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     private void initFromAttributes(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ViewGroup, defStyleAttr,
+        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ViewGroup,
+                defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.ViewGroup, attrs, a, defStyleAttr,
                 defStyleRes);
 
         final int N = a.getIndexCount();

@@ -242,6 +242,8 @@ public class TextClock extends TextView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TextClock, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.TextClock,
+                attrs, a, defStyleAttr, defStyleRes);
         try {
             mFormat12 = a.getText(R.styleable.TextClock_format12Hour);
             mFormat24 = a.getText(R.styleable.TextClock_format24Hour);

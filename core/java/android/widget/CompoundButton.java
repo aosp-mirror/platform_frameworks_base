@@ -100,6 +100,8 @@ public abstract class CompoundButton extends Button implements Checkable {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.CompoundButton, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.CompoundButton,
+                attrs, a, defStyleAttr, defStyleRes);
 
         final Drawable d = a.getDrawable(com.android.internal.R.styleable.CompoundButton_button);
         if (d != null) {

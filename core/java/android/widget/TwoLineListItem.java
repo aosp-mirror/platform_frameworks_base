@@ -62,6 +62,8 @@ public class TwoLineListItem extends RelativeLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.TwoLineListItem, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.TwoLineListItem,
+                attrs, a, defStyleAttr, defStyleRes);
 
         a.recycle();
     }

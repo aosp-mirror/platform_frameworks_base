@@ -175,6 +175,8 @@ public class HorizontalScrollView extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, android.R.styleable.HorizontalScrollView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, android.R.styleable.HorizontalScrollView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         setFillViewport(a.getBoolean(android.R.styleable.HorizontalScrollView_fillViewport, false));
 

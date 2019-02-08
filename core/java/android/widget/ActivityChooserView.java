@@ -232,6 +232,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         TypedArray attributesArray = context.obtainStyledAttributes(attrs,
                 R.styleable.ActivityChooserView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.ActivityChooserView, attrs,
+                attributesArray, defStyleAttr, defStyleRes);
 
         mInitialActivityCount = attributesArray.getInt(
                 R.styleable.ActivityChooserView_initialActivityCount,

@@ -262,6 +262,8 @@ public class ProgressBar extends View {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ProgressBar, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.ProgressBar,
+                attrs, a, defStyleAttr, defStyleRes);
 
         mNoInvalidate = true;
 

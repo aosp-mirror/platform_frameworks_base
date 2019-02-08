@@ -213,6 +213,8 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.Gallery, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.Gallery,
+                attrs, a, defStyleAttr, defStyleRes);
 
         int index = a.getInt(com.android.internal.R.styleable.Gallery_gravity, -1);
         if (index >= 0) {

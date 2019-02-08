@@ -150,6 +150,8 @@ public class GridView extends AbsListView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.GridView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.GridView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         int hSpacing = a.getDimensionPixelOffset(
                 R.styleable.GridView_horizontalSpacing, 0);

@@ -236,6 +236,8 @@ public class ListView extends AbsListView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ListView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.ListView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         final CharSequence[] entries = a.getTextArray(R.styleable.ListView_entries);
         if (entries != null) {
