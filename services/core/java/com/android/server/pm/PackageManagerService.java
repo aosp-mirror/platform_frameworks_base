@@ -15859,6 +15859,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (reconciledPkg.prepareResult.replace) {
                 PackageParser.Package oldPackage = mPackages.get(packageName);
+
+                // Set the update and install times
+                PackageSetting deletedPkgSetting = (PackageSetting) oldPackage.mExtras;
+                setInstallAndUpdateTime(pkg, deletedPkgSetting.firstInstallTime,
+                        System.currentTimeMillis());
+
                 if (reconciledPkg.prepareResult.system) {
                     // Remove existing system package
                     removePackageLI(oldPackage, true);
@@ -15873,11 +15879,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     } else {
                         res.removedInfo.args = null;
                     }
-
-                    // Set the update and install times
-                    PackageSetting deletedPkgSetting = (PackageSetting) oldPackage.mExtras;
-                    setInstallAndUpdateTime(pkg, deletedPkgSetting.firstInstallTime,
-                            System.currentTimeMillis());
 
                     // Update the package dynamic state if succeeded
                     // Now that the install succeeded make sure we remove data
