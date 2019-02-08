@@ -9628,7 +9628,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled {@code true} to enable the backup service, {@code false} to disable it.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner.
      */
     public void setBackupServiceEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setBackupServiceEnabled");
