@@ -29,7 +29,7 @@ android_library {
 
     resource_dirs: ["res"],
 
-    srcs: ["src/**/*.java"],
+    srcs: ["src/**/*.java", "src/**/*.kt"],
 
     min_sdk_version: "21",
 
