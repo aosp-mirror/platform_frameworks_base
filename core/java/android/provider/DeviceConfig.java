@@ -77,6 +77,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     public interface ContentCapture {
         String NAMESPACE = "content_capture";
 
@@ -101,17 +102,9 @@ public final class DeviceConfig {
          * @hide
          */
         // TODO(b/121153631): revert back to SERVICE_EXPLICITLY_ENABLED approach
+        @TestApi
         String PROPERTY_CONTENTCAPTURE_ENABLED = "enable_contentcapture";
     }
-
-    /**
-     * Namespace for content capture feature used by on-device machine intelligence
-     * to provide suggestions in a privacy-safe manner.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
 
     /**
      * Namespace for all input-related features that are used at the native level.
@@ -360,6 +353,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static String getProperty(String namespace, String name) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();

@@ -5709,7 +5709,6 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
     field public static final String NAMESPACE_AUTOFILL = "autofill";
-    field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
