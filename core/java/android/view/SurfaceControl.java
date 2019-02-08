@@ -62,6 +62,7 @@ import libcore.util.NativeAllocationRegistry;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Handle to an on-screen Surface managed by the system compositor. The SurfaceControl is
@@ -711,8 +712,10 @@ public final class SurfaceControl implements Parcelable {
                 for (int i = 0; i < metadata.size(); ++i) {
                     metaParcel.writeInt(metadata.keyAt(i));
                     metaParcel.writeByteArray(
-                            ByteBuffer.allocate(4).putInt(metadata.valueAt(i)).array());
+                            ByteBuffer.allocate(4).order(ByteOrder.nativeOrder())
+                                    .putInt(metadata.valueAt(i)).array());
                 }
+                metaParcel.setDataPosition(0);
             }
             mNativeObject = nativeCreate(session, name, w, h, format, flags,
                     parent != null ? parent.mNativeObject : 0, metaParcel);
