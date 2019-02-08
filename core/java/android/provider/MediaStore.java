@@ -3166,18 +3166,27 @@ public final class MediaStore {
 
         final ArrayList<File> res = new ArrayList<>();
         if (VOLUME_INTERNAL.equals(volumeName)) {
-            res.add(new File(Environment.getRootDirectory(), "media"));
-            res.add(new File(Environment.getOemDirectory(), "media"));
-            res.add(new File(Environment.getProductDirectory(), "media"));
+            addCanoncialFile(res, new File(Environment.getRootDirectory(), "media"));
+            addCanoncialFile(res, new File(Environment.getOemDirectory(), "media"));
+            addCanoncialFile(res, new File(Environment.getProductDirectory(), "media"));
         } else {
-            res.add(getVolumePath(volumeName));
+            addCanoncialFile(res, getVolumePath(volumeName));
             final UserManager um = AppGlobals.getInitialApplication()
                     .getSystemService(UserManager.class);
             if (VOLUME_EXTERNAL.equals(volumeName) && um.isDemoUser()) {
-                res.add(Environment.getDataPreloadsMediaDirectory());
+                addCanoncialFile(res, Environment.getDataPreloadsMediaDirectory());
             }
         }
         return res;
+    }
+
+    private static void addCanoncialFile(List<File> list, File file) {
+        try {
+            list.add(file.getCanonicalFile());
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to resolve " + file + ": " + e);
+            list.add(file);
+        }
     }
 
     /**
