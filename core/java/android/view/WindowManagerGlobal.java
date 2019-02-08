@@ -520,7 +520,7 @@ public final class WindowManagerGlobal {
         return false;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void trimMemory(int level) {
         if (ThreadedRenderer.isAvailable()) {
             if (shouldDestroyEglContext(level)) {
