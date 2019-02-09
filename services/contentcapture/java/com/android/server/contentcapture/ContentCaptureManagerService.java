@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -39,6 +40,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.LocalLog;
 import android.util.Slog;
@@ -89,19 +91,38 @@ public final class ContentCaptureManagerService extends
     @Nullable
     private SparseBooleanArray mDisabledUsers;
 
+    /**
+     * Global kill-switch based on value defined by
+     * {@link ContentCaptureManager#DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED}.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private boolean mDisabledByDeviceConfig;
 
     public ContentCaptureManagerService(@NonNull Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
                 com.android.internal.R.string.config_defaultContentCaptureService),
                 UserManager.DISALLOW_CONTENT_CAPTURE);
-        // Sets which serviecs are disabled
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                ActivityThread.currentApplication().getMainExecutor(),
+                (namespace, key, value) -> {
+                    if (!ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED
+                            .equals(key)) {
+                        Slog.i(mTag, "Ignoring change on " + key);
+                        return;
+                    }
+                    setDisabledByDeviceConfig(value);
+                });
+        setDisabledByDeviceConfig();
+
+        // Sets which services are disabled
         final UserManager um = getContext().getSystemService(UserManager.class);
         final List<UserInfo> users = um.getUsers();
         for (int i = 0; i < users.size(); i++) {
             final int userId = users.get(i).id;
-            final boolean disabled = isDisabledBySettings(userId);
+            final boolean disabled = mDisabledByDeviceConfig || isDisabledBySettings(userId);
             if (disabled) {
-                Slog.i(mTag, "user " + userId + " disabled by settings");
+                Slog.i(mTag, "user " + userId + " disabled by settings or device config");
                 if (mDisabledUsers == null) {
                     mDisabledUsers = new SparseBooleanArray(1);
                 }
@@ -160,7 +181,8 @@ public final class ContentCaptureManagerService extends
 
     @Override // from AbstractMasterSystemService
     protected boolean isDisabledLocked(@UserIdInt int userId) {
-        return isDisabledBySettingsLocked(userId) || super.isDisabledLocked(userId);
+        return mDisabledByDeviceConfig || isDisabledBySettingsLocked(userId)
+                || super.isDisabledLocked(userId);
     }
 
     private boolean isDisabledBySettingsLocked(@UserIdInt int userId) {
@@ -189,6 +211,45 @@ public final class ContentCaptureManagerService extends
             Slog.w(mTag, "Invalid value for property " + property + ": " + value);
         }
         return false;
+    }
+
+    private void setDisabledByDeviceConfig() {
+        final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED);
+        setDisabledByDeviceConfig(value);
+    }
+
+    private void setDisabledByDeviceConfig(@Nullable String value) {
+        if (verbose) Slog.v(mTag, "setDisabledByDeviceConfig(): value=" + value);
+        final UserManager um = getContext().getSystemService(UserManager.class);
+        final List<UserInfo> users = um.getUsers();
+
+        final boolean newDisabledValue;
+
+        if (value != null && value.equalsIgnoreCase("false")) {
+            newDisabledValue = true;
+        } else {
+            newDisabledValue = false;
+        }
+
+        synchronized (mLock) {
+            if (mDisabledByDeviceConfig == newDisabledValue) {
+                if (verbose) {
+                    Slog.v(mTag, "setDisabledByDeviceConfig(): already " + newDisabledValue);
+                }
+                return;
+            }
+            mDisabledByDeviceConfig = newDisabledValue;
+
+            Slog.i(mTag, "setDisabledByDeviceConfig(): set to " + mDisabledByDeviceConfig);
+            for (int i = 0; i < users.size(); i++) {
+                final int userId = users.get(i).id;
+                boolean disabled = mDisabledByDeviceConfig || isDisabledBySettingsLocked(userId);
+                Slog.i(mTag, "setDisabledByDeviceConfig(): updating service for user "
+                        + userId + " to " + (disabled ? "'disabled'" : "'enabled'"));
+                updateCachedServiceLocked(userId, disabled);
+            }
+        }
     }
 
     private void setContentCaptureFeatureEnabledForUser(@UserIdInt int userId, boolean enabled) {
@@ -338,6 +399,8 @@ public final class ContentCaptureManagerService extends
         super.dumpLocked(prefix, pw);
 
         pw.print(prefix); pw.print("Disabled users: "); pw.println(mDisabledUsers);
+        pw.print(prefix); pw.print("Disabled by DeviceConfig: ");
+        pw.println(mDisabledByDeviceConfig);
     }
 
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {
@@ -406,7 +469,7 @@ public final class ContentCaptureManagerService extends
                         "isContentCaptureFeatureEnabled()", userId, Binder.getCallingUid(), result);
                 if (!isService) return;
 
-                enabled = !isDisabledBySettingsLocked(userId);
+                enabled = !mDisabledByDeviceConfig && !isDisabledBySettingsLocked(userId);
             }
             try {
                 result.send(enabled ? ContentCaptureManager.RESULT_CODE_TRUE

@@ -72,39 +72,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
-     * ContentCapture-related properties definitions.
+     * Namespace for content capture feature used by on-device machine intelligence
+     * to provide suggestions in a privacy-safe manner.
      *
      * @hide
      */
     @SystemApi
     @TestApi
-    public interface ContentCapture {
-        String NAMESPACE = "content_capture";
-
-        /**
-         * Property used by {@code com.android.server.SystemServer} on start to decide whether
-         * the Content Capture service should be created or not.
-         *
-         * <p>Possible values are:
-         *
-         * <ul>
-         *   <li>If set to {@code default}, it will only be set if the OEM provides and defines the
-         *   service name by overlaying {@code config_defaultContentCaptureService} (this is the
-         *   "default" mode)
-         *   <li>If set to {@code always}, it will always be enabled, even when the resource is not
-         *   overlaid (this is useful during development and to run the CTS tests on AOSP builds).
-         *   <li>Otherwise, it's explicitly disabled (this could work as a "kill switch" so OEMs
-         *   can disable it remotely in case of emergency by setting to something else (like
-         *   {@code "false"}); notice that it's also disabled if the OEM doesn't explicitly set one
-         *   of the values above).
-         * </ul>
-         *
-         * @hide
-         */
-        // TODO(b/121153631): revert back to SERVICE_EXPLICITLY_ENABLED approach
-        @TestApi
-        String PROPERTY_CONTENTCAPTURE_ENABLED = "enable_contentcapture";
-    }
+    public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
 
     /**
      * Namespace for all input-related features that are used at the native level.
