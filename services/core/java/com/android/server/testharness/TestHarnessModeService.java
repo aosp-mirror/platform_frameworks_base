@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.debug.AdbManagerInternal;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -42,6 +43,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +51,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
@@ -85,6 +86,7 @@ public class TestHarnessModeService extends SystemService {
                 break;
             case PHASE_BOOT_COMPLETED:
                 disableAutoSync();
+                configureSettings();
                 break;
         }
         super.onBootPhase(phase);
@@ -98,31 +100,19 @@ public class TestHarnessModeService extends SystemService {
             return;
         }
         mShouldSetUpTestHarnessMode = true;
+        setUpAdb(testHarnessModeData);
+        setDeviceProvisioned();
+    }
+
+    private void setUpAdb(byte[] testHarnessModeData) {
+        ContentResolver cr = getContext().getContentResolver();
+        // Disable the TTL for ADB keys before enabling ADB
+        Settings.Global.putLong(cr, Settings.Global.ADB_ALLOWED_CONNECTION_TIME, 0);
+
         PersistentData persistentData = PersistentData.fromBytes(testHarnessModeData);
 
         SystemProperties.set(TEST_HARNESS_MODE_PROPERTY, persistentData.mEnabled ? "1" : "0");
         writeAdbKeysFile(persistentData);
-        // Clear out the data block so that we don't revert the ADB keys on every boot.
-        getPersistentDataBlock().clearTestHarnessModeData();
-
-        ContentResolver cr = getContext().getContentResolver();
-        if (Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0) == 0) {
-            // Enable ADB
-            Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1);
-        } else {
-            // ADB is already enabled, we should restart the service so it picks up the new keys
-            android.os.SystemService.restart("adbd");
-        }
-
-        Settings.Global.putInt(cr, Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
-        Settings.Global.putInt(
-                cr,
-                Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
-                BatteryManager.BATTERY_PLUGGED_ANY);
-        Settings.Global.putInt(cr, Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE, 1);
-        Settings.Global.putInt(cr, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
-
-        setDeviceProvisioned();
     }
 
     private void disableAutoSync() {
@@ -134,11 +124,36 @@ public class TestHarnessModeService extends SystemService {
             .setMasterSyncAutomaticallyAsUser(false, primaryUser.getUserHandle().getIdentifier());
     }
 
+    private void configureSettings() {
+        if (!mShouldSetUpTestHarnessMode) {
+            return;
+        }
+        ContentResolver cr = getContext().getContentResolver();
+
+        Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1);
+        Settings.Global.putInt(cr, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
+        Settings.Global.putInt(cr, Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
+        Settings.Global.putInt(
+                cr,
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
+                BatteryManager.BATTERY_PLUGGED_ANY);
+        Settings.Global.putInt(cr, Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE, 1);
+    }
+
     private void writeAdbKeysFile(PersistentData persistentData) {
-        Path adbKeys = Paths.get("/data/misc/adb/adb_keys");
+        AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
+
+        writeBytesToFile(persistentData.mAdbKeys, adbManager.getAdbKeysFile().toPath());
+        writeBytesToFile(persistentData.mAdbTempKeys, adbManager.getAdbTempKeysFile().toPath());
+
+        // Clear out the data block so that we don't revert the ADB keys on every boot.
+        getPersistentDataBlock().clearTestHarnessModeData();
+    }
+
+    private void writeBytesToFile(byte[] keys, Path adbKeys) {
         try {
             OutputStream fileOutputStream = Files.newOutputStream(adbKeys);
-            fileOutputStream.write(persistentData.mAdbKeys);
+            fileOutputStream.write(keys);
             fileOutputStream.close();
 
             Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(adbKeys);
@@ -219,23 +234,22 @@ public class TestHarnessModeService extends SystemService {
         }
 
         private int handleEnable() {
-            Path adbKeys = Paths.get("/data/misc/adb/adb_keys");
-            if (!Files.exists(adbKeys)) {
+            AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
+            File adbKeys = adbManager.getAdbKeysFile();
+            File adbTempKeys = adbManager.getAdbTempKeysFile();
+            if (adbKeys == null && adbTempKeys == null) {
                 // This should only be accessible on eng builds that haven't yet set up ADB keys
                 getErrPrintWriter()
                     .println("No ADB keys stored; not enabling test harness mode");
                 return 1;
             }
 
-            try (InputStream inputStream = Files.newInputStream(adbKeys)) {
-                long size = Files.size(adbKeys);
-                byte[] adbKeysBytes = new byte[(int) size];
-                int numBytes = inputStream.read(adbKeysBytes);
-                if (numBytes != size) {
-                    getErrPrintWriter().println("Failed to read all bytes of adb_keys");
-                    return 1;
-                }
-                PersistentData persistentData = new PersistentData(true, adbKeysBytes);
+            try {
+                byte[] adbKeysBytes = getBytesFromFile(adbKeys);
+                byte[] adbTempKeysBytes = getBytesFromFile(adbTempKeys);
+
+                PersistentData persistentData =
+                        new PersistentData(true, adbKeysBytes, adbTempKeysBytes);
                 getPersistentDataBlock().setTestHarnessModeData(persistentData.toBytes());
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to store ADB keys.", e);
@@ -250,6 +264,22 @@ public class TestHarnessModeService extends SystemService {
             i.putExtra(Intent.EXTRA_WIPE_EXTERNAL_STORAGE, true);
             getContext().sendBroadcastAsUser(i, UserHandle.SYSTEM);
             return 0;
+        }
+
+        private byte[] getBytesFromFile(File file) throws IOException {
+            if (file == null || !file.exists()) {
+                return new byte[0];
+            }
+            Path path = file.toPath();
+            try (InputStream inputStream = Files.newInputStream(path)) {
+                int size = (int) Files.size(path);
+                byte[] bytes = new byte[size];
+                int numBytes = inputStream.read(bytes);
+                if (numBytes != size) {
+                    throw new IOException("Failed to read the whole file");
+                }
+                return bytes;
+            }
         }
 
         @Override
@@ -290,15 +320,17 @@ public class TestHarnessModeService extends SystemService {
         final int mVersion;
         final boolean mEnabled;
         final byte[] mAdbKeys;
+        final byte[] mAdbTempKeys;
 
-        PersistentData(boolean enabled, byte[] adbKeys) {
-            this(VERSION_1, enabled, adbKeys);
+        PersistentData(boolean enabled, byte[] adbKeys, byte[] adbTempKeys) {
+            this(VERSION_1, enabled, adbKeys, adbTempKeys);
         }
 
-        PersistentData(int version, boolean enabled, byte[] adbKeys) {
+        PersistentData(int version, boolean enabled, byte[] adbKeys, byte[] adbTempKeys) {
             this.mVersion = version;
             this.mEnabled = enabled;
             this.mAdbKeys = adbKeys;
+            this.mAdbTempKeys = adbTempKeys;
         }
 
         static PersistentData fromBytes(byte[] bytes) {
@@ -309,7 +341,10 @@ public class TestHarnessModeService extends SystemService {
                 int adbKeysLength = is.readInt();
                 byte[] adbKeys = new byte[adbKeysLength];
                 is.readFully(adbKeys);
-                return new PersistentData(version, enabled, adbKeys);
+                int adbTempKeysLength = is.readInt();
+                byte[] adbTempKeys = new byte[adbTempKeysLength];
+                is.readFully(adbTempKeys);
+                return new PersistentData(version, enabled, adbKeys, adbTempKeys);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -323,6 +358,8 @@ public class TestHarnessModeService extends SystemService {
                 dos.writeBoolean(mEnabled);
                 dos.writeInt(mAdbKeys.length);
                 dos.write(mAdbKeys);
+                dos.writeInt(mAdbTempKeys.length);
+                dos.write(mAdbTempKeys);
                 dos.close();
                 return os.toByteArray();
             } catch (IOException e) {

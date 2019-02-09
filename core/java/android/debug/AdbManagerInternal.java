@@ -16,6 +16,8 @@
 
 package android.debug;
 
+import java.io.File;
+
 /**
  * This class allows the control of ADB-related functions that should only be called from the system
  * server.
@@ -41,4 +43,14 @@ public abstract class AdbManagerInternal {
      * Returns {@code true} if ADB debugging is enabled.
      */
     public abstract boolean isAdbEnabled();
+
+    /**
+     * Returns the file that contains all of the ADB keys used by the device.
+     */
+    public abstract File getAdbKeysFile();
+
+    /**
+     * Returns the file that contains all of the ADB keys and their last used time.
+     */
+    public abstract File getAdbTempKeysFile();
 }
