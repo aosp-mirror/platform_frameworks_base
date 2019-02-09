@@ -391,10 +391,11 @@ public class BiometricService extends SystemService {
         private final Random mRandom = new Random();
 
         // TODO(b/123378871): Remove when moved.
-        // When BiometricPrompt#setEnableFallback is set to true, we need to store the client (app)
-        // receiver. BiometricService internally launches CDCA which invokes BiometricService to
-        // start authentication (normal path). When auth is success/rejected, CDCA will use an aidl
-        // method to poke BiometricService - the result will then be forwarded to this receiver.
+        // When BiometricPrompt#setAllowDeviceCredentials is set to true, we need to store the
+        // client (app) receiver. BiometricService internally launches CDCA which invokes
+        // BiometricService to start authentication (normal path). When auth is success/rejected,
+        // CDCA will use an aidl method to poke BiometricService - the result will then be forwarded
+        // to this receiver.
         private IBiometricServiceReceiver mConfirmDeviceCredentialReceiver;
 
         // The current authentication session, null if idle/done. We need to track both the current
@@ -803,11 +804,21 @@ public class BiometricService extends SystemService {
             // we can't get activity results. Store the receiver somewhere so we can forward the
             // result back to the client.
             // TODO(b/123378871): Remove when moved.
-            if (bundle.getBoolean(BiometricPrompt.KEY_ENABLE_FALLBACK)) {
+            if (bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL)) {
                 mHandler.post(() -> {
-                    mConfirmDeviceCredentialReceiver = receiver;
                     final KeyguardManager kgm = getContext().getSystemService(
                             KeyguardManager.class);
+                    if (!kgm.isDeviceSecure()) {
+                        try {
+                            receiver.onError(BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
+                                    getContext().getString(
+                                            R.string.biometric_error_device_not_secured));
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Remote exception", e);
+                        }
+                        return;
+                    }
+                    mConfirmDeviceCredentialReceiver = receiver;
                     // Use this so we don't need to duplicate logic..
                     final Intent intent = kgm.createConfirmDeviceCredentialIntent(null /* title */,
                             null /* description */);
