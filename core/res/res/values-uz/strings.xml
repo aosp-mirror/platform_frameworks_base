@@ -100,7 +100,7 @@
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Teng huquqli ishtirokchi teletayp rejimini VCO (gapiradi, eshitolmaydi) qilib o‘zgartirdi"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Teng huquqli ishtirokchi teletayp rejimini OFF (o‘chirilgan) qilib o‘zgartirdi"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Ovozli aloqa"</string>
-    <string name="serviceClassData" msgid="872456782077937893">"Ma’lumot"</string>
+    <string name="serviceClassData" msgid="872456782077937893">"Internet"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAKS"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Asinx"</string>
@@ -133,8 +133,8 @@
     <item msgid="4397097370387921767">"%s Wi-Fi qo‘ng‘iroqlar"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzal ko‘rilsin"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil internet ustivorligi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzalligi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil internet afzalligi"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Faqat Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -284,7 +284,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun SMS xabarlarni yuborish va ko‘rishga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Xotira"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qurilmangizdagi surat, multimedia va fayllarga kirish"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun qurilmangizdagi surat, multimedia va fayllarga ruxsat berilsinmi?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ilovasiga qurilmangizdagi surat, multimedia va fayllarga kirish uchun ruxsat berilsinmi?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ovoz yozib olish"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun audio yozib olishga ruxsat berilsinmi?"</string>
@@ -1128,7 +1128,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> jarayoni o‘zi uchun ajratilgan <xliff:g id="SIZE">%2$s</xliff:g> xotira chegarasidan o‘tib ketdi. Ilova dasturchisi bilan ulashishingiz uchun hip-damp ma’lumotlari yig‘ilib qoldi. Ehtiyot bo\'ling: ushbu hip-dampda ilova uchun foydalanishga ruxsat berilgan shaxsiy ma’lumotlaringiz bo‘lishi mumkin."</string>
     <string name="sendText" msgid="5209874571959469142">"Matn uchun amalni tanlash"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Jiringlaganda tovush balandligi"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Multimedia ovozi"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Multimedia tovushi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth orqali ijro etilmoqda"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="3941680041282788711">"Suhbat vaqtidagi tovush balandligi"</string>
@@ -1139,7 +1139,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth tovushi"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Rington balandligi"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Qo‘ng‘iroq tovushi balandligi"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia ovozi"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia tovushi"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Eslatma tovushi"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standart rington"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Standart (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

@@ -201,7 +201,7 @@ public final class BluetoothServerSocket implements Closeable {
     /**
      * Returns the assigned dynamic protocol/service multiplexer (PSM) value for the listening L2CAP
      * Connection-oriented Channel (CoC) server socket. This server socket must be returned by the
-     * {#link BluetoothAdapter.listenUsingL2capCoc(int)} or {#link
+     * {@link BluetoothAdapter.listenUsingL2capCoc(int)} or {@link
      * BluetoothAdapter.listenUsingInsecureL2capCoc(int)}. The returned value is undefined if this
      * method is called on non-L2CAP server sockets.
      *

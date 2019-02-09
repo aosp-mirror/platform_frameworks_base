@@ -346,7 +346,7 @@
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Profile sa trabaho"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Mao-on sa sunset"</string>
-    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hanggang mag-umaga"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hanggang sunrise"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Mao-on sa ganap na <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hanggang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>

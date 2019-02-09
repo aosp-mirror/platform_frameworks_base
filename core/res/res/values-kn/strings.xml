@@ -133,7 +133,7 @@
     <item msgid="4397097370387921767">"%s ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ಆಫ್"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ವೈ-ಫೈಗೆ ಆದ್ಯತೆ ನೀಡಲಾಗಿದೆ"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ವೈ-ಫೈಗೆ ಆದ್ಯತೆ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ಮೊಬೈಲ್‌ಗೆ ಆದ್ಯತೆ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ವೈ-ಫೈ ಮಾತ್ರ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
@@ -284,7 +284,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"ಎಸ್‌ಎಂಎಸ್‌ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಮತ್ತು ವೀಕ್ಷಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ಸಂಗ್ರಹಣೆ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ, ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ಮೈಕ್ರೋಫೋನ್‌"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ಆಡಿಯೋ ರೆಕಾರ್ಡ್‌ ಮಾಡಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>

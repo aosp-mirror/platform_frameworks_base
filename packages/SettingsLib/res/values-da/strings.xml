@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Vis en knap til oprettelse af fejlrapporter i menu for slukknap"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Lås ikke"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skærmen går ikke i dvale under opladning"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivér Bluetooth HCI snoop log"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivér Bluetooth HCI spionlog"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Gem alle Bluetooth HCI-pakker i en fil (slå Bluetooth fra og til igen, når du har ændret denne indstilling)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-oplåsning"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Tillad, at startindlæseren låses op"</string>
@@ -388,8 +388,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Denne tablet lukker muligvis snart ned (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Enheden lukker muligvis snart ned (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> til det er fuldt opladet"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> til det er fuldt opladet"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"fuldt opladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – fuldt opladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Ukendt"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Oplader"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"oplader"</string>

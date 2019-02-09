@@ -15493,7 +15493,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Sets the visual z position of this view, in pixels. This is equivalent to setting the
      * {@link #setTranslationZ(float) translationZ} property to be the difference between
-     * the x value passed in and the current {@link #getElevation() elevation} property.
+     * the z value passed in and the current {@link #getElevation() elevation} property.
      *
      * @param z The visual z position of this view, in pixels.
      */

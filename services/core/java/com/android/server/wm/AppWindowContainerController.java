@@ -18,9 +18,9 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_UNSET;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -65,6 +65,7 @@ public class AppWindowContainerController
     private final class H extends Handler {
         public static final int NOTIFY_WINDOWS_DRAWN = 1;
         public static final int NOTIFY_STARTING_WINDOW_DRAWN = 2;
+        public static final int NOTIFY_WINDOWS_NOTDRAWN = 3;
 
         public H(Looper looper) {
             super(looper);
@@ -85,9 +86,17 @@ public class AppWindowContainerController
                     if (mListener == null) {
                         return;
                     }
-                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting starting window drawn in "
                             + AppWindowContainerController.this.mToken);
                     mListener.onStartingWindowDrawn(msg.getWhen());
+                    break;
+                case NOTIFY_WINDOWS_NOTDRAWN:
+                    if (mListener == null) {
+                        return;
+                    }
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting undrawn in "
+                            + AppWindowContainerController.this.mToken);
+                    mListener.onWindowsNotDrawn(msg.getWhen());
                     break;
                 default:
                     break;
@@ -738,6 +747,10 @@ public class AppWindowContainerController
 
     void reportWindowsDrawn() {
         mHandler.sendMessage(mHandler.obtainMessage(H.NOTIFY_WINDOWS_DRAWN));
+    }
+
+    void reportWindowsNotDrawn() {
+        mHandler.sendMessage(mHandler.obtainMessage(H.NOTIFY_WINDOWS_NOTDRAWN));
     }
 
     void reportWindowsVisible() {

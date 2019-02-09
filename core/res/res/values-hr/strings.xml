@@ -124,7 +124,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Pretraživanje usluge"</string>
     <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Postavljanje Wi‑Fi poziva nije uspjelo"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3910386316304772394">"Da biste telefonirali i slali poruke putem Wi-Fi-ja, od mobilnog operatera morate tražiti da postavi tu uslugu. Zatim ponovo uključite Wi-Fi pozive u postavkama. (Kôd pogreške: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="3910386316304772394">"Da biste telefonirali i slali poruke putem Wi-Fija, od mobilnog operatera morate tražiti da postavi tu uslugu. Zatim ponovo uključite Wi-Fi pozive u postavkama. (Kôd pogreške: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Poteškoća s registracijom Wi‑Fi poziva kod mobilnog operatera: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -218,7 +218,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zaključavanje zaslona"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Isključi"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Hitno"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Hitne službe"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izvješće o bugovima"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snimka zaslona"</string>
@@ -738,7 +738,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Pritisnite Izbornik za otključavanje ili pozivanje hitnih službi."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Pritisnite Izbornik za otključavanje."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Iscrtajte uzorak za otključavanje"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Hitno"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Hitne službe"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Uzvrati poziv"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Ispravno!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Pokušajte ponovo"</string>
@@ -1477,7 +1477,7 @@
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Dost. ogr. Wi-Fi prijenosa pod."</string>
     <string name="data_usage_limit_body" msgid="2908179506560812973">"Podatkovni je promet pauziran za ostatak ciklusa"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Premašen limit mobilnih podataka"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Premašen limit podataka Wi-Fi-ja"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Premašen limit podataka Wi-Fija"</string>
     <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"Premašili ste postavljeno ograničenje za <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Pozadinski podaci ograničeni"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Dodirnite i uklonite ograničenje"</string>

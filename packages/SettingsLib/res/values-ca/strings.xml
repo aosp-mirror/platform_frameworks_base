@@ -70,7 +70,7 @@
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Actiu"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Àudio multimèdia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Trucades telefòniques"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència del fitxer"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència de fitxers"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Dispositiu d\'entrada"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accés a Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Compartir contactes"</string>
@@ -189,9 +189,9 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"La configuració de la VPN no està disponible per a aquest usuari."</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"La configuració de compartició de xarxa no està disponible per a aquest usuari."</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"La configuració del nom del punt d\'accés no està disponible per a aquest usuari."</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Depuració USB"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Depuració per USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Activa el mode de depuració quan el dispositiu estigui connectat per USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Revoca autoritzacions de depuració USB"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Revoca autoritzacions de depuració per USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Drecera per a informe d\'errors"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Mostra un botó al menú d\'engegada per crear un informe d\'errors"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Pantalla sempre activa"</string>
@@ -251,9 +251,9 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspecció d\'atributs de visualització"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantén les dades mòbils sempre actives, fins i tot quan la Wi‑Fi està activada (per canviar de xarxa ràpidament)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Fes servir l\'acceleració per maquinari per compartir la xarxa, si està disponible"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Voleu permetre la depuració USB?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"La depuració USB només està indicada per a activitats de desenvolupament. Fes-la servir intercanviar dades entre l\'ordinador i el dispositiu, per instal·lar aplicacions al dispositiu sense rebre notificacions i per llegir dades de registre."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vols revocar l\'accés a la depuració d\'USB dels ordinadors que has autoritzat anteriorment?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Voleu permetre la depuració per USB?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"La depuració per USB només està indicada per a activitats de desenvolupament. Fes-la servir intercanviar dades entre l\'ordinador i el dispositiu, per instal·lar aplicacions al dispositiu sense rebre notificacions i per llegir dades de registre."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vols revocar l\'accés a la depuració per USB dels ordinadors que has autoritzat anteriorment?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vols permetre la conf. de desenvolupament?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aquesta configuració només està prevista per a usos de desenvolupament. Pot fer que el dispositiu i que les aplicacions s\'interrompin o tinguin un comportament inadequat."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica aplicacions per USB"</string>
@@ -395,7 +395,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"s\'està carregant"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"No s\'està carregant"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"El dispositiu està endollat però en aquests moments no es pot carregar"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Plena"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlat per l\'administrador"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Activada per l\'administrador"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Desactivada per l\'administrador"</string>

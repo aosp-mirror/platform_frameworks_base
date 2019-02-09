@@ -370,7 +370,7 @@
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Ekranı sola doğru böl"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Ekranı sağa doğru böl"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Genel bakışı aç/kapat"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Ödeme alındı"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Şarj oldu"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Şarj oluyor"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Tam şarj olmasına <xliff:g id="CHARGING_TIME">%s</xliff:g> kaldı"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Şarj olmuyor"</string>

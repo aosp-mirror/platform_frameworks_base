@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Skift af mobilnetværk"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Åbn oplysninger om batteri"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batteriet oplades. <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batteriet oplades. <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemindstillinger."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Underretninger."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Se alle underretninger"</string>
@@ -360,15 +360,15 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> kunne ikke startes."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> er deaktiveret i sikker tilstand."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Ryd alle"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Træk hertil for at bruge delt skærm"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Træk hertil for at bruge opdelt skærm"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Stryg opad for at skifte apps"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Træk til højre for hurtigt at skifte app"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Opdel vandret"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Opdel lodret"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Opdel brugerdefineret"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Delt skærm øverst"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Delt skærm til venstre"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Delt skærm til højre"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Opdelt skærm øverst"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Opdelt skærm til venstre"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Opdelt skærm til højre"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Slå Oversigt til/fra"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Opladet"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Oplader"</string>
@@ -680,7 +680,7 @@
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Applikationer"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Assistance"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Browser"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontaktpersoner"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontakter"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"E-mail"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"Sms"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Musik"</string>
@@ -744,7 +744,7 @@
     <item msgid="3327323682209964956">"Vis ikke dette ikon"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"Andet"</string>
-    <string name="accessibility_divider" msgid="5903423481953635044">"Adskiller til delt skærm"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Adskiller til opdelt skærm"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Vis venstre del i fuld skærm"</string>
     <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"Venstre 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"Venstre 50 %"</string>
@@ -765,8 +765,8 @@
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> blev flyttet til position <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Redigeringsværktøj for Hurtige indstillinger."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-underretning: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"Appen fungerer muligvis ikke i delt skærm."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen understøtter ikke delt skærm."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Appen fungerer muligvis ikke i opdelt skærm."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen understøtter ikke opdelt skærm."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Appen fungerer muligvis ikke på sekundære skærme."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Appen kan ikke åbnes på sekundære skærme."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Åbn Indstillinger."</string>

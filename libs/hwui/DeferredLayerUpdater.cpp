@@ -133,9 +133,10 @@ void DeferredLayerUpdater::doUpdateTexImage() {
         bool forceFilter = false;
         sp<GraphicBuffer> buffer = mSurfaceTexture->getCurrentBuffer();
         if (buffer != nullptr) {
+            mLayer->setBufferSize(buffer->getWidth(), buffer->getHeight());
             // force filtration if buffer size != layer size
-            forceFilter = mWidth != static_cast<int>(buffer->getWidth()) ||
-                          mHeight != static_cast<int>(buffer->getHeight());
+            forceFilter = mWidth != static_cast<int>(mLayer->getBufferWidth()) ||
+                          mHeight != static_cast<int>(mLayer->getBufferHeight());
         }
 
 #if DEBUG_RENDERER

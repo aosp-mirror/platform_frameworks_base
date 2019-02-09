@@ -411,11 +411,11 @@
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"alterar as suas definições de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que a aplicação modifique definições de áudio globais, tais como o volume e qual o altifalante utilizado para a saída de som."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
-    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Esta aplicação pode gravar áudio através do microfone a qualquer momento."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Esta aplicação pode gravar áudio através do microfone em qualquer altura."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar comandos para o SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite que a aplicação envie comandos para o SIM. Esta ação é muito perigosa."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tirar fotos e vídeos"</string>
-    <string name="permdesc_camera" msgid="5392231870049240670">"Esta aplicação pode tirar fotos e gravar vídeos através da câmara a qualquer momento."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Esta aplicação pode tirar fotos e gravar vídeos através da câmara em qualquer altura."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar vibração"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite à aplicação controlar o vibrador."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"marcar números de telefone diretamente"</string>
@@ -1274,7 +1274,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Sobrepor a outras aplicações"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"A aplicação <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplic."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se não pretende que a aplicação <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Desligar"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>

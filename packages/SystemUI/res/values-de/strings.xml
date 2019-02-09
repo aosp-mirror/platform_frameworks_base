@@ -214,9 +214,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Der Flugmodus ist aktiviert."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"lautlos"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"nur Wecker"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nicht stören."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Nicht stören\" deaktiviert"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Nicht stören\" aktiviert"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Bitte nicht stören."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Bitte nicht stören\" deaktiviert"</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Bitte nicht stören\" aktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth deaktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth aktiviert"</string>
@@ -278,7 +278,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Bildschirmschoner"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Halte die Symbole gedrückt, um weitere Optionen zu sehen"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Nicht stören"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Bitte nicht stören"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Nur wichtige Unterbrechungen"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Nur Wecker"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Lautlos"</string>
@@ -443,9 +443,9 @@
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Keine Benachrichtigungen"</string>
-    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird möglicherweise überwacht."</string>
-    <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird möglicherweise überwacht."</string>
-    <string name="branded_vpn_footer" msgid="2168111859226496230">"Das Netzwerk wird möglicherweise überwacht"</string>
+    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird eventuell überwacht."</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird eventuell überwacht."</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Das Netzwerk wird eventuell überwacht"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"Deine Organisation verwaltet dieses Gerät und kann den Netzwerkverkehr überwachen"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> verwaltet dieses Gerät und kann den Netzwerkverkehr überwachen"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"Das Gerät wird von deiner Organisation verwaltet und ist mit <xliff:g id="VPN_APP">%1$s</xliff:g> verbunden"</string>
@@ -456,7 +456,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"Das Gerät wird von <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> verwaltet und ist mit VPNs verbunden"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"Deine Organisation kann den Netzwerkverkehr in deinem Arbeitsprofil überwachen"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kann den Netzwerkverkehr in deinem Arbeitsprofil überwachen"</string>
-    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Das Netzwerk wird möglicherweise überwacht"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Das Netzwerk wird eventuell überwacht"</string>
     <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"Das Gerät ist mit VPNs verbunden"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Arbeitsprofil verbunden mit <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Das persönliche Profil ist mit <xliff:g id="VPN_APP">%1$s</xliff:g> verbunden"</string>
@@ -691,9 +691,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalender"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Einschließlich Lautstärkeregler anzeigen"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Nicht stören"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Bitte nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Tastenkombination für Lautstärketasten"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"\"Nicht stören\" bei \"Lauter\" deaktivieren"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"\"Bitte nicht stören\" bei \"Lauter\" deaktivieren"</string>
     <string name="battery" msgid="7498329822413202973">"Akku"</string>
     <string name="clock" msgid="7416090374234785905">"Uhr"</string>
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
@@ -830,10 +830,10 @@
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> – <xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"WLAN ist deaktiviert"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth ist deaktiviert"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"\"Nicht stören\" ist deaktiviert"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"\"Nicht stören\" wurde von einer automatischen Regel aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"\"Nicht stören\" wurde von einer App aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"\"Nicht stören\" wurde von einer automatischen Regel oder einer App aktiviert."</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"\"Bitte nicht stören\" ist deaktiviert"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"\"Bitte nicht stören\" wurde von einer automatischen Regel aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"\"Bitte nicht stören\" wurde von einer App aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"\"Bitte nicht stören\" wurde von einer automatischen Regel oder einer App aktiviert."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Bis <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Beibehalten"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ersetzen"</string>
@@ -850,10 +850,10 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Zulassen"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Ablehnen"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Tippen zum Planen des Energiesparmodus"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Automatisch aktivieren bei einem Akkustand von <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Automatisch aktivieren bei einem Akkustand von <xliff:g id="PERCENTAGE">%d</xliff:g> %%"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Nein danke"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Geplanter Energiesparmodus aktiviert"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Der Energiesparmodus wird bei einem Akkustand von <xliff:g id="PERCENTAGE">%d</xliff:g>%% automatisch aktiviert."</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Der Energiesparmodus wird bei einem Akkustand von <xliff:g id="PERCENTAGE">%d</xliff:g> %% automatisch aktiviert."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Einstellungen"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>

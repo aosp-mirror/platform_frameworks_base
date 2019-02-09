@@ -284,7 +284,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të dërgojë dhe të shikojë mesazhet SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qasjen te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te fotografitë, media dhe skedarët në pajisjen tënde?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Të lejohet apl. &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; që të ketë qasje te fotografitë, media dhe skedarët në pajisjen tënde?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të regjistrojë audio?"</string>

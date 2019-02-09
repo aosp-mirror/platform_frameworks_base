@@ -245,7 +245,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Setări"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Asistență"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asistent vocal"</string>
-    <string name="global_action_lockdown" msgid="1099326950891078929">"Blocați"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Blocare strictă"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"˃999"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Notificare nouă"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Tastatură virtuală"</string>
@@ -578,9 +578,9 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite aplicației să se conecteze la serviciile operatorului. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accesează Nu deranja"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite aplicației să citească și să scrie configurația Nu deranja."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Setați reguli pentru parolă"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorizați încercările de deblocare a ecranului"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Să monitorizeze încercările de deblocare a ecranului"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți datele acesteia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
@@ -603,9 +603,9 @@
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Setați serverul proxy global pentru dispozitiv, care să fie utilizat cât timp politica este activă. Numai proprietarul dispozitivului poate seta serverul proxy global."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Setați expirarea parolei pentru blocarea ecranului"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modificați frecvența cu care trebuie să se schimbe parola, codul PIN sau modelul pentru blocarea ecranului."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setați criptarea stocării"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Să seteze criptarea stocării"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicației stocate să fie criptate."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivați camerele foto"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Să dezactiveze camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicați utilizarea camerelor foto de pe dispozitiv."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Să oprească funcții de blocare ecran"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Împiedicați folosirea unor funcții de blocare a ecranului."</string>

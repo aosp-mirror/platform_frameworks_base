@@ -62,11 +62,11 @@
     <string name="label_view" msgid="6304565553218192990">"Mostra"</string>
     <string name="always_use_device" msgid="4015357883336738417">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de l\'RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració per USB?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració per USB"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -83,7 +83,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Munta com a càmera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Instal·la aplic. transf. fitxers Android per a Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Enrere"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Pàgina d\'inici"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Inici"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Accessibilitat"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"Gira la pantalla"</string>
@@ -652,7 +652,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Esquerra"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Dreta"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Centre"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Pestanya"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulador"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Espai"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Retorn"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Retrocés"</string>

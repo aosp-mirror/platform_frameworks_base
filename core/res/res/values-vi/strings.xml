@@ -134,7 +134,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Được ưu tiên trên thiết bị di động"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Ưu tiên dữ liệu di động"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Chỉ Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>

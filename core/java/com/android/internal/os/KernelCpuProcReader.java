@@ -24,13 +24,14 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 
 /**
  * Reads cpu time proc files with throttling (adjustable interval).
@@ -55,7 +56,6 @@ public class KernelCpuProcReader {
     private static final int ERROR_THRESHOLD = 5;
     // Throttle interval in milliseconds
     private static final long DEFAULT_THROTTLE_INTERVAL = 3000L;
-    private static final int INITIAL_BUFFER_SIZE = 8 * 1024;
     private static final int MAX_BUFFER_SIZE = 1024 * 1024;
     private static final String PROC_UID_FREQ_TIME = "/proc/uid_cpupower/time_in_state";
     private static final String PROC_UID_ACTIVE_TIME = "/proc/uid_cpupower/concurrent_active_time";
@@ -84,13 +84,12 @@ public class KernelCpuProcReader {
     private long mThrottleInterval = DEFAULT_THROTTLE_INTERVAL;
     private long mLastReadTime = Long.MIN_VALUE;
     private final Path mProc;
-    private ByteBuffer mBuffer;
+    private byte[] mBuffer = new byte[8 * 1024];
+    private int mContentSize;
 
     @VisibleForTesting
     public KernelCpuProcReader(String procFile) {
         mProc = Paths.get(procFile);
-        mBuffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
-        mBuffer.clear();
     }
 
     /**
@@ -108,38 +107,45 @@ public class KernelCpuProcReader {
             return null;
         }
         if (SystemClock.elapsedRealtime() < mLastReadTime + mThrottleInterval) {
-            if (mBuffer.limit() > 0 && mBuffer.limit() < mBuffer.capacity()) {
-                // mBuffer has data.
-                return mBuffer.asReadOnlyBuffer().order(ByteOrder.nativeOrder());
+            if (mContentSize > 0) {
+                return ByteBuffer.wrap(mBuffer, 0, mContentSize).asReadOnlyBuffer()
+                        .order(ByteOrder.nativeOrder());
             }
             return null;
         }
         mLastReadTime = SystemClock.elapsedRealtime();
-        mBuffer.clear();
+        mContentSize = 0;
         final int oldMask = StrictMode.allowThreadDiskReadsMask();
-        try (FileChannel fc = FileChannel.open(mProc, StandardOpenOption.READ)) {
-            while (fc.read(mBuffer) == mBuffer.capacity()) {
-                if (!resize()) {
-                    mErrors++;
-                    Slog.e(TAG, "Proc file is too large: " + mProc);
-                    return null;
+        try (InputStream in = Files.newInputStream(mProc)) {
+            int numBytes = 0;
+            int curr;
+            while ((curr = in.read(mBuffer, numBytes, mBuffer.length - numBytes)) >= 0) {
+                numBytes += curr;
+                if (numBytes == mBuffer.length) {
+                    // Hit the limit. Resize mBuffer.
+                    if (mBuffer.length == MAX_BUFFER_SIZE) {
+                        mErrors++;
+                        Slog.e(TAG, "Proc file is too large: " + mProc);
+                        return null;
+                    }
+                    mBuffer = Arrays.copyOf(mBuffer,
+                            Math.min(mBuffer.length << 1, MAX_BUFFER_SIZE));
                 }
-                fc.position(0);
             }
+            mContentSize = numBytes;
+            return ByteBuffer.wrap(mBuffer, 0, mContentSize).asReadOnlyBuffer()
+                    .order(ByteOrder.nativeOrder());
         } catch (NoSuchFileException | FileNotFoundException e) {
             // Happens when the kernel does not provide this file. Not a big issue. Just log it.
             mErrors++;
             Slog.w(TAG, "File not exist: " + mProc);
-            return null;
         } catch (IOException e) {
             mErrors++;
             Slog.e(TAG, "Error reading: " + mProc, e);
-            return null;
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
         }
-        mBuffer.flip();
-        return mBuffer.asReadOnlyBuffer().order(ByteOrder.nativeOrder());
+        return null;
     }
 
     /**
@@ -152,15 +158,5 @@ public class KernelCpuProcReader {
         if (throttleInterval >= 0) {
             mThrottleInterval = throttleInterval;
         }
-    }
-
-    private boolean resize() {
-        if (mBuffer.capacity() >= MAX_BUFFER_SIZE) {
-            return false;
-        }
-        int newSize = Math.min(mBuffer.capacity() << 1, MAX_BUFFER_SIZE);
-        // Slog.i(TAG, "Resize buffer " + mBuffer.capacity() + " => " + newSize);
-        mBuffer = ByteBuffer.allocateDirect(newSize);
-        return true;
     }
 }

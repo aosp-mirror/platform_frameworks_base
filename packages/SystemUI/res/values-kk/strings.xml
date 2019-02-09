@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Оператор желісін өзгерту"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Батарея мәліметтерін ашу"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батарея <xliff:g id="NUMBER">%d</xliff:g> пайыз."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батарея зарядталуда, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> пайыз."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батарея зарядталуда, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Жүйе параметрлері."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Хабарлар."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Барлық хабарландыруды қарау"</string>

@@ -165,7 +165,7 @@
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> motorraren ezarpenak"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Abiarazi motorraren ezarpenak"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Motor hobetsia"</string>
-    <string name="tts_general_section_title" msgid="4402572014604490502">"Orokorra"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Orokorrak"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Berrezarri ahots-tonua"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Berrezarri testua esateko ahots-tonu lehenetsia."</string>
   <string-array name="tts_rate_entries">
