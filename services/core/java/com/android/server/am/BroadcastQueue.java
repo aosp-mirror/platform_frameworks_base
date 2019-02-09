@@ -898,6 +898,11 @@ public final class BroadcastQueue {
         for (int i = perms.length-1; i >= 0; i--) {
             try {
                 PermissionInfo pi = pm.getPermissionInfo(perms[i], "android", 0);
+                if (pi == null) {
+                    // a required permission that no package has actually
+                    // defined cannot be signature-required.
+                    return false;
+                }
                 if ((pi.protectionLevel & (PermissionInfo.PROTECTION_MASK_BASE
                         | PermissionInfo.PROTECTION_FLAG_PRIVILEGED))
                         != PermissionInfo.PROTECTION_SIGNATURE) {
