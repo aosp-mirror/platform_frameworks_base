@@ -40,8 +40,8 @@
     <bool name="def_wifi_display_on">false</bool>
     <bool name="def_install_non_market_apps">false</bool>
     <bool name="def_package_verifier_enable">true</bool>
-    <!-- Comma-separated list of location providers -->
-    <string name="def_location_providers_allowed" translatable="false">gps,network</string>
+    <!-- 0 == off, 3 == on -->
+    <integer name="def_location_mode">3</integer>
     <bool name="assisted_gps_enabled">true</bool>
     <bool name="def_netstats_enabled">true</bool>
     <bool name="def_usb_mass_storage_enabled">true</bool>
