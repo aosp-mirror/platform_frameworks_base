@@ -138,7 +138,7 @@ public class ImageView extends View {
     private int mDrawableWidth;
     @UnsupportedAppUsage
     private int mDrawableHeight;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124051687)
     private Matrix mDrawMatrix = null;
 
     // Avoid allocations...
