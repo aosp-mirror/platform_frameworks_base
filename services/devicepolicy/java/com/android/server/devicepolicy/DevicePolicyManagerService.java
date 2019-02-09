@@ -12790,10 +12790,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    // TODO(b/22388012): When backup is available for secondary users and profiles, consider
-    // whether there are any privacy/security implications of enabling the backup service here
-    // if there are other users or profiles unmanaged or managed by a different entity (i.e. not
-    // affiliated).
     @Override
     public void setBackupServiceEnabled(ComponentName admin, boolean enabled) {
         if (!mHasFeature) {
