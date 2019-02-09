@@ -515,6 +515,9 @@ message WifiLog {
 
   // Total number of scan results for WPA3-Enterprise networks
   optional int32 num_wpa3_enterprise_network_scan_results = 136;
+
+  // WifiConfigStore read/write metrics.
+  optional WifiConfigStoreIO wifi_config_store_io = 137;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -2168,5 +2171,27 @@ message WifiDppLog {
     // Easy Connect Failure event: Invalid network provided to Easy Connect configurator.
     // Network must either be WPA3-Personal (SAE) or WPA2-Personal (PSK).
     EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = 9;
+  }
+}
+
+// WifiConfigStore read/write metrics.
+message WifiConfigStoreIO {
+  // Histogram of config store read durations.
+  repeated DurationBucket read_durations = 1;
+
+  // Histogram of config store write durations.
+  repeated DurationBucket write_durations = 2;
+
+  // Total Number of instances of write/read duration in this duration bucket.
+  message DurationBucket {
+    // Bucket covers duration : [range_start_ms, range_end_ms)
+    // The (inclusive) lower bound of read/write duration represented by this bucket
+    optional int32 range_start_ms = 1;
+
+    // The (exclusive) upper bound of read/write duration represented by this bucket
+    optional int32 range_end_ms = 2;
+
+    // Number of read/write durations that fit into this bucket
+    optional int32 count = 3;
   }
 }
