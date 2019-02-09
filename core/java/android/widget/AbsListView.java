@@ -657,7 +657,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private Runnable mClearScrollingCache;
     Runnable mPositionScrollAfterLayout;
     private int mMinimumVelocity;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124051740)
     private int mMaximumVelocity;
     private float mVelocityScale = 1.0f;
 
