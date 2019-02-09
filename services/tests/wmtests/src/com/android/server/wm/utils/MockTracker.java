@@ -20,9 +20,11 @@ import android.util.Log;
 
 import org.mockito.Mockito;
 import org.mockito.MockitoFramework;
+import org.mockito.internal.creation.settings.CreationSettings;
 import org.mockito.listeners.MockCreationListener;
 import org.mockito.mock.MockCreationSettings;
 
+import java.lang.reflect.Field;
 import java.util.IdentityHashMap;
 
 /**
@@ -32,6 +34,17 @@ import java.util.IdentityHashMap;
  */
 public class MockTracker implements MockCreationListener, AutoCloseable {
     private static final String TAG = "MockTracker";
+
+    private static final Field SPIED_INSTANCE_FIELD;
+
+    static {
+        try {
+            SPIED_INSTANCE_FIELD = CreationSettings.class.getDeclaredField("spiedInstance");
+            SPIED_INSTANCE_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private final MockitoFramework mMockitoFramework = Mockito.framework();
 
@@ -44,6 +57,25 @@ public class MockTracker implements MockCreationListener, AutoCloseable {
     @Override
     public void onMockCreated(Object mock, MockCreationSettings settings) {
         mMocks.put(mock, null);
+        clearSpiedInstanceIfNeeded(mock, settings);
+    }
+
+    // HACK: Changing Mockito core implementation details.
+    // TODO(b/123984854): Remove this once there is a real fix.
+    private void clearSpiedInstanceIfNeeded(Object mock, MockCreationSettings settings) {
+        if (mock != settings.getSpiedInstance()) {
+            // Not a spyOn instance.
+            return;
+        }
+        if (!(settings instanceof CreationSettings)) {
+            throw new IllegalStateException("Unexpected type of settings: " + settings.getClass());
+        }
+        try {
+            SPIED_INSTANCE_FIELD.set(settings, null);
+            Log.d(TAG, "Setting spiedInstance for " + mock + " to null.");
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
