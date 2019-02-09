@@ -6954,6 +6954,7 @@ package android.telecom {
     field public static final String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
+    field public static final String EXTRA_IS_USER_INTENT_EMERGENCY_CALL = "android.telecom.extra.IS_USER_INTENT_EMERGENCY_CALL";
     field public static final int TTY_MODE_FULL = 1; // 0x1
     field public static final int TTY_MODE_HCO = 2; // 0x2
     field public static final int TTY_MODE_OFF = 0; // 0x0
@@ -8225,6 +8226,7 @@ package android.telephony.ims {
     method public int getServiceType();
     method public static int getVideoStateFromCallType(int);
     method public static int getVideoStateFromImsCallProfile(android.telephony.ims.ImsCallProfile);
+    method public boolean hasKnownUserIntentEmergency();
     method public boolean isEmergencyCallTesting();
     method public boolean isVideoCall();
     method public boolean isVideoPaused();
@@ -8237,6 +8239,7 @@ package android.telephony.ims {
     method public void setEmergencyCallTesting(boolean);
     method public void setEmergencyServiceCategories(int);
     method public void setEmergencyUrns(java.util.List<java.lang.String>);
+    method public void setHasKnownUserIntentEmergency(boolean);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
