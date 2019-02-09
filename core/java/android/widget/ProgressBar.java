@@ -199,7 +199,9 @@ public class ProgressBar extends View {
     private boolean mMaxInitialized;
 
     private int mBehavior;
-    @UnsupportedAppUsage
+    // Better to define a Drawable that implements Animatable if you want to modify animation
+    // characteristics programatically.
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124052713)
     private int mDuration;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mIndeterminate;
@@ -276,7 +278,6 @@ public class ProgressBar extends View {
                 setProgressDrawable(progressDrawable);
             }
         }
-
 
         mDuration = a.getInt(R.styleable.ProgressBar_indeterminateDuration, mDuration);
 
@@ -702,7 +703,17 @@ public class ProgressBar extends View {
     /**
      * Define the drawable used to draw the progress bar in indeterminate mode.
      *
+     * <p>For the Drawable to animate, it must implement {@link Animatable}, or override
+     * {@link Drawable#onLevelChange(int)}.  A Drawable that implements Animatable will be animated
+     * via that interface and therefore provides the greatest amount of customization. A Drawable
+     * that only overrides onLevelChange(int) is animated directly by ProgressBar and only the
+     * animation {@link android.R.styleable#ProgressBar_indeterminateDuration duration},
+         * {@link android.R.styleable#ProgressBar_indeterminateBehavior repeating behavior}, and
+     * {@link #setInterpolator(Interpolator) interpolator} can be modified, and only before the
+     * indeterminate animation begins.
+     *
      * @param d the new drawable
+     * @attr ref android.R.styleable#ProgressBar_indeterminateDrawable
      * @see #getIndeterminateDrawable()
      * @see #setIndeterminate(boolean)
      */
@@ -1762,10 +1773,21 @@ public class ProgressBar extends View {
 
     /**
      * Sets the acceleration curve for the indeterminate animation.
-     * The interpolator is loaded as a resource from the specified context.
+     *
+     * <p>The interpolator is loaded as a resource from the specified context. Defaults to a linear
+     * interpolation.
+     *
+     * <p>The interpolator only affects the indeterminate animation if the
+     * {@link #setIndeterminateDrawable(Drawable) supplied indeterminate drawable} does not
+     * implement {@link Animatable}.
+     *
+     * <p>This call must be made before the indeterminate animation starts for it to have an affect.
      *
      * @param context The application environment
      * @param resID The resource identifier of the interpolator to load
+     * @attr ref android.R.styleable#ProgressBar_interpolator
+     * @see #setInterpolator(Interpolator)
+     * @see #getInterpolator()
      */
     public void setInterpolator(Context context, @InterpolatorRes int resID) {
         setInterpolator(AnimationUtils.loadInterpolator(context, resID));
@@ -1775,7 +1797,17 @@ public class ProgressBar extends View {
      * Sets the acceleration curve for the indeterminate animation.
      * Defaults to a linear interpolation.
      *
+     * <p>The interpolator only affects the indeterminate animation if the
+     * {@link #setIndeterminateDrawable(Drawable) supplied indeterminate drawable} does not
+     * implement {@link Animatable}.
+     *
+     * <p>This call must be made before the indeterminate animation starts for it to have
+     * an affect.
+     *
      * @param interpolator The interpolator which defines the acceleration curve
+     * @attr ref android.R.styleable#ProgressBar_interpolator
+     * @see #setInterpolator(Context, int)
+     * @see #getInterpolator()
      */
     public void setInterpolator(Interpolator interpolator) {
         mInterpolator = interpolator;
@@ -1785,6 +1817,9 @@ public class ProgressBar extends View {
      * Gets the acceleration curve type for the indeterminate animation.
      *
      * @return the {@link Interpolator} associated to this animation
+     * @attr ref android.R.styleable#ProgressBar_interpolator
+     * @see #setInterpolator(Context, int)
+     * @see #setInterpolator(Interpolator)
      */
     @InspectableProperty
     public Interpolator getInterpolator() {
