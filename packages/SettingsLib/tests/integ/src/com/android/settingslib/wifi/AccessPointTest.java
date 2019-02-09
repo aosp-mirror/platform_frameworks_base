@@ -43,13 +43,16 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiSsid;
+import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
+import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -68,6 +71,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 @SmallTest
@@ -75,8 +81,11 @@ import java.util.concurrent.CountDownLatch;
 public class AccessPointTest {
 
     private static final String TEST_SSID = "\"test_ssid\"";
+    private static final String ROAMING_SSID = "\"roaming_ssid\"";
+    private static final String OSU_FRIENDLY_NAME = "osu_friendly_name";
 
-    private static final ArrayList<ScanResult> SCAN_RESULTS = buildScanResultCache();
+    private ArrayList<ScanResult> mScanResults;
+    private ArrayList<ScanResult> mRoamingScans;
 
     private static final RssiCurve FAST_BADGE_CURVE =
             new RssiCurve(-150, 10, new byte[]{Speed.FAST});
@@ -88,10 +97,11 @@ public class AccessPointTest {
     private WifiInfo mWifiInfo;
     @Mock private RssiCurve mockBadgeCurve;
     @Mock private WifiNetworkScoreCache mockWifiNetworkScoreCache;
-    public static final int NETWORK_ID = 123;
-    public static final int DEFAULT_RSSI = -55;
+    @Mock private AccessPoint.AccessPointListener mMockAccessPointListener;
+    private static final int NETWORK_ID = 123;
+    private static final int DEFAULT_RSSI = -55;
 
-    private static ScanResult createScanResult(String ssid, String bssid, int rssi) {
+    private ScanResult createScanResult(String ssid, String bssid, int rssi) {
         ScanResult scanResult = new ScanResult();
         scanResult.SSID = ssid;
         scanResult.level = rssi;
@@ -101,6 +111,12 @@ public class AccessPointTest {
         return scanResult;
     }
 
+    private OsuProvider createOsuProvider() {
+        Map<String, String> friendlyNames = new HashMap<>();
+        friendlyNames.put("en", OSU_FRIENDLY_NAME);
+        return new OsuProvider(null, friendlyNames, null, null, null, null, null);
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -108,6 +124,8 @@ public class AccessPointTest {
         mWifiInfo = new WifiInfo();
         mWifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
         mWifiInfo.setBSSID(TEST_BSSID);
+        mScanResults = buildScanResultCache(TEST_SSID);
+        mRoamingScans = buildScanResultCache(ROAMING_SSID);
         WifiTracker.sVerboseLogging = false;
     }
 
@@ -573,14 +591,14 @@ public class AccessPointTest {
         Bundle bundle = new Bundle();
         bundle.putParcelableArray(
                 AccessPoint.KEY_SCANRESULTS,
-                SCAN_RESULTS.toArray(new Parcelable[SCAN_RESULTS.size()]));
+                mScanResults.toArray(new Parcelable[mScanResults.size()]));
         return new AccessPoint(mContext, bundle);
     }
 
-    private static ArrayList<ScanResult> buildScanResultCache() {
+    private ArrayList<ScanResult> buildScanResultCache(String ssid) {
         ArrayList<ScanResult> scanResults = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            ScanResult scanResult = createScanResult(TEST_SSID, "bssid-" + i, i);
+            ScanResult scanResult = createScanResult(ssid, "bssid-" + i, i);
             scanResults.add(scanResult);
         }
         return scanResults;
@@ -975,12 +993,12 @@ public class AccessPointTest {
         int speed1 = Speed.MODERATE;
         RssiCurve badgeCurve1 = mock(RssiCurve.class);
         when(badgeCurve1.lookupScore(anyInt())).thenReturn((byte) speed1);
-        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(0)))
+        when(mockWifiNetworkScoreCache.getScoredNetwork(mScanResults.get(0)))
                 .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve1));
         int speed2 = Speed.VERY_FAST;
         RssiCurve badgeCurve2 = mock(RssiCurve.class);
         when(badgeCurve2.lookupScore(anyInt())).thenReturn((byte) speed2);
-        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(1)))
+        when(mockWifiNetworkScoreCache.getScoredNetwork(mScanResults.get(1)))
                 .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
 
         int expectedSpeed = (speed1 + speed2) / 2;
@@ -998,12 +1016,12 @@ public class AccessPointTest {
         int speed1 = Speed.VERY_FAST;
         RssiCurve badgeCurve1 = mock(RssiCurve.class);
         when(badgeCurve1.lookupScore(anyInt())).thenReturn((byte) speed1);
-        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(0)))
+        when(mockWifiNetworkScoreCache.getScoredNetwork(mScanResults.get(0)))
                 .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve1));
         int speed2 = Speed.NONE;
         RssiCurve badgeCurve2 = mock(RssiCurve.class);
         when(badgeCurve2.lookupScore(anyInt())).thenReturn((byte) speed2);
-        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(1)))
+        when(mockWifiNetworkScoreCache.getScoredNetwork(mScanResults.get(1)))
                 .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
 
         ap.update(
@@ -1123,7 +1141,7 @@ public class AccessPointTest {
                 .setActive(true)
                 .setScoredNetworkCache(
                         new ArrayList(Arrays.asList(recentScore)))
-                .setScanResults(SCAN_RESULTS)
+                .setScanResults(mScanResults)
                 .build();
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
@@ -1151,7 +1169,7 @@ public class AccessPointTest {
                 .setActive(true)
                 .setScoredNetworkCache(
                         new ArrayList(Arrays.asList(recentScore)))
-                .setScanResults(SCAN_RESULTS)
+                .setScanResults(mScanResults)
                 .build();
 
         int newSpeed = Speed.MODERATE;
@@ -1196,7 +1214,7 @@ public class AccessPointTest {
         AccessPoint ap = new TestAccessPointBuilder(mContext)
                 .setSsid(TEST_SSID)
                 .setBssid(TEST_BSSID)
-                .setScanResults(SCAN_RESULTS)
+                .setScanResults(mScanResults)
                 .build();
 
         assertThat(ap.update(null, mWifiInfo, null)).isFalse();
@@ -1216,5 +1234,173 @@ public class AccessPointTest {
         AccessPoint passpointAp = new AccessPoint(mContext, spyConfig);
 
         assertThat(passpointAp.update(null, mWifiInfo, null)).isFalse();
+    }
+
+    /**
+     * Verifies that an AccessPoint's getKey() is consistent with the overloaded static getKey().
+     */
+    @Test
+    public void testGetKey_matchesKeysCorrectly() {
+        AccessPoint ap = new AccessPoint(mContext, mScanResults);
+        assertThat(ap.getKey()).isEqualTo(AccessPoint.getKey(mScanResults.get(0)));
+
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+        when(spyConfig.isPasspoint()).thenReturn(true);
+        spyConfig.FQDN = "fqdn";
+        AccessPoint passpointAp = new AccessPoint(mContext, spyConfig, mScanResults, null);
+        assertThat(passpointAp.getKey()).isEqualTo(AccessPoint.getKey(spyConfig));
+
+        OsuProvider provider = createOsuProvider();
+        AccessPoint osuAp = new AccessPoint(mContext, provider, mScanResults);
+        assertThat(osuAp.getKey()).isEqualTo(AccessPoint.getKey(provider));
+    }
+
+    /**
+     * Verifies that the Passpoint AccessPoint constructor creates AccessPoints whose isPasspoint()
+     * returns true.
+     */
+    @Test
+    public void testPasspointAccessPointConstructor_createdAccessPointIsPasspoint() {
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+        when(spyConfig.isPasspoint()).thenReturn(true);
+        AccessPoint passpointAccessPoint = new AccessPoint(mContext, spyConfig,
+                mScanResults, mRoamingScans);
+
+        assertThat(passpointAccessPoint.isPasspoint()).isTrue();
+    }
+
+    /**
+     * Verifies that Passpoint AccessPoints set their config's SSID to the home scans', and to the
+     * roaming scans' if no home scans are available.
+     */
+    @Test
+    public void testSetScanResultsPasspoint_differentiatesHomeAndRoaming() {
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+        when(spyConfig.isPasspoint()).thenReturn(true);
+        AccessPoint passpointAccessPoint = new AccessPoint(mContext, spyConfig,
+                mScanResults, mRoamingScans);
+        assertThat(AccessPoint.removeDoubleQuotes(spyConfig.SSID)).isEqualTo(TEST_SSID);
+
+        passpointAccessPoint.setScanResultsPasspoint(null, mRoamingScans);
+        assertThat(AccessPoint.removeDoubleQuotes(spyConfig.SSID)).isEqualTo(ROAMING_SSID);
+
+        passpointAccessPoint.setScanResultsPasspoint(mScanResults, null);
+        assertThat(AccessPoint.removeDoubleQuotes(spyConfig.SSID)).isEqualTo(TEST_SSID);
+    }
+
+    /**
+     * Verifies that getScanResults returns both home and roaming scans.
+     */
+    @Test
+    public void testGetScanResults_showsHomeAndRoamingScans() {
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+        when(spyConfig.isPasspoint()).thenReturn(true);
+        AccessPoint passpointAccessPoint = new AccessPoint(mContext, spyConfig,
+                mScanResults, mRoamingScans);
+        Set<ScanResult> fullSet = new ArraySet<>();
+        fullSet.addAll(mScanResults);
+        fullSet.addAll(mRoamingScans);
+        assertThat(passpointAccessPoint.getScanResults()).isEqualTo(fullSet);
+    }
+
+    /**
+     * Verifies that the Passpoint AccessPoint takes the ssid of the strongest scan result.
+     */
+    @Test
+    public void testPasspointAccessPoint_setsBestSsid() {
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+        when(spyConfig.isPasspoint()).thenReturn(true);
+
+        String badSsid = "badSsid";
+        String goodSsid = "goodSsid";
+        String bestSsid = "bestSsid";
+        ScanResult badScanResult = createScanResult(badSsid, TEST_BSSID, -100);
+        ScanResult goodScanResult = createScanResult(goodSsid, TEST_BSSID, -10);
+        ScanResult bestScanResult = createScanResult(bestSsid, TEST_BSSID, -1);
+
+        AccessPoint passpointAccessPoint = new AccessPoint(mContext, spyConfig,
+                Arrays.asList(badScanResult, goodScanResult), null);
+        assertThat(passpointAccessPoint.getConfig().SSID)
+                .isEqualTo(AccessPoint.convertToQuotedString(goodSsid));
+        passpointAccessPoint.setScanResultsPasspoint(
+                Arrays.asList(badScanResult, goodScanResult, bestScanResult), null);
+        assertThat(passpointAccessPoint.getConfig().SSID)
+                .isEqualTo(AccessPoint.convertToQuotedString(bestSsid));
+    }
+
+    /**
+     * Verifies that the OSU AccessPoint constructor creates AccessPoints whose isOsuProvider()
+     * returns true.
+     */
+    @Test
+    public void testOsuAccessPointConstructor_createdAccessPointIsOsuProvider() {
+        AccessPoint osuAccessPoint = new AccessPoint(mContext, createOsuProvider(),
+                mScanResults);
+
+        assertThat(osuAccessPoint.isOsuProvider()).isTrue();
+    }
+
+    /**
+     * Verifies that the summary of an OSU entry only shows the tap_to_sign_up string.
+     */
+    @Test
+    public void testOsuAccessPointSummary_showsTapToSignUp() {
+        AccessPoint osuAccessPoint = new AccessPoint(mContext, createOsuProvider(),
+                mScanResults);
+
+        assertThat(osuAccessPoint.getSummary())
+                .isEqualTo(mContext.getString(R.string.tap_to_sign_up));
+    }
+
+    @Test
+    public void testOsuAccessPointSummary_showsProvisioningUpdates() {
+        AccessPoint osuAccessPoint = new AccessPoint(mContext, createOsuProvider(),
+                mScanResults);
+
+        osuAccessPoint.setListener(mMockAccessPointListener);
+
+        AccessPoint.AccessPointProvisioningCallback provisioningCallback =
+                osuAccessPoint.new AccessPointProvisioningCallback();
+
+        int[] openingProviderStatuses = {
+                ProvisioningCallback.OSU_STATUS_AP_CONNECTING,
+                ProvisioningCallback.OSU_STATUS_AP_CONNECTED,
+                ProvisioningCallback.OSU_STATUS_SERVER_CONNECTING,
+                ProvisioningCallback.OSU_STATUS_SERVER_VALIDATED,
+                ProvisioningCallback.OSU_STATUS_SERVER_CONNECTED,
+                ProvisioningCallback.OSU_STATUS_INIT_SOAP_EXCHANGE,
+                ProvisioningCallback.OSU_STATUS_WAITING_FOR_REDIRECT_RESPONSE
+        };
+        int[] completingSignUpStatuses = {
+                ProvisioningCallback.OSU_STATUS_REDIRECT_RESPONSE_RECEIVED,
+                ProvisioningCallback.OSU_STATUS_SECOND_SOAP_EXCHANGE,
+                ProvisioningCallback.OSU_STATUS_THIRD_SOAP_EXCHANGE,
+                ProvisioningCallback.OSU_STATUS_RETRIEVING_TRUST_ROOT_CERTS,
+        };
+
+        for (int status : openingProviderStatuses) {
+            provisioningCallback.onProvisioningStatus(status);
+            assertThat(osuAccessPoint.getSummary())
+                    .isEqualTo(String.format(mContext.getString(R.string.osu_opening_provider),
+                            OSU_FRIENDLY_NAME));
+        }
+
+        provisioningCallback.onProvisioningFailure(0);
+        assertThat(osuAccessPoint.getSummary())
+                .isEqualTo(mContext.getString(R.string.osu_connect_failed));
+
+        for (int status : completingSignUpStatuses) {
+            provisioningCallback.onProvisioningStatus(status);
+            assertThat(osuAccessPoint.getSummary())
+                    .isEqualTo(mContext.getString(R.string.osu_completing_sign_up));
+        }
+
+        provisioningCallback.onProvisioningFailure(0);
+        assertThat(osuAccessPoint.getSummary())
+                .isEqualTo(mContext.getString(R.string.osu_sign_up_failed));
+
+        provisioningCallback.onProvisioningComplete();
+        assertThat(osuAccessPoint.getSummary())
+                .isEqualTo(mContext.getString(R.string.osu_sign_up_complete));
     }
 }
