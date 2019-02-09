@@ -725,6 +725,8 @@ bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
             ALOGE("Invalid metric tracker index.");
             return false;
         }
+        allMetricProducers[metricTrackerIndex]->setActivationType(
+                metric_activation.activation_type());
         metricsWithActivation.push_back(metricTrackerIndex);
         for (int j = 0; j < metric_activation.event_activation_size(); ++j) {
             const EventActivation& activation = metric_activation.event_activation(j);

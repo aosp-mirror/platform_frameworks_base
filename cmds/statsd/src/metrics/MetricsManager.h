@@ -132,11 +132,17 @@ public:
         return mIsActive;
     }
 
-    inline void getActiveMetrics(std::vector<const MetricProducer*>& metrics) const {
+    inline void getActiveMetrics(std::vector<MetricProducer*>& metrics) const {
         for (const auto& metric : mAllMetricProducers) {
             if (metric->isActive()) {
                 metrics.push_back(metric.get());
             }
+        }
+    }
+
+    inline void prepForShutDown(int64_t currentTimeNs) {
+        for (const auto& metric : mAllMetricProducers) {
+            metric->prepActiveForBootIfNecessary(currentTimeNs);
         }
     }
 
@@ -271,6 +277,7 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
 
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
 };
 
 }  // namespace statsd
