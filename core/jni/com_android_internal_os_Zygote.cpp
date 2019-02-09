@@ -598,23 +598,31 @@ static int UnmountTree(const char* path) {
     return 0;
 }
 
+static void CreateDir(const std::string& dir,
+                      mode_t mode, uid_t uid, gid_t gid,
+                      fail_fn_t fail_fn) {
+    if (TEMP_FAILURE_RETRY(access(dir.c_str(), F_OK)) == 0) {
+        return;
+    } else if (errno != ENOENT) {
+        fail_fn(CREATE_ERROR("Failed to stat %s: %s", dir.c_str(), strerror(errno)));
+    }
+    if (fs_prepare_dir(dir.c_str(), mode, uid, gid) != 0) {
+        fail_fn(CREATE_ERROR("fs_prepare_dir failed on %s: %s",
+                dir.c_str(), strerror(errno)));
+    }
+}
+
 static void CreatePkgSandbox(uid_t uid, const std::string& package_name, fail_fn_t fail_fn) {
     // Create /mnt/user/0/package/<package-name>
     userid_t user_id = multiuser_get_user_id(uid);
     std::string pkg_sandbox_dir = StringPrintf("/mnt/user/%d", user_id);
-    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0751, AID_ROOT, AID_ROOT) != 0) {
-        fail_fn(CREATE_ERROR("fs_prepare_dir failed on %s", pkg_sandbox_dir.c_str()));
-    }
+    CreateDir(pkg_sandbox_dir, 0751, AID_ROOT, AID_ROOT, fail_fn);
 
     StringAppendF(&pkg_sandbox_dir, "/package");
-    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0700, AID_ROOT, AID_ROOT) != 0) {
-        fail_fn(CREATE_ERROR("fs_prepare_dir failed on %s", pkg_sandbox_dir.c_str()));
-    }
+    CreateDir(pkg_sandbox_dir, 0700, AID_ROOT, AID_ROOT, fail_fn);
 
     StringAppendF(&pkg_sandbox_dir, "/%s", package_name.c_str());
-    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0755, uid, uid) != 0) {
-        fail_fn(CREATE_ERROR("fs_prepare_dir failed on %s", pkg_sandbox_dir.c_str()));
-    }
+    CreateDir(pkg_sandbox_dir, 0700, AID_ROOT, AID_ROOT, fail_fn);
 }
 
 static void BindMount(const std::string& sourceDir, const std::string& targetDir,
@@ -629,20 +637,41 @@ static void BindMount(const std::string& sourceDir, const std::string& targetDir
 static void MountPkgSpecificDir(const std::string& mntSourceRoot,
                                 const std::string& mntTargetRoot,
                                 const std::string& packageName,
+                                uid_t uid,
                                 const char* dirName,
                                 fail_fn_t fail_fn) {
     std::string mntSourceDir = StringPrintf("%s/Android/%s/%s",
             mntSourceRoot.c_str(), dirName, packageName.c_str());
+    CreateDir(mntSourceDir, 0755, uid, uid, fail_fn);
+
     std::string mntTargetDir = StringPrintf("%s/Android/%s/%s",
             mntTargetRoot.c_str(), dirName, packageName.c_str());
+    CreateDir(mntTargetDir, 0755, uid, uid, fail_fn);
 
     BindMount(mntSourceDir, mntTargetDir, fail_fn);
+}
+
+
+static void createPkgSpecificDirRoots(const std::string& parentDir,
+                                      bool createSandbox,
+                                      mode_t mode, uid_t uid, gid_t gid,
+                                      fail_fn_t fail_fn) {
+    std::string androidDir = StringPrintf("%s/Android", parentDir.c_str());
+    CreateDir(androidDir, mode, uid, gid, fail_fn);
+    std::vector<std::string> dirs = {"data", "media", "obb"};
+    if (createSandbox) {
+        dirs.push_back("sandbox");
+    }
+    for (auto& dir : dirs) {
+        std::string path = StringPrintf("%s/%s", androidDir.c_str(), dir.c_str());
+        CreateDir(path, mode, uid, gid, fail_fn);
+    }
 }
 
 static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
                                    const std::vector<std::string>& volumeLabels,
                                    bool mountAllObbs, const std::string& sandboxId,
-                                   userid_t userId, fail_fn_t fail_fn) {
+                                   userid_t userId, uid_t uid, fail_fn_t fail_fn) {
     for (auto& label : volumeLabels) {
         std::string mntSource = StringPrintf("/mnt/runtime/write/%s", label.c_str());
         std::string mntTarget = StringPrintf("/storage/%s", label.c_str());
@@ -651,15 +680,26 @@ static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
             StringAppendF(&mntTarget, "/%d", userId);
         }
 
+        if (TEMP_FAILURE_RETRY(access(mntSource.c_str(), F_OK)) < 0) {
+            ALOGE("Can't access %s: %s", mntSource.c_str(), strerror(errno));
+            continue;
+        }
+
+        // Create /mnt/runtime/write/emulated/0/Android/{data,media,obb,sandbox}
+        createPkgSpecificDirRoots(mntSource, true, 0700, AID_ROOT, AID_ROOT, fail_fn);
+
         std::string sandboxSource = StringPrintf("%s/Android/sandbox/%s",
             mntSource.c_str(), sandboxId.c_str());
+        CreateDir(sandboxSource, 0755, uid, uid, fail_fn);
         BindMount(sandboxSource, mntTarget, fail_fn);
 
+        // Create /storage/emulated/0/Android/{data,media,obb}
+        createPkgSpecificDirRoots(mntTarget, false, 0755, uid, uid, fail_fn);
         for (auto& package : packageNames) {
-            MountPkgSpecificDir(mntSource, mntTarget, package, "data", fail_fn);
-            MountPkgSpecificDir(mntSource, mntTarget, package, "media", fail_fn);
+            MountPkgSpecificDir(mntSource, mntTarget, package, uid, "data", fail_fn);
+            MountPkgSpecificDir(mntSource, mntTarget, package, uid, "media", fail_fn);
             if (!mountAllObbs) {
-                MountPkgSpecificDir(mntSource, mntTarget, package, "obb", fail_fn);
+                MountPkgSpecificDir(mntSource, mntTarget, package, uid, "obb", fail_fn);
             }
         }
 
@@ -774,7 +814,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
             // care of by vold later.
             if (sandboxAlreadyCreated) {
                 PreparePkgSpecificDirs(packages_for_uid, visible_vol_ids,
-                    mount_mode == MOUNT_EXTERNAL_INSTALLER, sandbox_id, user_id, fail_fn);
+                    mount_mode == MOUNT_EXTERNAL_INSTALLER, sandbox_id, user_id, uid, fail_fn);
             }
         }
     } else {
