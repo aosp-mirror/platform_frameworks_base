@@ -107,6 +107,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             mHandler.obtainMessage(MSG_REMOVED, remaining, 0,
                     new Face(null, faceId, deviceId)).sendToTarget();
         }
+
+        @Override
+        public void onEnumerated(long deviceId, int faceId, int remaining) {
+            // TODO: Finish. Low priority since it's not used.
+        }
     };
 
     /**

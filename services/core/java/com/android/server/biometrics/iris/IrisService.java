@@ -17,11 +17,14 @@
 package com.android.server.biometrics.iris;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.Metrics;
+
+import java.util.List;
 
 /**
  * A service to manage multiple clients that want to access the Iris HAL API.
@@ -58,6 +61,11 @@ public class IrisService extends BiometricServiceBase {
     @Override
     protected String getTag() {
         return TAG;
+    }
+
+    @Override
+    protected DaemonWrapper getDaemonWrapper() {
+        return null;
     }
 
     @Override
@@ -106,11 +114,6 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected void handleUserSwitching(int userId) {
-
-    }
-
-    @Override
     protected boolean hasEnrolledBiometrics(int userId) {
         return false;
     }
@@ -128,6 +131,11 @@ public class IrisService extends BiometricServiceBase {
     @Override
     protected boolean checkAppOps(int uid, String opPackageName) {
         return false;
+    }
+
+    @Override
+    protected List<? extends BiometricAuthenticator.Identifier> getEnrolledTemplates(int userId) {
+        return null;
     }
 
     @Override

@@ -61,7 +61,6 @@ import android.util.StatsLog;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.SystemService;
-import com.android.server.biometrics.fingerprint.FingerprintService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +79,7 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected static final boolean DEBUG = true;
 
+    private static final boolean CLEANUP_UNKNOWN_TEMPLATES = true;
     private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
     private static final int MSG_USER_SWITCHING = 10;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30 * 1000;
@@ -107,11 +107,15 @@ public abstract class BiometricServiceBase extends SystemService
     protected final AppOpsManager mAppOps;
     protected final H mHandler = new H();
 
+    private final IBinder mToken = new Binder(); // Used for internal enumeration
+    private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
+
     private IBiometricService mBiometricService;
     private ClientMonitor mCurrentClient;
     private ClientMonitor mPendingClient;
     private PerformanceStats mPerformanceStats;
     protected int mCurrentUserId = UserHandle.USER_NULL;
+    protected long mHalDeviceId;
     // Tracks if the current authentication makes use of CryptoObjects.
     protected boolean mIsCrypto;
     // Normal authentications are tracked by mPerformanceMap.
@@ -133,6 +137,11 @@ public abstract class BiometricServiceBase extends SystemService
      * @return the log tag.
      */
     protected abstract String getTag();
+
+    /**
+     * @return wrapper for the HAL
+     */
+    protected abstract DaemonWrapper getDaemonWrapper();
 
     /**
      * @return the biometric utilities for a specific implementation.
@@ -186,13 +195,6 @@ public abstract class BiometricServiceBase extends SystemService
     protected abstract long getHalDeviceId();
 
     /**
-     * This method is called when the user switches. Implementations should probably notify the
-     * HAL.
-     * @param userId
-     */
-    protected abstract void handleUserSwitching(int userId);
-
-    /**
      * @param userId
      * @return Returns true if the user has any enrolled biometrics.
      */
@@ -214,6 +216,9 @@ public abstract class BiometricServiceBase extends SystemService
      * Checks if the caller passes the app ops check
      */
     protected abstract boolean checkAppOps(int uid, String opPackageName);
+
+    protected abstract List<? extends BiometricAuthenticator.Identifier> getEnrolledTemplates(
+            int userId);
 
     /**
      * Notifies clients of any change in the biometric state (active / idle). This is mainly for
@@ -319,40 +324,106 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    protected abstract class RemovalClientImpl extends RemovalClient {
-        private boolean mShouldNotify;
-
-        public RemovalClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
-                IBinder token, ServiceListener listener, int fingerId, int groupId, int userId,
+    /**
+     * An internal class to help clean up unknown templates in HAL and Framework
+     */
+    private final class InternalRemovalClient extends RemovalClient {
+        InternalRemovalClient(Context context,
+                DaemonWrapper daemon, long halDeviceId, IBinder token,
+                ServiceListener listener, int templateId, int groupId, int userId,
                 boolean restricted, String owner) {
-            super(context, getMetrics(), daemon, halDeviceId, token, listener, fingerId, groupId,
+            super(context, getMetrics(), daemon, halDeviceId, token, listener, templateId, groupId,
                     userId, restricted, owner, getBiometricUtils());
         }
 
-        public void setShouldNotifyUserActivity(boolean shouldNotify) {
-            mShouldNotify = shouldNotify;
-        }
-
         @Override
-        public void notifyUserActivity() {
-            if (mShouldNotify) {
-                userActivity();
-            }
+        protected int statsModality() {
+            return BiometricServiceBase.this.statsModality();
         }
     }
 
-    protected abstract class EnumerateClientImpl extends EnumerateClient {
+    /**
+     * Internal class to help clean up unknown templates in the HAL and Framework
+     */
+    private final class InternalEnumerateClient extends EnumerateClient {
 
-        public EnumerateClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
-                IBinder token, ServiceListener listener, int groupId, int userId,
-                boolean restricted, String owner) {
+        private BiometricUtils mUtils;
+        // List of templates that are known to the Framework. Remove from this list when enumerate
+        // returns a template that contains a match.
+        private List<? extends BiometricAuthenticator.Identifier> mEnrolledList;
+        // List of templates to remove from the HAL
+        private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
+
+        InternalEnumerateClient(Context context,
+                DaemonWrapper daemon, long halDeviceId, IBinder token,
+                ServiceListener listener, int groupId, int userId, boolean restricted,
+                String owner, List<? extends BiometricAuthenticator.Identifier> enrolledList,
+                BiometricUtils utils) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener, groupId, userId,
                     restricted, owner);
+            mEnrolledList = enrolledList;
+            mUtils = utils;
+        }
+
+        private void handleEnumeratedTemplate(BiometricAuthenticator.Identifier identifier) {
+            if (identifier == null) {
+                return;
+            }
+            Slog.v(getTag(), "handleEnumeratedTemplate: " + identifier.getBiometricId());
+            boolean matched = false;
+            for (int i = 0; i < mEnrolledList.size(); i++) {
+                if (mEnrolledList.get(i).getBiometricId() == identifier.getBiometricId()) {
+                    mEnrolledList.remove(i);
+                    matched = true;
+                    break;
+                }
+            }
+
+            // TemplateId 0 means no templates in HAL
+            if (!matched && identifier.getBiometricId() != 0) {
+                mUnknownHALTemplates.add(identifier);
+            }
+            Slog.v(getTag(), "Matched: " + matched);
+        }
+
+        private void doTemplateCleanup() {
+            if (mEnrolledList == null) {
+                return;
+            }
+
+            // At this point, mEnrolledList only contains templates known to the framework and
+            // not the HAL.
+            for (int i = 0; i < mEnrolledList.size(); i++) {
+                BiometricAuthenticator.Identifier identifier = mEnrolledList.get(i);
+                Slog.e(getTag(), "doTemplateCleanup(): Removing dangling template from framework: "
+                        + identifier.getBiometricId() + " "
+                        + identifier.getName());
+                mUtils.removeBiometricForUser(getContext(),
+                        getTargetUserId(), identifier.getBiometricId());
+                StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                        statsModality(),
+                        BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK);
+            }
+            mEnrolledList.clear();
+        }
+
+        public List<BiometricAuthenticator.Identifier> getUnknownHALTemplates() {
+            return mUnknownHALTemplates;
         }
 
         @Override
-        public void notifyUserActivity() {
-            userActivity();
+        public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
+                int remaining) {
+            handleEnumeratedTemplate(identifier);
+            if (remaining == 0) {
+                doTemplateCleanup();
+            }
+            return remaining == 0;
+        }
+
+        @Override
+        protected int statsModality() {
+            return BiometricServiceBase.this.statsModality();
         }
     }
 
@@ -429,7 +500,7 @@ public abstract class BiometricServiceBase extends SystemService
      * subclasses.
      */
     protected interface DaemonWrapper {
-        int ERROR_ESRCH = 3; // Likely fingerprint HAL is dead. see errno.h.
+        int ERROR_ESRCH = 3; // Likely HAL is dead. see errno.h.
         int authenticate(long operationId, int groupId) throws RemoteException;
         int cancel() throws RemoteException;
         int remove(int groupId, int biometricId) throws RemoteException;
@@ -583,6 +654,19 @@ public abstract class BiometricServiceBase extends SystemService
     }
 
     /**
+     * Container for enumerated templates. Used to keep track when cleaning up unknown
+     * templates.
+     */
+    private final class UserTemplate {
+        final BiometricAuthenticator.Identifier mIdentifier;
+        final int mUserId;
+        UserTemplate(BiometricAuthenticator.Identifier identifier, int userId) {
+            this.mIdentifier = identifier;
+            this.mUserId = userId;
+        }
+    }
+
+    /**
      * Initializes the system service.
      * <p>
      * Subclasses must define a single argument constructor that accepts the context
@@ -688,6 +772,11 @@ public abstract class BiometricServiceBase extends SystemService
         if (DEBUG) Slog.v(getTag(), "handleError(client="
                 + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
 
+        if (client instanceof InternalRemovalClient
+                || client instanceof InternalEnumerateClient) {
+            clearEnumerateState();
+        }
+
         if (client != null && client.onError(deviceId, error, vendorCode)) {
             removeClient(client);
         }
@@ -719,6 +808,39 @@ public abstract class BiometricServiceBase extends SystemService
             }
             if (!hasEnrolledBiometrics(userId)) {
                 updateActiveGroup(userId, null);
+            }
+        }
+
+        if (client instanceof InternalRemovalClient && !mUnknownHALTemplates.isEmpty()) {
+            startCleanupUnknownHALTemplates();
+        } else if (client instanceof InternalRemovalClient) {
+            clearEnumerateState();
+        }
+    }
+
+    protected void handleEnumerate(BiometricAuthenticator.Identifier identifier, int remaining) {
+        ClientMonitor client = getCurrentClient();
+
+        client.onEnumerationResult(identifier, remaining);
+
+        // All templates in the HAL for this user were enumerated
+        if (remaining == 0) {
+            if (client instanceof InternalEnumerateClient) {
+                List<BiometricAuthenticator.Identifier> unknownHALTemplates =
+                        ((InternalEnumerateClient) client).getUnknownHALTemplates();
+
+                if (!unknownHALTemplates.isEmpty()) {
+                    Slog.w(getTag(), "Adding " + unknownHALTemplates.size()
+                            + " templates for deletion");
+                }
+                for (int i = 0; i < unknownHALTemplates.size(); i++) {
+                    mUnknownHALTemplates.add(new UserTemplate(unknownHALTemplates.get(i),
+                            client.getTargetUserId()));
+                }
+                removeClient(client);
+                startCleanupUnknownHALTemplates();
+            } else {
+                removeClient(client);
             }
         }
     }
@@ -832,13 +954,13 @@ public abstract class BiometricServiceBase extends SystemService
         });
     }
 
-    protected void removeInternal(RemovalClientImpl client) {
+    protected void removeInternal(RemovalClient client) {
         mHandler.post(() -> {
             startClient(client, true /* initiatedByClient */);
         });
     }
 
-    protected void enumerateInternal(EnumerateClientImpl client) {
+    protected void enumerateInternal(EnumerateClient client) {
         mHandler.post(() -> {
             startClient(client, true /* initiatedByClient */);
         });
@@ -965,10 +1087,10 @@ public abstract class BiometricServiceBase extends SystemService
                     currentClient.getOwnerString());
             // This check only matters for FingerprintService, since enumerate may call back
             // multiple times.
-            if (currentClient instanceof FingerprintService.EnumerateClientImpl ||
-                    currentClient instanceof FingerprintService.RemovalClientImpl) {
+            if (currentClient instanceof InternalEnumerateClient
+                    || currentClient instanceof InternalRemovalClient) {
                 // This condition means we're currently running internal diagnostics to
-                // remove extra fingerprints in the hardware and/or the software
+                // remove extra templates in the hardware and/or the software
                 // TODO: design an escape hatch in case client never finishes
                 if (newClient != null) {
                     Slog.w(getTag(), "Internal cleanup in progress but trying to start client "
@@ -1122,6 +1244,71 @@ public abstract class BiometricServiceBase extends SystemService
     protected long getAuthenticatorId(String opPackageName) {
         final int userId = getUserOrWorkProfileId(opPackageName, UserHandle.getCallingUserId());
         return mAuthenticatorIds.getOrDefault(userId, 0L);
+    }
+
+    /**
+     * This method should be called upon connection to the daemon, and when user switches.
+     * @param userId
+     */
+    protected void doTemplateCleanupForUser(int userId) {
+        if (CLEANUP_UNKNOWN_TEMPLATES) {
+            enumerateUser(userId);
+        }
+    }
+
+    private void clearEnumerateState() {
+        if (DEBUG) Slog.v(getTag(), "clearEnumerateState()");
+        mUnknownHALTemplates.clear();
+    }
+
+    /**
+     * Remove unknown templates from HAL
+     */
+    private void startCleanupUnknownHALTemplates() {
+        if (!mUnknownHALTemplates.isEmpty()) {
+            UserTemplate template = mUnknownHALTemplates.get(0);
+            mUnknownHALTemplates.remove(template);
+            boolean restricted = !hasPermission(getManageBiometricPermission());
+            InternalRemovalClient client = new InternalRemovalClient(getContext(),
+                    getDaemonWrapper(), mHalDeviceId, mToken, null /* listener */,
+                    template.mIdentifier.getBiometricId(), 0 /* groupId */, template.mUserId,
+                    restricted, getContext().getPackageName());
+            removeInternal(client);
+            StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                    statsModality(),
+                    BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
+        } else {
+            clearEnumerateState();
+        }
+    }
+
+    private void enumerateUser(int userId) {
+        if (DEBUG) Slog.v(getTag(), "Enumerating user(" + userId + ")");
+
+        final boolean restricted = !hasPermission(getManageBiometricPermission());
+        final List<? extends BiometricAuthenticator.Identifier> enrolledList =
+                getEnrolledTemplates(userId);
+
+        InternalEnumerateClient client = new InternalEnumerateClient(getContext(),
+                getDaemonWrapper(), mHalDeviceId, mToken, null /* serviceListener */, userId,
+                userId, restricted, getContext().getOpPackageName(), enrolledList,
+                getBiometricUtils());
+        enumerateInternal(client);
+    }
+
+    /**
+     * This method is called when the user switches. Implementations should probably notify the
+     * HAL.
+     */
+    private void handleUserSwitching(int userId) {
+        if (getCurrentClient() instanceof InternalRemovalClient
+                || getCurrentClient() instanceof InternalEnumerateClient) {
+            Slog.w(getTag(), "User switched while performing cleanup");
+            removeClient(getCurrentClient());
+            clearEnumerateState();
+        }
+        updateActiveGroup(userId, null);
+        doTemplateCleanupForUser(userId);
     }
 
     private void scheduleLockoutResetForUser(int userId) {

@@ -53,7 +53,10 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
+import com.android.server.biometrics.ClientMonitor;
+import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.Metrics;
+import com.android.server.biometrics.RemovalClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -216,15 +219,14 @@ public class FaceService extends BiometricServiceBase {
             }
 
             final boolean restricted = isRestricted();
-            final RemovalClientImpl client = new RemovalClientImpl(getContext(), mDaemonWrapper,
-                    mHalDeviceId, token, new ServiceListenerImpl(receiver), faceId, 0 /* groupId */,
-                    userId, restricted, token.toString()) {
+            final RemovalClient client = new RemovalClient(getContext(), getMetrics(),
+                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver), faceId,
+                    0 /* groupId */, userId, restricted, token.toString(), getBiometricUtils()) {
                 @Override
                 protected int statsModality() {
                     return FaceService.this.statsModality();
                 }
             };
-            client.setShouldNotifyUserActivity(true);
             removeInternal(client);
         }
 
@@ -234,9 +236,9 @@ public class FaceService extends BiometricServiceBase {
             checkPermission(MANAGE_BIOMETRIC);
 
             final boolean restricted = isRestricted();
-            final EnumerateClientImpl client = new EnumerateClientImpl(getContext(), mDaemonWrapper,
-                    mHalDeviceId, token, new ServiceListenerImpl(receiver), userId, userId,
-                    restricted, getContext().getOpPackageName()) {
+            final EnumerateClient client = new EnumerateClient(getContext(), getMetrics(),
+                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver), userId,
+                    userId, restricted, getContext().getOpPackageName()) {
                 @Override
                 protected int statsModality() {
                     return FaceService.this.statsModality();
@@ -317,7 +319,7 @@ public class FaceService extends BiometricServiceBase {
                 return null;
             }
 
-            return FaceService.this.getEnrolledFaces(userId);
+            return FaceService.this.getEnrolledTemplates(userId);
         }
 
         @Override // Binder call
@@ -511,7 +513,8 @@ public class FaceService extends BiometricServiceBase {
         public void onEnumerated(BiometricAuthenticator.Identifier identifier, int remaining)
                 throws RemoteException {
             if (mFaceServiceReceiver != null) {
-
+                mFaceServiceReceiver.onEnumerated(identifier.getDeviceId(),
+                        identifier.getBiometricId(), remaining);
             }
         }
     }
@@ -520,80 +523,92 @@ public class FaceService extends BiometricServiceBase {
 
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
-    private long mHalDeviceId;
 
     /**
      * Receives callbacks from the HAL.
      */
     private IBiometricsFaceClientCallback mDaemonCallback =
             new IBiometricsFaceClientCallback.Stub() {
-                @Override
-                public void onEnrollResult(final long deviceId, int faceId, int userId,
-                        int remaining) {
-                    mHandler.post(() -> {
-                        final Face face = new Face(getBiometricUtils()
-                                .getUniqueName(getContext(), userId), faceId, deviceId);
-                        FaceService.super.handleEnrollResult(face, remaining);
-                    });
+        @Override
+        public void onEnrollResult(final long deviceId, int faceId, int userId,
+                int remaining) {
+            mHandler.post(() -> {
+                final Face face = new Face(getBiometricUtils()
+                        .getUniqueName(getContext(), userId), faceId, deviceId);
+                FaceService.super.handleEnrollResult(face, remaining);
+            });
+        }
+
+        @Override
+        public void onAcquired(final long deviceId, final int userId,
+                final int acquiredInfo,
+                final int vendorCode) {
+            mHandler.post(() -> {
+                FaceService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
+            });
+        }
+
+        @Override
+        public void onAuthenticated(final long deviceId, final int faceId, final int userId,
+                ArrayList<Byte> token) {
+            mHandler.post(() -> {
+                Face face = new Face("", faceId, deviceId);
+                FaceService.super.handleAuthenticated(face, token);
+            });
+        }
+
+        @Override
+        public void onError(final long deviceId, final int userId, final int error,
+                final int vendorCode) {
+            mHandler.post(() -> {
+                FaceService.super.handleError(deviceId, error, vendorCode);
+
+                // TODO: this chunk of code should be common to all biometric services
+                if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
+                    // If we get HW_UNAVAILABLE, try to connect again later...
+                    Slog.w(TAG, "Got ERROR_HW_UNAVAILABLE; try reconnecting next client.");
+                    synchronized (this) {
+                        mDaemon = null;
+                        mHalDeviceId = 0;
+                        mCurrentUserId = UserHandle.USER_NULL;
+                    }
                 }
+            });
+        }
 
-                @Override
-                public void onAcquired(final long deviceId, final int userId,
-                        final int acquiredInfo,
-                        final int vendorCode) {
-                    mHandler.post(() -> {
-                        FaceService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
-                    });
+        @Override
+        public void onRemoved(final long deviceId, final int faceId, final int userId,
+                final int remaining) {
+            mHandler.post(() -> {
+                final Face face = new Face("", faceId, deviceId);
+                FaceService.super.handleRemoved(face, remaining);
+            });
+        }
+
+        @Override
+        public void onEnumerate(long deviceId, ArrayList<Integer> faceIds, int userId)
+                throws RemoteException {
+            mHandler.post(() -> {
+                if (!faceIds.isEmpty()) {
+                    for (int i = 0; i < faceIds.size(); i++) {
+                        final Face face = new Face("", faceIds.get(i), deviceId);
+                        // Convert to old old behavior
+                        FaceService.super.handleEnumerate(face, faceIds.size() - i - 1);
+                    }
+                } else {
+                    // For face, the HIDL contract is to receive an empty list when there are no
+                    // templates enrolled. Send a null identifier since we don't consume them
+                    // anywhere, and send remaining == 0 to plumb this with existing common code.
+                    FaceService.super.handleEnumerate(null /* identifier */, 0);
                 }
+            });
+        }
 
-                @Override
-                public void onAuthenticated(final long deviceId, final int faceId, final int userId,
-                        ArrayList<Byte> token) {
-                    mHandler.post(() -> {
-                        Face face = new Face("", faceId, deviceId);
-                        FaceService.super.handleAuthenticated(face, token);
-                    });
-                }
+        @Override
+        public void onLockoutChanged(long duration) {
 
-                @Override
-                public void onError(final long deviceId, final int userId, final int error,
-                        final int vendorCode) {
-                    mHandler.post(() -> {
-                        FaceService.super.handleError(deviceId, error, vendorCode);
-
-                        // TODO: this chunk of code should be common to all biometric services
-                        if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
-                            // If we get HW_UNAVAILABLE, try to connect again later...
-                            Slog.w(TAG, "Got ERROR_HW_UNAVAILABLE; try reconnecting next client.");
-                            synchronized (this) {
-                                mDaemon = null;
-                                mHalDeviceId = 0;
-                                mCurrentUserId = UserHandle.USER_NULL;
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onRemoved(final long deviceId, final int faceId, final int userId,
-                        final int remaining) {
-                    mHandler.post(() -> {
-                        final Face face = new Face("", faceId, deviceId);
-                        FaceService.super.handleRemoved(face, remaining);
-                    });
-                }
-
-                @Override
-                public void onEnumerate(long deviceId, ArrayList<Integer> faceIds, int userId)
-                        throws RemoteException {
-                    // TODO
-                }
-
-                @Override
-                public void onLockoutChanged(long duration) {
-
-                }
-            };
+        }
+    };
 
     /**
      * Wraps the HAL-specific code and is passed to the ClientMonitor implementations so that they
@@ -652,7 +667,6 @@ public class FaceService extends BiometricServiceBase {
             for (int i = 0; i < cryptoToken.length; i++) {
                 token.add(cryptoToken[i]);
             }
-            // TODO: plumb requireAttention down from framework
             return daemon.enroll(token, timeout, disabledFeatures);
         }
     };
@@ -672,6 +686,11 @@ public class FaceService extends BiometricServiceBase {
     @Override
     public String getTag() {
         return TAG;
+    }
+
+    @Override
+    protected DaemonWrapper getDaemonWrapper() {
+        return mDaemonWrapper;
     }
 
     @Override
@@ -698,7 +717,7 @@ public class FaceService extends BiometricServiceBase {
     protected boolean hasReachedEnrollmentLimit(int userId) {
         final int limit = getContext().getResources().getInteger(
                 com.android.internal.R.integer.config_faceMaxTemplatesPerUser);
-        final int enrolled = FaceService.this.getEnrolledFaces(userId).size();
+        final int enrolled = FaceService.this.getEnrolledTemplates(userId).size();
         if (enrolled >= limit) {
             Slog.w(TAG, "Too many faces registered");
             return true;
@@ -765,11 +784,6 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
-    protected void handleUserSwitching(int userId) {
-        updateActiveGroup(userId, null);
-    }
-
-    @Override
     protected boolean hasEnrolledBiometrics(int userId) {
         if (userId != UserHandle.getCallingUserId()) {
             checkPermission(INTERACT_ACROSS_USERS);
@@ -785,13 +799,17 @@ public class FaceService extends BiometricServiceBase {
     @Override
     protected void checkUseBiometricPermission() {
         // noop for Face. The permission checks are all done on the incoming binder call.
-        // TODO: Perhaps do the same in FingerprintService
     }
 
     @Override
     protected boolean checkAppOps(int uid, String opPackageName) {
         return mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, uid, opPackageName)
                 == AppOpsManager.MODE_ALLOWED;
+    }
+
+    @Override
+    protected List<Face> getEnrolledTemplates(int userId) {
+        return getBiometricUtils().getBiometricsForUser(getContext(), userId);
     }
 
     @Override
@@ -833,6 +851,7 @@ public class FaceService extends BiometricServiceBase {
             if (mHalDeviceId != 0) {
                 loadAuthenticatorIds();
                 updateActiveGroup(ActivityManager.getCurrentUser(), null);
+                doTemplateCleanupForUser(ActivityManager.getCurrentUser());
             } else {
                 Slog.w(TAG, "Failed to open Face HAL!");
                 MetricsLogger.count(getContext(), "faced_openhal_error", 1);
@@ -868,10 +887,6 @@ public class FaceService extends BiometricServiceBase {
             Slog.e(TAG, "startRevokeChallenge failed", e);
         }
         return 0;
-    }
-
-    private List<Face> getEnrolledFaces(int userId) {
-        return getBiometricUtils().getBiometricsForUser(getContext(), userId);
     }
 
     private void dumpInternal(PrintWriter pw) {

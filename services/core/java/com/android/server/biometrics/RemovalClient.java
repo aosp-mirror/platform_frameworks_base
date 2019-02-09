@@ -44,6 +44,10 @@ public abstract class RemovalClient extends ClientMonitor {
     }
 
     @Override
+    public void notifyUserActivity() {
+    }
+
+    @Override
     protected int statsAction() {
         return BiometricsProtoEnums.ACTION_REMOVE;
     }
@@ -95,7 +99,9 @@ public abstract class RemovalClient extends ClientMonitor {
     private boolean sendRemoved(BiometricAuthenticator.Identifier identifier,
             int remaining) {
         try {
-            getListener().onRemoved(identifier, remaining);
+            if (getListener() != null) {
+                getListener().onRemoved(identifier, remaining);
+            }
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to notify Removed:", e);
         }
