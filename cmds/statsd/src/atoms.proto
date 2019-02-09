@@ -215,7 +215,7 @@ message Atom {
         SpeechDspStatReported speech_dsp_stat_reported = 145;
         UsbContaminantReported usb_contaminant_reported = 146;
         WatchdogRollbackOccurred watchdog_rollback_occurred = 147;
-        BiometricHalDeathReported biometric_hal_death_reported = 148;
+        BiometricSystemHealthIssueDetected biometric_system_health_issue_detected = 148;
         BubbleUIChanged bubble_ui_changed = 149;
         ScheduledJobConstraintChanged scheduled_job_constraint_changed = 150;
         BluetoothActiveDeviceChanged bluetooth_active_device_changed = 151;
@@ -3050,13 +3050,15 @@ message BiometricErrorOccurred {
 }
 
 /**
- * Logs when a biometric HAL has crashed.
+ * Logs when a system health issue is detected.
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/biometrics
  */
-message BiometricHalDeathReported {
+message BiometricSystemHealthIssueDetected {
     // Biometric modality.
     optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // Type of issue detected.
+    optional android.hardware.biometrics.IssueEnum issue = 2;
 }
 
 message Notification {

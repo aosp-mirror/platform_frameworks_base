@@ -44,3 +44,15 @@ enum ActionEnum {
     ACTION_ENUMERATE = 3;
     ACTION_REMOVE = 4;
 }
+
+enum IssueEnum {
+    ISSUE_UNKNOWN = 0;
+    // When a biometric HAL has crashed.
+    ISSUE_HAL_DEATH = 1;
+    // When Android Framework has a template that doesn't exist in the HAL. The framework
+    // is expected to remove its template to stay in sync with the HAL.
+    ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK = 2;
+    // When the HAL has a template that doesn't exist in Android Framework. The framework
+    // is expected to notify the HAL to remove this template to stay in sync with the framework.
+    ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL = 3;
+}

@@ -624,7 +624,8 @@ public abstract class BiometricServiceBase extends SystemService
         handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                 0 /*vendorCode */);
 
-        StatsLog.write(StatsLog.BIOMETRIC_HAL_DEATH_REPORTED, statsModality());
+        StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED, statsModality(),
+                BiometricsProtoEnums.ISSUE_HAL_DEATH);
     }
 
     protected ClientMonitor getCurrentClient() {
