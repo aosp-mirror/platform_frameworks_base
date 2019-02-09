@@ -2427,6 +2427,16 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG =
             "opportunistic_network_data_switch_hysteresis_time_long";
 
+   /**
+    * An int array containing CDMA enhanced roaming indicator values for Home (non-roaming) network.
+    * The default values come from 3GPP2 C.R1001 table 8.1-1.
+    * Enhanced Roaming Indicator Number Assignments
+    *
+    * @hide
+    */
+    public static final String KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY =
+            "cdma_enhanced_roaming_indicator_for_home_network_int_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2803,6 +2813,10 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_ENTRY_OR_EXIT_HYSTERESIS_TIME_LONG, 10000);
         /* Default value is 10 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
+        sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
+                new int[] {
+                        1 /* Roaming Indicator Off */
+                });
     }
 
     /**
