@@ -367,7 +367,7 @@ class GnssConfiguration {
             return defaultValue;
         }
         try {
-            return Integer.parseInt(valueString);
+            return Integer.decode(valueString);
         } catch (NumberFormatException e) {
             Log.e(TAG, "Unable to parse config parameter " + configParameter + " value: "
                     + valueString + ". Using default value: " + defaultValue);
