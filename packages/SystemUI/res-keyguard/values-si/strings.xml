@@ -150,7 +150,7 @@
       <item quantity="one">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
       <item quantity="other">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"ඒ"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"දොළහ"</item>
     <item msgid="7389464214252023751">"එක"</item>

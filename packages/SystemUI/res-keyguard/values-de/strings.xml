@@ -150,7 +150,7 @@
       <item quantity="other">Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch <xliff:g id="_NUMBER_1">%d</xliff:g> Versuche, bevor die SIM-Karte endgültig gesperrt wird. Weitere Informationen erhältst du von deinem Mobilfunkanbieter.</item>
       <item quantity="one">Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch <xliff:g id="_NUMBER_0">%d</xliff:g> Versuch, bevor die SIM-Karte endgültig gesperrt wird. Weitere Informationen erhältst du von deinem Mobilfunkanbieter.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Es ist"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"zwölf Uhr"</item>
     <item msgid="7389464214252023751">"ein Uhr"</item>

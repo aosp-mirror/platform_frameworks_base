@@ -150,7 +150,7 @@
       <item quantity="one">Naka-disable na ang SIM. Ilagay ang PUK code upang magpatuloy. Mayroon kang <xliff:g id="_NUMBER_1">%d</xliff:g> natitirang pagsubok bago tuluyang hindi magamit ang SIM. Makipag-ugnayan sa carrier para sa mga detalye.</item>
       <item quantity="other">Naka-disable na ang SIM. Ilagay ang PUK code upang magpatuloy. Mayroon kang <xliff:g id="_NUMBER_1">%d</xliff:g> na natitirang pagsubok bago tuluyang hindi magamit ang SIM. Makipag-ugnayan sa carrier para sa mga detalye.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Oras ay"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Twelve"</item>
     <item msgid="7389464214252023751">"One"</item>

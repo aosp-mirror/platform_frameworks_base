@@ -150,7 +150,7 @@
       <item quantity="other">Sasa SIM imefungwa. Weka msimbo wa PUK ili uendelee. Umesalia na majaribio <xliff:g id="_NUMBER_1">%d</xliff:g> kabla ya SIM kuacha kufanya kazi kabisa. Wasiliana na mtoa huduma kwa maelezo.</item>
       <item quantity="one">Sasa SIM imefungwa. Weka msimbo wa PUK ili uendelee. Umesalia na jaribio <xliff:g id="_NUMBER_0">%d</xliff:g> kabla ya SIM kuacha kufanya kazi kabisa. Wasiliana na mtoa huduma kwa maelezo.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Ni saa"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Sita"</item>
     <item msgid="7389464214252023751">"Saba"</item>

@@ -166,7 +166,7 @@
       <item quantity="many">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спроб, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>
       <item quantity="other">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спробы, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Зараз"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Дванаццаць"</item>
     <item msgid="7389464214252023751">"Адна"</item>

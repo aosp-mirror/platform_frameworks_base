@@ -684,7 +684,7 @@
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"ဂဏန်းကွက်<xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"စနစ်"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"ပင်မ"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"မကြာသေးခင်က"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"လတ်တလော"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"နောက်သို့"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"အကြောင်းကြားချက်များ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"ကီးဘုတ် ဖြတ်လမ်းများ"</string>
@@ -879,8 +879,7 @@
       <item quantity="one">အပလီကေးရှင်း <xliff:g id="NUM_APPS_0">%1$d</xliff:g> ခုက သင်၏ <xliff:g id="TYPE_1">%2$s</xliff:g> ကို အသုံးပြုနေသည်။</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"ရပါပြီ"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"ကန့်သတ်ဆက်တင်များ"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"သင့် <xliff:g id="TYPES_LIST">%s</xliff:g> ကို အသုံးပြုနေသော အက်ပ်"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"သင့် <xliff:g id="TYPES_LIST">%s</xliff:g> ကို အသုံးပြုနေသော အက်ပ်များ"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">"၊ "</string>
@@ -895,8 +894,12 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"အာရုံခံကိရိယာများ ပိတ်ထားသည်"</string>
     <string name="device_services" msgid="1191212554435440592">"စက်ပစ္စည်းဝန်ဆောင်မှုများ"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"ခေါင်းစဉ် မရှိပါ"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကိုဖွင့်ရန်"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် အကြောင်းကြားချက်ဆက်တင်များကို ဖွင့်ရန်"</string>
+    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
     <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <!-- no translation found for no_bubbles (7173621233904687258) -->
+    <skip />
+    <!-- no translation found for yes_bubbles (668809525728633841) -->
     <skip />
 </resources>

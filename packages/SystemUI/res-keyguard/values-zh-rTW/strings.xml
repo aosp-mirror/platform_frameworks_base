@@ -150,7 +150,7 @@
       <item quantity="other">SIM 卡現在已遭停用。請輸入 PUK 碼以繼續進行。你還可以再試 <xliff:g id="_NUMBER_1">%d</xliff:g> 次，如果仍然失敗，SIM 卡將永久無法使用。詳情請與電信業者聯絡。</item>
       <item quantity="one">SIM 卡現在已遭停用。請輸入 PUK 碼以繼續進行。你還可以再試 <xliff:g id="_NUMBER_0">%d</xliff:g> 次，如果仍然失敗，SIM 卡將永久無法使用。詳情請與電信業者聯絡。</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"時間是"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"十二"</item>
     <item msgid="7389464214252023751">"一"</item>

@@ -150,7 +150,7 @@
       <item quantity="other">La tarjeta SIM está inhabilitada. Introduce el código PUK para continuar. Te quedan <xliff:g id="_NUMBER_1">%d</xliff:g> intentos para que la tarjeta SIM quede inservible de forma permanente. Ponte en contacto con tu operador para obtener más información.</item>
       <item quantity="one">La tarjeta SIM está inhabilitada. Introduce el código PUK para continuar. Te queda <xliff:g id="_NUMBER_0">%d</xliff:g> intento para que la tarjeta SIM quede inservible de forma permanente. Ponte en contacto con tu operador para obtener más información.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Son las"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Doce"</item>
     <item msgid="7389464214252023751">"Uno"</item>

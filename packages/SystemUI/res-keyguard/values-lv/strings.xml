@@ -158,7 +158,7 @@
       <item quantity="one">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizi. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
       <item quantity="other">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizes. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Laiks:"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Divpadsmit"</item>
     <item msgid="7389464214252023751">"Viens"</item>

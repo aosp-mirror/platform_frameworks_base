@@ -441,7 +441,7 @@
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Energiesparmodus deaktivieren"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nimmt alle auf deinem Bildschirm angezeigten Aktivitäten auf."</string>
-    <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht erneut anzeigen"</string>
+    <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht mehr anzeigen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Verwalten"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
@@ -883,8 +883,7 @@
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> App verwendet gerade: <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Datenschutzeinst."</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App, die <xliff:g id="TYPES_LIST">%s</xliff:g> verwendet"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apps, die <xliff:g id="TYPES_LIST">%s</xliff:g> verwenden"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -899,8 +898,12 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensoren aus"</string>
     <string name="device_services" msgid="1191212554435440592">"Gerätedienste"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Kein Titel"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> öffnen"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Benachrichtigungseinstellungen für <xliff:g id="APP_NAME">%1$s</xliff:g> öffnen"</string>
+    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
     <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <!-- no translation found for no_bubbles (7173621233904687258) -->
+    <skip />
+    <!-- no translation found for yes_bubbles (668809525728633841) -->
     <skip />
 </resources>

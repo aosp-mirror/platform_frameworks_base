@@ -150,7 +150,7 @@
       <item quantity="other">SIM लाई असक्षम पारिएको छ। जारी राख्न PUK कोड प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयासहरू बाँकी छन्, त्यसपछि SIM सदाका लागि प्रयोग गर्न नमिल्ने हुन्छ। विवरणहरूका लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।</item>
       <item quantity="one">SIM लाई असक्षम पारिएको छ। जारी राख्न PUK कोड प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="_NUMBER_0">%d</xliff:g> प्रयास बाँकी छ, त्यसपछि SIM सदाका लागि प्रयोग गर्न नमिल्ने हुन्छ। विवरणहरूका लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"समय:"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"बाह्र"</item>
     <item msgid="7389464214252023751">"एक"</item>

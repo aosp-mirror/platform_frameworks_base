@@ -150,7 +150,7 @@
       <item quantity="other">SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK-кодду киргизиңиз. SIM-картанын биротоло жарактан чыгарына <xliff:g id="_NUMBER_1">%d</xliff:g> аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.</item>
       <item quantity="one">SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK-кодду киргизиңиз. SIM-картанын биротоло жарактан чыгаарына <xliff:g id="_NUMBER_0">%d</xliff:g> аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Саат"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Он эки"</item>
     <item msgid="7389464214252023751">"Бир"</item>

@@ -150,7 +150,7 @@
       <item quantity="other">SIM картасы өшірілді. Жалғастыру үшін PUK кодын енгізіңіз. <xliff:g id="_NUMBER_1">%d</xliff:g> мүмкіндік қалды, одан кейін SIM картасы біржола құлыпталады. Толығырақ мәліметті оператордан алыңыз.</item>
       <item quantity="one">SIM картасы өшірілді. Жалғастыру үшін PUK кодын енгізіңіз. <xliff:g id="_NUMBER_0">%d</xliff:g> мүмкіндік қалды, одан кейін SIM картасы біржола құлыпталады. Толығырақ мәліметті оператордан алыңыз.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Қазір"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Он екі"</item>
     <item msgid="7389464214252023751">"Бір"</item>

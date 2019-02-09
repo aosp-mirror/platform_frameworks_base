@@ -150,7 +150,7 @@
       <item quantity="other">Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
       <item quantity="one">Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIM txartela betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Ordua:"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Hamabiak"</item>
     <item msgid="7389464214252023751">"Ordu bata"</item>

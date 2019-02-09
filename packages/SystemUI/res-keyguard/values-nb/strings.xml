@@ -150,7 +150,7 @@
       <item quantity="other">SIM-kortet er deaktivert nå. Skriv inn PUK-koden for å fortsette. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøk igjen før SIM-kortet blir permanent ubrukelig. Kontakt operatøren for å få vite mer.</item>
       <item quantity="one">SIM-kortet er deaktivert nå. Skriv inn PUK-koden for å fortsette. Du har <xliff:g id="_NUMBER_0">%d</xliff:g> forsøk igjen før SIM-kortet blir permanent ubrukelig. Kontakt operatøren for å få vite mer.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Klokken"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Tolv"</item>
     <item msgid="7389464214252023751">"Ett"</item>
