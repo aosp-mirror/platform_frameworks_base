@@ -554,8 +554,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 // Adding the items which are not coming from the default item.
                 VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
                 if (volumeItem.defaultItem) {
-                    // Set progress here due to the progress of seekbar may not be updated.
-                    volumeItem.listItem.setProgress(volumeItem.progress);
+                    updateDefaultVolumeItem(volumeItem.listItem);
                 } else {
                     addSeekbarListItem(volumeItem, groupId, 0, null);
                 }
@@ -572,8 +571,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 if (!volumeItem.defaultItem) {
                     itr.remove();
                 } else {
-                    // Set progress here due to the progress of seekbar may not be updated.
-                    seekbarListItem.setProgress(volumeItem.progress);
+                    updateDefaultVolumeItem(seekbarListItem);
                 }
             }
             inAnimator = AnimatorInflater.loadAnimator(
@@ -593,6 +591,21 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         animators.setTarget(mExpandIcon);
         animators.start();
         mPagedListAdapter.notifyDataSetChanged();
+    }
+
+    private void updateDefaultVolumeItem(SeekbarListItem seekbarListItem){
+        VolumeItem volumeItem = findVolumeItem(seekbarListItem);
+
+        // When volume dialog is expanded or collapsed the default list item is never
+        // reset. Whereas all other list items are removed when the dialog is collapsed and then
+        // added when the dialog is expanded using {@link CarVolumeDialogImpl#addSeekbarListItem}.
+        // This sets the progressbar and the tint color of icons for all items other than default
+        // if they were changed. For default list item it should be done manually here.
+        int color = mContext.getResources().getColor(R.color.car_volume_dialog_tint);
+        Drawable primaryIcon = mContext.getResources().getDrawable(volumeItem.icon);
+        primaryIcon.mutate().setTint(color);
+        volumeItem.listItem.setPrimaryActionIcon(primaryIcon);
+        volumeItem.listItem.setProgress(volumeItem.progress);
     }
 
     private final class VolumeSeekBarChangeListener implements OnSeekBarChangeListener {
