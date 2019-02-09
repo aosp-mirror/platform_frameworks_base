@@ -157,10 +157,6 @@ public final class MediaStore {
     public static final String PARAM_DELETE_DATA = "deletedata";
 
     /** {@hide} */
-    public static final String PARAM_PRIMARY = "primary";
-    /** {@hide} */
-    public static final String PARAM_SECONDARY = "secondary";
-    /** {@hide} */
     public static final String PARAM_INCLUDE_PENDING = "includePending";
     /** {@hide} */
     public static final String PARAM_INCLUDE_TRASHED = "includeTrashed";
@@ -582,14 +578,7 @@ public final class MediaStore {
      */
     public static @NonNull Uri createPending(@NonNull Context context,
             @NonNull PendingParams params) {
-        final Uri.Builder builder = params.insertUri.buildUpon();
-        if (!TextUtils.isEmpty(params.primaryDirectory)) {
-            builder.appendQueryParameter(PARAM_PRIMARY, params.primaryDirectory);
-        }
-        if (!TextUtils.isEmpty(params.secondaryDirectory)) {
-            builder.appendQueryParameter(PARAM_SECONDARY, params.secondaryDirectory);
-        }
-        return context.getContentResolver().insert(builder.build(), params.insertValues);
+        return context.getContentResolver().insert(params.insertUri, params.insertValues);
     }
 
     /**
@@ -612,10 +601,6 @@ public final class MediaStore {
         public final Uri insertUri;
         /** {@hide} */
         public final ContentValues insertValues;
-        /** {@hide} */
-        public String primaryDirectory;
-        /** {@hide} */
-        public String secondaryDirectory;
 
         /**
          * Create parameters that describe a pending media item.
@@ -657,7 +642,11 @@ public final class MediaStore {
          * @see MediaColumns#PRIMARY_DIRECTORY
          */
         public void setPrimaryDirectory(@Nullable String primaryDirectory) {
-            this.primaryDirectory = primaryDirectory;
+            if (primaryDirectory == null) {
+                this.insertValues.remove(MediaColumns.PRIMARY_DIRECTORY);
+            } else {
+                this.insertValues.put(MediaColumns.PRIMARY_DIRECTORY, primaryDirectory);
+            }
         }
 
         /**
@@ -670,7 +659,11 @@ public final class MediaStore {
          * @see MediaColumns#SECONDARY_DIRECTORY
          */
         public void setSecondaryDirectory(@Nullable String secondaryDirectory) {
-            this.secondaryDirectory = secondaryDirectory;
+            if (secondaryDirectory == null) {
+                this.insertValues.remove(MediaColumns.SECONDARY_DIRECTORY);
+            } else {
+                this.insertValues.put(MediaColumns.SECONDARY_DIRECTORY, secondaryDirectory);
+            }
         }
 
         /**
@@ -3173,18 +3166,27 @@ public final class MediaStore {
 
         final ArrayList<File> res = new ArrayList<>();
         if (VOLUME_INTERNAL.equals(volumeName)) {
-            res.add(new File(Environment.getRootDirectory(), "media"));
-            res.add(new File(Environment.getOemDirectory(), "media"));
-            res.add(new File(Environment.getProductDirectory(), "media"));
+            addCanoncialFile(res, new File(Environment.getRootDirectory(), "media"));
+            addCanoncialFile(res, new File(Environment.getOemDirectory(), "media"));
+            addCanoncialFile(res, new File(Environment.getProductDirectory(), "media"));
         } else {
-            res.add(getVolumePath(volumeName));
+            addCanoncialFile(res, getVolumePath(volumeName));
             final UserManager um = AppGlobals.getInitialApplication()
                     .getSystemService(UserManager.class);
             if (VOLUME_EXTERNAL.equals(volumeName) && um.isDemoUser()) {
-                res.add(Environment.getDataPreloadsMediaDirectory());
+                addCanoncialFile(res, Environment.getDataPreloadsMediaDirectory());
             }
         }
         return res;
+    }
+
+    private static void addCanoncialFile(List<File> list, File file) {
+        try {
+            list.add(file.getCanonicalFile());
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to resolve " + file + ": " + e);
+            list.add(file);
+        }
     }
 
     /**
