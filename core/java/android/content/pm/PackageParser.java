@@ -839,7 +839,6 @@ public class PackageParser {
     public static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
     public static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
     public static final int PARSE_ENFORCE_CODE = 1 << 6;
-    public static final int PARSE_FORCE_SDK = 1 << 7;
     public static final int PARSE_CHATTY = 1 << 31;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
@@ -847,7 +846,6 @@ public class PackageParser {
             PARSE_COLLECT_CERTIFICATES,
             PARSE_ENFORCE_CODE,
             PARSE_EXTERNAL_STORAGE,
-            PARSE_FORCE_SDK,
             PARSE_IGNORE_PROCESSES,
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
@@ -2684,8 +2682,6 @@ public class PackageParser {
      * @param platformSdkCodenames array of allowed pre-release SDK codenames
      *                             for this platform
      * @param outError output array to populate with error, if applicable
-     * @param forceCurrentDev if development target code is not available, use the current
-     *                        development version by default.
      * @return the targetSdkVersion to use at runtime, or -1 if the package is
      *         not compatible with this platform
      * @hide Exposed for unit testing only.
@@ -2693,7 +2689,7 @@ public class PackageParser {
     @TestApi
     public static int computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
-            @NonNull String[] outError, boolean forceCurrentDev) {
+            @NonNull String[] outError) {
         // If it's a release SDK, return the version number unmodified.
         if (targetCode == null) {
             return targetVers;
@@ -2701,7 +2697,7 @@ public class PackageParser {
 
         // If it's a pre-release SDK and the codename matches this platform, it
         // definitely targets this SDK.
-        if (matchTargetCode(platformSdkCodenames, targetCode) || forceCurrentDev) {
+        if (matchTargetCode(platformSdkCodenames, targetCode)) {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
         }
 
@@ -2768,9 +2764,8 @@ public class PackageParser {
             return null;
         }
 
-        boolean defaultToCurrentDevBranch = (flags & PARSE_FORCE_SDK) != 0;
         final int targetSdkVersion = computeTargetSdkVersion(targetVers,
-                targetCode, SDK_CODENAMES, outError, defaultToCurrentDevBranch);
+                targetCode, SDK_CODENAMES, outError);
         if (targetSdkVersion < 0) {
             return null;
         }

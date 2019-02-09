@@ -2383,8 +2383,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         sessionParams.volumeUuid = null;
                     }
                     break;
-                case "--force-sdk":
-                    sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
+                case "--force-sdk": // ignore
                     break;
                 case "--apex":
                     sessionParams.setInstallAsApex();
@@ -2961,8 +2960,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          0=unknown, 1=admin policy, 2=device restore,");
         pw.println("          3=device setup, 4=user request");
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
-        pw.println("      --force-sdk: allow install even when existing app targets platform");
-        pw.println("          codename but new one targets a final API level");
         pw.println("      --apex: install an .apex file, not an .apk");
         pw.println("");
         pw.println("  install-create [-lrtsfdg] [-i PACKAGE] [--user USER_ID|all|current]");
