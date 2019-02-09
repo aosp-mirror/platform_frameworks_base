@@ -18,8 +18,8 @@ package android.security;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.WorkerThread;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -37,6 +36,8 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
+
+import com.android.org.conscrypt.TrustedCertificateStore;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -57,8 +58,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.security.auth.x500.X500Principal;
-
-import com.android.org.conscrypt.TrustedCertificateStore;
 
 /**
  * The {@code KeyChain} class provides access to private keys and
@@ -214,8 +213,8 @@ public final class KeyChain {
      *
      * @deprecated Use {@link #ACTION_KEYCHAIN_CHANGED}, {@link #ACTION_TRUST_STORE_CHANGED} or
      * {@link #ACTION_KEY_ACCESS_CHANGED}. Apps that target a version higher than
-     * {@link Build.VERSION_CODES#N_MR1} will only receive this broadcast if they register for it
-     * at runtime.
+     * {@link android.os.Build.VERSION_CODES#N_MR1} will only receive this broadcast if they
+     * register for it at runtime.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
@@ -532,14 +531,23 @@ public final class KeyChain {
     }
 
     /**
-     * Returns the {@code PrivateKey} for the requested alias, or null
-     * if there is no result.
+     * Returns the {@code PrivateKey} for the requested alias, or null if the alias does not exist
+     * or the caller has no permission to access it (see note on exceptions below).
      *
      * <p> This method may block while waiting for a connection to another process, and must never
      * be called from the main thread.
      * <p> As {@link Activity} and {@link Service} contexts are short-lived and can be destroyed
      * at any time from the main thread, it is safer to rely on a long-lived context such as one
      * returned from {@link Context#getApplicationContext()}.
+     *
+     * <p> If the caller provides a valid alias to which it was not granted access, then the
+     * caller must invoke {@link #choosePrivateKeyAlias} again to get another valid alias
+     * or a grant to access the same alias.
+     * <p>On Android versions prior to Q, when a key associated with the specified alias is
+     * unavailable, the method will throw a {@code KeyChainException} rather than return null.
+     * If the exception's cause (as obtained by calling {@code KeyChainException.getCause()})
+     * is a throwable of type {@code IllegalStateException} then the caller lacks a grant
+     * to access the key and certificates associated with this alias.
      *
      * @param alias The alias of the desired private key, typically returned via
      *              {@link KeyChainAliasCallback#alias}.
@@ -591,8 +599,10 @@ public final class KeyChain {
     }
 
     /**
-     * Returns the {@code X509Certificate} chain for the requested
-     * alias, or null if there is no result.
+     * Returns the {@code X509Certificate} chain for the requested alias, or null if the alias
+     * does not exist or the caller has no permission to access it (see note on exceptions
+     * in {@link #getPrivateKey}).
+     *
      * <p>
      * <strong>Note:</strong> If a certificate chain was explicitly specified when the alias was
      * installed, this method will return that chain. If only the client certificate was specified
@@ -604,6 +614,9 @@ public final class KeyChain {
      * <p> As {@link Activity} and {@link Service} contexts are short-lived and can be destroyed
      * at any time from the main thread, it is safer to rely on a long-lived context such as one
      * returned from {@link Context#getApplicationContext()}.
+     * <p> In case the caller specifies an alias for which it lacks a grant, it must call
+     * {@link #choosePrivateKeyAlias} again. See {@link #getPrivateKey} for more details on
+     * coping with this scenario.
      *
      * @param alias The alias of the desired certificate chain, typically
      * returned via {@link KeyChainAliasCallback#alias}.
