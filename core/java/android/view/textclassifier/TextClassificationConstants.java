@@ -131,6 +131,7 @@ public final class TextClassificationConstants {
                     .add(ConversationAction.TYPE_TRACK_FLIGHT)
                     .add(ConversationAction.TYPE_VIEW_CALENDAR)
                     .add(ConversationAction.TYPE_VIEW_MAP)
+                    .add(ConversationAction.TYPE_ADD_CONTACT)
                     .toString();
     /**
      * < 0  : Not set. Use value from LangId model.
