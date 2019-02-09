@@ -1752,9 +1752,9 @@ message BluetoothSocketConnectionStateChanged {
     // Salt: Randomly generated 256 bit value
     // Hash algorithm: HMAC-SHA256
     // Size: 32 byte
-    // Default: null or empty if the device identifier is not known
+    // Default: null or empty if this is a server listener socket
     optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
-    // Port of this socket
+    // Temporary port of this socket for the current connection or session only
     // Default 0 when unknown or don't care
     optional int32 port = 2;
     // Socket type as mentioned in
@@ -1768,6 +1768,14 @@ message BluetoothSocketConnectionStateChanged {
     optional int64 tx_bytes = 5;
     // Number of bytes received from remote device during this connection
     optional int64 rx_bytes = 6;
+    // Socket owner's UID
+    optional int32 uid = 7 [(is_uid) = true];
+    // Server port of this socket, if any. When both |server_port| and |port| fields are populated,
+    // |port| must be spawned by |server_port|
+    // Default 0 when unknown or don't care
+    optional int32 server_port = 8;
+    // Whether this is a server listener socket
+    optional android.bluetooth.SocketRoleEnum is_server = 9;
 }
 
 /**
