@@ -1471,6 +1471,8 @@
     <string name="biometric_not_recognized">Not recognized</string>
     <!-- Message shown when biometric authentication has been canceled [CHAR LIMIT=50] -->
     <string name="biometric_error_canceled">Authentication canceled</string>
+    <!-- Message returned to applications if BiometricPrompt setAllowDeviceCredentials is enabled but no pin, pattern, or password is set. [CHAR LIMIT=NONE] -->
+    <string name="biometric_error_device_not_secured">No pin, pattern, or password set</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>
@@ -1512,7 +1514,7 @@
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
     <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
-    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor</string>
+    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -1555,8 +1557,22 @@
     <string name="face_acquired_poor_gaze">Please look at the sensor.</string>
     <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=50] -->
     <string name="face_acquired_not_detected">No face detected.</string>
-    <!-- Message shown during face acquisition when the face is not kept steady infront of device [CHAR LIMIT=50] -->
-    <string name="face_acquired_not_steady">Keep face steady infront of device.</string>
+    <!-- Message shown during face acquisition when the device is not steady [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_much_motion">Too much motion.</string>
+    <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=50] -->
+    <string name="face_acquired_recalibrate">Please re-enroll your face.</string>
+    <!-- Message shown during face enrollment when a different person's face is detected [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_different">Different face detected.</string>
+    <!-- Message shown during face enrollment when the face is too similar to a previous acquisition [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_similar">Too similar, please change your pose.</string>
+    <!-- Message shown during acqusition when the user's face is turned too far left or right [CHAR LIMIT=50] -->
+    <string name="face_acquired_pan_too_extreme">Please look more directly at the camera.</string>
+    <!-- Message shown during acqusition when the user's face is tilted too high or too low [CHAR LIMIT=50] -->
+    <string name="face_acquired_tilt_too_extreme">Please look more directly at the camera.</string>
+    <!-- Message shown during acquisiton when the user's face is tilted too far left or right [CHAR LIMIT=50] -->
+    <string name="face_acquired_roll_too_extreme">Please straighten your head vertically.</string>
+    <!-- Message shown during acquisition when the user's face is obscured [CHAR LIMIT=50] -->
+    <string name="face_acquired_obscured">Please uncover your face.</string>
     <!-- Array containing custom messages shown during face acquisition from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="face_acquired_vendor">
     </string-array>
@@ -1580,7 +1596,7 @@
     <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=50] -->
     <string name="face_error_not_enrolled">No face enrolled.</string>
     <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=60] -->
-    <string name="face_error_hw_not_present">This device does not have a face authentication sensor</string>
+    <string name="face_error_hw_not_present">This device does not have a face authentication sensor.</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>

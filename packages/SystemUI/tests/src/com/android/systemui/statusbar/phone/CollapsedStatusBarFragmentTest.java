@@ -32,8 +32,8 @@ import android.view.ViewPropertyAnimator;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;

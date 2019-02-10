@@ -59,7 +59,7 @@ function _clang_format()
 
 function _bpfmt()
 {
-    local output="$(bpfmt -s -d $bp_files)"
+    local output="$(bpfmt -d $bp_files)"
     if [[ "$output" ]]; then
         echo "$output"
         return 1
@@ -72,7 +72,9 @@ function _cpplint()
     local cpplint="${ANDROID_BUILD_TOP}/tools/repohooks/tools/cpplint.py"
     local output="$($cpplint --quiet $cpp_files 2>&1 >/dev/null | grep -v \
         -e 'Found C system header after C++ system header.' \
+        -e 'Unknown NOLINT error category: cert-dcl50-cpp' \
         -e 'Unknown NOLINT error category: misc-non-private-member-variables-in-classes' \
+        -e 'Unknown NOLINT error category: performance-unnecessary-copy-initialization' \
     )"
     if [[ "$output" ]]; then
         echo "$output"
@@ -115,7 +117,7 @@ if [[ $opt_mode == "check" ]]; then
     exit $errors
 elif [[ $opt_mode == "fix" ]]; then
     clang-format -style=file -i $cpp_files
-    bpfmt -s -w $bp_files
+    bpfmt -w $bp_files
     exit 0
 elif [[ $opt_mode == "help" ]]; then
     echo "Run static analysis tools such as clang-format and cpplint on the idmap2"

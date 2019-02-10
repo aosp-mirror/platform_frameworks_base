@@ -16,6 +16,7 @@
 
 package android.hardware.biometrics;
 
+import android.app.KeyguardManager;
 import android.hardware.face.FaceManager;
 
 /**
@@ -132,6 +133,13 @@ public interface BiometricFaceConstants {
      * @hide
      */
     public static final int FACE_ERROR_NEGATIVE_BUTTON = 13;
+
+    /**
+     * The device does not have pin, pattern, or password set up. See
+     * {@link BiometricPrompt.Builder#setAllowDeviceCredential(boolean)} and
+     * {@link KeyguardManager#isDeviceSecure()}
+     */
+    public static final int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
 
     /**
      * @hide

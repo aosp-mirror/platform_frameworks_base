@@ -6,5 +6,13 @@
     {
       "path": "frameworks/base/services/core/java/com/android/server/wm"
     }
+  ],
+  "presubmit": [
+      {
+        "name": "CtsFragmentTestCases"
+      },
+      {
+        "name": "CtsFragmentTestCasesSdk26"
+      }
   ]
 }

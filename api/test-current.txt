@@ -17,8 +17,9 @@ package android {
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 
-  public static final class R.array {
-    field public static final int config_defaultRoleHolders = 17235974; // 0x1070006
+  public static final class R.string {
+    field public static final int config_defaultAssistant = 17039393; // 0x1040021
+    field public static final int config_defaultDialer = 17039395; // 0x1040023
   }
 
 }
@@ -767,6 +768,7 @@ package android.location {
     method public void setCodeType(int);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
+    method public void setOtherCodeTypeName(@NonNull String);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
@@ -934,6 +936,7 @@ package android.net {
   }
 
   public class ConnectivityManager {
+    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.os.Bundle);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
   }
@@ -1782,8 +1785,10 @@ package android.provider {
   }
 
   public final class DeviceConfig {
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getProperty(String, String);
     method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static boolean setProperty(String, String, String, boolean);
+    field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
   }
 
   public static interface DeviceConfig.Privacy {
@@ -1851,6 +1856,7 @@ package android.provider {
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
+    field public static final String NOTIFICATION_BADGING = "notification_badging";
     field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
@@ -2578,6 +2584,10 @@ package android.view {
     method public void setDisplayId(int);
   }
 
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
+    method public abstract String asyncImpl() default "";
+  }
+
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
     method public static boolean isDefaultFocusHighlightEnabled();
@@ -2664,6 +2674,8 @@ package android.view.autofill {
   public final class AutofillId implements android.os.Parcelable {
     ctor public AutofillId(int);
     ctor public AutofillId(@NonNull android.view.autofill.AutofillId, int);
+    ctor public AutofillId(int, int);
+    ctor public AutofillId(@NonNull android.view.autofill.AutofillId, long, int);
   }
 
   public final class AutofillManager {
@@ -2709,10 +2721,71 @@ package android.view.contentcapture {
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
     method public void setContentCaptureFeatureEnabled(boolean);
+    field public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED = "service_explicitly_enabled";
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
     method @Nullable public android.view.autofill.AutofillId getParentAutofillId();
+    method @Nullable public static android.view.contentcapture.ViewNode readFromParcel(@NonNull android.os.Parcel);
+    method public static void writeToParcel(@NonNull android.os.Parcel, @Nullable android.view.contentcapture.ViewNode, int);
+  }
+
+  public static final class ViewNode.ViewStructureImpl extends android.view.ViewStructure {
+    ctor public ViewNode.ViewStructureImpl(@NonNull android.view.View);
+    ctor public ViewNode.ViewStructureImpl(@NonNull android.view.autofill.AutofillId, long, int);
+    method public int addChildCount(int);
+    method public void asyncCommit();
+    method public android.view.ViewStructure asyncNewChild(int);
+    method public android.view.autofill.AutofillId getAutofillId();
+    method public int getChildCount();
+    method public android.os.Bundle getExtras();
+    method public CharSequence getHint();
+    method public android.view.contentcapture.ViewNode getNode();
+    method public android.graphics.Rect getTempRect();
+    method public CharSequence getText();
+    method public int getTextSelectionEnd();
+    method public int getTextSelectionStart();
+    method public boolean hasExtras();
+    method public android.view.ViewStructure newChild(int);
+    method public android.view.ViewStructure.HtmlInfo.Builder newHtmlInfoBuilder(String);
+    method public void setAccessibilityFocused(boolean);
+    method public void setActivated(boolean);
+    method public void setAlpha(float);
+    method public void setAssistBlocked(boolean);
+    method public void setAutofillHints(String[]);
+    method public void setAutofillId(android.view.autofill.AutofillId);
+    method public void setAutofillId(android.view.autofill.AutofillId, int);
+    method public void setAutofillOptions(CharSequence[]);
+    method public void setAutofillType(int);
+    method public void setAutofillValue(android.view.autofill.AutofillValue);
+    method public void setCheckable(boolean);
+    method public void setChecked(boolean);
+    method public void setChildCount(int);
+    method public void setClassName(String);
+    method public void setClickable(boolean);
+    method public void setContentDescription(CharSequence);
+    method public void setContextClickable(boolean);
+    method public void setDataIsSensitive(boolean);
+    method public void setDimens(int, int, int, int, int, int);
+    method public void setElevation(float);
+    method public void setEnabled(boolean);
+    method public void setFocusable(boolean);
+    method public void setFocused(boolean);
+    method public void setHint(CharSequence);
+    method public void setHtmlInfo(android.view.ViewStructure.HtmlInfo);
+    method public void setId(int, String, String, String);
+    method public void setInputType(int);
+    method public void setLocaleList(android.os.LocaleList);
+    method public void setLongClickable(boolean);
+    method public void setOpaque(boolean);
+    method public void setSelected(boolean);
+    method public void setText(CharSequence);
+    method public void setText(CharSequence, int, int);
+    method public void setTextLines(int[], int[]);
+    method public void setTextStyle(float, int, int, int);
+    method public void setTransformation(android.graphics.Matrix);
+    method public void setVisibility(int);
+    method public void setWebDomain(String);
   }
 
 }

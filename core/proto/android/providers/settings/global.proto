@@ -259,6 +259,8 @@ message GlobalSettingsProto {
         optional SettingProto app = 1;
         // Whether views are allowed to save their attribute data.
         optional SettingProto view_attributes = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Which application package is allowed to save view attribute data.
+        optional SettingProto view_attributes_application_package = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Debug debug = 37;
 

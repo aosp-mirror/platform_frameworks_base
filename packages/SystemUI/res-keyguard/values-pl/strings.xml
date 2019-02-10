@@ -166,7 +166,7 @@
       <item quantity="other">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_1">%d</xliff:g> próby, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>
       <item quantity="one">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_0">%d</xliff:g> próbę, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Jest"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Dwanaście"</item>
     <item msgid="7389464214252023751">"Jeden"</item>

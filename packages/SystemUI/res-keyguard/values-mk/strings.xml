@@ -150,7 +150,7 @@
       <item quantity="one">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостанува уште <xliff:g id="_NUMBER_1">%d</xliff:g> обид пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>
       <item quantity="other">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостануваат уште <xliff:g id="_NUMBER_1">%d</xliff:g> обиди пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Сега е"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Дванаесет"</item>
     <item msgid="7389464214252023751">"Еден"</item>

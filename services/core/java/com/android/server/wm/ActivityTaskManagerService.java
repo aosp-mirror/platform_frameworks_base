@@ -1383,6 +1383,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setProfilerInfo(profilerInfo)
                 .setActivityOptions(bOptions)
                 .setMayWait(userId)
+                .setAllowBackgroundActivityStart(true)
                 .execute();
     }
 
@@ -1398,6 +1399,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setResolvedType(resolvedType)
                 .setActivityOptions(bOptions)
                 .setMayWait(userId)
+                .setAllowBackgroundActivityStart(true)
                 .execute();
     }
 

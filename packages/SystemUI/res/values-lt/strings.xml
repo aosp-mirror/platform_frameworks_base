@@ -893,8 +893,7 @@
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> programų naudoja jūsų <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Supratau"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Privatumo nustatymai"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Programa, kuri naudoja: <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Programos, kurios naudoja: <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -911,8 +910,12 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Jutikliai išjungti"</string>
     <string name="device_services" msgid="1191212554435440592">"Įrenginio paslaugos"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Nėra pavadinimo"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Atidaryti „<xliff:g id="APP_NAME">%1$s</xliff:g>“"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Atidaryti „<xliff:g id="APP_NAME">%1$s</xliff:g>“ pranešimų nustatymus"</string>
+    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
     <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
+    <!-- no translation found for no_bubbles (7173621233904687258) -->
+    <skip />
+    <!-- no translation found for yes_bubbles (668809525728633841) -->
     <skip />
 </resources>

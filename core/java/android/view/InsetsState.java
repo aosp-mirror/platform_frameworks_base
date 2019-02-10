@@ -19,6 +19,7 @@ package android.view;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.indexOf;
 
@@ -34,11 +35,13 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowManager.LayoutParams;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Holder for state of system windows that cause window insets for all other windows in the system.
@@ -104,6 +107,11 @@ public class InsetsState implements Parcelable {
 
     private final ArrayMap<Integer, InsetsSource> mSources = new ArrayMap<>();
 
+    /**
+     * The frame of the display these sources are relative to.
+     */
+    private final Rect mDisplayFrame = new Rect();
+
     public InsetsState() {
     }
 
@@ -124,7 +132,7 @@ public class InsetsState implements Parcelable {
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout,
             @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
-            @Nullable @InsetSide SparseIntArray typeSideMap) {
+            int legacySoftInputMode, @Nullable @InsetSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         boolean[] typeVisibilityMap = new boolean[SIZE];
@@ -140,8 +148,12 @@ public class InsetsState implements Parcelable {
             if (source == null) {
                 continue;
             }
-            if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                    && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR)) {
+
+            boolean skipSystemBars = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
+                    && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR);
+            boolean skipIme = source.getType() == TYPE_IME
+                    && (legacySoftInputMode & LayoutParams.SOFT_INPUT_ADJUST_RESIZE) == 0;
+            if (skipSystemBars || skipIme) {
                 typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
                 continue;
             }
@@ -209,6 +221,14 @@ public class InsetsState implements Parcelable {
         return mSources.computeIfAbsent(type, InsetsSource::new);
     }
 
+    public void setDisplayFrame(Rect frame) {
+        mDisplayFrame.set(frame);
+    }
+
+    public Rect getDisplayFrame() {
+        return mDisplayFrame;
+    }
+
     /**
      * Modifies the state of this class to exclude a certain type to make it ready for dispatching
      * to the client.
@@ -224,6 +244,7 @@ public class InsetsState implements Parcelable {
     }
 
     public void set(InsetsState other, boolean copySources) {
+        mDisplayFrame.set(other.mDisplayFrame);
         mSources.clear();
         if (copySources) {
             for (int i = 0; i < other.mSources.size(); i++) {
@@ -323,6 +344,9 @@ public class InsetsState implements Parcelable {
 
         InsetsState state = (InsetsState) o;
 
+        if (!mDisplayFrame.equals(state.mDisplayFrame)) {
+            return false;
+        }
         if (mSources.size() != state.mSources.size()) {
             return false;
         }
@@ -341,7 +365,7 @@ public class InsetsState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return mSources.hashCode();
+        return Objects.hash(mDisplayFrame, mSources);
     }
 
     public InsetsState(Parcel in) {
@@ -355,9 +379,10 @@ public class InsetsState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mDisplayFrame, flags);
         dest.writeInt(mSources.size());
         for (int i = 0; i < mSources.size(); i++) {
-            dest.writeParcelable(mSources.valueAt(i), 0 /* flags */);
+            dest.writeParcelable(mSources.valueAt(i), flags);
         }
     }
 
@@ -374,6 +399,7 @@ public class InsetsState implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         mSources.clear();
+        mDisplayFrame.set(in.readParcelable(null /* loader */));
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
             final InsetsSource source = in.readParcelable(null /* loader */);

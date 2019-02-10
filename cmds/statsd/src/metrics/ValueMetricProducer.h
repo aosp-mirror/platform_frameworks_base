@@ -52,7 +52,7 @@ public:
 
     // Process data pulled on bucket boundary.
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data,
-                      bool pullSuccess) override;
+                      bool pullSuccess, int64_t originalPullTimeNs) override;
 
     // ValueMetric needs special logic if it's a pulled atom.
     void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
@@ -61,6 +61,7 @@ public:
         if (!mSplitBucketForAppUpgrade) {
             return;
         }
+        flushIfNeededLocked(eventTimeNs - 1);
         if (mIsPulled && mCondition) {
             pullAndMatchEventsLocked(eventTimeNs - 1);
         }
@@ -115,6 +116,9 @@ private:
     // Value fields for matching.
     std::vector<Matcher> mFieldMatchers;
 
+    // Value fields for matching.
+    std::set<MetricDimensionKey> mMatchedMetricDimensionKeys;
+
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 
@@ -158,6 +162,9 @@ private:
     bool hitFullBucketGuardRailLocked(const MetricDimensionKey& newKey);
 
     void pullAndMatchEventsLocked(const int64_t timestampNs);
+
+    void accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData, 
+                          int64_t originalPullTimeNs, int64_t eventElapsedTimeNs);
 
     ValueBucket buildPartialBucket(int64_t bucketEndTime,
                                    const std::vector<Interval>& intervals);
@@ -212,6 +219,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
+    FRIEND_TEST(ValueMetricProducerTest, TestPartialBucketCreated);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
@@ -238,6 +246,12 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullDelayExceeded);
+    FRIEND_TEST(ValueMetricProducerTest, TestBaseSetOnConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onDataPulled);
+    FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onConditionChanged);
+    FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onBucketBoundary);
+    FRIEND_TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries);
 };
 
 }  // namespace statsd

@@ -166,7 +166,7 @@
       <item quantity="few">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskuse. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
       <item quantity="other">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskusov. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Ura je"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Dvanajst"</item>
     <item msgid="7389464214252023751">"Ena"</item>

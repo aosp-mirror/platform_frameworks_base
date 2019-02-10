@@ -43,10 +43,11 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.RemoteInputController.Callback;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
@@ -98,8 +99,9 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new WindowManager.LayoutParams();
-        Dependency.get(StatusBarStateController.class).addCallback(
-                mStateListener, StatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
+        ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
+                .addCallback(mStateListener,
+                        SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
 

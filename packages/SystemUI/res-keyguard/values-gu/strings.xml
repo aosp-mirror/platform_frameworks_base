@@ -150,7 +150,7 @@
       <item quantity="one">સિમ હવે બંધ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. સિમ કાયમીરૂપે બિનઉપયોગી બની જાય એ પહેલાં તમારી પાસે <xliff:g id="_NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે. વિગતો માટે કૅરિઅરનો સંપર્ક કરો.</item>
       <item quantity="other">સિમ હવે બંધ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. સિમ કાયમીરૂપે બિનઉપયોગી બની જાય એ પહેલાં તમારી પાસે <xliff:g id="_NUMBER_1">%d</xliff:g> પ્રયાસો બાકી છે. વિગતો માટે કૅરિઅરનો સંપર્ક કરો.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"સમય છે"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"બાર"</item>
     <item msgid="7389464214252023751">"એક"</item>

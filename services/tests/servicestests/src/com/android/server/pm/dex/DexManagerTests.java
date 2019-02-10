@@ -141,7 +141,8 @@ public class DexManagerTests {
         assertIsUsedByOtherApps(mBarUser0, pui, true);
         assertTrue(pui.getDexUseInfoMap().isEmpty());
 
-        assertHasDclInfo(mBarUser0, mFooUser0, mBarUser0.getBaseAndSplitDexPaths());
+        // A package loading another package's APK is not DCL (it's not app data).
+        assertNoDclInfo(mBarUser0);
     }
 
     @Test
@@ -334,7 +335,9 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, newSplits, mUser0);
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
         assertIsUsedByOtherApps(newSplits, pui, true);
-        assertHasDclInfo(mBarUser0, mFooUser0, newSplits);
+
+        // Primary and split APKs are not recorded as DCL.
+        assertNoDclInfo(mBarUser0);
     }
 
     @Test

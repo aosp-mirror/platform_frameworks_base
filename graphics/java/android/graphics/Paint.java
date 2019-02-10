@@ -1279,7 +1279,6 @@ public class Paint {
      * (content of the render target).
      * <p />
      * Pass null to clear any previous blend mode.
-     * As a convenience, the parameter passed is also returned.
      * <p />
      *
      * @see BlendMode

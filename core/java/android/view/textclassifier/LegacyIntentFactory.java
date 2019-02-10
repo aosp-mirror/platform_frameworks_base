@@ -182,7 +182,8 @@ public final class LegacyIntentFactory implements IntentFactory {
         actions.add(new LabeledIntent(
                 context.getString(com.android.internal.R.string.browse),
                 context.getString(com.android.internal.R.string.browse_desc),
-                new Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                new Intent(Intent.ACTION_VIEW)
+                        .setDataAndNormalize(Uri.parse(text))
                         .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()),
                 LabeledIntent.DEFAULT_REQUEST_CODE));
         return actions;

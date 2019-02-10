@@ -150,7 +150,7 @@
       <item quantity="other">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact operator for details.</item>
       <item quantity="one">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. Contact operator for details.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"It’s"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Twelve"</item>
     <item msgid="7389464214252023751">"One"</item>

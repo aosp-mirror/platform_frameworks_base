@@ -4013,7 +4013,7 @@ class StorageManagerService extends IStorageManager.Stub
                     return;
                 }
                 userPackages.add(packageName);
-                sandboxId = getSandboxId(packageName, sharedUserId);
+                sandboxId = StorageManagerService.this.getSandboxId(packageName, sharedUserId);
             }
 
             try {
@@ -4028,7 +4028,8 @@ class StorageManagerService extends IStorageManager.Stub
             if (!ENABLE_ISOLATED_STORAGE) {
                 return;
             }
-            final String sandboxId = getSandboxId(packageName, sharedUserId);
+            final String sandboxId = StorageManagerService.this.getSandboxId(
+                    packageName, sharedUserId);
             synchronized (mPackagesLock) {
                 final ArraySet<String> userPackages = mPackages.get(userId);
                 // If the userPackages is null, it means the user is not started but we still
@@ -4054,6 +4055,12 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
             return visibleVolsForUser.toArray(new String[visibleVolsForUser.size()]);
+        }
+
+        @Override
+        public String getSandboxId(String packageName) {
+            return StorageManagerService.this.getSandboxId(packageName,
+                    mPmInternal.getSharedUserIdForPackage(packageName));
         }
 
         private String getVolumeLabel(VolumeInfo vol) {

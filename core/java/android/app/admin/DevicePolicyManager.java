@@ -4618,6 +4618,10 @@ public class DevicePolicyManager {
      * <p>If the installer must have access to the credentials, call
      * {@link #installKeyPair(ComponentName, PrivateKey, Certificate[], String, boolean)} instead.
      *
+     * <p>Note: If the provided {@code alias} is of an existing alias, all former grants that apps
+     * have been given to access the key and certificates associated with this alias will be
+     * revoked.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
      * @param privKey The private key to install.
@@ -4644,6 +4648,10 @@ public class DevicePolicyManager {
      * <p>The caller of this API may grant itself access to the certificate and private key
      * immediately, without user approval. It is a best practice not to request this unless strictly
      * necessary since it opens up additional security vulnerabilities.
+     *
+     * <p>Note: If the provided {@code alias} is of an existing alias, all former grants that apps
+     * have been given to access the key and certificates associated with this alias will be
+     * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if calling from a delegated certificate installer.
@@ -4684,6 +4692,10 @@ public class DevicePolicyManager {
      *
      * <p>Include {@link #INSTALLKEY_SET_USER_SELECTABLE} in the {@code flags} argument to allow
      * the user to select the key from a dialog.
+     *
+     * <p>Note: If the provided {@code alias} is of an existing alias, all former grants that apps
+     * have been given to access the key and certificates associated with this alias will be
+     * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if calling from a delegated certificate installer.
@@ -4760,6 +4772,10 @@ public class DevicePolicyManager {
      *
      * <p>Because this method might take several seconds to complete, it should only be called from
      * a worker thread. This method returns {@code null} when called from the main thread.
+     *
+     * <p>Note: If the provided {@code alias} is of an existing alias, all former grants that apps
+     * have been given to access the key and certificates associated with this alias will be
+     * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
@@ -9628,7 +9644,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled {@code true} to enable the backup service, {@code false} to disable it.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner.
      */
     public void setBackupServiceEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setBackupServiceEnabled");

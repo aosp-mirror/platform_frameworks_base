@@ -1034,6 +1034,7 @@
   <java-symbol type="string" name="sipAddressTypeOther" />
   <java-symbol type="string" name="sipAddressTypeWork" />
   <java-symbol type="string" name="default_sms_application" />
+  <java-symbol type="string" name="default_browser" />
   <java-symbol type="string" name="sms_control_message" />
   <java-symbol type="string" name="sms_control_title" />
   <java-symbol type="string" name="sms_control_no" />
@@ -2472,6 +2473,7 @@
   <java-symbol type="string" name="biometric_error_user_canceled" />
   <java-symbol type="string" name="biometric_not_recognized" />
   <java-symbol type="string" name="biometric_error_canceled" />
+  <java-symbol type="string" name="biometric_error_device_not_secured" />
 
   <!-- Fingerprint messages -->
   <java-symbol type="string" name="fingerprint_error_unable_to_process" />
@@ -2521,6 +2523,14 @@
   <java-symbol type="string" name="face_acquired_too_left" />
   <java-symbol type="string" name="face_acquired_poor_gaze" />
   <java-symbol type="string" name="face_acquired_not_detected" />
+  <java-symbol type="string" name="face_acquired_too_much_motion" />
+  <java-symbol type="string" name="face_acquired_recalibrate" />
+  <java-symbol type="string" name="face_acquired_too_different" />
+  <java-symbol type="string" name="face_acquired_too_similar" />
+  <java-symbol type="string" name="face_acquired_pan_too_extreme" />
+  <java-symbol type="string" name="face_acquired_tilt_too_extreme" />
+  <java-symbol type="string" name="face_acquired_roll_too_extreme" />
+  <java-symbol type="string" name="face_acquired_obscured" />
   <java-symbol type="array" name="face_acquired_vendor" />
   <java-symbol type="string" name="face_name_template" />
   <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
@@ -3585,6 +3595,7 @@
   <java-symbol type="bool" name="config_useSmsAppService" />
 
   <java-symbol type="id" name="transition_overlay_view_tag" />
+  <java-symbol type="id" name="notification_custom_view_index_tag" />
 
   <java-symbol type="dimen" name="rounded_corner_radius" />
   <java-symbol type="dimen" name="rounded_corner_radius_top" />

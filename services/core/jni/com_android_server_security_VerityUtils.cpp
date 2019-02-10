@@ -122,7 +122,7 @@ class JavaByteArrayHolder {
     }
 
     ~JavaByteArrayHolder() {
-        LOG_ALWAYS_FATAL_IF(mElements == nullptr, "Elements are not released");
+        LOG_ALWAYS_FATAL_IF(mElements != nullptr, "Elements are not released");
     }
 
   private:

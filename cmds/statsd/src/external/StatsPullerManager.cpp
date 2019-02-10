@@ -174,9 +174,12 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // Size of specific categories of files. Eg. Music.
         {android::util::CATEGORY_SIZE,
          {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
-        // Number of fingerprints registered to each user.
+        // Number of fingerprints enrolled for each user.
         {android::util::NUM_FINGERPRINTS_ENROLLED,
          {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},
+        // Number of faces enrolled for each user.
+        {android::util::NUM_FACES_ENROLLED,
+         {.puller = new StatsCompanionServicePuller(android::util::NUM_FACES_ENROLLED)}},
         // ProcStats.
         {android::util::PROC_STATS,
          {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
@@ -381,7 +384,7 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
         for (const auto& receiverInfo : pullInfo.second) {
             sp<PullDataReceiver> receiverPtr = receiverInfo->receiver.promote();
             if (receiverPtr != nullptr) {
-                receiverPtr->onDataPulled(data, pullSuccess);
+                receiverPtr->onDataPulled(data, pullSuccess, elapsedTimeNs);
                 // We may have just come out of a coma, compute next pull time.
                 int numBucketsAhead =
                         (elapsedTimeNs - receiverInfo->nextPullTimeNs) / receiverInfo->intervalNs;

@@ -258,7 +258,7 @@ class ZygoteConnection {
                 parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
                 parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
                 parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mPackageName,
-                parsedArgs.mPackagesForUid, parsedArgs.mVisibleVolIds);
+                parsedArgs.mPackagesForUid, parsedArgs.mVisibleVolIds, parsedArgs.mSandboxId);
 
         try {
             if (pid == 0) {
@@ -334,9 +334,14 @@ class ZygoteConnection {
         }
     }
 
-    private class HiddenApiUsageLogger implements VMRuntime.HiddenApiUsageLogger {
+    private static class HiddenApiUsageLogger implements VMRuntime.HiddenApiUsageLogger {
 
         private final MetricsLogger mMetricsLogger = new MetricsLogger();
+        private static HiddenApiUsageLogger sInstance = new HiddenApiUsageLogger();
+
+        public static HiddenApiUsageLogger getInstance() {
+            return HiddenApiUsageLogger.sInstance;
+        }
 
         public void hiddenApiUsed(String packageName, String signature,
                 int accessMethod, boolean accessDenied) {
@@ -370,7 +375,7 @@ class ZygoteConnection {
     private void handleHiddenApiAccessLogSampleRate(int samplingRate) {
         try {
             ZygoteInit.setHiddenApiAccessLogSampleRate(samplingRate);
-            ZygoteInit.setHiddenApiUsageLogger(new HiddenApiUsageLogger());
+            ZygoteInit.setHiddenApiUsageLogger(HiddenApiUsageLogger.getInstance());
             mSocketOutStream.writeInt(0);
         } catch (IOException ioe) {
             throw new IllegalStateException("Error writing to command socket", ioe);

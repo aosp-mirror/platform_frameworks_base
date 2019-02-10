@@ -34,7 +34,6 @@ import android.view.ViewStructure.HtmlInfo.Builder;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 //TODO(b/122484602): add javadocs / implement Parcelable / implement
@@ -589,6 +588,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
     }
 
     /** @hide */
+    @TestApi
     public static void writeToParcel(@NonNull Parcel parcel, @Nullable ViewNode node, int flags) {
         if (node == null) {
             parcel.writeLong(0);
@@ -598,18 +598,20 @@ public final class ViewNode extends AssistStructure.ViewNode {
     }
 
     /** @hide */
+    @TestApi
     public static @Nullable ViewNode readFromParcel(@NonNull Parcel parcel) {
         final long nodeFlags = parcel.readLong();
         return nodeFlags == 0 ? null : new ViewNode(nodeFlags, parcel);
     }
 
     /** @hide */
-    @VisibleForTesting // Must be public to be accessed from FrameworkCoreTests' apk.
+    @TestApi
     public static final class ViewStructureImpl extends ViewStructure {
 
         final ViewNode mNode = new ViewNode();
 
-        @VisibleForTesting // Must be public to be accessed from FrameworkCoreTests' apk.
+        /** @hide */
+        @TestApi
         public ViewStructureImpl(@NonNull View view) {
             mNode.mAutofillId = Preconditions.checkNotNull(view).getAutofillId();
             final ViewParent parent = view.getParent();
@@ -618,13 +620,15 @@ public final class ViewNode extends AssistStructure.ViewNode {
             }
         }
 
-        @VisibleForTesting // Must be public to be accessed from FrameworkCoreTests' apk.
+        /** @hide */
+        @TestApi
         public ViewStructureImpl(@NonNull AutofillId parentId, long virtualId, int sessionId) {
             mNode.mParentAutofillId = Preconditions.checkNotNull(parentId);
             mNode.mAutofillId = new AutofillId(parentId, virtualId, sessionId);
         }
 
-        @VisibleForTesting // Must be public to be accessed from FrameworkCoreTests' apk.
+        /** @hide */
+        @TestApi
         public ViewNode getNode() {
             return mNode;
         }

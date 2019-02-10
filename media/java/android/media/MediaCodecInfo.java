@@ -1614,29 +1614,59 @@ public final class MediaCodecInfo {
         }
 
         /**
-         * Video performance points are a set of standard performance points defined by pixel rate.
+         * Video performance points are a set of standard performance points defined by number of
+         * pixels, pixel rate and frame rate. Performance point represents an upper bound. This
+         * means that it covers all performance points with fewer pixels, pixel rate and frame
+         * rate.
          */
         public static final class PerformancePoint {
             /**
-             * Frame width in pixels.
+             * (Maximum) number of macroblocks in the frame.
+             *
+             * Video frames are conceptually divided into 16-by-16 pixel blocks called macroblocks.
+             * Most coding standards operate on these 16-by-16 pixel blocks; thus, codec performance
+             * is characterized using such blocks.
              */
-            public final int width;
+            public final int macroBlocks;
 
             /**
-             * Frame height in pixels.
-             */
-            public final int height;
-
-            /**
-             * Frame rate in frames per second.
+             * (Maximum) frame rate in frames per second.
              */
             public final int frameRate;
 
+            /**
+             * (Maximum) number of macroblocks processed per second.
+             */
+            public final long macroBlockRate;
+
             /* package private */
-            PerformancePoint(int width_, int height_, int frameRate_) {
-                width = width_;
-                height = height_;
-                frameRate = frameRate_;
+            PerformancePoint(int width_, int height_, int frameRate_, int maxFrameRate_) {
+                macroBlocks = saturateLongToInt(
+                        ((Math.max(1, (long)width_) + 15) / 16)
+                                * ((Math.max(1, (long)height_) + 15) / 16));
+                frameRate = Math.max(1, frameRate_);
+                macroBlockRate = Math.max(maxFrameRate_, frameRate) * macroBlocks;
+            }
+
+            /**
+             * Create a performance point for a given frame size and frame rate.
+             *
+             * @param width_ width of the frame in pixels
+             * @param height_ height of the frame in pixels
+             * @param frameRate_ frame rate in frames per second
+             */
+            public PerformancePoint(int width_, int height_, int frameRate_) {
+                this(width_, height_, frameRate_, frameRate_ /* maxFrameRate */);
+            }
+
+            private int saturateLongToInt(long value) {
+                if (value < Integer.MIN_VALUE) {
+                    return Integer.MIN_VALUE;
+                } else if (value > Integer.MAX_VALUE) {
+                    return Integer.MAX_VALUE;
+                } else {
+                    return (int)value;
+                }
             }
 
             /**
@@ -1647,26 +1677,40 @@ public final class MediaCodecInfo {
              * @return {@code true} if the performance point covers the format.
              */
             public boolean covers(@NonNull MediaFormat format) {
-                // for simplicity, this code assumes a 16x16 block size.
-                long macroBlocks = ((width + 15) / 16) * (long)((height + 15) / 16);
-                long mbps = macroBlocks * frameRate;
-
-                long formatMacroBlocks =
-                    (long)((format.getInteger(MediaFormat.KEY_WIDTH, 0) + 15) / 16)
-                            * ((format.getInteger(MediaFormat.KEY_HEIGHT, 0) + 15) / 16);
-                double formatMbps =
-                    Math.ceil(formatMacroBlocks
-                              * format.getNumber(MediaFormat.KEY_FRAME_RATE, 0).doubleValue());
-                return formatMacroBlocks > 0 && formatMacroBlocks <= macroBlocks
-                        && formatMbps <= mbps;
+                PerformancePoint other = new PerformancePoint(
+                        format.getInteger(MediaFormat.KEY_WIDTH, 0),
+                        format.getInteger(MediaFormat.KEY_HEIGHT, 0),
+                        // safely convert ceil(double) to int through float case and Math.round
+                        Math.round((float)(
+                                Math.ceil(format.getNumber(MediaFormat.KEY_FRAME_RATE, 0)
+                                        .doubleValue()))));
+                return covers(other);
             }
+
+            /**
+             * Checks whether the performance point covers another performance point. Use this
+             * method to determine if a performance point advertised by a codec covers the
+             * performance point required. This method can also be used for lose ordering as this
+             * method is transitive.
+             *
+             * @param other other performance point considered
+             *
+             * @return {@code true} if the performance point covers the other.
+             */
+            public boolean covers(@NonNull PerformancePoint other) {
+                return (macroBlocks >= other.macroBlocks
+                        && frameRate >= other.frameRate
+                        && macroBlockRate >= other.macroBlockRate);
+            }
+
 
             @Override
             public boolean equals(Object o) {
                 if (o instanceof PerformancePoint) {
                     PerformancePoint other = (PerformancePoint)o;
-                    return ((long)width * height) == ((long)other.width * other.height)
-                            && frameRate == other.frameRate;
+                    return (macroBlocks == other.macroBlocks
+                            && frameRate == other.frameRate
+                            && macroBlockRate == other.macroBlockRate);
                 }
                 return false;
             }
@@ -1931,7 +1975,8 @@ public final class MediaCodecInfo {
                     continue;
                 }
                 ret.add(new PerformancePoint(
-                        size.getWidth(), size.getHeight(), range.getLower().intValue()));
+                        size.getWidth(), size.getHeight(), range.getLower().intValue(),
+                        range.getUpper().intValue()));
             }
             // check if the component specified no performance point indication
             if (ret.size() == 0) {
@@ -1939,9 +1984,12 @@ public final class MediaCodecInfo {
             }
 
             // sort reversed by area first, then by frame rate
-            ret.sort((a, b) -> (a.width * a.height != b.width * b.height ?
-                                    (b.width * b.height - a.width * a.height) :
-                                    (b.frameRate - a.frameRate)));
+            ret.sort((a, b) -> -((a.macroBlocks != b.macroBlocks) ?
+                                        (a.macroBlocks < b.macroBlocks ? -1 : 1) :
+                                (a.macroBlockRate != b.macroBlockRate) ?
+                                        (a.macroBlockRate < b.macroBlockRate ? -1 : 1) :
+                                (a.frameRate != b.frameRate) ?
+                                        (a.frameRate < b.frameRate ? -1 : 1) : 0));
             return ret;
         }
 
@@ -2363,39 +2411,45 @@ public final class MediaCodecInfo {
                     boolean supported = true;
                     switch (profileLevel.level) {
                         case CodecProfileLevel.AVCLevel1:
-                            MBPS =    1485; FS =    99; BR =     64; DPB =    396; break;
+                            MBPS =     1485; FS =     99; BR =     64; DPB =    396; break;
                         case CodecProfileLevel.AVCLevel1b:
-                            MBPS =    1485; FS =    99; BR =    128; DPB =    396; break;
+                            MBPS =     1485; FS =     99; BR =    128; DPB =    396; break;
                         case CodecProfileLevel.AVCLevel11:
-                            MBPS =    3000; FS =   396; BR =    192; DPB =    900; break;
+                            MBPS =     3000; FS =    396; BR =    192; DPB =    900; break;
                         case CodecProfileLevel.AVCLevel12:
-                            MBPS =    6000; FS =   396; BR =    384; DPB =   2376; break;
+                            MBPS =     6000; FS =    396; BR =    384; DPB =   2376; break;
                         case CodecProfileLevel.AVCLevel13:
-                            MBPS =   11880; FS =   396; BR =    768; DPB =   2376; break;
+                            MBPS =    11880; FS =    396; BR =    768; DPB =   2376; break;
                         case CodecProfileLevel.AVCLevel2:
-                            MBPS =   11880; FS =   396; BR =   2000; DPB =   2376; break;
+                            MBPS =    11880; FS =    396; BR =   2000; DPB =   2376; break;
                         case CodecProfileLevel.AVCLevel21:
-                            MBPS =   19800; FS =   792; BR =   4000; DPB =   4752; break;
+                            MBPS =    19800; FS =    792; BR =   4000; DPB =   4752; break;
                         case CodecProfileLevel.AVCLevel22:
-                            MBPS =   20250; FS =  1620; BR =   4000; DPB =   8100; break;
+                            MBPS =    20250; FS =   1620; BR =   4000; DPB =   8100; break;
                         case CodecProfileLevel.AVCLevel3:
-                            MBPS =   40500; FS =  1620; BR =  10000; DPB =   8100; break;
+                            MBPS =    40500; FS =   1620; BR =  10000; DPB =   8100; break;
                         case CodecProfileLevel.AVCLevel31:
-                            MBPS =  108000; FS =  3600; BR =  14000; DPB =  18000; break;
+                            MBPS =   108000; FS =   3600; BR =  14000; DPB =  18000; break;
                         case CodecProfileLevel.AVCLevel32:
-                            MBPS =  216000; FS =  5120; BR =  20000; DPB =  20480; break;
+                            MBPS =   216000; FS =   5120; BR =  20000; DPB =  20480; break;
                         case CodecProfileLevel.AVCLevel4:
-                            MBPS =  245760; FS =  8192; BR =  20000; DPB =  32768; break;
+                            MBPS =   245760; FS =   8192; BR =  20000; DPB =  32768; break;
                         case CodecProfileLevel.AVCLevel41:
-                            MBPS =  245760; FS =  8192; BR =  50000; DPB =  32768; break;
+                            MBPS =   245760; FS =   8192; BR =  50000; DPB =  32768; break;
                         case CodecProfileLevel.AVCLevel42:
-                            MBPS =  522240; FS =  8704; BR =  50000; DPB =  34816; break;
+                            MBPS =   522240; FS =   8704; BR =  50000; DPB =  34816; break;
                         case CodecProfileLevel.AVCLevel5:
-                            MBPS =  589824; FS = 22080; BR = 135000; DPB = 110400; break;
+                            MBPS =   589824; FS =  22080; BR = 135000; DPB = 110400; break;
                         case CodecProfileLevel.AVCLevel51:
-                            MBPS =  983040; FS = 36864; BR = 240000; DPB = 184320; break;
+                            MBPS =   983040; FS =  36864; BR = 240000; DPB = 184320; break;
                         case CodecProfileLevel.AVCLevel52:
-                            MBPS = 2073600; FS = 36864; BR = 240000; DPB = 184320; break;
+                            MBPS =  2073600; FS =  36864; BR = 240000; DPB = 184320; break;
+                        case CodecProfileLevel.AVCLevel6:
+                            MBPS =  4177920; FS = 139264; BR = 240000; DPB = 696320; break;
+                        case CodecProfileLevel.AVCLevel61:
+                            MBPS =  8355840; FS = 139264; BR = 480000; DPB = 696320; break;
+                        case CodecProfileLevel.AVCLevel62:
+                            MBPS = 16711680; FS = 139264; BR = 800000; DPB = 696320; break;
                         default:
                             Log.w(TAG, "Unrecognized level "
                                     + profileLevel.level + " for " + mime);

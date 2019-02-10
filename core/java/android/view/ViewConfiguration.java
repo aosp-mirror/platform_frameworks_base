@@ -293,12 +293,14 @@ public class ViewConfiguration {
      */
     private static final float AMBIGUOUS_GESTURE_MULTIPLIER = 2f;
 
+    private final boolean mConstructedWithContext;
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
     private final int mMinimumFlingVelocity;
     private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mMinScalingSpan;
     private final int mHoverSlop;
     private final int mMinScrollbarTouchTarget;
     private final int mDoubleTapTouchSlop;
@@ -329,6 +331,7 @@ public class ViewConfiguration {
      */
     @Deprecated
     public ViewConfiguration() {
+        mConstructedWithContext = false;
         mEdgeSlop = EDGE_SLOP;
         mFadingEdgeLength = FADING_EDGE_LENGTH;
         mMinimumFlingVelocity = MINIMUM_FLING_VELOCITY;
@@ -350,6 +353,10 @@ public class ViewConfiguration {
         mHorizontalScrollFactor = HORIZONTAL_SCROLL_FACTOR;
         mVerticalScrollFactor = VERTICAL_SCROLL_FACTOR;
         mShowMenuShortcutsWhenKeyboardPresent = false;
+
+        // Getter throws if mConstructedWithContext is false so doesn't matter what
+        // this value is.
+        mMinScalingSpan = 0;
     }
 
     /**
@@ -363,6 +370,7 @@ public class ViewConfiguration {
      * @see android.util.DisplayMetrics
      */
     private ViewConfiguration(Context context) {
+        mConstructedWithContext = true;
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
         final Configuration config = res.getConfiguration();
@@ -447,6 +455,8 @@ public class ViewConfiguration {
         mShowMenuShortcutsWhenKeyboardPresent = res.getBoolean(
             com.android.internal.R.bool.config_showMenuShortcutsWhenKeyboardPresent);
 
+        mMinScalingSpan = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_minScalingSpan);
     }
 
     /**
@@ -956,6 +966,26 @@ public class ViewConfiguration {
      */
     public boolean shouldShowMenuShortcutsWhenKeyboardPresent() {
         return mShowMenuShortcutsWhenKeyboardPresent;
+    }
+
+    /**
+     * Retrieves the distance in pixels between touches that must be reached for a gesture to be
+     * interpreted as scaling.
+     *
+     * In general, scaling shouldn't start until this distance has been met or surpassed, and
+     * scaling should end when the distance in pixels between touches drops below this distance.
+     *
+     * @return The distance in pixels
+     * @throws IllegalStateException if this method is called on a ViewConfiguration that was
+     *         instantiated using a constructor with no Context parameter.
+     */
+    public int getScaledMinScalingSpan() {
+        if (!mConstructedWithContext) {
+            throw new IllegalStateException("Min scaling span cannot be determined when this "
+                    + "method is called on a ViewConfiguration that was instantiated using a "
+                    + "constructor with no Context parameter");
+        }
+        return mMinScalingSpan;
     }
 
     /**

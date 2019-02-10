@@ -1275,7 +1275,19 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void onDisplayChanged(DisplayContent dc) {
         DisplayContent prevDc = mDisplayContent;
         super.onDisplayChanged(dc);
-        if (prevDc != null && prevDc.mFocusedApp == this) {
+        if (prevDc == null) {
+            return;
+        }
+        if (prevDc.mChangingApps.contains(this)) {
+            // This gets called *after* the AppWindowToken has been reparented to the new display.
+            // That reparenting resulted in this window changing modes (eg. FREEFORM -> FULLSCREEN),
+            // so this token is now "frozen" while waiting for the animation to start on prevDc
+            // (which will be cancelled since the window is no-longer a child). However, since this
+            // is no longer a child of prevDc, this won't be notified of the cancelled animation,
+            // so we need to cancel the change transition here.
+            clearChangeLeash(getPendingTransaction(), true /* cancel */);
+        }
+        if (prevDc.mFocusedApp == this) {
             prevDc.setFocusedApp(null);
             final TaskStack stack = dc.getTopStack();
             if (stack != null) {
@@ -1584,7 +1596,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
-        if (!isVisible() || getDisplayContent().mAppTransition.isTransitionSet()) {
+        if (mWmService.mDisableTransitionAnimation
+                || !isVisible()
+                || getDisplayContent().mAppTransition.isTransitionSet()
+                || getSurfaceControl() == null) {
             return false;
         }
         // Only do an animation into and out-of freeform mode for now. Other mode
@@ -2504,7 +2519,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     public void onAnimationLeashDestroyed(Transaction t) {
         super.onAnimationLeashDestroyed(t);
         if (mAnimationBoundsLayer != null) {
-            t.reparent(mAnimationBoundsLayer, null);
+            t.remove(mAnimationBoundsLayer);
             mAnimationBoundsLayer = null;
         }
 
@@ -2561,9 +2576,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return;
         } else if (mTransitChangeLeash != null) {
             // unparent mTransitChangeLeash for clean-up
-            t.hide(mTransitChangeLeash);
-            t.reparent(mTransitChangeLeash, null);
-            mTransitChangeLeash = null;
+            clearChangeLeash(t, false /* cancel */);
         }
 
         if (mAnimatingAppWindowTokenRegistry != null) {
@@ -2659,15 +2672,36 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return super.isSelfAnimating();
     }
 
+    /**
+     * @param cancel {@code true} if clearing the leash due to cancelling instead of transferring
+     *                            to another leash.
+     */
+    private void clearChangeLeash(Transaction t, boolean cancel) {
+        if (mTransitChangeLeash == null) {
+            return;
+        }
+        if (cancel) {
+            clearThumbnail();
+            SurfaceControl sc = getSurfaceControl();
+            SurfaceControl parentSc = getParentSurfaceControl();
+            // Don't reparent if surface is getting destroyed
+            if (parentSc != null && sc != null) {
+                t.reparent(sc, getParentSurfaceControl());
+            }
+        }
+        t.hide(mTransitChangeLeash);
+        t.reparent(mTransitChangeLeash, null);
+        mTransitChangeLeash = null;
+        if (cancel) {
+            onAnimationLeashDestroyed(t);
+        }
+    }
+
     @Override
     void cancelAnimation() {
         cancelAnimationOnly();
         clearThumbnail();
-        if (mTransitChangeLeash != null) {
-            getPendingTransaction().hide(mTransitChangeLeash);
-            getPendingTransaction().reparent(mTransitChangeLeash, null);
-            mTransitChangeLeash = null;
-        }
+        clearChangeLeash(getPendingTransaction(), true /* cancel */);
     }
 
     /**
@@ -3003,7 +3037,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void removeFromPendingTransition() {
         if (isWaitingForTransitionStart() && mDisplayContent != null) {
             mDisplayContent.mOpeningApps.remove(this);
-            mDisplayContent.mChangingApps.remove(this);
+            if (mDisplayContent.mChangingApps.remove(this)) {
+                clearChangeLeash(getPendingTransaction(), true /* cancel */);
+            }
             mDisplayContent.mClosingApps.remove(this);
         }
     }

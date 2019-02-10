@@ -166,7 +166,7 @@
       <item quantity="many">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
       <item quantity="other">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Сейчас"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"двенадцать"</item>
     <item msgid="7389464214252023751">"один"</item>

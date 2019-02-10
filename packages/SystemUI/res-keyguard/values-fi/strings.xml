@@ -150,7 +150,7 @@
       <item quantity="other">SIM-kortti on nyt lukittu. Anna PUK-koodi, niin voit jatkaa. Sinulla on <xliff:g id="_NUMBER_1">%d</xliff:g> yritystä jäljellä, ennen kuin SIM-kortti poistuu pysyvästi käytöstä. Pyydä lisätietoja operaattoriltasi.</item>
       <item quantity="one">SIM-kortti on nyt lukittu. Anna PUK-koodi, niin voit jatkaa. Sinulla on <xliff:g id="_NUMBER_0">%d</xliff:g> yritys jäljellä, ennen kuin SIM-kortti poistuu pysyvästi käytöstä. Pyydä lisätietoja operaattoriltasi.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Kello on"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Kaksitoista"</item>
     <item msgid="7389464214252023751">"Yksi"</item>

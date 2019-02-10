@@ -507,6 +507,19 @@ package android.provider {
     field @Deprecated public static final String TIMESTAMP = "timestamp";
   }
 
+  public final class MediaStore {
+    method @Deprecated @NonNull public static android.net.Uri setIncludeTrashed(@NonNull android.net.Uri);
+    method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri);
+    method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri, long);
+    method @Deprecated public static void untrash(@NonNull android.content.Context, @NonNull android.net.Uri);
+  }
+
+  public static interface MediaStore.MediaColumns extends android.provider.BaseColumns {
+    field @Deprecated public static final String DATE_EXPIRES = "date_expires";
+    field @Deprecated public static final String HASH = "_hash";
+    field @Deprecated public static final String IS_TRASHED = "is_trashed";
+  }
+
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field @Deprecated public static final String CONTACT_METADATA_SYNC = "contact_metadata_sync";
   }

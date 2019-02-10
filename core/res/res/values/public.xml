@@ -2925,11 +2925,11 @@
         <public name="importantForContentCapture" />
         <public name="supportsMultipleDisplays" />
         <public name="useAppZygote" />
-        <public name="usageInfoRequired" />
-        <public name="dataSentOffDevice" />
-        <public name="dataSharedWithThirdParty" />
-        <public name="dataUsedForMonetization" />
-        <public name="dataRetentionTime" />
+        <public name="__removed1" />
+        <public name="__removed2" />
+        <public name="__removed3" />
+        <public name="__removed4" />
+        <public name="__removed5" />
         <public name="selectionDividerHeight" />
         <public name="foregroundServiceType" />
         <public name="hasFragileUserData" />
@@ -2971,6 +2971,14 @@
         <public name="config_feedbackIntentExtraKey" />
         <!-- @hide @SystemApi -->
         <public name="config_feedbackIntentNameKey" />
+      <!-- @hide @SystemApi @TestApi -->
+      <public name="config_defaultAssistant" />
+      <!-- @hide @SystemApi -->
+      <public name="config_defaultBrowser" />
+      <!-- @hide @SystemApi @TestApi -->
+      <public name="config_defaultDialer" />
+      <!-- @hide @SystemApi -->
+      <public name="config_defaultSms" />
     </public-group>
 
     <public-group type="bool" first-id="0x01110000">
@@ -2988,11 +2996,6 @@
     <public-group type="color" first-id="0x0106001c">
         <!-- @hide @SystemApi -->
         <public name="system_notification_accent_color" />
-    </public-group>
-
-    <public-group type="array" first-id="0x01070006">
-      <!-- @hide @TestApi @SystemApi -->
-      <public name="config_defaultRoleHolders" />
     </public-group>
 
   <!-- ===============================================================

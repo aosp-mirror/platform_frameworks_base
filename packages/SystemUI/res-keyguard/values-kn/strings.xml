@@ -150,7 +150,7 @@
       <item quantity="one">ಸಿಮ್ ಅನ್ನು ಈಗ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಸಲು PUK ಕೋಡ್ ನಮೂದಿಸಿ. ಸಿಮ್ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವ ಮುನ್ನ ನಿಮ್ಮಲ್ಲಿ <xliff:g id="_NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ. ವಿವರಗಳಿಗಾಗಿ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಿ.</item>
       <item quantity="other">ಸಿಮ್ ಅನ್ನು ಈಗ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಸಲು PUK ಕೋಡ್ ನಮೂದಿಸಿ. ಸಿಮ್ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವ ಮುನ್ನ ನಿಮ್ಮಲ್ಲಿ <xliff:g id="_NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ. ವಿವರಗಳಿಗಾಗಿ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಿ.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"ಇದು"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"ಹನ್ನೆರಡು"</item>
     <item msgid="7389464214252023751">"ಒಂದು"</item>

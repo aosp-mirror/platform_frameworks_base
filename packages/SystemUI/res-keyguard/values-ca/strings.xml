@@ -150,7 +150,7 @@
       <item quantity="other">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queden <xliff:g id="_NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
       <item quantity="one">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queda <xliff:g id="_NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Són les"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"i dotze"</item>
     <item msgid="7389464214252023751">"Una"</item>

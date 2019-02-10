@@ -20,10 +20,18 @@ import android.content.Context;
 
 /**
  * The manager class for RCS related utilities.
- * @hide
+ *
+ * @hide - TODO: make public
  */
 @SystemService(Context.TELEPHONY_RCS_SERVICE)
 public class RcsManager {
+
+    /**
+     * @hide
+     */
+    public RcsManager() {
+        // empty constructor
+    }
 
     private static final RcsMessageStore sRcsMessageStoreInstance = new RcsMessageStore();
 

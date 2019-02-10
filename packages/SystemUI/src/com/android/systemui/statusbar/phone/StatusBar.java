@@ -163,6 +163,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.Recents;
@@ -188,7 +189,8 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -482,7 +484,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateAodMaskVisibility(deviceSupportsAodWallpaper && aodImageWallpaperEnabled);
             // If WallpaperInfo is null, it must be ImageWallpaper.
             final boolean supportsAmbientMode = deviceSupportsAodWallpaper
-                    && (info == null || info.supportsAmbientMode());
+                    && (info == null && aodImageWallpaperEnabled
+                        || info != null && info.supportsAmbientMode());
 
             mStatusBarWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
@@ -557,8 +560,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
     private boolean mNoAnimationOnNextBarModeChange;
     protected FalsingManager mFalsingManager;
-    private final StatusBarStateController
-            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    private final SysuiStatusBarStateController mStatusBarStateController =
+            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -649,7 +652,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         mColorExtractor.addOnColorsChangedListener(this);
-        mStatusBarStateController.addCallback(this, StatusBarStateController.RANK_STATUS_BAR);
+        mStatusBarStateController.addCallback(this,
+                StatusBarStateControllerImpl.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mDreamManager = IDreamManager.Stub.asInterface(
@@ -803,15 +807,17 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
-                .createNotificationIconAreaController(
-                        context, this, mStatusBarStateController, mNotificationListener);
+                .createNotificationIconAreaController(context, this,
+                        mStatusBarStateController, mNotificationListener);
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
 
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mNotificationIconAreaController);
-        // Allow plugins to reference DarkIconDispatcher
+        // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         Dependency.get(PluginDependencyProvider.class)
                 .allowPluginDependency(DarkIconDispatcher.class);
+        Dependency.get(PluginDependencyProvider.class)
+                .allowPluginDependency(StatusBarStateController.class);
         FragmentHostManager.get(mStatusBarWindow)
                 .addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
                     CollapsedStatusBarFragment statusBarFragment =
@@ -3369,7 +3375,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // ringing.
         // Other transitions are covered in handleVisibleToUserChanged().
         if (mVisible && (newState == StatusBarState.SHADE_LOCKED
-                || (Dependency.get(StatusBarStateController.class).goingToFullShade()))) {
+                || (((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
+                .goingToFullShade()))) {
             clearNotificationEffects();
         }
         if (newState == StatusBarState.KEYGUARD) {

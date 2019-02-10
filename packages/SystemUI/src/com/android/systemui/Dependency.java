@@ -18,6 +18,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.ArrayMap;
@@ -25,7 +26,6 @@ import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
@@ -42,6 +42,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.privacy.PrivacyItemController;
@@ -55,7 +56,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
-import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -206,7 +206,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<UserInfoController> mUserInfoController;
     @Inject Lazy<KeyguardMonitor> mKeyguardMonitor;
     @Inject Lazy<BatteryController> mBatteryController;
-    @Inject Lazy<ColorDisplayController> mColorDisplayController;
+    @Inject Lazy<NightDisplayListener> mNightDisplayListener;
     @Inject Lazy<ManagedProfileController> mManagedProfileController;
     @Inject Lazy<NextAlarmController> mNextAlarmController;
     @Inject Lazy<DataSaverController> mDataSaverController;
@@ -330,7 +330,7 @@ public class Dependency extends SystemUI {
 
         mProviders.put(BatteryController.class, mBatteryController::get);
 
-        mProviders.put(ColorDisplayController.class, mColorDisplayController::get);
+        mProviders.put(NightDisplayListener.class, mNightDisplayListener::get);
 
         mProviders.put(ManagedProfileController.class, mManagedProfileController::get);
 

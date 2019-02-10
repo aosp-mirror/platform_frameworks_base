@@ -1006,7 +1006,7 @@ public class TaskStack extends WindowContainer<Task> implements
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 
         if (mAnimationBackgroundSurface != null) {
-            mAnimationBackgroundSurface.destroy();
+            mAnimationBackgroundSurface.remove();
             mAnimationBackgroundSurface = null;
         }
 

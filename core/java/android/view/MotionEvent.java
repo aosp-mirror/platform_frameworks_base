@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -1513,7 +1514,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     // Pointer to the native MotionEvent object that contains the actual data.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private long mNativePtr;
 
     private MotionEvent mNext;

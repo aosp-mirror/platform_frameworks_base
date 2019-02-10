@@ -346,9 +346,6 @@ public final class AutofillManager {
     @TestApi
     public static final int FLAG_SMART_SUGGESTION_SYSTEM = 0x1;
 
-    /** @hide */ // TODO(b/123233342): remove when not used anymore
-    public static final int FLAG_SMART_SUGGESTION_LEGACY = 0x2;
-
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_SMART_SUGGESTION_" }, value = {
             FLAG_SMART_SUGGESTION_SYSTEM

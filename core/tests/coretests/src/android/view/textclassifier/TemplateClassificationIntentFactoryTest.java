@@ -41,6 +41,7 @@ public class TemplateClassificationIntentFactoryTest {
 
     private static final String TEXT = "text";
     private static final String TITLE = "Map";
+    private static final String DESCRIPTION = "Opens in Maps";
     private static final String ACTION = Intent.ACTION_VIEW;
 
     @Mock
@@ -57,19 +58,6 @@ public class TemplateClassificationIntentFactoryTest {
 
     @Test
     public void create_foreignText() {
-        RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
-                null,
-                ACTION,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-
         AnnotatorModel.ClassificationResult classificationResult =
                 new AnnotatorModel.ClassificationResult(
                         TextClassifier.TYPE_ADDRESS,
@@ -81,7 +69,7 @@ public class TemplateClassificationIntentFactoryTest {
                         null,
                         null,
                         null,
-                        new RemoteActionTemplate[]{remoteActionTemplate});
+                        createRemoteActionTemplates());
 
         List<TextClassifierImpl.LabeledIntent> intents =
                 mTemplateClassificationIntentFactory.create(
@@ -106,19 +94,6 @@ public class TemplateClassificationIntentFactoryTest {
 
     @Test
     public void create_notForeignText() {
-        RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
-                null,
-                ACTION,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-
         AnnotatorModel.ClassificationResult classificationResult =
                 new AnnotatorModel.ClassificationResult(
                         TextClassifier.TYPE_ADDRESS,
@@ -130,7 +105,7 @@ public class TemplateClassificationIntentFactoryTest {
                         null,
                         null,
                         null,
-                        new RemoteActionTemplate[]{remoteActionTemplate});
+                        createRemoteActionTemplates());
 
         List<TextClassifierImpl.LabeledIntent> intents =
                 mTemplateClassificationIntentFactory.create(
@@ -146,5 +121,22 @@ public class TemplateClassificationIntentFactoryTest {
         Intent intent = labeledIntent.getIntent();
         assertThat(intent.getAction()).isEqualTo(ACTION);
         assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
+    }
+
+    private static RemoteActionTemplate[] createRemoteActionTemplates() {
+        return new RemoteActionTemplate[]{
+                new RemoteActionTemplate(
+                        TITLE,
+                        DESCRIPTION,
+                        ACTION,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                )
+        };
     }
 }

@@ -47,10 +47,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
 
 import org.junit.Before;
 import org.junit.Ignore;

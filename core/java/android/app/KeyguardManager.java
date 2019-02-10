@@ -125,7 +125,7 @@ public class KeyguardManager {
     public static final int RESULT_ALTERNATE = 1;
 
     /**
-     * @deprecated see {@link BiometricPrompt.Builder#setEnableFallback(boolean)}
+     * @deprecated see {@link BiometricPrompt.Builder#setAllowDeviceCredential(boolean)}
      *
      * Get an intent to prompt the user to confirm credentials (pin, pattern, password or biometrics
      * if enrolled) for the current user of the device. The caller is expected to launch this

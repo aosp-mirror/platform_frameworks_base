@@ -150,7 +150,7 @@
       <item quantity="one">La carte SIM est maintenant désactivée. Saisissez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne devienne définitivement inutilisable. Pour de plus amples informations, veuillez contacter votre opérateur.</item>
       <item quantity="other">La carte SIM est maintenant désactivée. Saisissez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne devienne définitivement inutilisable. Pour de plus amples informations, veuillez contacter votre opérateur.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Il est"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"douze heures"</item>
     <item msgid="7389464214252023751">"une heure"</item>

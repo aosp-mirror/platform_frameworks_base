@@ -127,18 +127,8 @@ public final class OomAdjuster {
     private final ActivityManagerService mService;
     private final ProcessList mProcessList;
 
-    /**
-     * Used to lock {@link #updateOomAdjImpl} for state consistency. It also reduces frequency lock
-     * and unlock when getting and setting value to {@link ProcessRecord#mWindowProcessController}.
-     * Note it is declared as Object type so the locked-region-code-injection won't wrap the
-     * unnecessary priority booster.
-     */
-    private final Object mAtmGlobalLock;
-
-    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
-            Object atmGlobalLock) {
+    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
         mService = service;
-        mAtmGlobalLock = atmGlobalLock;
         mProcessList = processList;
         mActiveUids = activeUids;
 
@@ -196,13 +186,6 @@ public final class OomAdjuster {
 
     @GuardedBy("mService")
     final void updateOomAdjLocked() {
-        synchronized (mAtmGlobalLock) {
-            updateOomAdjImpl();
-        }
-    }
-
-    @GuardedBy({"mService", "mAtmGlobalLock"})
-    private void updateOomAdjImpl() {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "updateOomAdj");
         mService.mOomAdjProfiler.oomAdjStarted();
         final ProcessRecord TOP_APP = mService.getTopAppLocked();
@@ -1224,8 +1207,8 @@ public final class OomAdjuster {
                                     }
                                 } else if ((cr.flags & Context.BIND_ADJUST_BELOW_PERCEPTIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
-                                        && adj > ProcessList.PERCEPTIBLE_APP_ADJ + 1) {
-                                    newAdj = ProcessList.PERCEPTIBLE_APP_ADJ + 1;
+                                        && adj > ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+                                    newAdj = ProcessList.PERCEPTIBLE_LOW_APP_ADJ;
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -1610,7 +1593,7 @@ public final class OomAdjuster {
         //      " adj=" + adj + " curAdj=" + app.curAdj + " maxAdj=" + app.maxAdj);
         if (adj > app.maxAdj) {
             adj = app.maxAdj;
-            if (app.maxAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
+            if (app.maxAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             }
         }

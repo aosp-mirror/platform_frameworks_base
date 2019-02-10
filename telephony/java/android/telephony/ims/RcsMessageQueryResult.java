@@ -29,13 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The result of a {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)}
+ * The result of a {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)}
  * call. This class allows getting the token for querying the next batch of messages in order to
  * prevent handling large amounts of data at once.
  *
- * @hide
+ * @hide - TODO: make public
  */
-public class RcsMessageQueryResult implements Parcelable {
+public final class RcsMessageQueryResult implements Parcelable {
     // The token to continue the query to get the next batch of results
     private RcsQueryContinuationToken mContinuationToken;
     // The message type and message ID pairs for all the messages in this query result
@@ -83,7 +83,7 @@ public class RcsMessageQueryResult implements Parcelable {
         return messages;
     }
 
-    protected RcsMessageQueryResult(Parcel in) {
+    private RcsMessageQueryResult(Parcel in) {
         mContinuationToken = in.readParcelable(
                 RcsQueryContinuationToken.class.getClassLoader());
         in.readTypedList(mMessageTypeIdPairs, RcsTypeIdPair.CREATOR);

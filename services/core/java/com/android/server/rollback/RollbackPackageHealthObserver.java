@@ -16,8 +16,11 @@
 
 package com.android.server.rollback;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -25,6 +28,7 @@ import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -91,6 +95,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                     + failedPackage.getVersionCode() + "]");
             return false;
         }
+
         RollbackInfo rollback = rollbackPair.first;
         // We only log mainline package rollbacks, so check if rollback contains the
         // module metadata provider, if it does, the rollback is a mainline rollback
@@ -111,6 +116,12 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                             StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
                             moduleMetadataPackage.getPackageName(),
                             moduleMetadataPackage.getVersionCode());
+                    if (rollback.isStaged()) {
+                        int rollbackId = rollback.getRollbackId();
+                        BroadcastReceiver listener =
+                                listenForStagedSessionReady(rollbackManager, rollbackId);
+                        handleStagedSessionChange(rollbackManager, rollbackId, listener);
+                    }
                 } else {
                     StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
                             StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
@@ -176,6 +187,44 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         } catch (PackageManager.NameNotFoundException e) {
             Slog.w(TAG, "Module metadata provider not found");
             return null;
+        }
+    }
+
+    private BroadcastReceiver listenForStagedSessionReady(RollbackManager rollbackManager,
+            int rollbackId) {
+        BroadcastReceiver sessionUpdatedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                handleStagedSessionChange(rollbackManager,
+                        rollbackId, this /* BroadcastReceiver */);
+            }
+        };
+        IntentFilter sessionUpdatedFilter =
+                new IntentFilter(PackageInstaller.ACTION_SESSION_UPDATED);
+        mContext.registerReceiver(sessionUpdatedReceiver, sessionUpdatedFilter);
+        return sessionUpdatedReceiver;
+    }
+
+    private void handleStagedSessionChange(RollbackManager rollbackManager, int rollbackId,
+            BroadcastReceiver listener) {
+        PackageInstaller packageInstaller =
+                mContext.getPackageManager().getPackageInstaller();
+        List<RollbackInfo> recentRollbacks =
+                rollbackManager.getRecentlyCommittedRollbacks();
+        for (int i = 0; i < recentRollbacks.size(); i++) {
+            RollbackInfo recentRollback = recentRollbacks.get(i);
+            int sessionId = recentRollback.getCommittedSessionId();
+            if ((rollbackId == recentRollback.getRollbackId())
+                    && (sessionId != PackageInstaller.SessionInfo.INVALID_ID)) {
+                PackageInstaller.SessionInfo sessionInfo =
+                        packageInstaller.getSessionInfo(sessionId);
+                if (sessionInfo.isSessionReady()) {
+                    mContext.unregisterReceiver(listener);
+                    mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
+                } else if (sessionInfo.isSessionFailed()) {
+                    mContext.unregisterReceiver(listener);
+                }
+            }
         }
     }
 }

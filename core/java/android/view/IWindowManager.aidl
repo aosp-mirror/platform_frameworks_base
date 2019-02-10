@@ -25,6 +25,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -378,6 +379,16 @@ interface IWindowManager
      * Retrieves the current stable insets from the primary display.
      */
     void getStableInsets(int displayId, out Rect outInsets);
+
+    /**
+     * Set the forwarded insets on the display.
+     * <p>
+     * This is only used in case a virtual display is displayed on another display that has insets,
+     * and the bounds of the virtual display is overlapping with the insets from the host display.
+     * In that case, the contents on the virtual display won't be placed over the forwarded insets.
+     * Only the owner of the display is permitted to set the forwarded insets on it.
+     */
+    void setForwardedInsets(int displayId, in Insets insets);
 
     /**
      * Register shortcut key. Shortcut code is packed as:

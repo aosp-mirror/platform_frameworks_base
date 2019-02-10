@@ -55,6 +55,8 @@ public final class AppCompactor {
     private static final int COMPACT_ACTION_FILE_FLAG = 1;
     private static final int COMPACT_ACTION_ANON_FLAG = 2;
     private static final int COMPACT_ACTION_FULL_FLAG = 3;
+    private static final int COMPACT_ACTION_NONE_FLAG = 4;
+    private static final String COMPACT_ACTION_NONE = "";
     private static final String COMPACT_ACTION_FILE = "file";
     private static final String COMPACT_ACTION_ANON = "anon";
     private static final String COMPACT_ACTION_FULL = "all";
@@ -320,6 +322,8 @@ public final class AppCompactor {
     @VisibleForTesting
     static String compactActionIntToString(int action) {
         switch(action) {
+            case COMPACT_ACTION_NONE_FLAG:
+                return COMPACT_ACTION_NONE;
             case COMPACT_ACTION_FILE_FLAG:
                 return COMPACT_ACTION_FILE;
             case COMPACT_ACTION_ANON_FLAG:
@@ -327,7 +331,7 @@ public final class AppCompactor {
             case COMPACT_ACTION_FULL_FLAG:
                 return COMPACT_ACTION_FULL;
             default:
-                return COMPACT_ACTION_FILE;
+                return COMPACT_ACTION_NONE;
         }
     }
 
@@ -396,6 +400,10 @@ public final class AppCompactor {
                         action = mCompactActionSome;
                     } else {
                         action = mCompactActionFull;
+                    }
+
+                    if (action.equals(COMPACT_ACTION_NONE)) {
+                        return;
                     }
 
                     try {

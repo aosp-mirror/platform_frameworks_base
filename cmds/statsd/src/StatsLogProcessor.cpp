@@ -526,9 +526,10 @@ void StatsLogProcessor::WriteMetricsActivationToDisk(int64_t currentTimeNs) {
         proto.write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_ID, (long long)pair.first.GetId());
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_UID, pair.first.GetUid());
 
-        vector<const MetricProducer*> acrtiveMetrics;
-        pair.second->getActiveMetrics(acrtiveMetrics);
-        for (const MetricProducer* metric : acrtiveMetrics) {
+        vector<MetricProducer*> activeMetrics;
+        pair.second->prepForShutDown(currentTimeNs);
+        pair.second->getActiveMetrics(activeMetrics);
+        for (MetricProducer* metric : activeMetrics) {
             if (metric->isActive()) {
                 uint64_t metricToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                                    FIELD_ID_ACTIVE_METRIC);

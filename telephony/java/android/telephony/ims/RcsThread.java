@@ -28,10 +28,13 @@ import com.android.internal.annotations.VisibleForTesting;
  * RcsThread represents a single RCS conversation thread. It holds messages that were sent and
  * received and events that occurred on that thread.
  *
- * @hide - TODO(109759350) make this public
+ * @hide - TODO: make public
  */
 public abstract class RcsThread {
-    // The rcs_participant_thread_id that represents this thread in the database
+    /**
+     * The rcs_participant_thread_id that represents this thread in the database
+     * @hide
+     */
     protected int mThreadId;
 
     /**
@@ -59,10 +62,10 @@ public abstract class RcsThread {
     @WorkerThread
     @NonNull
     public RcsIncomingMessage addIncomingMessage(
-            @NonNull RcsIncomingMessageCreationParameters rcsIncomingMessageCreationParameters)
+            @NonNull RcsIncomingMessageCreationParams rcsIncomingMessageCreationParams)
             throws RcsMessageStoreException {
         return new RcsIncomingMessage(RcsControllerCall.call(iRcs -> iRcs.addIncomingMessage(
-                mThreadId, rcsIncomingMessageCreationParameters)));
+                mThreadId, rcsIncomingMessageCreationParams)));
     }
 
     /**
@@ -73,10 +76,10 @@ public abstract class RcsThread {
     @WorkerThread
     @NonNull
     public RcsOutgoingMessage addOutgoingMessage(
-            @NonNull RcsMessageCreationParameters rcsMessageCreationParameters)
+            @NonNull RcsOutgoingMessageCreationParams rcsOutgoingMessageCreationParams)
             throws RcsMessageStoreException {
         int messageId = RcsControllerCall.call(iRcs -> iRcs.addOutgoingMessage(
-                mThreadId, rcsMessageCreationParameters));
+                mThreadId, rcsOutgoingMessageCreationParams));
 
         return new RcsOutgoingMessage(messageId);
     }
@@ -97,7 +100,7 @@ public abstract class RcsThread {
     /**
      * Convenience function for loading all the {@link RcsMessage}s in this {@link RcsThread}. For
      * a more detailed and paginated query, please use
-     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParameters)}
+     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)}
      *
      * @return Loads the {@link RcsMessage}s in this thread and returns them in an immutable list.
      * @throws RcsMessageStoreException if the messages could not be read from the storage
@@ -105,8 +108,8 @@ public abstract class RcsThread {
     @WorkerThread
     @NonNull
     public RcsMessageQueryResult getMessages() throws RcsMessageStoreException {
-        RcsMessageQueryParameters queryParameters =
-                new RcsMessageQueryParameters.Builder().setThread(this).build();
+        RcsMessageQueryParams queryParameters =
+                new RcsMessageQueryParams.Builder().setThread(this).build();
         return RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters));
     }
 

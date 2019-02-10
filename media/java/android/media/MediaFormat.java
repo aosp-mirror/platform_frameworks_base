@@ -1520,6 +1520,7 @@ public final class MediaFormat {
      * Create a copy of a media format object.
      */
     public MediaFormat(@NonNull MediaFormat other) {
+        this();
         mMap.putAll(other.mMap);
     }
 

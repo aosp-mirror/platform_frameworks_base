@@ -195,6 +195,7 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2);

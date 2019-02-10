@@ -565,16 +565,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     public static String getErrorString(Context context, int errMsg, int vendorCode) {
         switch (errMsg) {
-            case FACE_ERROR_UNABLE_TO_PROCESS:
-                return context.getString(
-                        com.android.internal.R.string.face_error_unable_to_process);
             case FACE_ERROR_HW_UNAVAILABLE:
                 return context.getString(
                         com.android.internal.R.string.face_error_hw_not_available);
-            case FACE_ERROR_NO_SPACE:
-                return context.getString(com.android.internal.R.string.face_error_no_space);
+            case FACE_ERROR_UNABLE_TO_PROCESS:
+                return context.getString(
+                        com.android.internal.R.string.face_error_unable_to_process);
             case FACE_ERROR_TIMEOUT:
                 return context.getString(com.android.internal.R.string.face_error_timeout);
+            case FACE_ERROR_NO_SPACE:
+                return context.getString(com.android.internal.R.string.face_error_no_space);
             case FACE_ERROR_CANCELED:
                 return context.getString(com.android.internal.R.string.face_error_canceled);
             case FACE_ERROR_LOCKOUT:
@@ -629,6 +629,24 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 return context.getString(R.string.face_acquired_poor_gaze);
             case FACE_ACQUIRED_NOT_DETECTED:
                 return context.getString(R.string.face_acquired_not_detected);
+            case FACE_ACQUIRED_TOO_MUCH_MOTION:
+                return context.getString(R.string.face_acquired_too_much_motion);
+            case FACE_ACQUIRED_RECALIBRATE:
+                return context.getString(R.string.face_acquired_recalibrate);
+            case FACE_ACQUIRED_TOO_DIFFERENT:
+                return context.getString(R.string.face_acquired_too_different);
+            case FACE_ACQUIRED_TOO_SIMILAR:
+                return context.getString(R.string.face_acquired_too_similar);
+            case FACE_ACQUIRED_PAN_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_pan_too_extreme);
+            case FACE_ACQUIRED_TILT_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_tilt_too_extreme);
+            case FACE_ACQUIRED_ROLL_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_roll_too_extreme);
+            case FACE_ACQUIRED_FACE_OBSCURED:
+                return context.getString(R.string.face_acquired_obscured);
+            case FACE_ACQUIRED_START:
+                return null;
             case FACE_ACQUIRED_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         R.array.face_acquired_vendor);

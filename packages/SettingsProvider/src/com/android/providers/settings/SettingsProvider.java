@@ -3232,7 +3232,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 173;
+            private static final int SETTINGS_VERSION = 174;
 
             private final int mUserId;
 
@@ -4250,6 +4250,24 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 173;
+                }
+
+                if (currentVersion == 173) {
+                    // Version 173: Set the default value for Secure Settings: NOTIFICATION_BUBBLES
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    final Setting bubblesSetting = secureSettings.getSettingLocked(
+                            Secure.NOTIFICATION_BUBBLES);
+
+                    if (bubblesSetting.isNull()) {
+                        secureSettings.insertSettingLocked(Secure.NOTIFICATION_BUBBLES,
+                                getContext().getResources().getBoolean(
+                                        R.bool.def_notification_bubbles) ? "1" : "0", null,
+                                true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 174;
                 }
 
                 // vXXX: Add new settings above this point.

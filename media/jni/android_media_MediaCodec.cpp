@@ -153,8 +153,12 @@ JMediaCodec::JMediaCodec(
 
     if (nameIsType) {
         mCodec = MediaCodec::CreateByType(mLooper, name, encoder, &mInitStatus);
+        if (mCodec == nullptr || mCodec->getName(&mNameAtCreation) != OK) {
+            mNameAtCreation = "(null)";
+        }
     } else {
         mCodec = MediaCodec::CreateByComponentName(mLooper, name, &mInitStatus);
+        mNameAtCreation = name;
     }
     CHECK((mCodec != NULL) != (mInitStatus != OK));
 }
@@ -699,9 +703,8 @@ status_t JMediaCodec::getCodecInfo(JNIEnv *env, jobject *codecInfoObject) const 
         return err;
     }
 
-    // TODO: get alias
     ScopedLocalRef<jstring> nameObject(env,
-            env->NewStringUTF(codecInfo->getCodecName()));
+            env->NewStringUTF(mNameAtCreation.c_str()));
 
     ScopedLocalRef<jstring> canonicalNameObject(env,
             env->NewStringUTF(codecInfo->getCodecName()));

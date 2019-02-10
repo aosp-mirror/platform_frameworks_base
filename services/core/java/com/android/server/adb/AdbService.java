@@ -45,6 +45,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -94,6 +95,16 @@ public class AdbService extends IAdbManager.Stub {
         @Override
         public boolean isAdbEnabled() {
             return mAdbEnabled;
+        }
+
+        @Override
+        public File getAdbKeysFile() {
+            return mDebuggingManager.getUserKeyFile();
+        }
+
+        @Override
+        public File getAdbTempKeysFile() {
+            return mDebuggingManager.getAdbTempKeysFile();
         }
     }
 

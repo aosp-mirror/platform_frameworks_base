@@ -21,6 +21,8 @@ import static com.android.server.audio.AudioService.CONNECTION_STATE_DISCONNECTE
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -424,11 +426,28 @@ import java.util.ArrayList;
     }
 
     /*package*/ void postDisconnectHearingAid() {
-        sendMsgNoDelay(MSG_DISCONNECT_HEARING_AID, SENDMSG_QUEUE);
+        sendMsgNoDelay(MSG_DISCONNECT_BT_HEARING_AID, SENDMSG_QUEUE);
     }
 
     /*package*/ void postDisconnectHeadset() {
-        sendMsgNoDelay(MSG_DISCONNECT_HEADSET, SENDMSG_QUEUE);
+        sendMsgNoDelay(MSG_DISCONNECT_BT_HEADSET, SENDMSG_QUEUE);
+    }
+
+    /*package*/ void postBtA2dpProfileConnected(BluetoothA2dp a2dpProfile) {
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP, SENDMSG_QUEUE, a2dpProfile);
+    }
+
+    /*package*/ void postBtA2dpSinkProfileConnected(BluetoothProfile profile) {
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP_SINK, SENDMSG_QUEUE, profile);
+    }
+
+    /*package*/ void postBtHeasetProfileConnected(BluetoothHeadset headsetProfile) {
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET, SENDMSG_QUEUE, headsetProfile);
+    }
+
+    /*package*/ void postBtHearingAidProfileConnected(BluetoothHearingAid hearingAidProfile) {
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID, SENDMSG_QUEUE,
+                hearingAidProfile);
     }
 
     //---------------------------------------------------------------------
@@ -460,16 +479,14 @@ import java.util.ArrayList;
         }
     }
 
+    @GuardedBy("mDeviceStateLock")
     /*package*/ void handleSetA2dpSinkConnectionState(@BluetoothProfile.BtProfileState int state,
                 @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
         final int intState = (state == BluetoothA2dp.STATE_CONNECTED)
                 ? CONNECTION_STATE_CONNECTED : CONNECTION_STATE_DISCONNECTED;
-        final int delay;
-        synchronized (mDeviceStateLock) {
-            delay = mDeviceInventory.checkSendBecomingNoisyIntent(
+        final int delay = mDeviceInventory.checkSendBecomingNoisyIntent(
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, intState,
                     AudioSystem.DEVICE_NONE);
-        }
         final String addr = btDeviceInfo == null ? "null" : btDeviceInfo.getBtDevice().getAddress();
 
         if (AudioService.DEBUG_DEVICES) {
@@ -719,14 +736,34 @@ import java.util.ArrayList;
                         mDeviceInventory.disconnectA2dpSink();
                     }
                     break;
-                case MSG_DISCONNECT_HEARING_AID:
+                case MSG_DISCONNECT_BT_HEARING_AID:
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.disconnectHearingAid();
                     }
                     break;
-                case MSG_DISCONNECT_HEADSET:
+                case MSG_DISCONNECT_BT_HEADSET:
                     synchronized (mDeviceStateLock) {
                         mBtHelper.disconnectHeadset();
+                    }
+                    break;
+                case MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP:
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onA2dpProfileConnected((BluetoothA2dp) msg.obj);
+                    }
+                    break;
+                case MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP_SINK:
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onA2dpSinkProfileConnected((BluetoothProfile) msg.obj);
+                    }
+                    break;
+                case MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID:
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onHearingAidProfileConnected((BluetoothHearingAid) msg.obj);
+                    }
+                    break;
+                case MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET:
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onHeadsetProfileConnected((BluetoothHeadset) msg.obj);
                     }
                     break;
                 default:
@@ -766,8 +803,12 @@ import java.util.ArrayList;
     private static final int MSG_L_A2DP_ACTIVE_DEVICE_CHANGE = 18;
     private static final int MSG_DISCONNECT_A2DP = 19;
     private static final int MSG_DISCONNECT_A2DP_SINK = 20;
-    private static final int MSG_DISCONNECT_HEARING_AID = 21;
-    private static final int MSG_DISCONNECT_HEADSET = 22;
+    private static final int MSG_DISCONNECT_BT_HEARING_AID = 21;
+    private static final int MSG_DISCONNECT_BT_HEADSET = 22;
+    private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP = 23;
+    private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP_SINK = 24;
+    private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID = 25;
+    private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET = 26;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {

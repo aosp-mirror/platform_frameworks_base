@@ -1603,7 +1603,7 @@ public final class ViewRootImpl implements ViewParent,
         mSurfaceSession = null;
 
         if (mBoundsSurfaceControl != null) {
-            mBoundsSurfaceControl.destroy();
+            mBoundsSurfaceControl.remove();
             mBoundsSurface.release();
             mBoundsSurfaceControl = null;
         }
@@ -1887,7 +1887,7 @@ public final class ViewRootImpl implements ViewParent,
                 mLastWindowInsets = mInsetsController.calculateInsets(
                         mContext.getResources().getConfiguration().isScreenRound(),
                         mAttachInfo.mAlwaysConsumeNavBar, displayCutout,
-                        contentInsets, stableInsets);
+                        contentInsets, stableInsets, mWindowAttributes.softInputMode);
             } else {
                 mLastWindowInsets = new WindowInsets(contentInsets, stableInsets,
                         mContext.getResources().getConfiguration().isScreenRound(),

@@ -150,7 +150,7 @@
       <item quantity="one">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
       <item quantity="other">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"সময়"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"বাৰ"</item>
     <item msgid="7389464214252023751">"এক"</item>

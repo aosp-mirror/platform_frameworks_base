@@ -685,7 +685,7 @@ public class RollbackTest {
                             ActivityManager am = context.getSystemService(ActivityManager.class);
                             am.killBackgroundProcesses(TEST_APP_A);
                             // Allow another package launch
-                            crashQueue.offer(intent.getIntExtra("count", 0), 5, TimeUnit.SECONDS);
+                            crashQueue.put(intent.getIntExtra("count", 0));
                         } catch (InterruptedException e) {
                             fail("Failed to communicate with test app");
                         }
@@ -694,14 +694,9 @@ public class RollbackTest {
             context.registerReceiver(crashCountReceiver, crashCountFilter);
 
             // Start apps PackageWatchdog#TRIGGER_FAILURE_COUNT times so TEST_APP_A crashes
-            Integer crashCount = null;
             do {
                 RollbackTestUtils.launchPackage(TEST_APP_A);
-                crashCount = crashQueue.poll(5, TimeUnit.SECONDS);
-                if (crashCount == null) {
-                    fail("Timed out waiting for crash signal from test app");
-                }
-            } while(crashCount < 5);
+            } while(crashQueue.take() < 5);
 
             // TEST_APP_A is automatically rolled back by the RollbackPackageHealthObserver
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));

@@ -280,7 +280,7 @@ class SurfaceAnimator {
         }
         mService.mAnimationTransferMap.remove(mAnimation);
         if (mLeash != null && destroyLeash) {
-            t.reparent(mLeash, null);
+            t.remove(mLeash);
             scheduleAnim = true;
         }
         mLeash = null;

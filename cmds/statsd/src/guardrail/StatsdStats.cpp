@@ -423,34 +423,48 @@ void StatsdStats::noteEmptyData(int atomId) {
     mPulledAtomStats[atomId].emptyData++;
 }
 
-void StatsdStats::noteHardDimensionLimitReached(int metricId) {
+void StatsdStats::noteHardDimensionLimitReached(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).hardDimensionLimitReached++;
 }
 
-void StatsdStats::noteLateLogEventSkipped(int metricId) {
+void StatsdStats::noteLateLogEventSkipped(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).lateLogEventSkipped++;
 }
 
-void StatsdStats::noteSkippedForwardBuckets(int metricId) {
+void StatsdStats::noteSkippedForwardBuckets(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).skippedForwardBuckets++;
 }
 
-void StatsdStats::noteBadValueType(int metricId) {
+void StatsdStats::noteBadValueType(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).badValueType++;
 }
 
-void StatsdStats::noteConditionChangeInNextBucket(int metricId) {
+void StatsdStats::noteBucketDropped(int64_t metricId) {
+    lock_guard<std::mutex> lock(mLock);
+    getAtomMetricStats(metricId).bucketDropped++;
+}
+
+void StatsdStats::noteConditionChangeInNextBucket(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).conditionChangeInNextBucket++;
 }
 
-void StatsdStats::noteInvalidatedBucket(int metricId) {
+void StatsdStats::noteInvalidatedBucket(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).invalidatedBucket++;
+}
+
+void StatsdStats::noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs) {
+    lock_guard<std::mutex> lock(mLock);
+    AtomMetricStats& pullStats = getAtomMetricStats(metricId);
+    pullStats.maxBucketBoundaryDelayNs =
+            std::max(pullStats.maxBucketBoundaryDelayNs, timeDelayNs);
+    pullStats.minBucketBoundaryDelayNs =
+            std::min(pullStats.minBucketBoundaryDelayNs, timeDelayNs);
 }
 
 StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int metricId) {

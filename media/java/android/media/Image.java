@@ -155,6 +155,13 @@ public abstract class Image implements AutoCloseable {
      *   UnSupportedOperationException being thrown.
      *   </td>
      * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#HEIC HEIC}</td>
+     *   <td>1</td>
+     *   <td>Compressed data, so row and pixel strides are 0. To uncompress, use
+     *      {@link android.graphics.BitmapFactory#decodeByteArray BitmapFactory#decodeByteArray}.
+     *   </td>
+     * </tr>
      * </table>
      *
      * @see android.graphics.ImageFormat

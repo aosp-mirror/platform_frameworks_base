@@ -37,12 +37,13 @@ namespace statsd {
 // If the metric has no activation requirement, it will be active once the metric producer is
 // created.
 // If the metric needs to be activated by atoms, the metric producer will start
-// with kNotActive state, turn to kActive when the activation event arrives, become kNotActive
-// when it reaches the duration limit (timebomb). If the activation event arrives again before
-// or after it expires, the event producer will be re-activated and ttl will be reset.
+// with kNotActive state, turn to kActive or kActiveOnBoot when the activation event arrives, become
+// kNotActive when it reaches the duration limit (timebomb). If the activation event arrives again
+// before or after it expires, the event producer will be re-activated and ttl will be reset.
 enum ActivationState {
     kNotActive = 0,
     kActive = 1,
+    kActiveOnBoot = 2,
 };
 
 // A MetricProducer is responsible for compute one single metrics, creating stats log report, and
@@ -218,7 +219,16 @@ public:
         return isActiveLocked();
     }
 
+    void prepActiveForBootIfNecessary(int64_t currentTimeNs) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        prepActiveForBootIfNecessaryLocked(currentTimeNs);
+    }
+
     void addActivation(int activationTrackerIndex, int64_t ttl_seconds);
+
+    inline void setActivationType(const MetricActivation::ActivationType& activationType) {
+        mActivationType = activationType;
+    }
 
     void flushIfExpire(int64_t elapsedTimestampNs);
 
@@ -242,6 +252,8 @@ protected:
     inline bool isActiveLocked() const {
         return mIsActive;
     }
+
+    void prepActiveForBootIfNecessaryLocked(int64_t currentTimeNs);
 
     int64_t getRemainingTtlNsLocked(int64_t currentTimeNs) const;
 
@@ -367,9 +379,12 @@ protected:
 
     bool mIsActive;
 
+    MetricActivation::ActivationType mActivationType;
+
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
 
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
 };
 
 }  // namespace statsd

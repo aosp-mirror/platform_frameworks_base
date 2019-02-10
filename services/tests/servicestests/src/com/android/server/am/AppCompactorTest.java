@@ -147,10 +147,10 @@ public final class AppCompactorTest {
                 KEY_USE_COMPACTION, "true", false);
         DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
                 KEY_COMPACT_ACTION_1,
-                Integer.toString((AppCompactor.DEFAULT_COMPACT_ACTION_1 + 1 % 3) + 1), false);
+                Integer.toString((AppCompactor.DEFAULT_COMPACT_ACTION_1 + 1 % 4) + 1), false);
         DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
                 KEY_COMPACT_ACTION_2,
-                Integer.toString((AppCompactor.DEFAULT_COMPACT_ACTION_2 + 1 % 3) + 1), false);
+                Integer.toString((AppCompactor.DEFAULT_COMPACT_ACTION_2 + 1 % 4) + 1), false);
         DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
                 KEY_COMPACT_THROTTLE_1,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_1 + 1), false);
@@ -173,9 +173,9 @@ public final class AppCompactorTest {
         assertThat(mCompactorUnderTest.mCompactionThread.isAlive(), is(true));
 
         assertThat(mCompactorUnderTest.mCompactActionSome,
-                is(compactActionIntToString((AppCompactor.DEFAULT_COMPACT_ACTION_1 + 1 % 3) + 1)));
+                is(compactActionIntToString((AppCompactor.DEFAULT_COMPACT_ACTION_1 + 1 % 4) + 1)));
         assertThat(mCompactorUnderTest.mCompactActionFull,
-                is(compactActionIntToString((AppCompactor.DEFAULT_COMPACT_ACTION_2 + 1 % 3) + 1)));
+                is(compactActionIntToString((AppCompactor.DEFAULT_COMPACT_ACTION_2 + 1 % 4) + 1)));
         assertThat(mCompactorUnderTest.mCompactThrottleSomeSome,
                 is(AppCompactor.DEFAULT_COMPACT_THROTTLE_1 + 1));
         assertThat(mCompactorUnderTest.mCompactThrottleSomeFull,
@@ -233,13 +233,13 @@ public final class AppCompactorTest {
 
         // When we override new values for the compaction action with reasonable values...
 
-        // There are three possible values for compactAction[Some|Full].
-        for (int i = 1; i < 4; i++) {
+        // There are four possible values for compactAction[Some|Full].
+        for (int i = 1; i < 5; i++) {
             mCountDown = new CountDownLatch(2);
-            int expectedSome = (mCompactorUnderTest.DEFAULT_COMPACT_ACTION_1 + i) % 3 + 1;
+            int expectedSome = (mCompactorUnderTest.DEFAULT_COMPACT_ACTION_1 + i) % 4 + 1;
             DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
                     KEY_COMPACT_ACTION_1, Integer.toString(expectedSome), false);
-            int expectedFull = (mCompactorUnderTest.DEFAULT_COMPACT_ACTION_2 + i) % 3 + 1;
+            int expectedFull = (mCompactorUnderTest.DEFAULT_COMPACT_ACTION_2 + i) % 4 + 1;
             DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
                     KEY_COMPACT_ACTION_2, Integer.toString(expectedFull), false);
             assertThat(mCountDown.await(5, TimeUnit.SECONDS), is(true));

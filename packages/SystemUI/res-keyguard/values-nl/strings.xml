@@ -150,7 +150,7 @@
       <item quantity="other">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_1">%d</xliff:g> pogingen over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
       <item quantity="one">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_0">%d</xliff:g> poging over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Het is"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Twaalf"</item>
     <item msgid="7389464214252023751">"Eén"</item>

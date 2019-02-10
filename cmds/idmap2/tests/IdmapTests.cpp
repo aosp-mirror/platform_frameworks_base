@@ -191,8 +191,8 @@ TEST(IdmapTests, CreateIdmapFromApkAssets) {
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
   ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x01U);
-  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0xab7cf70d);
-  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0xd470336b);
+  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0xdd53ca29);
+  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0xa71ccd77);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), target_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);

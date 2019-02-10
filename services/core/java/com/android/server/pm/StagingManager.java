@@ -220,6 +220,7 @@ public class StagingManager {
             session.setStagedSessionFailed(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "APEX staging failed, check logcat messages from apexd for more details.");
+            return;
         }
 
         if (apexInfoList.apexInfos != null && apexInfoList.apexInfos.length > 0) {

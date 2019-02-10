@@ -35,7 +35,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IInCallAdapter;
 import com.android.internal.telecom.IInCallService;
 
-import java.lang.String;
 import java.util.Collections;
 import java.util.List;
 
@@ -212,7 +211,7 @@ import java.util.List;
  *     {@link android.Manifest.permission.CALL_COMPANION_APP}.</li>
  * </ul>
  * <p>
- * Your app should request to fill the role {@code android.app.role.CAR_MODE_DIALER_APP} in order to
+ * Your app should request to fill the role {@code android.app.role.CAR_MODE_DIALER} in order to
  * become the default (see <a href="#requestRole">above</a> for how to request your app fills this
  * role).
  *
@@ -232,7 +231,7 @@ import java.util.List;
  *     {@link android.Manifest.permission.CALL_COMPANION_APP}.</li>
  * </ul>
  * <p>
- * Your app should request to fill the role {@code android.app.role.CALL_COMPANION_APP} in order to
+ * Your app should request to fill the role {@code android.app.role.CALL_COMPANION} in order to
  * become a call companion app (see <a href="#requestRole">above</a> for how to request your app
  * fills this role).
  */

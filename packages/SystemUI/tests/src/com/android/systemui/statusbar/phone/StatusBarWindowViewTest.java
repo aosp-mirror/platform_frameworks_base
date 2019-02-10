@@ -28,9 +28,9 @@ import android.view.MotionEvent;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;

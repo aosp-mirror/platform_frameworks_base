@@ -51,17 +51,22 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 
 import android.annotation.SuppressLint;
+import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.ViewRootImpl;
+import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -626,6 +631,39 @@ public class DisplayContentTests extends WindowTestsBase {
                 dc.onDescendantOrientationChanged(window.mToken.token, activityRecord));
         verify(mWm.mAtmService, never()).updateDisplayOverrideConfigurationLocked(any(),
                 eq(activityRecord), anyBoolean(), eq(dc.getDisplayId()));
+    }
+
+    @Test
+    public void testComputeImeParent_app() throws Exception {
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
+            final DisplayContent dc = createNewDisplay();
+            dc.mInputMethodTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
+            assertEquals(dc.mInputMethodTarget.mAppToken.getSurfaceControl(),
+                    dc.computeImeParent());
+        }
+    }
+
+    @Test
+    public void testComputeImeParent_app_notFullscreen() throws Exception {
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
+            final DisplayContent dc = createNewDisplay();
+            dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "app");
+            dc.mInputMethodTarget.setWindowingMode(
+                    WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+            assertEquals(dc.getWindowingLayer(), dc.computeImeParent());
+        }
+    }
+
+    @Test
+    public void testComputeImeParent_noApp() throws Exception {
+        try (final InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
+            final DisplayContent dc = createNewDisplay();
+            dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+            assertEquals(dc.getWindowingLayer(), dc.computeImeParent());
+        }
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

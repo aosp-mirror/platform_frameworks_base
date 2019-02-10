@@ -77,6 +77,7 @@ EventMetricProducer::~EventMetricProducer() {
 
 void EventMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     mProto->clear();
+    StatsdStats::getInstance().noteBucketDropped(mMetricId);
 }
 
 void EventMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,

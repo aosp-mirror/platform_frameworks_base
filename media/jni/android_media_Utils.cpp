@@ -29,6 +29,9 @@
 
 #define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
 
+// Must be in sync with the value in HeicCompositeStream.cpp
+#define CAMERA3_HEIC_BLOB_ID 0x00FE
+
 namespace android {
 
 AssetStream::AssetStream(SkStream* stream)
@@ -609,34 +612,35 @@ bool isPossiblyYUV(PixelFormat format) {
     }
 }
 
-uint32_t Image_getJpegSize(LockedImage* buffer, bool usingRGBAOverride) {
+uint32_t Image_getBlobSize(LockedImage* buffer, bool usingRGBAOverride) {
     ALOGV("%s", __FUNCTION__);
     LOG_ALWAYS_FATAL_IF(buffer == NULL, "Input buffer is NULL!!!");
     uint32_t size = 0;
     uint32_t width = buffer->width;
-    uint8_t* jpegBuffer = buffer->data;
+    uint8_t* blobBuffer = buffer->data;
 
     if (usingRGBAOverride) {
         width = (buffer->width + buffer->stride * (buffer->height - 1)) * 4;
     }
 
-    // First check for JPEG transport header at the end of the buffer
-    uint8_t* header = jpegBuffer + (width - sizeof(struct camera3_jpeg_blob));
+    // First check for BLOB transport header at the end of the buffer
+    uint8_t* header = blobBuffer + (width - sizeof(struct camera3_jpeg_blob));
     struct camera3_jpeg_blob *blob = (struct camera3_jpeg_blob*)(header);
-    if (blob->jpeg_blob_id == CAMERA3_JPEG_BLOB_ID) {
+    if (blob->jpeg_blob_id == CAMERA3_JPEG_BLOB_ID ||
+            blob->jpeg_blob_id == CAMERA3_HEIC_BLOB_ID) {
         size = blob->jpeg_size;
-        ALOGV("%s: Jpeg size = %d", __FUNCTION__, size);
+        ALOGV("%s: Jpeg/Heic size = %d", __FUNCTION__, size);
     }
 
     // failed to find size, default to whole buffer
     if (size == 0) {
         /*
-         * This is a problem because not including the JPEG header
-         * means that in certain rare situations a regular JPEG blob
+         * This is a problem because not including the JPEG/BLOB header
+         * means that in certain rare situations a regular JPEG/HEIC blob
          * will be mis-identified as having a header, in which case
          * we will get a garbage size value.
          */
-        ALOGW("%s: No JPEG header detected, defaulting to size=width=%d",
+        ALOGW("%s: No JPEG/HEIC header detected, defaulting to size=width=%d",
                 __FUNCTION__, width);
         size = width;
     }
@@ -760,7 +764,7 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
 
 
             pData = buffer->data;
-            dataSize = Image_getJpegSize(buffer, usingRGBAOverride);
+            dataSize = Image_getBlobSize(buffer, usingRGBAOverride);
             pStride = 0;
             rStride = 0;
             break;

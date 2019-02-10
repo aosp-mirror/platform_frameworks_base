@@ -334,7 +334,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
         updateSurface();
         if (mSurfaceControl != null) {
-            mSurfaceControl.destroy();
+            mSurfaceControl.remove();
         }
         mSurfaceControl = null;
 
@@ -502,11 +502,11 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     private void releaseSurfaces() {
         if (mSurfaceControl != null) {
-            mSurfaceControl.destroy();
+            mSurfaceControl.remove();
             mSurfaceControl = null;
         }
         if (mBackgroundControl != null) {
-            mBackgroundControl.destroy();
+            mBackgroundControl.remove();
             mBackgroundControl = null;
         }
     }
@@ -816,7 +816,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         }
 
         if (mDeferredDestroySurfaceControl != null) {
-            mDeferredDestroySurfaceControl.destroy();
+            mDeferredDestroySurfaceControl.remove();
             mDeferredDestroySurfaceControl = null;
         }
 

@@ -150,7 +150,7 @@
       <item quantity="other">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి. వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>
       <item quantity="one">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"ఇప్పుడు"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"పన్నెండు"</item>
     <item msgid="7389464214252023751">"ఒకటి"</item>

@@ -2226,7 +2226,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = hasHandlerThread ? new ActivityManagerConstants(this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, new Object());
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
         mIntentFirewall = hasHandlerThread
                 ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
@@ -2274,7 +2274,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = new ActivityManagerConstants(this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, atm.getGlobalLock());
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
         // Broadcast policy parameters
         final BroadcastConstants foreConstants = new BroadcastConstants(
@@ -6549,7 +6549,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
                         stable);
                 if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
-                    if (cpr.proc != null && r.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
+                    if (cpr.proc != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
                         // If this is a perceptible app accessing the provider,
                         // make sure to count it as being accessed and thus
                         // back up on the LRU list.  This is good because
@@ -10828,6 +10828,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             printOomLevel(pw, "FOREGROUND_APP_ADJ", ProcessList.FOREGROUND_APP_ADJ);
             printOomLevel(pw, "VISIBLE_APP_ADJ", ProcessList.VISIBLE_APP_ADJ);
             printOomLevel(pw, "PERCEPTIBLE_APP_ADJ", ProcessList.PERCEPTIBLE_APP_ADJ);
+            printOomLevel(pw, "PERCEPTIBLE_LOW_APP_ADJ", ProcessList.PERCEPTIBLE_LOW_APP_ADJ);
             printOomLevel(pw, "BACKUP_APP_ADJ", ProcessList.BACKUP_APP_ADJ);
             printOomLevel(pw, "HEAVY_WEIGHT_APP_ADJ", ProcessList.HEAVY_WEIGHT_APP_ADJ);
             printOomLevel(pw, "SERVICE_ADJ", ProcessList.SERVICE_ADJ);
@@ -10878,16 +10879,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.println("  Total number of kills: " + cnt);
 
         return reportLmkKillAtOrBelow(pw, ProcessList.CACHED_APP_MAX_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.CACHED_APP_MIN_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_B_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.PREVIOUS_APP_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.HOME_APP_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.HEAVY_WEIGHT_APP_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.BACKUP_APP_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.PERCEPTIBLE_APP_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.VISIBLE_APP_ADJ) &&
-            reportLmkKillAtOrBelow(pw, ProcessList.FOREGROUND_APP_ADJ);
+                reportLmkKillAtOrBelow(pw, ProcessList.CACHED_APP_MIN_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_B_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.PREVIOUS_APP_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.HOME_APP_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.HEAVY_WEIGHT_APP_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.BACKUP_APP_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.PERCEPTIBLE_LOW_APP_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.PERCEPTIBLE_APP_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.VISIBLE_APP_ADJ) &&
+                reportLmkKillAtOrBelow(pw, ProcessList.FOREGROUND_APP_ADJ);
     }
 
     /**
@@ -11760,7 +11762,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessList.NATIVE_ADJ,
             ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ,
             ProcessList.PERSISTENT_SERVICE_ADJ, ProcessList.FOREGROUND_APP_ADJ,
-            ProcessList.VISIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_APP_ADJ,
+            ProcessList.VISIBLE_APP_ADJ,
+            ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_LOW_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
             ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.CACHED_APP_MIN_ADJ
@@ -11768,7 +11771,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_LABEL = new String[] {
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
-            "Visible", "Perceptible",
+            "Visible", "Perceptible", "Perceptible Low",
             "Heavy Weight", "Backup",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
@@ -11776,7 +11779,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_COMPACT_LABEL = new String[] {
             "native",
             "sys", "pers", "persvc", "fore",
-            "vis", "percept",
+            "vis", "percept", "perceptl",
             "heavy", "backup",
             "servicea", "home",
             "prev", "serviceb", "cached"

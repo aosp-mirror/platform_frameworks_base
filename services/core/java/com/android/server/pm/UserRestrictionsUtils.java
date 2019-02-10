@@ -743,6 +743,9 @@ public class UserRestrictionsUtils {
 
             case android.provider.Settings.Global.PRIVATE_DNS_MODE:
             case android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
                 restriction = UserManager.DISALLOW_CONFIG_PRIVATE_DNS;
                 break;
             default:

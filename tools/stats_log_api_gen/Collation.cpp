@@ -48,6 +48,7 @@ AtomDecl::AtomDecl(const AtomDecl& that)
       primaryFields(that.primaryFields),
       exclusiveField(that.exclusiveField),
       uidField(that.uidField),
+      whitelisted(that.whitelisted),
       binaryFields(that.binaryFields) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
@@ -162,6 +163,7 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
                  vector<java_type_t> *signature) {
 
   int errorCount = 0;
+
   // Build a sorted list of the fields. Descriptor has them in source file
   // order.
   map<int, const FieldDescriptor *> fields;
@@ -387,6 +389,11 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
 
     const Descriptor *atom = atomField->message_type();
     AtomDecl atomDecl(atomField->number(), atomField->name(), atom->name());
+
+    if (atomField->options().GetExtension(os::statsd::allow_from_any_uid) == true) {
+      atomDecl.whitelisted = true;
+    }
+
     vector<java_type_t> signature;
     errorCount += collate_atom(atom, &atomDecl, &signature);
     if (atomDecl.primaryFields.size() != 0 && atomDecl.exclusiveField == 0) {

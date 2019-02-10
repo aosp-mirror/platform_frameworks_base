@@ -1105,6 +1105,46 @@ static jobjectArray NativeGetSizeConfigurations(JNIEnv* env, jclass /*clazz*/, j
   return array;
 }
 
+static jintArray NativeAttributeResolutionStack(
+    JNIEnv* env, jclass /*clazz*/, jlong ptr,
+    jlong theme_ptr, jint xml_style_res,
+    jint def_style_attr, jint def_style_resid) {
+
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  Theme* theme = reinterpret_cast<Theme*>(theme_ptr);
+  CHECK(theme->GetAssetManager() == &(*assetmanager));
+  (void) assetmanager;
+
+  // Load default style from attribute, if specified...
+  uint32_t def_style_flags = 0u;
+  if (def_style_attr != 0) {
+    Res_value value;
+    if (theme->GetAttribute(def_style_attr, &value, &def_style_flags) != kInvalidCookie) {
+      if (value.dataType == Res_value::TYPE_REFERENCE) {
+        def_style_resid = value.data;
+      }
+    }
+  }
+
+  auto style_stack = assetmanager->GetBagResIdStack(xml_style_res);
+  auto def_style_stack = assetmanager->GetBagResIdStack(def_style_resid);
+
+  jintArray array = env->NewIntArray(style_stack.size() + def_style_stack.size());
+  if (env->ExceptionCheck()) {
+    return nullptr;
+  }
+
+  for (uint32_t i = 0; i < style_stack.size(); i++) {
+    jint attr_resid = style_stack[i];
+    env->SetIntArrayRegion(array, i, 1, &attr_resid);
+  }
+  for (uint32_t i = 0; i < def_style_stack.size(); i++) {
+    jint attr_resid = def_style_stack[i];
+    env->SetIntArrayRegion(array, style_stack.size() + i, 1, &attr_resid);
+  }
+  return array;
+}
+
 static void NativeApplyStyle(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong theme_ptr,
                              jint def_style_attr, jint def_style_resid, jlong xml_parser_ptr,
                              jintArray java_attrs, jlong out_values_ptr, jlong out_indices_ptr) {
@@ -1456,6 +1496,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
      (void*)NativeGetSizeConfigurations},
 
     // Style attribute related methods.
+    {"nativeAttributeResolutionStack", "(JJIII)[I", (void*)NativeAttributeResolutionStack},
     {"nativeApplyStyle", "(JJIIJ[IJJ)V", (void*)NativeApplyStyle},
     {"nativeResolveAttrs", "(JJII[I[I[I[I)Z", (void*)NativeResolveAttrs},
     {"nativeRetrieveAttributes", "(JJ[I[I[I)Z", (void*)NativeRetrieveAttributes},

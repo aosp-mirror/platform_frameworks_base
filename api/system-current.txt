@@ -201,7 +201,6 @@ package android {
   }
 
   public static final class R.array {
-    field public static final int config_defaultRoleHolders = 17235974; // 0x1070006
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
   }
 
@@ -237,6 +236,10 @@ package android {
   }
 
   public static final class R.string {
+    field public static final int config_defaultAssistant = 17039393; // 0x1040021
+    field public static final int config_defaultBrowser = 17039394; // 0x1040022
+    field public static final int config_defaultDialer = 17039395; // 0x1040023
+    field public static final int config_defaultSms = 17039396; // 0x1040024
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
     field public static final int config_helpIntentExtraKey = 17039389; // 0x104001d
@@ -3920,6 +3923,7 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementValue(int, boolean, @NonNull android.net.ConnectivityManager.TetheringEntitlementValueListener, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void setAirplaneMode(boolean);
+    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
@@ -5738,10 +5742,6 @@ package android.provider {
     field public static final String SERVICE_ENABLED = "service_enabled";
   }
 
-  public static interface DeviceConfig.ContentCapture {
-    field public static final String NAMESPACE = "content_capture";
-  }
-
   public static interface DeviceConfig.DexBoot {
     field public static final String NAMESPACE = "dex_boot";
     field public static final String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
@@ -5774,11 +5774,6 @@ package android.provider {
     field public static final String NAMESPACE = "privacy";
     field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
     field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
-  }
-
-  public static interface DeviceConfig.Runtime {
-    field public static final String NAMESPACE = "runtime";
-    field public static final String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
   }
 
   public static interface DeviceConfig.RuntimeNative {

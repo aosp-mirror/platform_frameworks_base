@@ -220,4 +220,7 @@
 
     <!-- Default for Settings.Secure.CHARGING_SOUNDS_ENABLED -->
     <bool name="def_charging_sounds_enabled">true</bool>
+
+    <!-- Default for Settings.Secure.NOTIFICATION_BUBBLES -->
+    <bool name="def_notification_bubbles">true</bool>
 </resources>

@@ -150,7 +150,7 @@
       <item quantity="other">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
       <item quantity="one">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_0">%d</xliff:g> کوشش بچی ہے۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"وقت/ابھی"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"بارہ"</item>
     <item msgid="7389464214252023751">"ایک"</item>

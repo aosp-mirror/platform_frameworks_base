@@ -166,7 +166,7 @@
       <item quantity="many">SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko <xliff:g id="_NUMBER_1">%d</xliff:g> bandymo. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.</item>
       <item quantity="other">SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko <xliff:g id="_NUMBER_1">%d</xliff:g> bandymų. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"Dabar"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Dvylika"</item>
     <item msgid="7389464214252023751">"Pirma"</item>

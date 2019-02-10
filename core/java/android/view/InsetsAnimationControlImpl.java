@@ -33,6 +33,7 @@ import android.util.SparseSetArray;
 import android.view.InsetsState.InsetSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -165,7 +166,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             @Nullable @InsetSide SparseIntArray typeSideMap) {
         return state.calculateInsets(frame, false /* isScreenRound */,
                 false /* alwaysConsumerNavBar */, null /* displayCutout */,
-                null /* legacyContentInsets */, null /* legacyStableInsets */, typeSideMap)
+                null /* legacyContentInsets */, null /* legacyStableInsets */,
+                LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/, typeSideMap)
                .getInsets(mTypes);
     }
 

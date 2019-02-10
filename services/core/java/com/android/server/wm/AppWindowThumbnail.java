@@ -143,7 +143,7 @@ class AppWindowThumbnail implements Animatable {
 
     void destroy() {
         mSurfaceAnimator.cancelAnimation();
-        mSurfaceControl.destroy();
+        getPendingTransaction().remove(mSurfaceControl);
     }
 
     /**

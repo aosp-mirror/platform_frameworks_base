@@ -42,10 +42,11 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
-import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
@@ -701,7 +702,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean isGoingToNotificationShade() {
-        return Dependency.get(StatusBarStateController.class).leaveOpenOnKeyguardHide();
+        return ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
+                .leaveOpenOnKeyguardHide();
     }
 
     public boolean isSecure(int userId) {

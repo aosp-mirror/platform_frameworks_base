@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -38,6 +37,7 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -138,6 +138,7 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -172,6 +173,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -3251,6 +3253,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
         mInsetsStateController.onImeTargetChanged(target);
+        updateImeParent();
+    }
+
+    private void updateImeParent() {
+        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE) {
+            return;
+        }
+        final SurfaceControl newParent = computeImeParent();
+        if (newParent != null) {
+            mPendingTransaction.reparent(mImeWindowsContainers.mSurfaceControl, newParent);
+            scheduleAnimation();
+        }
+    }
+
+    /**
+     * Computes the window the IME should be attached to.
+     */
+    @VisibleForTesting
+    SurfaceControl computeImeParent() {
+
+        // Attach it to app if the target is part of an app and such app is covering the entire
+        // screen. If it's not covering the entire screen the IME might extend beyond the apps
+        // bounds.
+        if (mInputMethodTarget != null && mInputMethodTarget.mAppToken != null &&
+                mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            return mInputMethodTarget.mAppToken.getSurfaceControl();
+        }
+
+        // Otherwise, we just attach it to the display.
+        return mWindowingLayer;
     }
 
     boolean getNeedsMenu(WindowState top, WindowManagerPolicy.WindowState bottom) {
@@ -4418,13 +4450,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         .show(mSplitScreenDividerAnchor);
                 scheduleAnimation();
             } else {
-                mAppAnimationLayer.destroy();
+                mAppAnimationLayer.remove();
                 mAppAnimationLayer = null;
-                mBoostedAppAnimationLayer.destroy();
+                mBoostedAppAnimationLayer.remove();
                 mBoostedAppAnimationLayer = null;
-                mHomeAppAnimationLayer.destroy();
+                mHomeAppAnimationLayer.remove();
                 mHomeAppAnimationLayer = null;
-                mSplitScreenDividerAnchor.destroy();
+                mSplitScreenDividerAnchor.remove();
                 mSplitScreenDividerAnchor = null;
             }
         }
@@ -4885,6 +4917,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 .reparent(mWindowingLayer, sc).reparent(mOverlayLayer, sc);
     }
 
+    @VisibleForTesting
+    SurfaceControl getWindowingLayer() {
+        return mWindowingLayer;
+    }
+
     /**
      * Create a portal window handle for input. This window transports any touch to the display
      * indicated by {@link InputWindowHandle#portalToDisplayId} if the touch hits this window.
@@ -4908,5 +4945,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         portalWindowHandle.ownerUid = Process.myUid();
         portalWindowHandle.portalToDisplayId = mDisplayId;
         return portalWindowHandle;
+    }
+
+    /**
+     * @see IWindowManager#setForwardedInsets
+     */
+    public void setForwardedInsets(Insets insets) {
+        if (insets == null) {
+            insets = Insets.NONE;
+        }
+        if (mDisplayPolicy.getForwardedInsets().equals(insets)) {
+            return;
+        }
+        mDisplayPolicy.setForwardedInsets(insets);
+        setLayoutNeeded();
+        mWmService.mWindowPlacerLocked.requestTraversal();
     }
 }

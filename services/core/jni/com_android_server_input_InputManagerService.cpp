@@ -373,6 +373,9 @@ void NativeInputManager::dump(std::string& dump) {
     mInputManager->getReader()->dump(dump);
     dump += "\n";
 
+    mInputManager->getClassifier()->dump(dump);
+    dump += "\n";
+
     mInputManager->getDispatcher()->dump(dump);
     dump += "\n";
 }

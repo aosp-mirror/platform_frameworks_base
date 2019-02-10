@@ -17,8 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.SysUiServiceProvider.getComponent;
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
-        .ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -63,6 +62,8 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -73,8 +74,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;

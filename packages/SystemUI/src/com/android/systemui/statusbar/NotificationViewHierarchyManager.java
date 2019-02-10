@@ -61,7 +61,7 @@ public class NotificationViewHierarchyManager {
     protected final NotificationLockscreenUserManager mLockscreenUserManager;
     protected final NotificationGroupManager mGroupManager;
     protected final VisualStabilityManager mVisualStabilityManager;
-    private final StatusBarStateController mStatusBarStateController;
+    private final StatusBarStateControllerImpl mStatusBarStateController;
     private final NotificationEntryManager mEntryManager;
 
     // Lazy
@@ -82,7 +82,7 @@ public class NotificationViewHierarchyManager {
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,
-            StatusBarStateController statusBarStateController,
+            StatusBarStateControllerImpl statusBarStateController,
             NotificationEntryManager notificationEntryManager,
             Lazy<ShadeController> shadeController) {
         mLockscreenUserManager = notificationLockscreenUserManager;

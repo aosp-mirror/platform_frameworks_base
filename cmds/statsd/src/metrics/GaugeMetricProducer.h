@@ -68,7 +68,7 @@ public:
 
     // Handles when the pulled data arrives.
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data,
-                      bool pullSuccess) override;
+                      bool pullSuccess, int64_t originalPullTimeNs) override;
 
     // GaugeMetric needs to immediately trigger another pull when we create the partial bucket.
     void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,

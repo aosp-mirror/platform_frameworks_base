@@ -16,24 +16,29 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import android.graphics.Rect;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -49,14 +54,20 @@ public class AppChangeTransitionTests extends WindowTestsBase {
     private Task mTask;
     private WindowTestUtils.TestAppWindowToken mToken;
 
-    @Before
-    public void setUp() throws Exception {
-        mStack = createTaskStackOnDisplay(mDisplayContent);
+    public void setUpOnDisplay(DisplayContent dc) {
+        mStack = createTaskStackOnDisplay(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, dc);
         mTask = createTaskInStack(mStack, 0 /* userId */);
-        mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
+        mToken = WindowTestUtils.createTestAppWindowToken(dc);
         mToken.mSkipOnParentChanged = false;
 
         mTask.addChild(mToken, 0);
+
+        // Set a remote animator with snapshot disabled. Snapshots don't work in wmtests.
+        RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
+        RemoteAnimationAdapter adapter =
+                new RemoteAnimationAdapter(new TestRemoteAnimationRunner(), 10, 1, false);
+        definition.addRemoteAnimation(TRANSIT_TASK_CHANGE_WINDOWING_MODE, adapter);
+        dc.registerRemoteAnimations(definition);
     }
 
     class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
@@ -85,14 +96,58 @@ public class AppChangeTransitionTests extends WindowTestsBase {
 
     @Test
     public void testModeChangeRemoteAnimatorNoSnapshot() {
-        RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
-        RemoteAnimationAdapter adapter =
-                new RemoteAnimationAdapter(new TestRemoteAnimationRunner(), 10, 1, false);
-        definition.addRemoteAnimation(TRANSIT_TASK_CHANGE_WINDOWING_MODE, adapter);
-        mDisplayContent.registerRemoteAnimations(definition);
+        // setup currently defaults to no snapshot.
+        setUpOnDisplay(mDisplayContent);
 
         mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertEquals(1, mDisplayContent.mChangingApps.size());
+
+        // Verify we are in a change transition, but without a snapshot.
+        // Though, the test will actually have crashed by now if a snapshot is attempted.
+        assertNull(mToken.getThumbnail());
+        assertTrue(mToken.isInChangeTransition());
+
+        waitUntilHandlersIdle();
+        mToken.removeImmediately();
+    }
+
+    @Test
+    public void testCancelPendingChangeOnRemove() {
+        // setup currently defaults to no snapshot.
+        setUpOnDisplay(mDisplayContent);
+
+        mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(1, mDisplayContent.mChangingApps.size());
+        assertTrue(mToken.isInChangeTransition());
+
+        // Removing the app-token from the display should clean-up the
+        // the change leash.
+        mDisplayContent.removeAppToken(mToken.token);
+        assertEquals(0, mDisplayContent.mChangingApps.size());
+        assertFalse(mToken.isInChangeTransition());
+
+        waitUntilHandlersIdle();
+        mToken.removeImmediately();
+    }
+
+    @Test
+    public void testNoChangeWhenMoveDisplay() {
+        mDisplayContent.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
+        dc1.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        setUpOnDisplay(dc1);
+
+        assertEquals(WINDOWING_MODE_FREEFORM, mTask.getWindowingMode());
+
+        // Reparenting to a display with different windowing mode may trigger
+        // a change transition internally, but it should be cleaned-up once
+        // the display change is complete.
+        mStack.reparent(mDisplayContent.getDisplayId(), new Rect(), true);
+
+        assertEquals(WINDOWING_MODE_FULLSCREEN, mTask.getWindowingMode());
+
+        // Make sure we're not waiting for a change animation (no leash)
+        assertFalse(mToken.isInChangeTransition());
         assertNull(mToken.getThumbnail());
 
         waitUntilHandlersIdle();

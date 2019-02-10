@@ -356,12 +356,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
-     * <p>MONOCHROME-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
-     * includes {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}) devices
-     * supporting {@link android.graphics.ImageFormat#Y8 Y8} support substituting {@code YUV}
-     * streams with {@code Y8} in all guaranteed stream combinations for the device's hardware level
-     * and capabilities.</p>
-     *
      * <p>FULL-level ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) devices
      * support at least the following stream combinations in addition to those for
@@ -434,6 +428,18 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code 640x480}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td>In-app viewfinder analysis with dynamic selection of output format.</td> </tr>
      * </table><br>
      * </p>
+     *
+     * <p>MONOCHROME-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
+     * includes {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}) devices
+     * supporting {@link android.graphics.ImageFormat#Y8 Y8} support substituting {@code YUV}
+     * streams with {@code Y8} in all guaranteed stream combinations for the device's hardware level
+     * and capabilities.</p>
+     *
+     * <p>Devices capable of outputting HEIC formats ({@link StreamConfigurationMap#getOutputFormats}
+     * contains {@link android.graphics.ImageFormat#HEIC}) will support substituting {@code JPEG}
+     * streams with {@code HEIC} in all guaranteed stream combinations for the device's hardware
+     * level and capabilities. Calling createCaptureSession with both JPEG and HEIC outputs is not
+     * supported.</p>
      *
      * <p>Clients can access the above mandatory stream combination tables via
      * {@link android.hardware.camera2.params.MandatoryStreamCombination}.</p>

@@ -150,7 +150,7 @@
       <item quantity="one">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
       <item quantity="other">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"ነው"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"አስራ ሁለት"</item>
     <item msgid="7389464214252023751">"አንድ"</item>

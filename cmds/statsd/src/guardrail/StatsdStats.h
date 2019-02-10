@@ -342,32 +342,43 @@ public:
     /**
      * Hard limit was reached in the cardinality of an atom
      */
-    void noteHardDimensionLimitReached(int atomId);
+    void noteHardDimensionLimitReached(int64_t metricId);
 
     /**
      * A log event was too late, arrived in the wrong bucket and was skipped
      */
-    void noteLateLogEventSkipped(int atomId);
+    void noteLateLogEventSkipped(int64_t metricId);
 
     /**
      * Buckets were skipped as time elapsed without any data for them
      */
-    void noteSkippedForwardBuckets(int atomId);
+    void noteSkippedForwardBuckets(int64_t metricId);
 
     /**
      * An unsupported value type was received
      */
-    void noteBadValueType(int atomId);
+    void noteBadValueType(int64_t metricId);
+
+    /**
+     * Buckets were dropped due to reclaim memory.
+     */
+    void noteBucketDropped(int64_t metricId);
 
     /**
      * A condition change was too late, arrived in the wrong bucket and was skipped
      */
-    void noteConditionChangeInNextBucket(int atomId);
+    void noteConditionChangeInNextBucket(int64_t metricId);
 
     /**
      * A bucket has been tagged as invalid.
      */
-    void noteInvalidatedBucket(int metricId);
+    void noteInvalidatedBucket(int64_t metricId);
+
+    /**
+     * For pulls at bucket boundaries, it represents the misalignment between the real timestamp and
+     * the end of the bucket.
+     */
+    void noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs);
 
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
@@ -414,6 +425,9 @@ public:
         long badValueType = 0;
         long conditionChangeInNextBucket = 0;
         long invalidatedBucket = 0;
+        long bucketDropped = 0;
+        int64_t minBucketBoundaryDelayNs = 0;
+        int64_t maxBucketBoundaryDelayNs = 0;
     } AtomMetricStats;
 
 private:

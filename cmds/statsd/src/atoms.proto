@@ -41,12 +41,13 @@ import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
+import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
+import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
-import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
-import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
+import "frameworks/base/core/proto/android/wifi/enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -110,7 +111,7 @@ message Atom {
         PacketWakeupOccurred packet_wakeup_occurred = 44;
         WallClockTimeShifted wall_clock_time_shifted = 45;
         AnomalyDetected anomaly_detected = 46;
-        AppBreadcrumbReported app_breadcrumb_reported = 47;
+        AppBreadcrumbReported app_breadcrumb_reported = 47 [(allow_from_any_uid) = true];
         AppStartOccurred app_start_occurred = 48;
         AppStartCanceled app_start_canceled = 49;
         AppStartFullyDrawn app_start_fully_drawn = 50;
@@ -121,7 +122,7 @@ message Atom {
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         ShutdownSequenceReported shutdown_sequence_reported = 56;
         BootSequenceReported boot_sequence_reported = 57;
-        DaveyOccurred davey_occurred = 58;
+        DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true];
         OverlayStateChanged overlay_state_changed = 59;
         ForegroundServiceStateChanged foreground_service_state_changed = 60;
         CallStateChanged call_state_changed = 61;
@@ -214,7 +215,7 @@ message Atom {
         SpeechDspStatReported speech_dsp_stat_reported = 145;
         UsbContaminantReported usb_contaminant_reported = 146;
         WatchdogRollbackOccurred watchdog_rollback_occurred = 147;
-        BiometricHalDeathReported biometric_hal_death_reported = 148;
+        BiometricSystemHealthIssueDetected biometric_system_health_issue_detected = 148;
         BubbleUIChanged bubble_ui_changed = 149;
         ScheduledJobConstraintChanged scheduled_job_constraint_changed = 150;
         BluetoothActiveDeviceChanged bluetooth_active_device_changed = 151;
@@ -994,6 +995,9 @@ message WifiLockStateChanged {
         ON = 1;
     }
     optional State state = 2;
+
+    // WifiLock type, from frameworks/base/core/proto/android/wifi/enums.proto.
+    optional android.net.wifi.WifiModeEnum mode = 3;
 }
 
 /**
@@ -2082,9 +2086,9 @@ message BluetoothSocketConnectionStateChanged {
     // Salt: Randomly generated 256 bit value
     // Hash algorithm: HMAC-SHA256
     // Size: 32 byte
-    // Default: null or empty if the device identifier is not known
+    // Default: null or empty if this is a server listener socket
     optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
-    // Port of this socket
+    // Temporary port of this socket for the current connection or session only
     // Default 0 when unknown or don't care
     optional int32 port = 2;
     // Socket type as mentioned in
@@ -2098,6 +2102,14 @@ message BluetoothSocketConnectionStateChanged {
     optional int64 tx_bytes = 5;
     // Number of bytes received from remote device during this connection
     optional int64 rx_bytes = 6;
+    // Socket owner's UID
+    optional int32 uid = 7 [(is_uid) = true];
+    // Server port of this socket, if any. When both |server_port| and |port| fields are populated,
+    // |port| must be spawned by |server_port|
+    // Default 0 when unknown or don't care
+    optional int32 server_port = 8;
+    // Whether this is a server listener socket
+    optional android.bluetooth.SocketRoleEnum is_server = 9;
 }
 
 /**
@@ -3046,13 +3058,15 @@ message BiometricErrorOccurred {
 }
 
 /**
- * Logs when a biometric HAL has crashed.
+ * Logs when a system health issue is detected.
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/biometrics
  */
-message BiometricHalDeathReported {
+message BiometricSystemHealthIssueDetected {
     // Biometric modality.
     optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // Type of issue detected.
+    optional android.hardware.biometrics.IssueEnum issue = 2;
 }
 
 message Notification {

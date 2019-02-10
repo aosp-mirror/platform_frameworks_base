@@ -168,6 +168,7 @@ public class FaceService extends BiometricServiceBase {
                 String opPackageName, int cookie, int callingUid, int callingPid,
                 int callingUserId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
+            updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token,
@@ -704,6 +705,8 @@ public class FaceService extends BiometricServiceBase {
     public void serviceDied(long cookie) {
         super.serviceDied(cookie);
         mDaemon = null;
+
+        mCurrentUserId = UserHandle.USER_NULL; // Force updateActiveGroup() to re-evaluate
     }
 
     @Override

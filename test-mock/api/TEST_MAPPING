@@ -1,0 +1,10 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsAndroidTestMockCurrentApiSignatureTestCases"
+    },
+    {
+      "name": "CtsCurrentApiSignatureTestCases"
+    }
+  ]
+}

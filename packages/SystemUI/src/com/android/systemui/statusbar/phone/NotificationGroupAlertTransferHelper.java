@@ -25,12 +25,12 @@ import android.util.ArrayMap;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListener;
 import com.android.systemui.statusbar.InflationTask;
-import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;

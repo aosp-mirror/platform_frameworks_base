@@ -27,6 +27,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
@@ -103,6 +104,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -110,6 +112,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.hardware.power.V1_0.PowerHint;
@@ -134,6 +137,7 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
@@ -338,6 +342,16 @@ public class DisplayPolicy {
     private boolean mAllowLockscreenWhenOn;
 
     private InputConsumer mInputConsumer = null;
+
+    /**
+     * The area covered by system windows which belong to another display. Forwarded insets is set
+     * in case this is a virtual display, this is displayed on another display that has insets, and
+     * the bounds of this display is overlapping with the insets of the host display (e.g. IME is
+     * displayed on the host display, and it covers a part of this virtual display.)
+     * The forwarded insets is used to compute display frames of this virtual display, which will
+     * be then used to layout windows in the virtual display.
+     */
+    @NonNull private Insets mForwardedInsets = Insets.NONE;
 
     // -------- PolicyHandler --------
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 1;
@@ -1362,6 +1376,15 @@ public class DisplayPolicy {
             displayFrames.mDisplayCutoutSafe.top = Math.max(displayFrames.mDisplayCutoutSafe.top,
                     displayFrames.mStable.top);
         }
+
+        // In case this is a virtual display, and the host display has insets that overlap this
+        // virtual display, apply the insets of the overlapped area onto the current and content
+        // frame of this virtual display. This let us layout windows in the virtual display as
+        // expected when the window needs to avoid overlap with the system windows.
+        // TODO: Generalize the forwarded insets, so that we can handle system windows other than
+        // IME.
+        displayFrames.mCurrent.inset(mForwardedInsets);
+        displayFrames.mContent.inset(mForwardedInsets);
     }
 
     private void layoutScreenDecorWindows(DisplayFrames displayFrames) {
@@ -1900,7 +1923,10 @@ public class DisplayPolicy {
                         if (win.isVoiceInteraction()) {
                             cf.set(displayFrames.mVoiceContent);
                         } else {
-                            if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+                            // IME Insets are handled on the client for ADJUST_RESIZE in the new
+                            // insets world
+                            if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_NONE
+                                    || adjust != SOFT_INPUT_ADJUST_RESIZE) {
                                 cf.set(displayFrames.mDock);
                             } else {
                                 cf.set(displayFrames.mContent);
@@ -1991,7 +2017,11 @@ public class DisplayPolicy {
                     of.set(displayFrames.mRestricted);
                     df.set(displayFrames.mRestricted);
                     pf.set(displayFrames.mRestricted);
-                    if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+
+                    // IME Insets are handled on the client for ADJUST_RESIZE in the new insets
+                    // world
+                    if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_NONE
+                            || adjust != SOFT_INPUT_ADJUST_RESIZE) {
                         cf.set(displayFrames.mDock);
                     } else {
                         cf.set(displayFrames.mContent);
@@ -2716,6 +2746,18 @@ public class DisplayPolicy {
             outInsets.right += displayCutout.getSafeInsetRight();
             outInsets.bottom += displayCutout.getSafeInsetBottom();
         }
+    }
+
+    /**
+     * @see IWindowManager#setForwardedInsets
+     */
+    public void setForwardedInsets(@NonNull Insets forwardedInsets) {
+        mForwardedInsets = forwardedInsets;
+    }
+
+    @NonNull
+    public Insets getForwardedInsets() {
+        return mForwardedInsets;
     }
 
     @NavigationBarPosition

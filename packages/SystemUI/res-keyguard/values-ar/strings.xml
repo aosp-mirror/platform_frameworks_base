@@ -182,7 +182,7 @@
       <item quantity="other">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
       <item quantity="one">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك محاولة واحدة (<xliff:g id="_NUMBER_0">%d</xliff:g>) قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
     </plurals>
-    <string name="type_clock_header" msgid="4786545441902447636">"الساعة"</string>
+    <!-- no translation found for type_clock_header (6782840450655632763) -->
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"الثانية عشرة"</item>
     <item msgid="7389464214252023751">"الواحدة"</item>

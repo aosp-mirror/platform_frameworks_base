@@ -981,7 +981,7 @@ public class WifiManager {
      * @deprecated This API is non-functional and will have no impact.
      */
     @Deprecated
-    public static final int WIFI_MODE_FULL = 1;
+    public static final int WIFI_MODE_FULL = WifiProtoEnums.WIFI_MODE_FULL; // 1
 
     /**
      * In this Wi-Fi lock mode, Wi-Fi will be kept active,
@@ -995,7 +995,7 @@ public class WifiManager {
      * @deprecated This API is non-functional and will have no impact.
      */
     @Deprecated
-    public static final int WIFI_MODE_SCAN_ONLY = 2;
+    public static final int WIFI_MODE_SCAN_ONLY = WifiProtoEnums.WIFI_MODE_SCAN_ONLY; // 2
 
     /**
      * In this Wi-Fi lock mode, Wi-Fi will not go to power save.
@@ -1013,7 +1013,7 @@ public class WifiManager {
      * When there is no support from the hardware, the {@link #WIFI_MODE_FULL_HIGH_PERF}
      * lock will have no impact.
      */
-    public static final int WIFI_MODE_FULL_HIGH_PERF = 3;
+    public static final int WIFI_MODE_FULL_HIGH_PERF = WifiProtoEnums.WIFI_MODE_FULL_HIGH_PERF; // 3
 
     /**
      * In this Wi-Fi lock mode, Wi-Fi will operate with a priority to achieve low latency.
@@ -1037,15 +1037,13 @@ public class WifiManager {
      * Example use cases are real time gaming or virtual reality applications where
      * low latency is a key factor for user experience.
      * <p>
-     * When there is no support from the hardware, the {@link #WIFI_MODE_FULL_LOW_LATENCY}
-     * lock will cause the device not to go power save.
-     * <p>
      * Note: For an app which acquires both {@link #WIFI_MODE_FULL_LOW_LATENCY} and
      * {@link #WIFI_MODE_FULL_HIGH_PERF} locks, {@link #WIFI_MODE_FULL_LOW_LATENCY}
      * lock will be effective when app is running in foreground and screen is on,
      * while the {@link #WIFI_MODE_FULL_HIGH_PERF} lock will take effect otherwise.
      */
-    public static final int WIFI_MODE_FULL_LOW_LATENCY = 4;
+    public static final int WIFI_MODE_FULL_LOW_LATENCY =
+            WifiProtoEnums.WIFI_MODE_FULL_LOW_LATENCY; // 4
 
     /** Anything worse than or equal to this will show 0 bars. */
     @UnsupportedAppUsage

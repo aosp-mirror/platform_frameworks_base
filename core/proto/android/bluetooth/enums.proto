@@ -132,3 +132,9 @@ enum SocketConnectionstateEnum {
     // This socket is closed
     SOCKET_CONNECTION_STATE_DISCONNECTED = 5;
 }
+
+enum SocketRoleEnum {
+    SOCKET_ROLE_UNKNOWN = 0;
+    SOCKET_ROLE_LISTEN = 1;
+    SOCKET_ROLE_CONNECTION = 2;
+}

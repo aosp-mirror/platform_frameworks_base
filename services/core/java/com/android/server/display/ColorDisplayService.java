@@ -72,7 +72,6 @@ import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ColorDisplayController;
 import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
 import com.android.server.SystemService;
@@ -448,7 +447,6 @@ public final class ColorDisplayService extends SystemService {
     private ContentObserver mUserSetupObserver;
     private boolean mBootCompleted;
 
-    private ColorDisplayController mNightDisplayController;
     private ContentObserver mContentObserver;
 
     private DisplayWhiteBalanceListener mDisplayWhiteBalanceListener;
@@ -547,8 +545,6 @@ public final class ColorDisplayService extends SystemService {
     private void setUp() {
         Slog.d(TAG, "setUp: currentUser=" + mCurrentUser);
 
-        mNightDisplayController = new ColorDisplayController(getContext(), mCurrentUser);
-
         // Listen for external changes to any of the settings.
         if (mContentObserver == null) {
             mContentObserver = new ContentObserver(new Handler(DisplayThread.get().getLooper())) {
@@ -586,7 +582,7 @@ public final class ColorDisplayService extends SystemService {
                                         getNightDisplayCustomEndTimeInternal().getLocalTime());
                                 break;
                             case System.DISPLAY_COLOR_MODE:
-                                onDisplayColorModeChanged(mNightDisplayController.getColorMode());
+                                onDisplayColorModeChanged(getColorModeInternal());
                                 break;
                             case Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED:
                                 onAccessibilityInversionChanged();
@@ -634,7 +630,7 @@ public final class ColorDisplayService extends SystemService {
 
         // Set the color mode, if valid, and immediately apply the updated tint matrix based on the
         // existing activated state. This ensures consistency of tint across the color mode change.
-        onDisplayColorModeChanged(mNightDisplayController.getColorMode());
+        onDisplayColorModeChanged(getColorModeInternal());
 
         if (mNightDisplayTintController.isAvailable(getContext())) {
             // Reset the activated state.
@@ -666,10 +662,6 @@ public final class ColorDisplayService extends SystemService {
         Slog.d(TAG, "tearDown: currentUser=" + mCurrentUser);
 
         getContext().getContentResolver().unregisterContentObserver(mContentObserver);
-
-        if (mNightDisplayController != null) {
-            mNightDisplayController = null;
-        }
 
         if (mNightDisplayTintController.isAvailable(getContext())) {
             if (mNightDisplayAutoMode != null) {
@@ -740,7 +732,7 @@ public final class ColorDisplayService extends SystemService {
     }
 
     private void onAccessibilityActivated() {
-        onDisplayColorModeChanged(mNightDisplayController.getColorMode());
+        onDisplayColorModeChanged(getColorModeInternal());
     }
 
     /**
@@ -1003,8 +995,7 @@ public final class ColorDisplayService extends SystemService {
                 mCurrentUser);
     }
 
-    private @ColorMode
-    int getColorModeInternal() {
+    private @ColorMode int getColorModeInternal() {
         final ContentResolver cr = getContext().getContentResolver();
         if (Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
                 0, mCurrentUser) == 1

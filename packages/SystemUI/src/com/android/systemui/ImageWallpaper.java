@@ -19,11 +19,8 @@ package com.android.systemui;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.WallpaperManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
@@ -31,9 +28,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
-import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Trace;
 import android.service.wallpaper.WallpaperService;
@@ -44,7 +39,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -57,17 +51,12 @@ import java.io.PrintWriter;
 public class ImageWallpaper extends WallpaperService {
     private static final String TAG = "ImageWallpaper";
     private static final String GL_LOG_TAG = "ImageWallpaperGL";
-    // TODO: Testing purpose, need to remove later, b/123616712.
-    private static final String SENSOR_EVENT_AWAKE = "systemui.test.event.awake";
-    // TODO: Testing purpose, need to remove later, b/123616712.
-    private static final String SENSOR_EVENT_SLEEP = "systemui.test.event.sleep";
     private static final boolean DEBUG = false;
     private static final String PROPERTY_KERNEL_QEMU = "ro.kernel.qemu";
     private static final long DELAY_FORGET_WALLPAPER = 5000;
 
     private WallpaperManager mWallpaperManager;
     private DrawableEngine mEngine;
-    private GLEngine mGlEngine;
 
     @Override
     public void onCreate() {
@@ -84,112 +73,10 @@ public class ImageWallpaper extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
-        mGlEngine = new GLEngine(this);
-        return mGlEngine;
+        mEngine = new DrawableEngine();
+        return mEngine;
     }
 
-    class GLEngine extends Engine {
-        private GLWallpaperSurfaceView mWallpaperSurfaceView;
-
-        GLEngine(Context context) {
-            mWallpaperSurfaceView = new GLWallpaperSurfaceView(context);
-            mWallpaperSurfaceView.setRenderer(
-                    new ImageWallpaperRenderer(context, mWallpaperSurfaceView));
-            mWallpaperSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-            setOffsetNotificationsEnabled(true);
-        }
-
-        @Override
-        public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
-            if (mWallpaperSurfaceView != null) {
-                mWallpaperSurfaceView.notifyAmbientModeChanged(inAmbientMode);
-            }
-        }
-
-        @Override
-        public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep,
-                float yOffsetStep, int xPixelOffset, int yPixelOffset) {
-            if (mWallpaperSurfaceView != null) {
-                mWallpaperSurfaceView.notifyOffsetsChanged(xOffset, yOffset);
-            }
-        }
-
-        private class GLWallpaperSurfaceView extends GLSurfaceView implements ImageGLView {
-            private SensorEventListener mEventListener;
-            private WallpaperStatusListener mWallpaperChangedListener;
-
-            // TODO: Testing purpose, need to remove later, b/123616712.
-            /**
-             * For testing only: adb shell am broadcast -a <INTENT>
-             */
-            private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (intent == null) {
-                        return;
-                    }
-                    switch (intent.getAction()) {
-                        case SENSOR_EVENT_AWAKE:
-                            notifySensorEvents(true);
-                            break;
-                        case SENSOR_EVENT_SLEEP:
-                            notifySensorEvents(false);
-                            break;
-                    }
-                }
-            };
-
-            GLWallpaperSurfaceView(Context context) {
-                super(context);
-                setEGLContextClientVersion(2);
-                // TODO: Testing purpose, need to remove later, b/123616712.
-                if (Build.IS_DEBUGGABLE) {
-                    IntentFilter filter = new IntentFilter();
-                    filter.addAction(SENSOR_EVENT_AWAKE);
-                    filter.addAction(SENSOR_EVENT_SLEEP);
-                    registerReceiver(mReceiver, filter);
-                }
-            }
-
-            @Override
-            public SurfaceHolder getHolder() {
-                return getSurfaceHolder();
-            }
-
-            @Override
-            public void setRenderer(Renderer renderer) {
-                super.setRenderer(renderer);
-                mEventListener = (SensorEventListener) renderer;
-                mWallpaperChangedListener = (WallpaperStatusListener) renderer;
-            }
-
-            private void notifySensorEvents(boolean reach) {
-                if (mEventListener != null) {
-                    mEventListener.onSensorEvent(reach);
-                }
-            }
-
-            private void notifyAmbientModeChanged(boolean inAmbient) {
-                if (mWallpaperChangedListener != null) {
-                    mWallpaperChangedListener.onAmbientModeChanged(inAmbient);
-                }
-            }
-
-            private void notifyOffsetsChanged(float xOffset, float yOffset) {
-                if (mWallpaperChangedListener != null) {
-                    mWallpaperChangedListener.onOffsetsChanged(
-                            xOffset, yOffset, getHolder().getSurfaceFrame());
-                }
-            }
-
-            @Override
-            public void render() {
-                requestRender();
-            }
-        }
-    }
-
-    // TODO: Remove this engine, tracking on b/123617158.
     class DrawableEngine extends Engine {
         private final Runnable mUnloadWallpaperCallback = () -> {
             unloadWallpaper(false /* forgetSize */);
@@ -676,47 +563,5 @@ public class ImageWallpaper extends WallpaperService {
                 }
             }
         }
-    }
-
-    /**
-     * A listener to trace sensor event.
-     */
-    public interface SensorEventListener {
-
-        /**
-         * Called back while sensor event comes.
-         * @param reach The status of sensor.
-         */
-        void onSensorEvent(boolean reach);
-    }
-
-    /**
-     * A listener to trace status of image wallpaper.
-     */
-    public interface WallpaperStatusListener {
-
-        /**
-         * Called back while ambient mode changes.
-         * @param inAmbientMode true if is in ambient mode, false otherwise.
-         */
-        void onAmbientModeChanged(boolean inAmbientMode);
-
-        /**
-         * Called back while wallpaper offsets.
-         * @param xOffset The offset portion along x.
-         * @param yOffset The offset portion along y.
-         */
-        void onOffsetsChanged(float xOffset, float yOffset, Rect frame);
-    }
-
-    /**
-     * An abstraction for view of GLRenderer.
-     */
-    public interface ImageGLView {
-
-        /**
-         * Ask the view to render.
-         */
-        void render();
     }
 }

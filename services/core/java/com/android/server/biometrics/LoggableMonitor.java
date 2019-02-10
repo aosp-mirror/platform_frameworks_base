@@ -28,7 +28,7 @@ import android.util.StatsLog;
 public abstract class LoggableMonitor {
 
     public static final String TAG = "BiometricStats";
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private long mFirstAcquireTimeMs;
 
@@ -137,6 +137,8 @@ public abstract class LoggableMonitor {
                     + ", RequireConfirmation: " + requireConfirmation
                     + ", State: " + authState
                     + ", Latency: " + latency);
+        } else {
+            Slog.v(TAG, "Authentication latency: " + latency);
         }
 
         StatsLog.write(StatsLog.BIOMETRIC_AUTHENTICATED,
