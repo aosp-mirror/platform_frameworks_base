@@ -25,7 +25,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
@@ -35,10 +37,13 @@ import android.os.Handler;
 import android.os.Trace;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.DynamicDrawableSpan;
+import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
+import android.util.MathUtils;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.slice.Slice;
@@ -72,6 +77,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     private static final StyleSpan BOLD_STYLE = new StyleSpan(Typeface.BOLD);
     public static final String KEYGUARD_SLICE_URI = "content://com.android.systemui.keyguard/main";
+    private static final String KEYGUARD_HEADER_URI =
+            "content://com.android.systemui.keyguard/header";
     public static final String KEYGUARD_DATE_URI = "content://com.android.systemui.keyguard/date";
     public static final String KEYGUARD_NEXT_ALARM_URI =
             "content://com.android.systemui.keyguard/alarm";
@@ -90,6 +97,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private static KeyguardSliceProvider sInstance;
 
     protected final Uri mSliceUri;
+    protected final Uri mHeaderUri;
     protected final Uri mDateUri;
     protected final Uri mAlarmUri;
     protected final Uri mDndUri;
@@ -163,6 +171,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     KeyguardSliceProvider(Handler handler) {
         mHandler = handler;
         mSliceUri = Uri.parse(KEYGUARD_SLICE_URI);
+        mHeaderUri = Uri.parse(KEYGUARD_HEADER_URI);
         mDateUri = Uri.parse(KEYGUARD_DATE_URI);
         mAlarmUri = Uri.parse(KEYGUARD_NEXT_ALARM_URI);
         mDndUri = Uri.parse(KEYGUARD_DND_URI);
@@ -213,26 +222,32 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected void addMediaLocked(ListBuilder listBuilder) {
         if (mMediaMetaData != null) {
             SpannableStringBuilder builder = new SpannableStringBuilder();
+
+            Icon notificationIcon = mMediaManager == null ? null : mMediaManager.getMediaIcon();
+            if (notificationIcon != null) {
+                Drawable drawable = notificationIcon.loadDrawable(getContext());
+                Rect mediaBounds = new Rect(0 /* left */, 0 /* top */,
+                        drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                int iconHeaderSize = getContext().getResources()
+                        .getDimensionPixelSize(R.dimen.header_icon_size);
+                MathUtils.fitRect(mediaBounds, iconHeaderSize);
+                drawable.setBounds(mediaBounds);
+                builder.append("# ");
+                builder.setSpan(new ImageSpan(drawable, DynamicDrawableSpan.ALIGN_CENTER),
+                        0 /* start */, 1 /* end */, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            }
+
             CharSequence title = mMediaMetaData.getText(MediaMetadata.METADATA_KEY_TITLE);
             if (TextUtils.isEmpty(title)) {
                 title = getContext().getResources().getString(R.string.music_controls_no_title);
             }
             builder.append(title);
-            builder.setSpan(BOLD_STYLE, 0, title.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+            listBuilder.setHeader(new ListBuilder.HeaderBuilder(mHeaderUri).setTitle(builder));
 
             CharSequence album = mMediaMetaData.getText(MediaMetadata.METADATA_KEY_ARTIST);
             if (!TextUtils.isEmpty(album)) {
-                builder.append("  ").append(album);
+                listBuilder.addRow(new RowBuilder(mMediaUri).setTitle(album));
             }
-
-            RowBuilder mediaBuilder = new RowBuilder(mMediaUri).setTitle(builder);
-            Icon notificationIcon = mMediaManager == null ? null : mMediaManager.getMediaIcon();
-            if (notificationIcon != null) {
-                IconCompat icon = IconCompat.createFromIcon(notificationIcon);
-                mediaBuilder.addEndItem(icon, ListBuilder.ICON_IMAGE);
-            }
-
-            listBuilder.addRow(mediaBuilder);
         }
     }
 
