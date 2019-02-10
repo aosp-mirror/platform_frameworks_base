@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Person;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
@@ -235,8 +237,11 @@ public class NotificationData {
         if (mRankingMap != null) {
             getRanking(statusBarNotification.getKey(), mTmpRanking);
             if (mTmpRanking.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
-                    || statusBarNotification.getNotification().isForegroundService()
-                    || statusBarNotification.getNotification().hasMediaSession()) {
+                    || isImportantOngoing(statusBarNotification.getNotification())
+                    || statusBarNotification.getNotification().hasMediaSession()
+                    || hasPerson(statusBarNotification.getNotification())
+                    || hasStyle(statusBarNotification.getNotification(),
+                    Notification.MessagingStyle.class)) {
                 return true;
             }
             if (mGroupManager.isSummaryOfGroup(statusBarNotification)) {
@@ -250,6 +255,24 @@ public class NotificationData {
             }
         }
         return false;
+    }
+
+    private boolean isImportantOngoing(Notification notification) {
+        return notification.isForegroundService()
+                && mTmpRanking.getImportance() >= NotificationManager.IMPORTANCE_LOW;
+    }
+
+    private boolean hasStyle(Notification notification, Class targetStyle) {
+        Class<? extends Notification.Style> style = notification.getNotificationStyle();
+        return targetStyle.equals(style);
+    }
+
+    private boolean hasPerson(Notification notification) {
+        // TODO: cache favorite and recent contacts to check contact affinity
+        ArrayList<Person> people = notification.extras != null
+                ? notification.extras.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST)
+                : new ArrayList<>();
+        return people != null && !people.isEmpty();
     }
 
     public boolean isAmbient(String key) {

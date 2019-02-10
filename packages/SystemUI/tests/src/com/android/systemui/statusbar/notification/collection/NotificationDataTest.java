@@ -23,12 +23,19 @@ import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+
+import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_CHANNEL;
+import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_IMPORTANCE;
+import static com.android.systemui.statusbar.notification.collection.NotificationDataTest.TestableNotificationData.OVERRIDE_VIS_EFFECTS;
 
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,6 +43,7 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Intent;
@@ -84,8 +92,6 @@ public class NotificationDataTest extends SysuiTestCase {
 
     private static final int UID_NORMAL = 123;
     private static final int UID_ALLOW_DURING_SETUP = 456;
-    private static final String TEST_HIDDEN_NOTIFICATION_KEY = "testHiddenNotificationKey";
-    private static final String TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY = "exempt";
     private static final NotificationChannel NOTIFICATION_CHANNEL =
             new NotificationChannel("id", "name", NotificationChannel.USER_LOCKED_IMPORTANCE);
 
@@ -97,7 +103,7 @@ public class NotificationDataTest extends SysuiTestCase {
     NotificationData.KeyguardEnvironment mEnvironment;
 
     private final IPackageManager mMockPackageManager = mock(IPackageManager.class);
-    private NotificationData mNotificationData;
+    private TestableNotificationData mNotificationData;
     private ExpandableNotificationRow mRow;
 
     @Before
@@ -131,6 +137,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
     @Test
     public void testChannelSetWhenAdded() {
+        mNotificationData.rankingOverrides.putParcelable(OVERRIDE_CHANNEL, NOTIFICATION_CHANNEL);
         mNotificationData.add(mRow.getEntry());
         assertEquals(NOTIFICATION_CHANNEL, mRow.getEntry().channel);
     }
@@ -217,12 +224,12 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testIsExemptFromDndVisualSuppression_foreground() {
         initStatusBarNotification(false);
-        when(mMockStatusBarNotification.getKey()).thenReturn(
-                TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
+
         Notification n = mMockStatusBarNotification.getNotification();
         n.flags = Notification.FLAG_FOREGROUND_SERVICE;
         NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         mNotificationData.add(entry);
+        mNotificationData.rankingOverrides.putInt(OVERRIDE_VIS_EFFECTS, 255);
 
         assertTrue(entry.isExemptFromDndVisualSuppression());
         assertFalse(entry.shouldSuppressAmbient());
@@ -231,8 +238,6 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testIsExemptFromDndVisualSuppression_media() {
         initStatusBarNotification(false);
-        when(mMockStatusBarNotification.getKey()).thenReturn(
-                TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
         Notification n = mMockStatusBarNotification.getNotification();
         Notification.Builder nb = Notification.Builder.recoverBuilder(mContext, n);
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
@@ -240,6 +245,7 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mMockStatusBarNotification.getNotification()).thenReturn(n);
         NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         mNotificationData.add(entry);
+        mNotificationData.rankingOverrides.putInt(OVERRIDE_VIS_EFFECTS, 255);
 
         assertTrue(entry.isExemptFromDndVisualSuppression());
         assertFalse(entry.shouldSuppressAmbient());
@@ -248,11 +254,10 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testIsExemptFromDndVisualSuppression_system() {
         initStatusBarNotification(false);
-        when(mMockStatusBarNotification.getKey()).thenReturn(
-                TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
         NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         entry.mIsSystemNotification = true;
         mNotificationData.add(entry);
+        mNotificationData.rankingOverrides.putInt(OVERRIDE_VIS_EFFECTS, 255);
 
         assertTrue(entry.isExemptFromDndVisualSuppression());
         assertFalse(entry.shouldSuppressAmbient());
@@ -261,10 +266,10 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testIsNotExemptFromDndVisualSuppression_hiddenCategories() {
         initStatusBarNotification(false);
-        when(mMockStatusBarNotification.getKey()).thenReturn(
-                TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
         NotificationEntry entry = new NotificationEntry(mMockStatusBarNotification);
         entry.mIsSystemNotification = true;
+        mNotificationData.rankingOverrides.putInt(OVERRIDE_VIS_EFFECTS,
+                NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT);
         mNotificationData.add(entry);
 
         when(mMockStatusBarNotification.getNotification()).thenReturn(
@@ -353,6 +358,64 @@ public class NotificationDataTest extends SysuiTestCase {
         assertTrue(entry.isLastMessageFromReply());
     }
 
+    @Test
+    public void personHighPriority() {
+        Person person = new Person.Builder()
+                .setName("name")
+                .setKey("abc")
+                .setUri("uri")
+                .setBot(true)
+                .build();
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addPerson(person)
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
+                notification, mContext.getUser(), "", 0);
+
+        assertTrue(mNotificationData.isHighPriority(sbn));
+    }
+
+    @Test
+    public void messagingStyleHighPriority() {
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle(""))
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
+                notification, mContext.getUser(), "", 0);
+
+        assertTrue(mNotificationData.isHighPriority(sbn));
+    }
+
+    @Test
+    public void minForegroundNotHighPriority() {
+        Notification notification = mock(Notification.class);
+        when(notification.isForegroundService()).thenReturn(true);
+
+        mNotificationData.rankingOverrides.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_MIN);
+
+        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
+                notification, mContext.getUser(), "", 0);
+
+        assertFalse(mNotificationData.isHighPriority(sbn));
+    }
+
+    @Test
+    public void lowForegroundHighPriority() {
+        Notification notification = mock(Notification.class);
+        when(notification.isForegroundService()).thenReturn(true);
+
+        mNotificationData.rankingOverrides.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_LOW);
+
+        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
+                notification, mContext.getUser(), "", 0);
+
+        assertTrue(mNotificationData.isHighPriority(sbn));
+    }
+
     private void initStatusBarNotification(boolean allowDuringSetup) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, allowDuringSetup);
@@ -362,39 +425,90 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mMockStatusBarNotification.getNotification()).thenReturn(notification);
     }
 
-    private class TestableNotificationData extends NotificationData {
+    public static class TestableNotificationData extends NotificationData {
         public TestableNotificationData() {
             super();
         }
 
+        public static final String OVERRIDE_RANK = "r";
+        public static final String OVERRIDE_DND = "dnd";
+        public static final String OVERRIDE_VIS_OVERRIDE = "vo";
+        public static final String OVERRIDE_VIS_EFFECTS = "ve";
+        public static final String OVERRIDE_IMPORTANCE = "i";
+        public static final String OVERRIDE_IMP_EXP = "ie";
+        public static final String OVERRIDE_GROUP = "g";
+        public static final String OVERRIDE_CHANNEL = "c";
+        public static final String OVERRIDE_PEOPLE = "p";
+        public static final String OVERRIDE_SNOOZE_CRITERIA = "sc";
+        public static final String OVERRIDE_BADGE = "b";
+        public static final String OVERRIDE_USER_SENTIMENT = "us";
+        public static final String OVERRIDE_HIDDEN = "h";
+        public static final String OVERRIDE_LAST_ALERTED = "la";
+        public static final String OVERRIDE_NOISY = "n";
+        public static final String OVERRIDE_SMART_ACTIONS = "sa";
+        public static final String OVERRIDE_SMART_REPLIES = "sr";
+        public static final String OVERRIDE_BUBBLE = "cb";
+
+        public Bundle rankingOverrides = new Bundle();
+
         @Override
         protected boolean getRanking(String key, Ranking outRanking) {
             super.getRanking(key, outRanking);
-            if (key.equals(TEST_HIDDEN_NOTIFICATION_KEY)) {
-                outRanking.populate(key, outRanking.getRank(),
-                        outRanking.matchesInterruptionFilter(),
-                        outRanking.getVisibilityOverride(), outRanking.getSuppressedVisualEffects(),
-                        outRanking.getImportance(), outRanking.getImportanceExplanation(),
-                        outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true,
-                        -1, false, null, null, outRanking.canBubble());
-            } else if (key.equals(TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY)) {
-                outRanking.populate(key, outRanking.getRank(),
-                        outRanking.matchesInterruptionFilter(),
-                        outRanking.getVisibilityOverride(), 255,
-                        outRanking.getImportance(), outRanking.getImportanceExplanation(),
-                        outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true, -1,
-                        false, null, null, outRanking.canBubble());
-            } else {
-                outRanking.populate(key, outRanking.getRank(),
-                        outRanking.matchesInterruptionFilter(),
-                        outRanking.getVisibilityOverride(), outRanking.getSuppressedVisualEffects(),
-                        outRanking.getImportance(), outRanking.getImportanceExplanation(),
-                        outRanking.getOverrideGroupKey(), NOTIFICATION_CHANNEL, null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), false, -1,
-                        false, null, null, outRanking.canBubble());
+
+            ArrayList<String> currentAdditionalPeople = new ArrayList<>();
+            if (outRanking.getAdditionalPeople() != null) {
+                currentAdditionalPeople.addAll(outRanking.getAdditionalPeople());
             }
+
+            ArrayList<SnoozeCriterion> currentSnooze = new ArrayList<>();
+            if (outRanking.getSnoozeCriteria() != null) {
+                currentSnooze.addAll(outRanking.getSnoozeCriteria());
+            }
+
+            ArrayList<Notification.Action> currentActions = new ArrayList<>();
+            if (outRanking.getSmartActions() != null) {
+                currentActions.addAll(outRanking.getSmartActions());
+            }
+
+            ArrayList<CharSequence> currentReplies = new ArrayList<>();
+            if (outRanking.getSmartReplies() != null) {
+                currentReplies.addAll(outRanking.getSmartReplies());
+            }
+
+            outRanking.populate(key,
+                    rankingOverrides.getInt(OVERRIDE_RANK, outRanking.getRank()),
+                    rankingOverrides.getBoolean(OVERRIDE_DND,
+                            outRanking.matchesInterruptionFilter()),
+                    rankingOverrides.getInt(OVERRIDE_VIS_OVERRIDE,
+                            outRanking.getVisibilityOverride()),
+                    rankingOverrides.getInt(OVERRIDE_VIS_EFFECTS,
+                            outRanking.getSuppressedVisualEffects()),
+                    rankingOverrides.getInt(OVERRIDE_IMPORTANCE, outRanking.getImportance()),
+                    rankingOverrides.getCharSequence(OVERRIDE_IMP_EXP,
+                            outRanking.getImportanceExplanation()),
+                    rankingOverrides.getString(OVERRIDE_GROUP, outRanking.getOverrideGroupKey()),
+                    rankingOverrides.containsKey(OVERRIDE_CHANNEL)
+                            ? (NotificationChannel) rankingOverrides.getParcelable(OVERRIDE_CHANNEL)
+                            : outRanking.getChannel(),
+                    rankingOverrides.containsKey(OVERRIDE_PEOPLE)
+                            ? rankingOverrides.getStringArrayList(OVERRIDE_PEOPLE)
+                            : currentAdditionalPeople,
+                    rankingOverrides.containsKey(OVERRIDE_SNOOZE_CRITERIA)
+                            ? rankingOverrides.getParcelableArrayList(OVERRIDE_SNOOZE_CRITERIA)
+                            : currentSnooze,
+                    rankingOverrides.getBoolean(OVERRIDE_BADGE, outRanking.canShowBadge()),
+                    rankingOverrides.getInt(OVERRIDE_USER_SENTIMENT, outRanking.getUserSentiment()),
+                    rankingOverrides.getBoolean(OVERRIDE_HIDDEN, outRanking.isSuspended()),
+                    rankingOverrides.getLong(OVERRIDE_LAST_ALERTED,
+                            outRanking.getLastAudiblyAlertedMillis()),
+                    rankingOverrides.getBoolean(OVERRIDE_NOISY, outRanking.isNoisy()),
+                    rankingOverrides.containsKey(OVERRIDE_SMART_ACTIONS)
+                            ? rankingOverrides.getParcelableArrayList(OVERRIDE_SMART_ACTIONS)
+                            : currentActions,
+                    rankingOverrides.containsKey(OVERRIDE_SMART_REPLIES)
+                            ? rankingOverrides.getCharSequenceArrayList(OVERRIDE_SMART_REPLIES)
+                            : currentReplies,
+                    rankingOverrides.getBoolean(OVERRIDE_BUBBLE, outRanking.canBubble()));
             return true;
         }
     }
