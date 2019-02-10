@@ -76,10 +76,12 @@ public class StretchAnalogClock extends View {
     }
 
     /**
-     * Set the color of the minute hand.
+     * Set the colors to use on the clock face.
+     * @param dark Darker color obtained from color palette.
+     * @param light Lighter color obtained from color palette.
      */
-    public void setMinuteHandColor(int color) {
-        mMinutePaint.setColor(color);
+    public void setClockColor(int dark, int light) {
+        mHourPaint.setColor(dark);
         invalidate();
     }
 

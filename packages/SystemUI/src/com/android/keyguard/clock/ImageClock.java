@@ -78,6 +78,16 @@ public class ImageClock extends FrameLayout {
         mTime.setTimeZone(timeZone);
     }
 
+    /**
+     * Sets the colors to use on the clock face.
+     * @param dark Darker color obtained from color palette.
+     * @param light Lighter color obtained from color palette.
+     */
+    public void setClockColors(int dark, int light) {
+        mHourHand.setColorFilter(dark);
+        mMinuteHand.setColorFilter(light);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();

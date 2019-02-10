@@ -55,9 +55,16 @@ public interface ClockPlugin extends Plugin {
     void setTextColor(int color);
 
     /**
+     * Sets the color palette for the clock face.
+     * @param supportsDarkText Whether dark text can be displayed.
+     * @param colors Colors that should be used on the clock face, ordered from darker to lighter.
+     */
+    default void setColorPalette(boolean supportsDarkText, int[] colors) {}
+
+    /**
      * Notifies that time tick alarm from doze service fired.
      */
-    default void dozeTimeTick() { }
+    default void dozeTimeTick() {}
 
     /**
      * Set the amount (ratio) that the device has transitioned to doze.
