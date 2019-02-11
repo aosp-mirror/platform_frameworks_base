@@ -1035,6 +1035,15 @@ public class AppTimeLimitControllerTests {
                 0L, group.getUsageRemaining());
     }
 
+    /** Verify that a limit of 0 is allowed for the special case of re-registering an observer. */
+    @Test
+    public void testAppUsageLimitObserver_ZeroTimeLimitIsAllowed() {
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, 0);
+        AppTimeLimitController.AppUsageLimitGroup group = getAppUsageLimitObserver(UID, OBS_ID1);
+        assertNotNull("Observer wasn't added", group);
+        assertEquals("Usage remaining was not 0.", 0, group.getUsageRemaining());
+    }
+
     private void startUsage(String packageName) {
         mController.noteUsageStart(packageName, USER_ID);
     }

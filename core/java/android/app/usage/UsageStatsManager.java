@@ -745,7 +745,11 @@ public final class UsageStatsManager {
      * Registering an {@code observerId} that was already registered will override the previous one.
      * No more than 1000 unique {@code observerId} may be registered by a single uid
      * at any one time.
-     * A limit may be unregistered via {@link #unregisterAppUsageLimitObserver}
+     * A limit is not cleared when the usage time is exceeded. It needs to be unregistered via
+     * {@link #unregisterAppUsageLimitObserver}.
+     * <p>
+     * Note: usage limits are not persisted in the system and are cleared on reboots. Callers
+     * must reset any limits that they need on reboots.
      * <p>
      * This method is similar to {@link #registerAppUsageObserver}, but the usage limit set here
      * will be visible to the launcher so that it can report the limit to the user and how much
@@ -757,12 +761,15 @@ public final class UsageStatsManager {
      * @param observedEntities The list of packages and token to observe for usage time. Cannot be
      *                         null and must include at least one package or token.
      * @param timeLimit The total time the set of apps can be in the foreground before the
-     *                  callbackIntent is delivered. Must be at least one minute.
+     *                  callbackIntent is delivered. Must be at least one minute. Note: a limit of
+     *                  0 can be set to indicate that the user has already exhausted the limit for
+     *                  a group, in which case, the given {@code callbackIntent} will be ignored.
      * @param timeUnit The unit for time specified in {@code timeLimit}. Cannot be null.
-     * @param callbackIntent The PendingIntent that will be dispatched when the  usage limit is
+     * @param callbackIntent The PendingIntent that will be dispatched when the usage limit is
      *                       exceeded by the group of apps. The delivered Intent will also contain
      *                       the extras {@link #EXTRA_OBSERVER_ID}, {@link #EXTRA_TIME_LIMIT} and
-     *                       {@link #EXTRA_TIME_USED}. Cannot be null.
+     *                       {@link #EXTRA_TIME_USED}. Cannot be {@code null} unless the observer is
+     *                       being registered with a {@code timeLimit} of 0.
      * @throws SecurityException if the caller doesn't have both SUSPEND_APPS and OBSERVE_APP_USAGE
      *                           permissions.
      * @hide
@@ -772,7 +779,7 @@ public final class UsageStatsManager {
             android.Manifest.permission.SUSPEND_APPS,
             android.Manifest.permission.OBSERVE_APP_USAGE})
     public void registerAppUsageLimitObserver(int observerId, @NonNull String[] observedEntities,
-            long timeLimit, @NonNull TimeUnit timeUnit, @NonNull PendingIntent callbackIntent) {
+            long timeLimit, @NonNull TimeUnit timeUnit, PendingIntent callbackIntent) {
         try {
             mService.registerAppUsageLimitObserver(observerId, observedEntities,
                     timeUnit.toMillis(timeLimit), callbackIntent, mContext.getOpPackageName());
