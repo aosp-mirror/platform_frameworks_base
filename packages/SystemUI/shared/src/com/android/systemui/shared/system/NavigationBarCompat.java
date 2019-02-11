@@ -17,31 +17,15 @@
 package com.android.systemui.shared.system;
 
 import android.annotation.IntDef;
-import android.content.Context;
-import android.content.res.Resources;
-import android.util.DisplayMetrics;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class NavigationBarCompat {
-    /**
-     * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
-     * home button press/long press over are ignored and will start to drag when exceeded and the
-     * touch slop is when the respected operation will occur when exceeded. Touch slop must be
-     * larger than the drag slop.
-     */
-    public static int getQuickStepDragSlopPx() {
-        return convertDpToPixel(10);
-    }
+/**
+ * TODO: Remove this class
+ */
+public class NavigationBarCompat extends QuickStepContract {
 
-    public static int getQuickStepTouchSlopPx() {
-        return convertDpToPixel(24);
-    }
-
-    public static int getQuickScrubTouchSlopPx() {
-        return convertDpToPixel(24);
-    }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HIT_TARGET_NONE, HIT_TARGET_BACK, HIT_TARGET_HOME, HIT_TARGET_OVERVIEW})
@@ -75,8 +59,4 @@ public class NavigationBarCompat {
      * Interaction type: show/hide the overview button while this service is connected to launcher
      */
     public static final int FLAG_SHOW_OVERVIEW_BUTTON = 0x4;
-
-    private static int convertDpToPixel(float dp){
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
 }

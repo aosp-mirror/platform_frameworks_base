@@ -56,6 +56,7 @@ import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.system.InputChannelCompat.InputEventDispatcher;
 import com.android.systemui.shared.system.NavigationBarCompat;
 
 import java.io.PrintWriter;
@@ -676,8 +677,13 @@ public class QuickStepController implements GestureHelper {
     }
 
     private boolean proxyMotionEvents(MotionEvent event) {
-        final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
         event.transform(mTransformGlobalMatrix);
+        InputEventDispatcher dispatcher = mOverviewEventSender.getInputEventDispatcher();
+        if (dispatcher != null) {
+            dispatcher.dispatch(event);
+        }
+
+        final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
         try {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 overviewProxy.onPreMotionEvent(mNavigationBarView.getDownHitTarget());

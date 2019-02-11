@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import android.os.Bundle;
 import android.os.Looper;
 import android.util.Pair;
 import android.view.BatchedInputEventReceiver;
@@ -50,6 +51,16 @@ public class InputChannelCompat {
         InputEventReceiver receiver = new InputEventReceiver(channels[1], looper, choreographer,
                 listener);
         return Pair.create(dispatcher, receiver);
+    }
+
+    /**
+     * Creates a dispatcher from the extras received as part on onInitialize
+     */
+    public static InputEventReceiver fromBundle(Bundle params, String key,
+            Looper looper, Choreographer choreographer, InputEventListener listener) {
+
+        InputChannel channel = params.getParcelable(key);
+        return new InputEventReceiver(channel, looper, choreographer, listener);
     }
 
     /**
@@ -90,7 +101,7 @@ public class InputChannelCompat {
         private final InputChannel mInputChannel;
         private final InputEventSender mSender;
 
-        private InputEventDispatcher(InputChannel inputChannel, Looper looper) {
+        public InputEventDispatcher(InputChannel inputChannel, Looper looper) {
             mInputChannel = inputChannel;
             mSender = new InputEventSender(inputChannel, looper) { };
         }
