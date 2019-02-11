@@ -1093,6 +1093,12 @@ public class FileUtils {
         return buildUniqueFileWithExtension(parent, parts[0], parts[1]);
     }
 
+    /** {@hide} */
+    public static File buildNonUniqueFile(File parent, String mimeType, String displayName) {
+        final String[] parts = splitFileName(mimeType, displayName);
+        return buildFile(parent, parts[0], parts[1]);
+    }
+
     /**
      * Generates a unique file name under the given parent directory, keeping
      * any extension intact.
