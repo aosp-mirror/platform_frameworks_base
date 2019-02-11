@@ -650,6 +650,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_USE_EMBEDDED_DEX = 1 << 25;
 
+    /**
+     * Value for {@link #privateFlags}: indicates whether this application's data will be cleared
+     * on a failed restore.
+     *
+     * <p>Comes from the
+     * android.R.styleable#AndroidManifestApplication_allowClearUserDataOnFailedRestore attribute
+     * of the &lt;application&gt; tag.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE = 1 << 26;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -676,6 +688,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_VENDOR,
             PRIVATE_FLAG_VIRTUAL_PRELOAD,
             PRIVATE_FLAG_HAS_FRAGILE_USER_DATA,
+            PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlags {}

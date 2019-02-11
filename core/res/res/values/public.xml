@@ -2939,6 +2939,8 @@
         <public name="zygotePreloadName" />
         <public name="useEmbeddedDex" />
         <public name="forceUriPermissions" />
+        <!-- @hide @SystemApi -->
+        <public name="allowClearUserDataOnFailedRestore"/>
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">
