@@ -11,3 +11,6 @@ lajos@google.com
 marcone@google.com
 sungsoo@google.com
 wjia@google.com
+
+# For maintaining sync with AndroidX code
+per-file ExifInterface.java = jinpark@google.com, sungsoo@google.com
