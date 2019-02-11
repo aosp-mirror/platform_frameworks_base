@@ -68,6 +68,7 @@ import java.util.List;
 public class NotificationContentView extends FrameLayout {
 
     private static final String TAG = "NotificationContentView";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final int VISIBLE_TYPE_CONTRACTED = 0;
     public static final int VISIBLE_TYPE_EXPANDED = 1;
     public static final int VISIBLE_TYPE_HEADSUP = 2;
@@ -1319,6 +1320,14 @@ public class NotificationContentView extends FrameLayout {
 
         SmartRepliesAndActions smartRepliesAndActions =
                 chooseSmartRepliesAndActions(mSmartReplyConstants, entry);
+        if (DEBUG) {
+            Log.d(TAG, String.format("Adding suggestions for %s, %d actions, and %d replies.",
+                    entry.notification.getKey(),
+                    smartRepliesAndActions.smartActions == null ? 0 :
+                            smartRepliesAndActions.smartActions.actions.size(),
+                    smartRepliesAndActions.smartReplies == null ? 0 :
+                            smartRepliesAndActions.smartReplies.choices.length));
+        }
 
         applyRemoteInput(entry, smartRepliesAndActions.hasFreeformRemoteInput);
         applySmartReplyView(smartRepliesAndActions, entry);
@@ -1341,6 +1350,10 @@ public class NotificationContentView extends FrameLayout {
                 notification.findRemoteInputActionPair(true /* freeform */);
 
         if (!smartReplyConstants.isEnabled()) {
+            if (DEBUG) {
+                Log.d(TAG, "Smart suggestions not enabled, not adding suggestions for "
+                        + entry.notification.getKey());
+            }
             return new SmartRepliesAndActions(null, null, freeformRemoteInputActionPair != null);
         }
         // Only use smart replies from the app if they target P or above. We have this check because

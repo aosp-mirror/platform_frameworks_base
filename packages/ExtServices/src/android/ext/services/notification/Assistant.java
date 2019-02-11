@@ -230,6 +230,10 @@ public class Assistant extends NotificationAssistantService {
         NotificationEntry entry =
                 new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
         SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
+        if (DEBUG) {
+            Log.d(TAG, String.format("Creating Adjustment for %s, with %d actions, and %d replies.",
+                    sbn.getKey(), suggestions.actions.size(), suggestions.replies.size()));
+        }
         return createEnqueuedNotificationAdjustment(
                 entry, suggestions.actions, suggestions.replies);
     }
