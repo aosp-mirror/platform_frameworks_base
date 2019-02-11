@@ -278,6 +278,39 @@ TEST(StatsdStatsTest, TestPullAtomStats) {
     EXPECT_EQ(3335L, report.pulled_atom_stats(0).max_pull_delay_nanos());
 }
 
+TEST(StatsdStatsTest, TestAtomMetricsStats) {
+    StatsdStats stats;
+    time_t now = time(nullptr);
+    // old event, we get it from the stats buffer. should be ignored.
+    stats.noteBucketDropped(1000L);
+
+    stats.noteBucketBoundaryDelayNs(1000L, -1L);
+    stats.noteBucketBoundaryDelayNs(1000L, -10L);
+    stats.noteBucketBoundaryDelayNs(1000L, 2L);
+
+    stats.noteBucketBoundaryDelayNs(1001L, 1L);
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    bool good = report.ParseFromArray(&output[0], output.size());
+    EXPECT_TRUE(good);
+
+    EXPECT_EQ(2, report.atom_metric_stats().size());
+
+    auto atomStats = report.atom_metric_stats(0);
+    EXPECT_EQ(1000L, atomStats.metric_id());
+    EXPECT_EQ(1L, atomStats.bucket_dropped());
+    EXPECT_EQ(-10L, atomStats.min_bucket_boundary_delay_ns());
+    EXPECT_EQ(2L, atomStats.max_bucket_boundary_delay_ns());
+
+    auto atomStats2 = report.atom_metric_stats(1);
+    EXPECT_EQ(1001L, atomStats2.metric_id());
+    EXPECT_EQ(0L, atomStats2.bucket_dropped());
+    EXPECT_EQ(0L, atomStats2.min_bucket_boundary_delay_ns());
+    EXPECT_EQ(1L, atomStats2.max_bucket_boundary_delay_ns());
+}
+
 TEST(StatsdStatsTest, TestAnomalyMonitor) {
     StatsdStats stats;
     stats.noteRegisteredAnomalyAlarmChanged();
