@@ -222,26 +222,55 @@ public class SmartActionsHelperTest {
 
         List<ConversationActions.Message> messages =
                 runSuggestAndCaptureRequest().getConversation();
-        assertThat(messages).hasSize(3);
+        assertThat(messages).hasSize(4);
 
-        ConversationActions.Message secondMessage = messages.get(0);
+        ConversationActions.Message firstMessage = messages.get(0);
+        MessageSubject.assertThat(firstMessage).hasText("firstMessage");
+        MessageSubject.assertThat(firstMessage)
+                .hasPerson(ConversationActions.Message.PERSON_USER_SELF);
+        MessageSubject.assertThat(firstMessage)
+                .hasReferenceTime(createZonedDateTimeFromMsUtc(1000));
+
+        ConversationActions.Message secondMessage = messages.get(1);
         MessageSubject.assertThat(secondMessage).hasText("secondMessage");
         MessageSubject.assertThat(secondMessage)
                 .hasPerson(ConversationActions.Message.PERSON_USER_SELF);
         MessageSubject.assertThat(secondMessage)
                 .hasReferenceTime(createZonedDateTimeFromMsUtc(2000));
 
-        ConversationActions.Message thirdMessage = messages.get(1);
+        ConversationActions.Message thirdMessage = messages.get(2);
         MessageSubject.assertThat(thirdMessage).hasText("thirdMessage");
         MessageSubject.assertThat(thirdMessage).hasPerson(userA);
         MessageSubject.assertThat(thirdMessage)
                 .hasReferenceTime(createZonedDateTimeFromMsUtc(3000));
 
-        ConversationActions.Message fourthMessage = messages.get(2);
+        ConversationActions.Message fourthMessage = messages.get(3);
         MessageSubject.assertThat(fourthMessage).hasText("fourthMessage");
         MessageSubject.assertThat(fourthMessage).hasPerson(userB);
         MessageSubject.assertThat(fourthMessage)
                 .hasReferenceTime(createZonedDateTimeFromMsUtc(4000));
+    }
+
+    @Test
+    public void testSuggest_lastMessageLocalUser() {
+        Person me = new Person.Builder().setName("Me").build();
+        Person userA = new Person.Builder().setName("A").build();
+        Notification.MessagingStyle style =
+                new Notification.MessagingStyle(me)
+                        .addMessage("firstMessage", 1000, userA)
+                        .addMessage("secondMessage", 2000, me);
+        Notification notification =
+                mNotificationBuilder
+                        .setContentText("You have two new messages")
+                        .setStyle(style)
+                        .setActions(createReplyAction())
+                        .build();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+
+        mSmartActionsHelper.suggest(createNotificationEntry());
+
+        verify(mTextClassifier, never())
+                .suggestConversationActions(any(ConversationActions.Request.class));
     }
 
     @Test
