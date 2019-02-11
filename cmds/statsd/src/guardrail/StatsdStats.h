@@ -511,6 +511,7 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestAnomalyMonitor);
     FRIEND_TEST(StatsdStatsTest, TestSystemServerCrash);
     FRIEND_TEST(StatsdStatsTest, TestPullAtomStats);
+    FRIEND_TEST(StatsdStatsTest, TestAtomMetricsStats);
 };
 
 }  // namespace statsd
