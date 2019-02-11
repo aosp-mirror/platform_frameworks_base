@@ -61,6 +61,7 @@ public class TlvBufferUtils {
     public static class TlvConstructor {
         private int mTypeSize;
         private int mLengthSize;
+        private ByteOrder mByteOrder = ByteOrder.BIG_ENDIAN;
 
         private byte[] mArray;
         private int mArrayLength;
@@ -84,6 +85,20 @@ public class TlvBufferUtils {
             }
             mTypeSize = typeSize;
             mLengthSize = lengthSize;
+            mPosition = 0;
+        }
+
+        /**
+         * Configure the TLV constructor to use a particular byte order. Should be
+         * {@link ByteOrder#BIG_ENDIAN} (the default at construction) or
+         * {@link ByteOrder#LITTLE_ENDIAN}.
+         *
+         * @return The constructor to facilitate chaining
+         *         {@code ctr.putXXX(..).putXXX(..)}.
+         */
+        public TlvConstructor setByteOrder(ByteOrder byteOrder) {
+            mByteOrder = byteOrder;
+            return this;
         }
 
         /**
@@ -96,6 +111,7 @@ public class TlvBufferUtils {
         public TlvConstructor wrap(@Nullable byte[] array) {
             mArray = array;
             mArrayLength = (array == null) ? 0 : array.length;
+            mPosition = 0;
             return this;
         }
 
@@ -109,6 +125,7 @@ public class TlvBufferUtils {
         public TlvConstructor allocate(int capacity) {
             mArray = new byte[capacity];
             mArrayLength = capacity;
+            mPosition = 0;
             return this;
         }
 
@@ -155,6 +172,18 @@ public class TlvBufferUtils {
         }
 
         /**
+         * Copies a raw byte into the TLV buffer - without a type or a length.
+         *
+         * @param b The byte to be inserted into the structure.
+         * @return The constructor to facilitate chaining {@code cts.putXXX(..).putXXX(..)}.
+         */
+        public TlvConstructor putRawByte(byte b) {
+            checkRawLength(1);
+            mArray[mPosition++] = b;
+            return this;
+        }
+
+        /**
          * Copies a byte array into the TLV with the indicated type. For an LV
          * formatted structure (i.e. typeLength=0 in {@link TlvConstructor
          * TlvConstructor(int, int)} ) the type field is ignored.
@@ -193,6 +222,22 @@ public class TlvBufferUtils {
         }
 
         /**
+         * Copies a byte array into the TLV - without a type or a length.
+         *
+         * @param array The array to be copied (in full) into the TLV structure.
+         * @return The constructor to facilitate chaining
+         *         {@code ctr.putXXX(..).putXXX(..)}.
+         */
+        public TlvConstructor putRawByteArray(@Nullable byte[] array) {
+            if (array == null) return this;
+
+            checkRawLength(array.length);
+            System.arraycopy(array, 0, mArray, mPosition, array.length);
+            mPosition += array.length;
+            return this;
+        }
+
+        /**
          * Places a zero length element (i.e. Length field = 0) into the TLV.
          * For an LV formatted structure (i.e. typeLength=0 in
          * {@link TlvConstructor TlvConstructor(int, int)} ) the type field is
@@ -221,7 +266,7 @@ public class TlvBufferUtils {
         public TlvConstructor putShort(int type, short data) {
             checkLength(2);
             addHeader(type, 2);
-            Memory.pokeShort(mArray, mPosition, data, ByteOrder.BIG_ENDIAN);
+            Memory.pokeShort(mArray, mPosition, data, mByteOrder);
             mPosition += 2;
             return this;
         }
@@ -239,7 +284,7 @@ public class TlvBufferUtils {
         public TlvConstructor putInt(int type, int data) {
             checkLength(4);
             addHeader(type, 4);
-            Memory.pokeInt(mArray, mPosition, data, ByteOrder.BIG_ENDIAN);
+            Memory.pokeInt(mArray, mPosition, data, mByteOrder);
             mPosition += 4;
             return this;
         }
@@ -294,18 +339,24 @@ public class TlvBufferUtils {
             }
         }
 
+        private void checkRawLength(int dataLength) {
+            if (mPosition + dataLength > mArrayLength) {
+                throw new BufferOverflowException();
+            }
+        }
+
         private void addHeader(int type, int length) {
             if (mTypeSize == 1) {
                 mArray[mPosition] = (byte) type;
             } else if (mTypeSize == 2) {
-                Memory.pokeShort(mArray, mPosition, (short) type, ByteOrder.BIG_ENDIAN);
+                Memory.pokeShort(mArray, mPosition, (short) type, mByteOrder);
             }
             mPosition += mTypeSize;
 
             if (mLengthSize == 1) {
                 mArray[mPosition] = (byte) length;
             } else if (mLengthSize == 2) {
-                Memory.pokeShort(mArray, mPosition, (short) length, ByteOrder.BIG_ENDIAN);
+                Memory.pokeShort(mArray, mPosition, (short) length, mByteOrder);
             }
             mPosition += mLengthSize;
         }
@@ -330,13 +381,19 @@ public class TlvBufferUtils {
         public int length;
 
         /**
+         * Control of the endianess of the TLV element - true for big-endian, false for little-
+         * endian.
+         */
+        public ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
+
+        /**
          * The Value (V) field - a raw byte array representing the current TLV
          * element where the entry starts at {@link TlvElement#offset}.
          */
-        public byte[] refArray;
+        private byte[] mRefArray;
 
         /**
-         * The offset to be used into {@link TlvElement#refArray} to access the
+         * The offset to be used into {@link TlvElement#mRefArray} to access the
          * raw data representing the current TLV element.
          */
         public int offset;
@@ -344,12 +401,21 @@ public class TlvBufferUtils {
         private TlvElement(int type, int length, @Nullable byte[] refArray, int offset) {
             this.type = type;
             this.length = length;
-            this.refArray = refArray;
+            mRefArray = refArray;
             this.offset = offset;
 
             if (offset + length > refArray.length) {
                 throw new BufferOverflowException();
             }
+        }
+
+        /**
+         * Return the raw byte array of the Value (V) field.
+         *
+         * @return The Value (V) field as a byte array.
+         */
+        public byte[] getRawData() {
+            return Arrays.copyOfRange(mRefArray, offset, offset + length);
         }
 
         /**
@@ -364,7 +430,7 @@ public class TlvBufferUtils {
                 throw new IllegalArgumentException(
                         "Accesing a byte from a TLV element of length " + length);
             }
-            return refArray[offset];
+            return mRefArray[offset];
         }
 
         /**
@@ -379,7 +445,7 @@ public class TlvBufferUtils {
                 throw new IllegalArgumentException(
                         "Accesing a short from a TLV element of length " + length);
             }
-            return Memory.peekShort(refArray, offset, ByteOrder.BIG_ENDIAN);
+            return Memory.peekShort(mRefArray, offset, byteOrder);
         }
 
         /**
@@ -394,7 +460,7 @@ public class TlvBufferUtils {
                 throw new IllegalArgumentException(
                         "Accesing an int from a TLV element of length " + length);
             }
-            return Memory.peekInt(refArray, offset, ByteOrder.BIG_ENDIAN);
+            return Memory.peekInt(mRefArray, offset, byteOrder);
         }
 
         /**
@@ -403,7 +469,7 @@ public class TlvBufferUtils {
          * @return String repersentation of the current TLV element.
          */
         public String getString() {
-            return new String(refArray, offset, length);
+            return new String(mRefArray, offset, length);
         }
     }
 
@@ -413,6 +479,7 @@ public class TlvBufferUtils {
     public static class TlvIterable implements Iterable<TlvElement> {
         private int mTypeSize;
         private int mLengthSize;
+        private ByteOrder mByteOrder = ByteOrder.BIG_ENDIAN;
         private byte[] mArray;
         private int mArrayLength;
 
@@ -437,6 +504,13 @@ public class TlvBufferUtils {
             mLengthSize = lengthSize;
             mArray = array;
             mArrayLength = (array == null) ? 0 : array.length;
+        }
+
+        /**
+         * Configure the TLV iterator to use little-endian byte ordering.
+         */
+        public void setByteOrder(ByteOrder byteOrder) {
+            mByteOrder = byteOrder;
         }
 
         /**
@@ -486,7 +560,7 @@ public class TlvBufferUtils {
         public List<byte[]> toList() {
             List<byte[]> list = new ArrayList<>();
             for (TlvElement tlv : this) {
-                list.add(Arrays.copyOfRange(tlv.refArray, tlv.offset, tlv.offset + tlv.length));
+                list.add(Arrays.copyOfRange(tlv.mRefArray, tlv.offset, tlv.offset + tlv.length));
             }
 
             return list;
@@ -516,7 +590,7 @@ public class TlvBufferUtils {
                     if (mTypeSize == 1) {
                         type = mArray[mOffset];
                     } else if (mTypeSize == 2) {
-                        type = Memory.peekShort(mArray, mOffset, ByteOrder.BIG_ENDIAN);
+                        type = Memory.peekShort(mArray, mOffset, mByteOrder);
                     }
                     mOffset += mTypeSize;
 
@@ -524,11 +598,12 @@ public class TlvBufferUtils {
                     if (mLengthSize == 1) {
                         length = mArray[mOffset];
                     } else if (mLengthSize == 2) {
-                        length = Memory.peekShort(mArray, mOffset, ByteOrder.BIG_ENDIAN);
+                        length = Memory.peekShort(mArray, mOffset, mByteOrder);
                     }
                     mOffset += mLengthSize;
 
                     TlvElement tlv = new TlvElement(type, length, mArray, mOffset);
+                    tlv.byteOrder = mByteOrder;
                     mOffset += length;
                     return tlv;
                 }
@@ -543,7 +618,8 @@ public class TlvBufferUtils {
 
     /**
      * Validates that a (T)LV array is constructed correctly. I.e. that its specified Length
-     * fields correctly fill the specified length (and do not overshoot).
+     * fields correctly fill the specified length (and do not overshoot). Uses big-endian
+     * byte ordering.
      *
      * @param array The (T)LV array to verify.
      * @param typeSize The size (in bytes) of the type field. Valid values are 0, 1, or 2.
@@ -551,6 +627,22 @@ public class TlvBufferUtils {
      * @return A boolean indicating whether the array is valid (true) or invalid (false).
      */
     public static boolean isValid(@Nullable byte[] array, int typeSize, int lengthSize) {
+        return isValidEndian(array, typeSize, lengthSize, ByteOrder.BIG_ENDIAN);
+    }
+
+    /**
+     * Validates that a (T)LV array is constructed correctly. I.e. that its specified Length
+     * fields correctly fill the specified length (and do not overshoot).
+     *
+     * @param array The (T)LV array to verify.
+     * @param typeSize The size (in bytes) of the type field. Valid values are 0, 1, or 2.
+     * @param lengthSize The size (in bytes) of the length field. Valid values are 1 or 2.
+     * @param byteOrder The endianness of the byte array: {@link ByteOrder#BIG_ENDIAN} or
+     *                  {@link ByteOrder#LITTLE_ENDIAN}.
+     * @return A boolean indicating whether the array is valid (true) or invalid (false).
+     */
+    public static boolean isValidEndian(@Nullable byte[] array, int typeSize, int lengthSize,
+            ByteOrder byteOrder) {
         if (typeSize < 0 || typeSize > 2) {
             throw new IllegalArgumentException(
                     "Invalid arguments - typeSize must be 0, 1, or 2: typeSize=" + typeSize);
@@ -569,8 +661,7 @@ public class TlvBufferUtils {
             if (lengthSize == 1) {
                 nextTlvIndex += lengthSize + array[nextTlvIndex];
             } else {
-                nextTlvIndex += lengthSize + Memory.peekShort(array, nextTlvIndex,
-                        ByteOrder.BIG_ENDIAN);
+                nextTlvIndex += lengthSize + Memory.peekShort(array, nextTlvIndex, byteOrder);
             }
         }
 
