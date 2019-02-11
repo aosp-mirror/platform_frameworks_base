@@ -48,7 +48,6 @@ import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -553,12 +552,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             Handler mUiHandler = new Handler(Looper.getMainLooper());
             mUiHandler.post(() -> {
                 Dialog mDialog = new OngoingPrivacyDialog(mContext, builder).createDialog();
-                mDialog.getWindow().setType(
-                        WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-                SystemUIDialog.setShowForAllUsers(mDialog, true);
+                SystemUIDialog.setShowForAllUsers(mDialog, false);
                 SystemUIDialog.registerDismissListener(mDialog);
                 SystemUIDialog.setWindowOnTop(mDialog);
-                mUiHandler.post(() -> mDialog.show());
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> mDialog.show());
                 mHost.collapsePanels();
             });
         }
