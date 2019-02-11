@@ -30,6 +30,9 @@
     <backup-transport-whitelisted-service
         service="com.android.localtransport/.LocalTransportService" />
 
+    <!-- Whitelist Shell to use the bugreport API -->
+    <bugreport-whitelisted package="com.android.shell" />
+
     <!-- Whitelist of bundled applications which all handle URLs to their websites by default -->
     <app-link package="com.android.carrierdefaultapp" />
 </config>
