@@ -744,12 +744,8 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(user.getIdentifier(), "Cannot access usage limit")) {
                 return null;
             }
-
-            final PackageManagerInternal pmi =
-                    LocalServices.getService(PackageManagerInternal.class);
-            final ComponentName cn = pmi.getDefaultHomeActivity(user.getIdentifier());
-            if (!cn.getPackageName().equals(callingPackage)) {
-                throw new SecurityException("Caller is not the active launcher");
+            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
+                throw new SecurityException("Caller is not the recents app");
             }
 
             final UsageStatsManagerInternal.AppUsageLimitData data =
