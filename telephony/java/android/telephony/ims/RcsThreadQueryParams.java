@@ -35,8 +35,6 @@ import java.util.Set;
 /**
  * The parameters to pass into {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParams)} in
  * order to select a subset of {@link RcsThread}s present in the message store.
- *
- * @hide - TODO: make public
  */
 public final class RcsThreadQueryParams implements Parcelable {
     /**

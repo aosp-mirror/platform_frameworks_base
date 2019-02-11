@@ -24,8 +24,6 @@ import android.os.Parcelable;
  * {@link RcsIncomingMessageCreationParams} is a collection of parameters that should be passed
  * into {@link RcsThread#addIncomingMessage(RcsIncomingMessageCreationParams)} to generate an
  * {@link RcsIncomingMessage} on that {@link RcsThread}
- *
- * @hide - TODO: make public
  */
 public final class RcsIncomingMessageCreationParams extends RcsMessageCreationParams implements
         Parcelable {

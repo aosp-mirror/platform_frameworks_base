@@ -21,8 +21,6 @@ import android.annotation.WorkerThread;
 /**
  * This class holds the delivery information of an {@link RcsOutgoingMessage} for each
  * {@link RcsParticipant} that the message was intended for.
- *
- * @hide - TODO: make public
  */
 public class RcsOutgoingMessageDelivery {
     // The participant that this delivery is intended for

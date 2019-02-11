@@ -20,8 +20,6 @@ import android.os.Parcel;
 
 /**
  * An event that happened on an {@link RcsGroupThread}.
- *
- * @hide - TODO: make public
  */
 public abstract class RcsGroupThreadEvent extends RcsEvent {
     private final int mRcsGroupThreadId;
