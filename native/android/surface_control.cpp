@@ -440,6 +440,20 @@ void ASurfaceTransaction_setBufferAlpha(ASurfaceTransaction* aSurfaceTransaction
     transaction->setAlpha(surfaceControl, alpha);
 }
 
+void ASurfaceTransaction_setBufferDataSpace(ASurfaceTransaction* aSurfaceTransaction,
+                                         ASurfaceControl* aSurfaceControl,
+                                         ADataSpace aDataSpace) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    LOG_ALWAYS_FATAL_IF(!isDataSpaceValid(surfaceControl, aDataSpace), "invalid dataspace");
+
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setDataspace(surfaceControl, static_cast<ui::Dataspace>(aDataSpace));
+}
+
 void ASurfaceTransaction_setHdrMetadata_smpte2086(ASurfaceTransaction* aSurfaceTransaction,
                                                   ASurfaceControl* aSurfaceControl,
                                                   struct AHdrMetadata_smpte2086* metadata) {
