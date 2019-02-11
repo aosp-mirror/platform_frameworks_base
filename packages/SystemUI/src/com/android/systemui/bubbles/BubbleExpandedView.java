@@ -34,8 +34,10 @@ import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.StatsLog;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -234,6 +236,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             mStackView.collapseStack(() -> {
                 try {
                     n.contentIntent.send();
+                    logBubbleClickEvent(mEntry.notification,
+                            StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_APP);
                 } catch (PendingIntent.CanceledException e) {
                     Log.w(TAG, "Failed to send intent for bubble with key: "
                             + (mEntry != null ? mEntry.key : " null entry"));
@@ -242,7 +246,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         } else if (id == R.id.settings_button) {
             Intent intent = getSettingsIntent(mEntry.notification.getPackageName(),
                     mEntry.notification.getUid());
-            mStackView.collapseStack(() -> mContext.startActivity(intent));
+            mStackView.collapseStack(() -> {
+                mContext.startActivity(intent);
+                logBubbleClickEvent(mEntry.notification,
+                        StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
+            });
         } else if (id == R.id.no_bubbles_button) {
             setBubblesAllowed(false);
         } else if (id == R.id.yes_bubbles_button) {
@@ -262,6 +270,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             } else if (mOnBubbleBlockedListener != null) {
                 mOnBubbleBlockedListener.onBubbleBlocked(mEntry);
             }
+            logBubbleClickEvent(mEntry.notification,
+                    allowed ? StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_OPT_IN :
+                            StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_OPT_OUT);
         } catch (RemoteException e) {
             Log.w(TAG, e);
         }
@@ -317,5 +328,23 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
          * Called when a bubble is blocked for the provided entry.
          */
         void onBubbleBlocked(NotificationEntry entry);
+    }
+
+    /**
+     * Logs bubble UI click event.
+     *
+     * @param notification the bubble notification that user is interacting with.
+     * @param action the user interaction enum.
+     */
+    private void logBubbleClickEvent(StatusBarNotification notification, int action) {
+        StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
+                notification.getPackageName(),
+                notification.getNotification().getChannelId(),
+                notification.getId(),
+                mStackView.getBubbleIndex(mStackView.getExpandedBubble()),
+                mStackView.getBubbleCount(),
+                action,
+                mStackView.getNormalizedXPosition(),
+                mStackView.getNormalizedYPosition());
     }
 }
