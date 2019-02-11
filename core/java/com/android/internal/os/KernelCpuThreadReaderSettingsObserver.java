@@ -59,6 +59,13 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
     private static final String COLLECTED_UIDS_SETTINGS_KEY = "collected_uids";
     private static final String COLLECTED_UIDS_DEFAULT = "1000-1000";
 
+    /**
+     * Minimum total CPU usage to report
+     */
+    private static final String MINIMUM_TOTAL_CPU_USAGE_MILLIS_SETTINGS_KEY =
+            "minimum_total_cpu_usage_millis";
+    private static final int MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT = 0;
+
     private final Context mContext;
 
     @Nullable
@@ -87,7 +94,8 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
         mContext = context;
         mKernelCpuThreadReader = KernelCpuThreadReader.create(
                 NUM_BUCKETS_DEFAULT,
-                UidPredicate.fromString(COLLECTED_UIDS_DEFAULT));
+                UidPredicate.fromString(COLLECTED_UIDS_DEFAULT),
+                MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT);
     }
 
     @Override
@@ -124,6 +132,9 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
         mKernelCpuThreadReader.setNumBuckets(
                 parser.getInt(NUM_BUCKETS_SETTINGS_KEY, NUM_BUCKETS_DEFAULT));
         mKernelCpuThreadReader.setUidPredicate(uidPredicate);
+        mKernelCpuThreadReader.setMinimumTotalCpuUsageMillis(parser.getInt(
+                MINIMUM_TOTAL_CPU_USAGE_MILLIS_SETTINGS_KEY,
+                MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT));
     }
 
     /**

@@ -109,6 +109,12 @@ public class KernelCpuThreadReader {
     private Predicate<Integer> mUidPredicate;
 
     /**
+     * If a thread has strictly less than {@code minimumTotalCpuUsageMillis} total CPU usage, it
+     * will not be reported
+     */
+    private int mMinimumTotalCpuUsageMillis;
+
+    /**
      * Where the proc filesystem is mounted
      */
     private final Path mProcPath;
@@ -142,10 +148,12 @@ public class KernelCpuThreadReader {
     public KernelCpuThreadReader(
             int numBuckets,
             Predicate<Integer> uidPredicate,
+            int minimumTotalCpuUsageMillis,
             Path procPath,
             Path initialTimeInStatePath,
             Injector injector) throws IOException {
         mUidPredicate = uidPredicate;
+        mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
         mProcPath = procPath;
         mProcTimeInStateReader = new ProcTimeInStateReader(initialTimeInStatePath);
         mInjector = injector;
@@ -158,11 +166,13 @@ public class KernelCpuThreadReader {
      * @return the reader, null if an exception was thrown during creation
      */
     @Nullable
-    public static KernelCpuThreadReader create(int numBuckets, Predicate<Integer> uidPredicate) {
+    public static KernelCpuThreadReader create(
+            int numBuckets, Predicate<Integer> uidPredicate, int minimumTotalCpuUsageMillis) {
         try {
             return new KernelCpuThreadReader(
                     numBuckets,
                     uidPredicate,
+                    minimumTotalCpuUsageMillis,
                     DEFAULT_PROC_PATH,
                     DEFAULT_INITIAL_TIME_IN_STATE_PATH,
                     new Injector());
@@ -308,6 +318,18 @@ public class KernelCpuThreadReader {
     }
 
     /**
+     * If a thread has strictly less than {@code minimumTotalCpuUsageMillis} total CPU usage, it
+     * will not be reported
+     */
+    void setMinimumTotalCpuUsageMillis(int minimumTotalCpuUsageMillis) {
+        if (minimumTotalCpuUsageMillis < 0) {
+            Slog.w(TAG, "Negative minimumTotalCpuUsageMillis: " + minimumTotalCpuUsageMillis);
+            return;
+        }
+        mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
+    }
+
+    /**
      * Get the CPU frequencies that correspond to the times reported in
      * {@link ThreadCpuUsage#usageTimesMillis}
      */
@@ -345,6 +367,15 @@ public class KernelCpuThreadReader {
             return null;
         }
         int[] cpuUsages = mFrequencyBucketCreator.getBucketedValues(cpuUsagesLong);
+
+        // Check if the total CPU usage below the threshold
+        int totalCpuUsage = 0;
+        for (int i = 0; i < cpuUsages.length; i++) {
+            totalCpuUsage += cpuUsages[i];
+        }
+        if (totalCpuUsage < mMinimumTotalCpuUsageMillis) {
+            return null;
+        }
 
         return new ThreadCpuUsage(threadId, threadName, cpuUsages);
     }
