@@ -124,6 +124,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private TintedIconManager mIconManager;
     private TouchAnimator mStatusIconsAlphaAnimator;
     private TouchAnimator mHeaderTextContainerAlphaAnimator;
+    private TouchAnimator mPrivacyChipAlphaAnimator;
 
     private View mSystemIconsView;
     private View mQuickQsStatusIcons;
@@ -212,6 +213,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mNextAlarmTextView = findViewById(R.id.next_alarm_text);
         mRingerModeIcon = findViewById(R.id.ringer_mode_icon);
         mRingerModeTextView = findViewById(R.id.ringer_mode_text);
+        mPrivacyChip = findViewById(R.id.privacy_chip);
+        mPrivacyChip.setOnClickListener(this);
 
         updateResources();
 
@@ -230,8 +233,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
         mDateView = findViewById(R.id.date);
-        mPrivacyChip = findViewById(R.id.privacy_chip);
-        mPrivacyChip.setOnClickListener(this);
         mSpace = findViewById(R.id.space);
 
         // Tint for the battery icons are handled in setupHost()
@@ -383,6 +384,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
+        updatePrivacyChipAlphaAnimator();
     }
 
     private void updateStatusIconAlphaAnimator() {
@@ -395,6 +397,12 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
                 .addFloat(mHeaderTextContainerView, "alpha", 0, 1)
                 .setStartDelay(.5f)
+                .build();
+    }
+
+    private void updatePrivacyChipAlphaAnimator() {
+        mPrivacyChipAlphaAnimator = new TouchAnimator.Builder()
+                .addFloat(mPrivacyChip, "alpha", 1, 0, 1)
                 .build();
     }
 
@@ -430,6 +438,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         if (mHeaderTextContainerAlphaAnimator != null) {
             mHeaderTextContainerAlphaAnimator.setPosition(keyguardExpansionFraction);
+        }
+        if (mPrivacyChipAlphaAnimator != null) {
+            mPrivacyChip.setExpanded(expansionFraction > 0.5);
+            mPrivacyChipAlphaAnimator.setPosition(keyguardExpansionFraction);
         }
 
         // Check the original expansion fraction - we don't want to show the tooltip until the
