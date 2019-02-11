@@ -473,6 +473,15 @@ public class StackScrollAlgorithm {
                     childState.yTranslation = topState.yTranslation + topState.height
                             - childState.height;
                 }
+
+                // heads up notification show and this row is the top entry of heads up
+                // notifications. i.e. this row should be the only one row that has input field
+                // To check if the row need to do translation according to scroll Y
+                // heads up show full of row's content and any scroll y indicate that the
+                // translationY need to move up the HUN.
+                if (!mIsExpanded && isTopEntry && ambientState.getScrollY() > 0) {
+                    childState.yTranslation -= ambientState.getScrollY();
+                }
             }
             if (row.isHeadsUpAnimatingAway()) {
                 childState.hidden = false;

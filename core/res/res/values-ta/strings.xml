@@ -60,7 +60,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"வெளிசெல்லும் அழைப்பாளர் ஐடி"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"இணைக்கப்பட்ட லைன் ஐடி"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"இணைக்கப்பட்ட லைன் ஐடியை வரம்பிடல்"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"அழைப்புப் பகிர்வு"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"அழைப்பு திருப்பிவிடுதல்"</string>
     <string name="CwMmi" msgid="9129678056795016867">"அழைப்பு காத்திருப்பு"</string>
     <string name="BaMmi" msgid="455193067926770581">"அழைப்புத் தவிர்ப்பு"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"கடவுச்சொல்லை மாற்று"</string>
@@ -88,7 +88,7 @@
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"அவசர அழைப்பைச் செய்ய முடியாது"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"வைஃபை மூலம் அவசர அழைப்புகளைச் செய்ய முடியாது"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"விழிப்பூட்டல்கள்"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"அழைப்புப் பகிர்வு"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"அழைப்பு திருப்பிவிடுதல்"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"அவசரகாலத் திரும்ப அழைக்கும் பயன்முறை"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"மொபைல் டேட்டாவின் நிலை"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS செய்திகள்"</string>
@@ -275,16 +275,16 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"தொடர்புகளை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ள"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"கேலெண்டர்"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"கேலெண்டரை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"மெசேஜ்களை அனுப்பவும், அவற்றைப் பார்க்கவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"மெசேஜ்களை அனுப்பவும், பார்க்கவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"சேமிப்பிடம்"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுக வேண்டும்"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"உங்கள் சாதனத்திலுள்ள படங்கள், மீடியா, ஃபைல்கள் ஆகியவற்றை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"உங்கள் சாதனத்திலுள்ள படங்கள், மீடியா, ஃபைல்கள் ஆகியவற்றை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஒலிப் பதிவு செய்யலாம்"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ஆடியோவைப் பதிவு செய்ய &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
@@ -296,7 +296,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"உங்கள் மொபைல் அழைப்புப் பதிவுகளை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"மொபைல் அழைப்புகள் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"மொபைல் அழைப்புகள் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் சென்சார்கள்"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"உங்கள் உடலியக்கக் குறிகள் பற்றிய சென்சார் தரவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
@@ -1697,8 +1697,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"பேட்டரியின் ஆயுளை அதிகரிக்க, பேட்டரி சேமிப்பான் அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும். "<annotation id="url">"மேலும் அறிக"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"பேட்டரி இயங்கும் நேரத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும்."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"பேட்டரி இயங்கும் நேரத்தை அதிகரிக்க, \'பேட்டரி சேமிப்பான்\' அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும். "<annotation id="url">"மேலும் அறிக"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"பேட்டரி இயங்கும் நேரத்தை அதிகரிக்க, \'பேட்டரி சேமிப்பான்\' அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும்."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில பயன்பாடுகளை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் பயன்பாடானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"இயக்கு"</string>

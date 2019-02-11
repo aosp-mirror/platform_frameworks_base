@@ -33,7 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correio de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexão ou código MMI inválido."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"A operação é limitada somente a números de chamadas fixas."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"A operação é limitada somente a números de discagem fixa."</string>
     <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Não é possível alterar as configurações de encaminhamento de chamada do seu smartphone em roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"O serviço foi ativado."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"O serviço foi ativado para:"</string>
@@ -47,12 +47,12 @@
     <string name="mismatchPin" msgid="609379054496863419">"Os PINs digitados não correspondem."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Digite um PIN com 4 a 8 números."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Digite um PUK com oito números ou mais."</string>
-    <string name="needPuk" msgid="919668385956251611">"O seu cartão SIM está bloqueado por um PUK. Digite o código PUK para desbloqueá-lo."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Digite o PUK2 para desbloquear o cartão SIM."</string>
-    <string name="enablePin" msgid="209412020907207950">"Falha. Ative o bloqueio do SIM/R-UIM."</string>
+    <string name="needPuk" msgid="919668385956251611">"O seu chip está bloqueado por um PUK. Digite o código PUK para desbloqueá-lo."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Digite o PUK2 para desbloquear o chip."</string>
+    <string name="enablePin" msgid="209412020907207950">"Falha. Ative o bloqueio do chip/R-UIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o SIM será bloqueado.</item>
-      <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o SIM será bloqueado.</item>
+      <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
+      <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -82,7 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Sem serviço de voz"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Nenhum serviço de voz nem chamada de emergência"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Temporariamente desativado pela sua operadora"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Temporariamente desativado pela sua operadora para o SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Temporariamente desativado pela sua operadora para o chip <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Não foi possível acessar a rede móvel"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Tente alterar a rede preferencial. Toque para alterar."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Chamadas de emergência indisponíveis"</string>
@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensagens SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensagens do correio de voz"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Chamadas por Wi-Fi"</string>
-    <string name="notification_channel_sim" msgid="4052095493875188564">"Status do SIM"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Status do chip"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTD modo COMPLETO solicitado"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTD modo HCO solicitado"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTD modo VCO solicitado"</string>
@@ -412,8 +412,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que o app modifique configurações de áudio globais como volume e alto-falantes de saída."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Este app pode gravar áudio usando o microfone a qualquer momento."</string>
-    <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar comandos para o SIM"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite que o app envie comandos ao SIM. Muito perigoso."</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar comandos para o chip"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite que o app envie comandos ao chip. Muito perigoso."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tirar fotos e gravar vídeos"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Este app pode tirar fotos e gravar vídeos usando a câmera a qualquer momento."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar vibração"</string>
@@ -742,14 +742,14 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Tente novamente"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Desbloqueio para todos os recursos e dados"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sem cartão SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Não há um cartão SIM no tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Nenhum cartão SIM na TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Não há um cartão SIM no telefone."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insera um cartão SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"O cartão SIM não foi inserido ou não é possível lê-lo. Insira um cartão SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Cartão SIM inutilizável."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"O cartão SIM foi desativado permanentemente.\nEntre em contato com seu provedor de serviços sem fio para obter outro cartão SIM."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sem chip"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Não há um chip no tablet."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Nenhum chip na TV."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Não há um chip no telefone."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insera um chip."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"O chip não foi inserido ou não é possível lê-lo. Insira um chip."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Chip inutilizável."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"O chip foi desativado permanentemente.\nEntre em contato com seu provedor de serviços sem fio para obter outro chip."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Faixa anterior"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Próxima faixa"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Pausar"</string>
@@ -759,10 +759,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Avançar"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Só chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Rede bloqueada"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"O cartão SIM está bloqueado pelo PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"O chip está bloqueado pelo PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consulte o Guia do usuário ou entre em contato com o Serviço de atendimento ao cliente."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"O cartão SIM está bloqueado."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Desbloqueando o cartão SIM…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"O chip está bloqueado."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Desbloqueando o chip…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Você desenhou seu padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Você digitou sua senha incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Você digitou seu PIN incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes.\n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
@@ -813,8 +813,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueio com padrão."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueio facial."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueio com PIN."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Desbloqueio com PIN do SIM."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Desbloqueio com PUK do SIM."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Desbloqueio com PIN do chip."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Desbloqueio com PUK do chip."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueio com senha."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área do padrão."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Área de deslize."</string>
@@ -1224,17 +1224,17 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"P/ alterar: Configurações &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Sempre permitir"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nunca permitir"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"Cartão SIM removido"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"A rede móvel ficará indisponível até que você reinicie com um cartão SIM válido inserido."</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"Chip removido"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"A rede móvel ficará indisponível até que você reinicie com um chip válido inserido."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Concluído"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"Cartão SIM adicionado"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"Chip adicionado"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Reinicie o dispositivo para acessar a rede móvel."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Ativar serviço móvel"</string>
-    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Faça o download do app da operadora para ativar seu novo SIM"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Faça o download do app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo SIM"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Faça o download do app da operadora para ativar seu novo chip"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Faça o download do app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo chip"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Fazer download do app"</string>
-    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Novo SIM inserido"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Novo chip inserido"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Toque para configurar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Definir hora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Definir data"</string>
@@ -1519,17 +1519,17 @@
       <item quantity="other">Tente novamente em <xliff:g id="NUMBER">%d</xliff:g> segundos.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Desenhe seu padrão"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Digite o PIN do cartão SIM"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Digite o PIN do chip"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Digite o PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Digite a senha"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"O SIM foi desativado. Insira o código PUK para continuar. Entre em contato com a operadora para obter mais detalhes."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"O chip foi desativado. Insira o código PUK para continuar. Entre em contato com a operadora para obter mais detalhes."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Digite o código PIN desejado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirme o código PIN desejado"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Desbloqueando o cartão SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Desbloqueando o chip…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Código PIN incorreto."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Digite um PIN com quatro a oito números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"O código PUK deve ter oito números."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Introduza novamente o código PUK correto. Muitas tentativas malsucedidas desativarão permanentemente o SIM."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Introduza novamente o código PUK correto. Muitas tentativas malsucedidas desativarão permanentemente o chip."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Os códigos PIN não coincidem"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Muitas tentativas de padrão"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Para desbloquear, faça login usando sua Conta do Google."</string>
@@ -1764,7 +1764,7 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Porta USB periférica"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Mais opções"</string>
-    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fechar barra flutuante"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fechar menu flutuante"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximizar"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
@@ -1852,9 +1852,9 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Teste de mensagens de emergência"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Responder"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM não autorizado para voz"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM não aprovisionado para voz"</string>
-    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM não autorizado para voz"</string>
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Chip não autorizado para voz"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Chip não aprovisionado para voz"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Chip não autorizado para voz"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Smartphone não autorizado para voz"</string>
     <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> não permitido"</string>
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> não aprovisionado"</string>

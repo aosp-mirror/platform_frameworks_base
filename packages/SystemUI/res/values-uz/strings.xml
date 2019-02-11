@@ -125,7 +125,7 @@
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Ma’lumotlar bitta panelda."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Ma’lumotlar ikkita panelda."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Ma’lumotlar uchta panelda."</string>
-    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Ma’lumot uzatish signali to‘liq."</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Internet signali butun."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Ulangan: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Ulangan: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="4026393061247081201">"Bunga ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -160,7 +160,7 @@
     <string name="data_connection_roaming" msgid="6037232010953697354">"Rouming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta solinmagan."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobil internet"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobil internet yoniq"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Mobil internet yoqilmagan"</string>
@@ -172,9 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Batareya quvvati sarfi haqida ma’lumot"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya quvvat olmoqda (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%)."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Tizim sozlamalari."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Eslatmalar."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Barcha bildirishnomalarni ko‘rish"</string>
@@ -298,7 +296,7 @@
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Eniga"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Joylashuv"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuv xizmati o‘chiq"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuvni aniqlash xizmati yoqilmagan"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Media qurilma"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Favqulodda chaqiruvlar"</string>
@@ -776,7 +774,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tezkor sozlamalarni yopish."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Signal o‘rnatildi."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> sifatida kirgansiz"</string>
-    <string name="data_connection_no_internet" msgid="4503302451650972989">"Internetga ulanmagan"</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"Internetga ulanmagansiz"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Tafsilotlarini ko‘rsatish."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> sozlamalarini ochish."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Sozlamalar tartibini o‘zgartirish."</string>
@@ -848,10 +846,10 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Ruxsat"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Rad etish"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Quvvat tejash rejimini rejalashtirish uchun bosing"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Batareya quvvati <xliff:g id="PERCENTAGE">%d</xliff:g>%% ga tushganda avtomatik yoqish"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Batareya quvvati <xliff:g id="PERCENTAGE">%d</xliff:g>%% ga tushganida avtomatik yoqish"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Kerak emas"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Quvvat tejash rejimi jadvali faollashtirildi"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Batareya quvvati <xliff:g id="PERCENTAGE">%d</xliff:g>%% ga tushganda, quvvat tejash rejimi avtomatik ravishda yoqiladi."</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Batareya quvvati <xliff:g id="PERCENTAGE">%d</xliff:g>%% ga tushsa, quvvat tejash rejimi avtomatik ravishda yoqiladi."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Sozlamalar"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>

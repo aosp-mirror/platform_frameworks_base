@@ -284,7 +284,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS メッセージの送信と表示を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"端末内の写真、メディア、ファイルへのアクセス"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"端末内の写真、メディア、ファイルへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"端末内の写真、メディア、ファイルへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
@@ -573,8 +573,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"携帯通信会社のサービスへのバインド"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"携帯通信会社のサービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"マナーモードへのアクセス"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"マナーモード設定の読み取りと書き込みをアプリに許可します。"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"サイレント モードへのアクセス"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"画面ロック解除試行の監視"</string>
@@ -1736,10 +1736,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（次のアラーム）まで"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"自分が OFF にするまで"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"マナーモードを OFF にするまで"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"サイレント モードを OFF にするまで"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"マナーモード"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"サイレント モード"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ダウンタイム"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"平日の夜"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"週末"</string>
@@ -1875,10 +1875,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"着信や通知をバイブレーションで知らせます"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"着信音と通知音をミュートします"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"システムの変更"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"マナーモード"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"新機能: マナーモードでは通知が非表示になります"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"サイレント モード"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"新機能: サイレント モードでは通知が非表示になります"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"タップすると、詳細を確認して設定を変更できます。"</string>
-    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"マナーモードが変わりました"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"タップしてブロック対象をご確認ください。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"システム"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"設定"</string>

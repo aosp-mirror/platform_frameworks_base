@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Thay đổi mạng của nhà mạng"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Mở chi tiết về pin"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> phần trăm pin."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Đang sạc pin, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> phần trăm."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Đang sạc pin, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Cài đặt hệ thống"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Thông báo."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Xem tất cả thông báo"</string>
@@ -204,8 +204,8 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Đã bật Wifi."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Di động <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Pin <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Chế độ trên máy bay tắt."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Chế độ trên máy bay bật."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Chế độ trên máy bay đang tắt."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Chế độ trên máy bay đang bật."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Đã tắt chế độ trên máy bay."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Đã bật chế độ trên máy bay."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"hoàn toàn tắt tiếng"</string>
@@ -329,7 +329,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Đang dùng làm điểm truy cập Internet"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Điểm phát sóng"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Đang bật…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Trình tiết kiệm dữ liệu bật"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Trình tiết kiệm dữ liệu đang bật"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d thiết bị</item>
       <item quantity="one">%d thiết bị</item>

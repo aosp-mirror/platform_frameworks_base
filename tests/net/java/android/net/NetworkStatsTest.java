@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.net.NetworkStats.Entry;
 import android.os.Process;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
@@ -785,7 +786,38 @@ public class NetworkStatsTest {
         ArrayMap<String, String> stackedIface = new ArrayMap<>();
         stackedIface.put(v4Iface, baseIface);
 
-        NetworkStats.Entry otherEntry = new NetworkStats.Entry(
+        // Ipv4 traffic sent/received by an app on stacked interface.
+        final NetworkStats.Entry appEntry = new NetworkStats.Entry(
+                v4Iface, appUid, SET_DEFAULT, TAG_NONE,
+                30501490  /* rxBytes */,
+                22401 /* rxPackets */,
+                876235 /* txBytes */,
+                13805 /* txPackets */,
+                0 /* operations */);
+
+        // Traffic measured for the root uid on the base interface if eBPF is in use.
+        // Incorrectly includes appEntry's bytes and packets, plus IPv4-IPv6 translation
+        // overhead (20 bytes per packet), only for TX traffic.
+        final NetworkStats.Entry ebpfRootUidEntry = new NetworkStats.Entry(
+                baseIface, rootUid, SET_DEFAULT, TAG_NONE,
+                163577 /* rxBytes */,
+                187 /* rxPackets */,
+                1169942 /* txBytes */,
+                13902 /* txPackets */,
+                0 /* operations */);
+
+        // Traffic measured for the root uid on the base interface if xt_qtaguid is in use.
+        // Incorrectly includes appEntry's bytes and packets, plus IPv4-IPv6 translation
+        // overhead (20 bytes per packet), in both directions.
+        final NetworkStats.Entry xtRootUidEntry = new NetworkStats.Entry(
+                baseIface, rootUid, SET_DEFAULT, TAG_NONE,
+                31113087 /* rxBytes */,
+                22588 /* rxPackets */,
+                1169942 /* txBytes */,
+                13902 /* txPackets */,
+                0 /* operations */);
+
+        final NetworkStats.Entry otherEntry = new NetworkStats.Entry(
                 otherIface, appUid, SET_DEFAULT, TAG_NONE,
                 2600  /* rxBytes */,
                 2 /* rxPackets */,
@@ -793,39 +825,41 @@ public class NetworkStatsTest {
                 3 /* txPackets */,
                 0 /* operations */);
 
-        NetworkStats stats = new NetworkStats(TEST_START, 3)
-                .addValues(v4Iface, appUid, SET_DEFAULT, TAG_NONE,
-                        30501490  /* rxBytes */,
-                        22401 /* rxPackets */,
-                        876235 /* txBytes */,
-                        13805 /* txPackets */,
-                        0 /* operations */)
-                .addValues(baseIface, rootUid, SET_DEFAULT, TAG_NONE,
-                        31113087,
-                        22588,
-                        1169942,
-                        13902,
-                        0)
+        final NetworkStats statsXt = new NetworkStats(TEST_START, 3)
+                .addValues(appEntry)
+                .addValues(xtRootUidEntry)
                 .addValues(otherEntry);
 
-        stats.apply464xlatAdjustments(stackedIface);
+        final NetworkStats statsEbpf = new NetworkStats(TEST_START, 3)
+                .addValues(appEntry)
+                .addValues(ebpfRootUidEntry)
+                .addValues(otherEntry);
 
-        assertEquals(3, stats.size());
-        assertValues(stats, 0, v4Iface, appUid, SET_DEFAULT, TAG_NONE,
-                METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO,
+        statsXt.apply464xlatAdjustments(stackedIface, false);
+        statsEbpf.apply464xlatAdjustments(stackedIface, true);
+
+        assertEquals(3, statsXt.size());
+        assertEquals(3, statsEbpf.size());
+        final NetworkStats.Entry expectedAppUid = new NetworkStats.Entry(
+                v4Iface, appUid, SET_DEFAULT, TAG_NONE,
                 30949510,
                 22401,
                 1152335,
                 13805,
                 0);
-        assertValues(stats, 1, baseIface, 0, SET_DEFAULT, TAG_NONE,
-                METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO,
+        final NetworkStats.Entry expectedRootUid = new NetworkStats.Entry(
+                baseIface, 0, SET_DEFAULT, TAG_NONE,
                 163577,
                 187,
                 17607,
                 97,
                 0);
-        assertEquals(otherEntry, stats.getValues(2, null));
+        assertEquals(expectedAppUid, statsXt.getValues(0, null));
+        assertEquals(expectedRootUid, statsXt.getValues(1, null));
+        assertEquals(otherEntry, statsXt.getValues(2, null));
+        assertEquals(expectedAppUid, statsEbpf.getValues(0, null));
+        assertEquals(expectedRootUid, statsEbpf.getValues(1, null));
+        assertEquals(otherEntry, statsEbpf.getValues(2, null));
     }
 
     @Test
@@ -850,7 +884,7 @@ public class NetworkStatsTest {
                 .addValues(secondEntry);
 
         // Empty map: no adjustment
-        stats.apply464xlatAdjustments(new ArrayMap<>());
+        stats.apply464xlatAdjustments(new ArrayMap<>(), false);
 
         assertEquals(2, stats.size());
         assertEquals(firstEntry, stats.getValues(0, null));

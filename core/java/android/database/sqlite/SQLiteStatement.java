@@ -51,7 +51,7 @@ public final class SQLiteStatement extends SQLiteProgram {
     }
 
     /**
-     * Execute this SQL statement, if the the number of rows affected by execution of this SQL
+     * Execute this SQL statement, if the number of rows affected by execution of this SQL
      * statement is of any importance to the caller - for example, UPDATE / DELETE SQL statements.
      *
      * @return the number of rows affected by this SQL statement execution.

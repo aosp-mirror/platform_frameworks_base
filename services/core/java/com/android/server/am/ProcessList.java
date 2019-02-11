@@ -162,9 +162,11 @@ public final class ProcessList {
     // LMK_TARGET <minfree> <minkillprio> ... (up to 6 pairs)
     // LMK_PROCPRIO <pid> <uid> <prio>
     // LMK_PROCREMOVE <pid>
+    // LMK_PROCPURGE
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
+    static final byte LMK_PROCPURGE = 3;
 
     // These are the various interesting memory levels that we will give to
     // the OOM killer.  Note that the OOM killer only supports 6 slots, so we
@@ -813,31 +815,46 @@ public final class ProcessList {
         return true;
     }
 
+    // Never call directly, use writeLmkd() instead
+    private static boolean writeLmkdCommand(ByteBuffer buf) {
+        try {
+            sLmkdOutputStream.write(buf.array(), 0, buf.position());
+        } catch (IOException ex) {
+            Slog.w(TAG, "Error writing to lowmemorykiller socket");
+
+            try {
+                sLmkdSocket.close();
+            } catch (IOException ex2) {
+            }
+
+            sLmkdSocket = null;
+            return false;
+        }
+        return true;
+    }
+
     private static void writeLmkd(ByteBuffer buf) {
 
         for (int i = 0; i < 3; i++) {
             if (sLmkdSocket == null) {
-                    if (openLmkdSocket() == false) {
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ie) {
-                        }
-                        continue;
+                if (openLmkdSocket() == false) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ie) {
                     }
-            }
-
-            try {
-                sLmkdOutputStream.write(buf.array(), 0, buf.position());
-                return;
-            } catch (IOException ex) {
-                Slog.w(TAG, "Error writing to lowmemorykiller socket");
-
-                try {
-                    sLmkdSocket.close();
-                } catch (IOException ex2) {
+                    continue;
                 }
 
-                sLmkdSocket = null;
+                // Purge any previously registered pids
+                ByteBuffer purge_buf = ByteBuffer.allocate(4);
+                purge_buf.putInt(LMK_PROCPURGE);
+                if (writeLmkdCommand(purge_buf) == false) {
+                    // Write failed, skip the rest and retry
+                    continue;
+                }
+            }
+            if (writeLmkdCommand(buf)) {
+                return;
             }
         }
     }

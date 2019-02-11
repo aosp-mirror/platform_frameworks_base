@@ -38,7 +38,7 @@ import java.nio.ByteOrder;
  * <li>MIFARE Classic Mini are 320 bytes ({@link #SIZE_MINI}), with 5 sectors each of 4 blocks.
  * <li>MIFARE Classic 1k are 1024 bytes ({@link #SIZE_1K}), with 16 sectors each of 4 blocks.
  * <li>MIFARE Classic 2k are 2048 bytes ({@link #SIZE_2K}), with 32 sectors each of 4 blocks.
- * <li>MIFARE Classic 4k} are 4096 bytes ({@link #SIZE_4K}). The first 32 sectors contain 4 blocks
+ * <li>MIFARE Classic 4k are 4096 bytes ({@link #SIZE_4K}). The first 32 sectors contain 4 blocks
  * and the last 8 sectors contain 16 blocks.
  * </ul>
  *

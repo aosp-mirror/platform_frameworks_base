@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="4967302169856689448">"Decupare ecran pe colț"</string>
+    <string name="display_cutout_emulation_overlay" msgid="1677693377327336341">"Decupajul colțului"</string>
 </resources>

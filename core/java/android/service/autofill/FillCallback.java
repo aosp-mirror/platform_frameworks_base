@@ -39,13 +39,20 @@ public final class FillCallback {
     }
 
     /**
-     * Notifies the Android System that an
-     * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
-     * FillCallback)} was successfully fulfilled by the service.
+     * Notifies the Android System that a fill request
+     * ({@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
+     * FillCallback)}) was successfully fulfilled by the service.
      *
-     * @param response autofill information for that activity, or {@code null} when the activity
-     * cannot be autofilled (for example, if it only contains read-only fields). See
-     * {@link FillResponse} for examples.
+     * <p>This method should always be called, even if the service doesn't have the heuristics to
+     * fulfill the request (in which case it should be called with {@code null}).
+     *
+     * <p>See the main {@link AutofillService} documentation for more details and examples.
+     *
+     * @param response autofill information for that activity, or {@code null} when the service
+     * cannot autofill the activity.
+     *
+     * @throws IllegalStateException if this method or {@link #onFailure(CharSequence)} was already
+     * called.
      */
     public void onSuccess(@Nullable FillResponse response) {
         assertNotCalled();
@@ -63,11 +70,25 @@ public final class FillCallback {
     }
 
     /**
-     * Notifies the Android System that an
+     * Notifies the Android System that a fill request (
      * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
-     * FillCallback)} could not be fulfilled by the service.
+     * FillCallback)}) could not be fulfilled by the service (for example, because the user data was
+     * not available yet), so the request could be retried later.
      *
-     * @param message error message to be displayed to the user.
+     * <p><b>Note: </b>this method should not be used when the service didn't have the heursitics to
+     * fulfill the request; in this case, the service should call {@link #onSuccess(FillResponse)
+     * onSuccess(null)} instead.
+     *
+     * <p><b>Note: </b>on Android versions up to {@link android.os.Build.VERSION_CODES#P}, this
+     * method is not working as intended, and the service should call
+     * {@link #onSuccess(FillResponse) onSuccess(null)} instead.
+     *
+     * @param message error message to be displayed to the user. <b>Note: </b> this message is
+     * displayed on {@code logcat} logs and should not contain PII (Personally Identifiable
+     * Information, such as username or email address).
+     *
+     * @throws IllegalStateException if this method or {@link #onSuccess(FillResponse)} was already
+     * called.
      */
     public void onFailure(@Nullable CharSequence message) {
         assertNotCalled();

@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Se ha producido un problema de conexión o el código MMI no es válido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"La operación solo es válida para números de marcación fija."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de desvío de llamada desde tu teléfono mientras estás en itinerancia."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de desvío de llamadas desde tu teléfono mientras estás en itinerancia."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"El servicio se ha habilitado."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Se ha habilitado el servicio para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"El servicio se ha inhabilitado."</string>
@@ -60,7 +60,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"ID de emisor de llamada saliente"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID de línea conectada"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Restricción de ID de línea conectada"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Desvío de llamada"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Desvío de llamadas"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Llamada en espera"</string>
     <string name="BaMmi" msgid="455193067926770581">"Bloqueo de llamada"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Cambio de contraseña"</string>
@@ -88,7 +88,7 @@
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Servicio de llamadas de emergencia no disponible"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"No se pueden hacer llamadas de emergencia por Wi‑Fi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamada"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de llamada de emergencia"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Estado de los datos móviles"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensajes SMS"</string>
@@ -133,7 +133,7 @@
     <item msgid="4397097370387921767">"Llamadas Wi-Fi de %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Dar preferencia a Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferir datos móviles"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
@@ -584,14 +584,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el tablet o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea la TV o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar el bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambiar el bloqueo de pantalla"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambia el bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia el bloqueo de pantalla"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear la pantalla"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar cómo y cuándo se bloquea la pantalla"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Borrar los datos del tablet sin avisar restableciendo el estado de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Borra los datos de la TV sin advertencia previa restableciendo la TV a los valores predeterminados de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borrar los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Borrar datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Borra los datos del usuario en este tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Borra los datos del usuario en esta TV sin avisar."</string>
@@ -603,7 +603,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Cifrado del almacenamiento"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se cifren los datos de la aplicación almacenados."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inhabilitar cámaras"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar el uso de las cámaras del dispositivo"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evita el uso de las cámaras del dispositivo"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Inhabilitar algunas funciones del bloqueo de pantalla"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Evitar el uso de algunas funciones del bloqueo de pantalla"</string>
   <string-array name="phoneTypes">
@@ -1075,7 +1075,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Volver a abrir la aplicación"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Enviar sugerencias"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Enviar comentarios"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Cerrar"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Silenciar hasta que se reinicie el dispositivo"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Esperar"</string>

@@ -64,11 +64,11 @@
     <string name="label_view" msgid="6304565553218192990">"Zobrazit"</string>
     <string name="always_use_device" msgid="4015357883336738417">"Když bude připojeno zařízení <xliff:g id="USB_DEVICE">%2$s</xliff:g>, vždy otevřít <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Když bude připojeno zařízení <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>, vždy otevřít <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Povolit ladění USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Povolit ladění přes USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitální otisk RSA počítače je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povolit z tohoto počítače"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladění USB není povoleno"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladění přes USB není povoleno"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění přes USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Přiblížit na celou obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celou obrazovku"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snímek obrazovky"</string>
@@ -174,9 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Probíhá změna sítě operátora"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Otevřít podrobnosti o baterii"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Stav baterie: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Baterie se nabíjí. Nabito: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systémová nastavení."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Oznámení."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Zobrazit všechna oznámení"</string>

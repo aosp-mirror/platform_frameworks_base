@@ -71,7 +71,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * See {@link PhoneAccount} and {@link TelecomManager#registerPhoneAccount} for more information.
  * <p>
  * System managed {@link ConnectionService}s must be enabled by the user in the phone app settings
- * before Telecom will bind to them.  Self-manged {@link ConnectionService}s must be granted the
+ * before Telecom will bind to them.  Self-managed {@link ConnectionService}s must be granted the
  * appropriate permission before Telecom will bind to them.
  * <p>
  * Once registered and enabled by the user in the phone app settings or granted permission, telecom

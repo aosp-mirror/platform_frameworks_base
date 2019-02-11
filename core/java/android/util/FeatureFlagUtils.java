@@ -33,6 +33,8 @@ public class FeatureFlagUtils {
 
     public static final String FFLAG_PREFIX = "sys.fflag.";
     public static final String FFLAG_OVERRIDE_PREFIX = FFLAG_PREFIX + "override.";
+    public static final String PERSIST_PREFIX = "persist." + FFLAG_OVERRIDE_PREFIX;
+    public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
 
     private static final Map<String, String> DEFAULT_FLAGS;
     static {
@@ -44,6 +46,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_data_usage_v2", "true");
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
+        DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
     }
 
     /**

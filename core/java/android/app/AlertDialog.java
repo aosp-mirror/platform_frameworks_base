@@ -395,7 +395,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * @param listener The {@link DialogInterface.OnClickListener} to use.
      * @deprecated Use
      *             {@link #setButton(int, CharSequence, android.content.DialogInterface.OnClickListener)}
-     *             with {@link DialogInterface#BUTTON_POSITIVE}
+     *             with {@link DialogInterface#BUTTON_NEUTRAL}
      */
     @Deprecated
     public void setButton3(CharSequence text, final OnClickListener listener) {

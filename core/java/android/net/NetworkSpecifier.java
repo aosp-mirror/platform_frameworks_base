@@ -35,7 +35,7 @@ public abstract class NetworkSpecifier {
     public abstract boolean satisfiedBy(NetworkSpecifier other);
 
     /**
-     * Optional method which can be overriden by concrete implementations of NetworkSpecifier to
+     * Optional method which can be overridden by concrete implementations of NetworkSpecifier to
      * check a self-reported UID. A concrete implementation may contain a UID which would be self-
      * reported by the caller (since NetworkSpecifier implementations should be non-mutable). This
      * function is called by ConnectivityService and is passed the actual UID of the caller -
