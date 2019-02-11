@@ -22,8 +22,6 @@ import android.os.Parcelable;
 /**
  * An event that indicates an RCS participant has joined an {@link RcsThread}. Please see US6-3 -
  * GSMA RCC.71 (RCS Universal Profile Service Definition Document)
- *
- * @hide - TODO: make public
  */
 public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEvent implements
         Parcelable {
