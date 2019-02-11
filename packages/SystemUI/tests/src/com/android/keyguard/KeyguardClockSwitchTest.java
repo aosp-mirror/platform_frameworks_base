@@ -35,7 +35,6 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.text.TextPaint;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextClock;
 
@@ -60,6 +59,8 @@ import org.mockito.MockitoAnnotations;
 @RunWithLooper(setAsMainLooper = true)
 public class KeyguardClockSwitchTest extends SysuiTestCase {
     private FrameLayout mClockContainer;
+    private FrameLayout mBigClockContainer;
+    private TextClock mBigClock;
     private StatusBarStateController.StateListener mStateListener;
 
     @Mock
@@ -73,6 +74,8 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         mKeyguardClockSwitch =
                 (KeyguardClockSwitch) layoutInflater.inflate(R.layout.keyguard_clock_switch, null);
         mClockContainer = mKeyguardClockSwitch.findViewById(R.id.clock_view);
+        mBigClockContainer = new FrameLayout(getContext());
+        mBigClock = new TextClock(getContext());
         MockitoAnnotations.initMocks(this);
         when(mClockView.getPaint()).thenReturn(mock(TextPaint.class));
         mStateListener = mKeyguardClockSwitch.getStateListener();
@@ -93,19 +96,17 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     @Test
     public void onPluginConnected_showPluginBigClock() {
         // GIVEN that the container for the big clock has visibility GONE
-        FrameLayout bigClockContainer = new FrameLayout(getContext());
-        bigClockContainer.setVisibility(GONE);
-        mKeyguardClockSwitch.setBigClockContainer(bigClockContainer);
+        mBigClockContainer.setVisibility(GONE);
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
         // AND the plugin returns a view for the big clock
         ClockPlugin plugin = mock(ClockPlugin.class);
-        TextClock pluginView = new TextClock(getContext());
-        when(plugin.getBigClockView()).thenReturn(pluginView);
+        when(plugin.getBigClockView()).thenReturn(mBigClock);
         // WHEN the plugin is connected
         mKeyguardClockSwitch.getClockChangedListener().onClockChanged(plugin);
         // THEN the big clock container is visible and it is the parent of the
         // big clock view.
-        assertThat(bigClockContainer.getVisibility()).isEqualTo(VISIBLE);
-        assertThat(pluginView.getParent()).isEqualTo(bigClockContainer);
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mBigClock.getParent()).isEqualTo(mBigClockContainer);
     }
 
     @Test
@@ -246,24 +247,64 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     @Test
     public void onStateChanged_InvisibleInShade() {
         // GIVEN that the big clock container is visible
-        ViewGroup container = mock(ViewGroup.class);
-        when(container.getVisibility()).thenReturn(View.VISIBLE);
-        mKeyguardClockSwitch.setBigClockContainer(container);
+        mBigClockContainer.setVisibility(View.VISIBLE);
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
         // WHEN transitioned to SHADE state
         mStateListener.onStateChanged(StatusBarState.SHADE);
         // THEN the container is invisible.
-        verify(container).setVisibility(View.INVISIBLE);
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
     @Test
     public void onStateChanged_VisibleInKeyguard() {
         // GIVEN that the big clock container is invisible
-        ViewGroup container = mock(ViewGroup.class);
-        when(container.getVisibility()).thenReturn(View.INVISIBLE);
-        mKeyguardClockSwitch.setBigClockContainer(container);
+        mBigClockContainer.setVisibility(View.INVISIBLE);
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
         // WHEN transitioned to KEYGUARD state
         mStateListener.onStateChanged(StatusBarState.KEYGUARD);
         // THEN the container is visible.
-        verify(container).setVisibility(View.VISIBLE);
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void setBigClockContainer_visible() {
+        // GIVEN that the big clock container is visible
+        mBigClockContainer.setVisibility(View.VISIBLE);
+        // AND GIVEN that a plugin is active.
+        ClockPlugin plugin = mock(ClockPlugin.class);
+        when(plugin.getBigClockView()).thenReturn(mBigClock);
+        mKeyguardClockSwitch.getClockChangedListener().onClockChanged(plugin);
+        // WHEN the container is associated with the clock switch
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+        // THEN the container remains visible.
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void setBigClockContainer_invisible() {
+        // GIVEN that the big clock container is invisible
+        mBigClockContainer.setVisibility(View.INVISIBLE);
+        // AND GIVEN that a plugin is active.
+        ClockPlugin plugin = mock(ClockPlugin.class);
+        when(plugin.getBigClockView()).thenReturn(mBigClock);
+        mKeyguardClockSwitch.getClockChangedListener().onClockChanged(plugin);
+        // WHEN the container is associated with the clock switch
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+        // THEN the container remains invisible.
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void setBigClockContainer_gone() {
+        // GIVEN that the big clock container is gone
+        mBigClockContainer.setVisibility(View.GONE);
+        // AND GIVEN that a plugin is active.
+        ClockPlugin plugin = mock(ClockPlugin.class);
+        when(plugin.getBigClockView()).thenReturn(mBigClock);
+        mKeyguardClockSwitch.getClockChangedListener().onClockChanged(plugin);
+        // WHEN the container is associated with the clock switch
+        mKeyguardClockSwitch.setBigClockContainer(mBigClockContainer);
+        // THEN the container is made visible.
+        assertThat(mBigClockContainer.getVisibility()).isEqualTo(View.VISIBLE);
     }
 }
