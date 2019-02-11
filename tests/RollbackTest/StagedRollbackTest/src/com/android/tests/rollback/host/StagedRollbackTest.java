@@ -16,6 +16,8 @@
 
 package com.android.tests.rollback.host;
 
+import static org.junit.Assert.assertTrue;
+
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
@@ -29,10 +31,26 @@ import org.junit.runner.RunWith;
 public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     /**
+     * Runs the given phase of a test by calling into the device.
+     * Throws an exception if the test phase fails.
+     * <p>
+     * For example, <code>runPhase("testBasicEnableRollback");</code>
+     */
+    private void runPhase(String phase) throws Exception {
+        assertTrue(runDeviceTests("com.android.tests.rollback",
+                    "com.android.tests.rollback.StagedRollbackTest",
+                    phase));
+    }
+
+    /**
      * Tests staged rollbacks.
      */
     @Test
-    public void testStagedRollback() {
-        // TODO: Actually test staged rollbacks.
+    public void testBasic() throws Exception {
+        runPhase("testBasicEnableRollback");
+        getDevice().reboot();
+        runPhase("testBasicCommitRollback");
+        getDevice().reboot();
+        runPhase("testBasicConfirmRollback");
     }
 }
