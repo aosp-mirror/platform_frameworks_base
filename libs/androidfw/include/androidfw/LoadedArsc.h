@@ -20,6 +20,7 @@
 #include <memory>
 #include <set>
 #include <vector>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "android-base/macros.h"
@@ -242,6 +243,10 @@ class LoadedPackage {
     return defines_overlayable_;
   }
 
+  const std::unordered_map<std::string, std::string>& GetOverlayableMap() const {
+    return overlayable_map_;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
@@ -261,6 +266,7 @@ class LoadedPackage {
   ByteBucketArray<uint32_t> resource_ids_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
   std::vector<const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
+  std::unordered_map<std::string, std::string> overlayable_map_;
 };
 
 // Read-only view into a resource table. This class validates all data

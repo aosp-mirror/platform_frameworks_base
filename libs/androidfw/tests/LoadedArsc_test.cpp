@@ -331,7 +331,7 @@ TEST(LoadedArscTest, ResourceIdentifierIterator) {
 
   const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
   ASSERT_EQ(1u, packages.size());
-  EXPECT_EQ(std::string("com.android.basic"), packages[0]->GetPackageName());
+  ASSERT_EQ(std::string("com.android.basic"), packages[0]->GetPackageName());
 
   const auto& loaded_package = packages[0];
   auto iter = loaded_package->begin();
@@ -367,6 +367,24 @@ TEST(LoadedArscTest, ResourceIdentifierIterator) {
   ASSERT_EQ(0x7f070002u, *iter++);
   ASSERT_EQ(0x7f070003u, *iter++);
   ASSERT_EQ(end, iter);
+}
+
+TEST(LoadedArscTest, GetOverlayableMap) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
+                                      "resources.arsc", &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
+  ASSERT_EQ(1u, packages.size());
+  ASSERT_EQ(std::string("com.android.overlayable"), packages[0]->GetPackageName());
+
+  const auto map = packages[0]->GetOverlayableMap();
+  ASSERT_EQ(2, map.size());
+  ASSERT_EQ(map.at("OverlayableResources1"), "overlay://theme");
+  ASSERT_EQ(map.at("OverlayableResources2"), "overlay://com.android.overlayable");
 }
 
 // structs with size fields (like Res_value, ResTable_entry) should be
