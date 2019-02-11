@@ -919,11 +919,9 @@ public class ContextWrapper extends Context {
         return mBase.getDisplayAdjustments(displayId);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
+    @TestApi
     @Override
-    @UnsupportedAppUsage
     public Display getDisplay() {
         return mBase.getDisplay();
     }

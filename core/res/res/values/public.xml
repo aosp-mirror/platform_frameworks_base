@@ -2998,6 +2998,8 @@
       <public name="config_showDefaultEmergency" />
       <!-- @hide @SystemApi -->
       <public name="config_showDefaultHome" />
+      <!-- @hide @TestApi -->
+      <public name="config_perDisplayFocusEnabled" />
     </public-group>
 
     <public-group type="dimen" first-id="0x01050007">
