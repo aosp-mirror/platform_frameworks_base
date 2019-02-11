@@ -658,6 +658,67 @@ public class BinderCallsStatsTest {
         assertTrue(debugEntry3.latencyMicros >= 0);
     }
 
+    @Test
+    public void testTrackScreenInteractiveDisabled() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setTrackScreenInteractive(false);
+        Binder binder = new Binder();
+
+        mDeviceState.setScreenInteractive(false);
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        mDeviceState.setScreenInteractive(true);
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 1000;  // shoud be ignored.
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(WORKSOURCE_UID);
+        Assert.assertNotNull(uidEntry);
+        assertEquals(2, uidEntry.callCount);
+
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
+        assertEquals(1, callStatsList.size());
+        BinderCallsStats.CallStat callStats = callStatsList.get(0);
+        assertEquals(false, callStats.screenInteractive);
+        assertEquals(2, callStats.callCount);
+        assertEquals(2, callStats.recordedCallCount);
+    }
+
+    @Test
+    public void testTrackCallingUidDisabled() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setTrackDirectCallerUid(false);
+        Binder binder = new Binder();
+
+        bcs.setCallingUid(1);
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        bcs.setCallingUid(2);
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 1000;  // shoud be ignored.
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(WORKSOURCE_UID);
+        Assert.assertNotNull(uidEntry);
+        assertEquals(2, uidEntry.callCount);
+
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
+        assertEquals(1, callStatsList.size());
+        BinderCallsStats.CallStat callStats = callStatsList.get(0);
+        assertEquals(-1, callStats.callingUid);
+        assertEquals(2, callStats.callCount);
+        assertEquals(2, callStats.recordedCallCount);
+    }
+
+
     class TestBinderCallsStats extends BinderCallsStats {
         public int callingUid = CALLING_UID;
         public long time = 1234;
@@ -682,6 +743,8 @@ public class BinderCallsStatsTest {
             });
             setSamplingInterval(1);
             setAddDebugEntries(false);
+            setTrackScreenInteractive(true);
+            setTrackDirectCallerUid(true);
             if (deviceState != null) {
                 setDeviceState(deviceState.getReadonlyClient());
             }
@@ -700,6 +763,10 @@ public class BinderCallsStatsTest {
         @Override
         protected int getCallingUid() {
             return callingUid;
+        }
+
+        protected void setCallingUid(int uid) {
+            callingUid = uid;
         }
     }
 

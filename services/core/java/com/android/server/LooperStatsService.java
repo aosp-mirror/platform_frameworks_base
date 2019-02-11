@@ -51,16 +51,19 @@ public class LooperStatsService extends Binder {
     private static final String LOOPER_STATS_SERVICE_NAME = "looper_stats";
     private static final String SETTINGS_ENABLED_KEY = "enabled";
     private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
+    private static final String SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY = "track_screen_state";
     private static final String DEBUG_SYS_LOOPER_STATS_ENABLED =
             "debug.sys.looper_stats_enabled";
     private static final int DEFAULT_SAMPLING_INTERVAL = 100;
     private static final int DEFAULT_ENTRIES_SIZE_CAP = 2000;
     private static final boolean DEFAULT_ENABLED = true;
+    private static final boolean DEFAULT_TRACK_SCREEN_INTERACTIVE = false;
 
     private final Context mContext;
     private final LooperStats mStats;
     // Default should be false so that the first call to #setEnabled installed the looper observer.
     private boolean mEnabled = false;
+    private boolean mTrackScreenInteractive = false;
 
     private LooperStatsService(Context context, LooperStats stats) {
         this.mContext = context;
@@ -79,6 +82,9 @@ public class LooperStatsService extends Binder {
 
         setSamplingInterval(
                 parser.getInt(SETTINGS_SAMPLING_INTERVAL_KEY, DEFAULT_SAMPLING_INTERVAL));
+        setTrackScreenInteractive(
+                parser.getBoolean(SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY,
+                DEFAULT_TRACK_SCREEN_INTERACTIVE));
         // Manually specified value takes precedence over Settings.
         setEnabled(SystemProperties.getBoolean(
                 DEBUG_SYS_LOOPER_STATS_ENABLED,
@@ -152,6 +158,13 @@ public class LooperStatsService extends Binder {
             mStats.reset();
             mStats.setAddDebugEntries(enabled);
             Looper.setObserver(enabled ? mStats : null);
+        }
+    }
+
+    private void setTrackScreenInteractive(boolean enabled) {
+        if (mTrackScreenInteractive != enabled) {
+            mTrackScreenInteractive = enabled;
+            mStats.reset();
         }
     }
 
