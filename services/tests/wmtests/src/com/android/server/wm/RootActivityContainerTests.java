@@ -67,6 +67,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -142,7 +143,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
     private static void ensureStackPlacement(ActivityStack stack, TaskRecord... tasks) {
         final ArrayList<TaskRecord> stackTasks = stack.getAllTasks();
-        assertEquals(stackTasks.size(), tasks != null ? tasks.length : 0);
+        assertEquals("Expecting " + Arrays.deepToString(tasks) + " got " + stackTasks,
+                stackTasks.size(), tasks != null ? tasks.length : 0);
 
         if (tasks == null) {
             return;

@@ -72,8 +72,10 @@ import com.android.server.am.PendingIntentController;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.utils.MockTracker;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -87,6 +89,8 @@ import java.util.List;
  */
 class ActivityTestsBase {
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
+
+    private static MockTracker sMockTracker;
 
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -107,7 +111,15 @@ class ActivityTestsBase {
 
     @BeforeClass
     public static void setUpOnceBase() {
+        sMockTracker = new MockTracker();
+
         AttributeCache.init(getInstrumentation().getTargetContext());
+    }
+
+    @AfterClass
+    public static void tearDownOnceBase() {
+        sMockTracker.close();
+        sMockTracker = null;
     }
 
     @Before
@@ -657,12 +669,11 @@ class ActivityTestsBase {
     private static WindowManagerService sMockWindowManagerService;
 
     private static WindowManagerService prepareMockWindowManager() {
-        if (sMockWindowManagerService != null) {
-            return sMockWindowManagerService;
+        if (sMockWindowManagerService == null) {
+            sMockWindowManagerService = mock(WindowManagerService.class);
         }
 
-        final WindowManagerService service = mock(WindowManagerService.class);
-        service.mRoot = mock(RootWindowContainer.class);
+        sMockWindowManagerService.mRoot = mock(RootWindowContainer.class);
 
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);
@@ -670,10 +681,9 @@ class ActivityTestsBase {
                 runnable.run();
             }
             return null;
-        }).when(service).inSurfaceTransaction(any());
+        }).when(sMockWindowManagerService).inSurfaceTransaction(any());
 
-        sMockWindowManagerService = service;
-        return service;
+        return sMockWindowManagerService;
     }
 
     /**
