@@ -158,8 +158,9 @@ public final class DisplayInfo implements Parcelable {
      *
      * @hide
      */
+    // Remark on @UnsupportedAppUsage: Display.getCutout should be used instead
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public DisplayCutout displayCutout;
 
     /**
