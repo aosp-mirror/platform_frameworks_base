@@ -476,6 +476,33 @@ public final class LooperStatsTest {
         assertThat(debugEntry3.totalLatencyMicros).isAtLeast(0L);
     }
 
+    @Test
+    public void testScreenStateTrackingDisabled() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+        looperStats.setTrackScreenInteractive(false);
+
+        Message message = mHandlerFirst.obtainMessage(1000);
+        message.workSourceUid = 1000;
+        message.when = looperStats.getSystemUptimeMillis();
+
+        looperStats.tickUptime(30);
+        mDeviceState.setScreenInteractive(false);
+        Object token = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token, message);
+
+        looperStats.tickUptime(30);
+        mDeviceState.setScreenInteractive(true);
+        token = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token, message);
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(1);
+        LooperStats.ExportedEntry entry = entries.get(0);
+        assertThat(entry.isInteractive).isEqualTo(false);
+        assertThat(entry.messageCount).isEqualTo(2);
+        assertThat(entry.recordedMessageCount).isEqualTo(2);
+    }
+
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {
         try {
             r.run();
@@ -501,6 +528,7 @@ public final class LooperStatsTest {
             super(samplingInterval, sizeCap);
             mSamplingInterval = samplingInterval;
             setAddDebugEntries(false);
+            setTrackScreenInteractive(true);
             if (deviceState != null) {
                 setDeviceState(deviceState.getReadonlyClient());
             }
