@@ -302,7 +302,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             MAX_RETRY_INTERVAL);
 
     // true if we are enabled, protected by this
-    private boolean mEnabled = true;
+    private boolean mEnabled;
 
     private boolean mShutdown;
 

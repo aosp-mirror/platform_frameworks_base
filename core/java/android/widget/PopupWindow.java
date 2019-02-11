@@ -490,7 +490,7 @@ public class PopupWindow {
      */
     @Nullable
     public Rect getEpicenterBounds() {
-        return mEpicenterBounds;
+        return mEpicenterBounds != null ? new Rect(mEpicenterBounds) : null;
     }
 
     /**
@@ -509,7 +509,7 @@ public class PopupWindow {
      * @see #getEpicenterBounds()
      */
     public void setEpicenterBounds(@Nullable Rect bounds) {
-        mEpicenterBounds = bounds;
+        mEpicenterBounds = bounds != null ? new Rect(bounds) : null;
     }
 
     private Transition getTransition(int resId) {

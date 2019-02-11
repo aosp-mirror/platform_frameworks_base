@@ -87,6 +87,15 @@ public class TypeClockController implements ClockPlugin {
     }
 
     @Override
+    public void setColorPalette(boolean supportsDarkText, int[] colorPalette) {
+        if (colorPalette == null || colorPalette.length == 0) {
+            return;
+        }
+        final int length = colorPalette.length;
+        mTypeClock.setClockColor(colorPalette[Math.max(0, length - 5)]);
+    }
+
+    @Override
     public void dozeTimeTick() {
         mTypeClock.onTimeChanged();
     }

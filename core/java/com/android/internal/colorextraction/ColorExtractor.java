@@ -22,7 +22,6 @@ import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -32,7 +31,6 @@ import com.android.internal.colorextraction.types.Tonal;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Class to process wallpaper colors and generate a tonal palette based on them.
@@ -222,6 +220,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     public static class GradientColors {
         private int mMainColor;
         private int mSecondaryColor;
+        private int[] mColorPalette;
         private boolean mSupportsDarkText;
 
         public void setMainColor(int mainColor) {
@@ -232,6 +231,10 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
             mSecondaryColor = secondaryColor;
         }
 
+        public void setColorPalette(int[] colorPalette) {
+            mColorPalette = colorPalette;
+        }
+
         public void setSupportsDarkText(boolean supportsDarkText) {
             mSupportsDarkText = supportsDarkText;
         }
@@ -239,6 +242,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         public void set(GradientColors other) {
             mMainColor = other.mMainColor;
             mSecondaryColor = other.mSecondaryColor;
+            mColorPalette = other.mColorPalette;
             mSupportsDarkText = other.mSupportsDarkText;
         }
 
@@ -248,6 +252,10 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
 
         public int getSecondaryColor() {
             return mSecondaryColor;
+        }
+
+        public int[] getColorPalette() {
+            return mColorPalette;
         }
 
         public boolean supportsDarkText() {

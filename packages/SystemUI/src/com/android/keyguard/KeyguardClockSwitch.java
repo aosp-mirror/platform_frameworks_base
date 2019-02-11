@@ -1,5 +1,6 @@
 package com.android.keyguard;
 
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -12,8 +13,10 @@ import android.widget.TextClock;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.Dependency;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -50,6 +53,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * Maintain state so that a newly connected plugin can be initialized.
      */
     private float mDarkAmount;
+    private boolean mSupportsDarkText;
+    private int[] mColorPalette;
 
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
@@ -71,6 +76,21 @@ public class KeyguardClockSwitch extends RelativeLayout {
     };
 
     private ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
+
+    /**
+     * Listener for changes to the color palette.
+     *
+     * The color palette changes when the wallpaper is changed.
+     */
+    private SysuiColorExtractor.OnColorsChangedListener mColorsListener = (extractor, which) -> {
+        if ((which & WallpaperManager.FLAG_LOCK) != 0) {
+            if (extractor instanceof SysuiColorExtractor) {
+                updateColors((SysuiColorExtractor) extractor);
+            } else {
+                updateColors(Dependency.get(SysuiColorExtractor.class));
+            }
+        }
+    };
 
     public KeyguardClockSwitch(Context context) {
         this(context, null);
@@ -100,6 +120,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onAttachedToWindow();
         Dependency.get(ClockManager.class).addOnClockChangedListener(mClockChangedListener);
         Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
+        SysuiColorExtractor colorExtractor = Dependency.get(SysuiColorExtractor.class);
+        colorExtractor.addOnColorsChangedListener(mColorsListener);
+        updateColors(colorExtractor);
     }
 
     @Override
@@ -107,6 +130,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onDetachedFromWindow();
         Dependency.get(ClockManager.class).removeOnClockChangedListener(mClockChangedListener);
         Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
+        Dependency.get(SysuiColorExtractor.class)
+            .removeOnColorsChangedListener(mColorsListener);
     }
 
     private void setClockPlugin(ClockPlugin plugin) {
@@ -149,6 +174,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockPlugin.setStyle(getPaint().getStyle());
         mClockPlugin.setTextColor(getCurrentTextColor());
         mClockPlugin.setDarkAmount(mDarkAmount);
+        if (mColorPalette != null) {
+            mClockPlugin.setColorPalette(mSupportsDarkText, mColorPalette);
+        }
     }
 
     /**
@@ -243,6 +271,16 @@ public class KeyguardClockSwitch extends RelativeLayout {
     public void onTimeZoneChanged(TimeZone timeZone) {
         if (mClockPlugin != null) {
             mClockPlugin.onTimeZoneChanged(timeZone);
+        }
+    }
+
+    private void updateColors(SysuiColorExtractor colorExtractor) {
+        ColorExtractor.GradientColors colors = colorExtractor.getColors(WallpaperManager.FLAG_LOCK,
+                true);
+        mSupportsDarkText = colors.supportsDarkText();
+        mColorPalette = colors.getColorPalette();
+        if (mClockPlugin != null) {
+            mClockPlugin.setColorPalette(mSupportsDarkText, mColorPalette);
         }
     }
 

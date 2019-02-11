@@ -89,8 +89,17 @@ public class StretchAnalogClockController implements ClockPlugin {
     @Override
     public void setTextColor(int color) {
         mLockClock.setTextColor(color);
-        mDigitalClock.setTextColor(color);
-        mAnalogClock.setMinuteHandColor(color);
+    }
+
+    @Override
+    public void setColorPalette(boolean supportsDarkText, int[] colorPalette) {
+        if (colorPalette == null || colorPalette.length == 0) {
+            return;
+        }
+        final int length = colorPalette.length;
+        mDigitalClock.setTextColor(colorPalette[Math.max(0, length - 5)]);
+        mAnalogClock.setClockColor(colorPalette[Math.max(0, length - 5)],
+                colorPalette[Math.max(0, length - 2)]);
     }
 
     @Override
