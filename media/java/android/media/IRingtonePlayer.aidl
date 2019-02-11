@@ -17,6 +17,7 @@
 package android.media;
 
 import android.media.AudioAttributes;
+import android.media.VolumeShaper;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
@@ -27,6 +28,8 @@ import android.os.UserHandle;
 interface IRingtonePlayer {
     /** Used for Ringtone.java playback */
     oneway void play(IBinder token, in Uri uri, in AudioAttributes aa, float volume, boolean looping);
+    oneway void playWithVolumeShaping(IBinder token, in Uri uri, in AudioAttributes aa,
+        float volume, boolean looping, in @nullable VolumeShaper.Configuration volumeShaperConfig);
     oneway void stop(IBinder token);
     boolean isPlaying(IBinder token);
     oneway void setPlaybackProperties(IBinder token, float volume, boolean looping);
