@@ -1545,7 +1545,7 @@ public class StorageManager {
     public static boolean hasIsolatedStorage() {
         // Prefer to use snapshot for current boot when available
         return SystemProperties.getBoolean(PROP_ISOLATED_STORAGE_SNAPSHOT,
-                SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, false));
+                SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, true));
     }
 
     /**
