@@ -18,6 +18,7 @@ package com.android.systemui.privacy
 
 import android.app.ActivityManager
 import android.app.AppOpsManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.Handler
@@ -28,6 +29,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import com.android.systemui.Dependency
+import com.android.systemui.Dependency.BG_HANDLER
+import com.android.systemui.Dependency.MAIN_HANDLER
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpItem
@@ -81,15 +84,20 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var privacyItemController: PrivacyItemController
+    private lateinit var handler: Handler
+
+    fun PrivacyItemController(context: Context) =
+            PrivacyItemController(context, appOpsController, handler, handler)
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
+        handler = Handler(testableLooper.looper)
 
         appOpsController = mDependency.injectMockDependency(AppOpsController::class.java)
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, testableLooper.looper)
-        mDependency.injectTestDependency(Dependency.MAIN_HANDLER, Handler(testableLooper.looper))
+        mDependency.injectTestDependency(Dependency.BG_HANDLER, handler)
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER, handler)
         mContext.addMockSystemService(UserManager::class.java, userManager)
         mContext.getOrCreateTestableResources().addOverride(R.string.device_services,
                 DEVICE_SERVICES_STRING)
