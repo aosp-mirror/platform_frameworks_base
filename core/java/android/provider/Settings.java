@@ -12862,6 +12862,19 @@ public final class Settings {
                 "user_preferred_sub2","user_preferred_sub3"};
 
         /**
+         * Which subscription is enabled for a physical slot.
+         * @hide
+         */
+        public static final String ENABLED_SUBSCRIPTION_FOR_SLOT = "enabled_subscription_for_slot";
+
+        /**
+         * Whether corresponding logical modem is enabled for a physical slot.
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String MODEM_STACK_ENABLED_FOR_SLOT = "modem_stack_enabled_for_slot";
+
+        /**
          * Whether to enable new contacts aggregator or not.
          * The value 1 - enable, 0 - disable
          * @hide
