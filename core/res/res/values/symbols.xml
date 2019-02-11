@@ -2989,7 +2989,7 @@
   <!-- Global actions icons -->
   <java-symbol type="drawable" name="ic_restart" />
   <java-symbol type="drawable" name="ic_screenshot" />
-
+  <java-symbol type="drawable" name="ic_faster_emergency" />
   <java-symbol type="drawable" name="emergency_icon" />
 
   <java-symbol type="array" name="config_convert_to_emergency_number_map" />
@@ -3415,6 +3415,8 @@
 
   <java-symbol type="string" name="config_misprovisionedDeviceModel" />
   <java-symbol type="string" name="config_misprovisionedBrandValue" />
- 
+
+  <java-symbol type="integer" name="db_wal_truncate_size" />
+
   <java-symbol type="string" name="config_defaultAssistantComponentName" />
 </resources>

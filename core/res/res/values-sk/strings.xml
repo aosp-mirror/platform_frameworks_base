@@ -72,7 +72,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Konferencia troch účastníkov"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Odmietnutie nevyžiadaných obťažujúcich hovorov"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Doručenie volaného čísla"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Nerušiť"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Režim bez vyrušení"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"V predvolenom nastavení je identifikácia volajúceho obmedzená. Ďalší hovor: Obmedzené"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"V predvolenom nastavení je identifikácia volajúceho obmedzená. Ďalší hovor: Bez obmedzenia"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"V predvolenom nastavení nie je identifikácia volajúceho obmedzená. Ďalší hovor: Obmedzené"</string>
@@ -135,8 +135,8 @@
     <item msgid="4397097370387921767">"Volanie siete Wi‑Fi %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuté"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Uprednostniť Wi‑Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferujem mobilné dáta"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferovať Wi‑Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferovať mobilné spojenie"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Len Wi‑Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepresmerované"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -579,8 +579,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby na odosielanie správ SMS a MMS operátora. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"naviazať sa na služby operátora"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Umožňuje držiteľovi povolenia naviazať sa na služby operátora. Bežné aplikácie by toto povolenie nemali nikdy nepotrebovať."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"prístup k nastaveniu Nerušiť"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Umožňuje aplikácii čítať a zapisovať konfiguráciu nastavenia Nerušiť."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"prístup k režimu bez vyrušení"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Umožňuje aplikácii čítať a zapisovať konfiguráciu režimu bez vyrušení."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Sledovanie pokusov o odomknutie obrazovky"</string>
@@ -1802,10 +1802,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ďalší budík)"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"Dokiaľ túto funkciu nevypnete"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokiaľ nevypnete režim Nerušiť"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokiaľ nevypnete režim bez vyrušení"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zbaliť"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nerušiť"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Režim bez vyrušení"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Doba pokoja"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Noc pracovného dňa"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Víkend"</string>
@@ -1945,10 +1945,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Hovory a upozornenia budú vibrovať"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Hovory a upozornenia budú stlmené"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Zmeny systému"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Nerušiť"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novinka: režim Nerušiť skrýva upozornenia"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Režim bez vyrušení"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novinka: režim bez vyrušení skrýva upozornenia"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Klepnutím získate ďalšie informácie a budete môcť vykonať zmeny."</string>
-    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Nastavenie Nerušiť sa zmenilo"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Režim bez vyrušení sa zmenil"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Klepnutím skontrolujete, čo je blokované."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Systém"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Nastavenia"</string>

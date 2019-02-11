@@ -137,7 +137,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Το Ethernet αποσυνδέθηκε."</string>
     <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Το Ethernet συνδέθηκε."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Δεν υπάρχει σήμα."</string>
-    <string name="accessibility_not_connected" msgid="6395326276213402883">"Δεν έχει συνδεθεί."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"Μη συνδεδεμένο"</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Μηδέν γραμμές."</string>
     <string name="accessibility_one_bar" msgid="1685730113192081895">"Μία γραμμή."</string>
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Δύο γραμμές."</string>
@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Αλλαγή δικτύου εταιρείας κινητής τηλεφωνίας"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Άνοιγμα λεπτομερειών μπαταρίας"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Μπαταρία <xliff:g id="NUMBER">%d</xliff:g> τοις εκατό."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Φόρτιση μπαταρίας, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> τοις εκατό."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Φόρτιση μπαταρίας, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%% τοις εκατό."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Ρυθμίσεις συστήματος."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Ειδοποιήσεις."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Δείτε όλες τις ειδοποιήσεις"</string>

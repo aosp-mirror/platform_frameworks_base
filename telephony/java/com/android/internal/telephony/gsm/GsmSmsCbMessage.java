@@ -33,6 +33,7 @@ import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsConstants;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 
 /**
  * Parses a GSM or UMTS format SMS-CB message into an {@link SmsCbMessage} object. The class is
@@ -44,16 +45,34 @@ public class GsmSmsCbMessage {
      * Languages in the 0000xxxx DCS group as defined in 3GPP TS 23.038, section 5.
      */
     private static final String[] LANGUAGE_CODES_GROUP_0 = {
-            "de", "en", "it", "fr", "es", "nl", "sv", "da", "pt", "fi", "no", "el", "tr", "hu",
-            "pl", null
+            Locale.GERMAN.getLanguage(),        // German
+            Locale.ENGLISH.getLanguage(),       // English
+            Locale.ITALIAN.getLanguage(),       // Italian
+            Locale.FRENCH.getLanguage(),        // French
+            new Locale("es").getLanguage(),     // Spanish
+            new Locale("nl").getLanguage(),     // Dutch
+            new Locale("sv").getLanguage(),     // Swedish
+            new Locale("da").getLanguage(),     // Danish
+            new Locale("pt").getLanguage(),     // Portuguese
+            new Locale("fi").getLanguage(),     // Finnish
+            new Locale("nb").getLanguage(),     // Norwegian
+            new Locale("el").getLanguage(),     // Greek
+            new Locale("tr").getLanguage(),     // Turkish
+            new Locale("hu").getLanguage(),     // Hungarian
+            new Locale("pl").getLanguage(),     // Polish
+            null
     };
 
     /**
      * Languages in the 0010xxxx DCS group as defined in 3GPP TS 23.038, section 5.
      */
     private static final String[] LANGUAGE_CODES_GROUP_2 = {
-            "cs", "he", "ar", "ru", "is", null, null, null, null, null, null, null, null, null,
-            null, null
+            new Locale("cs").getLanguage(),     // Czech
+            new Locale("he").getLanguage(),     // Hebrew
+            new Locale("ar").getLanguage(),     // Arabic
+            new Locale("ru").getLanguage(),     // Russian
+            new Locale("is").getLanguage(),     // Icelandic
+            null, null, null, null, null, null, null, null, null, null, null
     };
 
     private static final char CARRIAGE_RETURN = 0x0d;

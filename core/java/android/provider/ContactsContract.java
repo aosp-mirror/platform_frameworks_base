@@ -867,13 +867,21 @@ public final class ContactsContract {
      */
     protected interface ContactOptionsColumns {
         /**
-         * The number of times a contact has been contacted
+         * The number of times a contact has been contacted.
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field is obsolete. For
+         * more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.</p>
          * <P>Type: INTEGER</P>
          */
         public static final String TIMES_CONTACTED = "times_contacted";
 
         /**
          * The last time a contact was contacted.
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field is obsolete. For
+         * more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.</p>
          * <P>Type: INTEGER</P>
          */
         public static final String LAST_TIME_CONTACTED = "last_time_contacted";
@@ -1692,6 +1700,11 @@ public final class ContactsContract {
          * TIMES_CONTACTED field is incremented by 1 and the LAST_TIME_CONTACTED
          * field is populated with the current system time.
          *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this method is obsolete. For
+         * more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
+         *
          * @param resolver the ContentResolver to use
          * @param contactId the person who was contacted
          *
@@ -1728,12 +1741,22 @@ public final class ContactsContract {
          * The content:// style URI for this table joined with useful data from
          * {@link ContactsContract.Data}, filtered to include only starred contacts
          * and the most frequently contacted contacts.
+         *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer sorts
+         * results based on contacts frequency. For more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
          */
         public static final Uri CONTENT_STREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_URI, "strequent");
 
         /**
          * The content:// style URI for showing a list of frequently contacted people.
+         *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer sorts
+         * results based on contacts frequency. For more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
          */
         public static final Uri CONTENT_FREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_URI, "frequent");
@@ -1743,6 +1766,11 @@ public final class ContactsContract {
          * {@link #CONTENT_STREQUENT_URI} URI. The filter string will be used to match
          * various parts of the contact name. The filter argument should be passed
          * as an additional path segment after this URI.
+         *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer sorts
+         * results based on contacts frequency. For more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
          */
         public static final Uri CONTENT_STREQUENT_FILTER_URI = Uri.withAppendedPath(
                 CONTENT_STREQUENT_URI, "filter");
@@ -4285,10 +4313,27 @@ public final class ContactsContract {
      * Columns in the Data_Usage_Stat table
      */
     protected interface DataUsageStatColumns {
-        /** The last time (in milliseconds) this {@link Data} was used. */
+        /**
+         * The last time (in milliseconds) this {@link Data} was used.
+         *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field is obsolete. For
+         * more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
+         *
+         */
         public static final String LAST_TIME_USED = "last_time_used";
 
-        /** The number of times the referenced {@link Data} has been used. */
+        /**
+         * The number of times the referenced {@link Data} has been used.
+         *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field is obsolete. For
+         * more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
+         *
+         *
+         */
         public static final String TIMES_USED = "times_used";
 
         /** @hide Raw value. */
@@ -5257,7 +5302,14 @@ public final class ContactsContract {
         private PhoneLookup() {}
 
         /**
-         * The content:// style URI for this table. Append the phone number you want to lookup
+         * The content:// style URI for this table.
+         *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer
+         * sorts results based on contacts frequency. For more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
+         *
+         * Append the phone number you want to lookup
          * to this URI and query it to perform a lookup. For example:
          * <pre>
          * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
@@ -5269,6 +5321,11 @@ public final class ContactsContract {
 
         /**
          * <p>URI used for the "enterprise caller-id".</p>
+         *
+         * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer
+         * sorts results based on contacts frequency. For more information, see the
+         * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+         * page.
          *
          * <p>
          * It supports the same semantics as {@link #CONTENT_FILTER_URI} and returns the same
@@ -6065,14 +6122,24 @@ public final class ContactsContract {
              * records of MIME type {@link #CONTENT_ITEM_TYPE}. The filter is applied
              * to display names as well as phone numbers. The filter argument should be passed
              * as an additional path segment after this URI.
+             *
+             * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer
+             * sorts results based on contacts frequency. For more information, see the
+             * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+             * page.
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
 
             /**
-             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
-             * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the
+             * same columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
              * parameters, otherwise it will throw IllegalArgumentException.
+             *
+             * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer sorts
+             * results based on contacts frequency. For more information, see the
+             * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+             * page.
              */
             public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                     CONTENT_URI, "filter_enterprise");
@@ -6239,7 +6306,7 @@ public final class ContactsContract {
          */
         public static final class Email implements DataColumnsWithJoins, CommonColumns,
                 ContactCounts {
-            /**
+            /*
              * This utility class cannot be instantiated
              */
             private Email() {}
@@ -6330,12 +6397,17 @@ public final class ContactsContract {
                     Uri.withAppendedPath(CONTENT_URI, "lookup_enterprise");
 
             /**
-             * <p>
              * The content:// style URL for email lookup using a filter. The filter returns
              * records of MIME type {@link #CONTENT_ITEM_TYPE}. The filter is applied
              * to display names as well as email addresses. The filter argument should be passed
              * as an additional path segment after this URI.
              * </p>
+             *
+             * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer sorts
+             * results based on contacts frequency. For more information, see the
+             * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+             * page.</p>
+             *
              * <p>The query in the following example will return "Robert Parr (bob@incredibles.com)"
              * as well as "Bob Parr (incredible@android.com)".
              * <pre>
@@ -6350,9 +6422,14 @@ public final class ContactsContract {
                     "filter");
 
             /**
-             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
-             * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the
+             * same columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
              * parameters, otherwise it will throw IllegalArgumentException.
+             *
+             * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer
+             * sorts results based on contacts frequency. For more information, see the
+             * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+             * page.
              */
             public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                     CONTENT_URI, "filter_enterprise");
@@ -7567,6 +7644,11 @@ public final class ContactsContract {
             /**
              * Similar to {@link Phone#CONTENT_FILTER_URI}, but allows users to filter callable
              * data.
+             *
+             * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer
+             * sorts results based on contacts frequency. For more information, see the
+             * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+             * page.
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
@@ -7575,6 +7657,11 @@ public final class ContactsContract {
              * Similar to {@link Phone#ENTERPRISE_CONTENT_FILTER_URI}, but allows users to filter
              * callable data. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
              * parameters, otherwise it will throw IllegalArgumentException.
+             *
+             * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer
+             * sorts results based on contacts frequency. For more information, see the
+             * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+             * page.</p>
              */
             public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                     CONTENT_URI, "filter_enterprise");
@@ -7599,8 +7686,13 @@ public final class ContactsContract {
                     "contactables");
 
             /**
-             * The content:// style URI for these data items, which allows for a query parameter to
-             * be appended onto the end to filter for data items matching the query.
+             * The content:// style URI for these data items, which allows for a query parameter
+             * to be appended onto the end to filter for data items matching the query.
+             *
+             * <p class="caution"><b>Caution: </b>As of January 7, 2019, this field no longer
+             * sorts results based on contacts frequency. For more information, see the
+             * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+             * page.
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(
                     Contactables.CONTENT_URI, "filter");
@@ -8249,11 +8341,15 @@ public final class ContactsContract {
     }
 
     /**
-     * <p>
      * API allowing applications to send usage information for each {@link Data} row to the
      * Contacts Provider.  Applications can also clear all usage information.
+     *
+     * <p class="caution"><b>Caution: </b>As of January 7, 2019, this class is obsolete. For
+     * more information, see the
+     * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
+     * page.
      * </p>
-     * <p>
+     *
      * With the feedback, Contacts Provider may return more contextually appropriate results for
      * Data listing, typically supplied with
      * {@link ContactsContract.Contacts#CONTENT_FILTER_URI},

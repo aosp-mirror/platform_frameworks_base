@@ -318,8 +318,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"מגבלה של תהליכים ברקע"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"‏הצגת מקרי ANR ברקע"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"הצגת תיבת דו-שיח של \'אפליקציה לא מגיבה\' עבור אפליקציות שפועלות ברקע"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"אזהרות לגבי ערוץ הודעות"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"הצגת אזהרה כשאפליקציה שולחת הודעה ללא ערוץ חוקי"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"אזהרות לגבי ערוץ התראות"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"הצגת אזהרה כשאפליקציה שולחת התראה ללא ערוץ חוקי"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"אילוץ הרשאת אפליקציות באחסון חיצוני"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"אלץ יכולת קביעת גודל של הפעילויות"</string>

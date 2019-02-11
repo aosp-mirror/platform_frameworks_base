@@ -172,9 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Cambio de rede do operador"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir os detalles da batería"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Carga da batería: <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"A batería está cargando. Nivel: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuración do sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificacións"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Ver todas as notificacións"</string>
@@ -401,9 +399,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silencio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Só\nprioridade"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Só\nalarmas"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para rematar a carga)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando rapidamente (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para rematar a carga)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando lentamente (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para rematar a carga)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para completar a carga)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando rapidamente (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para completar a carga)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando lentamente (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para completar a carga)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Cambiar usuario"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Cambiar usuario, usuario actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuario actual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>

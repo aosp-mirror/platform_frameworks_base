@@ -202,10 +202,10 @@
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"फॅक्‍टरी डेटा रीसेट"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"रीस्टार्ट करत आहे..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"बंद होत आहे…"</string>
-    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"आपला टॅबलेट बंद होईल."</string>
-    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"आपला टीव्ही बंद होईल."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"तुमचा टॅबलेट बंद होईल."</string>
+    <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"तुमचा टीव्ही बंद होईल."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"तुमचे घड्याळ बंद होईल."</string>
-    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"आपला फोन बंद होईल."</string>
+    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"तुमचा फोन बंद होईल."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"तुम्ही बंद करू इच्छिता?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"सुरक्षित मोडमध्ये रीबूट करा"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"तुम्ही सुरक्षित मोडमध्ये रीबूट करू इच्छिता? हे तुम्ही इंस्टॉल केलेले सर्व तृतीय पक्ष अॅप्लिकेशन अक्षम करेल. तुम्ही पुन्हा रीबूट करता तेव्हा ते पुनर्संचयित केले जातील."</string>
@@ -223,7 +223,7 @@
     <string name="bugreport_title" msgid="2667494803742548533">"बग रीपोर्ट घ्या"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ई-मेल मेसेज म्हणून पाठविण्यासाठी, हे तुमच्या सद्य डिव्हाइस स्थितीविषयी माहिती संकलित करेल. बग रीपोर्ट सुरू करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बहुतांश प्रसंगांमध्ये याचा वापर करा. ते आपल्याला अहवालाच्या प्रगतीचा मागोवा घेण्याची, समस्येविषयी आणखी तपाशील एंटर करण्याची आणि स्क्रीनशॉट घेण्याची अनुमती देते. ते कदाचित अहवाल देण्यासाठी बराच वेळ घेणारे कमी-वापरलेले विभाग वगळू शकते."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बहुतांश प्रसंगांमध्ये याचा वापर करा. ते तुम्हाला अहवालाच्या प्रगतीचा मागोवा घेण्याची, समस्येविषयी आणखी तपाशील एंटर करण्याची आणि स्क्रीनशॉट घेण्याची अनुमती देते. ते कदाचित अहवाल देण्यासाठी बराच वेळ घेणारे कमी-वापरलेले विभाग वगळू शकते."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"संपूर्ण अहवाल"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"तुमचे डिव्हाइस प्रतिसाद देत नाही किंवा खूप धीमे असते किंवा तुम्हाला सर्व अहवाल विभागांची आवश्यकता असते तेव्हा कमीतकमी सिस्टम हस्तक्षेपासाठी या पर्यायाचा वापर करा. तुम्हाला आणखी तपशील एंटर करण्याची किंवा अतिरिक्त स्क्रीनशॉट घेण्याची अनुमती देत नाही."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
@@ -329,9 +329,9 @@
     <string name="permlab_receiveSms" msgid="8673471768947895082">"मजकूर मेसेज मिळवा (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS मेसेज प्राप्त करण्याची आणि त्यावर प्रक्रिया करण्याची अॅप ला अनुमती देते. म्हणजेच अॅप आपल्या डीव्हाइसवर पाठविलेले मेसेज तुम्हाला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"मजकूर मेसेज मिळवा (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS मेसेज प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अॅप ला अनुमती देते. म्हणजेच अॅप आपल्या डिव्हाइसवर पाठविलेले मेसेज आपल्याला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS मेसेज प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अॅप ला अनुमती देते. म्हणजेच अॅप आपल्या डिव्हाइसवर पाठविलेले मेसेज तुम्हाला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल प्रसारण मेसेज वाचा"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"आपल्या डिव्हाइसद्वारे प्राप्त केलेले सेल प्रसारण मेसेज वाचण्यासाठी अॅप ला अनुमती देते. काही स्थानांमध्ये आपल्याला आणीबाणीच्या परिस्थितीची चेतावणी देण्यासाठी सेल प्रसारण सूचना वितरीत केल्या जातात. आणीबाणी सेल प्रसारण प्राप्त होते तेव्हा आपल्या डिव्हाइसच्या कार्यप्रदर्शनात किंवा कार्यात दुर्भावनापूर्ण अॅप्स व्यत्यय आणू शकतात."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"आपल्या डिव्हाइसद्वारे प्राप्त केलेले सेल प्रसारण मेसेज वाचण्यासाठी अॅप ला अनुमती देते. काही स्थानांमध्ये तुम्हाला आणीबाणीच्या परिस्थितीची चेतावणी देण्यासाठी सेल प्रसारण सूचना वितरीत केल्या जातात. आणीबाणी सेल प्रसारण प्राप्त होते तेव्हा आपल्या डिव्हाइसच्या कार्यप्रदर्शनात किंवा कार्यात दुर्भावनापूर्ण अॅप्स व्यत्यय आणू शकतात."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता घेतलेली फीड वाचा"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"सध्या संकालित केलेल्या फीडविषयी तपशील मिळविण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS मेसेज पाठवणे आणि पाहणे"</string>
@@ -341,7 +341,7 @@
     <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"हा अॅप तुमच्या टीव्हीवर स्टोअर केलेले सर्व SMS (मजकूर) मेसेज वाचू शकतो."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"हा अॅप तुमच्या फोनवर स्टोअर केलेले सर्व SMS (मजकूर) मेसेज वाचू शकतो."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"मजकूर मेसेज मिळवा (WAP)"</string>
-    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP मेसेज प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्याला पाठविलेले मेसेज आपल्याला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP मेसेज प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी तुम्हाला पाठविलेले मेसेज तुम्हाला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अॅप्लिकेशन वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफाईल आणि डिव्हाइस मालक व्यवस्थापित करा"</string>
@@ -377,25 +377,25 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"रोचक प्रसारणे पाठविण्यास अॅपला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर तसेच रहाते. अतिरिक्त वापर टीव्ही धीमा किंवा यासाठी बरीच मेमरी वापरली जात असल्यामुळे तो अस्थिर करू शकतो."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"रोचक प्रसारणे पाठविण्यासाठी अॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो फोनला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"तुमचे संपर्क वाचा"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा सेव्ह करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"तुम्ही विशिष्ट लोकांना इतर मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषित केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप्सला अनुमती देतात. ही परवागनी अॅप्सला आपला संपर्क डेटा सेव्ह करण्यासाठी अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्याला न कळविता संपर्क डेटा सामायिक करू शकतात."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या फोनवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा सेव्ह करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी तुमचा संपर्क डेटा सेव्ह करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा शेअर करू शकतात."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"तुम्ही विशिष्ट लोकांना इतर मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषित केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप्सला अनुमती देतात. ही परवागनी अॅप्सला तुमचा संपर्क डेटा सेव्ह करण्यासाठी अनुमती देते आणि दुर्भावनापूर्ण अॅप्स तुम्हाला न कळविता संपर्क डेटा शेअर करू शकतात."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या फोनवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी तुमचा संपर्क डेटा सेव्ह करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा शेअर करू शकतात."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"तुमचे संपर्क सुधारित करा"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"तुम्ही विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"तुम्ही विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅपला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"तुम्ही विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या फोनवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"कॉल लॉग वाचा"</string>
-    <string name="permdesc_readCallLog" msgid="3204122446463552146">"हा अॅप आपला कॉल इतिहास वाचू शकता."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"हा अॅप तुमचा कॉल इतिहास वाचू शकता."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"कॉल लॉग लिहा"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टीव्हीचा कॉल लॉग सुधारित करण्यासाठी अॅपला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टीव्हीचा कॉल लॉग सुधारित करण्यासाठी अॅपला अनुमती देते. दुर्भावनापूर्ण अॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"शरीर सेंसर (हृदय गती मॉनिटरसारखे) अॅक्सेस करा"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"हृदय गती सारख्या, आपल्या शारीरिक स्थितीचे नियंत्रण करणार्‍या सेन्सरवरून डेटामध्ये प्रवेश करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"कॅलेंडर इव्हेंट आणि तपशील वाचा"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"हा अॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि सामायिक करू शकतो किंवा आपला कॅलेंडर डेटा सेव्ह करू शकतो."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"हा अॅप आपल्या टीव्हीवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि सामायिक करू शकतो किंवा आपला कॅलेंडर डेटा सेव्ह करू शकतो."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"हा अॅप आपल्या फोनवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि सामायिक करू शकतो किंवा आपला कॅलेंडर डेटा सेव्ह करू शकतो."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"हा अॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"हा अॅप आपल्या टीव्हीवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"हा अॅप आपल्या फोनवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"कॅलेंडर इव्हेंट जोडा किंवा बदला आणि मालकाला न कळवता अतिथींना ईमेल पाठवा"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"हा अॅप आपल्या टॅब्लेटवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"हा अॅप आपल्या टीव्हीवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
@@ -442,7 +442,7 @@
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"अ‍ॅप ला फोनच्‍या इन्‍फ्रारेड ट्रान्‍समीटरचा वापर करण्‍याची अनुमती देते."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"वॉलपेपर सेट करा"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"सिस्टम वॉलपेपर सेट करण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"आपला वॉलपेपर आकार समायोजित करा"</string>
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"तुमचा वॉलपेपर आकार समायोजित करा"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"सिस्टम वॉलपेपर आकार सूचना सेट करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"टाइम झोन सेट करा"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"टॅब्लेटचा टाइम झोन बदलण्यासाठी अॅप ला अनुमती देते."</string>
@@ -466,7 +466,7 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय अॅक्सेस बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डिव्हाइस कॉंफिगरेशनमध्ये बदल करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाय-फाय मल्‍टिकास्‍ट रिसेप्‍शनला अनुमती द्या"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त तुमच्या टॅब्लेटवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डीव्हाइसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे मल्टिकास्टखेरिज इतर मोडसाठी अधिक पॉवर वापरते."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"केवळ आपला टीव्ही न वापरता, एकाधिक पत्ते वापरून एका वाय-फाय नेटवकवरील सर्व डीव्हाइसवर पाठविलेली पॅकेट प्राप्त करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"केवळ तुमचा टीव्ही न वापरता, एकाधिक पत्ते वापरून एका वाय-फाय नेटवकवरील सर्व डीव्हाइसवर पाठविलेली पॅकेट प्राप्त करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त तुमच्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डीव्हाइसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे मल्टिकास्टखेरिज इतर मोडसाठी अधिक पॉवर वापरते."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटूथ सेटिंग्ज अॅक्सेस करा"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक ब्लूटूथ टॅबलेट कॉंफिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
@@ -668,7 +668,7 @@
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"कार्य मोबाईल"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"कार्य पेजर"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"साहाय्यक"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"असिस्टंट"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"कस्टम"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"वाढदिवस"</string>
@@ -701,7 +701,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"अन्य"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"कस्टम"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"साहाय्यक"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"असिस्टंट"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"भाऊ"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"मूल"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"घरातील जोडीदार"</string>
@@ -763,12 +763,12 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"वापरकर्ता मार्गदर्शक पहा किंवा कस्टमर केअरशी संपर्क साधा."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"सिम कार्ड लॉक केलेले आहे."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"सिम कार्ड अनलॉक करत आहे…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"तुम्ही आपला पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"तुम्ही आपला पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीचा रेखांकित केला आहे. <xliff:g id="NUMBER_1">%2$d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, तुम्हाला तुमचे Google साइन इन वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा आपला अनलॉक पॅटर्न अयोग्यरीत्या काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला तुमचे Google साइन इन वापरून आपला टीव्ही अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांनी पुन्हा प्रयत्न करा."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे रेखांकित केला आहे. <xliff:g id="NUMBER_1">%2$d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, तुम्हाला तुमचे Google साइन इन वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"तुम्ही तुमचा पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"तुम्ही तुमचा पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीचा रेखांकित केला आहे. <xliff:g id="NUMBER_1">%2$d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, तुम्हाला तुमचे Google साइन इन वापरून तुमचा टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा तुमचा अनलॉक पॅटर्न अयोग्यरीत्या काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला तुमचे Google साइन इन वापरून तुमचा टीव्ही अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांनी पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे रेखांकित केला आहे. <xliff:g id="NUMBER_1">%2$d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, तुम्हाला तुमचे Google साइन इन वापरून तुमचा फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा टॅबलेट अनलॉक करण्याचे चुकीचे प्रयत्न केले. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, टॅबलेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावला जाईल."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा टीव्ही अनलॉक करण्याचा अयोग्यरित्या प्रयत्न केला. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, टीव्ही फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावेल."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा फोन अनलॉक करण्याचे चुकीचे प्रयत्न केले. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, फोन फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावला जाईल."</string>
@@ -833,7 +833,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"Javascript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"नेव्हिगेशनची पुष्टी करा"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"हे पृष्ठ सोडा"</string>
-    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"या पृष्ठावर रहा"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"या पेजवर रहा"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nआपल्‍याला खात्री आहे की तुम्ही या पृष्‍ठावरून नेव्‍हिगेट करू इच्‍छिता?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"पुष्टी करा"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"टीप: झूम कमी करण्यासाठी आणि वाढवण्यासाठी दोनदा-टॅप करा."</string>
@@ -872,7 +872,7 @@
     <string name="save_password_notnow" msgid="6389675316706699758">"आत्ता नाही"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"लक्षात ठेवा"</string>
     <string name="save_password_never" msgid="8274330296785855105">"कधीही नाही"</string>
-    <string name="open_permission_deny" msgid="7374036708316629800">"आपल्याला हे पृष्ठ उघडण्याची परवानगी नाही."</string>
+    <string name="open_permission_deny" msgid="7374036708316629800">"तुम्हाला हे पृष्ठ उघडण्याची परवानगी नाही."</string>
     <string name="text_copied" msgid="4985729524670131385">"मजकूर क्लिपबोर्डवर कॉपी केला."</string>
     <string name="more_item_label" msgid="4650918923083320495">"अधिक"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"मेनू+"</string>
@@ -1124,8 +1124,8 @@
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> सेव्ह न करता बंद होईल"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"हीप डंप गोळा केले. शेअर करण्यासाठी टॅप करा."</string>
-    <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप सामायिक करायचे?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह सामायिक करण्यासाठी तुमच्यासाठी हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये तुमची कोणतीही वैयक्तिक माहिती असू शकते ज्यात अॅप्लिकेशन प्रवेश करू शकतो."</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप शेअर करायचे?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह शेअर करण्यासाठी तुमच्यासाठी हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये तुमची कोणतीही वैयक्तिक माहिती असू शकते ज्यात अॅप्लिकेशन प्रवेश करू शकतो."</string>
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर व्हॉल्यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया व्हॉल्यूम"</string>
@@ -1261,7 +1261,7 @@
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB डीबगिंग बंद करण्यासाठी टॅप करा"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबगिंग बंद करण्यासाठी निवडा."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"बग रीपोर्ट घेत आहे..."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल सामायिक करायचा?"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल शेअर करायचा?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रीपोर्ट शेअर करत आहे..."</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"आपल्या प्रशासकाने या डिव्हाइसचे समस्या निवारण करण्यात मदत करण्यासाठी दोष अहवालाची विनंती केली. अॅप्स आणि डेटा शेअर केले जाऊ शकतात."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"शेअर करा"</string>
@@ -1380,7 +1380,7 @@
     <string name="next_button_label" msgid="1080555104677992408">"पुढील"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"वगळा"</string>
     <string name="no_matches" msgid="8129421908915840737">"कोणत्याही जुळण्या नाहीत"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"पृष्ठावर शोधा"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"पेजवर शोधा"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="one"><xliff:g id="TOTAL">%d</xliff:g> पैकी <xliff:g id="INDEX">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> पैकी <xliff:g id="INDEX">%d</xliff:g></item>
@@ -1442,7 +1442,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"अधिक पर्याय"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"अंतर्गत सामायिक केलेला स्टोरेज"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"अंतर्गत शेअर केलेला स्टोरेज"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD कार्ड"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD कार्ड"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB ड्राइव्‍ह"</string>
@@ -1540,18 +1540,18 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"अवैध वापरकर्तानाव किंवा पासवर्ड."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"तुमचे वापरकर्तानाव किंवा पासवर्ड विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते तपासत आहे…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"तुम्ही आपला पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"तुम्ही आपला पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"तुम्ही तुमचा पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"तुम्ही तुमचा पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा टॅबलेट अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. <xliff:g id="NUMBER_1">%2$d</xliff:g> आणखी अयशस्वी प्रयत्नांनंतर, टॅबलेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि वापरकर्ता डेटा गमावेल."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा टीव्ही अनलॉक करण्याचा अयोग्यरित्या प्रयत्न केला. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, टीव्ही फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावेल."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा फोन अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. <xliff:g id="NUMBER_1">%2$d</xliff:g> आणखी अयशस्वी प्रयत्नांनंतर, फोन फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि वापरकर्ता डेटा गमावेल."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"तुम्ही <xliff:g id="NUMBER">%d</xliff:g> वेळा टॅबलेट अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. टॅबलेट आता फॅक्टरी डीफॉल्ट वर रीसेट केला जाईल."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"तुम्ही <xliff:g id="NUMBER">%d</xliff:g> वेळा टीव्ही अनलॉक करण्याचा अयोग्यरित्या प्रयत्न केला. टीव्ही आता फॅक्टरी डीफॉल्टवर रीसेट केला जाईल."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"तुम्ही <xliff:g id="NUMBER">%d</xliff:g> वेळा फोन अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. फोन आता फॅक्टरी डीफॉल्ट वर रीसेट केला जाईल."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा आपला अनलॉक पॅटर्न अयोग्यरीत्या काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून आपला टीव्ही अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांनी पुन्हा प्रयत्न करा."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून तुमचा टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा तुमचा अनलॉक पॅटर्न अयोग्यरीत्या काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून तुमचा टीव्ही अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांनी पुन्हा प्रयत्न करा."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून तुमचा फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"काढा"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
@@ -1747,7 +1747,7 @@
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"इव्‍हेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"निष्क्रिय आहे"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> काही ध्‍वनी म्‍यूट करत आहे"</string>
-    <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि आपला फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि तुमचा फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD विनंती नियमित कॉलवर बदलली"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD विनंती SS विनंतीवर बदलली"</string>
@@ -1809,7 +1809,7 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो प्रारंभ करत आहे..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"डिव्हाइस रीसेट करत आहे..."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
-    <string name="conference_call" msgid="3751093130790472426">"परिषद कॉल"</string>
+    <string name="conference_call" msgid="3751093130790472426">"कॉन्फरन्स कॉल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"टूलटिप"</string>
     <string name="app_category_game" msgid="5431836943981492993">"गेम"</string>
     <string name="app_category_audio" msgid="1659853108734301647">"संगीत आणि ऑडिओ"</string>

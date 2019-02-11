@@ -233,7 +233,7 @@ public class PackageInfo implements Parcelable {
     /**
      * Array of all signatures read from the package file. This is only filled
      * in if the flag {@link PackageManager#GET_SIGNATURES} was set. A package
-     * must be singed with at least one certificate which is at position zero.
+     * must be signed with at least one certificate which is at position zero.
      * The package can be signed with additional certificates which appear as
      * subsequent entries.
      *

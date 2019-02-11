@@ -231,7 +231,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Aus"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatisch"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Hostname des privaten DNS-Anbieters"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostnamen des DNS-Anbieters eingeben"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Level für WLAN-Protokollierung erhöhen, in WiFi Picker pro SSID-RSSI anzeigen"</string>
@@ -350,7 +350,7 @@
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Momentan ausgeführte Dienste anzeigen und steuern"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-Implementierung"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView-Implementierung festlegen"</string>
-    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Diese Auswahl ist nicht mehr gültig. Versuche es erneut."</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Diese Auswahl ist nicht mehr gültig. Bitte versuche es noch einmal."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Zu Dateiverschlüsselung wechseln"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Wechseln…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Dateiverschlüsselung wird bereits verwendet."</string>
@@ -381,12 +381,12 @@
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Weniger als <xliff:g id="THRESHOLD">%1$s</xliff:g> verbleibend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mehr als <xliff:g id="TIME_REMAINING">%1$s</xliff:g> verbleibend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Mehr als <xliff:g id="TIME_REMAINING">%1$s</xliff:g> verbleibend"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Smartphone wird möglicherweise bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Tablet wird möglicherweise bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Gerät wird möglicherweise bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Smartphone wird möglicherweise bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Tablet wird möglicherweise bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Gerät wird möglicherweise bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Smartphone wird eventuell bald ausgeschaltet"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Tablet wird eventuell bald ausgeschaltet"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Gerät wird eventuell bald ausgeschaltet"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Smartphone wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Tablet wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Gerät wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> bis zur vollständigen Aufladung"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> bis vollständig geladen"</string>

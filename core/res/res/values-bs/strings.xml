@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem sa povezivanjem ili nevažeći MMI kôd."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operacija je ograničena samo na brojeve fiksnog biranja."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Nije moguće promijeniti postavke za preusmjeravanje poziva s vašeg telefona dok ste u romingu."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Nije moguće promijeniti postavke prosljeđivanja poziva s vašeg telefona dok ste u romingu."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Usluga je omogućena."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Usluga je omogućena za:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Usluga je onemogućena."</string>
@@ -61,7 +61,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"ID odlaznog poziva"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Identifikacija povezane linije"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ograničenje identifikacije povezane linije"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Preusmjeravanje poziva"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Prosljeđivanje poziva"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Poziv na čekanju"</string>
     <string name="BaMmi" msgid="455193067926770581">"Zabrana poziva"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Promjena lozinke"</string>
@@ -89,17 +89,17 @@
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Hitni pozivi su nedostupni"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Nije moguće uspostaviti hitne pozive putem Wi‑Fi mreže"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmjeravanje poziva"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Prosljeđivanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Način rada za hitni povratni poziv"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status prijenosa podataka na mobilnoj mreži"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS poruke"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
-    <string name="notification_channel_wfc" msgid="2130802501654254801">"WiFi pozivanje"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Pozivanje putem WiFi-ja"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Status SIM-a"</string>
-    <string name="peerTtyModeFull" msgid="6165351790010341421">"Ravnopravni uređaj zatražio TTY PUNI način rada"</string>
-    <string name="peerTtyModeHco" msgid="5728602160669216784">"Ravnopravni uređaj zatražio TTY HCO način rada"</string>
-    <string name="peerTtyModeVco" msgid="1742404978686538049">"Ravnopravni uređaj zatražio TTY VCO način rada"</string>
-    <string name="peerTtyModeOff" msgid="3280819717850602205">"Ravnopravni uređaj zatražio TTY ISKLJUČENI način rada"</string>
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"Ravnopravni uređaj zatražio načina rada TTY FULL"</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"Ravnopravni uređaj zatražio načina rada TTY HCO"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"Ravnopravni uređaj zatražio načina rada TTY VCO"</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"Ravnopravni uređaj zatražio načina rada TTY OFF"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Govorna"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Podatke"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Faks"</string>
@@ -122,16 +122,16 @@
     <string name="roamingText11" msgid="4154476854426920970">"Oznaka da je uređaj u roamingu uključena"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Oznaka da je uređaj u roamingu ugašena"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Traženje usluge"</string>
-    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Nije moguće postaviti WiFi pozivanje"</string>
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Nije moguće postaviti pozivanje putem WiFi-ja"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3910386316304772394">"Da biste pozivali i slali poruke koristeći WiFi mrežu, prvo zatražite od operatera da postavi tu uslugu. Zatim ponovo uključite WiFi pozivanje u Postavkama. (Kôd greške: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="3910386316304772394">"Da biste pozivali i slali poruke koristeći WiFi mrežu, prvo zatražite od operatera da postavi tu uslugu. Zatim ponovo uključite pozivanje putem WiFi-ja u Postavkama. (Kôd greške: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Došlo je do problema prilikom registracije pozivanja putem WiFi mreže kod vašeg operatera: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"WiFi pozivanje preko operatera %s"</item>
+    <item msgid="4397097370387921767">"Pozivanje putem WiFi-ja preko operatera %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Isključeno"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferira se WiFi"</string>
@@ -261,7 +261,7 @@
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Status VPN-a"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administracija uređaja"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozorenja"</string>
-    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Promotivna demonstracija u maloprodaji"</string>
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Prodajna demonstracija"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB veza"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Pokrenuta je aplikacija"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikacije koje troše bateriju"</string>
@@ -770,7 +770,7 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Pogrešno ste unijeli svoju lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Pogrešno ste unijeli svoj PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Pogrešno ste unijeli uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Nakon toga ćete morati otključati tablet prijavom na svoj Google račun.\n\n Broj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_2">%3$d</xliff:g>"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Uzorak za otključavanje ste neispravno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću Google prijave.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Uzorak za otključavanje ste neispravno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću Google prijave.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Pogrešno ste unijeli uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Nakon toga ćete morati otključati telefon prijavom na svoj Google račun.\n\n Broj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_2">%3$d</xliff:g>"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Pogrešno ste pokušali otključati tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Ukoliko ni tada ne uspijete otključati tablet, tablet će se vratiti na fabričke postavke i svi korisnički podaci bit će izgubljeni."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati TV. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, TV će biti vraćen na fabričke postavke i svi podaci korisnika bit će izgubljeni."</string>
@@ -1458,7 +1458,7 @@
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Odaberite aplikaciju"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Aplikacija <xliff:g id="APPLICATION_NAME">%s</xliff:g> se ne može pokrenuti."</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Podijeliti sa"</string>
-    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli koristeći aplikaciju <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli pomoću aplikacije <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Klizni regulator. Dodirnite &amp; držite."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Prevucite za otključavanje ekrana."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Vratite se na početnu stranicu"</string>
@@ -1574,9 +1574,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Pokušali ste otključati tablet na pogrešan način <xliff:g id="NUMBER">%d</xliff:g> puta. Tablet će sada biti vraćen na fabričke postavke."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati TV. TV će sada biti vraćen na fabričke postavke."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Pokušali ste otključati telefon na pogrešan način <xliff:g id="NUMBER">%d</xliff:g> puta. Telefon će sada biti vraćen na fabričke postavke."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate tablet pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Uzorak za otključavanje ste pogrešno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću računa e-pošte.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate telefon pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate tablet pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Uzorak za otključavanje ste pogrešno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću računa e-pošte.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate telefon pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ukloni"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Želite li pojačati zvuk iznad preporučenog nivoa?\n\nDužim slušanjem glasnog zvuka možete oštetiti sluh."</string>

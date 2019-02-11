@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"ဝန်ဆောင်မှုပေးသူ ကွန်ရက် ပြောင်းလဲနေသည်။"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ဘက်ထရီ အသေးစိတ် အချက်အလက်များကို ဖွင့်ပါ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ဘတ္တရီ <xliff:g id="NUMBER">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ဘက်ထရီအားသွင်းနေသည်၊ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ဘက်ထရီအားသွင်းနေသည်၊ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%။"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"စနစ်အပြင်အဆင်များ"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"အကြောင်းကြားချက်များ။"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"သတိပေးချက်များအားလုံးကို ကြည့်ရန်"</string>
@@ -598,7 +598,7 @@
     <string name="do_not_silence_block" msgid="4070647971382232311">"အသံ မတိတ်ပါနှင့် သို့မဟုတ် မပိတ်ဆို့ပါနှင့်"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ဖွင့်ပါ"</string>
-    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ပိတ်ပါ"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ပိတ်ထားသည်"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများကိုအသုံးပြုပြီး အက်ပ်တစ်ခု၏ အကြောင်းကြားချက် အရေးပါမှု ၀ မှ ၅ အထိသတ်မှတ်ပေးနိုင်သည်။ \n\n"<b>"အဆင့် ၅"</b>" \n- အကြောင်းကြားချက်စာရင်း၏ ထိပ်ဆုံးတွင် ပြသည် \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်းကို ခွင့်ပြုသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၄"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၃"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n\n"<b>"အဆင့် ၂"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n\n"<b>"အဆင့် ၁"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n- လော့ခ်ချထားသည့် မျက်နှာပြင်နှင့် အခြေအနေဘားတန်းတို့တွင် မပြပါ \n- အကြောင်းကြားချက်စာရင်း အောက်ဆုံးတွင်ပြသည် \n\n"<b>"အဆင့် ၀"</b>" \n- အက်ပ်မှ အကြောင်းကြားချက်များ အားလုံးကို ပိတ်ဆို့သည်"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"အကြောင်းကြားချက်များ"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ဤအကြောင်းကြားချက်များကို မြင်ရတော့မည် မဟုတ်ပါ"</string>
@@ -700,7 +700,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ဒေတာချွေတာမှု ဖွင့်ထားသည်"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ဒေတာချွေတာမှု ပိတ်ထားသည်"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ဖွင့်ပါ"</string>
-    <string name="switch_bar_off" msgid="8803270596930432874">"ပိတ်ပါ"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"ပိတ်ထားသည်"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ရွှေ့လျားရန်ဘားတန်း"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"အပြင်အဆင်"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"လက်ဝဲခလုတ် အမျိုးအစားအပို"</string>

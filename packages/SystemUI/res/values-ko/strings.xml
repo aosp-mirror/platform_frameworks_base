@@ -172,9 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"이동통신사 네트워크 변경"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"배터리 세부정보 열기"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"배터리 <xliff:g id="NUMBER">%d</xliff:g>퍼센트"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"배터리 충전 중, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%입니다."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"시스템 설정"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"알림"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"모든 알림 보기"</string>
@@ -410,13 +408,13 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"프로필 표시"</string>
     <string name="user_add_user" msgid="5110251524486079492">"사용자 추가"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"새 사용자"</string>
-    <string name="guest_nickname" msgid="8059989128963789678">"손님"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"게스트"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"게스트 추가"</string>
-    <string name="guest_exit_guest" msgid="7187359342030096885">"손님 삭제"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"손님을 삭제하시겠습니까?"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"게스트 삭제"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"게스트를 삭제하시겠습니까?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"삭제"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"손님 세션 다시 시작"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"게스트 세션 다시 시작"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"세션을 계속 진행하시겠습니까?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"다시 시작"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"예, 계속합니다."</string>
@@ -848,14 +846,10 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"허용"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"거부"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"탭하여 배터리 세이버 예약"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for auto_saver_text (6324376061044218113) -->
-    <skip />
+    <string name="auto_saver_text" msgid="6324376061044218113">"배터리가 <xliff:g id="PERCENTAGE">%d</xliff:g>%%가 되면 자동으로 켜기"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"사용 안함"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"배터리 세이버 예약 사용 설정됨"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
-    <skip />
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"배터리가 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 아래로 내려가면 배터리 세이버가 자동으로 켜집니다."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"설정"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"확인"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>

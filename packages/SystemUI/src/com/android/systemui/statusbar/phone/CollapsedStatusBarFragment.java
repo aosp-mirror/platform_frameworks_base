@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +91,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onViewCreated(view, savedInstanceState);
         mStatusBar = (PhoneStatusBarView) view;
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_PANEL_STATE)) {
-            mStatusBar.go(savedInstanceState.getInt(EXTRA_PANEL_STATE));
+            mStatusBar.restoreHierarchyState(
+                    savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
         mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
         mDarkIconManager.setShouldLog(true);
@@ -105,7 +108,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(EXTRA_PANEL_STATE, mStatusBar.getState());
+        SparseArray<Parcelable> states = new SparseArray<>();
+        mStatusBar.saveHierarchyState(states);
+        outState.putSparseParcelableArray(EXTRA_PANEL_STATE, states);
     }
 
     @Override
@@ -184,6 +189,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_SYSTEM_INFO;
             state |= DISABLE_CLOCK;
         }
+
+        // In landscape, the heads up show but shouldHideNotificationIcons() return false
+        // because the visual icon is in notification icon area rather than heads up's space.
+        // whether the notification icon show or not, clock should hide when heads up show.
+        if (mStatusBarComponent.isHeadsUpShouldBeVisible()) {
+            state |= DISABLE_CLOCK;
+        }
+
         if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
             if (mNetworkController.hasEmergencyCryptKeeperText()) {
                 state |= DISABLE_NOTIFICATION_ICONS;
