@@ -60,11 +60,13 @@ public class BenchmarkResults {
         if (size == 0) {
             return 0f;
         }
-        Collections.sort(mResults);
+
+        final ArrayList<Long> resultsCopy = new ArrayList<>(mResults);
+        Collections.sort(resultsCopy);
         final int idx = size / 2;
         return size % 2 == 0
-                ? (double) (mResults.get(idx) + mResults.get(idx - 1)) / 2
-                : mResults.get(idx);
+                ? (double) (resultsCopy.get(idx) + resultsCopy.get(idx - 1)) / 2
+                : resultsCopy.get(idx);
     }
 
     private double standardDeviation() {
