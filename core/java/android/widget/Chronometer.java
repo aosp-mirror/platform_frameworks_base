@@ -116,6 +116,8 @@ public class Chronometer extends TextView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.Chronometer, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.Chronometer,
+                attrs, a, defStyleAttr, defStyleRes);
         setFormat(a.getString(R.styleable.Chronometer_format));
         setCountDown(a.getBoolean(R.styleable.Chronometer_countDown, false));
         a.recycle();

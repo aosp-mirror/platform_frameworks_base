@@ -69,6 +69,8 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.AdapterViewFlipper, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.AdapterViewFlipper,
+                attrs, a, defStyleAttr, defStyleRes);
         mFlipInterval = a.getInt(
                 com.android.internal.R.styleable.AdapterViewFlipper_flipInterval, DEFAULT_INTERVAL);
         mAutoStart = a.getBoolean(

@@ -239,6 +239,8 @@ public class Switch extends CompoundButton {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.Switch, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.Switch,
+                attrs, a, defStyleAttr, defStyleRes);
         mThumbDrawable = a.getDrawable(com.android.internal.R.styleable.Switch_thumb);
         if (mThumbDrawable != null) {
             mThumbDrawable.setCallback(this);

@@ -303,6 +303,8 @@ public class GridLayout extends ViewGroup {
         mDefaultGap = context.getResources().getDimensionPixelOffset(R.dimen.default_gap);
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.GridLayout, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.GridLayout,
+                attrs, a, defStyleAttr, defStyleRes);
         try {
             setRowCount(a.getInt(ROW_COUNT, DEFAULT_COUNT));
             setColumnCount(a.getInt(COLUMN_COUNT, DEFAULT_COUNT));

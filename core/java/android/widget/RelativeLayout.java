@@ -257,6 +257,8 @@ public class RelativeLayout extends ViewGroup {
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.RelativeLayout, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.RelativeLayout,
+                attrs, a, defStyleAttr, defStyleRes);
         mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, View.NO_ID);
         mGravity = a.getInt(R.styleable.RelativeLayout_gravity, mGravity);
         a.recycle();

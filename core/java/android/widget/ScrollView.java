@@ -217,6 +217,8 @@ public class ScrollView extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.ScrollView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.ScrollView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         setFillViewport(a.getBoolean(R.styleable.ScrollView_fillViewport, false));
 

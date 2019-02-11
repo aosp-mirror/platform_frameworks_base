@@ -107,6 +107,8 @@ public abstract class AbsSeekBar extends ProgressBar {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.SeekBar, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.SeekBar, attrs, a, defStyleAttr,
+                defStyleRes);
 
         final Drawable thumb = a.getDrawable(R.styleable.SeekBar_thumb);
         setThumb(thumb);

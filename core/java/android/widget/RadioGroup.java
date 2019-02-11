@@ -98,6 +98,8 @@ public class RadioGroup extends LinearLayout {
         // XML layout file
         TypedArray attributes = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.RadioGroup, com.android.internal.R.attr.radioButtonStyle, 0);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.RadioGroup,
+                attrs, attributes, com.android.internal.R.attr.radioButtonStyle, 0);
 
         int value = attributes.getResourceId(R.styleable.RadioGroup_checkedButton, View.NO_ID);
         if (value != View.NO_ID) {

@@ -283,6 +283,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.SearchView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.SearchView,
+                attrs, a, defStyleAttr, defStyleRes);
         final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         final int layoutResId = a.getResourceId(

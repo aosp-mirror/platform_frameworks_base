@@ -180,6 +180,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.AdapterViewAnimator, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.AdapterViewAnimator,
+                attrs, a, defStyleAttr, defStyleRes);
+
         int resource = a.getResourceId(
                 com.android.internal.R.styleable.AdapterViewAnimator_inAnimation, 0);
         if (resource > 0) {

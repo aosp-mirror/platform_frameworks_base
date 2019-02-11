@@ -93,6 +93,8 @@ public class RatingBar extends AbsSeekBar {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.RatingBar, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.RatingBar,
+                attrs, a, defStyleAttr, defStyleRes);
         final int numStars = a.getInt(R.styleable.RatingBar_numStars, mNumStars);
         setIsIndicator(a.getBoolean(R.styleable.RatingBar_isIndicator, !mIsUserSeekable));
         final float rating = a.getFloat(R.styleable.RatingBar_rating, -1);

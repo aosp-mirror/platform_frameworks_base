@@ -200,6 +200,8 @@ public class ImageView extends View {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ImageView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.ImageView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         final Drawable d = a.getDrawable(R.styleable.ImageView_src);
         if (d != null) {

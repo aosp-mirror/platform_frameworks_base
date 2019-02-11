@@ -161,6 +161,8 @@ public class DatePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
                 defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.DatePicker,
+                attrs, a, defStyleAttr, defStyleRes);
         final boolean isDialogMode = a.getBoolean(R.styleable.DatePicker_dialogMode, false);
         final int requestedMode = a.getInt(R.styleable.DatePicker_datePickerMode, MODE_SPINNER);
         final int firstDayOfWeek = a.getInt(R.styleable.DatePicker_firstDayOfWeek, 0);
