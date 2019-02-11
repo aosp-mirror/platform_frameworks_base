@@ -27,8 +27,6 @@ import android.os.Parcel;
  * {@link RcsThread#addIncomingMessage(RcsIncomingMessageCreationParams)} and
  * {@link RcsThread#addOutgoingMessage(RcsOutgoingMessageCreationParams)} to create and persist
  * {@link RcsMessage}s on an {@link RcsThread}
- *
- * @hide - TODO: make public
  */
 public class RcsMessageCreationParams {
     // The globally unique id of the RcsMessage to be created.

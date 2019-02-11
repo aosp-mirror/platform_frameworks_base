@@ -24,8 +24,6 @@ import android.os.Parcelable;
 /**
  * An event that indicates an {@link RcsGroupThread}'s icon was changed. Please see R6-2-5 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
- *
- * @hide - TODO: make public
  */
 public final class RcsGroupThreadIconChangedEvent extends RcsGroupThreadEvent implements
         Parcelable {

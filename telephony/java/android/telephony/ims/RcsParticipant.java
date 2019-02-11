@@ -20,8 +20,6 @@ import android.annotation.WorkerThread;
 
 /**
  * RcsParticipant is an RCS capable contact that can participate in {@link RcsThread}s.
- *
- * @hide - TODO: make public
  */
 public class RcsParticipant {
     // The row ID of this participant in the database
