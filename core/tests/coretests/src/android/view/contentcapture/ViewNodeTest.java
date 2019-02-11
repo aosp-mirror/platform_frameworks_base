@@ -20,10 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.graphics.Matrix;
-import android.support.test.InstrumentationRegistry;
 import android.view.View;
 import android.view.ViewStructure.HtmlInfo;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
