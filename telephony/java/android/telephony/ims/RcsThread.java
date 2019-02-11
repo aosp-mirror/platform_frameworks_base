@@ -27,8 +27,6 @@ import com.android.internal.annotations.VisibleForTesting;
 /**
  * RcsThread represents a single RCS conversation thread. It holds messages that were sent and
  * received and events that occurred on that thread.
- *
- * @hide - TODO: make public
  */
 public abstract class RcsThread {
     /**

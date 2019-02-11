@@ -23,8 +23,6 @@ import android.os.Parcelable;
 /**
  * An event that indicates an {@link RcsParticipant}'s alias was changed. Please see US18-2 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
- *
- * @hide - TODO: make public
  */
 public final class RcsParticipantAliasChangedEvent extends RcsEvent implements Parcelable {
     // The ID of the participant that changed their alias

@@ -23,8 +23,6 @@ import android.os.Parcelable;
 /**
  * An event that indicates an {@link RcsGroupThread}'s name was changed. Please see R6-2-5 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
- *
- * @hide - TODO: make public
  */
 public final class RcsGroupThreadNameChangedEvent extends RcsGroupThreadEvent implements
         Parcelable {

@@ -37,8 +37,6 @@ import java.security.InvalidParameterException;
  * The parameters to pass into
  * {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)} in order to select a
  * subset of {@link RcsEvent}s present in the message store.
- *
- * @hide - TODO: make public
  */
 public final class RcsEventQueryParams implements Parcelable {
     /**
@@ -152,8 +150,8 @@ public final class RcsEventQueryParams implements Parcelable {
     }
 
     /**
-     * @return Returns the type of {@link RcsEvent}s that this {@link RcsEventQueryParams} is
-     * set to query for.
+     * @return Returns the number of {@link RcsEvent}s to be returned from the query. A value of
+     * 0 means there is no set limit.
      */
     public int getLimit() {
         return mLimit;

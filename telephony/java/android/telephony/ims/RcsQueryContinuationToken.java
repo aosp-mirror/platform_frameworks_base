@@ -31,8 +31,6 @@ import java.lang.annotation.RetentionPolicy;
  * @see RcsMessageQueryResult#getContinuationToken()
  * @see RcsParticipantQueryResult#getContinuationToken()
  * @see RcsThreadQueryResult#getContinuationToken()
- *
- * @hide - TODO: make public
  */
 public final class RcsQueryContinuationToken implements Parcelable {
     /**

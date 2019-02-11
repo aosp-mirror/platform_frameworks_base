@@ -29,8 +29,6 @@ import java.util.Set;
  * RcsGroupThread represents a single RCS conversation thread where {@link RcsParticipant}s can join
  * or leave. Please see Section 6 (Group Chat) - GSMA RCC.71 (RCS Universal Profile Service
  * Definition Document)
- *
- * @hide - TODO: make public
  */
 public class RcsGroupThread extends RcsThread {
     /**
