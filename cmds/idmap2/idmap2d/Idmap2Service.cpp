@@ -29,13 +29,13 @@
 #include "android-base/stringprintf.h"
 #include "binder/IPCThreadState.h"
 #include "utils/String8.h"
-#include "utils/Trace.h"
 
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
 #include "idmap2/Result.h"
+#include "idmap2/SysTrace.h"
 
 #include "idmap2d/Idmap2Service.h"
 
@@ -72,6 +72,7 @@ namespace android::os {
 Status Idmap2Service::getIdmapPath(const std::string& overlay_apk_path,
                                    int32_t user_id ATTRIBUTE_UNUSED, std::string* _aidl_return) {
   assert(_aidl_return);
+  SYSTRACE << "Idmap2Service::getIdmapPath " << overlay_apk_path;
   *_aidl_return = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
   return ok();
 }
@@ -79,6 +80,7 @@ Status Idmap2Service::getIdmapPath(const std::string& overlay_apk_path,
 Status Idmap2Service::removeIdmap(const std::string& overlay_apk_path,
                                   int32_t user_id ATTRIBUTE_UNUSED, bool* _aidl_return) {
   assert(_aidl_return);
+  SYSTRACE << "Idmap2Service::removeIdmap " << overlay_apk_path;
   const uid_t uid = IPCThreadState::self()->getCallingUid();
   const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
   if (!UidHasWriteAccessToPath(uid, idmap_path)) {
@@ -98,6 +100,7 @@ Status Idmap2Service::verifyIdmap(const std::string& overlay_apk_path,
                                   int32_t fulfilled_policies ATTRIBUTE_UNUSED,
                                   bool enforce_overlayable ATTRIBUTE_UNUSED,
                                   int32_t user_id ATTRIBUTE_UNUSED, bool* _aidl_return) {
+  SYSTRACE << "Idmap2Service::verifyIdmap " << overlay_apk_path;
   assert(_aidl_return);
   const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
   std::ifstream fin(idmap_path);
@@ -113,15 +116,10 @@ Status Idmap2Service::verifyIdmap(const std::string& overlay_apk_path,
 
 Status Idmap2Service::createIdmap(const std::string& target_apk_path,
                                   const std::string& overlay_apk_path, int32_t fulfilled_policies,
-                                  bool enforce_overlayable, int32_t user_id,
+                                  bool enforce_overlayable, int32_t user_id ATTRIBUTE_UNUSED,
                                   std::unique_ptr<std::string>* _aidl_return) {
   assert(_aidl_return);
-  std::stringstream trace;
-  trace << __FUNCTION__ << " " << target_apk_path << " " << overlay_apk_path << " "
-        << std::to_string(user_id);
-  ATRACE_NAME(trace.str().c_str());
-  std::cout << trace.str() << std::endl;
-
+  SYSTRACE << "Idmap2Service::createIdmap " << target_apk_path << " " << overlay_apk_path;
   _aidl_return->reset(nullptr);
 
   const PolicyBitmask policy_bitmask = ConvertAidlArgToPolicyBitmask(fulfilled_policies);

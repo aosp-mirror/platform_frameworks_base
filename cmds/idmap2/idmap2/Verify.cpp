@@ -21,11 +21,13 @@
 
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/SysTrace.h"
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::IdmapHeader;
 
 bool Verify(const std::vector<std::string>& args, std::ostream& out_error) {
+  SYSTRACE << "Verify " << args;
   std::string idmap_path;
 
   const CommandLineOptions opts =
