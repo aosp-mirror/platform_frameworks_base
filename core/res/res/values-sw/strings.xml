@@ -282,7 +282,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; itume na ione ujumbe wa SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hifadhi"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie picha, maudhui na faili kwenye kifaa chako?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Ungependa &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie picha, maudhui na faili kwenye kifaa chako?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Kipokea sauti"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"irekodi sauti"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; irekodi sauti?"</string>
@@ -451,7 +451,7 @@
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Huruhusu programu kupata orodha ya akaunti zinazojulikana na runinga. Hii inaweza kujumuisha akaunti zozote zilizofunguliwa na programu ambazo umesakinisha."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa simu. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"kuona mitandao"</string>
-    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Inaruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao ipi iliyopo na imeunganishwa."</string>
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Huruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao iliyopo na iliyounganishwa."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"pata ufikiaji kamili wa mtandao"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Inaruhusu programu kuunda soketi za mtandao na kutumia itifaki za mtandao maalum. Kivinajri na programu nyingine zilizotolewa zinamaanisha kutuma data kwenye mtandao, kwa hivyo kibali hiki hakihitajiki kutuma data kwenye mtandao."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"kubadilisha muunganisho wa mtandao"</string>
@@ -459,7 +459,7 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Badilisha muunganisho uliofunganishwa"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Inaruhusu programu kubadilisha hali ya muunganisho wa mtandao uliofungwa."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Kuona miunganisho ya Wi-Fi"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Inaruhusu programu kuona taarifa kuhusu mtandao wa Wi-Fi, kama vile ikiwa Wi-Fi imewezeshwa mna jina la vifaa vya Wi-Fi vilivyounganishwa."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Huruhusu programu kuona taarifa kuhusu mtandao wa Wi-Fi, kama vile ikiwa Wi-Fi imewashwa na majina ya vifaa vya Wi-Fi vilivyounganishwa."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"unganisha na utenganishe kutoka kwa Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Inaruhusu programu kuunganisha kwenye au kukata kutoka pointi za ufikivu wa Wi-Fi na kufanya mabadiliko kwenye usanidi wa kifaa cha mitandao ya Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ruhusu upokeaji wa Wi-Fi Multicast"</string>
@@ -477,9 +477,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Huruhusu programu kuunganisha runinga kwenye na kuondoa runinga kutoka mitandao ya WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Inaruhusu programu kuunganisha simu kwenye, na kukata simu kutoka mitandao ya WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"oanisha na vifaa vya Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Huruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Huruhusu programu kuona usanidi wa Bluetooth kwenye runinga, na kuomba na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Huruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zima kufuli la skrini yako"</string>
@@ -1518,7 +1518,7 @@
     </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chora ruwaza yako"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingiza PIN ya SIM"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingiza PIN"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Weka PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Weka Nenosiri"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Weka nambari yako ya PIN"</string>
@@ -1661,7 +1661,7 @@
     <string name="print_service_installed_title" msgid="2246317169444081628">"Huduma ya <xliff:g id="NAME">%s</xliff:g> imesakinisha"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Gusa ili uwashe"</string>
     <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Weka PIN ya msimamizi"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ingiza PIN"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Weka PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Sio sahihi"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ya sasa"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN mpya"</string>

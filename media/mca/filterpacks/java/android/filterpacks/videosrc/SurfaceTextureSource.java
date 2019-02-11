@@ -38,7 +38,7 @@ import android.util.Log;
  * <p>To use, connect up the sourceListener callback, and then when executing
  * the graph, use the SurfaceTexture object passed to the callback to feed
  * frames into the filter graph. For example, pass the SurfaceTexture into
- * {#link
+ * {@link
  * android.hardware.Camera.setPreviewTexture(android.graphics.SurfaceTexture)}.
  * This filter is intended for applications that need for flexibility than the
  * CameraSource and MediaSource provide. Note that the application needs to

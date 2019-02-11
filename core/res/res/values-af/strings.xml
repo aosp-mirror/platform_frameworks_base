@@ -133,7 +133,7 @@
     <item msgid="4397097370387921767">"%s Wi-Fi-oproep"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Af"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Verkieslik Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Verkies Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Verkies mobiel"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Net Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nie aangestuur nie"</string>

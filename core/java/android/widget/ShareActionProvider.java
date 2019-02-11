@@ -268,7 +268,7 @@ public class ShareActionProvider extends ActionProvider {
      * Intent shareIntent = new Intent(Intent.ACTION_SEND);
      * shareIntent.setType("image/*");
      * Uri uri = Uri.fromFile(new File(getFilesDir(), "foo.jpg"));
-     * shareIntent.putExtra(Intent.EXTRA_STREAM, uri));</pre>
+     * shareIntent.putExtra(Intent.EXTRA_STREAM, uri);</pre>
      *
      * @param shareIntent The share intent.
      *

@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"IU del sistema"</string>
+    <string name="app_label" msgid="7164937344850004466">"UI del sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Quitar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>
@@ -172,9 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Cambiando la red del operador"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir detalles de la batería"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> por ciento de batería"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batería cargando (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%)."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Ajustes del sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificaciones"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Ver todas las notificaciones"</string>
@@ -556,13 +554,13 @@
     <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
     <string name="output_service_wifi" msgid="3749735218931825054">"Wi‑Fi"</string>
     <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth y Wi‑Fi"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Configurador de IU del sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Configurador de UI del sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaje de batería insertado"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ajustes rápidos"</string>
     <string name="status_bar" msgid="4877645476959324760">"Barra de estado"</string>
     <string name="overview" msgid="4018602013895926956">"Aplicaciones recientes"</string>
-    <string name="demo_mode" msgid="2532177350215638026">"Modo de demostración de IU del sistema"</string>
+    <string name="demo_mode" msgid="2532177350215638026">"Modo de demostración de UI del sistema"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Habilitar modo de demostración"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Mostrar modo de demostración"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
@@ -579,12 +577,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Diversión solo para algunos"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"El configurador de IU del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"El configurador de UI del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
     <string name="got_it" msgid="2239653834387972602">"Entendido"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"¡Enhorabuena! El configurador de IU del sistema se ha añadido a Ajustes"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"¡Enhorabuena! El configurador de UI del sistema se ha añadido a Ajustes"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Quitar de Ajustes"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Quitar el configurador de IU del sistema de Ajustes y dejar de utilizar sus funciones?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Quitar el configurador de UI del sistema de Ajustes y dejar de utilizar sus funciones?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"La aplicación no está instalada en tu dispositivo"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostrar los segundos del reloj"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Muestra los segundos del reloj en la barra de estado. Puede afectar a la duración de la batería."</string>

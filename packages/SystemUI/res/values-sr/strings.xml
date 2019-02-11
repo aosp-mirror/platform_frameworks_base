@@ -173,7 +173,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Промена мреже мобилног оператера"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Отвори детаље о батерији"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерија је на <xliff:g id="NUMBER">%d</xliff:g> посто."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батерија се пуни, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> процената."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батерија се пуни, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Системска подешавања."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Обавештења."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Погледајте сва обавештења"</string>
@@ -375,7 +375,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Укључи/искључи преглед"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Напуњена је"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Пуњење"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> док се не напуни"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> до краја пуњења"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Не пуни се"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Мрежа се можда\nнадгледа"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Претрага"</string>

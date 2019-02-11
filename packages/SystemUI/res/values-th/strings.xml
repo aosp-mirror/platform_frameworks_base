@@ -85,7 +85,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"กลับ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"หน้าแรก"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"เมนู"</string>
-    <string name="accessibility_accessibility_button" msgid="7601252764577607915">"ความสามารถเข้าถึงได้ง่าย"</string>
+    <string name="accessibility_accessibility_button" msgid="7601252764577607915">"การเข้าถึงพิเศษ"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"หมุนหน้าจอ"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"ภาพรวม"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ค้นหา"</string>
@@ -430,7 +430,7 @@
     <string name="user_remove_user_message" msgid="1453218013959498039">"แอปและข้อมูลทั้งหมดของผู้ใช้นี้จะถูกลบ"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"นำออก"</string>
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
-    <string name="battery_saver_notification_text" msgid="820318788126672692">"ลดการใช้แบตเตอรี่และข้อมูลแบ็กกราวด์"</string>
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"ลดการใช้แบตเตอรี่และอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ปิดโหมดประหยัดแบตเตอรี่"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะเริ่มจับภาพทุกอย่างที่แสดงบนหน้าจอ"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
@@ -643,7 +643,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"การใช้งานแบตเตอรี่"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ไม่สามารถใช้โหมดประหยัดแบตเตอรี่ระหว่างการชาร์จ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"โหมดประหยัดแบตเตอรี่"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ลดประสิทธิภาพการทำงานและข้อมูลแบ็กกราวด์"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ลดประสิทธิภาพการทำงานและอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ปุ่ม <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"กลับ"</string>

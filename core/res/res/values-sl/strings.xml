@@ -135,7 +135,7 @@
     <item msgid="4397097370387921767">"Klicanje prek Wi-Fi-ja (%s)"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Izklopljeno"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Prednostno – Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Prednostno Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Prednostno mobilno"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Samo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ni posredovano"</string>
@@ -608,7 +608,7 @@
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Spreminjanje tega, kako pogosto je treba spremeniti geslo, kodo PIN ali vzorec za zaklepanje zaslona."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavitev šifriranja shrambe"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Shranjeni podatki aplikacije morajo biti šifrirani."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogoči fotoaparate"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogočanje fotoaparatov"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Prepreči uporabo vseh fotoaparatov v napravi."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogočanje nekaterih funkcij zaklepanja zaslona"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Prepreči uporabo nekaterih funkcij zaklepanja zaslona."</string>

@@ -6429,6 +6429,69 @@ message MetricsEvent {
     // OS: Q (will also ship in PQ1A)
     FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH = 1553;
 
+    // OPEN: Emergency dialer opened
+    // CLOSE: Emergency dialer closed
+    //  SUBTYPE: The entry type that user opened emergency dialer
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    EMERGENCY_DIALER = 1558;
+
+    // FIELD: The screen is currently locked
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_IS_SCREEN_LOCKED = 1559;
+
+    // FIELD: Bit flag indicating the actions performed by user
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_USER_ACTIONS = 1560;
+
+    // FIELD: The duration user stayed at emergency dialer
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_DURATION_MS = 1561;
+
+    // ACTION: Making call via emergency dialer
+    //  SUBTYPE: The UI that user made phone call
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    EMERGENCY_DIALER_MAKE_CALL = 1562;
+
+    // FIELD: The phone number type of a call user made
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_PHONE_NUMBER_TYPE = 1563;
+
+    // FIELD: There is a shortcut for the phone number
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_PHONE_NUMBER_HAS_SHORTCUT = 1564;
+
+    // FIELD: The phone is in pocket while using emergency dialer
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_IN_POCKET = 1565;
+
+    // ACTION: The second tap on emergency shortcut to make a phone call
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    EMERGENCY_DIALER_SHORTCUT_CONFIRM_TAP = 1566;
+
+    // FIELD: The time in milliseconds of second tap on shortcut since first tap
+    // CATEGORY: EMERGENCY_DIALER
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_SHORTCUT_TAPS_INTERVAL = 1567;
+
+    // OPEN: Power menu is opened
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: Q
+    POWER_MENU = 1568;
+
+    // ACTION: User tapped emergency dialer icon in the power menu.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: Q
+    ACTION_EMERGENCY_DIALER_FROM_POWER_MENU = 1569;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

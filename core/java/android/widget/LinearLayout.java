@@ -644,7 +644,7 @@ public class LinearLayout extends ViewGroup {
     }
 
     /**
-     * <p>Returns the view at the specified index. This method can be overriden
+     * <p>Returns the view at the specified index. This method can be overridden
      * to take into account virtual children. Refer to
      * {@link android.widget.TableLayout} and {@link android.widget.TableRow}
      * for an example.</p>
@@ -1518,7 +1518,7 @@ public class LinearLayout extends ViewGroup {
 
     /**
      * <p>Measure the child according to the parent's measure specs. This
-     * method should be overriden by subclasses to force the sizing of
+     * method should be overridden by subclasses to force the sizing of
      * children. This method is called by {@link #measureVertical(int, int)} and
      * {@link #measureHorizontal(int, int)}.</p>
      *

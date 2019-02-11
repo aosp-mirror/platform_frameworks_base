@@ -117,15 +117,15 @@
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Ingen dækning."</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Skift indtastningsmetode"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"Flytilstand"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Der skal angives et mønster efter genstart af enheden"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Der skal indtastes en pinkode efter genstart af enheden"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Der skal indtastes en adgangskode efter genstart af enheden"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Du skal angive et mønster, når du har genstartet enheden"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Der skal angives en pinkode efter genstart af enheden"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Der skal angives en adgangskode efter genstart af enheden"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"Der kræves et mønster som ekstra beskyttelse"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"Der kræves en pinkode som ekstra beskyttelse"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"Der kræves en adgangskode som ekstra beskyttelse"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Der skal angives et mønster, når du skifter profil"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Der skal indtastes en pinkode, når du skifter profil"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Der skal indtastes en adgangskode, når du skifter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Du skal angive et mønster, når du skifter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Der skal angives en pinkode, når du skifter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Der skal angives en adgangskode, når du skifter profil"</string>
     <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Enheden er blevet låst af administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Enheden blev låst manuelt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">

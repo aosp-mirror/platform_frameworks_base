@@ -65,7 +65,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"Visada atidaryti „<xliff:g id="APPLICATION">%1$s</xliff:g>“, kai prijungiamas (-a) <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Visada atidaryti „<xliff:g id="APPLICATION">%1$s</xliff:g>“, kai prijungiamas (-a) <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Leisti USB derinimą?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Šio kompiuterio RSA rakto kontrolinis kodas yra:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Šio kompiuterio RSA rakto piršto antspaudas yra:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Visada leisti iš šio kompiuterio"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB derinimas neleidžiamas"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Šiuo metu prie įrenginio prisijungęs naudotojas negali įjungti USB derinimo. Kad galėtumėte naudoti šią funkciją, perjunkite į pagrindinį naudotoją."</string>
@@ -95,8 +95,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefonas"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Atrakinti"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Laukiama kontrolinio kodo"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Atrakinti nenaudojant kontrolinio kodo"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Laukiama piršto antspaudo"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Atrakinti nenaudojant piršto antspaudo"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Nuskaitomas veidas"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Siųsti"</string>
     <string name="unlock_label" msgid="8779712358041029439">"atrakinti"</string>
@@ -105,8 +105,8 @@
     <string name="camera_label" msgid="7261107956054836961">"atidaryti fotoaparatą"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Pasirinkti naują užduoties išdėstymą"</string>
     <string name="cancel" msgid="6442560571259935130">"Atšaukti"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Palieskite kontrolinio kodo jutiklį"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Kontrolinio kodo piktograma"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Palieskite piršto antspaudo jutiklį"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Piršto antspaudo piktograma"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Programos piktograma"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Pagalbos pranešimo sritis"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Suderinamumo priartinimo mygtukas."</string>
@@ -174,7 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Keičiamas operatoriaus tinklas"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Atidaryti išsamią akumuliatoriaus informaciją"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumuliatorius: <xliff:g id="NUMBER">%d</xliff:g> proc."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> proc."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistemos nustatymai"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Pranešimai."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Žr. visus pranešimus"</string>
@@ -856,10 +856,10 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Leisti"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Neleisti"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Palietę planuokite akumuliatoriaus tausojimo priemonės veikimą"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Įjunkite automatiškai akumuliatoriaus įkrovai pasiekus <xliff:g id="PERCENTAGE">%d</xliff:g> proc."</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Įjunkite automatiškai akumuliatoriaus įkrovai pasiekus <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ne, ačiū"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Akumuliatoriaus tausojimo priemonės veikimas suplanuotas"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Akumuliatoriaus tausojimo priemonė bus įjungta automatiškai akumuliatoriaus įkrovai pasiekus mažiau nei <xliff:g id="PERCENTAGE">%d</xliff:g> proc."</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Akumuliatoriaus tausojimo priemonė bus įjungta automatiškai akumuliatoriaus įkrovai pasiekus mažiau nei <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Nustatymai"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Supratau"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Pat. „SysUI“ krūvą"</string>

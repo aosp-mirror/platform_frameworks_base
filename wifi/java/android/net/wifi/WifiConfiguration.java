@@ -328,9 +328,10 @@ public class WifiConfiguration implements Parcelable {
     public String preSharedKey;
 
     /**
-     * Up to four WEP keys. Either an ASCII string enclosed in double
-     * quotation marks (e.g., {@code "abcdef"}) or a string
-     * of hex digits (e.g., {@code 0102030405}).
+     * Four WEP keys. For each of the four values, provide either an ASCII
+     * string enclosed in double quotation marks (e.g., {@code "abcdef"}),
+     * a string of hex digits (e.g., {@code 0102030405}), or an empty string
+     * (e.g., {@code ""}).
      * <p/>
      * When the value of one of these keys is read, the actual key is
      * not returned, just a "*" if the key has a value, or the null
@@ -503,7 +504,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      * Universal name for app creating the configuration
-     *    see {#link {@link PackageManager#getNameForUid(int)}
+     *    see {@link PackageManager#getNameForUid(int)}
      */
     @SystemApi
     public String creatorName;
@@ -511,7 +512,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      * Universal name for app updating the configuration
-     *    see {#link {@link PackageManager#getNameForUid(int)}
+     *    see {@link PackageManager#getNameForUid(int)}
      */
     @SystemApi
     public String lastUpdateName;

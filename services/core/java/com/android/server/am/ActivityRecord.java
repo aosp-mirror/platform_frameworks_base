@@ -31,6 +31,7 @@ import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
+import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -80,7 +81,6 @@ import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
@@ -103,8 +103,6 @@ import static com.android.server.am.ActivityStack.LAUNCH_TICK;
 import static com.android.server.am.ActivityStack.LAUNCH_TICK_MSG;
 import static com.android.server.am.ActivityStack.PAUSE_TIMEOUT_MSG;
 import static com.android.server.am.ActivityStack.STOP_TIMEOUT_MSG;
-import static com.android.server.am.EventLogTags.AM_ACTIVITY_FULLY_DRAWN_TIME;
-import static com.android.server.am.EventLogTags.AM_ACTIVITY_LAUNCH_TIME;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.am.TaskPersister.DEBUG;
@@ -163,7 +161,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.service.voice.IVoiceInteractionSession;
@@ -185,6 +182,7 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.AttributeCache.Entry;
+import com.android.server.am.ActivityMetricsLogger.WindowingModeTransitionInfoSnapshot;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.AppWindowContainerListener;
@@ -264,9 +262,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private int windowFlags;        // custom window flags for preview window.
     private TaskRecord task;        // the task this is in.
     private long createTime = System.currentTimeMillis();
-    long displayStartTime;  // when we started launching this activity
-    long fullyDrawnStartTime; // when we started launching this activity
-    private long startTime;         // last time this activity was started
     long lastVisibleTime;   // last time this activity became visible
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     long pauseTime;         // last time we started pausing the activity
@@ -313,6 +308,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                                         // process that it is hidden.
     boolean sleeping;       // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
+    boolean drawn;          // is this activity's window drawn?
     boolean mClientVisibilityDeferred;// was the visibility change message to client deferred?
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
@@ -522,15 +518,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             pw.print(prefix);
             pw.print("requestedVrComponent=");
             pw.println(requestedVrComponent);
-        }
-        if (displayStartTime != 0 || startTime != 0) {
-            pw.print(prefix); pw.print("displayStartTime=");
-                    if (displayStartTime == 0) pw.print("0");
-                    else TimeUtils.formatDuration(displayStartTime, now, pw);
-                    pw.print(" startTime=");
-                    if (startTime == 0) pw.print("0");
-                    else TimeUtils.formatDuration(startTime, now, pw);
-                    pw.println();
         }
         final boolean waitingVisible =
                 mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(this);
@@ -885,6 +872,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         inHistory = false;
         visible = false;
         nowVisible = false;
+        drawn = false;
         idle = false;
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
@@ -1995,79 +1983,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     public void reportFullyDrawnLocked(boolean restoredFromBundle) {
-        final long curTime = SystemClock.uptimeMillis();
-        if (displayStartTime != 0) {
-            reportLaunchTimeLocked(curTime);
+        final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
+                .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
+        if (info != null) {
+            mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
+                    info.windowsFullyDrawnDelayMs);
         }
-        final LaunchTimeTracker.Entry entry = mStackSupervisor.getLaunchTimeTracker().getEntry(
-                getWindowingMode());
-        if (fullyDrawnStartTime != 0 && entry != null) {
-            final long thisTime = curTime - fullyDrawnStartTime;
-            final long totalTime = entry.mFullyDrawnStartTime != 0
-                    ? (curTime - entry.mFullyDrawnStartTime) : thisTime;
-            if (SHOW_ACTIVITY_START_TIME) {
-                Trace.asyncTraceEnd(TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-                EventLog.writeEvent(AM_ACTIVITY_FULLY_DRAWN_TIME,
-                        userId, System.identityHashCode(this), shortComponentName,
-                        thisTime, totalTime);
-                StringBuilder sb = service.mStringBuilder;
-                sb.setLength(0);
-                sb.append("Fully drawn ");
-                sb.append(shortComponentName);
-                sb.append(": ");
-                TimeUtils.formatDuration(thisTime, sb);
-                if (thisTime != totalTime) {
-                    sb.append(" (total ");
-                    TimeUtils.formatDuration(totalTime, sb);
-                    sb.append(")");
-                }
-                Log.i(TAG, sb.toString());
-            }
-            if (totalTime > 0) {
-                //service.mUsageStatsService.noteFullyDrawnTime(realActivity, (int) totalTime);
-            }
-            entry.mFullyDrawnStartTime = 0;
-        }
-        mStackSupervisor.getActivityMetricsLogger().logAppTransitionReportedDrawn(this,
-                restoredFromBundle);
-        fullyDrawnStartTime = 0;
     }
-
-    private void reportLaunchTimeLocked(final long curTime) {
-        final LaunchTimeTracker.Entry entry = mStackSupervisor.getLaunchTimeTracker().getEntry(
-                getWindowingMode());
-        if (entry == null) {
-            return;
-        }
-        final long thisTime = curTime - displayStartTime;
-        final long totalTime = entry.mLaunchStartTime != 0
-                ? (curTime - entry.mLaunchStartTime) : thisTime;
-        if (SHOW_ACTIVITY_START_TIME) {
-            Trace.asyncTraceEnd(TRACE_TAG_ACTIVITY_MANAGER, "launching: " + packageName, 0);
-            EventLog.writeEvent(AM_ACTIVITY_LAUNCH_TIME,
-                    userId, System.identityHashCode(this), shortComponentName,
-                    thisTime, totalTime);
-            StringBuilder sb = service.mStringBuilder;
-            sb.setLength(0);
-            sb.append("Displayed ");
-            sb.append(shortComponentName);
-            sb.append(": ");
-            TimeUtils.formatDuration(thisTime, sb);
-            if (thisTime != totalTime) {
-                sb.append(" (total ");
-                TimeUtils.formatDuration(totalTime, sb);
-                sb.append(")");
-            }
-            Log.i(TAG, sb.toString());
-        }
-        mStackSupervisor.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
-        if (totalTime > 0) {
-            //service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
-        }
-        displayStartTime = 0;
-        entry.mLaunchStartTime = 0;
-    }
-
     @Override
     public void onStartingWindowDrawn(long timestamp) {
         synchronized (service) {
@@ -2079,17 +2001,24 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     @Override
     public void onWindowsDrawn(long timestamp) {
         synchronized (service) {
-            mStackSupervisor.getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(),
-                    timestamp);
-            if (displayStartTime != 0) {
-                reportLaunchTimeLocked(timestamp);
-            }
+            drawn = true;
+            final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
+                    .getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(), timestamp);
+            final int windowsDrawnDelayMs = info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
+            mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
+                    windowsDrawnDelayMs);
             mStackSupervisor.sendWaitingVisibleReportLocked(this);
-            startTime = 0;
             finishLaunchTickingLocked();
             if (task != null) {
                 task.hasBeenVisible = true;
             }
+        }
+    }
+
+    @Override
+    public void onWindowsNotDrawn(long timestamp) {
+        synchronized (service) {
+            drawn = false;
         }
     }
 

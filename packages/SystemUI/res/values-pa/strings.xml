@@ -344,7 +344,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਸੀਮਾ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਚਿਤਾਵਨੀ"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ਰਾਤਰੀ ਲਾਈਟ"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ਰਾਤ ਦੀ ਰੋਸ਼ਨੀ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"ਸੂਰਜ ਛਿਪਣ \'ਤੇ ਚਾਲੂ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>

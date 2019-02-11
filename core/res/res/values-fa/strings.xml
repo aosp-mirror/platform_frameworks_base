@@ -221,7 +221,7 @@
     <string name="global_action_logout" msgid="935179188218826050">"پایان جلسه"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"عکس صفحه‌نمایش"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"گرفتن گزارش اشکال"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام رایانامه ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"گزارش تعاملی"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"گزارش کامل"</string>
@@ -396,7 +396,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در رایانه لوحی شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در تلویزیون شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در تلفن شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"افزودن یا تغییر رویدادهای تقویم و ارسال رایانامه به مهمانان بدون دخالت مالک"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"افزودن یا تغییر رویدادهای تقویم و ارسال ایمیل به مهمانان بدون دخالت مالک"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"این برنامه می‌تواند در رایانه لوحی شما رویدادهای تقویم اضافه کند، آن‌ها را حذف کند یا تغییر دهد. این برنامه می‌تواند پیام‌هایی ارسال کند که گویی از طرف مالکان تقویم هستند یا رویدادها را بدون اطلاع مالکان تغییر دهد."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"این برنامه می‌تواند در تلویزیون شما رویدادهای تقویم اضافه کند، آن‌ها را حذف کند یا تغییر دهد. این برنامه می‌تواند پیام‌هایی ارسال کند که گویی از طرف مالکان تقویم هستند یا رویدادها را بدون اطلاع مالکان تغییر دهد."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"این برنامه می‌تواند در تلفن شما رویدادهای تقویم اضافه کند، آن‌ها را حذف کند یا تغییر دهد. این برنامه می‌تواند پیام‌هایی ارسال کند که گویی از طرف مالکان تقویم هستند یا رویدادها را بدون اطلاع مالکان تغییر دهد."</string>
@@ -780,7 +780,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"بازگشایی قفل حساب"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"‏برای بازگشایی قفل، با حساب Google خود وارد سیستم شوید."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"نام کاربری (رایانامه)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"نام کاربری (ایمیل)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"گذرواژه"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ورود به سیستم"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"نام کاربر یا گذرواژه نامعتبر است."</string>
@@ -836,7 +836,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"ماندن در این صفحه"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nمطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگ‌نمایی و کوچک‌نمایی، دو بار ضربه بزنید."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای نزدیک‌نمایی و دورنمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"راه‌اندازی تکمیل خودکار"</string>
     <string name="autofill_window_title" msgid="4107745526909284887">"تکمیل خودکار با <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
@@ -1005,15 +1005,15 @@
     <string name="copyUrl" msgid="2538211579596067402">"‏کپی URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"انتخاب متن"</string>
     <string name="undo" msgid="7905788502491742328">"لغو"</string>
-    <string name="redo" msgid="7759464876566803888">"انجام مجدد"</string>
+    <string name="redo" msgid="7759464876566803888">"بازانجام"</string>
     <string name="autofill" msgid="3035779615680565188">"تکمیل خودکار"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"افزودن به واژه‌نامه"</string>
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"کنش‌های متنی"</string>
-    <string name="email" msgid="4560673117055050403">"رایانامه"</string>
-    <string name="email_desc" msgid="3638665569546416795">"ارسال رایانامه به نشانی انتخابی"</string>
+    <string name="email" msgid="4560673117055050403">"ایمیل"</string>
+    <string name="email_desc" msgid="3638665569546416795">"ارسال ایمیل به نشانی انتخابی"</string>
     <string name="dial" msgid="1253998302767701559">"تماس"</string>
     <string name="dial_desc" msgid="6573723404985517250">"تماس با شماره تلفن انتخابی"</string>
     <string name="map" msgid="5441053548030107189">"نقشه"</string>
@@ -1131,7 +1131,7 @@
     <string name="volume_music" msgid="5421651157138628171">"میزان صدای رسانه"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"پخش از طریق بلوتوث"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"آهنگ زنگ روی بی‌صدا تنظیم شد"</string>
-    <string name="volume_call" msgid="3941680041282788711">"میزان صدای هنگام تماس"</string>
+    <string name="volume_call" msgid="3941680041282788711">"صدا حینِ تماس"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"میزان صدای تماس بلوتوث"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"میزان صدای هشدار"</string>
     <string name="volume_notification" msgid="2422265656744276715">"میزان صدای اعلان"</string>
@@ -1377,7 +1377,7 @@
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"برای جزئیات، با سرپرستتان تماس بگیرید"</string>
     <string name="back_button_label" msgid="2300470004503343439">"برگشت"</string>
     <string name="next_button_label" msgid="1080555104677992408">"بعدی"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"پرش"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"رد شدن"</string>
     <string name="no_matches" msgid="8129421908915840737">"مورد منطبقی موجود نیست"</string>
     <string name="find_on_page" msgid="1946799233822820384">"یافتن در صفحه"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
@@ -1533,7 +1533,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"پین کدها منطبق نیستند"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"‏برای بازگشایی قفل، با حساب Google خود وارد سیستم شوید."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"نام کاربری (رایانامه)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"نام کاربری (ایمیل)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"گذرواژه"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ورود به سیستم"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"نام کاربری یا گذرواژه نامعتبر."</string>
@@ -1548,9 +1548,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. رایانه لوحی اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"<xliff:g id="NUMBER">%d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. اکنون تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب رایانامه قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"الگوی بازگشایی‌تان را <xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست رسم کرده‌اید. <xliff:g id="NUMBER_1">%2$d</xliff:g> پس از \n تلاش ناموفق دیگر، از شما خواسته می‌شود تا با استفاده از یک حساب رایانامه، قفل تلویزیون‌تان را باز کنید.\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب رایانامه قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"الگوی بازگشایی‌تان را <xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست رسم کرده‌اید. <xliff:g id="NUMBER_1">%2$d</xliff:g> پس از \n تلاش ناموفق دیگر، از شما خواسته می‌شود تا با استفاده از یک حساب ایمیل، قفل تلویزیون‌تان را باز کنید.\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"حذف"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
@@ -1845,7 +1845,7 @@
     <string name="autofill_save_type_address" msgid="4936707762193009542">"نشانی"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"کارت‌ اعتباری"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"نام کاربری"</string>
-    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"نشانی رایانامه"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"نشانی ایمیل"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"آرام باشید و پناهگاهی در این اطراف پیدا کنید."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"فوراً مناطق ساحلی و محدوده رودخانه را ترک کنید و به جایی امن، مثل ارتفاعات بروید."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"آرام باشید و پناهگاهی در این اطراف پیدا کنید."</string>
