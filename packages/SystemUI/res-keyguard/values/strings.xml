@@ -64,6 +64,9 @@
          charged, say that it is charged. -->
     <string name="keyguard_charged">Fully charged</string>
 
+    <!-- When the lock screen is showing and the phone plugged in, and the battery is not fully charged, say that it's wirelessly charging. [CHAR LIMIT=50]  -->
+    <string name="keyguard_plugged_in_wireless"><xliff:g id="percentage" example="20%">%s</xliff:g> • Wirelessly Charging</string>
+
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, say that it's charging.  -->
     <string name="keyguard_plugged_in"><xliff:g id="percentage">%s</xliff:g> • Charging</string>
