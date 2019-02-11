@@ -50,6 +50,7 @@ using android::base::StringPrintf;
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
+using android::util::ProtoReader;
 
 namespace android {
 namespace os {
@@ -1220,12 +1221,12 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
 
         experimentIdsProtoBuffer.resize(proto.size());
         size_t pos = 0;
-        auto iter = proto.data();
-        while (iter.readBuffer() != NULL) {
-            size_t toRead = iter.currentToRead();
-            std::memcpy(&(experimentIdsProtoBuffer[pos]), iter.readBuffer(), toRead);
+        sp<ProtoReader> reader = proto.data();
+        while (reader->readBuffer() != NULL) {
+            size_t toRead = reader->currentToRead();
+            std::memcpy(&(experimentIdsProtoBuffer[pos]), reader->readBuffer(), toRead);
             pos += toRead;
-            iter.rp()->move(toRead);
+            reader->move(toRead);
         }
     }
 

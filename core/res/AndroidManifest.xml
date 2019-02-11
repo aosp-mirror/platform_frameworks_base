@@ -116,6 +116,7 @@
     <protected-broadcast android:name="android.app.action.BUGREPORT_SHARE" />
     <protected-broadcast android:name="android.app.action.SHOW_DEVICE_MONITORING_DIALOG" />
     <protected-broadcast android:name="android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.INCIDENT_REPORT_READY" />
 
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_UPDATE_OPTIONS" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />

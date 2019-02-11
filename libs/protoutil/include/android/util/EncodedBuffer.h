@@ -17,6 +17,11 @@
 #ifndef ANDROID_UTIL_ENCODED_BUFFER_H
 #define ANDROID_UTIL_ENCODED_BUFFER_H
 
+#include <android/util/ProtoReader.h>
+
+#include <utils/Errors.h>
+#include <utils/RefBase.h>
+
 #include <stdint.h>
 #include <vector>
 
@@ -34,12 +39,12 @@ namespace util {
  *      *Index:     Index of a buffer within the mBuffers list.
  *      *Offset:    Position within a buffer.
  */
-class EncodedBuffer
+class EncodedBuffer : public virtual RefBase
 {
 public:
     EncodedBuffer();
     explicit EncodedBuffer(size_t chunkSize);
-    ~EncodedBuffer();
+    virtual ~EncodedBuffer();
 
     class Pointer {
     public:
@@ -80,8 +85,9 @@ public:
     Pointer* wp();
 
     /**
-     * Returns the current position of write pointer, if the write buffer is full, it will automatically
-     * rotate to a new buffer with given chunkSize. If NULL is returned, it means NO_MEMORY
+     * Returns the current position of write pointer, if the write buffer is full, it will
+     * automatically rotate to a new buffer with given chunkSize. If NULL is returned, it
+     * means NO_MEMORY.
      */
     uint8_t* writeBuffer();
 
@@ -120,6 +126,21 @@ public:
      */
     size_t writeHeader(uint32_t fieldId, uint8_t wireType);
 
+    /**
+     * Copy the contents of the parameter into the write buffer.
+     */
+    status_t writeRaw(uint8_t const* buf, size_t size);
+
+    /**
+     * Copy the entire contents of the ProtoReader into the write buffer.
+     */
+    status_t writeRaw(const sp<ProtoReader>& that);
+
+    /**
+     * Copy the size bytes of contents of the ProtoReader into the write buffer.
+     */
+    status_t writeRaw(const sp<ProtoReader>& that, size_t size);
+
     /********************************* Edit APIs ************************************************/
     /**
      * Returns the edit pointer.
@@ -157,63 +178,35 @@ public:
     void copy(size_t srcPos, size_t size);
 
     /********************************* Read APIs ************************************************/
-    class iterator;
-    friend class iterator;
-    class iterator {
-    public:
-        explicit iterator(const EncodedBuffer& buffer);
-
-        /**
-         * Returns the number of bytes written in the buffer
-         */
-        size_t size() const;
-
-        /**
-         * Returns the size of total bytes read.
-         */
-        size_t bytesRead() const;
-
-        /**
-         * Returns the read pointer.
-         */
-        Pointer* rp();
-
-        /**
-         * Returns the current position of read pointer, if NULL is returned, it reaches end of buffer.
-         */
-        uint8_t const* readBuffer();
-
-        /**
-         * Returns the readable size in the current read buffer.
-         */
-        size_t currentToRead();
-
-        /**
-         * Returns true if next bytes is available for read.
-         */
-        bool hasNext();
-
-        /**
-         * Reads the current byte and moves pointer 1 bit.
-         */
-        uint8_t next();
-
-        /**
-         * Read varint from iterator, the iterator will point to next available byte.
-         */
-        uint64_t readRawVarint();
-
-    private:
-        const EncodedBuffer& mData;
-        Pointer mRp;
-    };
-
     /**
-     * Returns the iterator of EncodedBuffer so it guarantees consumers won't be able to modified the buffer.
+     * Returns the Reader of EncodedBuffer so it guarantees consumers won't be able to
+     * modify the buffer.
      */
-    iterator begin() const;
+    sp<ProtoReader> read();
 
 private:
+    class Reader;
+    friend class Reader;
+    class Reader : public ProtoReader {
+    public:
+        explicit Reader(const sp<EncodedBuffer>& buffer);
+        virtual ~Reader();
+
+        virtual ssize_t size() const;
+        virtual size_t bytesRead() const;
+        virtual uint8_t const* readBuffer();
+        virtual size_t currentToRead();
+        virtual bool hasNext();
+        virtual uint8_t next();
+        virtual uint64_t readRawVarint();
+        virtual void move(size_t amt);
+
+    private:
+        const sp<EncodedBuffer> mData;
+        Pointer mRp;
+        friend class EncodedBuffer;
+    };
+
     size_t mChunkSize;
     std::vector<uint8_t*> mBuffers;
 

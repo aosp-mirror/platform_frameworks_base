@@ -19,7 +19,7 @@ option java_multiple_files = true;
 
 package com.android.server;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message IntentResolverProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;

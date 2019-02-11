@@ -1,0 +1,107 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.os.incidentd;
+
+import "frameworks/base/core/proto/android/os/metadata.proto";
+
+message ReportFileProto {
+    /**
+     * Metadata about each of the calls to reportIncident that
+     * initiated the incident report.
+     */
+    message Report {
+        /**
+         * Package name for broadcast receiver to be told when
+         * the report is complete.
+         */
+        optional string pkg = 1;
+
+        /**
+         * Class name for broadcast receiver to be told when
+         * the report is complete.
+         */
+        optional string cls = 2;
+
+        /**
+         * Privacy policy at which this report should be shared.
+         */
+        optional uint32 privacy_policy = 4;
+
+        /**
+         * Whether all available sections should be returned.
+         */
+        optional bool all_sections = 5;
+
+        /**
+         * If all_sections is not true, then this is the
+         * list of sections that were requested.
+         */
+        repeated int32 section = 6;
+
+        /**
+         * Flattened IncidentHeaderProto that was passed with this
+         * request.
+         */
+        repeated bytes header = 7;
+
+        /**
+         * Whether the user has approved this report to be shared with
+         * the given client.
+         */
+        optional bool share_approved = 8;
+    }
+
+    /**
+     * Metadata section recorded while the incident report
+     * was taken.
+     */
+    optional android.os.IncidentMetadata metadata = 1;
+
+    /**
+     * Report data structures for the incident reports.
+     */
+    repeated Report report = 2;
+
+    /**
+     * The file name, relative to the work directory where
+     * the data file is stored. The content of the data file
+     * is an android.os.IncidentProto, without the metadata
+     * or header sections.
+     */
+    optional string data_file = 3;
+
+    /**
+     * The privacy policy to which the file is already filtered.
+     */
+    optional uint32 privacy_policy = 4;
+
+    /**
+     * How big the data file is expected to be.  If the size
+     * recorded here and the size on disk mismatch, then we
+     * know there was an error.
+     */
+    optional int64 data_file_size = 5;
+
+    /**
+     * Whether this report has been finished, and is now
+     * ready for broadcast / dropbox / etc.
+     */
+    optional bool completed = 6;
+}
+

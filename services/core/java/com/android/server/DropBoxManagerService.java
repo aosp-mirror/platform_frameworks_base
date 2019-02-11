@@ -231,6 +231,8 @@ public final class DropBoxManagerService extends SystemService {
         final String tag = entry.getTag();
         try {
             int flags = entry.getFlags();
+            Slog.i(TAG, "add tag=" + tag + " isTagEnabled=" + isTagEnabled(tag)
+                    + " flags=0x" + Integer.toHexString(flags));
             if ((flags & DropBoxManager.IS_EMPTY) != 0) throw new IllegalArgumentException();
 
             init();
@@ -285,7 +287,8 @@ public final class DropBoxManagerService extends SystemService {
 
                 long len = temp.length();
                 if (len > max) {
-                    Slog.w(TAG, "Dropping: " + tag + " (" + temp.length() + " > " + max + " bytes)");
+                    Slog.w(TAG, "Dropping: " + tag + " (" + temp.length() + " > "
+                            + max + " bytes)");
                     temp.delete();
                     temp = null;  // Pass temp = null to createEntry() to leave a tombstone
                     break;

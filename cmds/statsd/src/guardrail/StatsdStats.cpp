@@ -904,12 +904,12 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     output->resize(bufferSize);
 
     size_t pos = 0;
-    auto it = proto.data();
-    while (it.readBuffer() != NULL) {
-        size_t toRead = it.currentToRead();
-        std::memcpy(&((*output)[pos]), it.readBuffer(), toRead);
+    sp<android::util::ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&((*output)[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        it.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     if (reset) {

@@ -26,6 +26,7 @@ namespace statsd {
 
 using std::string;
 using util::ProtoOutputStream;
+using util::ProtoReader;
 
 TEST(LogEventTest, TestLogParsing) {
     LogEvent event1(1, 2000);
@@ -590,12 +591,12 @@ TEST(LogEventTest, TestBinaryFieldAtom) {
     std::vector<uint8_t> outData;
     outData.resize(proto.size());
     size_t pos = 0;
-    auto iter = proto.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     std::string result_str(outData.begin(), outData.end());
@@ -629,12 +630,12 @@ TEST(LogEventTest, TestBinaryFieldAtom_empty) {
     std::vector<uint8_t> outData;
     outData.resize(proto.size());
     size_t pos = 0;
-    auto iter = proto.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     std::string result_str(outData.begin(), outData.end());

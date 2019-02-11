@@ -16,14 +16,12 @@
 
 package com.android.server.incident;
 
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IIncidentAuthListener;
@@ -31,7 +29,6 @@ import android.os.IncidentManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -76,24 +73,29 @@ class PendingReports {
         public IIncidentAuthListener listener;
         public long addedRealtime;
         public long addedWalltime;
+        public String receiverClass;
+        public String reportId;
 
         /**
          * Construct a PendingReportRec, with an auto-incremented id.
          */
-        PendingReportRec(String callingPackage, int flags, IIncidentAuthListener listener) {
+        PendingReportRec(String callingPackage, String receiverClass, String reportId, int flags,
+                IIncidentAuthListener listener) {
             this.id = mNextPendingId++;
             this.callingPackage = callingPackage;
             this.flags = flags;
             this.listener = listener;
             this.addedRealtime = SystemClock.elapsedRealtime();
             this.addedWalltime = System.currentTimeMillis();
+            this.receiverClass = receiverClass;
+            this.reportId = reportId;
         }
 
         /**
          * Get the Uri that contains the flattened data.
          */
         Uri getUri() {
-            return (new Uri.Builder())
+            final Uri.Builder builder = (new Uri.Builder())
                     .scheme(IncidentManager.URI_SCHEME)
                     .authority(IncidentManager.URI_AUTHORITY)
                     .path(IncidentManager.URI_PATH)
@@ -101,8 +103,15 @@ class PendingReports {
                     .appendQueryParameter(IncidentManager.URI_PARAM_CALLING_PACKAGE, callingPackage)
                     .appendQueryParameter(IncidentManager.URI_PARAM_FLAGS, Integer.toString(flags))
                     .appendQueryParameter(IncidentManager.URI_PARAM_TIMESTAMP,
-                            Long.toString(addedWalltime))
-                    .build();
+                            Long.toString(addedWalltime));
+            if (receiverClass != null && receiverClass.length() > 0) {
+                builder.appendQueryParameter(IncidentManager.URI_PARAM_RECEIVER_CLASS,
+                        receiverClass);
+            }
+            if (reportId != null && reportId.length() > 0) {
+                builder.appendQueryParameter(IncidentManager.URI_PARAM_REPORT_ID, reportId);
+            }
+            return builder.build();
         }
     }
 
@@ -121,13 +130,15 @@ class PendingReports {
      * <p>
      * The security checks are handled by IncidentCompanionService.
      */
-    public void authorizeReport(int callingUid, final String callingPackage, final int flags,
+    public void authorizeReport(int callingUid, final String callingPackage,
+            final String receiverClass, final String reportId, final int flags,
             final IIncidentAuthListener listener) {
         // Starting the system server is complicated, and rather than try to
         // have a complicated lifecycle that we share with dumpstated and incidentd,
         // we will accept the request, and then display it whenever it becomes possible to.
         mRequestQueue.enqueue(listener.asBinder(), true, () -> {
-            authorizeReportImpl(callingUid, callingPackage, flags, listener);
+            authorizeReportImpl(callingUid, callingPackage, receiverClass, reportId,
+                    flags, listener);
         });
     }
 
@@ -248,10 +259,11 @@ class PendingReports {
     /**
      * Start the confirmation process.
      */
-    private void authorizeReportImpl(int callingUid, final String callingPackage, int flags,
-            final IIncidentAuthListener listener) {
+    private void authorizeReportImpl(int callingUid, final String callingPackage,
+            final String receiverClass, final String reportId,
+            int flags, final IIncidentAuthListener listener) {
         // Enforce that the calling package pertains to the callingUid.
-        if (!isPackageInUid(callingUid, callingPackage)) {
+        if (callingUid != 0 && !isPackageInUid(callingUid, callingPackage)) {
             Log.w(TAG, "Calling uid " + callingUid + " doesn't match package "
                     + callingPackage);
             denyReportBeforeAddingRec(listener, callingPackage);
@@ -277,7 +289,7 @@ class PendingReports {
         // Save the record for when the PermissionController comes back to authorize it.
         PendingReportRec rec = null;
         synchronized (mLock) {
-            rec = new PendingReportRec(callingPackage, flags, listener);
+            rec = new PendingReportRec(callingPackage, receiverClass, reportId, flags, listener);
             mPending.add(rec);
         }
 
@@ -406,37 +418,7 @@ class PendingReports {
      * Returns UserHandle.USER_NULL if not valid.
      */
     private int getAndValidateUser() {
-        // Current user
-        UserInfo currentUser;
-        try {
-            currentUser = ActivityManager.getService().getCurrentUser();
-        } catch (RemoteException ex) {
-            // We're already inside the system process.
-            throw new RuntimeException(ex);
-        }
-
-        // Primary user
-        final UserManager um = UserManager.get(mContext);
-        final UserInfo primaryUser = um.getPrimaryUser();
-
-        // Check that we're using the right user.
-        if (currentUser == null) {
-            Log.w(TAG, "No current user.  Nobody to approve the report."
-                    + " The report will be denied.");
-            return UserHandle.USER_NULL;
-        }
-        if (primaryUser == null) {
-            Log.w(TAG, "No primary user.  Nobody to approve the report."
-                    + " The report will be denied.");
-            return UserHandle.USER_NULL;
-        }
-        if (primaryUser.id != currentUser.id) {
-            Log.w(TAG, "Only the primary user can approve bugreports, but they are not"
-                    + " the current user. The report will be denied.");
-            return UserHandle.USER_NULL;
-        }
-
-        return primaryUser.id;
+        return IncidentCompanionService.getAndValidateUser(mContext);
     }
 
     /**

@@ -21,7 +21,7 @@ option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/content/clipdescription.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // An android.content.ClipData object.
 message ClipDataProto {

@@ -25,7 +25,7 @@ import "frameworks/base/core/proto/android/app/notification_channel_group.proto"
 import "frameworks/base/core/proto/android/app/notificationmanager.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/media/audioattributes.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message NotificationServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;

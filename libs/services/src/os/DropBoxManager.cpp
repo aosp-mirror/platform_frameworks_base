@@ -225,7 +225,10 @@ DropBoxManager::add(const Entry& entry)
     if (service == NULL) {
         return Status::fromExceptionCode(Status::EX_NULL_POINTER, "can't find dropbox service");
     }
-    return service->add(entry);
+    ALOGD("About to call service->add()");
+    Status status = service->add(entry);
+    ALOGD("service->add returned %s", status.toString8().string());
+    return status;
 }
 
 }} // namespace android::os

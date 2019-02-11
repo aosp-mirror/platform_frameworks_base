@@ -21,7 +21,7 @@ option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/os/patternmatcher.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Next Tag: 13
 message IntentProto {

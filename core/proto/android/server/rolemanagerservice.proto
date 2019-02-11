@@ -20,7 +20,7 @@ package com.android.server.role;
 
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message RoleManagerServiceDumpProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;

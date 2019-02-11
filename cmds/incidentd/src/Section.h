@@ -46,29 +46,7 @@ public:
     Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS, bool userdebugAndEngOnly = false);
     virtual ~Section();
 
-    virtual status_t Execute(ReportRequestSet* requests) const = 0;
-};
-
-/**
- * Section that generates incident headers.
- */
-class HeaderSection : public Section {
-public:
-    HeaderSection();
-    virtual ~HeaderSection();
-
-    virtual status_t Execute(ReportRequestSet* requests) const;
-};
-
-/**
- * Section that generates incident metadata.
- */
-class MetadataSection : public Section {
-public:
-    MetadataSection();
-    virtual ~MetadataSection();
-
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const = 0;
 };
 
 /**
@@ -80,7 +58,7 @@ public:
                 int64_t timeoutMs = 5000 /* 5 seconds */);
     virtual ~FileSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
 private:
     const char* mFilename;
@@ -95,7 +73,7 @@ public:
     GZipSection(int id, const char* filename, ...);
     virtual ~GZipSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
 private:
     // It looks up the content from multiple files and stops when the first one is available.
@@ -111,7 +89,7 @@ public:
                         bool userdebugAndEngOnly = false);
     virtual ~WorkerThreadSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
     virtual status_t BlockingCall(int pipeWriteFd) const = 0;
 };
@@ -127,7 +105,7 @@ public:
 
     virtual ~CommandSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
 private:
     const char** mCommand;

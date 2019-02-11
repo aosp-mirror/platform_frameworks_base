@@ -20,7 +20,7 @@ package android.service.adb;
 option java_multiple_files = true;
 option java_outer_classname = "AdbServiceProto";
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message AdbServiceDumpProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;

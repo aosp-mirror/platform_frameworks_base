@@ -27,7 +27,7 @@ import "frameworks/base/core/proto/android/view/displayinfo.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/view/surface.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package com.android.server.wm;
 

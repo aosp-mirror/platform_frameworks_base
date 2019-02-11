@@ -30,7 +30,7 @@ import "frameworks/base/core/proto/android/os/bundle.proto";
 import "frameworks/base/core/proto/android/os/persistablebundle.proto";
 import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
 import "frameworks/base/core/proto/android/server/job/enums.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Next tag: 21
 message JobSchedulerServiceDumpProto {

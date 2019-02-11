@@ -26,7 +26,7 @@ namespace os {
 IncidentReportArgs::IncidentReportArgs()
     :mSections(),
      mAll(false),
-     mDest(-1)
+     mPrivacyPolicy(-1)
 {
 }
 
@@ -34,7 +34,9 @@ IncidentReportArgs::IncidentReportArgs(const IncidentReportArgs& that)
     :mSections(that.mSections),
      mHeaders(that.mHeaders),
      mAll(that.mAll),
-     mDest(that.mDest)
+     mPrivacyPolicy(that.mPrivacyPolicy),
+     mReceiverPkg(that.mReceiverPkg),
+     mReceiverCls(that.mReceiverCls)
 {
 }
 
@@ -76,17 +78,17 @@ IncidentReportArgs::writeToParcel(Parcel* out) const
         }
     }
 
-    err = out->writeInt32(mDest);
+    err = out->writeInt32(mPrivacyPolicy);
     if (err != NO_ERROR) {
         return err;
     }
 
-    err = out->writeString16(mReceiverPkg);
+    err = out->writeString16(String16(mReceiverPkg.c_str()));
     if (err != NO_ERROR) {
         return err;
     }
 
-    err = out->writeString16(mReceiverCls);
+    err = out->writeString16(String16(mReceiverCls.c_str()));
     if (err != NO_ERROR) {
         return err;
     }
@@ -137,15 +139,15 @@ IncidentReportArgs::readFromParcel(const Parcel* in)
         }
     }
 
-    int32_t dest;
-    err = in->readInt32(&dest);
+    int32_t privacyPolicy;
+    err = in->readInt32(&privacyPolicy);
     if (err != NO_ERROR) {
         return err;
     }
-    mDest = dest;
+    mPrivacyPolicy = privacyPolicy;
 
-    mReceiverPkg = in->readString16();
-    mReceiverCls = in->readString16();
+    mReceiverPkg = String8(in->readString16()).string();
+    mReceiverCls = String8(in->readString16()).string();
 
     return OK;
 }
@@ -160,9 +162,9 @@ IncidentReportArgs::setAll(bool all)
 }
 
 void
-IncidentReportArgs::setDest(int dest)
+IncidentReportArgs::setPrivacyPolicy(int privacyPolicy)
 {
-    mDest = dest;
+    mPrivacyPolicy = privacyPolicy;
 }
 
 void
@@ -176,13 +178,13 @@ IncidentReportArgs::addSection(int section)
 void
 IncidentReportArgs::setReceiverPkg(const string& pkg)
 {
-    mReceiverPkg = String16(pkg.c_str());
+    mReceiverPkg = pkg;
 }
 
 void
 IncidentReportArgs::setReceiverCls(const string& cls)
 {
-    mReceiverCls = String16(cls.c_str());
+    mReceiverCls = cls;
 }
 
 void
@@ -200,15 +202,18 @@ IncidentReportArgs::containsSection(int section) const
 void
 IncidentReportArgs::merge(const IncidentReportArgs& that)
 {
-    if (mAll) {
-        return;
-    } else if (that.mAll) {
-        mAll = true;
-        mSections.clear();
-    } else {
-        for (set<int>::const_iterator it=that.mSections.begin();
-                it!=that.mSections.end(); it++) {
-            mSections.insert(*it);
+    for (const vector<uint8_t>& header: that.mHeaders) {
+        mHeaders.push_back(header);
+    }
+    if (!mAll) {
+        if (that.mAll) {
+            mAll = true;
+            mSections.clear();
+        } else {
+            for (set<int>::const_iterator it=that.mSections.begin();
+                    it!=that.mSections.end(); it++) {
+                mSections.insert(*it);
+            }
         }
     }
 }

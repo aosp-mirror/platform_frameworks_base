@@ -36,7 +36,7 @@ TEST(IncidentReportArgsTest, testSerialization) {
     args.addHeader(header1);
     args.addHeader(header2);
 
-    args.setDest(1);
+    args.setPrivacyPolicy(1);
 
     args.setReceiverPkg("com.android.os");
     args.setReceiverCls("com.android.os.Receiver");
@@ -56,10 +56,10 @@ TEST(IncidentReportArgsTest, testSerialization) {
     sections.insert(1000);
     sections.insert(1001);
     EXPECT_EQ(sections, args2.sections());
-    EXPECT_EQ(1, args2.dest());
+    EXPECT_EQ(1, args2.getPrivacyPolicy());
 
-    EXPECT_EQ(String16("com.android.os"), args2.receiverPkg());
-    EXPECT_EQ(String16("com.android.os.Receiver"), args2.receiverCls());
+    EXPECT_EQ(string("com.android.os"), args2.receiverPkg());
+    EXPECT_EQ(string("com.android.os.Receiver"), args2.receiverCls());
 
     vector<vector<uint8_t>> headers;
     headers.push_back(header1);
