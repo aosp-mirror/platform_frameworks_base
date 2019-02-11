@@ -226,7 +226,7 @@ import java.util.Vector;
  *         transfers the object to the <em>Prepared</em> state once the method call
  *         returns, or a call to {@link #prepareAsync()} (asynchronous) which
  *         first transfers the object to the <em>Preparing</em> state after the
- *         call returns (which occurs almost right way) while the internal
+ *         call returns (which occurs almost right away) while the internal
  *         player engine continues working on the rest of preparation work
  *         until the preparation work completes. When the preparation completes or when {@link #prepare()} call returns,
  *         the internal player engine then calls a user supplied callback method,
@@ -335,7 +335,7 @@ import java.util.Vector;
  *
  * <table border="0" cellspacing="0" cellpadding="0">
  * <tr><td>Method Name </p></td>
- *     <td>Valid Sates </p></td>
+ *     <td>Valid States </p></td>
  *     <td>Invalid States </p></td>
  *     <td>Comments </p></td></tr>
  * <tr><td>attachAuxEffect </p></td>

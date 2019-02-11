@@ -42,6 +42,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Binder;
@@ -395,30 +396,11 @@ public class SliceManagerService extends ISliceManager.Stub {
     private String getProviderPkg(Uri uri, int user) {
         long ident = Binder.clearCallingIdentity();
         try {
-            IBinder token = new Binder();
-            IActivityManager activityManager = ActivityManager.getService();
-            ContentProviderHolder holder = null;
             String providerName = getUriWithoutUserId(uri).getAuthority();
-            try {
-                try {
-                    holder = activityManager.getContentProviderExternal(
-                            providerName, getUserIdFromUri(uri, user), token);
-                    if (holder != null && holder.info != null) {
-                        return holder.info.packageName;
-                    } else {
-                        return null;
-                    }
-                } finally {
-                    if (holder != null && holder.provider != null) {
-                        activityManager.removeContentProviderExternal(providerName, token);
-                    }
-                }
-            } catch (RemoteException e) {
-                // Can't happen.
-                throw e.rethrowAsRuntimeException();
-            }
+            ProviderInfo provider = mContext.getPackageManager().resolveContentProviderAsUser(
+                    providerName, 0, getUserIdFromUri(uri, user));
+            return provider.packageName;
         } finally {
-            // I know, the double finally seems ugly, but seems safest for the identity.
             Binder.restoreCallingIdentity(ident);
         }
     }

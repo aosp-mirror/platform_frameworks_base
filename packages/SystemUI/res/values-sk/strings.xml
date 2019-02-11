@@ -174,9 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Mení sa sieť operátora"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Otvoriť podrobnosti o batérii"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batéria <xliff:g id="NUMBER">%d</xliff:g> percent."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Nabíja sa batéria, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Nastavenia systému."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Upozornenia."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Zobraziť všetky upozornenia"</string>
@@ -214,9 +212,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Režim v lietadle je zapnutý."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"úplné ticho"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"iba budíky"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nerušiť"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Stav Nerušiť je vypnutý."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Stav Nerušiť je zapnutý."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Režim bez vyrušení"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Režim bez vyrušení je vypnutý."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Režim bez vyrušení je zapnutý."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Rozhranie Bluetooth je vypnuté."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Rozhranie Bluetooth je zapnuté."</string>
@@ -280,7 +278,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Šetrič obrazovky"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Pridržaním ikon zobrazíte ďalšie možnosti"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Nerušiť"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Režim bez vyrušení"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Iba prioritné"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Iba budíky"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Úplné ticho"</string>
@@ -444,7 +442,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nabudúce nezobrazovať"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Vymazať všetko"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"Spravovať upozornenia"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Upozornenia sú pozastavené režimom Nerušiť"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Upozornenia sú pozastavené režimom bez vyrušení"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Spustiť"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Žiadne upozornenia"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil môže byť monitorovaný"</string>
@@ -699,9 +697,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalendár"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Zobrazovať s ovládacími prvkami hlasitosti"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Nerušiť"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Režim bez vyrušení"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Skratka tlačidiel hlasitosti"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"Pri zvýšení hlasitosti ukončiť režim Nerušiť"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Pri zvýšení hlasitosti ukončiť režim bez vyrušení"</string>
     <string name="battery" msgid="7498329822413202973">"Batéria"</string>
     <string name="clock" msgid="7416090374234785905">"Hodiny"</string>
     <string name="headset" msgid="4534219457597457353">"Náhlavná súprava"</string>
@@ -838,10 +836,10 @@
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> – <xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Pripojenie Wi‑Fi je vypnuté"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Rozhranie Bluetooth je vypnuté"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"Nastavenie Nerušiť je vypnuté"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Režim Nerušiť bol zapnutý automatickým pravidlom (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Režim Nerušiť bol zapnutý aplikáciou (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Režim Nerušiť bol zapnutý automatickým pravidlom alebo aplikáciou."</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"Režim bez vyrušení je vypnutý"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Režim bez vyrušení bol zapnutý automatickým pravidlom (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Režim bez vyrušení bol zapnutý aplikáciou (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Režim bez vyrušení bol zapnutý automatickým pravidlom alebo aplikáciou."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Do <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Ponechať"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Nahradiť"</string>

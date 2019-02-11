@@ -77,7 +77,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Usar para compartilhamento de contatos"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Compartilhamento de conexão à Internet"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Mensagens de texto"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Acesso SIM"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Acesso ao chip"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Áudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Áudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Aparelho auditivo"</string>
@@ -93,7 +93,7 @@
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Compartilhamento de conexão local de Internet c/ disposit."</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Usar para acesso à Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Usar para mapa"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Use para acesso SIM"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Use para acesso ao chip"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Usar para áudio de mídia"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Usar para áudio do smartphone"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Usado para transferência de arquivo"</string>
@@ -227,7 +227,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Acionar seleção de codec de áudio\nBluetooth LDAC: qualidade de reprodução"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS particular"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selecione o modo DNS particular"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selecione o modo de DNS particular"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Desativado"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nome do host do provedor de DNS particular"</string>

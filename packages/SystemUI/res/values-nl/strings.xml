@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Netwerk van provider wordt gewijzigd"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Accudetails openen"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batterij: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batterij wordt opgeladen, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batterij wordt opgeladen, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%% procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systeeminstellingen."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Meldingen."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Alle meldingen bekijken"</string>
@@ -531,7 +531,7 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Frequentie voor tweevoudige multitoon"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Toegankelijkheid"</string>
-    <string name="ring_toggle_title" msgid="3281244519428819576">"Oproepen"</string>
+    <string name="ring_toggle_title" msgid="3281244519428819576">"Gesprekken"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Bellen"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Trillen"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Dempen"</string>
@@ -546,7 +546,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"dempen opheffen"</string>
     <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"trillen"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s-volumeknoppen"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Oproepen en meldingen gaan over (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Gesprekken en meldingen gaan over (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Media-uitvoer"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Uitvoer van telefoongesprek"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Geen apparaten gevonden"</string>

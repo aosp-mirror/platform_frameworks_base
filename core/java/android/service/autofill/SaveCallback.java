@@ -41,6 +41,9 @@ public final class SaveCallback {
      * Notifies the Android System that an
      * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} was successfully handled
      * by the service.
+     *
+     * @throws IllegalStateException if this method, {@link #onSuccess(IntentSender)}, or
+     * {@link #onFailure(CharSequence)} was already called.
      */
     public void onSuccess() {
         onSuccessInternal(null);
@@ -58,6 +61,9 @@ public final class SaveCallback {
      *
      * @param intentSender intent that will be launched from the context of activity being
      * autofilled.
+     *
+     * @throws IllegalStateException if this method, {@link #onSuccess()},
+     * or {@link #onFailure(CharSequence)} was already called.
      */
     public void onSuccess(@NonNull IntentSender intentSender) {
         onSuccessInternal(Preconditions.checkNotNull(intentSender));
@@ -86,7 +92,12 @@ public final class SaveCallback {
      * you prefer to show your own message, call {@link #onSuccess()} or
      * {@link #onSuccess(IntentSender)} instead.
      *
-     * @param message error message to be displayed to the user.
+     * @param message error message to be displayed to the user. <b>Note: </b> this message is
+     * displayed on {@code logcat} logs and should not contain PII (Personally Identifiable
+     * Information, such as username or email address).
+     *
+     * @throws IllegalStateException if this method, {@link #onSuccess()},
+     * or {@link #onSuccess(IntentSender)} was already called.
      */
     public void onFailure(CharSequence message) {
         assertNotCalled();

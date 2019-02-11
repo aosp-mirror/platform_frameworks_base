@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Verbindingsprobleem of ongeldige MMI-code."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Bewerking is beperkt tot vaste nummers."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Kan instellingen voor doorschakelen van oproepen niet wijzigen vanaf je telefoon tijdens roaming."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Kan instellingen voor doorschakelen van gesprekken niet wijzigen vanaf je telefoon tijdens roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Service is ingeschakeld."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Service is ingeschakeld voor:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Service is uitgeschakeld."</string>
@@ -60,26 +60,26 @@
     <string name="ClirMmi" msgid="7784673673446833091">"Uitgaande beller-ID"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID van verbonden lijn"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Beperking voor ID van verbonden lijn"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Oproep doorschakelen"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Gesprek doorschakelen"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Wisselgesprek"</string>
-    <string name="BaMmi" msgid="455193067926770581">"Oproep blokkeren"</string>
+    <string name="BaMmi" msgid="455193067926770581">"Gesprek blokkeren"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Wachtwoordwijziging"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Pin-wijziging"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"Nummer van beller beschikbaar"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"Nummer van beller beperkt"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Driewegs bellen"</string>
-    <string name="RuacMmi" msgid="7827887459138308886">"Ongewenste, vervelende oproepen weigeren"</string>
+    <string name="RuacMmi" msgid="7827887459138308886">"Ongewenste, vervelende gesprekken weigeren"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Weergave van nummer van beller"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Niet storen"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Beller-ID standaard ingesteld op \'beperkt\'. Volgende oproep: beperkt."</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Beller-ID standaard ingesteld op \'beperkt\'. Volgende oproep: onbeperkt."</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgende oproep: beperkt."</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgende oproep: onbeperkt."</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: beperkt."</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: onbeperkt."</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgend gesprek: beperkt."</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgend gesprek: onbeperkt."</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Service niet voorzien."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"U kunt de instelling voor de beller-ID niet wijzigen."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Geen service voor mobiele data"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Noodoproepen niet beschikbaar"</string>
-    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Geen service voor spraakoproepen"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Geen belservice"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Geen spraakservice of noodoproepen"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Tijdelijk uitgeschakeld door je provider"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Tijdelijk uitgeschakeld door je provider voor sim <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
@@ -88,7 +88,7 @@
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Noodoproepen niet beschikbaar"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Er kunnen geen noodoproepen worden gemaakt via wifi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Meldingen"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Oproep doorschakelen"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Gesprek doorschakelen"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modus voor noodoproepen"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status van mobiele data"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Sms\'jes"</string>
@@ -295,7 +295,7 @@
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"gesprekkenlijst lezen en schrijven"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je gesprekkenlijsten?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefoneren en oproepen beheren"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefoneren en gesprekken beheren"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om telefoongesprekken te starten en te beheren?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
@@ -322,8 +322,8 @@
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Een app toestaan snelkoppelingen aan het startscherm toe te voegen zonder tussenkomst van de gebruiker."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"snelkoppelingen verwijderen"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"De app toestaan snelkoppelingen van het startscherm te verwijderen zonder tussenkomst van de gebruiker."</string>
-    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"uitgaande oproepen doorschakelen"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"De app toestaan het nummer te bekijken dat wordt gekozen voor een uitgaande oproep, met de mogelijkheid de oproep om te leiden naar een ander nummer of de oproep helemaal af te breken."</string>
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"uitgaande gesprekken doorschakelen"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"De app toestaan het nummer te bekijken dat wordt gekozen voor een uitgaand gesprek, met de mogelijkheid het gesprek om te leiden naar een ander nummer of het gesprek helemaal af te breken."</string>
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"telefoonoproepen beantwoorden"</string>
     <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Hiermee kan de app een inkomende telefoonoproep beantwoorden."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"tekstberichten (SMS) ontvangen"</string>
@@ -385,11 +385,11 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekkenlijst lezen"</string>
-    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Deze app kan je oproepgeschiedenis lezen."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Deze app kan je gespreksgeschiedenis lezen."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekkenlijst schrijven"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het gesprekkenlijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app het gesprekkenlijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het gesprekkenlijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app de gesprekkenlijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app de gesprekkenlijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app de gesprekkenlijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"toegang tot lichaamssensoren (zoals hartslagmeters)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die je lichamelijke conditie controleren, zoals je hartslag."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Agenda-afspraken en -gegevens lezen"</string>
@@ -419,13 +419,13 @@
     <string name="permlab_vibrate" msgid="7696427026057705834">"trilling beheren"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Hiermee kan de app de trilstand beheren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Hiermee kan de app zonder je tussenkomst telefoonnummers bellen. Dit kan tot onverwachte kosten of oproepen leiden. De app kan hiermee geen noodnummers bellen. Schadelijke apps kunnen u geld kosten door nummers te bellen zonder om je bevestiging te vragen."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Hiermee kan de app zonder je tussenkomst telefoonnummers bellen. Dit kan tot onverwachte kosten of gesprekken leiden. De app kan hiermee geen noodnummers bellen. Schadelijke apps kunnen u geld kosten door nummers te bellen zonder om je bevestiging te vragen."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"toegang tot IMS-service voor bellen"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Hiermee kan de app de IMS-service gebruiken om te bellen zonder je tussenkomst."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefoonstatus en -identiteit lezen"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze toestemming kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een oproep actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
-    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"oproepen doorschakelen via het systeem"</string>
-    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Hiermee kan de app de bijbehorende oproepen doorschakelen via het systeem om de belfunctionaliteit te verbeteren."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze toestemming kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een gesprek actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"gesprekken doorschakelen via het systeem"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Hiermee kan de app de bijbehorende gesprekken doorschakelen via het systeem om de belfunctionaliteit te verbeteren."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"een gesprek voortzetten vanuit een andere app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Hiermee kan de app een gesprek voortzetten dat is gestart in een andere app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefoonnummers lezen"</string>
@@ -485,7 +485,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"Near Field Communication regelen"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"je schermvergrendeling uitschakelen"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Zo kan de telefoon de toetsenblokkering uitschakelen wanneer er een oproep binnenkomt en de toetsenblokkering weer inschakelen als de oproep is beëindigd."</string>
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Zo kan de telefoon de toetsenblokkering uitschakelen wanneer je wordt gebeld en de toetsenblokkering weer inschakelen als het gesprek is beëindigd."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"biometrische hardware gebruiken"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Hiermee kan de app biometrische hardware gebruiken voor verificatie"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Vingerafdrukhardware beheren"</string>
@@ -529,18 +529,18 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"de content van je SD-kaart aanpassen of verwijderen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Hiermee kan de app schrijven naar de USB-opslag."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Hiermee kan de app schrijven naar de SD-kaart."</string>
-    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP-oproepen plaatsen/ontvangen"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"Toestaan dat de app SIP-oproepen plaatst en ontvangt."</string>
+    <string name="permlab_use_sip" msgid="2052499390128979920">"Bellen of gebeld worden via SIP"</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"Toestaan dat de app belt en gebeld wordt via SIP"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"nieuwe telecom-sim-verbindingen registreren"</string>
     <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Hiermee kan de app nieuwe telecom-sim-verbindingen registreren."</string>
     <string name="permlab_register_call_provider" msgid="108102120289029841">"nieuwe telecomverbindingen registreren"</string>
     <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Hiermee kan de app nieuwe telecomverbindingen registreren."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"telecomverbindingen beheren"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Hiermee kan de app telecomverbindingen beheren."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interactie met scherm in actieve oproep"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Hiermee kan de app bepalen wanneer en hoe de gebruiker het scherm in een actieve oproep te zien krijgt."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interactie met scherm in actief gesprek"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Hiermee kan de app bepalen wanneer en hoe de gebruiker het scherm in een actief gesprek te zien krijgt."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"communicatie met telefonische diensten"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Hiermee kan de app met telefonische diensten communiceren om oproepen te plaatsen/ontvangen."</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Hiermee kan de app met telefonische diensten communiceren zodat je kunt bellen of gebeld worden."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"een gebruikerservaring bieden tijdens een gesprek"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Hiermee kan de app een gebruikerservaring bieden tijdens een gesprek."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"historisch netwerkgebruik lezen"</string>
@@ -1131,9 +1131,9 @@
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspelen via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille beltoon ingesteld"</string>
-    <string name="volume_call" msgid="3941680041282788711">"Volume inkomende oproep"</string>
+    <string name="volume_call" msgid="3941680041282788711">"Volume inkomend gesprek"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume tijdens gesprek in Bluetooth-modus"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Alarmvolume"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Wekkervolume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Meldingsvolume"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-volume"</string>
@@ -1480,7 +1480,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Delen met"</string>
     <string name="sending" msgid="3245653681008218030">"Verzenden..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
-    <string name="SetupCallDefault" msgid="5834948469253758575">"Oproep accepteren?"</string>
+    <string name="SetupCallDefault" msgid="5834948469253758575">"Gesprek accepteren?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altijd"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Één keer"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ondersteunt werkprofielen niet"</string>
@@ -1748,11 +1748,11 @@
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dempt sommige geluiden"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Er is een intern probleem met je apparaat. Het apparaat kan instabiel zijn totdat u het apparaat terugzet naar de fabrieksinstellingen."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Er is een intern probleem met je apparaat. Neem contact op met de fabrikant voor meer informatie."</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-verzoek gewijzigd in normale oproep"</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-verzoek gewijzigd in normaal gesprek"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD-verzoek gewijzigd in SS-verzoek"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"Gewijzigd in nieuw USSD-verzoek"</string>
     <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD-verzoek gewijzigd in videogesprek"</string>
-    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS-verzoek gewijzigd in normale oproep"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS-verzoek gewijzigd in normaal gesprek"</string>
     <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS-verzoek gewijzigd in videogesprek"</string>
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS-verzoek gewijzigd in USSD-verzoek"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Gewijzigd in nieuw SS-verzoek"</string>
@@ -1872,8 +1872,8 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Schadelijke app gevonden"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> wil segmenten van <xliff:g id="APP_2">%2$s</xliff:g> weergeven"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Bewerken"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Trillen bij oproepen en meldingen"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Oproepen en meldingen zijn gedempt"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Trillen bij gesprekken en meldingen"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Gesprekken en meldingen zijn gedempt"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Systeemwijzigingen"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Niet storen"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Nieuw: \'Niet storen\' verbergt meldingen"</string>

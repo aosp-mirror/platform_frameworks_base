@@ -320,7 +320,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Επιτρέπει στην εφαρμογή να αναπτύξει ή να συμπτύξει τη γραμμή κατάστασης."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"εγκαθιστά συντομεύσεις"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Επιτρέπει σε μια εφαρμογή την προσθήκη συντομεύσεων στην Αρχική οθόνη χωρίς την παρέμβαση του χρήστη."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"καταργεί την εγκατάσταση συντομεύσεων"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"απεγκατάσταση συντομεύσεων"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Επιτρέπει στην εφαρμογή την κατάργηση συντομεύσεων από την Αρχική οθόνη χωρίς την παρέμβαση του χρήστη."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"αναδρομολογεί τις εξερχόμενες κλήσεις"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Επιτρέπει στην εφαρμογή να βλέπει τον αριθμό που καλέσατε κατά τη διάρκεια μιας εξερχόμενης κλήσης με επιλογή ανακατεύθυνσης της κλήσης σε έναν διαφορετικό αριθμό ή διακοπής της κλήσης."</string>

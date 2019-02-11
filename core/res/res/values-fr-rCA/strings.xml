@@ -256,7 +256,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alertes réseau"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Réseau accessible"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"État du RPV"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administration d\'appareils"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Gestion de l\'appareil"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Démo en magasin"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexion USB"</string>

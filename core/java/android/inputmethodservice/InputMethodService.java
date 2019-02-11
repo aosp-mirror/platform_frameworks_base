@@ -2110,7 +2110,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * Called when the application has reported a new location of its text
      * cursor.  This is only called if explicitly requested by the input method.
      * The default implementation does nothing.
-     * @deprecated Use {#link onUpdateCursorAnchorInfo(CursorAnchorInfo)} instead.
+     * @deprecated Use {@link #onUpdateCursorAnchorInfo(CursorAnchorInfo)} instead.
      */
     @Deprecated
     public void onUpdateCursor(Rect newCursor) {
@@ -2177,7 +2177,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * @return {#link ExtractEditText} if it is considered to be visible and active. Otherwise
+     * @return {@link ExtractEditText} if it is considered to be visible and active. Otherwise
      * {@code null} is returned.
      */
     private ExtractEditText getExtractEditTextIfVisible() {

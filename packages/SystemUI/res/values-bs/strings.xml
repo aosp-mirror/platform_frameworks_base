@@ -173,7 +173,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Promjena mreže mobilnog operatera"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Otvori detalje o potrošnji baterije"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterija na <xliff:g id="NUMBER">%d</xliff:g> posto."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Punjenje baterije, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procenata."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Punjenje baterije, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Postavke sistema."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Obavještenja."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Vidite sva obavještenja"</string>
@@ -848,7 +848,7 @@
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Može čitati informacije iz aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Može poduzeti radnje unutar aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Može poduzeti radnje u aplikaciji <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Dozvoli aplikaciji <xliff:g id="APP">%1$s</xliff:g> prikazivanje isječaka iz svake aplikacije"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Dozvoli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Odbij"</string>

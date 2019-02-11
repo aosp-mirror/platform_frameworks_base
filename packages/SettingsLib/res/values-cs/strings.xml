@@ -189,9 +189,9 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Nastavení sítě VPN pro tohoto uživatele není dostupné."</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Nastavení sdíleného připojení pro tohoto uživatele není dostupné."</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Nastavení přístupového bodu pro tohoto uživatele není dostupné."</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Ladění USB"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Ladění přes USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Povolit režim ladění s připojeným zařízením USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Zrušit autorizace k ladění USB"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Zrušit autorizace k ladění přes USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Zástupce hlášení chyb"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Zobrazit v hlavní nabídce tlačítko k vygenerování chybového hlášení"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Nevypínat obrazovku"</string>
@@ -251,9 +251,9 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Kontrola atributu zobrazení"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobilní data budou vždy ponechána aktivní, i když bude aktivní Wi-Fi (za účelem rychlého přepínání sítí)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Pokud je k dispozici hardwarová akceleraci tetheringu, použít ji"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Povolit ladění USB?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Povolit ladění přes USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ladění prostřednictvím rozhraní USB je určeno pouze pro účely vývoje. Použijte je ke kopírování dat mezi počítačem a zařízením, instalaci aplikací do zařízení bez upozornění a čtení dat protokolů."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Zrušit přístup k ladění USB ze všech počítačů, které jste v minulosti autorizovali?"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Zrušit přístup k ladění přes USB ze všech počítačů, které jste v minulosti autorizovali?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Povolit nastavení pro vývojáře?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Tato nastavení jsou určena pouze pro vývojáře. Mohou způsobit rozbití nebo nesprávné fungování zařízení a nainstalovaných aplikací."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ověřit aplikace z USB"</string>

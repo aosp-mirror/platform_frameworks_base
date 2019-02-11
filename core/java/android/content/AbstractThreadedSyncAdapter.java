@@ -95,7 +95,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * the SyncManager will wait until the sync adapter is not in use before requesting that
  * it sync an account's data.
  * <li><code>android:isAlwaysSyncable</code> defaults to false and if true tells the SyncManager
- * to intialize the isSyncable state to 1 for that sync adapter for each account that is added.
+ * to initialize the isSyncable state to 1 for that sync adapter for each account that is added.
  * <li><code>android:syncAdapterSettingsAction</code> defaults to null and if supplied it
  * specifies an Intent action of an activity that can be used to adjust the sync adapter's
  * sync settings. The activity must live in the same package as the sync adapter.

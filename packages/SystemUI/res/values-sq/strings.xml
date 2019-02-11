@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Rrjeti i operatorit celular po ndryshohet"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Hap detajet e baterisë"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria ka edhe <xliff:g id="NUMBER">%d</xliff:g> për qind."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Bateria po ngarkohet, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> për qind."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Bateria po ngarkohet, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Cilësimet e sistemit."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Njoftimet."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Shiko të gjitha njoftimet"</string>
@@ -814,7 +814,7 @@
     <string name="tuner_app" msgid="3507057938640108777">"Aplikacioni <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Sinjalizimet"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
-    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pamjet e ekranit"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pamje ekrani"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mesazhe të përgjithshme"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Hapësira ruajtëse"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Sugjerimet"</string>

@@ -250,7 +250,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="1099326950891078929">"נעילה"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="6351207030447943784">"הודעה חדשה"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"התראה חדשה"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"מקלדת וירטואלית"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"מקלדת פיזית"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"אבטחה"</string>
@@ -555,8 +555,8 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"מאפשר לאפליקציה לנהל מדיניות הרשת להגדיר כללים ספציפיים-לאפליקציה."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"שנה ניהול חשבונות של שימוש ברשת"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת לאפליקציה לשנות את אופן החישוב של נתוני שימוש ברשת מול כל אפליקציה. לא מיועד לשימוש באפליקציות רגילות."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להודעות"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"מאפשר לאפליקציה לאחזר, לבדוק ולמחוק הודעות, כולל כאלה שפורסמו על ידי אפליקציות אחרות."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להתראות"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"מאפשר לאפליקציה לאחזר, לבדוק ולמחוק התראות, כולל כאלה שפורסמו על ידי אפליקציות אחרות."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"איגוד לשירות של מאזין להתראות"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של שירות מאזין להתראות. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"איגוד לשירות ספק תנאי"</string>
@@ -593,7 +593,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"שינוי נעילת המסך"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"שינוי של נעילת המסך."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"נעילת המסך"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"שליטה באופן ובתזמון של נעילת המסך"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"שליטה באופן ובתזמון של נעילת המסך."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"מחיקת כל הנתונים"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"מחק את נתוני הטאבלט ללא אזהרה על ידי ביצוע איפוס נתוני יצרן."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"מחיקה של נתוני הטלוויזיה ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
@@ -1174,19 +1174,19 @@
     <string name="volume_call" msgid="3941680041282788711">"עוצמת קול בשיחה"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"‏עוצמת הקול בשיחה ב-Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"עוצמת קול של התראה"</string>
-    <string name="volume_notification" msgid="2422265656744276715">"עוצמת קול של הודעות"</string>
+    <string name="volume_notification" msgid="2422265656744276715">"עוצמת הקול של ההתראות"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"עוצמת קול"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"‏עוצמת קול של Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"עוצמת קול של רינגטון"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"עוצמת קול של שיחות"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"עוצמת קול של מדיה"</string>
-    <string name="volume_icon_description_notification" msgid="7044986546477282274">"עוצמת קול של הודעות"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"עוצמת הקול של ההתראות"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"רינגטון ברירת מחדל"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"ברירת מחדל (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ללא"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"רינגטונים"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"צלילי התראה"</string>
-    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"צלילי הודעה"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"צלילי התראה"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"לא ידוע"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="two">‏יש רשתות Wi-Fi זמינות</item>
@@ -1399,7 +1399,7 @@
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"מאזין להתראות"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"‏VR ליסנר"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"ספק תנאי"</string>
-    <string name="notification_ranker_binding_label" msgid="774540592299064747">"שירות של דירוג הודעות"</string>
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"שירות של דירוג התראות"</string>
     <string name="vpn_title" msgid="19615213552042827">"‏VPN מופעל"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"‏VPN מופעל על ידי <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="1610714069627824309">"הקש כדי לנהל את הרשת."</string>
@@ -1448,7 +1448,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"מחק את הפריטים"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"בטל את פעולות המחיקה"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"אל תעשה דבר כרגע"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"בחר חשבון"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"בחירת חשבון"</string>
     <string name="add_account_label" msgid="2935267344849993553">"הוספת חשבון"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"הוספת חשבון"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"הוסף"</string>
@@ -1841,7 +1841,7 @@
       <item quantity="one">בחרת <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ללא שיוך לקטגוריה"</string>
-    <string name="importance_from_user" msgid="7318955817386549931">"אתה מגדיר את החשיבות של ההודעות האלה."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"עליך להגדיר את החשיבות של ההתראות האלה."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>
