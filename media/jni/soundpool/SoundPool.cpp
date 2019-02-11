@@ -17,8 +17,9 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "SoundPool"
 
+#include <chrono>
 #include <inttypes.h>
-
+#include <thread>
 #include <utils/Log.h>
 
 #define USE_SHARED_MEM_BUFFER
@@ -967,6 +968,12 @@ bool SoundChannel::doStop_l()
     if (mState != IDLE) {
         setVolume_l(0, 0);
         ALOGV("stop");
+        // Since we're forcibly halting the previously playing content,
+        // we sleep here to ensure the volume is ramped down before we stop the track.
+        // Ideally the sleep time is the mixer period, or an approximation thereof
+        // (Fast vs Normal tracks are different).
+        // TODO: consider pausing instead of stop here.
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
         mAudioTrack->stop();
         mPrevSampleID = mSample->sampleID();
         mSample.clear();
