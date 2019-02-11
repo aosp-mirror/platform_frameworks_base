@@ -49,6 +49,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
@@ -167,10 +168,14 @@ public final class AutofillManagerService
         mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
         mAm = LocalServices.getService(ActivityManagerInternal.class);
 
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_AUTOFILL,
+                ActivityThread.currentApplication().getMainExecutor(),
+                (namespace, name, value) -> setSmartSuggestionModesFromDeviceConfig(value));
+
         setLogLevelFromSettings();
         setMaxPartitionsFromSettings();
         setMaxVisibleDatasetsFromSettings();
-        setSmartSuggestionEmulationFromSettings();
+        setSmartSuggestionModesFromDeviceConfig();
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -197,9 +202,6 @@ public final class AutofillManagerService
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS), false, observer,
                 UserHandle.USER_ALL);
-        resolver.registerContentObserver(Settings.Global.getUriFor(
-                Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS), false, observer,
-                UserHandle.USER_ALL);
     }
 
     @Override // from AbstractMasterSystemService
@@ -213,9 +215,6 @@ public final class AutofillManagerService
                 break;
             case Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS:
                 setMaxVisibleDatasetsFromSettings();
-                break;
-            case Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS:
-                setSmartSuggestionEmulationFromSettings();
                 break;
             default:
                 Slog.w(TAG, "Unexpected property (" + property + "); updating cache instead");
@@ -457,14 +456,25 @@ public final class AutofillManagerService
         }
     }
 
-    private void setSmartSuggestionEmulationFromSettings() {
-        final int flags = Settings.Global.getInt(getContext().getContentResolver(),
-                Settings.Global.AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS, 0);
-        if (sDebug) {
-            Slog.d(TAG, "setSmartSuggestionEmulationFromSettings(): "
-                    + getSmartSuggestionModeToString(flags));
-        }
+    private void setSmartSuggestionModesFromDeviceConfig() {
+        final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_AUTOFILL,
+                AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES);
+        setSmartSuggestionModesFromDeviceConfig(value);
+    }
 
+    private void setSmartSuggestionModesFromDeviceConfig(@Nullable String value) {
+        if (sDebug) Slog.d(TAG, "setSmartSuggestionEmulationFromDeviceConfig(): value=" + value);
+        final int flags;
+        if (value == null) {
+            flags = AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
+        } else {
+            try {
+                flags = Integer.parseInt(value);
+            } catch (Exception e) {
+                Slog.w(TAG, "setSmartSuggestionEmulationFromDeviceConfig(): NAN:" + value);
+                return;
+            }
+        }
         synchronized (mLock) {
             mSupportedSmartSuggestionModes = flags;
         }

@@ -13285,17 +13285,6 @@ public final class Settings {
         public static final String AUTOFILL_MAX_VISIBLE_DATASETS = "autofill_max_visible_datasets";
 
         /**
-         * Used to emulate Smart Suggestion for Augmented Autofill during development
-         *
-         * <p>Valid values: {@code 0x1} for IME and/or {@code 0x2} for popup window.
-         *
-         * @hide
-         */
-        @TestApi
-        public static final String AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS =
-                "autofill_smart_suggestion_emulation_flags";
-
-        /**
          * Exemptions to the hidden API blacklist.
          *
          * @hide
