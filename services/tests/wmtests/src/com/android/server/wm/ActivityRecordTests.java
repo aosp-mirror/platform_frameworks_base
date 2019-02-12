@@ -183,9 +183,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 .thenReturn(navBarPosition);
         mTask.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
         mActivity.info.maxAspectRatio = aspectRatio;
-        mActivity.ensureActivityConfiguration(
-                0 /* globalChanges */, false /* preserveWindow */);
+        ensureActivityConfiguration();
         assertEquals(expectedActivityBounds, mActivity.getBounds());
+    }
+
+    private void ensureActivityConfiguration() {
+        mActivity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
     }
 
     @Test
@@ -281,7 +284,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         mActivity.mRelaunchReason = ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
-        mActivity.ensureActivityConfiguration(0, false, false);
+        ensureActivityConfiguration();
 
         assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE,
                 mActivity.mRelaunchReason);
@@ -305,7 +308,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         mActivity.mRelaunchReason = ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
-        mActivity.ensureActivityConfiguration(0, false, false);
+        ensureActivityConfiguration();
 
         assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE,
                 mActivity.mRelaunchReason);
@@ -327,7 +330,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.mRelaunchReason =
                 ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 
-        mActivity.ensureActivityConfiguration(0, false, false);
+        ensureActivityConfiguration();
 
         assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_NONE,
                 mActivity.mRelaunchReason);
@@ -432,5 +435,47 @@ public class ActivityRecordTests extends ActivityTestsBase {
         } finally {
             stack.getDisplay().removeChild(stack);
         }
+    }
+
+    @Test
+    public void testFixedScreenConfigurationWhenMovingToDisplay() {
+        // Initialize different bounds on a new display.
+        final ActivityDisplay newDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        newDisplay.setBounds(0, 0, 1000, 2000);
+        newDisplay.getConfiguration().densityDpi = 300;
+
+        mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
+        mTask.getConfiguration().densityDpi = 200;
+        when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
+                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.maxAspectRatio = 1.5f;
+        ensureActivityConfiguration();
+        final Rect originalBounds = new Rect(mActivity.getBounds());
+        final int originalDpi = mActivity.getConfiguration().densityDpi;
+
+        // Move the non-resizable activity to the new display.
+        mStack.reparent(newDisplay, true /* onTop */, false /* displayRemoved */);
+        ensureActivityConfiguration();
+
+        assertEquals(originalBounds, mActivity.getBounds());
+        assertEquals(originalDpi, mActivity.getConfiguration().densityDpi);
+    }
+
+    @Test
+    public void testFixedScreenBoundsWhenDisplaySizeChanged() {
+        when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
+        mActivity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        ensureActivityConfiguration();
+        final Rect originalBounds = new Rect(mActivity.getBounds());
+
+        // Change the size of current display.
+        mStack.getDisplay().setBounds(0, 0, 1000, 2000);
+        ensureActivityConfiguration();
+
+        assertEquals(originalBounds, mActivity.getBounds());
     }
 }

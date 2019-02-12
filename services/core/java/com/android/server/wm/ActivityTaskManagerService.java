@@ -1720,7 +1720,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
-            return r.getRequestedOrientation();
+            return r.getOrientation();
         }
     }
 
