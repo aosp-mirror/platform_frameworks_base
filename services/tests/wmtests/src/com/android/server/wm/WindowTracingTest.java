@@ -58,7 +58,7 @@ import java.nio.charset.StandardCharsets;
  * Test class for {@link WindowTracing}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowTracingTest
+ *  atest WmTests:WindowTracingTest
  */
 @SmallTest
 @Presubmit

@@ -34,7 +34,6 @@ import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.SurfaceAnimator.Animatable;
@@ -51,7 +50,7 @@ import org.mockito.MockitoAnnotations;
  * Test class for {@link SurfaceAnimatorTest}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:SurfaceAnimatorTest
+ *  atest WmTests:SurfaceAnimatorTest
  */
 @SmallTest
 @Presubmit

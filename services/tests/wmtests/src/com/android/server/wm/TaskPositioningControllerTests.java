@@ -43,7 +43,6 @@ import org.junit.Test;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:TaskPositioningControllerTests
  */
-@FlakyTest(bugId = 117924387)
 @SmallTest
 @Presubmit
 public class TaskPositioningControllerTests extends WindowTestsBase {
@@ -90,6 +89,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         assertNull(mTarget.getDragWindowHandleLocked());
     }
 
+    @FlakyTest(bugId = 69229402)
     @Test
     public void testHandleTapOutsideTask() {
         synchronized (mWm.mGlobalLock) {

@@ -24,7 +24,6 @@ import android.app.ActivityOptions;
 import android.platform.test.annotations.Presubmit;
 import android.view.RemoteAnimationAdapter;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.OffsettableClock;

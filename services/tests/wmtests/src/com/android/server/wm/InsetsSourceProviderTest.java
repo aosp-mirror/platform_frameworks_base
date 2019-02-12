@@ -19,11 +19,11 @@ package com.android.server.wm;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -31,8 +31,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 
-import org.junit.Before;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
