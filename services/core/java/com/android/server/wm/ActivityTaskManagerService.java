@@ -151,7 +151,6 @@ import android.app.RemoteAction;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
-import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.usage.UsageStatsManagerInternal;
@@ -363,7 +362,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowManagerService mWindowManager;
     private UserManagerService mUserManager;
     private AppOpsService mAppOpsService;
-    private DevicePolicyManager mDpm;
     /** All active uids in the system. */
     private final SparseArray<Integer> mActiveUids = new SparseArray<>();
     private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
@@ -623,6 +621,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private FontScaleSettingObserver mFontScaleSettingObserver;
 
+    private String mDeviceOwnerPackageName;
+
     private final class FontScaleSettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
         private final Uri mHideErrorDialogsUri = Settings.Global.getUriFor(HIDE_ERROR_DIALOGS);
@@ -836,13 +836,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAppOpsService = (AppOpsService) IAppOpsService.Stub.asInterface(b);
         }
         return mAppOpsService;
-    }
-
-    DevicePolicyManager getDevicePolicyManager() {
-        if (mDpm == null) {
-            mDpm = mContext.getSystemService(DevicePolicyManager.class);
-        }
-        return mDpm;
     }
 
     boolean hasUserRestriction(String restriction, int userId) {
@@ -5691,6 +5684,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
+    boolean isDeviceOwner(String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        return packageName.equals(mDeviceOwnerPackageName);
+    }
+
+    void setDeviceOwnerPackageName(String deviceOwnerPkg) {
+        mDeviceOwnerPackageName = deviceOwnerPkg;
+    }
+
     /**
      * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
      * the whitelist
@@ -7106,6 +7110,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean isUidForeground(int uid) {
             synchronized (mGlobalLock) {
                 return ActivityTaskManagerService.this.isUidForeground(uid);
+            }
+        }
+
+        @Override
+        public void setDeviceOwnerPackageName(String deviceOwnerPkg) {
+            synchronized (mGlobalLock) {
+                ActivityTaskManagerService.this.setDeviceOwnerPackageName(deviceOwnerPkg);
             }
         }
     }
