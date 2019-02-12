@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package android.provider;
+package com.android.server.testables;
 
 import static android.provider.DeviceConfig.OnPropertyChangedListener;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityThread;
-import android.content.ContentResolver;
-import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,17 +38,14 @@ import java.util.concurrent.TimeUnit;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class DeviceConfigTest {
-    // TODO(b/109919982): Migrate tests to CTS
+public class TestableDeviceConfigTest {
     private static final String sNamespace = "namespace1";
     private static final String sKey = "key1";
     private static final String sValue = "value1";
     private static final long WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS = 2000; // 2 sec
 
-    @After
-    public void cleanUp() {
-        deleteViaContentProvider(sNamespace, sKey);
-    }
+    @Rule
+    public TestableDeviceConfig mTestableDeviceConfig = new TestableDeviceConfig();
 
     @Test
     public void getProperty_empty() {
@@ -83,9 +78,6 @@ public class DeviceConfigTest {
         assertThat(result).isEqualTo(sValue);
         result = DeviceConfig.getProperty(newNamespace, sKey);
         assertThat(result).isEqualTo(newValue);
-
-        // clean up
-        deleteViaContentProvider(newNamespace, sKey);
     }
 
     @Test
@@ -107,7 +99,6 @@ public class DeviceConfigTest {
             assertThat(value).isEqualTo(sValue);
             countDownLatch.countDown();
         };
-
         try {
             DeviceConfig.addOnPropertyChangedListener(sNamespace,
                     ActivityThread.currentApplication().getMainExecutor(), changeListener);
@@ -117,16 +108,8 @@ public class DeviceConfigTest {
         } finally {
             DeviceConfig.removeOnPropertyChangedListener(changeListener);
         }
-
-    }
-
-    private static boolean deleteViaContentProvider(String namespace, String key) {
-        ContentResolver resolver = InstrumentationRegistry.getContext().getContentResolver();
-        String compositeName = namespace + "/" + key;
-        Bundle result = resolver.call(
-                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, compositeName, null);
-        assertThat(result).isNotNull();
-        return compositeName.equals(result.getString(Settings.NameValueTable.VALUE));
     }
 
 }
+
+

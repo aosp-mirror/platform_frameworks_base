@@ -23,6 +23,7 @@ android_test {
         "androidx.test.runner",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
+        "truth-prebuilt",
     ],
 
     libs: [
