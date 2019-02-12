@@ -6992,6 +6992,16 @@ message MetricsEvent {
     // OS: Q
     ACTION_PANEL_INTERACTION = 1658;
 
+    // ACTION: Change phone orientation
+    // OS: Q
+    // SUBTYPE is orientation defined in Configuration.class
+    ACTION_PHONE_ORIENTATION_CHANGED = 1659;
+
+    // CATEGORY: ACTION_PHONE_ORIENTATION_CHANGED
+    // OS: Q
+    // Different display can have different orientations, so need to log display id
+    FIELD_DISPLAY_ID = 1660;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
