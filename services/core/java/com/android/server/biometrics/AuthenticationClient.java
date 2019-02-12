@@ -34,13 +34,18 @@ public abstract class AuthenticationClient extends ClientMonitor {
     private long mOpId;
 
     public abstract int handleFailedAttempt();
-    public abstract void resetFailedAttempts();
+    public void resetFailedAttempts() {}
 
     public static final int LOCKOUT_NONE = 0;
     public static final int LOCKOUT_TIMED = 1;
     public static final int LOCKOUT_PERMANENT = 2;
 
     private final boolean mRequireConfirmation;
+
+    // We need to track this state since it's possible for applications to request for
+    // authentication while the device is already locked out. In that case, the client is created
+    // but not started yet. The user shouldn't receive the error haptics in this case.
+    private boolean mStarted;
 
     /**
      * This method is called when authentication starts.
@@ -52,6 +57,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
      * (cancelled by the user, or an error such as lockout has occurred).
      */
     public abstract void onStop();
+
+    /**
+     * @return true if the framework should handle lockout.
+     */
+    public abstract boolean shouldFrameworkHandleLockout();
 
     public AuthenticationClient(Context context, Metrics metrics,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
@@ -91,6 +101,23 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
+    public boolean onError(long deviceId, int error, int vendorCode) {
+        if (!shouldFrameworkHandleLockout()) {
+            switch (error) {
+                case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
+                case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
+                    if (mStarted) {
+                        vibrateError();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return super.onError(deviceId, error, vendorCode);
+    }
+
+    @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
         super.logOnAuthenticated(authenticated, mRequireConfirmation, getTargetUserId(),
@@ -113,7 +140,9 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     vibrateSuccess();
                 }
                 result = true;
-                resetFailedAttempts();
+                if (shouldFrameworkHandleLockout()) {
+                    resetFailedAttempts();
+                }
                 onStop();
 
                 final byte[] byteToken = new byte[token.size()];
@@ -147,9 +176,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 if (listener != null) {
                     vibrateError();
                 }
+
                 // Allow system-defined limit of number of attempts before giving up
                 final int lockoutMode = handleFailedAttempt();
-                if (lockoutMode != LOCKOUT_NONE) {
+                if (lockoutMode != LOCKOUT_NONE && shouldFrameworkHandleLockout()) {
                     Slog.w(getLogTag(), "Forcing lockout (driver code should do this!), mode("
                             + lockoutMode + ")");
                     stop(false);
@@ -170,7 +200,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                         }
                     }
                 }
-                result |= lockoutMode != LOCKOUT_NONE; // in a lockout mode
+                result = lockoutMode != LOCKOUT_NONE; // in a lockout mode
             }
         } catch (RemoteException e) {
             Slog.e(getLogTag(), "Remote exception", e);
@@ -184,6 +214,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
      */
     @Override
     public int start() {
+        mStarted = true;
         onStart();
         try {
             final int result = getDaemonWrapper().authenticate(mOpId, getGroupId());
@@ -208,6 +239,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
             Slog.w(getLogTag(), "stopAuthentication: already cancelled!");
             return 0;
         }
+
+        mStarted = false;
 
         onStop();
 

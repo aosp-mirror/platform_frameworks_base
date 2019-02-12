@@ -51,6 +51,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
@@ -82,8 +83,6 @@ public class FaceService extends BiometricServiceBase {
     private static final String FACE_DATA_DIR = "facedata";
     private static final String ACTION_LOCKOUT_RESET =
             "com.android.server.biometrics.face.ACTION_LOCKOUT_RESET";
-    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 3;
-    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 12;
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
     private final class FaceAuthClient extends AuthenticationClientImpl {
@@ -99,6 +98,11 @@ public class FaceService extends BiometricServiceBase {
         protected int statsModality() {
             return FaceService.this.statsModality();
         }
+
+        @Override
+        public boolean shouldFrameworkHandleLockout() {
+            return false;
+        }
     }
 
     /**
@@ -109,6 +113,7 @@ public class FaceService extends BiometricServiceBase {
         /**
          * The following methods contain common code which is shared in biometrics/common.
          */
+
         @Override // Binder call
         public long generateChallenge(IBinder token) {
             checkPermission(MANAGE_BIOMETRIC);
@@ -356,10 +361,13 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void resetTimeout(byte[] token) {
+        public void resetLockout(byte[] token) {
             checkPermission(MANAGE_BIOMETRIC);
-            // TODO: confirm security token when we move timeout management into the HAL layer.
-            mHandler.post(mResetFailedAttemptsForCurrentUserRunnable);
+            try {
+                mDaemonWrapper.resetLockout(token);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Unable to reset lockout", e);
+            }
         }
 
         @Override
@@ -523,6 +531,8 @@ public class FaceService extends BiometricServiceBase {
 
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
+    // One of the AuthenticationClient constants
+    private int mCurrentUserLockoutMode;
 
     /**
      * Receives callbacks from the HAL.
@@ -606,7 +616,20 @@ public class FaceService extends BiometricServiceBase {
 
         @Override
         public void onLockoutChanged(long duration) {
+            Slog.d(TAG, "onLockoutChanged: " + duration);
+            if (duration == 0) {
+                mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_NONE;
+            } else if (duration == Long.MAX_VALUE) {
+                mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_PERMANENT;
+            } else {
+                mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_TIMED;
+            }
 
+            mHandler.post(() -> {
+                if (duration == 0) {
+                    notifyLockoutResetMonitors();
+                }
+            });
         }
     };
 
@@ -669,6 +692,20 @@ public class FaceService extends BiometricServiceBase {
             }
             return daemon.enroll(token, timeout, disabledFeatures);
         }
+
+        @Override
+        public void resetLockout(byte[] cryptoToken) throws RemoteException {
+            IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.w(TAG, "resetLockout(): no face HAL!");
+                return;
+            }
+            final ArrayList<Byte> token = new ArrayList<>();
+            for (int i = 0; i < cryptoToken.length; i++) {
+                token.add(cryptoToken[i]);
+            }
+            daemon.resetLockout(token);
+        }
     };
 
 
@@ -696,16 +733,6 @@ public class FaceService extends BiometricServiceBase {
     @Override
     protected BiometricUtils getBiometricUtils() {
         return FaceUtils.getInstance();
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutTimed() {
-        return MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED;
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutPermanent() {
-        return MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT;
     }
 
     @Override
@@ -784,6 +811,13 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
+    protected void handleUserSwitching(int userId) {
+        super.handleUserSwitching(userId);
+        // Will be updated when we get the callback from HAL
+        mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_NONE;
+    }
+
+    @Override
     protected boolean hasEnrolledBiometrics(int userId) {
         if (userId != UserHandle.getCallingUserId()) {
             checkPermission(INTERACT_ACROSS_USERS);
@@ -820,6 +854,11 @@ public class FaceService extends BiometricServiceBase {
     @Override
     protected int statsModality() {
         return BiometricsProtoEnums.MODALITY_FACE;
+    }
+
+    @Override
+    protected int getLockoutMode() {
+        return mCurrentUserLockoutMode;
     }
 
     /** Gets the face daemon */

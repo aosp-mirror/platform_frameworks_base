@@ -479,25 +479,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
-     * Reset the lockout timer when asked to do so by keyguard.
-     *
-     * @param token an opaque token returned by password confirmation.
-     * @hide
-     */
-    @RequiresPermission(MANAGE_BIOMETRIC)
-    public void resetTimeout(byte[] token) {
-        if (mService != null) {
-            try {
-                mService.resetTimeout(token);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Log.w(TAG, "resetTimeout(): Service not connected!");
-        }
-    }
-
-    /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)

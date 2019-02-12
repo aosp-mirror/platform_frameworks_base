@@ -55,6 +55,8 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.authsecret.V1_0.IAuthSecret;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.face.FaceManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -671,7 +673,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mDeviceProvisionedObserver.onSystemReady();
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
-        mStrongAuth.systemReady();
     }
 
     private void migrateOldData() {
@@ -2375,6 +2376,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             userCredential = null;
         }
 
+        final PackageManager pm = mContext.getPackageManager();
+        // TODO: When lockout is handled under the HAL for all biometrics (fingerprint),
+        // we need to generate challenge for each one, have it signed by GK and reset lockout
+        // for each modality.
+        if (!hasChallenge && pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            challenge = mContext.getSystemService(FaceManager.class).generateChallenge();
+        }
+
         final AuthenticationResult authResult;
         VerifyCredentialResponse response;
         synchronized (mSpManager) {
@@ -2413,6 +2422,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
             notifyActivePasswordMetricsAvailable(userCredential, userId);
             unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
+            // Reset lockout
+            if (BiometricManager.hasBiometrics(mContext)) {
+                BiometricManager bm = mContext.getSystemService(BiometricManager.class);
+                Slog.i(TAG, "Resetting lockout, length: "
+                        + authResult.gkResponse.getPayload().length);
+                bm.resetLockout(authResult.gkResponse.getPayload());
+
+                if (!hasChallenge && pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+                    mContext.getSystemService(FaceManager.class).revokeChallenge();
+                }
+            }
 
             final byte[] secret = authResult.authToken.deriveDiskEncryptionKey();
             Slog.i(TAG, "Unlocking user " + userId + " with secret only, length " + secret.length);

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 
+import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.Metrics;
@@ -71,16 +72,6 @@ public class IrisService extends BiometricServiceBase {
     @Override
     protected BiometricUtils getBiometricUtils() {
         return null;
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutTimed() {
-        return 0;
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutPermanent() {
-        return 0;
     }
 
     @Override
@@ -141,5 +132,10 @@ public class IrisService extends BiometricServiceBase {
     @Override
     protected int statsModality() {
         return BiometricsProtoEnums.MODALITY_IRIS;
+    }
+
+    @Override
+    protected int getLockoutMode() {
+        return AuthenticationClient.LOCKOUT_NONE;
     }
 }

@@ -16,15 +16,16 @@
 
 package com.android.server.locksettings;
 
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
+        .STRONG_AUTH_NOT_REQUIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
+        .STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.content.Context;
-import android.hardware.biometrics.BiometricManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteCallbackList;
@@ -61,18 +62,11 @@ public class LockSettingsStrongAuth {
     private final Context mContext;
 
     private AlarmManager mAlarmManager;
-    private BiometricManager mBiometricManager;
 
     public LockSettingsStrongAuth(Context context) {
         mContext = context;
         mDefaultStrongAuthFlags = StrongAuthTracker.getDefaultFlags(context);
         mAlarmManager = context.getSystemService(AlarmManager.class);
-    }
-
-    public void systemReady() {
-        if (BiometricManager.hasBiometrics(mContext)) {
-            mBiometricManager = mContext.getSystemService(BiometricManager.class);
-        }
     }
 
     private void handleAddStrongAuthTracker(IStrongAuthTracker tracker) {
@@ -185,11 +179,6 @@ public class LockSettingsStrongAuth {
     }
 
     public void reportSuccessfulStrongAuthUnlock(int userId) {
-        if (mBiometricManager != null) {
-            byte[] token = null; /* TODO: pass real auth token once HAL supports it */
-            mBiometricManager.resetTimeout(token);
-        }
-
         final int argNotUsed = 0;
         mHandler.obtainMessage(MSG_SCHEDULE_STRONG_AUTH_TIMEOUT, userId, argNotUsed).sendToTarget();
     }

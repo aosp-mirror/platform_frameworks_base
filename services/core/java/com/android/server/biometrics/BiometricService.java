@@ -1029,7 +1029,7 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public void resetTimeout(byte[] token) {
+        public void resetLockout(byte[] token) {
             checkInternalPermission();
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -1037,7 +1037,7 @@ public class BiometricService extends SystemService {
                     mFingerprintService.resetTimeout(token);
                 }
                 if (mFaceService != null) {
-                    mFaceService.resetTimeout(token);
+                    mFaceService.resetLockout(token);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);

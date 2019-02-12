@@ -24,8 +24,13 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -46,15 +51,19 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
@@ -90,6 +99,27 @@ public class FingerprintService extends BiometricServiceBase {
             "com.android.server.biometrics.fingerprint.ACTION_LOCKOUT_RESET";
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 5;
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 20;
+    private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30 * 1000;
+    private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
+
+    private final class ResetFailedAttemptsForUserRunnable implements Runnable {
+        @Override
+        public void run() {
+            resetFailedAttemptsForUser(true /* clearAttemptCounter */,
+                    ActivityManager.getCurrentUser());
+        }
+    }
+
+    private final class LockoutReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Slog.v(getTag(), "Resetting lockout: " + intent.getAction());
+            if (getLockoutResetIntent().equals(intent.getAction())) {
+                final int user = intent.getIntExtra(KEY_LOCKOUT_RESET_USER, 0);
+                resetFailedAttemptsForUser(false /* clearAttemptCounter */, user);
+            }
+        }
+    }
 
     private final class FingerprintAuthClient extends AuthenticationClientImpl {
         @Override
@@ -109,6 +139,30 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         protected int statsModality() {
             return FingerprintService.this.statsModality();
+        }
+
+        @Override
+        public void resetFailedAttempts() {
+            resetFailedAttemptsForUser(true /* clearAttemptCounter */,
+                    ActivityManager.getCurrentUser());
+        }
+
+        @Override
+        public boolean shouldFrameworkHandleLockout() {
+            return true;
+        }
+
+        @Override
+        public int handleFailedAttempt() {
+            final int currentUser = ActivityManager.getCurrentUser();
+            mFailedAttempts.put(currentUser, mFailedAttempts.get(currentUser, 0) + 1);
+            mTimedLockoutCleared.put(ActivityManager.getCurrentUser(), false);
+
+            if (getLockoutMode() != AuthenticationClient.LOCKOUT_NONE) {
+                scheduleLockoutResetForUser(currentUser);
+            }
+
+            return super.handleFailedAttempt();
         }
     }
 
@@ -503,6 +557,12 @@ public class FingerprintService extends BiometricServiceBase {
 
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;
+    private final SparseBooleanArray mTimedLockoutCleared;
+    private final SparseIntArray mFailedAttempts;
+    private final AlarmManager mAlarmManager;
+    private final LockoutReceiver mLockoutReceiver = new LockoutReceiver();
+    protected final ResetFailedAttemptsForUserRunnable mResetFailedAttemptsForCurrentUserRunnable =
+            new ResetFailedAttemptsForUserRunnable();
 
     /**
      * Receives callbacks from the HAL.
@@ -629,10 +689,22 @@ public class FingerprintService extends BiometricServiceBase {
             }
             return daemon.enroll(cryptoToken, groupId, timeout);
         }
+
+        @Override
+        public void resetLockout(byte[] token) throws RemoteException {
+            // TODO: confirm security token when we move timeout management into the HAL layer.
+            Slog.e(TAG, "Not supported");
+            return;
+        }
     };
 
     public FingerprintService(Context context) {
         super(context);
+        mTimedLockoutCleared = new SparseBooleanArray();
+        mFailedAttempts = new SparseIntArray();
+        mAlarmManager = context.getSystemService(AlarmManager.class);
+        context.registerReceiver(mLockoutReceiver, new IntentFilter(getLockoutResetIntent()),
+                getLockoutBroadcastPermission(), null /* handler */);
     }
 
     @Override
@@ -655,16 +727,6 @@ public class FingerprintService extends BiometricServiceBase {
     @Override
     protected BiometricUtils getBiometricUtils() {
         return FingerprintUtils.getInstance();
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutTimed() {
-        return MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED;
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutPermanent() {
-        return MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT;
     }
 
     @Override
@@ -808,6 +870,20 @@ public class FingerprintService extends BiometricServiceBase {
         return BiometricsProtoEnums.MODALITY_FINGERPRINT;
     }
 
+    @Override
+    protected int getLockoutMode() {
+        final int currentUser = ActivityManager.getCurrentUser();
+        final int failedAttempts = mFailedAttempts.get(currentUser, 0);
+        if (failedAttempts >= MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT) {
+            return AuthenticationClient.LOCKOUT_PERMANENT;
+        } else if (failedAttempts > 0
+                && !mTimedLockoutCleared.get(currentUser, false)
+                && (failedAttempts % MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED == 0)) {
+            return AuthenticationClient.LOCKOUT_TIMED;
+        }
+        return AuthenticationClient.LOCKOUT_NONE;
+    }
+
     /** Gets the fingerprint daemon */
     private synchronized IBiometricsFingerprint getFingerprintDaemon() {
         if (mDaemon == null) {
@@ -873,6 +949,40 @@ public class FingerprintService extends BiometricServiceBase {
             Slog.e(TAG, "startPostEnroll failed", e);
         }
         return 0;
+    }
+
+    // Attempt counter should only be cleared when Keyguard goes away or when
+    // a biometric is successfully authenticated. Lockout should eventually be done below the HAL.
+    // See AuthenticationClient#shouldFrameworkHandleLockout().
+    private void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {
+        if (DEBUG && getLockoutMode() != AuthenticationClient.LOCKOUT_NONE) {
+            Slog.v(getTag(), "Reset biometric lockout, clearAttemptCounter=" + clearAttemptCounter);
+        }
+        if (clearAttemptCounter) {
+            mFailedAttempts.put(userId, 0);
+        }
+        mTimedLockoutCleared.put(userId, true);
+        // If we're asked to reset failed attempts externally (i.e. from Keyguard),
+        // the alarm might still be pending; remove it.
+        cancelLockoutResetForUser(userId);
+        notifyLockoutResetMonitors();
+    }
+
+
+    private void cancelLockoutResetForUser(int userId) {
+        mAlarmManager.cancel(getLockoutResetIntentForUser(userId));
+    }
+
+    private void scheduleLockoutResetForUser(int userId) {
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + FAIL_LOCKOUT_TIMEOUT_MS,
+                getLockoutResetIntentForUser(userId));
+    }
+
+    private PendingIntent getLockoutResetIntentForUser(int userId) {
+        return PendingIntent.getBroadcast(getContext(), userId,
+                new Intent(getLockoutResetIntent()).putExtra(KEY_LOCKOUT_RESET_USER, userId),
+                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private void dumpInternal(PrintWriter pw) {
