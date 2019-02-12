@@ -65,7 +65,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         public OwnersTestable(MockSystemServices services) {
             super(services.userManager, services.userManagerInternal,
-                    services.packageManagerInternal, new MockInjector(services));
+                    services.packageManagerInternal, services.activityTaskManagerInternal,
+                    new MockInjector(services));
         }
 
         static class MockInjector extends Injector {

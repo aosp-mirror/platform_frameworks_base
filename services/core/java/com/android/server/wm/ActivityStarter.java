@@ -989,8 +989,8 @@ class ActivityStarter {
         if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
             return false;
         }
-        // don't abort if the callingPackage is a device owner
-        if (mService.getDevicePolicyManager().isDeviceOwnerApp(callingPackage)) {
+        // don't abort if the callingPackage is the device owner
+        if (mService.isDeviceOwner(callingPackage)) {
             return false;
         }
         // anything that has fallen through would currently be aborted
