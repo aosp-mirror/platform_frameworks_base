@@ -47,7 +47,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -1839,6 +1838,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             outDisplayFrame.set(win.getDisplayFrameLw());
+            if (win.inSizeCompatMode()) {
+                outDisplayFrame.scale(win.mInvGlobalScale);
+            }
         }
     }
 
@@ -1963,8 +1965,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_LAYOUT) Slog.v(TAG_WM, "Relayout " + win + ": viewVisibility=" + viewVisibility
                     + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
             winAnimator.mSurfaceDestroyDeferred = (flags & RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
-            win.mEnforceSizeCompat =
-                    (win.mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 winAnimator.mAlpha = attrs.alpha;
             }
