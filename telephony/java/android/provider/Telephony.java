@@ -2717,6 +2717,41 @@ public final class Telephony {
             Uri RCS_EVENT_QUERY_URI = Uri.withAppendedPath(CONTENT_AND_AUTHORITY,
                     RCS_EVENT_QUERY_URI_PATH);
         }
+
+        /**
+         * Allows RCS specific canonical address handling.
+         */
+        interface RcsCanonicalAddressHelper {
+            /**
+             * Returns the canonical address ID for a canonical address, if now row exists, this
+             * will add a row and return its ID. This helper works against the same table used by
+             * the SMS and MMS threads, but is accessible only by the phone process for use by RCS
+             * message storage.
+             *
+             * @throws IllegalArgumentException if unable to retrieve or create the canonical
+             *                                  address entry.
+             */
+            static long getOrCreateCanonicalAddressId(
+                    ContentResolver contentResolver, String canonicalAddress) {
+
+                Uri.Builder uriBuilder = CONTENT_AND_AUTHORITY.buildUpon();
+                uriBuilder.appendPath("canonical-address");
+                uriBuilder.appendQueryParameter("address", canonicalAddress);
+                Uri uri = uriBuilder.build();
+
+                try (Cursor cursor = contentResolver.query(uri, null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        return cursor.getLong(cursor.getColumnIndex(CanonicalAddressesColumns._ID));
+                    } else {
+                        Rlog.e(TAG, "getOrCreateCanonicalAddressId returned no rows");
+                    }
+                }
+
+                Rlog.e(TAG, "getOrCreateCanonicalAddressId failed");
+                throw new IllegalArgumentException(
+                        "Unable to find or allocate a canonical address ID");
+            }
+        }
     }
 
     /**
