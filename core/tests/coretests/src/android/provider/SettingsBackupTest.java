@@ -504,7 +504,9 @@ public class SettingsBackupTest {
                     Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION,
                     Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                     Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
-                    Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS);
+                    Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
+                    Settings.Global.ENABLED_SUBSCRIPTION_FOR_SLOT,
+                    Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT);
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
