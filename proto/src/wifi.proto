@@ -518,6 +518,9 @@ message WifiLog {
 
   // WifiConfigStore read/write metrics.
   optional WifiConfigStoreIO wifi_config_store_io = 137;
+
+  // Total number of saved networks with mac randomization enabled.
+  optional int32 num_saved_networks_with_mac_randomization = 138;
 }
 
 // Information that gets logged for every WiFi connection.
