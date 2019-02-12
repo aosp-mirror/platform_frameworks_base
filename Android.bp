@@ -742,7 +742,6 @@ java_defaults {
 
     static_libs: [
         "apex_aidl_interface-java",
-        "networkstack-aidl-interfaces-java",
         "framework-protos",
         "game-driver-protos",
         "mediaplayer2-protos",
