@@ -254,6 +254,7 @@ applications that come with the platform
         <permission name="android.permission.CHANGE_LOWPAN_STATE"/>
         <permission name="android.permission.CHANGE_OVERLAY_PACKAGES"/>
         <permission name="android.permission.CLEAR_APP_CACHE"/>
+        <permission name="android.permission.ACCESS_INSTANT_APPS" />
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.DELETE_CACHE_FILES"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
