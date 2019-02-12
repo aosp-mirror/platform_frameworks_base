@@ -976,7 +976,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         if (DEBUG) Log.d(TAG, "setRequest " + mProviderRequest);
-        if (mProviderRequest.reportLocation && !mDisableGps && isEnabled()) {
+        if (mProviderRequest.reportLocation && isEnabled()) {
             // update client uids
             updateClientUids(mWorkSource);
 
