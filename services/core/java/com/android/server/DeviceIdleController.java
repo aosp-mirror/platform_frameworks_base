@@ -271,6 +271,7 @@ public class DeviceIdleController extends SystemService
     private static final int EVENT_BUFFER_SIZE = 100;
 
     private AlarmManager mAlarmManager;
+    private AlarmManagerInternal mLocalAlarmManager;
     private IBatteryStats mBatteryStats;
     private ActivityManagerInternal mLocalActivityManager;
     private ActivityTaskManagerInternal mLocalActivityTaskManager;
@@ -616,7 +617,8 @@ public class DeviceIdleController extends SystemService
         }
     };
 
-    private final AlarmManager.OnAlarmListener mDeepAlarmListener
+    @VisibleForTesting
+    final AlarmManager.OnAlarmListener mDeepAlarmListener
             = new AlarmManager.OnAlarmListener() {
         @Override
         public void onAlarm() {
@@ -1874,6 +1876,7 @@ public class DeviceIdleController extends SystemService
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             synchronized (this) {
                 mAlarmManager = mInjector.getAlarmManager();
+                mLocalAlarmManager = getLocalService(AlarmManagerInternal.class);
                 mBatteryStats = BatteryStatsService.getService();
                 mLocalActivityManager = getLocalService(ActivityManagerInternal.class);
                 mLocalActivityTaskManager = getLocalService(ActivityTaskManagerInternal.class);
@@ -2605,6 +2608,16 @@ public class DeviceIdleController extends SystemService
         // next natural time to come out of it.
     }
 
+
+    /** Returns true if the screen is locked. */
+    @VisibleForTesting
+    boolean isKeyguardShowing() {
+        synchronized (this) {
+            return mScreenLocked;
+        }
+    }
+
+    @VisibleForTesting
     void keyguardShowingLocked(boolean showing) {
         if (DEBUG) Slog.i(TAG, "keyguardShowing=" + showing);
         if (mScreenLocked != showing) {
@@ -2616,25 +2629,38 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @VisibleForTesting
     void scheduleReportActiveLocked(String activeReason, int activeUid) {
         Message msg = mHandler.obtainMessage(MSG_REPORT_ACTIVE, activeUid, 0, activeReason);
         mHandler.sendMessage(msg);
     }
 
     void becomeActiveLocked(String activeReason, int activeUid) {
-        if (DEBUG) Slog.i(TAG, "becomeActiveLocked, reason = " + activeReason);
+        becomeActiveLocked(activeReason, activeUid, mConstants.INACTIVE_TIMEOUT, true);
+    }
+
+    private void becomeActiveLocked(String activeReason, int activeUid,
+            long newInactiveTimeout, boolean changeLightIdle) {
+        if (DEBUG) {
+            Slog.i(TAG, "becomeActiveLocked, reason=" + activeReason
+                    + ", changeLightIdle=" + changeLightIdle);
+        }
         if (mState != STATE_ACTIVE || mLightState != STATE_ACTIVE) {
             EventLogTags.writeDeviceIdle(STATE_ACTIVE, activeReason);
-            EventLogTags.writeDeviceIdleLight(LIGHT_STATE_ACTIVE, activeReason);
-            scheduleReportActiveLocked(activeReason, activeUid);
             mState = STATE_ACTIVE;
-            mLightState = LIGHT_STATE_ACTIVE;
-            mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
+            mInactiveTimeout = newInactiveTimeout;
             mCurIdleBudget = 0;
             mMaintenanceStartTime = 0;
             resetIdleManagementLocked();
-            resetLightIdleManagementLocked();
-            addEvent(EVENT_NORMAL, activeReason);
+
+            if (changeLightIdle) {
+                EventLogTags.writeDeviceIdleLight(LIGHT_STATE_ACTIVE, activeReason);
+                mLightState = LIGHT_STATE_ACTIVE;
+                resetLightIdleManagementLocked();
+                // Only report active if light is also ACTIVE.
+                scheduleReportActiveLocked(activeReason, activeUid);
+                addEvent(EVENT_NORMAL, activeReason);
+            }
         }
     }
 
@@ -2654,49 +2680,81 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    /** Sanity check to make sure DeviceIdleController and AlarmManager are on the same page. */
+    private void verifyAlarmStateLocked() {
+        if (mState == STATE_ACTIVE && mNextAlarmTime != 0) {
+            Slog.wtf(TAG, "mState=ACTIVE but mNextAlarmTime=" + mNextAlarmTime);
+        }
+        if (mState != STATE_IDLE && mLocalAlarmManager.isIdling()) {
+            Slog.wtf(TAG, "mState=" + stateToString(mState) + " but AlarmManager is idling");
+        }
+        if (mState == STATE_IDLE && !mLocalAlarmManager.isIdling()) {
+            Slog.wtf(TAG, "mState=IDLE but AlarmManager is not idling");
+        }
+        if (mLightState == LIGHT_STATE_ACTIVE && mNextLightAlarmTime != 0) {
+            Slog.wtf(TAG, "mLightState=ACTIVE but mNextLightAlarmTime is "
+                    + TimeUtils.formatDuration(mNextLightAlarmTime - SystemClock.elapsedRealtime())
+                    + " from now");
+        }
+    }
+
     void becomeInactiveIfAppropriateLocked() {
-        if (DEBUG) Slog.d(TAG, "becomeInactiveIfAppropriateLocked()");
-        if ((!mScreenOn && !mCharging) || mForceIdle) {
-            // Become inactive and determine if we will ultimately go idle.
-            if (mDeepEnabled) {
-                if (mQuickDozeActivated) {
-                    if (mState == STATE_QUICK_DOZE_DELAY || mState == STATE_IDLE
-                            || mState == STATE_IDLE_MAINTENANCE) {
-                        // Already "idling". Don't want to restart the process.
-                        // mLightState can't be LIGHT_STATE_ACTIVE if mState is any of these 3
-                        // values, so returning here is safe.
-                        return;
-                    }
-                    if (DEBUG) {
-                        Slog.d(TAG, "Moved from "
-                                + stateToString(mState) + " to STATE_QUICK_DOZE_DELAY");
-                    }
-                    mState = STATE_QUICK_DOZE_DELAY;
-                    // Make sure any motion sensing or locating is stopped.
-                    resetIdleManagementLocked();
-                    // Wait a small amount of time in case something (eg: background service from
-                    // recently closed app) needs to finish running.
-                    scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
-                    EventLogTags.writeDeviceIdle(mState, "no activity");
-                } else if (mState == STATE_ACTIVE) {
-                    mState = STATE_INACTIVE;
-                    if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE");
-                    resetIdleManagementLocked();
-                    long delay = mInactiveTimeout;
-                    if (shouldUseIdleTimeoutFactorLocked()) {
-                        delay = (long) (mPreIdleFactor * delay);
-                    }
-                    scheduleAlarmLocked(delay, false);
-                    EventLogTags.writeDeviceIdle(mState, "no activity");
+        verifyAlarmStateLocked();
+
+        final boolean isScreenBlockingInactive =
+                mScreenOn && (!mConstants.WAIT_FOR_UNLOCK || !mScreenLocked);
+        if (DEBUG) {
+            Slog.d(TAG, "becomeInactiveIfAppropriateLocked():"
+                    + " isScreenBlockingInactive=" + isScreenBlockingInactive
+                    + " (mScreenOn=" + mScreenOn
+                    + ", WAIT_FOR_UNLOCK=" + mConstants.WAIT_FOR_UNLOCK
+                    + ", mScreenLocked=" + mScreenLocked + ")"
+                    + " mCharging=" + mCharging
+                    + " mForceIdle=" + mForceIdle
+            );
+        }
+        if (!mForceIdle && (mCharging || isScreenBlockingInactive)) {
+            return;
+        }
+        // Become inactive and determine if we will ultimately go idle.
+        if (mDeepEnabled) {
+            if (mQuickDozeActivated) {
+                if (mState == STATE_QUICK_DOZE_DELAY || mState == STATE_IDLE
+                        || mState == STATE_IDLE_MAINTENANCE) {
+                    // Already "idling". Don't want to restart the process.
+                    // mLightState can't be LIGHT_STATE_ACTIVE if mState is any of these 3
+                    // values, so returning here is safe.
+                    return;
                 }
+                if (DEBUG) {
+                    Slog.d(TAG, "Moved from "
+                            + stateToString(mState) + " to STATE_QUICK_DOZE_DELAY");
+                }
+                mState = STATE_QUICK_DOZE_DELAY;
+                // Make sure any motion sensing or locating is stopped.
+                resetIdleManagementLocked();
+                // Wait a small amount of time in case something (eg: background service from
+                // recently closed app) needs to finish running.
+                scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                EventLogTags.writeDeviceIdle(mState, "no activity");
+            } else if (mState == STATE_ACTIVE) {
+                mState = STATE_INACTIVE;
+                if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE");
+                resetIdleManagementLocked();
+                long delay = mInactiveTimeout;
+                if (shouldUseIdleTimeoutFactorLocked()) {
+                    delay = (long) (mPreIdleFactor * delay);
+                }
+                scheduleAlarmLocked(delay, false);
+                EventLogTags.writeDeviceIdle(mState, "no activity");
             }
-            if (mLightState == LIGHT_STATE_ACTIVE && mLightEnabled) {
-                mLightState = LIGHT_STATE_INACTIVE;
-                if (DEBUG) Slog.d(TAG, "Moved from LIGHT_STATE_ACTIVE to LIGHT_STATE_INACTIVE");
-                resetLightIdleManagementLocked();
-                scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT);
-                EventLogTags.writeDeviceIdleLight(mLightState, "no activity");
-            }
+        }
+        if (mLightState == LIGHT_STATE_ACTIVE && mLightEnabled) {
+            mLightState = LIGHT_STATE_INACTIVE;
+            if (DEBUG) Slog.d(TAG, "Moved from LIGHT_STATE_ACTIVE to LIGHT_STATE_INACTIVE");
+            resetLightIdleManagementLocked();
+            scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT);
+            EventLogTags.writeDeviceIdleLight(mLightState, "no activity");
         }
     }
 
@@ -3216,33 +3274,10 @@ public class DeviceIdleController extends SystemService
         // The device is not yet active, so we want to go back to the pending idle
         // state to wait again for no motion.  Note that we only monitor for motion
         // after moving out of the inactive state, so no need to worry about that.
-        boolean becomeInactive = false;
-        if (mState != STATE_ACTIVE) {
-            // Motion shouldn't affect light state, if it's already in doze-light or maintenance
-            boolean lightIdle = mLightState == LIGHT_STATE_IDLE
-                    || mLightState == LIGHT_STATE_WAITING_FOR_NETWORK
-                    || mLightState == LIGHT_STATE_IDLE_MAINTENANCE;
-            if (!lightIdle) {
-                // Only switch to active state if we're not in either idle state
-                scheduleReportActiveLocked(type, Process.myUid());
-                addEvent(EVENT_NORMAL, type);
-            }
-            mActiveReason = ACTIVE_REASON_MOTION;
-            mState = STATE_ACTIVE;
-            mInactiveTimeout = timeout;
-            mCurIdleBudget = 0;
-            mMaintenanceStartTime = 0;
-            EventLogTags.writeDeviceIdle(mState, type);
-            becomeInactive = true;
-            updateActiveConstraintsLocked();
-        }
-        if (mLightState == LIGHT_STATE_OVERRIDE) {
-            // We went out of light idle mode because we had started deep idle mode...  let's
-            // now go back and reset things so we resume light idling if appropriate.
-            mLightState = LIGHT_STATE_ACTIVE;
-            EventLogTags.writeDeviceIdleLight(mLightState, type);
-            becomeInactive = true;
-        }
+        final boolean becomeInactive = mState != STATE_ACTIVE
+                || mLightState == LIGHT_STATE_OVERRIDE;
+        // We only want to change the IDLE state if it's OVERRIDE.
+        becomeActiveLocked(type, Process.myUid(), timeout, mLightState == LIGHT_STATE_OVERRIDE);
         if (becomeInactive) {
             becomeInactiveIfAppropriateLocked();
         }

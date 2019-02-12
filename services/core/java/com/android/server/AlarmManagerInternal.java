@@ -26,6 +26,8 @@ public interface AlarmManagerInternal {
         void broadcastAlarmComplete(int recipientUid);
     }
 
+    /** Returns true if AlarmManager is delaying alarms due to device idle. */
+    boolean isIdling();
     public void removeAlarmsForUid(int uid);
     public void registerInFlightListener(InFlightListener callback);
 }
