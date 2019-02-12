@@ -24,7 +24,7 @@ oneway interface INetworkMonitorCallbacks {
     void onNetworkMonitorCreated(in INetworkMonitor networkMonitor);
     void notifyNetworkTested(int testResult, @nullable String redirectUrl);
     void notifyPrivateDnsConfigResolved(in PrivateDnsConfigParcel config);
-    void showProvisioningNotification(String action);
+    void showProvisioningNotification(String action, String packageName);
     void hideProvisioningNotification();
     void logCaptivePortalLoginEvent(int eventId, String packageName);
 }
