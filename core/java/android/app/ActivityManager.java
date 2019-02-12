@@ -2019,8 +2019,9 @@ public class ActivityManager {
             return getTaskService().isActivityStartAllowedOnDisplay(displayId, intent,
                     intent.resolveTypeIfNeeded(context.getContentResolver()), context.getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            e.rethrowFromSystemServer();
         }
+        return false;
     }
 
     /**
