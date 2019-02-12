@@ -41,9 +41,7 @@ easier.
         <item name="textAppearance">?attr/textAppearanceButton</item>
         <item name="textColor">@color/btn_colored_text_material</item>
     </style>
-    <style name="Widget.DeviceDefault.TextView" parent="Widget.Material.TextView">
-        <item name="fontFamily">@string/config_bodyFontFamily</item>
-    </style>
+    <style name="Widget.DeviceDefault.TextView" parent="Widget.Material.TextView" />
     <style name="Widget.DeviceDefault.CheckedTextView" parent="Widget.Material.CheckedTextView"/>
     <style name="Widget.DeviceDefault.AutoCompleteTextView" parent="Widget.Material.AutoCompleteTextView"/>
     <style name="Widget.DeviceDefault.CompoundButton.CheckBox" parent="Widget.Material.CompoundButton.CheckBox"/>
