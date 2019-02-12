@@ -71,7 +71,7 @@
         android:gravity="center_vertical"
         android:ellipsize="marquee"
         android:textDirection="locale"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
         android:textColor="?attr/wallpaperTextColorSecondary"
         android:singleLine="true"
         systemui:showMissingSim="true"

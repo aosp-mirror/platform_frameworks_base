@@ -24,5 +24,4 @@
     android:gravity="center"
     android:minHeight="@dimen/qs_customize_header_min_height"
     android:textAppearance="@style/TextAppearance.QSEdit.Headers"
-    android:textColor="?android:attr/colorAccent"
     android:text="@string/drag_to_rearrange_tiles" />
