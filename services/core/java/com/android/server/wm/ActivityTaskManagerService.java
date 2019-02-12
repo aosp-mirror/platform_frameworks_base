@@ -2452,6 +2452,40 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    @Override
+    public void offsetPinnedStackBounds(int stackId, Rect compareBounds, int xOffset, int yOffset,
+            int animationDuration) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "offsetPinnedStackBounds()");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (xOffset == 0 && yOffset == 0) {
+                    return;
+                }
+                final ActivityStack stack = mRootActivityContainer.getStack(stackId);
+                if (stack == null) {
+                    Slog.w(TAG, "offsetPinnedStackBounds: stackId " + stackId + " not found.");
+                    return;
+                }
+                if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                    throw new IllegalArgumentException("Stack: " + stackId
+                            + " doesn't support animated resize.");
+                }
+                final Rect destBounds = new Rect();
+                stack.getAnimationOrCurrentBounds(destBounds);
+                if (!destBounds.isEmpty() || !destBounds.equals(compareBounds)) {
+                    Slog.w(TAG, "The current stack bounds does not matched! It may be obsolete.");
+                    return;
+                }
+                destBounds.offset(xOffset, yOffset);
+                stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
+                        animationDuration, false /* fromFullscreen */);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
     /**
      * Moves the specified task to the primary-split-screen stack.
      *

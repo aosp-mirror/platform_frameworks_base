@@ -79,6 +79,7 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
 
     private static final int MSG_RESIZE_IMMEDIATE = 1;
     private static final int MSG_RESIZE_ANIMATE = 2;
+    private static final int MSG_OFFSET_ANIMATE = 3;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -360,9 +361,20 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     /**
      * Animates the PiP to offset it from the IME or shelf.
      */
-    void animateToOffset(Rect toBounds) {
+    void animateToOffset(Rect originalBounds, int offset) {
         cancelAnimations();
-        resizeAndAnimatePipUnchecked(toBounds, SHIFT_DURATION);
+        adjustAndAnimatePipOffset(originalBounds, offset, SHIFT_DURATION);
+    }
+
+    private void adjustAndAnimatePipOffset(Rect originalBounds, int offset, int duration) {
+        if (offset == 0) {
+            return;
+        }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = originalBounds;
+        args.argi1 = offset;
+        args.argi2 = duration;
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_OFFSET_ANIMATE, args));
     }
 
     /**
@@ -545,6 +557,31 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);
+                }
+                return true;
+            }
+
+            case MSG_OFFSET_ANIMATE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                Rect originalBounds = (Rect) args.arg1;
+                final int offset = args.argi1;
+                final int duration = args.argi2;
+                try {
+                    StackInfo stackInfo = mActivityTaskManager.getStackInfo(
+                            WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+                    if (stackInfo == null) {
+                        // In the case where we've already re-expanded or dismissed the PiP, then
+                        // just skip the resize
+                        return true;
+                    }
+
+                    mActivityTaskManager.offsetPinnedStackBounds(stackInfo.stackId, originalBounds,
+                            0/* xOffset */, offset, duration);
+                    Rect toBounds = new Rect(originalBounds);
+                    toBounds.offset(0, offset);
+                    mBounds.set(toBounds);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not animate offset pinned stack with offset: " + offset, e);
                 }
                 return true;
             }
