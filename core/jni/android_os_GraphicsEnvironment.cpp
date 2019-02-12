@@ -55,6 +55,11 @@ void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appNa
             devOptInChars.c_str(), rulesFd_native, rulesOffset, rulesLength);
 }
 
+bool shouldUseAngle_native(JNIEnv* env, jobject clazz, jstring appName) {
+    ScopedUtfChars appNameChars(env, appName);
+    return android::GraphicsEnv::getInstance().shouldUseAngle(appNameChars.c_str());
+}
+
 void setLayerPaths_native(JNIEnv* env, jobject clazz, jobject classLoader, jstring layerPaths) {
     android::NativeLoaderNamespace* appNamespace = android::FindNativeLoaderNamespaceByClassLoader(
         env, classLoader);
@@ -81,6 +86,7 @@ const JNINativeMethod g_methods[] = {
     { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
     { "setGpuStats", "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V", reinterpret_cast<void*>(setGpuStats_native) },
     { "setAngleInfo", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/FileDescriptor;JJ)V", reinterpret_cast<void*>(setAngleInfo_native) },
+    { "getShouldUseAngle", "(Ljava/lang/String;)Z", reinterpret_cast<void*>(shouldUseAngle_native) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
     { "setDebugLayers", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayers_native) },
     { "setDebugLayersGLES", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayersGLES_native) },
