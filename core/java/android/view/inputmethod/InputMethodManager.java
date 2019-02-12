@@ -1373,7 +1373,7 @@ public final class InputMethodManager {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768499)
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         try {
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be removed "
