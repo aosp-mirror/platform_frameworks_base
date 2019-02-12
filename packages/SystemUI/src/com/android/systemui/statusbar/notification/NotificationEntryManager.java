@@ -420,6 +420,7 @@ public class NotificationEntryManager implements
         }
     }
 
+    @Override
     public void updateNotificationRanking(NotificationListenerService.RankingMap rankingMap) {
         List<NotificationEntry> entries = new ArrayList<>();
         entries.addAll(mNotificationData.getActiveNotifications());

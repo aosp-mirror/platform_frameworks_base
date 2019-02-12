@@ -1550,12 +1550,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mEntryManager.updateNotificationRanking(null /* rankingMap */);
+        mEntryManager.updateNotifications();
     }
 
     @Override
     public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
-        mEntryManager.updateNotificationRanking(null);
+        mEntryManager.updateNotifications();
         if (isAmbient) {
             mDozeServiceHost.fireNotificationPulse();
         } else if (!mAmbientPulseManager.hasNotifications()) {
