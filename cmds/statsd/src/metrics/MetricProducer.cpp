@@ -107,7 +107,8 @@ void MetricProducer::activateLocked(int activationTrackerIndex, int64_t elapsedT
     if (it == mEventActivationMap.end()) {
         return;
     }
-    if (mActivationType == MetricActivation::ACTIVATE_ON_BOOT) {
+    if (mActivationType == MetricActivation::ACTIVATE_ON_BOOT &&
+        it->second.state == ActivationState::kNotActive) {
         it->second.state = ActivationState::kActiveOnBoot;
         return;
     }
