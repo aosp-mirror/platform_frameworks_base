@@ -14,12 +14,19 @@ Copyright (C) 2017 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24.0"
-    android:viewportHeight="24.0"
-    android:tint="?android:attr/colorControlNormal" >
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24"
+        android:tint="?android:attr/colorControlNormal">
+
     <path
-        android:pathData="M13.51,12l3.75,-3.74c0.41,-0.41 0.41,-1.07 0,-1.48l-4.47,-4.47 -0.03,-0.03a1.046,1.046 0,0 0,-1.76 0.76v6.44L6.95,5.43c-0.41,-0.41 -1.06,-0.41 -1.47,0s-0.41,1.06 0,1.47l5.09,5.1 -5.09,5.09c-0.41,0.41 -0.41,1.06 0,1.47s1.06,0.41 1.47,0L11,14.51v6.45a1.04,1.04 0,0 0,1.75 0.76l0.05,-0.05 4.46,-4.46c0.41,-0.41 0.41,-1.07 0,-1.48L13.51,12zM12.99,9.67v-4.3l2.15,2.15 -2.15,2.15zM12.99,18.62v-4.3l2.15,2.15 -2.15,2.15zM6.06,13.06c-0.59,0.59 -1.54,0.59 -2.12,0a1.49,1.49 0,0 1,0 -2.12,1.49 1.49,0 0,1 2.12,0c0.59,0.59 0.59,1.53 0,2.12zM20.06,10.94c0.59,0.59 0.59,1.54 0,2.12 -0.59,0.59 -1.54,0.59 -2.12,0a1.49,1.49 0,0 1,0 -2.12,1.49 1.49,0 0,1 2.12,0z"
-        android:fillColor="#FFFFFFFF" />
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M17.71,7.71L12,2h-1v7.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L11,14.41V22h1l5.71-5.71L13.41,12L17.71,7.71z M13,5.83 l1.88,1.88L13,9.59V5.83z M14.88,16.29L13,18.17v-3.76L14.88,16.29z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 5 10.5 C 5.82842712475 10.5 6.5 11.1715728753 6.5 12 C 6.5 12.8284271247 5.82842712475 13.5 5 13.5 C 4.17157287525 13.5 3.5 12.8284271247 3.5 12 C 3.5 11.1715728753 4.17157287525 10.5 5 10.5 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 19 10.5 C 19.8284271247 10.5 20.5 11.1715728753 20.5 12 C 20.5 12.8284271247 19.8284271247 13.5 19 13.5 C 18.1715728753 13.5 17.5 12.8284271247 17.5 12 C 17.5 11.1715728753 18.1715728753 10.5 19 10.5 Z" />
 </vector>
