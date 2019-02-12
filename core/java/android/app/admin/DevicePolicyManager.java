@@ -10537,6 +10537,8 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS,
+            conditional = true)
     public void setProfileOwnerCanAccessDeviceIdsForUser(
             @NonNull ComponentName who, @NonNull UserHandle userHandle) {
         if (mService == null) {
