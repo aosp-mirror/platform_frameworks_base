@@ -37,6 +37,9 @@ final class ContentCaptureServerSession {
     final IBinder mActivityToken;
     private final ContentCapturePerUserService mService;
     private final RemoteContentCaptureService mRemoteService;
+
+    // NOTE: this is the "internal" context (like package and taskId), not the explicit content
+    // set by apps - those are only send to the ContentCaptureService.
     private final ContentCaptureContext mContentCaptureContext;
 
     /**

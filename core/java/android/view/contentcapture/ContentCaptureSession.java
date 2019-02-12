@@ -166,6 +166,14 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     private ContentCaptureSessionId mContentCaptureSessionId;
 
     /**
+     * {@link ContentCaptureContext} set by client, or {@code null} when it's the
+     * {@link ContentCaptureManager#getMainContentCaptureSession() default session} for the
+     * context.
+     */
+    @Nullable
+    private ContentCaptureContext mClientContext;
+
+    /**
      * List of children session.
      */
     @Nullable
@@ -181,6 +189,12 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @VisibleForTesting
     public ContentCaptureSession(@NonNull String id) {
         mId = Preconditions.checkNotNull(id);
+    }
+
+    // Used by ChildCOntentCaptureSession
+    ContentCaptureSession(@NonNull ContentCaptureContext initialContext) {
+        this();
+        mClientContext = Preconditions.checkNotNull(initialContext);
     }
 
     /** @hide */
@@ -238,6 +252,30 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * Flushes the buffered events to the service.
      */
     abstract void flush(@FlushReason int reason);
+
+    /**
+     * Sets the {@link ContentCaptureContext} associated with the session.
+     *
+     * <p>Typically used to change the context associated with the default session from an activity.
+     */
+    public final void setContentCaptureContext(@Nullable ContentCaptureContext context) {
+        mClientContext = context;
+        updateContentCaptureContext(context);
+    }
+
+    abstract void updateContentCaptureContext(@Nullable ContentCaptureContext context);
+
+    /**
+     * Gets the {@link ContentCaptureContext} associated with the session.
+     *
+     * @return context set on constructor or by
+     *         {@link #setContentCaptureContext(ContentCaptureContext)}, or {@code null} if never
+     *         explicitly set.
+     */
+    @Nullable
+    public final ContentCaptureContext getContentCaptureContext() {
+        return mClientContext;
+    }
 
     /**
      * Destroys this session, flushing out all pending notifications to the service.
@@ -424,6 +462,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @CallSuper
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("id: "); pw.println(mId);
+        if (mClientContext != null) {
+            pw.print(prefix); mClientContext.dump(pw); pw.println();
+        }
         synchronized (mLock) {
             pw.print(prefix); pw.print("destroyed: "); pw.println(mDestroyed);
             if (mChildren != null && !mChildren.isEmpty()) {
