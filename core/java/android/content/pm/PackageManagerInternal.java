@@ -163,6 +163,30 @@ public abstract class PackageManagerInternal {
     }
 
     /**
+     * Provider for default home
+     */
+    public interface DefaultHomeProvider {
+
+        /**
+         * Get the package name of the default home.
+         *
+         * @param userId the user id
+         *
+         * @return the package name of the default home, or {@code null} if none
+         */
+        @Nullable
+        String getDefaultHome(@UserIdInt int userId);
+
+        /**
+         * Set the package name of the default home.
+         *
+         * @param packageName package name of the default home, or {@code null} to remove
+         * @param userId the user id
+         */
+        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId);
+    }
+
+    /**
      * Sets the location provider packages provider.
      * @param provider The packages provider.
      */
@@ -886,4 +910,11 @@ public abstract class PackageManagerInternal {
      * @param provider the provider
      */
     public abstract void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider);
+
+    /**
+     * Sets the default home provider.
+     *
+     * @param provider the provider
+     */
+    public abstract void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider);
 }

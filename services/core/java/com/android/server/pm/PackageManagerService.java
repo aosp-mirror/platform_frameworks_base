@@ -986,6 +986,9 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
 
+    @GuardedBy("mPackages")
+    private PackageManagerInternal.DefaultHomeProvider mDefaultHomeProvider;
+
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
         private Context mContext;
         private ComponentName mIntentFilterVerifierComponent;
@@ -1345,7 +1348,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
-    final String mRequiredPermissionControllerPackage;
+    final @NonNull String mRequiredPermissionControllerPackage;
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mSystemTextClassifierPackage;
@@ -1936,6 +1939,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         // We may also need to apply pending (restored) runtime
                         // permission grants within these users.
                         mSettings.applyPendingPermissionGrantsLPw(packageName, userId);
+
+                        // Persistent preferred activity might have came into effect due to this
+                        // install.
+                        updateDefaultHomeLPw(userId);
                     }
                 }
             }
@@ -19104,6 +19111,7 @@ public class PackageManagerService extends IPackageManager.Stub
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
             postPreferredActivityChangedBroadcast(userId);
+            updateDefaultHomeLPw(userId);
         }
     }
 
@@ -19254,6 +19262,13 @@ public class PackageManagerService extends IPackageManager.Stub
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     @GuardedBy("mPackages")
     boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
+        return clearPackagePreferredActivitiesLPw(packageName, false, userId);
+    }
+
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
+    private boolean clearPackagePreferredActivitiesLPw(String packageName,
+            boolean skipUpdateDefaultHome, int userId) {
         ArrayList<PreferredActivity> removed = null;
         boolean changed = false;
         for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
@@ -19282,6 +19297,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     pir.removeFilter(pa);
                 }
                 changed = true;
+                if (!skipUpdateDefaultHome) {
+                    updateDefaultHomeLPw(thisUserId);
+                }
             }
         }
         if (changed) {
@@ -19341,8 +19359,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         try {
             synchronized (mPackages) {
-                clearPackagePreferredActivitiesLPw(null, userId);
+                clearPackagePreferredActivitiesLPw(null, true, userId);
                 mSettings.applyDefaultPreferredAppsLPw(userId);
+                updateDefaultHomeLPw(userId);
                 // TODO: We have to reset the default SMS and Phone. This requires
                 // significant refactoring to keep all default apps in the package
                 // manager (cleaner but more work) or have the services provide
@@ -19411,6 +19430,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     new PersistentPreferredActivity(filter, activity));
             scheduleWritePackageRestrictionsLocked(userId);
             postPreferredActivityChangedBroadcast(userId);
+            updateDefaultHomeLPw(userId);
         }
     }
 
@@ -19454,6 +19474,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (changed) {
                 scheduleWritePackageRestrictionsLocked(userId);
                 postPreferredActivityChangedBroadcast(userId);
+                updateDefaultHomeLPw(userId);
             }
         }
     }
@@ -19541,6 +19562,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     (readParser, readUserId) -> {
                         synchronized (mPackages) {
                             mSettings.readPreferredActivitiesLPw(readParser, readUserId);
+                            updateDefaultHomeLPw(readUserId);
                         }
                     });
         } catch (Exception e) {
@@ -19955,19 +19977,59 @@ public class PackageManagerService extends IPackageManager.Stub
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
             int userId) {
         Intent intent  = getHomeIntent();
-        List<ResolveInfo> list = queryIntentActivitiesInternal(intent, null,
+        List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, userId);
-        ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
-                true, false, false, userId);
-
         allHomeCandidates.clear();
-        if (list != null) {
-            allHomeCandidates.addAll(list);
+        if (resolveInfos == null) {
+            return null;
         }
-        return (preferred == null || preferred.activityInfo == null)
-                ? null
-                : new ComponentName(preferred.activityInfo.packageName,
-                        preferred.activityInfo.name);
+        allHomeCandidates.addAll(resolveInfos);
+
+        PackageManagerInternal.DefaultHomeProvider provider;
+        synchronized (mPackages) {
+            provider = mDefaultHomeProvider;
+        }
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultHomeProvider is null");
+            return null;
+        }
+        String packageName = provider.getDefaultHome(userId);
+        if (packageName == null) {
+            return null;
+        }
+        int resolveInfosSize = resolveInfos.size();
+        for (int i = 0; i < resolveInfosSize; i++) {
+            ResolveInfo resolveInfo = resolveInfos.get(i);
+
+            if (resolveInfo.activityInfo != null && TextUtils.equals(
+                    resolveInfo.activityInfo.packageName, packageName)) {
+                return new ComponentName(resolveInfo.activityInfo.packageName,
+                        resolveInfo.activityInfo.name);
+            }
+        }
+        return null;
+    }
+
+    private void updateDefaultHomeLPw(int userId) {
+        Intent intent = getHomeIntent();
+        List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
+                PackageManager.GET_META_DATA, userId);
+        ResolveInfo preferredResolveInfo = findPreferredActivity(intent, null, 0, resolveInfos,
+                0, true, false, false, userId);
+        String packageName = preferredResolveInfo != null
+                && preferredResolveInfo.activityInfo != null
+                ? preferredResolveInfo.activityInfo.packageName : null;
+        String currentPackageName = mDefaultHomeProvider.getDefaultHome(userId);
+        if (TextUtils.equals(currentPackageName, packageName)) {
+            return;
+        }
+        String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
+        if (callingPackages != null && ArrayUtils.contains(callingPackages,
+                mRequiredPermissionControllerPackage)) {
+            // PermissionController manages default home directly.
+            return;
+        }
+        mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId);
     }
 
     @Override
@@ -23899,6 +23961,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
             synchronized (mPackages) {
                 mDefaultBrowserProvider = provider;
+            }
+        }
+
+        @Override
+        public void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider) {
+            synchronized (mPackages) {
+                mDefaultHomeProvider = provider;
             }
         }
     }
