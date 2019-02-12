@@ -57,15 +57,15 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
     private int mSignalStrength; // To be removed
     private int mRssi;
-    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.O)
+    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
     private int mRsrp;
-    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.O)
+    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
     private int mRsrq;
-    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.O)
+    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
     private int mRssnr;
-    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.O)
+    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
     private int mCqi;
-    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.O)
+    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
     private int mTimingAdvance;
     private int mLevel;
 
