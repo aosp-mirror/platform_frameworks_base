@@ -284,13 +284,16 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
      * Tells the system UI that volume has changed on an active remote session.
      */
     public void notifyRemoteVolumeChanged(int flags, MediaSessionRecord session) {
-        if (mRvc == null || !session.isActive()) {
-            return;
-        }
-        try {
-            mRvc.remoteVolumeChanged(session.getSessionToken(), flags);
-        } catch (Exception e) {
-            Log.wtf(TAG, "Error sending volume change to system UI.", e);
+        synchronized (mLock) {
+            if (mRvc == null || !session.isActive()) {
+                return;
+            }
+            try {
+                mRvc.remoteVolumeChanged(session.getSessionToken(), flags);
+            } catch (Exception e) {
+                Log.w(TAG, "Error sending volume change to system UI.", e);
+                mRvc = null;
+            }
         }
     }
 
@@ -563,7 +566,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             String callerPackageName, SessionCallbackLink cb, String tag) {
         FullUserRecord user = getFullUserRecordLocked(userId);
         if (user == null) {
-            Log.wtf(TAG, "Request from invalid user: " +  userId);
+            Log.w(TAG, "Request from invalid user: " +  userId + ", pkg=" + callerPackageName);
             throw new RuntimeException("Session request from invalid user.");
         }
 
@@ -643,7 +646,8 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
                 mRvc.updateRemoteController(record == null ? null : record.getSessionToken());
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error sending default remote volume to sys ui.", e);
+                Log.w(TAG, "Error sending default remote volume to sys ui.", e);
+                mRvc = null;
             }
         }
     }
@@ -1661,7 +1665,9 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             final long token = Binder.clearCallingIdentity();
             try {
                 enforceSystemUiPermission("listen for volume changes", pid, uid);
-                mRvc = rvc;
+                synchronized (mLock) {
+                    mRvc = rvc;
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
