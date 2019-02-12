@@ -27,6 +27,7 @@ import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.ProxyInfo;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
@@ -167,6 +168,7 @@ interface IConnectivityManager
     void setAcceptUnvalidated(in Network network, boolean accept, boolean always);
     void setAvoidUnvalidated(in Network network);
     void startCaptivePortalApp(in Network network);
+    void startCaptivePortalAppInternal(in Bundle appExtras);
 
     boolean getAvoidBadWifi();
     int getMultipathPreference(in Network Network);
@@ -187,6 +189,9 @@ interface IConnectivityManager
     void startNattKeepaliveWithFd(in Network network, in FileDescriptor fd, int resourceId,
             int intervalSeconds, in Messenger messenger, in IBinder binder, String srcAddr,
             String dstAddr);
+
+    void startTcpKeepalive(in Network network, in FileDescriptor fd, int intervalSeconds,
+            in Messenger messenger, in IBinder binder);
 
     void stopKeepalive(in Network network, int slot);
 

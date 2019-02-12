@@ -187,15 +187,7 @@ public class SmsMessage {
         int activePhone = TelephonyManager.getDefault().getCurrentPhoneType();
         String format = (PHONE_TYPE_CDMA == activePhone) ?
                 SmsConstants.FORMAT_3GPP2 : SmsConstants.FORMAT_3GPP;
-        message = createFromPdu(pdu, format);
-
-        if (null == message || null == message.mWrappedSmsMessage) {
-            // decoding pdu failed based on activePhone type, must be other format
-            format = (PHONE_TYPE_CDMA == activePhone) ?
-                    SmsConstants.FORMAT_3GPP : SmsConstants.FORMAT_3GPP2;
-            message = createFromPdu(pdu, format);
-        }
-        return message;
+        return createFromPdu(pdu, format);
     }
 
     /**
@@ -211,11 +203,18 @@ public class SmsMessage {
      * {@link android.provider.Telephony.Sms.Intents#SMS_RECEIVED_ACTION} intent
      */
     public static SmsMessage createFromPdu(byte[] pdu, String format) {
-        SmsMessageBase wrappedMessage;
+        return createFromPdu(pdu, format, true);
+    }
+
+    private static SmsMessage createFromPdu(byte[] pdu, String format,
+            boolean fallbackToOtherFormat) {
         if (pdu == null) {
             Rlog.i(LOG_TAG, "createFromPdu(): pdu is null");
             return null;
         }
+        SmsMessageBase wrappedMessage;
+        String otherFormat = SmsConstants.FORMAT_3GPP2.equals(format) ? SmsConstants.FORMAT_3GPP :
+                SmsConstants.FORMAT_3GPP2;
         if (SmsConstants.FORMAT_3GPP2.equals(format)) {
             wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromPdu(pdu);
         } else if (SmsConstants.FORMAT_3GPP.equals(format)) {
@@ -228,8 +227,12 @@ public class SmsMessage {
         if (wrappedMessage != null) {
             return new SmsMessage(wrappedMessage);
         } else {
-            Rlog.e(LOG_TAG, "createFromPdu(): wrappedMessage is null");
-            return null;
+            if (fallbackToOtherFormat) {
+                return createFromPdu(pdu, otherFormat, false);
+            } else {
+                Rlog.e(LOG_TAG, "createFromPdu(): wrappedMessage is null");
+                return null;
+            }
         }
     }
 

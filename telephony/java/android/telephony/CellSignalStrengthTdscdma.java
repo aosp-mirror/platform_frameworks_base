@@ -72,6 +72,10 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
         // Convert from HAL values as part of construction.
         this(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 tdscdma.rscp != CellInfo.UNAVAILABLE ? -tdscdma.rscp : tdscdma.rscp);
+
+        if (mRssi == CellInfo.UNAVAILABLE && mRscp == CellInfo.UNAVAILABLE) {
+            setDefaultValues();
+        }
     }
 
     /** @hide */
@@ -79,6 +83,10 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
         // Convert from HAL values as part of construction.
         this(getRssiDbmFromAsu(tdscdma.signalStrength),
                 tdscdma.bitErrorRate, getRscpDbmFromAsu(tdscdma.rscp));
+
+        if (mRssi == CellInfo.UNAVAILABLE && mRscp == CellInfo.UNAVAILABLE) {
+            setDefaultValues();
+        }
     }
 
     /** @hide */

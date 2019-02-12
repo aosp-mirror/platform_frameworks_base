@@ -16,60 +16,118 @@
 
 package android.telephony.ims;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.util.Log;
+import static android.provider.Telephony.RcsColumns.RcsUnifiedThreadColumns.THREAD_TYPE_1_TO_1;
+import static android.provider.Telephony.RcsColumns.RcsUnifiedThreadColumns.THREAD_TYPE_GROUP;
+
+import android.annotation.NonNull;
+import android.annotation.WorkerThread;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * RcsThread represents a single RCS conversation thread. It holds messages that were sent and
  * received and events that occurred on that thread.
- * @hide - TODO(sahinc) make this public
  */
-public abstract class RcsThread implements Parcelable {
-    // Since this is an abstract class that gets parcelled, the sub-classes need to write these
-    // magic values into the parcel so that we know which type to unparcel into.
-    protected static final int RCS_1_TO_1_TYPE = 998;
-    protected static final int RCS_GROUP_TYPE = 999;
-
+public abstract class RcsThread {
+    /**
+     * The rcs_participant_thread_id that represents this thread in the database
+     * @hide
+     */
     protected int mThreadId;
 
+    /**
+     * @hide
+     */
     protected RcsThread(int threadId) {
         mThreadId = threadId;
     }
 
-    protected RcsThread(Parcel in) {
-        mThreadId = in.readInt();
+    /**
+     * @return Returns the summary of the latest message in this {@link RcsThread} packaged in an
+     * {@link RcsMessageSnippet} object
+     */
+    @WorkerThread
+    @NonNull
+    public RcsMessageSnippet getSnippet() throws RcsMessageStoreException {
+        return RcsControllerCall.call(iRcs -> iRcs.getMessageSnippet(mThreadId));
     }
 
-    public static final Creator<RcsThread> CREATOR = new Creator<RcsThread>() {
-        @Override
-        public RcsThread createFromParcel(Parcel in) {
-            int type = in.readInt();
-
-            switch (type) {
-                case RCS_1_TO_1_TYPE:
-                    return new Rcs1To1Thread(in);
-                case RCS_GROUP_TYPE:
-                    return new RcsGroupThread(in);
-                default:
-                    Log.e(RcsMessageStore.TAG, "Cannot unparcel RcsThread, wrong type: " + type);
-            }
-            return null;
-        }
-
-        @Override
-        public RcsThread[] newArray(int size) {
-            return new RcsThread[0];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
+    /**
+     * Adds a new {@link RcsIncomingMessage} to this RcsThread and persists it in storage.
+     *
+     * @throws RcsMessageStoreException if the message could not be persisted into storage.
+     */
+    @WorkerThread
+    @NonNull
+    public RcsIncomingMessage addIncomingMessage(
+            @NonNull RcsIncomingMessageCreationParams rcsIncomingMessageCreationParams)
+            throws RcsMessageStoreException {
+        return new RcsIncomingMessage(RcsControllerCall.call(iRcs -> iRcs.addIncomingMessage(
+                mThreadId, rcsIncomingMessageCreationParams)));
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mThreadId);
+    /**
+     * Adds a new {@link RcsOutgoingMessage} to this RcsThread and persists it in storage.
+     *
+     * @throws RcsMessageStoreException if the message could not be persisted into storage.
+     */
+    @WorkerThread
+    @NonNull
+    public RcsOutgoingMessage addOutgoingMessage(
+            @NonNull RcsOutgoingMessageCreationParams rcsOutgoingMessageCreationParams)
+            throws RcsMessageStoreException {
+        int messageId = RcsControllerCall.call(iRcs -> iRcs.addOutgoingMessage(
+                mThreadId, rcsOutgoingMessageCreationParams));
+
+        return new RcsOutgoingMessage(messageId);
+    }
+
+    /**
+     * Deletes an {@link RcsMessage} from this RcsThread and updates the storage.
+     *
+     * @param rcsMessage The message to delete from the thread
+     * @throws RcsMessageStoreException if the message could not be deleted
+     */
+    @WorkerThread
+    public void deleteMessage(@NonNull RcsMessage rcsMessage) throws RcsMessageStoreException {
+        RcsControllerCall.callWithNoReturn(
+                iRcs -> iRcs.deleteMessage(rcsMessage.getId(), rcsMessage.isIncoming(), mThreadId,
+                        isGroup()));
+    }
+
+    /**
+     * Convenience function for loading all the {@link RcsMessage}s in this {@link RcsThread}. For
+     * a more detailed and paginated query, please use
+     * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)}
+     *
+     * @return Loads the {@link RcsMessage}s in this thread and returns them in an immutable list.
+     * @throws RcsMessageStoreException if the messages could not be read from the storage
+     */
+    @WorkerThread
+    @NonNull
+    public RcsMessageQueryResult getMessages() throws RcsMessageStoreException {
+        RcsMessageQueryParams queryParameters =
+                new RcsMessageQueryParams.Builder().setThread(this).build();
+        return RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters));
+    }
+
+    /**
+     * @return Returns whether this is a group thread or not
+     */
+    public abstract boolean isGroup();
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public int getThreadId() {
+        return mThreadId;
+    }
+
+    /**
+     * @hide
+     */
+    public int getThreadType() {
+        return isGroup() ? THREAD_TYPE_GROUP : THREAD_TYPE_1_TO_1;
     }
 }

@@ -12,6 +12,11 @@
 #
 #   include frameworks/base/packages/SettingsLib/common.mk
 #
+# During the conversion to Soong bluprint files, the equivalent
+# functionality is provided by adding
+#   defaults: ["SettingsLibDefaults"],
+# to the corresponding module.
+# NOTE: keep this file and ./Android.bp in sync.
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
     androidx.annotation_annotation \

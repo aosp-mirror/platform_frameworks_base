@@ -68,6 +68,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -177,10 +178,10 @@ public class ConnectivityManager {
      * The lookup key for a {@link NetworkInfo} object. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      *
-     * @deprecated Since {@link NetworkInfo} can vary based on UID, applications
-     *             should always obtain network information through
-     *             {@link #getActiveNetworkInfo()}.
-     * @see #EXTRA_NETWORK_TYPE
+     * @deprecated The {@link NetworkInfo} object is deprecated, as many of its properties
+     *             can't accurately represent modern network characteristics.
+     *             Please obtain information about networks from the {@link NetworkCapabilities}
+     *             or {@link LinkProperties} objects instead.
      */
     @Deprecated
     public static final String EXTRA_NETWORK_INFO = "networkInfo";
@@ -189,7 +190,11 @@ public class ConnectivityManager {
      * Network type which triggered a {@link #CONNECTIVITY_ACTION} broadcast.
      *
      * @see android.content.Intent#getIntExtra(String, int)
+     * @deprecated The network type is not rich enough to represent the characteristics
+     *             of modern networks. Please use {@link NetworkCapabilities} instead,
+     *             in particular the transports.
      */
+    @Deprecated
     public static final String EXTRA_NETWORK_TYPE = "networkType";
 
     /**
@@ -1243,9 +1248,13 @@ public class ConnectivityManager {
      *        is no current default network.
      *
      * {@hide}
+     * @deprecated please use {@link #getLinkProperties(Network)} on the return
+     *             value of {@link #getActiveNetwork()} instead. In particular,
+     *             this method will return non-null LinkProperties even if the
+     *             app is blocked by policy from using this network.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 109783091)
     public LinkProperties getActiveLinkProperties() {
         try {
             return mService.getActiveLinkProperties();
@@ -1816,7 +1825,7 @@ public class ConnectivityManager {
                 @Override
                 public void handleMessage(Message message) {
                     switch (message.what) {
-                        case NetworkAgent.EVENT_PACKET_KEEPALIVE:
+                        case NetworkAgent.EVENT_SOCKET_KEEPALIVE:
                             int error = message.arg2;
                             try {
                                 if (error == SUCCESS) {
@@ -1881,7 +1890,8 @@ public class ConnectivityManager {
      * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
      *        changes. Must be extended by applications that use this API.
      *
-     * @return A {@link SocketKeepalive} object, which can be used to control this keepalive object.
+     * @return A {@link SocketKeepalive} object that can be used to control the keepalive on the
+     *         given socket.
      **/
     public SocketKeepalive createSocketKeepalive(@NonNull Network network,
             @NonNull UdpEncapsulationSocket socket,
@@ -1910,6 +1920,8 @@ public class ConnectivityManager {
      * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
      *        changes. Must be extended by applications that use this API.
      *
+     * @return A {@link SocketKeepalive} object that can be used to control the keepalive on the
+     *         given socket.
      * @hide
      */
     @SystemApi
@@ -1922,6 +1934,34 @@ public class ConnectivityManager {
             @NonNull Callback callback) {
         return new NattSocketKeepalive(mService, network, fd, INVALID_RESOURCE_ID /* Unused */,
                 source, destination, executor, callback);
+    }
+
+    /**
+     * Request that keepalives be started on a TCP socket.
+     * The socket must be established.
+     *
+     * @param network The {@link Network} the socket is on.
+     * @param socket The socket that needs to be kept alive.
+     * @param executor The executor on which callback will be invoked. This implementation assumes
+     *                 the provided {@link Executor} runs the callbacks in sequence with no
+     *                 concurrency. Failing this, no guarantee of correctness can be made. It is
+     *                 the responsibility of the caller to ensure the executor provides this
+     *                 guarantee. A simple way of creating such an executor is with the standard
+     *                 tool {@code Executors.newSingleThreadExecutor}.
+     * @param callback A {@link SocketKeepalive.Callback}. Used for notifications about keepalive
+     *        changes. Must be extended by applications that use this API.
+     *
+     * @return A {@link SocketKeepalive} object that can be used to control the keepalive on the
+     *         given socket.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD)
+    public SocketKeepalive createSocketKeepalive(@NonNull Network network,
+            @NonNull Socket socket,
+            @NonNull Executor executor,
+            @NonNull Callback callback) {
+        return new TcpSocketKeepalive(mService, network, socket, executor, callback);
     }
 
     /**
@@ -3861,6 +3901,25 @@ public class ConnectivityManager {
     public void startCaptivePortalApp(Network network) {
         try {
             mService.startCaptivePortalApp(network);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests that the system open the captive portal app with the specified extras.
+     *
+     * <p>This endpoint is exclusively for use by the NetworkStack and is protected by the
+     * corresponding permission.
+     * @param appExtras Extras to include in the app start intent.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    public void startCaptivePortalApp(Bundle appExtras) {
+        try {
+            mService.startCaptivePortalAppInternal(appExtras);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

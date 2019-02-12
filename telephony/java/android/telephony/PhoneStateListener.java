@@ -45,7 +45,8 @@ import java.util.concurrent.Executor;
  * <p>
  * Override the methods for the state that you wish to receive updates for, and
  * pass your PhoneStateListener object, along with bitwise-or of the LISTEN_
- * flags to {@link TelephonyManager#listen TelephonyManager.listen()}.
+ * flags to {@link TelephonyManager#listen TelephonyManager.listen()}. Methods are
+ * called when the state changes, os well as once on initial registration.
  * <p>
  * Note that access to some telephony information is
  * permission-protected. Your application won't receive updates for protected

@@ -63,9 +63,6 @@ public class NetworkStack {
     public static final String PERMISSION_MAINLINE_NETWORK_STACK =
             "android.permission.MAINLINE_NETWORK_STACK";
 
-    /** @hide */
-    public static final String NETWORKSTACK_PACKAGE_NAME = "com.android.mainline.networkstack";
-
     private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
 
     @NonNull

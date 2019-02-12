@@ -54,8 +54,15 @@ public final class AccessNetworkConstants {
      */
     @SystemApi
     public static final class TransportType {
+        /**
+         * Invalid transport type.
+         * @hide
+         */
+        public static final int INVALID = -1;
+
         /** Wireless Wide Area Networks (i.e. Cellular) */
         public static final int WWAN = 1;
+
         /** Wireless Local Area Networks (i.e. Wifi) */
         public static final int WLAN = 2;
 
@@ -65,6 +72,7 @@ public final class AccessNetworkConstants {
         /** @hide */
         public static String toString(int type) {
             switch (type) {
+                case INVALID: return "INVALID";
                 case WWAN: return "WWAN";
                 case WLAN: return "WLAN";
                 default: return Integer.toString(type);
