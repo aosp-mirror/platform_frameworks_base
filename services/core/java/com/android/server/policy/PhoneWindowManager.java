@@ -2316,14 +2316,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean allowWhenLocked = (win.isInputMethodWindow() || imeTarget == this)
                 && showImeOverKeyguard;
 
-        if (isKeyguardLocked() && isKeyguardOccluded()) {
+        final boolean isKeyguardShowing = mKeyguardDelegate.isShowing();
+
+        if (isKeyguardShowing && isKeyguardOccluded()) {
             // Show SHOW_WHEN_LOCKED windows if Keyguard is occluded.
             allowWhenLocked |= win.canShowWhenLocked()
                     // Show error dialogs over apps that are shown on lockscreen
                     || (attrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
 
-        boolean keyguardLocked = isKeyguardLocked();
         boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
                 && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
@@ -2333,7 +2334,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // now shown.
         final boolean hideIme = win.isInputMethodWindow()
                 && (mAodShowing || !mDefaultDisplayPolicy.isWindowManagerDrawComplete());
-        return (keyguardLocked && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
+        return (isKeyguardShowing && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
                 || hideDockDivider || hideIme;
     }
 
