@@ -860,7 +860,7 @@ class StorageManagerService extends IStorageManager.Stub
         } else if (remote == 1) {
             res = true;
         } else {
-            res = false;
+            res = true;
         }
 
         Slog.d(TAG, "Isolated storage local flag " + local + " and remote flag "
@@ -1533,7 +1533,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         // Snapshot feature flag used for this boot
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
-                SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)));
+                SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, true)));
 
         mContext = context;
         mResolver = mContext.getContentResolver();
