@@ -70,6 +70,8 @@ const int FIELD_ID_PULL_FAILED = 12;
 const int FIELD_ID_STATS_COMPANION_FAILED = 13;
 const int FIELD_ID_STATS_COMPANION_BINDER_TRANSACTION_FAILED = 14;
 const int FIELD_ID_EMPTY_DATA = 15;
+const int FIELD_ID_PULL_REGISTERED_COUNT = 16;
+const int FIELD_ID_PULL_UNREGISTERED_COUNT = 17;
 // for AtomMetricStats proto
 const int FIELD_ID_ATOM_METRIC_STATS = 17;
 const int FIELD_ID_METRIC_ID = 1;
@@ -480,6 +482,10 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
                        (long long)pair.second.statsCompanionPullBinderTransactionFailed);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_EMPTY_DATA,
                        (long long)pair.second.emptyData);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_REGISTERED_COUNT,
+                       (long long) pair.second.registeredCount);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_UNREGISTERED_COUNT,
+                       (long long) pair.second.unregisteredCount);
     protoOutput->end(token);
 }
 

@@ -804,6 +804,7 @@ filegroup {
     srcs: [
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
+        "core/java/android/os/IStatsPullerCallback.aidl",
     ],
 }
 

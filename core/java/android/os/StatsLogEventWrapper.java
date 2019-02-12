@@ -57,19 +57,17 @@ public final class StatsLogEventWrapper implements Parcelable {
     public static final Parcelable.Creator<StatsLogEventWrapper> CREATOR = new
             Parcelable.Creator<StatsLogEventWrapper>() {
                 public StatsLogEventWrapper createFromParcel(Parcel in) {
-                    android.util.EventLog.writeEvent(0x534e4554, "112550251",
-                            android.os.Binder.getCallingUid(), "");
-                    // Purposefully leaving this method not implemented.
-                    throw new RuntimeException("Not implemented");
+                    return new StatsLogEventWrapper(in);
                 }
 
                 public StatsLogEventWrapper[] newArray(int size) {
-                    android.util.EventLog.writeEvent(0x534e4554, "112550251",
-                            android.os.Binder.getCallingUid(), "");
-                    // Purposefully leaving this method not implemented.
-                    throw new RuntimeException("Not implemented");
+                    return new StatsLogEventWrapper[size];
                 }
             };
+
+    private StatsLogEventWrapper(Parcel in) {
+        readFromParcel(in);
+    }
 
     /**
      * Set work source if any.
@@ -189,6 +187,70 @@ public final class StatsLogEventWrapper implements Parcelable {
                     break;
                 case EVENT_TYPE_STORAGE:
                     out.writeByteArray((byte[]) mValues.get(i));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Reads from parcel and appropriately fills member fields.
+     */
+    public void readFromParcel(Parcel in) {
+        mTypes = new ArrayList<>();
+        mValues = new ArrayList<>();
+        mWorkSource = null;
+
+        mTag = in.readInt();
+        mElapsedTimeNs = in.readLong();
+        mWallClockTimeNs = in.readLong();
+
+        // Clear any data.
+        if (DEBUG) {
+            Slog.d(TAG, "Reading " + mTag + " " + mElapsedTimeNs + " " + mWallClockTimeNs);
+        }
+        // Set up worksource if present.
+        int numWorkChains = in.readInt();
+        if (numWorkChains > 0) {
+            mWorkSource = new WorkSource();
+            for (int i = 0; i < numWorkChains; i++) {
+                android.os.WorkSource.WorkChain workChain = mWorkSource.createWorkChain();
+                int workChainSize = in.readInt();
+                for (int j = 0; j < workChainSize; j++) {
+                    int uid = in.readInt();
+                    String tag = in.readString();
+                    workChain.addNode(uid, tag);
+                }
+            }
+        }
+
+        // Do the rest of the types.
+        int numTypes = in.readInt();
+        if (DEBUG) {
+            Slog.d(TAG, "Reading " + numTypes + " elements");
+        }
+        for (int i = 0; i < numTypes; i++) {
+            int type = in.readInt();
+            mTypes.add(type);
+            switch (type) {
+                case EVENT_TYPE_INT:
+                    mValues.add(in.readInt());
+                    break;
+                case EVENT_TYPE_LONG:
+                    mValues.add(in.readLong());
+                    break;
+                case EVENT_TYPE_FLOAT:
+                    mValues.add(in.readFloat());
+                    break;
+                case EVENT_TYPE_DOUBLE:
+                    mValues.add(in.readDouble());
+                    break;
+                case EVENT_TYPE_STRING:
+                    mValues.add(in.readString());
+                    break;
+                case EVENT_TYPE_STORAGE:
+                    mValues.add(in.createByteArray());
                     break;
                 default:
                     break;

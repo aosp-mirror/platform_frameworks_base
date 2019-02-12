@@ -407,6 +407,8 @@ message StatsdStatsReport {
         optional int64 stats_companion_pull_failed = 13;
         optional int64 stats_companion_pull_binder_transaction_failed = 14;
         optional int64 empty_data = 15;
+        optional int64 registered_count = 16;
+        optional int64 unregistered_count = 17;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
 
