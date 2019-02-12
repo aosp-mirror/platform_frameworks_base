@@ -481,6 +481,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        if (params.isStaged) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, TAG);
+        }
+
         if (!params.isMultiPackage) {
             // Only system components can circumvent runtime permissions when installing.
             if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
