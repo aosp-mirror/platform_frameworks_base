@@ -4721,7 +4721,6 @@ public class WifiManager {
      *
      * @hide
      */
-    @SystemApi
     private static class EasyConnectCallbackProxy extends IDppCallback.Stub {
         private final Executor mExecutor;
         private final EasyConnectStatusCallback mEasyConnectStatusCallback;
