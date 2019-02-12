@@ -869,6 +869,9 @@
          which means to get a larger screen. -->
     <bool name="config_lidControlsDisplayFold">false</bool>
 
+    <!-- Indicate the display area rect for foldable devices in folded state. -->
+    <string name="config_foldedArea"></string>
+
     <!-- Desk dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a desk dock.

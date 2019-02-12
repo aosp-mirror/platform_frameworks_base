@@ -64,6 +64,7 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -1468,6 +1469,20 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Unregisters an IDisplayFoldListener.
      */
     default void unregisterDisplayFoldListener(IDisplayFoldListener listener) {}
+
+    /**
+     * Overrides the folded area.
+     *
+     * @param area the overriding folded area or an empty {@code Rect} to clear the override.
+     */
+    default void setOverrideFoldedArea(@NonNull Rect area) {}
+
+    /**
+     * Get the display folded area.
+     */
+    default @NonNull Rect getFoldedArea() {
+        return new Rect();
+    }
 
     /**
      * Updates the flag about whether AOD is showing.

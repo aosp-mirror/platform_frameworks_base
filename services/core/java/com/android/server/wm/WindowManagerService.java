@@ -22,6 +22,7 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
@@ -3758,6 +3759,41 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.unregisterDisplayFoldListener(listener);
     }
 
+    /**
+     * Overrides the folded area.
+     *
+     * @param area the overriding folded area or an empty {@code Rect} to clear the override.
+     */
+    void setOverrideFoldedArea(@NonNull Rect area) {
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
+        }
+
+        long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mPolicy.setOverrideFoldedArea(area);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Get the display folded area.
+     */
+    @NonNull Rect getFoldedArea() {
+        long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mPolicy.getFoldedArea();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     @Override
     public int getPreferredOptionsPanelGravity(int displayId) {
         synchronized (mGlobalLock) {
@@ -4822,11 +4858,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setForcedDisplaySize(int displayId, int width, int height) {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " +
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -4844,11 +4878,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setForcedDisplayScalingMode(int displayId, int mode) {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " +
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -4908,11 +4940,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void clearForcedDisplaySize(int displayId) {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " +
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -4953,11 +4983,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setForcedDisplayDensityForUser(int displayId, int density, int userId) {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " +
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
         }
 
         final int targetUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -4978,11 +5006,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void clearForcedDisplayDensityForUser(int displayId, int userId) {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " +
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
         }
 
         final int callingUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -5047,11 +5073,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setOverscan(int displayId, int left, int top, int right, int bottom) {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " +
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
         }
         final long ident = Binder.clearCallingIdentity();
         try {
