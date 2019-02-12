@@ -44,6 +44,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.graphics.Xfermode;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -156,12 +157,12 @@ public class GradientDrawable extends Drawable {
     private static final float DEFAULT_INNER_RADIUS_RATIO = 3.0f;
     private static final float DEFAULT_THICKNESS_RATIO = 9.0f;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
     private GradientState mGradientState;
 
     @UnsupportedAppUsage
     private final Paint mFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124051827)
     private Rect mPadding;
     @UnsupportedAppUsage
     private Paint mStrokePaint;   // optional, set by the caller
@@ -670,7 +671,28 @@ public class GradientDrawable extends Drawable {
      * @see #setColor(int)
      */
     public void setColors(@ColorInt int[] colors) {
+        setColors(colors, null);
+    }
+
+    /**
+     * Sets the colors and offsets used to draw the gradient.
+     * <p>
+     * Each color is specified as an ARGB integer and the array must contain at
+     * least 2 colors.
+     * <p>
+     * <strong>Note</strong>: changing colors will affect all instances of a
+     * drawable loaded from a resource. It is recommended to invoke
+     * {@link #mutate()} before changing the colors.
+     *
+     * @param colors an array containing 2 or more ARGB colors
+     * @param offsets optional array of floating point parameters representing the positions
+     *                of the colors. Null evenly disperses the colors
+     * @see #mutate()
+     * @see #setColors(int[])
+     */
+    public void setColors(@ColorInt int[] colors, @Nullable float[] offsets) {
         mGradientState.setGradientColors(colors);
+        mGradientState.mPositions = offsets;
         mGradientIsDirty = true;
         invalidateSelf();
     }
@@ -847,6 +869,115 @@ public class GradientDrawable extends Drawable {
             mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
             mPathIsDirty = false;
         }
+    }
+
+    /**
+     * Inner radius of the ring expressed as a ratio of the ring's width.
+     *
+     * @see #getInnerRadiusRatio()
+     * @attr ref android.R.styleable#GradientDrawable_innerRadiusRatio
+     */
+    public void setInnerRadiusRatio(float innerRadiusRatio) {
+        mGradientState.mInnerRadiusRatio = innerRadiusRatio;
+        mPathIsDirty = true;
+        invalidateSelf();
+    }
+
+    /**
+     * Return the inner radius of the ring expressed as a ratio of the ring's width.
+     *
+     * @see #setInnerRadiusRatio(float)
+     * @attr ref android.R.styleable#GradientDrawable_innerRadiusRatio
+     */
+    public float getInnerRadiusRatio() {
+        return mGradientState.mInnerRadiusRatio;
+    }
+
+    /**
+     * Configure the inner radius of the ring.
+     *
+     * @see #getInnerRadius()
+     * @attr ref android.R.styleable#GradientDrawable_innerRadius
+     */
+    public void setInnerRadius(int innerRadius) {
+        mGradientState.mInnerRadius = innerRadius;
+        mPathIsDirty = true;
+        invalidateSelf();
+    }
+
+    /**
+     * Retrn the inner radius of the ring
+     *
+     * @see #setInnerRadius(int)
+     * @attr ref android.R.styleable#GradientDrawable_innerRadius
+     */
+    public int getInnerRadius() {
+        return mGradientState.mInnerRadius;
+    }
+
+    /**
+     * Configure the thickness of the ring expressed as a ratio of the ring's width.
+     *
+     * @see #getThicknessRatio()
+     * @attr ref android.R.styleable#GradientDrawable_thicknessRatio
+     */
+    public void setThicknessRatio(float thicknessRatio) {
+        mGradientState.mThicknessRatio = thicknessRatio;
+        mPathIsDirty = true;
+        invalidateSelf();
+    }
+
+    /**
+     * Return the thickness ratio of the ring expressed as a ratio of the ring's width.
+     *
+     * @see #setThicknessRatio(float)
+     * @attr ref android.R.styleable#GradientDrawable_thicknessRatio
+     */
+    public float getThicknessRatio() {
+        return mGradientState.mThicknessRatio;
+    }
+
+    /**
+     * Configure the thickness of the ring.
+     *
+     * @attr ref android.R.styleable#GradientDrawable_thickness
+     */
+    public void setThickness(int thickness) {
+        mGradientState.mThickness = thickness;
+        mPathIsDirty = true;
+        invalidateSelf();
+    }
+
+    /**
+     * Return the thickness of the ring
+     *
+     * @see #setThickness(int)
+     * @attr ref android.R.styleable#GradientDrawable_thickness
+     */
+    public int getThickness() {
+        return mGradientState.mThickness;
+    }
+
+    /**
+     * Configure the padding of the gradient shape
+     * @param left Left padding of the gradient shape
+     * @param top Top padding of the gradient shape
+     * @param right Right padding of the gradient shape
+     * @param bottom Bottom padding of the gradient shape
+     *
+     * @attr ref android.R.styleable#GradientDrawablePadding_left
+     * @attr ref android.R.styleable#GradientDrawablePadding_top
+     * @attr ref android.R.styleable#GradientDrawablePadding_right
+     * @attr ref android.R.styleable#GradientDrawablePadding_bottom
+     */
+    public void setPadding(int left, int top, int right, int bottom) {
+        if (mGradientState.mPadding == null) {
+            mGradientState.mPadding = new Rect();
+        }
+
+        mGradientState.mPadding.set(left, top, right, bottom);
+        mPadding = mGradientState.mPadding;
+        invalidateSelf();
     }
 
     private Path buildRing(GradientState st) {
@@ -1814,46 +1945,46 @@ public class GradientDrawable extends Drawable {
 
     final static class GradientState extends ConstantState {
         public @Config int mChangingConfigurations;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public @Shape int mShape = RECTANGLE;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public @GradientType int mGradient = LINEAR_GRADIENT;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public int mAngle = 0;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public Orientation mOrientation;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public ColorStateList mSolidColors;
         public ColorStateList mStrokeColors;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug =  124050917)
         public @ColorInt int[] mGradientColors;
         public @ColorInt int[] mTempColors; // no need to copy
         public float[] mTempPositions; // no need to copy
         @UnsupportedAppUsage
         public float[] mPositions;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public int mStrokeWidth = -1; // if >= 0 use stroking.
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public float mStrokeDashWidth = 0.0f;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public float mStrokeDashGap = 0.0f;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public float mRadius = 0.0f; // use this if mRadiusArray is null
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public float[] mRadiusArray = null;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public Rect mPadding = null;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public int mWidth = -1;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public int mHeight = -1;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public float mInnerRadiusRatio = DEFAULT_INNER_RADIUS_RATIO;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050218)
         public float mThicknessRatio = DEFAULT_THICKNESS_RATIO;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public int mInnerRadius = -1;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050218)
         public int mThickness = -1;
         public boolean mDither = false;
         public Insets mOpticalInsets = Insets.NONE;
