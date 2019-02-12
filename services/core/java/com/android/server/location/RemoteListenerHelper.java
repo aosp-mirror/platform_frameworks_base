@@ -31,9 +31,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A helper class, that handles operations in remote listeners, and tracks for remote process death.
+ * A helper class that handles operations in remote listeners.
+ *
+ * @param <TListener> the type of GNSS data listener.
  */
-abstract class RemoteListenerHelper<TListener extends IInterface> {
+public abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     protected static final int RESULT_SUCCESS = 0;
     protected static final int RESULT_NOT_AVAILABLE = 1;
@@ -46,7 +48,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     protected final Handler mHandler;
     private final String mTag;
 
-    private final Map<IBinder, LinkedListener> mListenerMap = new HashMap<>();
+    private final Map<IBinder, IdentifiedListener> mListenerMap = new HashMap<>();
 
     protected final Context mContext;
     protected final AppOpsManager mAppOps;
@@ -71,24 +73,21 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         return mIsRegistered;
     }
 
-    public boolean addListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
+    /**
+     * Adds GNSS data listener {@code listener} with caller identify {@code callerIdentify}.
+     */
+    public void addListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
         Preconditions.checkNotNull(listener, "Attempted to register a 'null' listener.");
         IBinder binder = listener.asBinder();
-        LinkedListener deathListener = new LinkedListener(listener, callerIdentity);
         synchronized (mListenerMap) {
             if (mListenerMap.containsKey(binder)) {
                 // listener already added
-                return true;
+                return;
             }
-            try {
-                binder.linkToDeath(deathListener, 0 /* flags */);
-            } catch (RemoteException e) {
-                // if the remote process registering the listener is already death, just swallow the
-                // exception and return
-                Log.v(mTag, "Remote listener already died.", e);
-                return false;
-            }
-            mListenerMap.put(binder, deathListener);
+
+            IdentifiedListener identifiedListener = new IdentifiedListener(listener,
+                    callerIdentity);
+            mListenerMap.put(binder, identifiedListener);
 
             // update statuses we already know about, starting from the ones that will never change
             int result;
@@ -107,25 +106,22 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
             } else {
                 // at this point if the supported flag is not set, the notification will be sent
                 // asynchronously in the future
-                return true;
+                return;
             }
-            post(deathListener, getHandlerOperation(result));
+            post(identifiedListener, getHandlerOperation(result));
         }
-        return true;
     }
 
+    /**
+     * Remove GNSS data listener {@code listener}.
+     */
     public void removeListener(@NonNull TListener listener) {
         Preconditions.checkNotNull(listener, "Attempted to remove a 'null' listener.");
-        IBinder binder = listener.asBinder();
-        LinkedListener linkedListener;
         synchronized (mListenerMap) {
-            linkedListener = mListenerMap.remove(binder);
+            mListenerMap.remove(listener.asBinder());
             if (mListenerMap.isEmpty()) {
                 tryUnregister();
             }
-        }
-        if (linkedListener != null) {
-            binder.unlinkToDeath(linkedListener, 0 /* flags */);
         }
     }
 
@@ -198,14 +194,15 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     }
 
     private void foreachUnsafe(ListenerOperation<TListener> operation) {
-        for (LinkedListener linkedListener : mListenerMap.values()) {
-            post(linkedListener, operation);
+        for (IdentifiedListener identifiedListener : mListenerMap.values()) {
+            post(identifiedListener, operation);
         }
     }
 
-    private void post(LinkedListener linkedListener, ListenerOperation<TListener> operation) {
+    private void post(IdentifiedListener identifiedListener,
+            ListenerOperation<TListener> operation) {
         if (operation != null) {
-            mHandler.post(new HandlerRunnable(linkedListener, operation));
+            mHandler.post(new HandlerRunnable(identifiedListener, operation));
         }
     }
 
@@ -259,35 +256,31 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         return RESULT_SUCCESS;
     }
 
-    private class LinkedListener implements IBinder.DeathRecipient {
+    private class IdentifiedListener {
         private final TListener mListener;
         private final CallerIdentity mCallerIdentity;
 
-        LinkedListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
+        private IdentifiedListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
             mListener = listener;
             mCallerIdentity = callerIdentity;
-        }
-
-        @Override
-        public void binderDied() {
-            Log.d(mTag, "Remote Listener died: " + mListener);
-            removeListener(mListener);
         }
     }
 
     private class HandlerRunnable implements Runnable {
-        private final LinkedListener mLinkedListener;
+        private final IdentifiedListener mIdentifiedListener;
         private final ListenerOperation<TListener> mOperation;
 
-        HandlerRunnable(LinkedListener linkedListener, ListenerOperation<TListener> operation) {
-            mLinkedListener = linkedListener;
+        private HandlerRunnable(IdentifiedListener identifiedListener,
+                ListenerOperation<TListener> operation) {
+            mIdentifiedListener = identifiedListener;
             mOperation = operation;
         }
 
         @Override
         public void run() {
             try {
-                mOperation.execute(mLinkedListener.mListener, mLinkedListener.mCallerIdentity);
+                mOperation.execute(mIdentifiedListener.mListener,
+                        mIdentifiedListener.mCallerIdentity);
             } catch (RemoteException e) {
                 Log.v(mTag, "Error in monitored listener.", e);
             }
