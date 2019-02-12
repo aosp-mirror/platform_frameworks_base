@@ -294,22 +294,6 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
       }
     }
 
-    if (el->FindAttribute("", "platformBuildVersionCode") == nullptr) {
-      auto versionCode = el->FindAttribute(xml::kSchemaAndroid, "versionCode");
-      if (versionCode != nullptr) {
-        el->attributes.push_back(xml::Attribute{"", "platformBuildVersionCode",
-                                                versionCode->value});
-      }
-    }
-
-    if (el->FindAttribute("", "platformBuildVersionName") == nullptr) {
-      auto versionName = el->FindAttribute(xml::kSchemaAndroid, "versionName");
-      if (versionName != nullptr) {
-        el->attributes.push_back(xml::Attribute{"", "platformBuildVersionName",
-                                                versionName->value});
-      }
-    }
-
     return true;
   });
 
@@ -489,8 +473,14 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
 
     // Make sure we un-compile the value if it was set to something else.
     attr->compiled_value = {};
-
     attr->value = options_.compile_sdk_version.value();
+
+    attr = root->FindOrCreateAttribute("", "platformBuildVersionCode");
+
+    // Make sure we un-compile the value if it was set to something else.
+    attr->compiled_value = {};
+    attr->value = options_.compile_sdk_version.value();
+
   }
 
   if (options_.compile_sdk_version_codename) {
@@ -499,7 +489,12 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
 
     // Make sure we un-compile the value if it was set to something else.
     attr->compiled_value = {};
+    attr->value = options_.compile_sdk_version_codename.value();
 
+    attr = root->FindOrCreateAttribute("", "platformBuildVersionName");
+
+    // Make sure we un-compile the value if it was set to something else.
+    attr->compiled_value = {};
     attr->value = options_.compile_sdk_version_codename.value();
   }
 
