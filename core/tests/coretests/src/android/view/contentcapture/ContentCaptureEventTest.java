@@ -24,6 +24,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.content.LocusId;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.SystemClock;
 import android.view.autofill.AutofillId;
@@ -45,9 +47,11 @@ public class ContentCaptureEventTest {
 
     private static final long MY_EPOCH = SystemClock.uptimeMillis();
 
+    private static final LocusId ID = new LocusId(Uri.parse("WHATEVER"));
+
     // Not using @Mock because it's final - no need to be fancy here....
-    private final ContentCaptureContext mClientContext = new ContentCaptureContext.Builder()
-            .setAction("WHATEVER").build();
+    private final ContentCaptureContext mClientContext =
+            new ContentCaptureContext.Builder(ID).build();
 
     @Test
     public void testSetAutofillId_null() {
@@ -177,7 +181,7 @@ public class ContentCaptureEventTest {
         assertThat(event.getViewNode()).isNull();
         final ContentCaptureContext clientContext = event.getContentCaptureContext();
         assertThat(clientContext).isNotNull();
-        assertThat(clientContext.getAction()).isEqualTo("WHATEVER");
+        assertThat(clientContext.getLocusId()).isEqualTo(ID);
     }
 
     @Test
@@ -210,7 +214,6 @@ public class ContentCaptureEventTest {
         assertThat(event.getContentCaptureContext()).isNull();
     }
 
-
     @Test
     public void testContextUpdated_directly() {
         final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_CONTEXT_UPDATED)
@@ -239,7 +242,7 @@ public class ContentCaptureEventTest {
         assertThat(event.getViewNode()).isNull();
         final ContentCaptureContext clientContext = event.getContentCaptureContext();
         assertThat(clientContext).isNotNull();
-        assertThat(clientContext.getAction()).isEqualTo("WHATEVER");
+        assertThat(clientContext.getLocusId()).isEqualTo(ID);
     }
 
     // TODO(b/123036895): add test for all events type (right now we're just testing the 3 types
