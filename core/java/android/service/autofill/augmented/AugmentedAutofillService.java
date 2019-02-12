@@ -61,8 +61,6 @@ import java.util.List;
  */
 @SystemApi
 @TestApi
-// TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-// in the same package as the test, and that module is compiled with SDK=test_current
 public abstract class AugmentedAutofillService extends Service {
 
     private static final String TAG = AugmentedAutofillService.class.getSimpleName();

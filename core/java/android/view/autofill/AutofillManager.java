@@ -1782,10 +1782,6 @@ public final class AutofillManager {
     /**
      * Explicitly limits augmented autofill to the given packages and activities.
      *
-     * <p>When the whitelist is set, it overrides the values passed to
-     * {@link #setActivityAugmentedAutofillEnabled(ComponentName, boolean)}
-     * and {@link #setPackageAugmentedAutofillEnabled(String, boolean)}.
-     *
      * <p>To reset the whitelist, call it passing {@code null} to both arguments.
      *
      * <p>Useful when the service wants to restrict augmented autofill to a category of apps, like
@@ -1803,8 +1799,6 @@ public final class AutofillManager {
      */
     @SystemApi
     @TestApi
-    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-    //in the same package as the test, and that module is compiled with SDK=test_current
     public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> activities) {
         // TODO(b/123100824): implement

@@ -30,8 +30,6 @@ import java.util.List;
  */
 @SystemApi
 @TestApi
-//TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-//in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillResponse {
 
     private final FillWindow mFillWindow;
@@ -53,8 +51,6 @@ public final class FillResponse {
      */
     @SystemApi
     @TestApi
-    //TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-    //in the same package as the test, and that module is compiled with SDK=test_current
     public static final class Builder {
 
         private FillWindow mFillWindow;
