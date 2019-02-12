@@ -145,8 +145,16 @@ public class UsageStatsService extends SystemService implements
     AppTimeLimitController mAppTimeLimit;
 
     final SparseArray<ArraySet<String>> mUsageReporters = new SparseArray();
-    final SparseArray<String> mVisibleActivities = new SparseArray();
+    final SparseArray<ActivityData> mVisibleActivities = new SparseArray();
 
+    private static class ActivityData {
+        private final String mTaskRootPackage;
+        private final String mTaskRootClass;
+        private ActivityData(String taskRootPackage, String taskRootClass) {
+            mTaskRootPackage = taskRootPackage;
+            mTaskRootClass = taskRootClass;
+        }
+    }
 
     private UsageStatsManagerInternal.AppIdleStateChangeListener mStandbyChangeListener =
             new UsageStatsManagerInternal.AppIdleStateChangeListener() {
@@ -464,47 +472,57 @@ public class UsageStatsService extends SystemService implements
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             convertToSystemTimeLocked(event);
 
-            if (event.getPackageName() != null
-                    && mPackageManagerInternal.isPackageEphemeral(userId, event.getPackageName())) {
+            if (event.mPackage != null
+                    && mPackageManagerInternal.isPackageEphemeral(userId, event.mPackage)) {
                 event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
-            }
-
-            final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
-            service.reportEvent(event);
-
-            mAppStandby.reportEvent(event, elapsedRealtime, userId);
-
-            String packageName;
-
-            switch(mUsageSource) {
-                case USAGE_SOURCE_CURRENT_ACTIVITY:
-                    packageName = event.getPackageName();
-                    break;
-                case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
-                default:
-                    packageName = event.getTaskRootPackageName();
-                    if (packageName == null) {
-                        packageName = event.getPackageName();
-                    }
-                    break;
             }
 
             switch (event.mEventType) {
                 case Event.ACTIVITY_RESUMED:
-                    synchronized (mVisibleActivities) {
-                        // check if this activity has already been resumed
-                        if (mVisibleActivities.get(event.mInstanceId) != null) break;
-                        mVisibleActivities.put(event.mInstanceId, event.getClassName());
-                        try {
-                            mAppTimeLimit.noteUsageStart(packageName, userId);
-                        } catch (IllegalArgumentException iae) {
-                            Slog.e(TAG, "Failed to note usage start", iae);
+                    // check if this activity has already been resumed
+                    if (mVisibleActivities.get(event.mInstanceId) != null) break;
+                    mVisibleActivities.put(event.mInstanceId,
+                            new ActivityData(event.mTaskRootPackage, event.mTaskRootClass));
+                    try {
+                        switch(mUsageSource) {
+                            case USAGE_SOURCE_CURRENT_ACTIVITY:
+                                mAppTimeLimit.noteUsageStart(event.mPackage, userId);
+                                break;
+                            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
+                            default:
+                                mAppTimeLimit.noteUsageStart(event.mTaskRootPackage, userId);
+                                break;
+                        }
+                    } catch (IllegalArgumentException iae) {
+                        Slog.e(TAG, "Failed to note usage start", iae);
+                    }
+                    break;
+                case Event.ACTIVITY_PAUSED:
+                    if (event.mTaskRootPackage == null) {
+                        // Task Root info is missing. Repair the event based on previous data
+                        final ActivityData prevData = mVisibleActivities.get(event.mInstanceId);
+                        if (prevData == null) {
+                            Slog.w(TAG, "Unexpected activity event reported! (" + event.mPackage
+                                    + "/" + event.mClass + " event : " + event.mEventType
+                                    + " instanceId : " + event.mInstanceId + ")");
+                        } else {
+                            event.mTaskRootPackage = prevData.mTaskRootPackage;
+                            event.mTaskRootClass = prevData.mTaskRootClass;
                         }
                     }
                     break;
-                case Event.ACTIVITY_STOPPED:
                 case Event.ACTIVITY_DESTROYED:
+                    // Treat activity destroys like activity stops.
+                    event.mEventType = Event.ACTIVITY_STOPPED;
+                    // Fallthrough
+                case Event.ACTIVITY_STOPPED:
+                    final ActivityData prevData =
+                            mVisibleActivities.removeReturnOld(event.mInstanceId);
+                    if (prevData == null) {
+                        // The activity stop was already handled.
+                        return;
+                    }
+
                     ArraySet<String> tokens;
                     synchronized (mUsageReporters) {
                         tokens = mUsageReporters.removeReturnOld(event.mInstanceId);
@@ -517,7 +535,7 @@ public class UsageStatsService extends SystemService implements
                                 final String token = tokens.valueAt(i);
                                 try {
                                     mAppTimeLimit.noteUsageStop(
-                                            buildFullToken(event.getPackageName(), token), userId);
+                                            buildFullToken(event.mPackage, token), userId);
                                 } catch (IllegalArgumentException iae) {
                                     Slog.w(TAG, "Failed to stop usage for during reporter death: "
                                             + iae);
@@ -525,18 +543,32 @@ public class UsageStatsService extends SystemService implements
                             }
                         }
                     }
-
-                    synchronized (mVisibleActivities) {
-                        if (mVisibleActivities.removeReturnOld(event.mInstanceId) != null) {
-                            try {
-                                mAppTimeLimit.noteUsageStop(packageName, userId);
-                            } catch (IllegalArgumentException iae) {
-                                Slog.w(TAG, "Failed to note usage stop", iae);
-                            }
+                    if (event.mTaskRootPackage == null) {
+                        // Task Root info is missing. Repair the event based on previous data
+                        event.mTaskRootPackage = prevData.mTaskRootPackage;
+                        event.mTaskRootClass = prevData.mTaskRootClass;
+                    }
+                    try {
+                        switch(mUsageSource) {
+                            case USAGE_SOURCE_CURRENT_ACTIVITY:
+                                mAppTimeLimit.noteUsageStop(event.mPackage, userId);
+                                break;
+                            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
+                            default:
+                                mAppTimeLimit.noteUsageStop(event.mTaskRootPackage, userId);
+                                break;
                         }
+                    } catch (IllegalArgumentException iae) {
+                        Slog.w(TAG, "Failed to note usage stop", iae);
                     }
                     break;
             }
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            service.reportEvent(event);
+
+            mAppStandby.reportEvent(event, elapsedRealtime, userId);
         }
     }
 

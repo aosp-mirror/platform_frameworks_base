@@ -15,7 +15,6 @@
  */
 package com.android.server.usage;
 
-import static android.app.usage.UsageEvents.Event.ACTIVITY_DESTROYED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
@@ -301,27 +300,6 @@ public class IntervalStats {
             for (int i = 0; i < size; i++) {
                 UsageStats usageStats = packageStats.valueAt(i);
                 usageStats.update(null, timeStamp, eventType, instanceId);
-            }
-        } else if (eventType == ACTIVITY_DESTROYED) {
-            UsageStats usageStats = packageStats.get(packageName);
-            if (usageStats != null) {
-                // If previous event is not ACTIVITY_STOPPED, convert ACTIVITY_DESTROYED
-                // to ACTIVITY_STOPPED and add to event list.
-                // Otherwise do not add anything to event list. (Because we want to save space
-                // and we do not want a ACTIVITY_STOPPED followed by
-                // ACTIVITY_DESTROYED in event list).
-                final int index = usageStats.mActivities.indexOfKey(instanceId);
-                if (index >= 0) {
-                    final int type = usageStats.mActivities.valueAt(index);
-                    if (type != ACTIVITY_STOPPED) {
-                        Event event = new Event(ACTIVITY_STOPPED, timeStamp);
-                        event.mPackage = packageName;
-                        event.mClass = className;
-                        event.mInstanceId = instanceId;
-                        addEvent(event);
-                    }
-                }
-                usageStats.update(className, timeStamp, ACTIVITY_DESTROYED, instanceId);
             }
         } else {
             UsageStats usageStats = getOrCreateUsageStats(packageName);
