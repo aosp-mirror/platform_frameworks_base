@@ -158,6 +158,7 @@ private:
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
+    bool hasReachedGuardRailLimit() const;
 
     bool hitFullBucketGuardRailLocked(const MetricDimensionKey& newKey);
 
@@ -244,6 +245,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange_EndOfBucket);
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenGuardRailHit);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullDelayExceeded);
