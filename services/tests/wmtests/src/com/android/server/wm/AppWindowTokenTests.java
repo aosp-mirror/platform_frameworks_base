@@ -141,6 +141,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mToken.removeImmediately();
     }
 
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     @Test
     public void testLandscapeSeascapeRotationByApp() {
         // Some plumbing to get the service ready for rotation updates.
@@ -166,6 +167,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mDisplayContent.updateOrientationFromAppTokens(
                 mDisplayContent.getRequestedOverrideConfiguration(),
                 null /* freezeThisOneIfNeeded */, false /* forceUpdate */);
+        // In this test, DC will not get config update. Set the waiting flag to false.
+        mDisplayContent.mWaitingForConfig = false;
         mWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
         assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, mDisplayContent.getLastOrientation());
         assertTrue(appWindow.mResizeReported);
