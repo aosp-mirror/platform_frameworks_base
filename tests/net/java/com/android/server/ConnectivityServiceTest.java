@@ -554,7 +554,7 @@ public class ConnectivityServiceTest {
 
                 if (mNmValidationRedirectUrl != null) {
                     mNmCallbacks.showProvisioningNotification(
-                            "test_provisioning_notif_action");
+                            "test_provisioning_notif_action", "com.android.test.package");
                     mNmProvNotificationRequested = true;
                 }
             } catch (RemoteException e) {
