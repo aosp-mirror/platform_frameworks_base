@@ -1785,10 +1785,17 @@ package android.provider {
   }
 
   public final class DeviceConfig {
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getProperty(String, String);
+    method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static boolean setProperty(String, String, String, boolean);
+    field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+  }
+
+  public static interface DeviceConfig.OnPropertyChangedListener {
+    method public void onPropertyChanged(String, String, String);
   }
 
   public static interface DeviceConfig.Privacy {
@@ -1813,7 +1820,6 @@ package android.provider {
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
-    field public static final String AUTOFILL_SMART_SUGGESTION_EMULATION_FLAGS = "autofill_smart_suggestion_emulation_flags";
     field public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
     field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
     field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
@@ -2156,6 +2162,10 @@ package android.telecom {
     ctor public CallAudioState(boolean, int, int, @Nullable android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.bluetooth.BluetoothDevice>);
   }
 
+  public abstract class Conference extends android.telecom.Conferenceable {
+    method public android.telecom.Connection getPrimaryConnection();
+  }
+
   public final class PhoneAccountSuggestion implements android.os.Parcelable {
     ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
   }
@@ -2166,6 +2176,16 @@ package android.telecom {
     method public android.os.IBinder onBind(android.content.Intent);
     method public final void suggestPhoneAccounts(@NonNull String, @NonNull java.util.List<android.telecom.PhoneAccountSuggestion>);
     field public static final String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
+  }
+
+  public class TelecomManager {
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(android.telecom.PhoneAccountHandle);
+    field public static final int TTY_MODE_FULL = 1; // 0x1
+    field public static final int TTY_MODE_HCO = 2; // 0x2
+    field public static final int TTY_MODE_OFF = 0; // 0x0
+    field public static final int TTY_MODE_VCO = 3; // 0x3
   }
 
 }
@@ -2680,6 +2700,8 @@ package android.view.autofill {
 
   public final class AutofillManager {
     method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    field public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES = "smart_suggestion_supported_modes";
+    field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
   }

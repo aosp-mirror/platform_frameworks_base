@@ -56,6 +56,7 @@ cc_library {
             shared_libs: [
                 "libandroidfw",
                 "libbase",
+                "libcutils",
                 "libutils",
                 "libziparchive",
             ],
@@ -150,6 +151,7 @@ cc_binary {
             shared_libs: [
                 "libandroidfw",
                 "libbase",
+                "libcutils",
                 "libidmap2",
                 "libutils",
                 "libziparchive",

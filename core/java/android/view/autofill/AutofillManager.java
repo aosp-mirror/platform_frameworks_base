@@ -17,7 +17,6 @@
 package android.view.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
-import static android.util.DebugUtils.flagsToString;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 
@@ -338,6 +337,14 @@ public final class AutofillManager {
     public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
 
     /**
+     * Disables Augmented Autofill.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_SMART_SUGGESTION_OFF = 0x0;
+
+    /**
      * Displays the Augment Autofill window using the same mechanism (such as a popup-window
      * attached to the focused view) as the standard autofill.
      *
@@ -347,11 +354,19 @@ public final class AutofillManager {
     public static final int FLAG_SMART_SUGGESTION_SYSTEM = 0x1;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "FLAG_SMART_SUGGESTION_" }, value = {
-            FLAG_SMART_SUGGESTION_SYSTEM
-    })
+    @IntDef(flag = false, value = { FLAG_SMART_SUGGESTION_OFF, FLAG_SMART_SUGGESTION_SYSTEM })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SmartSuggestionMode {}
+
+    /**
+     * {@code DeviceConfig} property used to set which Smart Suggestion modes for Augmented Autofill
+     * are available.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES =
+            "smart_suggestion_supported_modes";
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -2347,7 +2362,14 @@ public final class AutofillManager {
 
     /** @hide */
     public static String getSmartSuggestionModeToString(@SmartSuggestionMode int flags) {
-        return flagsToString(AutofillManager.class, "FLAG_SMART_SUGGESTION_", flags);
+        switch (flags) {
+            case FLAG_SMART_SUGGESTION_OFF:
+                return "OFF";
+            case FLAG_SMART_SUGGESTION_SYSTEM:
+                return "SYSTEM";
+            default:
+                return "INVALID:" + flags;
+        }
     }
 
     @GuardedBy("mLock")

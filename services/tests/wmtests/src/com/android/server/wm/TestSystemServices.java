@@ -88,6 +88,7 @@ class TestSystemServices {
         sPolicy = null;
 
         sMockitoSession.finishMocking();
+        sMockitoSession = null;
     }
 
     private static void setUpTestWindowService() {

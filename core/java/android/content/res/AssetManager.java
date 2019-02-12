@@ -47,6 +47,7 @@ import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides access to an application's raw asset files; see {@link Resources}
@@ -1345,6 +1346,17 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    /**
+     * @hide
+     */
+    @GuardedBy("this")
+    public @Nullable Map<String, String> getOverlayableMap(String packageName) {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetOverlayableMap(mObject, packageName);
+        }
+    }
+
     @GuardedBy("this")
     private void incRefsLocked(long id) {
         if (DEBUG_REFS) {
@@ -1462,6 +1474,8 @@ public final class AssetManager implements AutoCloseable {
 
     private static native void nativeVerifySystemIdmaps();
     private static native String[] nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
+    private static native @Nullable Map nativeGetOverlayableMap(long ptr,
+            @NonNull String packageName);
 
     // Global debug native methods.
     /**

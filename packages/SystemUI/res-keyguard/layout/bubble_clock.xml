@@ -19,9 +19,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
   >
-  <include
+  <TextClock
       android:id="@+id/digital_clock"
-      layout="@layout/text_clock"
+      android:layout_marginLeft="20dp"
+      android:layout_marginTop="72dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="top|left"
+      android:textSize="44dp"
+      android:letterSpacing="0.05"
+      android:textColor="?attr/wallpaperTextColor"
+      android:singleLine="true"
+      style="@style/widget_big"
+      android:format12Hour="@string/keyguard_widget_12_hours_format"
+      android:format24Hour="@string/keyguard_widget_24_hours_format"
+      android:elegantTextHeight="false"
   />
   <com.android.keyguard.clock.ImageClock
       android:id="@+id/analog_clock"

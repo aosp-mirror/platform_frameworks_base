@@ -19,8 +19,6 @@ import android.os.Parcel;
 
 /**
  * The base class for events that can happen on {@link RcsParticipant}s and {@link RcsThread}s.
- *
- * @hide - TODO: make public
  */
 public abstract class RcsEvent {
     /**

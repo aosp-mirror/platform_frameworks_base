@@ -2072,7 +2072,8 @@ class UserController implements Handler.Callback {
                 new TimingsTraceLog("SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER)
                         .logDuration("SystemUserUnlock", unlockTime);
             } else {
-                Slog.d(TAG, "Unlocking user " + id + " took " + unlockTime + " ms");
+                new TimingsTraceLog("SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER)
+                        .logDuration("User" + id + "Unlock", unlockTime);
             }
         }
     };

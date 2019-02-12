@@ -30,6 +30,7 @@
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/ResourceUtils.h"
+#include "idmap2/SysTrace.h"
 #include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"
 
@@ -67,6 +68,7 @@ bool VendorIsQOrLater() {
 
 std::unique_ptr<std::vector<std::string>> FindApkFiles(const std::vector<std::string>& dirs,
                                                        bool recursive, std::ostream& out_error) {
+  SYSTRACE << "FindApkFiles " << dirs << " " << recursive;
   const auto predicate = [](unsigned char type, const std::string& path) -> bool {
     static constexpr size_t kExtLen = 4;  // strlen(".apk")
     return type == DT_REG && path.size() > kExtLen &&
@@ -104,6 +106,7 @@ PolicyBitmask PolicyForPath(const std::string& apk_path) {
 }  // namespace
 
 bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
+  SYSTRACE << "Scan " << args;
   std::vector<std::string> input_directories;
   std::string target_package_name;
   std::string target_apk_path;

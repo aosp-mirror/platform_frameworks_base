@@ -50,6 +50,7 @@ import android.view.IWindow;
 import android.view.WindowManager;
 
 import com.android.server.AttributeCache;
+import com.android.server.wm.utils.MockTracker;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -76,6 +77,8 @@ class WindowTestsBase {
     // added display should be treated as default. This cannot be the default display
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
     static int sNextStackId = 1000;
+
+    private static MockTracker sMockTracker;
 
     /** Non-default display. */
     DisplayContent mDisplayContent;
@@ -109,11 +112,18 @@ class WindowTestsBase {
 
         TestSystemServices.setUpWindowManagerService();
 
+        // MockTracker needs to be initialized after TestSystemServices because we don't want to
+        // track static mocks.
+        sMockTracker = new MockTracker();
+
         sPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
     }
 
     @AfterClass
-    public static void tearDonwOnceBase() {
+    public static void tearDownOnceBase() {
+        sMockTracker.close();
+        sMockTracker = null;
+
         TestSystemServices.tearDownWindowManagerService();
     }
 

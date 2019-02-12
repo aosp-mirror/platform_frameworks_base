@@ -3643,4 +3643,6 @@
   <java-symbol type="array" name="config_displayWhiteBalanceDecreaseThresholds" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperature" />
+
+  <java-symbol type="drawable" name="ic_action_open" />
 </resources>

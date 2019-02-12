@@ -34,6 +34,7 @@
 #include "idmap2/Idmap.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
+#include "idmap2/SysTrace.h"
 #include "idmap2/ZipFile.h"
 
 namespace android::idmap2 {
@@ -258,6 +259,7 @@ std::string Idmap::CanonicalIdmapPathFor(const std::string& absolute_dir,
 
 std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
                                                      std::ostream& out_error) {
+  SYSTRACE << "Idmap::FromBinaryStream";
   std::unique_ptr<Idmap> idmap(new Idmap());
 
   idmap->header_ = IdmapHeader::FromBinaryStream(stream);
@@ -304,6 +306,7 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
     const std::string& target_apk_path, const ApkAssets& target_apk_assets,
     const std::string& overlay_apk_path, const ApkAssets& overlay_apk_assets,
     const PolicyBitmask& fulfilled_policies, bool enforce_overlayable, std::ostream& out_error) {
+  SYSTRACE << "Idmap::FromApkAssets";
   AssetManager2 target_asset_manager;
   if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true, false)) {
     out_error << "error: failed to create target asset manager" << std::endl;

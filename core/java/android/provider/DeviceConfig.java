@@ -69,6 +69,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
@@ -308,6 +309,25 @@ public final class DeviceConfig {
         String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
     }
 
+    /**
+     * Namespace for system scheduler related features. These features will be applied
+     * immediately upon change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Scheduler {
+        String NAMESPACE = "scheduler";
+
+        /**
+         * Flag for enabling fast metrics collection in system scheduler.
+         * A flag value of '' or '0' means the fast metrics collection is not
+         * enabled. Otherwise fast metrics collection is enabled and flag value
+         * is the order id.
+         */
+        String ENABLE_FAST_METRICS_COLLECTION = "enable_fast_metrics_collection";
+    }
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
@@ -399,6 +419,7 @@ public final class DeviceConfig {
      * @see #removeOnPropertyChangedListener(OnPropertyChangedListener)
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static void addOnPropertyChangedListener(
             @NonNull String namespace,
@@ -432,6 +453,7 @@ public final class DeviceConfig {
      * @see #addOnPropertyChangedListener(String, Executor, OnPropertyChangedListener)
      */
     @SystemApi
+    @TestApi
     public static void removeOnPropertyChangedListener(
             OnPropertyChangedListener onPropertyChangedListener) {
         synchronized (sLock) {
@@ -528,6 +550,7 @@ public final class DeviceConfig {
      * @hide
      */
     @SystemApi
+    @TestApi
     public interface OnPropertyChangedListener {
         /**
          * Called when a property has changed.

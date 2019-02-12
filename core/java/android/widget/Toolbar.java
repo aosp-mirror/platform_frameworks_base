@@ -237,6 +237,8 @@ public class Toolbar extends ViewGroup {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Toolbar,
                 defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.Toolbar,
+                attrs, a, defStyleAttr, defStyleRes);
 
         mTitleTextAppearance = a.getResourceId(R.styleable.Toolbar_titleTextAppearance, 0);
         mSubtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0);

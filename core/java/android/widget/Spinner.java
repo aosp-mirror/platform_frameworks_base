@@ -247,6 +247,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.Spinner, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.Spinner,
+                attrs, a, defStyleAttr, defStyleRes);
 
         if (popupTheme != null) {
             mPopupContext = new ContextThemeWrapper(context, popupTheme);

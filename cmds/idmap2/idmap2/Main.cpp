@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "idmap2/CommandLineOptions.h"
+#include "idmap2/SysTrace.h"
 
 #include "Commands.h"
 
@@ -48,6 +49,7 @@ void PrintUsage(const NameToFunctionMap& commands, std::ostream& out) {
 }  // namespace
 
 int main(int argc, char** argv) {
+  SYSTRACE << "main";
   const NameToFunctionMap commands = {
       {"create", Create}, {"dump", Dump}, {"lookup", Lookup}, {"scan", Scan}, {"verify", Verify},
   };

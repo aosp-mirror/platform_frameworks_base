@@ -37,6 +37,7 @@
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
+#include "idmap2/SysTrace.h"
 #include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"
 
@@ -156,6 +157,7 @@ Result<std::string> GetTargetPackageNameFromManifest(const std::string& apk_path
 }  // namespace
 
 bool Lookup(const std::vector<std::string>& args, std::ostream& out_error) {
+  SYSTRACE << "Lookup " << args;
   std::vector<std::string> idmap_paths;
   std::string config_str;
   std::string resid_str;

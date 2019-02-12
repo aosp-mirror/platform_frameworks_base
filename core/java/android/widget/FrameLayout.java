@@ -100,6 +100,8 @@ public class FrameLayout extends ViewGroup {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.FrameLayout, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.FrameLayout,
+                attrs, a, defStyleAttr, defStyleRes);
 
         if (a.getBoolean(R.styleable.FrameLayout_measureAllChildren, false)) {
             setMeasureAllChildren(true);

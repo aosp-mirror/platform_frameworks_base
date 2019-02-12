@@ -19,8 +19,6 @@ package android.telephony.ims;
 /**
  * An exception that happened on {@link RcsMessageStore} or one of the derived storage classes in
  * {@link android.telephony.ims}
- *
- * @hide - TODO: make public
  */
 public class RcsMessageStoreException extends Exception {
 

@@ -242,6 +242,8 @@ public class ExpandableListView extends ListView {
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.ExpandableListView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.ExpandableListView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         mGroupIndicator = a.getDrawable(
                 com.android.internal.R.styleable.ExpandableListView_groupIndicator);

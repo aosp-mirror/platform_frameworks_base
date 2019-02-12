@@ -26,8 +26,6 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * A part of a composite {@link RcsMessage} that holds a file transfer. Please see Section 7
  * (File Transfer) - GSMA RCC.71 (RCS Universal Profile Service Definition Document)
- *
- * @hide - TODO: make public
  */
 public class RcsFileTransferPart {
     /**

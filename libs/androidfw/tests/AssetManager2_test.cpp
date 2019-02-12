@@ -71,6 +71,9 @@ class AssetManager2Test : public ::testing::Test {
 
     app_assets_ = ApkAssets::Load(GetTestDataPath() + "/app/app.apk");
     ASSERT_THAT(app_assets_, NotNull());
+
+    overlayable_assets_ = ApkAssets::Load(GetTestDataPath() + "/overlayable/overlayable.apk");
+    ASSERT_THAT(overlayable_assets_, NotNull());
   }
 
  protected:
@@ -83,6 +86,7 @@ class AssetManager2Test : public ::testing::Test {
   std::unique_ptr<const ApkAssets> appaslib_assets_;
   std::unique_ptr<const ApkAssets> system_assets_;
   std::unique_ptr<const ApkAssets> app_assets_;
+  std::unique_ptr<const ApkAssets> overlayable_assets_;
 };
 
 TEST_F(AssetManager2Test, FindsResourceFromSingleApkAssets) {
@@ -701,6 +705,22 @@ TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {
 
   auto resultDisabled = assetmanager.GetLastResourceResolution();
   EXPECT_EQ("", resultDisabled);
+}
+
+TEST_F(AssetManager2Test, GetOverlayableMap) {
+  ResTable_config desired_config;
+  memset(&desired_config, 0, sizeof(desired_config));
+
+  AssetManager2 assetmanager;
+  assetmanager.SetResourceResolutionLoggingEnabled(true);
+  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetApkAssets({overlayable_assets_.get()});
+
+  const auto map = assetmanager.GetOverlayableMapForPackage(0x7f);
+  ASSERT_NE(nullptr, map);
+  ASSERT_EQ(2, map->size());
+  ASSERT_EQ(map->at("OverlayableResources1"), "overlay://theme");
+  ASSERT_EQ(map->at("OverlayableResources2"), "overlay://com.android.overlayable");
 }
 
 }  // namespace android

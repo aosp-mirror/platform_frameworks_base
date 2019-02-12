@@ -69,6 +69,22 @@ public final class RoleManager {
     private static final String LOG_TAG = RoleManager.class.getSimpleName();
 
     /**
+     * The name of the assistant app role.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
+
+    /**
+     * The name of the browser role.
+     *
+     * @see Intent#CATEGORY_APP_BROWSER
+     */
+    public static final String ROLE_BROWSER = "android.app.role.BROWSER";
+
+    /**
      * The name of the dialer role.
      *
      * @see Intent#ACTION_DIAL
@@ -83,25 +99,11 @@ public final class RoleManager {
     public static final String ROLE_SMS = "android.app.role.SMS";
 
     /**
-     * The name of the browser role.
+     * The name of the emergency role
      *
-     * @see Intent#CATEGORY_APP_BROWSER
+     * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
      */
-    public static final String ROLE_BROWSER = "android.app.role.BROWSER";
-
-    /**
-     * The name of the gallery role.
-     *
-     * @see Intent#CATEGORY_APP_GALLERY
-     */
-    public static final String ROLE_GALLERY = "android.app.role.GALLERY";
-
-    /**
-     * The name of the music player role.
-     *
-     * @see Intent#CATEGORY_APP_MUSIC
-     */
-    public static final String ROLE_MUSIC = "android.app.role.MUSIC";
+    public static final String ROLE_EMERGENCY = "android.app.role.EMERGENCY";
 
     /**
      * The name of the home role.
@@ -111,11 +113,18 @@ public final class RoleManager {
     public static final String ROLE_HOME = "android.app.role.HOME";
 
     /**
-     * The name of the emergency role
+     * The name of the music player role.
      *
-     * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
+     * @see Intent#CATEGORY_APP_MUSIC
      */
-    public static final String ROLE_EMERGENCY = "android.app.role.EMERGENCY";
+    public static final String ROLE_MUSIC = "android.app.role.MUSIC";
+
+    /**
+     * The name of the gallery role.
+     *
+     * @see Intent#CATEGORY_APP_GALLERY
+     */
+    public static final String ROLE_GALLERY = "android.app.role.GALLERY";
 
     /**
      * The name of the car mode dialer app role.
@@ -171,15 +180,6 @@ public final class RoleManager {
      * @hide
      */
     public static final String ROLE_CALL_COMPANION = "android.app.role.CALL_COMPANION";
-
-    /**
-     * The name of the assistant app role.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
 
     /**
      * @hide

@@ -121,6 +121,8 @@ public class BinderCallsStatsService extends Binder {
         private static final String SETTINGS_DETAILED_TRACKING_KEY = "detailed_tracking";
         private static final String SETTINGS_UPLOAD_DATA_KEY = "upload_data";
         private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
+        private static final String SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY = "track_screen_state";
+        private static final String SETTINGS_TRACK_DIRECT_CALLING_UID_KEY = "track_calling_uid";
         private static final String SETTINGS_MAX_CALL_STATS_KEY = "max_call_stats_count";
 
         private boolean mEnabled;
@@ -169,6 +171,12 @@ public class BinderCallsStatsService extends Binder {
             mBinderCallsStats.setMaxBinderCallStats(mParser.getInt(
                     SETTINGS_MAX_CALL_STATS_KEY,
                     BinderCallsStats.MAX_BINDER_CALL_STATS_COUNT_DEFAULT));
+            mBinderCallsStats.setTrackScreenInteractive(
+                    mParser.getBoolean(SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY,
+                    BinderCallsStats.DEFAULT_TRACK_SCREEN_INTERACTIVE));
+            mBinderCallsStats.setTrackDirectCallerUid(
+                    mParser.getBoolean(SETTINGS_TRACK_DIRECT_CALLING_UID_KEY,
+                    BinderCallsStats.DEFAULT_TRACK_DIRECT_CALLING_UID));
 
 
             final boolean enabled =

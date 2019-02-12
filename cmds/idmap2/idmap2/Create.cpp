@@ -29,6 +29,7 @@
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
 #include "idmap2/Result.h"
+#include "idmap2/SysTrace.h"
 
 using android::ApkAssets;
 using android::idmap2::BinaryStreamVisitor;
@@ -42,6 +43,7 @@ using android::idmap2::utils::kIdmapFilePermissionMask;
 using android::idmap2::utils::UidHasWriteAccessToPath;
 
 bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
+  SYSTRACE << "Create " << args;
   std::string target_apk_path;
   std::string overlay_apk_path;
   std::string idmap_path;

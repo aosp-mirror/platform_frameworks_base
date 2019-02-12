@@ -387,8 +387,10 @@ public final class ColorDisplayService extends SystemService {
             Slog.d(TAG, "Setting saturation level: " + saturationLevel);
 
             if (saturationLevel == 100) {
+                setActivated(false);
                 Matrix.setIdentityM(mMatrixGlobalSaturation, 0);
             } else {
+                setActivated(true);
                 float saturation = saturationLevel * 0.1f;
                 float desaturation = 1.0f - saturation;
                 float[] luminance = {0.231f * desaturation, 0.715f * desaturation,
@@ -556,14 +558,16 @@ public final class ColorDisplayService extends SystemService {
                     if (setting != null) {
                         switch (setting) {
                             case Secure.NIGHT_DISPLAY_ACTIVATED:
-                                final boolean activated = isNightDisplayActivatedSetting();
+                                final boolean activated = mNightDisplayTintController
+                                        .isActivatedSetting();
                                 if (mNightDisplayTintController.isActivatedStateNotSet()
                                         || mNightDisplayTintController.isActivated() != activated) {
-                                    mNightDisplayTintController.onActivated(activated);
+                                    mNightDisplayTintController.setActivated(activated);
                                 }
                                 break;
                             case Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE:
-                                final int temperature = getNightDisplayColorTemperatureSetting();
+                                final int temperature = mNightDisplayTintController
+                                        .getColorTemperatureSetting();
                                 if (mNightDisplayTintController.getColorTemperature()
                                         != temperature) {
                                     mNightDisplayTintController
@@ -639,14 +643,16 @@ public final class ColorDisplayService extends SystemService {
             // Prepare the night display color transformation matrix.
             mNightDisplayTintController
                     .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix());
-            mNightDisplayTintController.setMatrix(getNightDisplayColorTemperatureSetting());
+            mNightDisplayTintController
+                    .setMatrix(mNightDisplayTintController.getColorTemperatureSetting());
 
             // Initialize the current auto mode.
             onNightDisplayAutoModeChanged(getNightDisplayAutoModeInternal());
 
             // Force the initialization of the current saved activation state.
             if (mNightDisplayTintController.isActivatedStateNotSet()) {
-                mNightDisplayTintController.onActivated(isNightDisplayActivatedSetting());
+                mNightDisplayTintController
+                        .setActivated(mNightDisplayTintController.isActivatedSetting());
             }
         }
 
@@ -673,6 +679,10 @@ public final class ColorDisplayService extends SystemService {
 
         if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
             mDisplayWhiteBalanceTintController.endAnimator();
+        }
+
+        if (mGlobalSaturationTintController.isAvailable(getContext())) {
+            mGlobalSaturationTintController.setActivated(null);
         }
     }
 
@@ -722,7 +732,8 @@ public final class ColorDisplayService extends SystemService {
         if (mNightDisplayTintController.isAvailable(getContext())) {
             mNightDisplayTintController
                     .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
-            mNightDisplayTintController.setMatrix(getNightDisplayColorTemperatureSetting());
+            mNightDisplayTintController
+                    .setMatrix(mNightDisplayTintController.getColorTemperatureSetting());
         }
 
         updateDisplayWhiteBalanceStatus();
@@ -1040,8 +1051,7 @@ public final class ColorDisplayService extends SystemService {
      *
      * See {@link com.android.server.display.DisplayTransformManager}
      */
-    private @ColorMode
-    int getCurrentColorModeFromSystemProperties() {
+    private @ColorMode int getCurrentColorModeFromSystemProperties() {
         final int displayColorSetting = SystemProperties.getInt("persist.sys.sf.native_mode", 0);
         if (displayColorSetting == 0) {
             return "1.0".equals(SystemProperties.get("persist.sys.sf.color_saturation"))
@@ -1098,33 +1108,6 @@ public final class ColorDisplayService extends SystemService {
         pw.println("Color mode: " + getColorModeInternal());
     }
 
-    private boolean isNightDisplayActivatedSetting() {
-        return Secure.getIntForUser(getContext().getContentResolver(),
-                Secure.NIGHT_DISPLAY_ACTIVATED, 0, mCurrentUser) == 1;
-    }
-
-    private int getNightDisplayColorTemperatureSetting() {
-        return clampNightDisplayColorTemperature(Secure.getIntForUser(
-                getContext().getContentResolver(), Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, NOT_SET,
-                mCurrentUser));
-    }
-
-    private int clampNightDisplayColorTemperature(int colorTemperature) {
-        if (colorTemperature == NOT_SET) {
-            colorTemperature = getContext().getResources().getInteger(
-                    R.integer.config_nightDisplayColorTemperatureDefault);
-        }
-        final int minimumTemperature = ColorDisplayManager.getMinimumColorTemperature(getContext());
-        final int maximumTemperature = ColorDisplayManager.getMaximumColorTemperature(getContext());
-        if (colorTemperature < minimumTemperature) {
-            colorTemperature = minimumTemperature;
-        } else if (colorTemperature > maximumTemperature) {
-            colorTemperature = maximumTemperature;
-        }
-
-        return colorTemperature;
-    }
-
     private abstract class NightDisplayAutoMode {
 
         public abstract void onActivated(boolean activated);
@@ -1171,7 +1154,7 @@ public final class ColorDisplayService extends SystemService {
                 // Maintain the existing activated state if within the current period.
                 if (mLastActivatedTime.isBefore(now) && mLastActivatedTime.isAfter(start)
                         && (mLastActivatedTime.isAfter(end) || now.isBefore(end))) {
-                    activate = isNightDisplayActivatedSetting();
+                    activate = mNightDisplayTintController.isActivatedSetting();
                 }
             }
 
@@ -1267,7 +1250,7 @@ public final class ColorDisplayService extends SystemService {
                 // Maintain the existing activated state if within the current period.
                 if (mLastActivatedTime.isBefore(now) && (mLastActivatedTime.isBefore(sunrise)
                         ^ mLastActivatedTime.isBefore(sunset))) {
-                    activate = isNightDisplayActivatedSetting();
+                    activate = mNightDisplayTintController.isActivatedSetting();
                 }
             }
 
@@ -1466,9 +1449,11 @@ public final class ColorDisplayService extends SystemService {
 
             if (isActivatedStateNotSet() || activationStateChanged) {
                 super.setActivated(activated);
-                Secure.putIntForUser(getContext().getContentResolver(),
-                        Secure.NIGHT_DISPLAY_ACTIVATED,
-                        activated ? 1 : 0, mCurrentUser);
+                if (isActivatedSetting() != activated) {
+                    Secure.putIntForUser(getContext().getContentResolver(),
+                            Secure.NIGHT_DISPLAY_ACTIVATED,
+                            activated ? 1 : 0, mCurrentUser);
+                }
                 onActivated(activated);
             }
         }
@@ -1486,7 +1471,7 @@ public final class ColorDisplayService extends SystemService {
             return mIsAvailable;
         }
 
-        void onActivated(boolean activated) {
+        private void onActivated(boolean activated) {
             Slog.i(TAG, activated ? "Turning on night display" : "Turning off night display");
             if (mNightDisplayAutoMode != null) {
                 mNightDisplayAutoMode.onActivated(activated);
@@ -1501,7 +1486,7 @@ public final class ColorDisplayService extends SystemService {
 
         int getColorTemperature() {
             return mColorTemp != null ? clampNightDisplayColorTemperature(mColorTemp)
-                    : getNightDisplayColorTemperatureSetting();
+                    : getColorTemperatureSetting();
         }
 
         boolean setColorTemperature(int temperature) {
@@ -1515,6 +1500,36 @@ public final class ColorDisplayService extends SystemService {
         void onColorTemperatureChanged(int temperature) {
             setMatrix(temperature);
             mHandler.sendEmptyMessage(MSG_APPLY_NIGHT_DISPLAY_IMMEDIATE);
+        }
+
+        boolean isActivatedSetting() {
+            return Secure.getIntForUser(getContext().getContentResolver(),
+                    Secure.NIGHT_DISPLAY_ACTIVATED, 0, mCurrentUser) == 1;
+        }
+
+        int getColorTemperatureSetting() {
+            return clampNightDisplayColorTemperature(Secure.getIntForUser(
+                    getContext().getContentResolver(), Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
+                    NOT_SET,
+                    mCurrentUser));
+        }
+
+        private int clampNightDisplayColorTemperature(int colorTemperature) {
+            if (colorTemperature == NOT_SET) {
+                colorTemperature = getContext().getResources().getInteger(
+                        R.integer.config_nightDisplayColorTemperatureDefault);
+            }
+            final int minimumTemperature = ColorDisplayManager
+                    .getMinimumColorTemperature(getContext());
+            final int maximumTemperature = ColorDisplayManager
+                    .getMaximumColorTemperature(getContext());
+            if (colorTemperature < minimumTemperature) {
+                colorTemperature = minimumTemperature;
+            } else if (colorTemperature > maximumTemperature) {
+                colorTemperature = maximumTemperature;
+            }
+
+            return colorTemperature;
         }
     }
 
@@ -1668,6 +1683,20 @@ public final class ColorDisplayService extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
             return true;
+        }
+
+        @Override
+        public boolean isSaturationActivated() {
+            getContext().enforceCallingPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to get display saturation level");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return !mGlobalSaturationTintController.isActivatedStateNotSet()
+                        && mGlobalSaturationTintController.isActivated();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override

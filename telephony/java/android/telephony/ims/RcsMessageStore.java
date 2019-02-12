@@ -26,8 +26,6 @@ import java.util.List;
 /**
  * RcsMessageStore is the application interface to RcsProvider and provides access methods to
  * RCS related database tables.
- *
- * @hide - TODO: make public
  */
 public class RcsMessageStore {
     /**

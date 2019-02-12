@@ -657,7 +657,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private Runnable mClearScrollingCache;
     Runnable mPositionScrollAfterLayout;
     private int mMinimumVelocity;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124051740)
     private int mMaximumVelocity;
     private float mVelocityScale = 1.0f;
 
@@ -875,6 +875,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.AbsListView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.AbsListView, attrs, a, defStyleAttr,
+                defStyleRes);
 
         final Drawable selector = a.getDrawable(R.styleable.AbsListView_listSelector);
         if (selector != null) {

@@ -381,7 +381,8 @@ public class Ringtone {
                 volume = mVolume;
             }
             try {
-                mRemotePlayer.play(mRemoteToken, canonicalUri, mAudioAttributes, volume, looping);
+                mRemotePlayer.playWithVolumeShaping(mRemoteToken, canonicalUri, mAudioAttributes,
+                        volume, looping, mVolumeShaperConfig);
             } catch (RemoteException e) {
                 if (!playFallbackRingtone()) {
                     Log.w(TAG, "Problem playing ringtone: " + e);

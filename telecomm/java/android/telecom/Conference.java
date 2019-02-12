@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -571,6 +572,7 @@ public abstract class Conference extends Conferenceable {
      * @return The primary connection.
      * @hide
      */
+    @TestApi
     @SystemApi
     public Connection getPrimaryConnection() {
         if (mUnmodifiableChildConnections == null || mUnmodifiableChildConnections.isEmpty()) {

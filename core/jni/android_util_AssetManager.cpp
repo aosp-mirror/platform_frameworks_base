@@ -104,6 +104,12 @@ static struct configuration_offsets_t {
   jfieldID mScreenHeightDpOffset;
 } gConfigurationOffsets;
 
+static struct arraymap_offsets_t {
+  jclass classObject;
+  jmethodID constructor;
+  jmethodID put;
+} gArrayMapOffsets;
+
 jclass g_stringClass = nullptr;
 
 // ----------------------------------------------------------------------------
@@ -324,6 +330,50 @@ Guarded<AssetManager2>* AssetManagerForJavaObject(JNIEnv* env, jobject jassetman
 
 static Guarded<AssetManager2>& AssetManagerFromLong(jlong ptr) {
   return *AssetManagerForNdkAssetManager(reinterpret_cast<AAssetManager*>(ptr));
+}
+
+static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
+                                        jstring package_name) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  const ScopedUtfChars package_name_utf8(env, package_name);
+  CHECK(package_name_utf8.c_str() != nullptr);
+  const std::string std_package_name(package_name_utf8.c_str());
+  const std::unordered_map<std::string, std::string>* map = nullptr;
+
+  assetmanager->ForEachPackage([&](const std::string& this_package_name, uint8_t package_id) {
+    if (this_package_name == std_package_name) {
+      map = assetmanager->GetOverlayableMapForPackage(package_id);
+    }
+  });
+
+  if (map == nullptr) {
+    return nullptr;
+  }
+
+  jobject array_map = env->NewObject(gArrayMapOffsets.classObject, gArrayMapOffsets.constructor);
+  if (array_map == nullptr) {
+    return nullptr;
+  }
+
+  for (const auto& iter : *map) {
+    jstring name = env->NewStringUTF(iter.first.c_str());
+    if (env->ExceptionCheck()) {
+      return nullptr;
+    }
+
+    jstring actor = env->NewStringUTF(iter.second.c_str());
+    if (env->ExceptionCheck()) {
+      env->DeleteLocalRef(name);
+      return nullptr;
+    }
+
+    env->CallObjectMethod(array_map, gArrayMapOffsets.put, name, actor);
+
+    env->DeleteLocalRef(name);
+    env->DeleteLocalRef(actor);
+  }
+
+  return array_map;
 }
 
 static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> asset,
@@ -1524,6 +1574,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeVerifySystemIdmaps", "()V", (void*)NativeVerifySystemIdmaps},
     {"nativeCreateIdmapsForStaticOverlaysTargetingAndroid", "()[Ljava/lang/String;",
      (void*)NativeCreateIdmapsForStaticOverlaysTargetingAndroid},
+    {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",
+     (void*)NativeGetOverlayableMap},
 
     // Global management/debug methods.
     {"getGlobalAssetCount", "()I", (void*)NativeGetGlobalAssetCount},
@@ -1574,6 +1626,14 @@ int register_android_content_AssetManager(JNIEnv* env) {
       GetFieldIDOrDie(env, configurationClass, "screenWidthDp", "I");
   gConfigurationOffsets.mScreenHeightDpOffset =
       GetFieldIDOrDie(env, configurationClass, "screenHeightDp", "I");
+
+  jclass arrayMapClass = FindClassOrDie(env, "android/util/ArrayMap");
+  gArrayMapOffsets.classObject = MakeGlobalRefOrDie(env, arrayMapClass);
+  gArrayMapOffsets.constructor =
+      GetMethodIDOrDie(env, gArrayMapOffsets.classObject, "<init>", "()V");
+  gArrayMapOffsets.put =
+      GetMethodIDOrDie(env, gArrayMapOffsets.classObject, "put",
+                       "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
   return RegisterMethodsOrDie(env, "android/content/res/AssetManager", gAssetManagerMethods,
                               NELEM(gAssetManagerMethods));

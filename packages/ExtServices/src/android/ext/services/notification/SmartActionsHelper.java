@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.Person;
 import android.app.RemoteAction;
 import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Process;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class SmartActionsHelper {
@@ -118,6 +120,12 @@ public class SmartActionsHelper {
         }
         List<ConversationActions.Message> messages = extractMessages(entry.getNotification());
         if (messages.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Do not generate smart actions if the last message is from the local user.
+        ConversationActions.Message lastMessage = messages.get(messages.size() - 1);
+        if (arePersonsEqual(
+                ConversationActions.Message.PERSON_USER_SELF, lastMessage.getAuthor())) {
             return Collections.emptyList();
         }
 
@@ -230,8 +238,11 @@ public class SmartActionsHelper {
 
     private Notification.Action createNotificationAction(
             RemoteAction remoteAction, String actionType) {
+        Icon icon = remoteAction.shouldShowIcon()
+                ? remoteAction.getIcon()
+                : Icon.createWithResource(mContext, com.android.internal.R.drawable.ic_action_open);
         return new Notification.Action.Builder(
-                remoteAction.getIcon(),
+                icon,
                 remoteAction.getTitle(),
                 remoteAction.getActionIntent())
                 .setContextual(true)
@@ -312,13 +323,12 @@ public class SmartActionsHelper {
             if (message == null) {
                 continue;
             }
+            // As per the javadoc of Notification.addMessage, null means local user.
             Person senderPerson = message.getSenderPerson();
-            // Skip encoding once the sender is missing as it is important to distinguish
-            // local user and remote user when generating replies.
             if (senderPerson == null) {
-                break;
+                senderPerson = localUser;
             }
-            Person author = localUser != null && localUser.equals(senderPerson)
+            Person author = localUser != null && arePersonsEqual(localUser, senderPerson)
                     ? ConversationActions.Message.PERSON_USER_SELF : senderPerson;
             extractMessages.push(new ConversationActions.Message.Builder(author)
                     .setText(message.getText())
@@ -331,6 +341,12 @@ public class SmartActionsHelper {
             }
         }
         return new ArrayList<>(extractMessages);
+    }
+
+    private static boolean arePersonsEqual(@NonNull Person left, @NonNull Person right) {
+        return Objects.equals(left.getKey(), right.getKey())
+                && Objects.equals(left.getName(), right.getName())
+                && Objects.equals(left.getUri(), right.getUri());
     }
 
     static class SmartSuggestions {

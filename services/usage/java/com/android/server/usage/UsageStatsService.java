@@ -1377,7 +1377,7 @@ public class UsageStatsService extends SystemService implements
             if (packages == null || packages.length == 0) {
                 throw new IllegalArgumentException("Must specify at least one package");
             }
-            if (callbackIntent == null) {
+            if (callbackIntent == null && timeLimitMs != 0L) {
                 throw new NullPointerException("callbackIntent can't be null");
             }
             final int callingUid = Binder.getCallingUid();

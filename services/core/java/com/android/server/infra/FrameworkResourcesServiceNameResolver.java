@@ -187,7 +187,7 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     @Override
     public boolean isDefaultServiceEnabled(int userId) {
         synchronized (mLock) {
-            return mDefaultServicesDisabled.get(userId);
+            return !mDefaultServicesDisabled.get(userId);
         }
     }
 

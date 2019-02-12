@@ -242,6 +242,8 @@ public class TextClock extends TextView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TextClock, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.TextClock,
+                attrs, a, defStyleAttr, defStyleRes);
         try {
             mFormat12 = a.getText(R.styleable.TextClock_format12Hour);
             mFormat24 = a.getText(R.styleable.TextClock_format24Hour);
@@ -610,8 +612,16 @@ public class TextClock extends TextView {
                 resolver.registerContentObserver(uri, true,
                         mFormatChangeObserver, UserHandle.USER_ALL);
             } else {
+                // UserHandle.myUserId() is needed. This class is supported by the
+                // remote views mechanism and as a part of that the remote views
+                // can be inflated by a context for another user without the app
+                // having interact users permission - just for loading resources.
+                // For example, when adding widgets from a managed profile to the
+                // home screen. Therefore, we register the ContentObserver with the user
+                // the app is running (e.g. the launcher) and not the user of the
+                // context (e.g. the widget's profile).
                 resolver.registerContentObserver(uri, true,
-                        mFormatChangeObserver);
+                        mFormatChangeObserver, UserHandle.myUserId());
             }
         }
     }

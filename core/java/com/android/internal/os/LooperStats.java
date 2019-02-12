@@ -39,6 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class LooperStats implements Looper.Observer {
     public static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
     private static final int SESSION_POOL_SIZE = 50;
+    private static final boolean DISABLED_SCREEN_STATE_TRACKING_VALUE = false;
 
     @GuardedBy("mLock")
     private final SparseArray<Entry> mEntries = new SparseArray<>(512);
@@ -54,6 +55,7 @@ public class LooperStats implements Looper.Observer {
     private long mStartCurrentTime = System.currentTimeMillis();
     private long mStartElapsedTime = SystemClock.elapsedRealtime();
     private boolean mAddDebugEntries = false;
+    private boolean mTrackScreenInteractive = false;
 
     public LooperStats(int samplingInterval, int entriesSizeCap) {
         this.mSamplingInterval = samplingInterval;
@@ -218,9 +220,15 @@ public class LooperStats implements Looper.Observer {
         mSamplingInterval = samplingInterval;
     }
 
+    public void setTrackScreenInteractive(boolean enabled) {
+        mTrackScreenInteractive = enabled;
+    }
+
     @Nullable
     private Entry findEntry(Message msg, boolean allowCreateNew) {
-        final boolean isInteractive = mDeviceState.isScreenInteractive();
+        final boolean isInteractive = mTrackScreenInteractive
+                ? mDeviceState.isScreenInteractive()
+                : DISABLED_SCREEN_STATE_TRACKING_VALUE;
         final int id = Entry.idFor(msg, isInteractive);
         Entry entry;
         synchronized (mLock) {

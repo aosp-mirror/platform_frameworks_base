@@ -297,6 +297,7 @@ message Atom {
         NumBiometricsEnrolled num_faces_enrolled = 10048;
         RoleHolder role_holder = 10049;
         DangerousPermissionState dangerous_permission_state = 10050;
+        TrainInfo train_info = 10051;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2176,6 +2177,7 @@ message HardwareFailed {
         SPEAKER_SHORT = 3;
         FINGERPRINT_SENSOR_BROKEN = 4;
         FINGERPRINT_TOO_MANY_DEAD_PIXELS = 5;
+        DEGRADE = 6;
     }
     optional int32 failure_code = 3;
 }
@@ -5502,4 +5504,21 @@ message DeviceIdentifierAccessDenied {
 
     // True if the package is privileged.
     optional bool is_priv_app = 4;
+}
+
+/**
+ * Potential experiment ids that goes with a train install.
+ */
+message TrainExperimentIds {
+    repeated int64 experiment_id = 1;
+}
+
+/**
+ * Pulls the ongoing mainline install train version code.
+ * Pulled from StatsCompanionService
+ */
+message TrainInfo {
+    optional int64 train_version_code = 1;
+
+    optional TrainExperimentIds train_experiment_id = 2;
 }

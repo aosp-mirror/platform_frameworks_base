@@ -227,6 +227,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context,  R.styleable.AutoCompleteTextView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         if (popupTheme != null) {
             mPopupContext = new ContextThemeWrapper(context, popupTheme);
@@ -245,6 +247,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (mPopupContext != context) {
             pa = mPopupContext.obtainStyledAttributes(
                     attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
+            saveAttributeDataForStyleable(context, R.styleable.AutoCompleteTextView,
+                    attrs, a, defStyleAttr, defStyleRes);
         } else {
             pa = a;
         }

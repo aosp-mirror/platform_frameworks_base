@@ -118,7 +118,7 @@
     <attr name="manageSpaceActivity" format="string" />
 
     <!-- Option to let applications specify that user data can/cannot be
-         cleared. This flag is turned on by default.
+         cleared by the user in Settings. This flag is turned on by default.
          <em>This attribute is usable only by applications
          included in the system image. Third-party apps cannot use it.</em> -->
     <attr name="allowClearUserData" format="boolean" />
@@ -1661,7 +1661,12 @@
         <!-- If {@code true} the user is prompted to keep the app's data on uninstall -->
         <attr name="hasFragileUserData" />
 
-	<attr name="zygotePreloadName" />
+        <attr name="zygotePreloadName" />
+
+        <!-- If {@code true} the system will clear app's data if a restore operation fails.
+             This flag is turned on by default. <em>This attribute is usable only by system apps.
+             </em> -->
+        <attr name="allowClearUserDataOnFailedRestore"/>
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or

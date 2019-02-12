@@ -167,7 +167,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         // This is to ensure all the profiles are disconnected as some CK/Hs do not
         // disconnect  PBAP connection when HF connection is brought down
         PbapServerProfile PbapProfile = mProfileManager.getPbapProfile();
-        if (PbapProfile.getConnectionStatus(mDevice) == BluetoothProfile.STATE_CONNECTED)
+        if (PbapProfile != null && isConnectedProfile(PbapProfile))
         {
             PbapProfile.disconnect(mDevice);
         }
