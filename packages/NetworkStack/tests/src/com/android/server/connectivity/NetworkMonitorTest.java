@@ -482,7 +482,7 @@ public class NetworkMonitorTest {
         nm.notifyNetworkConnected();
 
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .showProvisioningNotification(any());
+                .showProvisioningNotification(any(), any());
 
         // Check that startCaptivePortalApp sends the expected intent.
         nm.launchCaptivePortalApp();
