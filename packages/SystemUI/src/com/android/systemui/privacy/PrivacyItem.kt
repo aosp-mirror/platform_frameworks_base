@@ -62,4 +62,6 @@ data class PrivacyApplication(val packageName: String, val uid: Int, val context
             context.packageManager.getApplicationLabel(it) as String
         } ?: packageName
     }
+
+    override fun toString() = "PrivacyApplication(packageName=$packageName, uid=$uid)"
 }
