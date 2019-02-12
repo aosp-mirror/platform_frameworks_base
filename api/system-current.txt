@@ -1569,7 +1569,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
     method @RequiresPermission(allOf={android.Manifest.permission.SET_PREFERRED_APPLICATIONS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public abstract boolean setDefaultBrowserPackageNameAsUser(String, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setDistractingPackageRestrictions(@NonNull String[], @android.content.pm.PackageManager.DistractionRestriction int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setDistractingPackageRestrictions(@NonNull String[], int);
     method @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public void setHarmfulAppWarning(@NonNull String, @Nullable CharSequence);
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable String);
     method @Nullable @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable android.content.pm.SuspendDialogInfo);
@@ -1645,9 +1645,6 @@ package android.content.pm {
   public abstract static class PackageManager.DexModuleRegisterCallback {
     ctor public PackageManager.DexModuleRegisterCallback();
     method public abstract void onDexModuleRegistered(String, boolean, String);
-  }
-
-  @IntDef(flag=true, prefix={"RESTRICTION_"}, value={android.content.pm.PackageManager.RESTRICTION_NONE, android.content.pm.PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.DistractionRestriction {
   }
 
   public static interface PackageManager.OnPermissionsChangedListener {

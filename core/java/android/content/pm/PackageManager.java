@@ -5920,24 +5920,24 @@ public abstract class PackageManager {
     /**
      * Flag to denote no restrictions. This should be used to clear any restrictions that may have
      * been previously set for the package.
-     * @see PackageManager.DistractionRestriction
      * @hide
+     * @see #setDistractingPackageRestrictions(String[], int)
      */
     @SystemApi
     public static final int RESTRICTION_NONE = 0x0;
 
     /**
      * Flag to denote that a package should be hidden from any suggestions to the user.
-     * @see PackageManager.DistractionRestriction
      * @hide
+     * @see #setDistractingPackageRestrictions(String[], int)
      */
     @SystemApi
     public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 0x00000001;
 
     /**
      * Flag to denote that a package's notifications should be hidden.
-     * @see PackageManager.DistractionRestriction
      * @hide
+     * @see #setDistractingPackageRestrictions(String[], int)
      */
     @SystemApi
     public static final int RESTRICTION_HIDE_NOTIFICATIONS = 0x00000002;
@@ -5949,7 +5949,6 @@ public abstract class PackageManager {
      * @see #setDistractingPackageRestrictions(String[], int)
      * @hide
      */
-    @SystemApi
     @IntDef(flag = true, prefix = {"RESTRICTION_"}, value = {
             RESTRICTION_NONE,
             RESTRICTION_HIDE_FROM_SUGGESTIONS,
@@ -5967,14 +5966,16 @@ public abstract class PackageManager {
      * <p>The caller must hold {@link android.Manifest.permission#SUSPEND_APPS} to use this API.
      *
      * @param packages Packages to mark as distracting.
-     * @param restrictionFlags Any combination of {@link DistractionRestriction restrictions} to
-     *                         impose on the given packages. {@link #RESTRICTION_NONE} can be used
-     *                         to clear any existing restrictions.
+     * @param restrictionFlags Any combination of restrictions to impose on the given packages.
+     *                         {@link #RESTRICTION_NONE} can be used to clear any existing
+     *                         restrictions.
      * @return A list of packages that could not have the {@code restrictionFlags} set. The system
      * may prevent restricting critical packages to preserve normal device function.
      *
-     * @see DistractionRestriction
      * @hide
+     * @see #RESTRICTION_NONE
+     * @see #RESTRICTION_HIDE_FROM_SUGGESTIONS
+     * @see #RESTRICTION_HIDE_NOTIFICATIONS
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.SUSPEND_APPS)
