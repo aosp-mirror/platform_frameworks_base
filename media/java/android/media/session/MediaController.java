@@ -865,6 +865,19 @@ public final class MediaController {
         }
 
         /**
+         * Set the playback speed.
+         *
+         * @param speed The playback speed
+         */
+        public void setPlaybackSpeed(float speed) {
+            try {
+                mSessionBinder.setPlaybackSpeed(mContext.getPackageName(), mCbStub, speed);
+            } catch (RuntimeException e) {
+                Log.wtf(TAG, "Error calling setPlaybackSpeed.", e);
+            }
+        }
+
+        /**
          * Send a custom action back for the {@link MediaSession} to perform.
          *
          * @param customAction The action to perform.

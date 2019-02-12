@@ -538,6 +538,10 @@ public final class MediaSessionEngine implements AutoCloseable {
         postToCallback(caller, CallbackMessageHandler.MSG_RATE, rating, null);
     }
 
+    void dispatchSetPlaybackSpeed(RemoteUserInfo caller, float speed) {
+        postToCallback(caller, CallbackMessageHandler.MSG_SET_PLAYBACK_SPEED, speed, null);
+    }
+
     void dispatchCustomAction(RemoteUserInfo caller, String action, Bundle args) {
         postToCallback(caller, CallbackMessageHandler.MSG_CUSTOM_ACTION, action, args);
     }
@@ -871,6 +875,17 @@ public final class MediaSessionEngine implements AutoCloseable {
         }
 
         /**
+         * Override to handle the playback speed change.
+         *
+         * @param speed the playback speed
+         */
+        public void onSetPlaybackSpeed(float speed) {
+            if (mCallback != null) {
+                mCallback.onSetPlaybackSpeed(speed);
+            }
+        }
+
+        /**
          * Called when a {@link MediaController} wants a {@link PlaybackState.CustomAction} to be
          * performed.
          *
@@ -1092,10 +1107,11 @@ public final class MediaSessionEngine implements AutoCloseable {
         private static final int MSG_REWIND = 17;
         private static final int MSG_SEEK_TO = 18;
         private static final int MSG_RATE = 19;
-        private static final int MSG_CUSTOM_ACTION = 20;
-        private static final int MSG_ADJUST_VOLUME = 21;
-        private static final int MSG_SET_VOLUME = 22;
-        private static final int MSG_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT = 23;
+        private static final int MSG_SET_PLAYBACK_SPEED = 20;
+        private static final int MSG_CUSTOM_ACTION = 21;
+        private static final int MSG_ADJUST_VOLUME = 22;
+        private static final int MSG_SET_VOLUME = 23;
+        private static final int MSG_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT = 24;
 
         @SuppressWarnings("WeakerAccess") /* synthetic access */
         CallbackWrapper mCallbackWrapper;
@@ -1185,6 +1201,9 @@ public final class MediaSessionEngine implements AutoCloseable {
                     break;
                 case MSG_RATE:
                     mCallbackWrapper.onSetRating((Rating) obj);
+                    break;
+                case MSG_SET_PLAYBACK_SPEED:
+                    mCallbackWrapper.onSetPlaybackSpeed((Float) obj);
                     break;
                 case MSG_CUSTOM_ACTION:
                     mCallbackWrapper.onCustomAction((String) obj, msg.getData());
