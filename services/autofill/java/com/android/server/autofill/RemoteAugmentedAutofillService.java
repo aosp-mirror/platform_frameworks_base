@@ -47,7 +47,7 @@ final class RemoteAugmentedAutofillService
 
     private static final String TAG = RemoteAugmentedAutofillService.class.getSimpleName();
 
-    private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
+    private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
 
     RemoteAugmentedAutofillService(Context context, ComponentName serviceName,
             int userId, RemoteAugmentedAutofillServiceCallbacks callbacks,
@@ -104,6 +104,12 @@ final class RemoteAugmentedAutofillService
             @Nullable AutofillValue focusedValue) {
         scheduleRequest(new PendingAutofillRequest(this, sessionId, client, taskId,
                 activityComponent, focusedId, focusedValue));
+    }
+
+    @Override
+    public String toString() {
+        return "RemoteAugmentedAutofillService["
+                + ComponentName.flattenToShortString(getComponentName()) + "]";
     }
 
     /**
@@ -181,11 +187,13 @@ final class RemoteAugmentedAutofillService
 
         @Override
         protected void onTimeout(RemoteAugmentedAutofillService remoteService) {
-            Slog.wtf(TAG, "timed out: " + this);
+            // TODO(b/122858578): must update the logged AUTOFILL_AUGMENTED_REQUEST with the
+            // timeout
+            Slog.w(TAG, "PendingAutofillRequest timed out (" + TIMEOUT_REMOTE_REQUEST_MILLIS
+                    + "ms) for " + remoteService);
             // NOTE: so far we don't need notify RemoteAugmentedAutofillServiceCallbacks
             finish();
         }
-
     }
 
     public interface RemoteAugmentedAutofillServiceCallbacks
