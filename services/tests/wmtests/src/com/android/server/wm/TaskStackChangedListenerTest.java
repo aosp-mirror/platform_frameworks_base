@@ -35,9 +35,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.annotations.GuardedBy;
@@ -76,6 +78,7 @@ public class TaskStackChangedListenerTest {
     }
 
     @Test
+    @Presubmit
     public void testTaskStackChanged_afterFinish() throws Exception {
         registerTaskStackChangedListener(new TaskStackListener() {
             @Override
@@ -87,7 +90,8 @@ public class TaskStackChangedListenerTest {
         });
 
         Context context = getInstrumentation().getContext();
-        context.startActivity(new Intent(context, ActivityA.class));
+        context.startActivity(
+                new Intent(context, ActivityA.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         UiDevice.getInstance(getInstrumentation()).waitForIdle();
         synchronized (sLock) {
             assertTrue(sTaskStackChangedCalled);
@@ -96,6 +100,7 @@ public class TaskStackChangedListenerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 119893767)
     public void testTaskDescriptionChanged() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch latch = new CountDownLatch(1);
@@ -124,6 +129,7 @@ public class TaskStackChangedListenerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 119893767)
     public void testActivityRequestedOrientationChanged() throws Exception {
         final int[] params = new int[2];
         final CountDownLatch latch = new CountDownLatch(1);
@@ -146,6 +152,7 @@ public class TaskStackChangedListenerTest {
      * Tests for onTaskCreated, onTaskMovedToFront, onTaskRemoved and onTaskRemovalStarted.
      */
     @Test
+    @FlakyTest(bugId = 119893767)
     public void testTaskChangeCallBacks() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch taskCreatedLaunchLatch = new CountDownLatch(1);
@@ -221,7 +228,8 @@ public class TaskStackChangedListenerTest {
         final ActivityMonitor monitor = new ActivityMonitor(activityClass.getName(), null, false);
         getInstrumentation().addMonitor(monitor);
         final Context context = getInstrumentation().getContext();
-        context.startActivity(new Intent(context, activityClass));
+        context.startActivity(
+                new Intent(context, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         final TestActivity activity = (TestActivity) monitor.waitForActivityWithTimeout(1000);
         if (activity == null) {
             throw new RuntimeException("Timed out waiting for Activity");

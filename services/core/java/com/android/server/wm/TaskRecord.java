@@ -119,6 +119,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -2332,6 +2333,7 @@ class TaskRecord extends ConfigurationContainer {
         info.userId = userId;
         info.stackId = getStackId();
         info.taskId = taskId;
+        info.displayId = mStack == null ? Display.INVALID_DISPLAY : mStack.mDisplayId;
         info.isRunning = getTopActivity() != null;
         info.baseIntent = new Intent(getBaseIntent());
         info.baseActivity = reuseActivitiesReport.base != null
