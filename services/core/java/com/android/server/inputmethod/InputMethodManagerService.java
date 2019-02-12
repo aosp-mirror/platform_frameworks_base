@@ -667,6 +667,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int mSequenceNumber;
         final long mTimestamp;
         final long mWallTime;
+        @UserIdInt
+        final int mImeUserId;
         @NonNull
         final IBinder mImeToken;
         final int mImeDisplayId;
@@ -675,6 +677,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @StartInputReason
         final int mStartInputReason;
         final boolean mRestarting;
+        @UserIdInt
+        final int mTargetUserId;
         final int mTargetDisplayId;
         @Nullable
         final IBinder mTargetWindow;
@@ -684,18 +688,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int mTargetWindowSoftInputMode;
         final int mClientBindSequenceNumber;
 
-        StartInputInfo(@NonNull IBinder imeToken, int imeDisplayId, @NonNull String imeId,
-                @StartInputReason int startInputReason, boolean restarting, int targetDisplayId,
-                @Nullable IBinder targetWindow, @NonNull EditorInfo editorInfo,
-                @SoftInputModeFlags int targetWindowSoftInputMode, int clientBindSequenceNumber) {
+        StartInputInfo(@UserIdInt int imeUserId, @NonNull IBinder imeToken, int imeDisplayId,
+                @NonNull String imeId, @StartInputReason int startInputReason, boolean restarting,
+                @UserIdInt int targetUserId, int targetDisplayId, @Nullable IBinder targetWindow,
+                @NonNull EditorInfo editorInfo, @SoftInputModeFlags int targetWindowSoftInputMode,
+                int clientBindSequenceNumber) {
             mSequenceNumber = sSequenceNumber.getAndIncrement();
             mTimestamp = SystemClock.uptimeMillis();
             mWallTime = System.currentTimeMillis();
+            mImeUserId = imeUserId;
             mImeToken = imeToken;
             mImeDisplayId = imeDisplayId;
             mImeId = imeId;
             mStartInputReason = startInputReason;
             mRestarting = restarting;
+            mTargetUserId = targetUserId;
             mTargetDisplayId = targetDisplayId;
             mTargetWindow = targetWindow;
             mEditorInfo = editorInfo;
@@ -753,6 +760,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             int mSequenceNumber;
             long mTimestamp;
             long mWallTime;
+            @UserIdInt
+            int mImeUserId;
             @NonNull
             String mImeTokenString;
             int mImeDisplayId;
@@ -761,6 +770,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason
             int mStartInputReason;
             boolean mRestarting;
+            @UserIdInt
+            int mTargetUserId;
             int mTargetDisplayId;
             @NonNull
             String mTargetWindowString;
@@ -778,6 +789,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mSequenceNumber = original.mSequenceNumber;
                 mTimestamp = original.mTimestamp;
                 mWallTime = original.mWallTime;
+                mImeUserId = original.mImeUserId;
                 // Intentionally convert to String so as not to keep a strong reference to a Binder
                 // object.
                 mImeTokenString = String.valueOf(original.mImeToken);
@@ -785,6 +797,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mImeId = original.mImeId;
                 mStartInputReason = original.mStartInputReason;
                 mRestarting = original.mRestarting;
+                mTargetUserId = original.mTargetUserId;
                 mTargetDisplayId = original.mTargetDisplayId;
                 // Intentionally convert to String so as not to keep a strong reference to a Binder
                 // object.
@@ -830,11 +843,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 pw.print(prefix);
                 pw.print(" imeToken=" + entry.mImeTokenString + " [" + entry.mImeId + "]");
+                pw.print(" imeUserId=" + entry.mImeUserId);
                 pw.println(" imeDisplayId=" + entry.mImeDisplayId);
 
                 pw.print(prefix);
                 pw.println(" targetWin=" + entry.mTargetWindowString
                         + " [" + entry.mEditorInfo.packageName + "]"
+                        + " targetUserId=" + entry.mTargetUserId
                         + " targetDisplayId=" + entry.mTargetDisplayId
                         + " clientBindSeq=" + entry.mClientBindSequenceNumber);
 
@@ -1914,9 +1929,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         final Binder startInputToken = new Binder();
-        final StartInputInfo info = new StartInputInfo(mCurToken, mCurTokenDisplayId, mCurId,
-                startInputReason, !initial, mCurClient.selfReportedDisplayId, mCurFocusedWindow,
-                mCurAttribute, mCurFocusedWindowSoftInputMode, mCurSeq);
+        final StartInputInfo info = new StartInputInfo(mSettings.getCurrentUserId(), mCurToken,
+                mCurTokenDisplayId, mCurId, startInputReason, !initial,
+                UserHandle.getUserId(mCurClient.uid), mCurClient.selfReportedDisplayId,
+                mCurFocusedWindow, mCurAttribute, mCurFocusedWindowSoftInputMode, mCurSeq);
         mImeTargetWindowMap.put(startInputToken, mCurFocusedWindow);
         mStartInputHistory.addEntry(info);
 
