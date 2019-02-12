@@ -248,12 +248,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
             mCecMessageCache.flushAll();
-        } else {
-            if (connected) {
-                launchDeviceDiscovery();
-            } else {
-                // TODO(amyjojo): remove device from mDeviceInfo
-            }
+        } else if (!connected){
+            // TODO(amyjojo): remove device from mDeviceInfo
         }
     }
 
