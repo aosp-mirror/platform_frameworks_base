@@ -64,7 +64,7 @@ public class TextClassifierPerfTest {
         Context context = InstrumentationRegistry.getTargetContext();
         TextClassificationManager textClassificationManager =
                 context.getSystemService(TextClassificationManager.class);
-        mTextClassifier = textClassificationManager.getTextClassifier();
+        mTextClassifier = textClassificationManager.getLocalTextClassifier();
     }
 
     @Test
