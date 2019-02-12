@@ -55,6 +55,15 @@ public final class DeviceConfig {
     public static final Uri CONTENT_URI = Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
     /**
+     * Namespace for activity manager related features. These features will be applied
+     * immediately upon change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
+
+    /**
      * Namespace for all Game Driver features.
      *
      * @hide
@@ -278,35 +287,6 @@ public final class DeviceConfig {
         String NAMESPACE = "dex_boot";
         String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
         String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
-    }
-
-    /**
-     * Namespace for activity manager related features. These features will be applied
-     * immediately upon change.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface ActivityManager {
-        String NAMESPACE = "activity_manager";
-
-        /**
-         * App compaction flags. See {@link com.android.server.am.AppCompactor}.
-         */
-        String KEY_USE_COMPACTION = "use_compaction";
-        String KEY_COMPACT_ACTION_1 = "compact_action_1";
-        String KEY_COMPACT_ACTION_2 = "compact_action_2";
-        String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
-        String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
-        String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
-        String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
-        String KEY_COMPACT_STATSD_SAMPLE_RATE = "compact_statsd_sample_rate";
-
-        /**
-         * Maximum number of cached processes. See
-         * {@link com.android.server.am.ActivityManagerConstants}.
-         */
-        String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
     }
 
     /**

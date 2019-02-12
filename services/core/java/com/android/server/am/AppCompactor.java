@@ -17,14 +17,6 @@
 package com.android.server.am;
 
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_1;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_2;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_STATSD_SAMPLE_RATE;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_1;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_2;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_3;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_4;
-import static android.provider.DeviceConfig.ActivityManager.KEY_USE_COMPACTION;
 
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -50,6 +42,17 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public final class AppCompactor {
+
+    // Flags stored in the DeviceConfig API.
+    @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";
+    @VisibleForTesting static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
+    @VisibleForTesting static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+    @VisibleForTesting static final String KEY_COMPACT_STATSD_SAMPLE_RATE =
+            "compact_statsd_sample_rate";
 
     // Phenotype sends int configurations and we map them to the strings we'll use on device,
     // preventing a weird string value entering the kernel.
@@ -165,7 +168,7 @@ public final class AppCompactor {
      * starts the background thread if necessary.
      */
     public void init() {
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.ActivityManager.NAMESPACE,
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(), mOnFlagsChangedListener);
         synchronized (mPhenotypeFlagLock) {
             updateUseCompaction();
@@ -228,7 +231,7 @@ public final class AppCompactor {
     @GuardedBy("mPhenotypeFlagLock")
     private void updateUseCompaction() {
         String useCompactionFlag =
-                DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_USE_COMPACTION);
         mUseCompaction = TextUtils.isEmpty(useCompactionFlag)
                 ? DEFAULT_USE_COMPACTION : Boolean.parseBoolean(useCompactionFlag);
@@ -241,10 +244,10 @@ public final class AppCompactor {
     @GuardedBy("mPhenotypeFlagLock")
     private void updateCompactionActions() {
         String compactAction1Flag =
-                DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                         KEY_COMPACT_ACTION_1);
         String compactAction2Flag =
-                DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                         KEY_COMPACT_ACTION_2);
 
         int compactAction1 = DEFAULT_COMPACT_ACTION_1;
@@ -271,16 +274,16 @@ public final class AppCompactor {
     private void updateCompactionThrottles() {
         boolean useThrottleDefaults = false;
         String throttleSomeSomeFlag =
-                DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_COMPACT_THROTTLE_1);
         String throttleSomeFullFlag =
-                DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_COMPACT_THROTTLE_2);
         String throttleFullSomeFlag =
-                DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_COMPACT_THROTTLE_3);
         String throttleFullFullFlag =
-                DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_COMPACT_THROTTLE_4);
 
         if (TextUtils.isEmpty(throttleSomeSomeFlag) || TextUtils.isEmpty(throttleSomeFullFlag)
@@ -309,7 +312,7 @@ public final class AppCompactor {
 
     @GuardedBy("mPhenotypeFlagLock")
     private void updateStatsdSampleRate() {
-        String sampleRateFlag = DeviceConfig.getProperty(DeviceConfig.ActivityManager.NAMESPACE,
+        String sampleRateFlag = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_COMPACT_STATSD_SAMPLE_RATE);
         try {
             mStatsdSampleRate = TextUtils.isEmpty(sampleRateFlag)

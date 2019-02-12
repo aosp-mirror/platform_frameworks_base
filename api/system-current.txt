@@ -5835,25 +5835,13 @@ package android.provider {
     method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
+    field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
-  }
-
-  public static interface DeviceConfig.ActivityManager {
-    field public static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
-    field public static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
-    field public static final String KEY_COMPACT_STATSD_SAMPLE_RATE = "compact_statsd_sample_rate";
-    field public static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
-    field public static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
-    field public static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
-    field public static final String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
-    field public static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
-    field public static final String KEY_USE_COMPACTION = "use_compaction";
-    field public static final String NAMESPACE = "activity_manager";
   }
 
   public static interface DeviceConfig.ActivityManagerNativeBoot {
