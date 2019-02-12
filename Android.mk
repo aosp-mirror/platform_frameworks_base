@@ -72,6 +72,9 @@ $(OUT_DOCS)/offline-sdk-timestamp: $(OUT_DOCS)/offline-sdk-docs-docs.zip
 	$(hide) mkdir -p $(OUT_DOCS)/offline-sdk
 	( unzip -qo $< -d $(OUT_DOCS)/offline-sdk && touch -f $@ ) || exit 1
 
+.PHONY: docs offline-sdk-docs
+docs offline-sdk-docs: $(OUT_DOCS)/offline-sdk-timestamp
+
 # Run this for checkbuild
 checkbuild: doc-comment-check-docs
 # Check comment when you are updating the API
