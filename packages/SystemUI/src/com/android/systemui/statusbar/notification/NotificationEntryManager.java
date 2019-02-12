@@ -230,7 +230,6 @@ public class NotificationEntryManager implements
                 }
             }
         }
-        entry.setLowPriorityStateUpdated(false);
     }
 
     @Override
@@ -384,13 +383,12 @@ public class NotificationEntryManager implements
 
         mNotificationData.update(entry, ranking, notification);
 
-        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
-                mNotificationData.get(entry.key) != null);
-
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
         }
 
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
+                mNotificationData.get(entry.key) != null);
         updateNotifications();
 
         if (DEBUG) {

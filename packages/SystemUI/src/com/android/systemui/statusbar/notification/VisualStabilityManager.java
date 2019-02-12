@@ -45,7 +45,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     private boolean mReorderingAllowed;
     private VisibilityLocationProvider mVisibilityLocationProvider;
     private ArraySet<View> mAllowedReorderViews = new ArraySet<>();
-    private ArraySet<View> mLowPriorityReorderingViews = new ArraySet<>();
+    private ArraySet<NotificationEntry> mLowPriorityReorderingViews = new ArraySet<>();
     private ArraySet<View> mAddedChildren = new ArraySet<>();
     private boolean mPulsing;
 
@@ -53,13 +53,20 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     public VisualStabilityManager(NotificationEntryManager notificationEntryManager) {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onEntryReinflated(NotificationEntry entry) {
-                if (entry.hasLowPriorityStateUpdated()) {
-                    onLowPriorityUpdated(entry);
-                    if (mPresenter != null) {
-                        mPresenter.updateNotificationViews();
-                    }
+            public void onPreEntryUpdated(NotificationEntry entry) {
+                final boolean mAmbientStateHasChanged =
+                        entry.ambient != entry.getRow().isLowPriority();
+                if (mAmbientStateHasChanged) {
+                    mLowPriorityReorderingViews.add(entry);
                 }
+            }
+
+            @Override
+            public void onPostEntryUpdated(NotificationEntry entry) {
+                // This line is technically not required as we'll get called as the hierarchy
+                // manager will call onReorderingFinished() immediately before this.
+                // TODO: Find a way to make this relationship more explicit
+                mLowPriorityReorderingViews.remove(entry);
             }
         });
     }
@@ -142,7 +149,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
         if (mAddedChildren.contains(row)) {
             return true;
         }
-        if (mLowPriorityReorderingViews.contains(row)) {
+        if (mLowPriorityReorderingViews.contains(row.getEntry())) {
             return true;
         }
         if (mAllowedReorderViews.contains(row)
@@ -170,10 +177,6 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
             // view and stay at the current location if they aren't.
             mAllowedReorderViews.add(entry.getRow());
         }
-    }
-
-    private void onLowPriorityUpdated(NotificationEntry entry) {
-        mLowPriorityReorderingViews.add(entry.getRow());
     }
 
     /**

@@ -226,10 +226,7 @@ public class NotificationRowBinder {
             StatusBarNotification sbn,
             ExpandableNotificationRow row,
             boolean isUpdate) {
-        boolean isLowPriority = entry.ambient;
-        boolean wasLowPriority = row.isLowPriority();
-        row.setIsLowPriority(isLowPriority);
-        row.setLowPriorityStateUpdated(isUpdate && (wasLowPriority != isLowPriority));
+        row.setIsLowPriority(entry.ambient);
         // bind the click event to the content area
         checkNotNull(mNotificationClicker).register(row, sbn);
 

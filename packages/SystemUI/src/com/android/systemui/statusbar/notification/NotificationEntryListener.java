@@ -47,7 +47,11 @@ public interface NotificationEntryListener {
     }
 
     /**
-     * Called when a notification is updated, before any filtering of notifications have occurred.
+     * Called when a notification is about to be updated. Notification- and ranking-derived fields
+     * on the entry have already been updated but the following have not yet occurred:
+     * (a) View binding (i.e. the associated view has not yet been updated / inflation has not yet
+     *      been kicked off.
+     * (b) Notification filtering
      */
     default void onPreEntryUpdated(NotificationEntry entry) {
     }
