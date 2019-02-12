@@ -33,6 +33,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -80,8 +82,6 @@ public abstract class LayoutInflater {
     private static final String TAG = LayoutInflater.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private static final String USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY
-        = "view.precompiled_layout_enabled";
     private static final String COMPILED_VIEW_DEX_FILE_NAME = "/compiled_view.dex";
 
     /** Empty stack trace used to avoid log spam in re-throw exceptions. */
@@ -412,8 +412,24 @@ public abstract class LayoutInflater {
     }
 
     private void initPrecompiledViews() {
-        initPrecompiledViews(
-                SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false));
+        // Use the device config if enabled, otherwise default to the system property.
+        String usePrecompiledLayout = null;
+        try {
+            usePrecompiledLayout = DeviceConfig.getProperty(
+                    DeviceConfig.Runtime.NAMESPACE,
+                    DeviceConfig.Runtime.USE_PRECOMPILED_LAYOUT);
+        } catch (Exception e) {
+          // May be caused by permission errors reading the property (i.e. instant apps).
+        }
+        boolean enabled = false;
+        if (TextUtils.isEmpty(usePrecompiledLayout)) {
+            enabled = SystemProperties.getBoolean(
+                    DeviceConfig.Runtime.USE_PRECOMPILED_LAYOUT,
+                    false);
+        } else {
+            enabled = Boolean.parseBoolean(usePrecompiledLayout);
+        }
+        initPrecompiledViews(enabled);
     }
 
     private void initPrecompiledViews(boolean enablePrecompiledViews) {
