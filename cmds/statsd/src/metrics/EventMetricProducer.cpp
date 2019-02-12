@@ -132,7 +132,7 @@ void EventMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
-    mCondition = conditionMet;
+    mCondition = conditionMet ? ConditionState::kTrue : ConditionState::kFalse;
 }
 
 void EventMetricProducer::onMatchedLogEventInternalLocked(

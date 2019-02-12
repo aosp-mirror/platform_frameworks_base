@@ -433,7 +433,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondit
 void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                       const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
-    mCondition = conditionMet;
+    mCondition = conditionMet ? ConditionState::kTrue : ConditionState::kFalse;
     flushIfNeededLocked(eventTime);
     for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
         for (auto& pair : whatIt.second) {
@@ -767,12 +767,13 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
                            !mSameConditionDimensionsInTracker,
                            !mHasLinksToAllConditionDimensionsInTracker,
                            &dimensionKeysInCondition);
-        condition = (conditionState == ConditionState::kTrue);
+        condition = conditionState == ConditionState::kTrue;
         if (mDimensionsInCondition.empty() && condition) {
             dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
         }
     } else {
-        condition = mCondition;
+        // TODO: The unknown condition state is not handled here, we should fix it.
+        condition = mCondition == ConditionState::kTrue;
         if (condition) {
             dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
         }

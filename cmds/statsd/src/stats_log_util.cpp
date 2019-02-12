@@ -82,6 +82,7 @@ const int FIELD_ID_INVALIDATED_BUCKET = 7;
 const int FIELD_ID_BUCKET_DROPPED = 8;
 const int FIELD_ID_MIN_BUCKET_BOUNDARY_DELAY_NS = 9;
 const int FIELD_ID_MAX_BUCKET_BOUNDARY_DELAY_NS = 10;
+const int FIELD_ID_BUCKET_UNKNOWN_CONDITION = 11;
 
 namespace {
 
@@ -506,6 +507,8 @@ void writeAtomMetricStatsToStream(const std::pair<int, StatsdStats::AtomMetricSt
                        (long long)pair.second.minBucketBoundaryDelayNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_MAX_BUCKET_BOUNDARY_DELAY_NS,
                        (long long)pair.second.maxBucketBoundaryDelayNs);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BUCKET_UNKNOWN_CONDITION,
+                       (long long)pair.second.bucketUnknownCondition);
     protoOutput->end(token);
 }
 

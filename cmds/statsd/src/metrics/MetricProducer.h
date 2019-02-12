@@ -59,7 +59,7 @@ public:
           mTimeBaseNs(timeBaseNs),
           mCurrentBucketStartTimeNs(timeBaseNs),
           mCurrentBucketNum(0),
-          mCondition(conditionIndex >= 0 ? false : true),
+          mCondition(conditionIndex >= 0 ? ConditionState::kUnknown : ConditionState::kTrue),
           mConditionSliced(false),
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
@@ -315,7 +315,7 @@ protected:
 
     int64_t mBucketSizeNs;
 
-    bool mCondition;
+    ConditionState mCondition;
 
     bool mConditionSliced;
 

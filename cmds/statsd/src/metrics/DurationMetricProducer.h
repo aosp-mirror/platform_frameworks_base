@@ -137,6 +137,7 @@ private:
 
     FRIEND_TEST(DurationMetricTrackerTest, TestNoCondition);
     FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedCondition);
+    FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedConditionUnknownState);
     FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade);
     FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket);
     FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade);

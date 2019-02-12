@@ -45,7 +45,8 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
                            &dimensionKeysInCondition);
         condition = (conditionState == ConditionState::kTrue);
     } else {
-        condition = mCondition;
+        // TODO: The unknown condition state is not handled here, we should fix it.
+        condition = mCondition == ConditionState::kTrue;
     }
 
     if (mDimensionsInCondition.empty() && condition) {
