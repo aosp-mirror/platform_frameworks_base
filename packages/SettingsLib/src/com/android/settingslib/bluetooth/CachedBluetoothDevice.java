@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
@@ -28,7 +29,7 @@ import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
-import android.bluetooth.BluetoothAdapter;
+
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
@@ -205,7 +206,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         // This is to ensure all the profiles are disconnected as some CK/Hs do not
         // disconnect  PBAP connection when HF connection is brought down
         PbapServerProfile PbapProfile = mProfileManager.getPbapProfile();
-        if (PbapProfile.getConnectionStatus(mDevice) == BluetoothProfile.STATE_CONNECTED)
+        if (PbapProfile != null && isConnectedProfile(PbapProfile))
         {
             PbapProfile.disconnect(mDevice);
         }
