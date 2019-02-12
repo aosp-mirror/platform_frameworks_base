@@ -213,6 +213,65 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Layout Option 3: File preview, icon, filename, copy-->
+    <LinearLayout
+        android:id="@+id/content_preview_file_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/chooser_view_spacing"
+        android:visibility="gone"
+        android:background="?attr/colorBackgroundFloating">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/chooser_edge_margin_normal"
+            android:paddingRight="@dimen/chooser_edge_margin_normal"
+            android:layout_marginBottom="@dimen/chooser_view_spacing"
+            android:id="@+id/content_preview_file_layout">
+
+            <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
+                  android:id="@+id/content_preview_file_thumbnail"
+                  android:layout_width="75dp"
+                  android:layout_height="75dp"
+                  android:layout_marginRight="16dp"
+                  android:adjustViewBounds="true"
+                  android:layout_gravity="center_vertical"
+                  android:gravity="center"
+                  android:scaleType="centerCrop"
+                  android:visibility="gone"/>
+            <ImageView
+                  android:id="@+id/content_preview_file_icon"
+                  android:layout_width="36dp"
+                  android:layout_height="36dp"
+                  android:layout_marginRight="16dp"
+                  android:adjustViewBounds="true"
+                  android:layout_gravity="center_vertical"
+                  android:gravity="center"
+                  android:scaleType="fitCenter"
+                  android:visibility="gone"/>
+            <TextView
+                android:id="@+id/content_preview_filename"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:ellipsize="middle"
+                android:gravity="start|top"
+                android:paddingRight="24dp"
+                android:singleLine="true"/>
+            <Button
+                android:id="@+id/file_copy_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/ic_content_copy_gm2"/>
+        </LinearLayout>
+    </LinearLayout>
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

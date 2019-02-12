@@ -409,8 +409,7 @@ public class ChooserActivityTest {
     @Test
     public void copyTextToClipboard() throws Exception {
         Intent sendIntent = createSendTextIntent();
-        List<ResolvedComponentInfo> resolvedComponentInfos =
-                createResolvedComponentsForTestWithOtherProfile(1);
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
             Mockito.anyBoolean(),
@@ -421,6 +420,7 @@ public class ChooserActivityTest {
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
 
+        onView(withId(R.id.copy_button)).check(matches(isDisplayed()));
         onView(withId(R.id.copy_button)).perform(click());
         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(
                 Context.CLIPBOARD_SERVICE);
@@ -439,8 +439,9 @@ public class ChooserActivityTest {
         ArrayList<Uri> uris = new ArrayList<>();
         uris.add(uri);
 
-        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
         sOverrides.previewThumbnail = createBitmap();
+        sOverrides.isImageType = true;
 
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
@@ -464,8 +465,9 @@ public class ChooserActivityTest {
         uris.add(uri);
         uris.add(uri);
 
-        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
         sOverrides.previewThumbnail = createBitmap();
+        sOverrides.isImageType = true;
 
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
@@ -492,8 +494,9 @@ public class ChooserActivityTest {
         uris.add(uri);
         uris.add(uri);
 
-        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
         sOverrides.previewThumbnail = createBitmap();
+        sOverrides.isImageType = true;
 
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
@@ -538,12 +541,11 @@ public class ChooserActivityTest {
         ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "empty preview logger test"));
         waitForIdle();
-        verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
+
+        verify(mockLogger, Mockito.times(1)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
-        assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
-                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
-        assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
-                is(CONTENT_PREVIEW_TEXT));
+        assertThat(logMakerCaptor.getAllValues().get(0).getCategory(),
+                is(MetricsProto.MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN));
     }
 
     @Test
@@ -552,9 +554,17 @@ public class ChooserActivityTest {
 
         MetricsLogger mockLogger = sOverrides.metricsLogger;
         ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+            Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
+            Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
-        verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
+        verify(mockLogger, Mockito.times(3)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
         assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
                 is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
@@ -570,8 +580,9 @@ public class ChooserActivityTest {
         ArrayList<Uri> uris = new ArrayList<>();
         uris.add(uri);
 
-        Intent sendIntent = createSendImageIntentWithPreview(uris);
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
         sOverrides.previewThumbnail = createBitmap();
+        sOverrides.isImageType = true;
 
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
@@ -595,6 +606,51 @@ public class ChooserActivityTest {
                 is(CONTENT_PREVIEW_IMAGE));
     }
 
+    @Test
+    public void oneVisibleFilePreview() throws InterruptedException {
+        Uri uri = Uri.parse("content://com.android.frameworks.coretests/app.pdf");
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_filename)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_filename)).check(matches(withText("app.pdf")));
+        onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
+    }
+
+
+    @Test
+    public void moreThanOneVisibleFilePreview() throws InterruptedException {
+        Uri uri = Uri.parse("content://com.android.frameworks.coretests/app.pdf");
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+        uris.add(uri);
+        uris.add(uri);
+
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_filename)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_filename)).check(matches(withText("app.pdf + 2 files")));
+        onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
+    }
+
     private Intent createSendTextIntent() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -615,7 +671,7 @@ public class ChooserActivityTest {
         return sendIntent;
     }
 
-    private Intent createSendImageIntentWithPreview(ArrayList<Uri> uris) {
+    private Intent createSendUriIntentWithPreview(ArrayList<Uri> uris) {
         Intent sendIntent = new Intent();
 
         if (uris.size() > 1) {

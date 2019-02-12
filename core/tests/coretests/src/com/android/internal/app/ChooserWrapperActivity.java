@@ -89,11 +89,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
 
     @Override
     protected boolean isImageType(String mimeType) {
-        if (sOverrides.previewThumbnail != null) {
-            return true;
-        }
-
-        return super.isImageType(mimeType);
+        return sOverrides.isImageType;
     }
 
     @Override
@@ -112,6 +108,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
         public ResolverListController resolverListController;
         public Boolean isVoiceInteraction;
+        public boolean isImageType;
         public Bitmap previewThumbnail;
         public MetricsLogger metricsLogger;
 
@@ -120,6 +117,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
             isVoiceInteraction = null;
             createPackageManager = null;
             previewThumbnail = null;
+            isImageType = false;
             resolverListController = mock(ResolverListController.class);
             metricsLogger = mock(MetricsLogger.class);
         }
