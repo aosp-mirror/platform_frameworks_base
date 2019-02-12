@@ -1169,7 +1169,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         BinderCallsStatsService.Internal binderStats =
                 LocalServices.getService(BinderCallsStatsService.Internal.class);
         if (binderStats == null) {
-            return;
+            throw new IllegalStateException("binderStats is null");
         }
 
         List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
@@ -1200,7 +1200,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         BinderCallsStatsService.Internal binderStats =
                 LocalServices.getService(BinderCallsStatsService.Internal.class);
         if (binderStats == null) {
-            return;
+            throw new IllegalStateException("binderStats is null");
         }
 
         ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
@@ -1218,7 +1218,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             List<StatsLogEventWrapper> pulledData) {
         LooperStats looperStats = LocalServices.getService(LooperStats.class);
         if (looperStats == null) {
-            return;
+            throw new IllegalStateException("looperStats null");
         }
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
@@ -1689,18 +1689,19 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullCpuTimePerThreadFreq(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         if (this.mKernelCpuThreadReader == null) {
-            return;
+            throw new IllegalStateException("mKernelCpuThreadReader is null");
         }
         ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
                 this.mKernelCpuThreadReader.getProcessCpuUsageByUids();
         if (processCpuUsages == null) {
-            return;
+            throw new IllegalStateException("processCpuUsages is null");
         }
         int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
         if (cpuFrequencies.length > CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES) {
-            Slog.w(TAG, "Expected maximum " + CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES
-                    + " frequencies, but got " + cpuFrequencies.length);
-            return;
+            String message = "Expected maximum " + CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES
+                    + " frequencies, but got " + cpuFrequencies.length;
+            Slog.w(TAG, message);
+            throw new IllegalStateException(message);
         }
         for (int i = 0; i < processCpuUsages.size(); i++) {
             KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = processCpuUsages.get(i);
@@ -1709,10 +1710,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             for (int j = 0; j < threadCpuUsages.size(); j++) {
                 KernelCpuThreadReader.ThreadCpuUsage threadCpuUsage = threadCpuUsages.get(j);
                 if (threadCpuUsage.usageTimesMillis.length != cpuFrequencies.length) {
-                    Slog.w(TAG, "Unexpected number of usage times,"
+                    String message = "Unexpected number of usage times,"
                             + " expected " + cpuFrequencies.length
-                            + " but got " + threadCpuUsage.usageTimesMillis.length);
-                    continue;
+                            + " but got " + threadCpuUsage.usageTimesMillis.length;
+                    Slog.w(TAG, message);
+                    throw new IllegalStateException(message);
                 }
 
                 StatsLogEventWrapper e =
