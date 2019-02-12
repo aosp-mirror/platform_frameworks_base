@@ -73,9 +73,8 @@ public class HeadsetProfile implements LocalBluetoothProfile {
                         BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
             }
-
-            mProfileManager.callServiceConnectedListeners();
             mIsProfileReady=true;
+            mProfileManager.callServiceConnectedListeners();
         }
 
         public void onServiceDisconnected(int profile) {
