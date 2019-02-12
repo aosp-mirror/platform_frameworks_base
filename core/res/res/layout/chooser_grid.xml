@@ -20,11 +20,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:maxWidth="@dimen/resolver_max_width"
     android:maxCollapsedHeight="288dp"
     android:maxCollapsedHeightSmall="56dp"
     android:id="@id/contentPanel">
-
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -153,8 +151,9 @@
         android:background="?attr/colorBackgroundFloating">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/chooser_preview_width"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="@dimen/chooser_edge_margin_normal"
             android:paddingRight="@dimen/chooser_edge_margin_normal"
@@ -182,8 +181,9 @@
         <!-- Required sub-layout so we can get the nice rounded corners-->
         <!-- around this section -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/chooser_preview_width"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="horizontal"
             android:layout_marginLeft="@dimen/chooser_edge_margin_thin"
             android:layout_marginRight="@dimen/chooser_edge_margin_thin"
@@ -224,8 +224,9 @@
         android:background="?attr/colorBackgroundFloating">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/chooser_preview_width"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="@dimen/chooser_edge_margin_normal"
             android:paddingRight="@dimen/chooser_edge_margin_normal"

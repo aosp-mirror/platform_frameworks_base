@@ -2755,6 +2755,7 @@
   <java-symbol type="dimen" name="chooser_edge_margin_thin" />
   <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
+  <java-symbol type="dimen" name="chooser_preview_width" />
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="resolve_grid_item" />
   <java-symbol type="id" name="day_picker_view_pager" />
