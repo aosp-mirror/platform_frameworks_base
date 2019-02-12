@@ -251,7 +251,7 @@ class SurfaceAnimator {
         if (DEBUG_ANIM) Slog.i(TAG, "Cancelling animation restarting=" + restarting);
         final SurfaceControl leash = mLeash;
         final AnimationAdapter animation = mAnimation;
-        reset(t, forwardCancel);
+        reset(t, false);
         if (animation != null) {
             if (!mAnimationStartDelayed && forwardCancel) {
                 animation.onAnimationCancelled(leash);
@@ -260,6 +260,12 @@ class SurfaceAnimator {
                 mAnimationFinishedCallback.run();
             }
         }
+
+        if (forwardCancel && leash != null) {
+            t.remove(leash);
+            mService.scheduleAnimationLocked();
+        }
+
         if (!restarting) {
             mAnimationStartDelayed = false;
         }
