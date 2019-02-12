@@ -884,6 +884,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             dc.setFocusedApp(null);
             mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
         }
+        if (mLetterbox != null) {
+            mLetterbox.destroy();
+            mLetterbox = null;
+        }
 
         if (!delayed) {
             updateReportedVisibilityLocked();
@@ -1296,6 +1300,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     dc.setFocusedApp(this);
                 }
             }
+        }
+
+        if (prevDc != mDisplayContent && mLetterbox != null) {
+            mLetterbox.onMovedToDisplay(mDisplayContent.getDisplayId());
         }
     }
 
@@ -1846,6 +1854,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (needsLetterbox) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));
+                mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
             mLetterbox.layout(getParent().getBounds(), w.getFrameLw(), mTmpPoint);
