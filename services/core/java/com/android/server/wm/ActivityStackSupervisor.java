@@ -170,6 +170,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     // How long we can hold the launch wake lock before giving up.
     static final int LAUNCH_TIMEOUT = 10 * 1000;
 
+    /** How long we wait until giving up on the activity telling us it released the top state. */
+    static final int TOP_RESUMED_STATE_LOSS_TIMEOUT = 500;
+
     static final int IDLE_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG;
     static final int IDLE_NOW_MSG = FIRST_SUPERVISOR_STACK_MSG + 1;
     static final int RESUME_TOP_ACTIVITY_MSG = FIRST_SUPERVISOR_STACK_MSG + 2;
@@ -179,6 +182,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
     static final int REPORT_PIP_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 15;
     static final int REPORT_HOME_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 16;
+    static final int TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 17;
 
     // Used to indicate that windows of activities should be preserved during the resize.
     static final boolean PRESERVE_WINDOWS = true;
@@ -299,6 +303,18 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * be considered for the transition animation.
      */
     final ArrayList<ActivityRecord> mNoAnimActivities = new ArrayList<>();
+
+    /**
+     * Cached value of the topmost resumed activity in the system. Updated when new activity is
+     * resumed.
+     */
+    private ActivityRecord mTopResumedActivity;
+
+    /**
+     * Flag indicating whether we're currently waiting for the previous top activity to handle the
+     * loss of the state and report back before making new activity top resumed.
+     */
+    private boolean mTopResumedActivityWaitingForPrev;
 
     /** The target stack bounds for the picture-in-picture mode changed that we need to report to
      * the application */
@@ -844,7 +860,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
-                mRootActivityContainer.updateTopResumedActivityIfNeeded();
+                updateTopResumedActivityIfNeeded();
 
                 if ((proc.mInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
                         && mService.mHasHeavyWeightFeature) {
@@ -2288,6 +2304,73 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mHandler.sendEmptyMessage(IDLE_NOW_MSG);
     }
 
+    /**
+     * Updates the record of top resumed activity when it changes and handles reporting of the
+     * state changes to previous and new top activities. It will immediately dispatch top resumed
+     * state loss message to previous top activity (if haven't done it already). After the previous
+     * activity releases the top state and reports back, message about acquiring top state will be
+     * sent to the new top resumed activity.
+     */
+    void updateTopResumedActivityIfNeeded() {
+        final ActivityRecord prevTopActivity = mTopResumedActivity;
+        final ActivityStack topStack = mRootActivityContainer.getTopDisplayFocusedStack();
+        if (topStack == null || topStack.mResumedActivity == prevTopActivity) {
+            return;
+        }
+
+        // Ask previous activity to release the top state.
+        final boolean prevActivityReceivedTopState =
+                prevTopActivity != null && !mTopResumedActivityWaitingForPrev;
+        // mTopResumedActivityWaitingForPrev == true at this point would mean that an activity
+        // before the prevTopActivity one hasn't reported back yet. So server never sent the top
+        // resumed state change message to prevTopActivity.
+        if (prevActivityReceivedTopState) {
+            prevTopActivity.scheduleTopResumedActivityChanged(false /* onTop */);
+            scheduleTopResumedStateLossTimeout(prevTopActivity);
+            mTopResumedActivityWaitingForPrev = true;
+        }
+
+        // Update the current top activity.
+        mTopResumedActivity = topStack.mResumedActivity;
+        scheduleTopResumedActivityStateIfNeeded();
+    }
+
+    /** Schedule top resumed state change if previous top activity already reported back. */
+    private void scheduleTopResumedActivityStateIfNeeded() {
+        if (mTopResumedActivity != null && !mTopResumedActivityWaitingForPrev) {
+            mTopResumedActivity.scheduleTopResumedActivityChanged(true /* onTop */);
+        }
+    }
+
+    /**
+     * Limit the time given to the app to report handling of the state loss.
+     */
+    private void scheduleTopResumedStateLossTimeout(ActivityRecord r) {
+        final Message msg = mHandler.obtainMessage(TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG);
+        msg.obj = r;
+        r.topResumedStateLossTime = SystemClock.uptimeMillis();
+        mHandler.sendMessageDelayed(msg, TOP_RESUMED_STATE_LOSS_TIMEOUT);
+        if (DEBUG_STATES) Slog.v(TAG_STATES, "Waiting for top state to be released by " + r);
+    }
+
+    /**
+     * Handle a loss of top resumed state by an activity - update internal state and inform next top
+     * activity if needed.
+     */
+    void handleTopResumedStateReleased(boolean timeout) {
+        if (DEBUG_STATES) {
+            Slog.v(TAG_STATES, "Top resumed state released "
+                    + (timeout ? " (due to timeout)" : " (transition complete)"));
+        }
+        mHandler.removeMessages(TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG);
+        if (!mTopResumedActivityWaitingForPrev) {
+            // Top resumed activity state loss already handled.
+            return;
+        }
+        mTopResumedActivityWaitingForPrev = false;
+        scheduleTopResumedActivityStateIfNeeded();
+    }
+
     void removeTimeoutsForActivityLocked(ActivityRecord r) {
         if (DEBUG_IDLE) Slog.d(TAG_IDLE, "removeTimeoutsForActivity: Callers="
                 + Debug.getCallers(4));
@@ -2578,8 +2661,18 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         // Start home activities on displays with no activities.
                         mRootActivityContainer.startHomeOnEmptyDisplays("homeChanged");
                     }
-                }
-                break;
+                } break;
+                case TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG: {
+                    ActivityRecord r = (ActivityRecord) msg.obj;
+                    Slog.w(TAG, "Activity top resumed state loss timeout for " + r);
+                    synchronized (mService.mGlobalLock) {
+                        if (r.hasProcess()) {
+                            mService.logAppTooSlow(r.app, r.topResumedStateLossTime,
+                                    "top state loss for " + r);
+                        }
+                    }
+                    handleTopResumedStateReleased(true /* timeout */);
+                } break;
             }
         }
     }

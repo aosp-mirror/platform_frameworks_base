@@ -289,10 +289,11 @@ final class ActivityRecord extends ConfigurationContainer {
     private int windowFlags;        // custom window flags for preview window.
     private TaskRecord task;        // the task this is in.
     private long createTime = System.currentTimeMillis();
-    long lastVisibleTime;   // last time this activity became visible
-    long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
-    long pauseTime;         // last time we started pausing the activity
-    long launchTickTime;    // base time for launch tick messages
+    long lastVisibleTime;         // last time this activity became visible
+    long cpuTimeAtResume;         // the cpu time of host process at the time of resuming activity
+    long pauseTime;               // last time we started pausing the activity
+    long launchTickTime;          // base time for launch tick messages
+    long topResumedStateLossTime; // last time we reported top resumed state loss to an activity
     // Last configuration reported to the activity in the client process.
     private MergedConfiguration mLastReportedConfiguration;
     private int mLastReportedDisplayId;
@@ -694,14 +695,14 @@ final class ActivityRecord extends ConfigurationContainer {
 
     void scheduleTopResumedActivityChanged(boolean onTop) {
         if (!attachedToProcess()) {
-            if (DEBUG_CONFIGURATION) {
+            if (DEBUG_STATES) {
                 Slog.w(TAG, "Can't report activity position update - client not running"
                                 + ", activityRecord=" + this);
             }
             return;
         }
         try {
-            if (DEBUG_CONFIGURATION) {
+            if (DEBUG_STATES) {
                 Slog.v(TAG, "Sending position change to " + this + ", onTop: " + onTop);
             }
 
@@ -3283,7 +3284,7 @@ final class ActivityRecord extends ConfigurationContainer {
             transaction.addCallback(callbackItem);
             transaction.setLifecycleStateRequest(lifecycleItem);
             mAtmService.getLifecycleManager().scheduleTransaction(transaction);
-            mRootActivityContainer.updateTopResumedActivityIfNeeded();
+            mStackSupervisor.updateTopResumedActivityIfNeeded();
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.

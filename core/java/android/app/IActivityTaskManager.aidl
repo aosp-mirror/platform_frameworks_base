@@ -129,6 +129,7 @@ interface IActivityTaskManager {
     oneway void activityIdle(in IBinder token, in Configuration config,
             in boolean stopProfiling);
     void activityResumed(in IBinder token);
+    void activityTopResumedStateLost();
     void activityPaused(in IBinder token);
     void activityStopped(in IBinder token, in Bundle state,
             in PersistableBundle persistentState, in CharSequence description);
