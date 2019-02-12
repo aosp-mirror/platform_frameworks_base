@@ -1336,7 +1336,7 @@ public final class DisplayManagerService extends SystemService {
                 && !TextUtils.isEmpty(info.uniqueId)) {
             viewportType = VIEWPORT_VIRTUAL;
         } else {
-            Slog.wtf(TAG, "Unable to populate viewport for display device: " + info);
+            Slog.i(TAG, "Display " + info + " does not support input device matching.");
             return;
         }
 
