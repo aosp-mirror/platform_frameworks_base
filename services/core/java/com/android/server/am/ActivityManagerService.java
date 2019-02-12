@@ -365,6 +365,7 @@ import android.provider.Downloads;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
+import android.sysprop.DisplayProperties;
 import android.sysprop.VoldProperties;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
@@ -14937,8 +14938,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK_ONLY);
         mHiddenApiBlacklist.registerObserver();
 
-        // Transfer any global setting for forcing RTL layout, into a System Property
-        SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
+        // Transfer any global setting for forcing RTL layout, into a Display Property
+        DisplayProperties.debug_force_rtl(forceRtl);
 
         final Configuration configuration = new Configuration();
         Settings.System.getConfiguration(resolver, configuration);
