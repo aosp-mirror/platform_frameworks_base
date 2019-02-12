@@ -215,13 +215,52 @@ public class SignalStrength implements Parcelable {
      * @see android.telephony#CellSignalStrengthGsm
      */
     public @NonNull List<CellSignalStrength> getCellSignalStrengths() {
-        List<CellSignalStrength> cssList = new ArrayList<>(2); // Usually have 2 or fewer elems
-        if (mLte.isValid()) cssList.add(mLte);
-        if (mCdma.isValid()) cssList.add(mCdma);
-        if (mTdscdma.isValid()) cssList.add(mTdscdma);
-        if (mWcdma.isValid()) cssList.add(mWcdma);
-        if (mGsm.isValid()) cssList.add(mGsm);
-        if (mNr.isValid()) cssList.add(mNr);
+        return getCellSignalStrengths(CellSignalStrength.class);
+    }
+
+    /**
+     * Returns a List of CellSignalStrength Components of this SignalStrength Report.
+     *
+     * Use this API to access underlying
+     * {@link android.telephony#CellSignalStrength CellSignalStrength} objects that provide more
+     * granular information about the SignalStrength report. Only valid (non-empty)
+     * CellSignalStrengths will be returned. The order of any returned elements is not guaranteed,
+     * and the list may contain more than one instance of a CellSignalStrength type.
+     *
+     * @param clazz a class type that extends
+     *        {@link android.telephony.CellSignalStrength CellSignalStrength} to filter possible
+     *        return values.
+     * @return a List of CellSignalStrength or an empty List if there are no valid measurements.
+     *
+     * @see android.telephony#CellSignalStrength
+     * @see android.telephony#CellSignalStrengthNr
+     * @see android.telephony#CellSignalStrengthLte
+     * @see android.telephony#CellSignalStrengthTdscdma
+     * @see android.telephony#CellSignalStrengthWcdma
+     * @see android.telephony#CellSignalStrengthCdma
+     * @see android.telephony#CellSignalStrengthGsm
+     */
+    public <T extends CellSignalStrength> @NonNull List<T> getCellSignalStrengths(
+            @NonNull Class<T> clazz) {
+        List<T> cssList = new ArrayList<>(2); // Usually have 2 or fewer elems
+        if (mLte.isValid() && clazz.isAssignableFrom(CellSignalStrengthLte.class)) {
+            cssList.add((T) mLte);
+        }
+        if (mCdma.isValid() && clazz.isAssignableFrom(CellSignalStrengthCdma.class)) {
+            cssList.add((T) mCdma);
+        }
+        if (mTdscdma.isValid() && clazz.isAssignableFrom(CellSignalStrengthTdscdma.class)) {
+            cssList.add((T) mTdscdma);
+        }
+        if (mWcdma.isValid() && clazz.isAssignableFrom(CellSignalStrengthWcdma.class)) {
+            cssList.add((T) mWcdma);
+        }
+        if (mGsm.isValid() && clazz.isAssignableFrom(CellSignalStrengthGsm.class)) {
+            cssList.add((T) mGsm);
+        }
+        if (mNr.isValid() && clazz.isAssignableFrom(CellSignalStrengthNr.class)) {
+            cssList.add((T) mNr);
+        }
         return cssList;
     }
 
