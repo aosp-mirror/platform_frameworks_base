@@ -1341,6 +1341,38 @@ public class TelephonyManager {
     @SystemApi
     public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000;
 
+    /**
+     * Intent sent when an error occurs that debug tools should log and possibly take further
+     * action such as capturing vendor-specific logs.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public static final String ACTION_DEBUG_EVENT = "android.telephony.action.DEBUG_EVENT";
+
+    /**
+     * An arbitrary ParcelUuid which should be consistent for each occurrence of the same event.
+     *
+     * This field must be included in all events.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEBUG_EVENT_ID = "android.telephony.extra.DEBUG_EVENT_ID";
+
+    /**
+     * A freeform string description of the event.
+     *
+     * This field is optional for all events and as a guideline should not exceed 80 characters
+     * and should be as short as possible to convey the essence of the event.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEBUG_EVENT_DESCRIPTION =
+            "android.telephony.extra.DEBUG_EVENT_DESCRIPTION";
+
     //
     //
     // Device Info
@@ -4834,12 +4866,13 @@ public class TelephonyManager {
      *
      * <p>Apps targeting {@link android.os.Build.VERSION_CODES#Q Android Q} or higher will no
      * longer trigger a refresh of the cached CellInfo by invoking this API. Instead, those apps
-     * will receive the latest cached results. Apps targeting
+     * will receive the latest cached results, which may not be current. Apps targeting
      * {@link android.os.Build.VERSION_CODES#Q Android Q} or higher that wish to request updated
      * CellInfo should call
-     * {android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()} and
-     * listen for responses via {@link android.telephony.PhoneStateListener#onCellInfoChanged
-     * onCellInfoChanged()}.
+     * {@link android.telephony.TelephonyManager#requestCellInfoUpdate requestCellInfoUpdate()};
+     * however, in all cases, updates will be rate-limited and are not guaranteed. To determine the
+     * recency of CellInfo data, callers should check
+     * {@link android.telephony.CellInfo#getTimeStamp CellInfo#getTimeStamp()}.
      *
      * <p>This method returns valid data for devices with
      * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY FEATURE_TELEPHONY}. In cases
@@ -6497,6 +6530,37 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the preferred network type bitmap.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return a 32-bit bitmap.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public @NetworkTypeBitMask int getPreferredNetworkTypeBitmap() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return RadioAccessFamily.getRafFromNetworkType(
+                        telephony.getPreferredNetworkType(getSubId()));
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getPreferredNetworkTypeBitmap RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getPreferredNetworkTypeBitmap NPE", ex);
+        }
+        return 0;
+    }
+
+    /**
      * Sets the network selection mode to automatic.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
@@ -6701,6 +6765,37 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.setPreferredNetworkType(subId, networkType);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setPreferredNetworkType NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Set the preferred network type bitmap.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param networkTypeBitmap a 32-bit bitmap.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean setPreferredNetworkTypeBitmap(@NetworkTypeBitMask int networkTypeBitmap) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setPreferredNetworkType(
+                        getSubId(), RadioAccessFamily.getNetworkTypeFromRaf(networkTypeBitmap));
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
@@ -7858,9 +7953,7 @@ public class TelephonyManager {
      * support for the feature and device firmware support.
      *
      * @return {@code true} if the device and carrier both support RTT, {@code false} otherwise.
-     * @hide
      */
-    @TestApi
     public boolean isRttSupported() {
         try {
             ITelephony telephony = getITelephony();
@@ -9569,10 +9662,10 @@ public class TelephonyManager {
      *
      * <p>
      * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isOpportunisticNetworkEnabled() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean isEnabled = false;
@@ -9953,12 +10046,17 @@ public class TelephonyManager {
      * Get preferred opportunistic data subscription Id
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}),
-     * or has permission {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
+     * or has either READ_PRIVILEGED_PHONE_STATE
+     * or {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission.
      * @return subId preferred opportunistic subscription id or
      * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} if there are no preferred
      * subscription id
      *
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public int getPreferredOpportunisticDataSubscription() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -10130,11 +10228,14 @@ public class TelephonyManager {
 
     /**
      * Get whether reboot is required or not after making changes to modem configurations.
-     * @Return {@code True} if reboot is required after making changes to modem configurations,
-     * otherwise return {@code False}.
+     * The modem configuration change refers to switching from single SIM configuration to DSDS
+     * or the other way around.
+     * @Return {@code true} if reboot is required after making changes to modem configurations,
+     * otherwise return {@code false}.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isRebootRequiredForModemConfigChange() {
         try {

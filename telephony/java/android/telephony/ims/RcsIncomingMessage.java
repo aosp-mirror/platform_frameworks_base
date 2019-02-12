@@ -15,34 +15,80 @@
  */
 package android.telephony.ims;
 
-import android.os.Parcel;
+import android.annotation.WorkerThread;
 
 /**
  * This is a single instance of a message received over RCS.
- * @hide - TODO(sahinc) make this public
  */
 public class RcsIncomingMessage extends RcsMessage {
-    public static final Creator<RcsIncomingMessage> CREATOR = new Creator<RcsIncomingMessage>() {
-        @Override
-        public RcsIncomingMessage createFromParcel(Parcel in) {
-            return new RcsIncomingMessage(in);
-        }
-
-        @Override
-        public RcsIncomingMessage[] newArray(int size) {
-            return new RcsIncomingMessage[size];
-        }
-    };
-
-    protected RcsIncomingMessage(Parcel in) {
+    /**
+     * @hide
+     */
+    RcsIncomingMessage(int id) {
+        super(id);
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    /**
+     * Sets the timestamp of arrival for this message and persists into storage. The timestamp is
+     * defined as milliseconds passed after midnight, January 1, 1970 UTC
+     *
+     * @param arrivalTimestamp The timestamp to set to.
+     * @throws RcsMessageStoreException if the value could not be persisted into storage
+     */
+    @WorkerThread
+    public void setArrivalTimestamp(long arrivalTimestamp) throws RcsMessageStoreException {
+        RcsControllerCall.callWithNoReturn(
+                iRcs -> iRcs.setMessageArrivalTimestamp(mId, true, arrivalTimestamp));
     }
 
+    /**
+     * @return Returns the timestamp of arrival for this message. The timestamp is defined as
+     * milliseconds passed after midnight, January 1, 1970 UTC
+     * @throws RcsMessageStoreException if the value could not be read from the storage
+     */
+    @WorkerThread
+    public long getArrivalTimestamp() throws RcsMessageStoreException {
+        return RcsControllerCall.call(iRcs -> iRcs.getMessageArrivalTimestamp(mId, true));
+    }
+
+    /**
+     * Sets the timestamp of when the user saw this message and persists into storage. The timestamp
+     * is defined as milliseconds passed after midnight, January 1, 1970 UTC
+     *
+     * @param notifiedTimestamp The timestamp to set to.
+     * @throws RcsMessageStoreException if the value could not be persisted into storage
+     */
+    @WorkerThread
+    public void setSeenTimestamp(long notifiedTimestamp) throws RcsMessageStoreException {
+        RcsControllerCall.callWithNoReturn(
+                iRcs -> iRcs.setMessageSeenTimestamp(mId, true, notifiedTimestamp));
+    }
+
+    /**
+     * @return Returns the timestamp of when the user saw this message. The timestamp is defined as
+     * milliseconds passed after midnight, January 1, 1970 UTC
+     * @throws RcsMessageStoreException if the value could not be read from the storage
+     */
+    @WorkerThread
+    public long getSeenTimestamp() throws RcsMessageStoreException {
+        return RcsControllerCall.call(iRcs -> iRcs.getMessageSeenTimestamp(mId, true));
+    }
+
+    /**
+     * @return Returns the sender of this incoming message.
+     * @throws RcsMessageStoreException if the value could not be read from the storage
+     */
+    @WorkerThread
+    public RcsParticipant getSenderParticipant() throws RcsMessageStoreException {
+        return new RcsParticipant(
+                RcsControllerCall.call(iRcs -> iRcs.getSenderParticipant(mId)));
+    }
+
+    /**
+     * @return Returns {@code true} as this is an incoming message
+     */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public boolean isIncoming() {
+        return true;
     }
 }

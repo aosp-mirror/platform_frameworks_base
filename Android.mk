@@ -72,6 +72,9 @@ $(OUT_DOCS)/offline-sdk-timestamp: $(OUT_DOCS)/offline-sdk-docs-docs.zip
 	$(hide) mkdir -p $(OUT_DOCS)/offline-sdk
 	( unzip -qo $< -d $(OUT_DOCS)/offline-sdk && touch -f $@ ) || exit 1
 
+.PHONY: docs offline-sdk-docs
+docs offline-sdk-docs: $(OUT_DOCS)/offline-sdk-timestamp
+
 # Run this for checkbuild
 checkbuild: doc-comment-check-docs
 # Check comment when you are updating the API
@@ -79,34 +82,6 @@ update-api: doc-comment-check-docs
 
 # ==== hiddenapi lists =======================================
 ifneq ($(UNSAFE_DISABLE_HIDDENAPI_FLAGS),true)
-.KATI_RESTAT: $(INTERNAL_PLATFORM_HIDDENAPI_FLAGS)
-$(INTERNAL_PLATFORM_HIDDENAPI_FLAGS): \
-    PRIVATE_FLAGS_INPUTS := $(PRIVATE_FLAGS_INPUTS) $(SOONG_HIDDENAPI_FLAGS)
-$(INTERNAL_PLATFORM_HIDDENAPI_FLAGS): \
-    frameworks/base/tools/hiddenapi/generate_hiddenapi_lists.py \
-    frameworks/base/config/hiddenapi-greylist.txt \
-    frameworks/base/config/hiddenapi-greylist-max-p.txt \
-    frameworks/base/config/hiddenapi-greylist-max-o.txt \
-    frameworks/base/config/hiddenapi-force-blacklist.txt \
-    $(INTERNAL_PLATFORM_HIDDENAPI_STUB_FLAGS) \
-    $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
-    $(SOONG_HIDDENAPI_FLAGS)
-	frameworks/base/tools/hiddenapi/generate_hiddenapi_lists.py \
-	    --csv $(INTERNAL_PLATFORM_HIDDENAPI_STUB_FLAGS) $(PRIVATE_FLAGS_INPUTS) \
-	    --greylist frameworks/base/config/hiddenapi-greylist.txt \
-	    --greylist-ignore-conflicts $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
-	    --greylist-max-p frameworks/base/config/hiddenapi-greylist-max-p.txt \
-	    --greylist-max-o-ignore-conflicts \
-	        frameworks/base/config/hiddenapi-greylist-max-o.txt \
-	    --blacklist frameworks/base/config/hiddenapi-force-blacklist.txt \
-	    --output $@.tmp
-	$(call commit-change-for-toc,$@)
-
-$(INTERNAL_PLATFORM_HIDDENAPI_GREYLIST_METADATA): \
-    frameworks/base/tools/hiddenapi/merge_csv.py \
-    $(PRIVATE_METADATA_INPUTS)
-	frameworks/base/tools/hiddenapi/merge_csv.py $(PRIVATE_METADATA_INPUTS) > $@
-
 $(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_FLAGS))
 $(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_GREYLIST_METADATA))
 endif  # UNSAFE_DISABLE_HIDDENAPI_FLAGS

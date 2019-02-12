@@ -1829,7 +1829,7 @@ interface ITelephony {
      * @hide
      */
     boolean isMultisimCarrierRestricted();
-    
+
     /**
      * Switch configs to enable multi-sim or switch back to single-sim
      * @hide
@@ -1842,6 +1842,7 @@ interface ITelephony {
     int getNumOfActiveSims();
     /**
      * Get if reboot is required upon altering modems configurations
+     * @hide
      */
     boolean isRebootRequiredForModemConfigChange();
 }

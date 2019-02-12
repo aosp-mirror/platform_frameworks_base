@@ -15,34 +15,51 @@
  */
 package android.telephony.ims;
 
-import android.os.Parcel;
+import android.annotation.NonNull;
+import android.annotation.WorkerThread;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is a single instance of a message sent over RCS.
- * @hide - TODO(sahinc) make this public
  */
 public class RcsOutgoingMessage extends RcsMessage {
-    public static final Creator<RcsOutgoingMessage> CREATOR = new Creator<RcsOutgoingMessage>() {
-        @Override
-        public RcsOutgoingMessage createFromParcel(Parcel in) {
-            return new RcsOutgoingMessage(in);
-        }
-
-        @Override
-        public RcsOutgoingMessage[] newArray(int size) {
-            return new RcsOutgoingMessage[size];
-        }
-    };
-
-    protected RcsOutgoingMessage(Parcel in) {
+    RcsOutgoingMessage(int id) {
+        super(id);
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    /**
+     * @return Returns the {@link RcsOutgoingMessageDelivery}s associated with this message. Please
+     * note that the deliveries returned for the {@link RcsOutgoingMessage} may not always match the
+     * {@link RcsParticipant}s on the {@link RcsGroupThread} as the group recipients may have
+     * changed.
+     * @throws RcsMessageStoreException if the outgoing deliveries could not be read from storage.
+     */
+    @NonNull
+    @WorkerThread
+    public List<RcsOutgoingMessageDelivery> getOutgoingDeliveries()
+            throws RcsMessageStoreException {
+        int[] deliveryParticipants;
+        List<RcsOutgoingMessageDelivery> messageDeliveries = new ArrayList<>();
+
+        deliveryParticipants = RcsControllerCall.call(
+                iRcs -> iRcs.getMessageRecipients(mId));
+
+        if (deliveryParticipants != null) {
+            for (Integer deliveryParticipant : deliveryParticipants) {
+                messageDeliveries.add(new RcsOutgoingMessageDelivery(deliveryParticipant, mId));
+            }
+        }
+
+        return messageDeliveries;
     }
 
+    /**
+     * @return Returns {@code false} as this is not an incoming message.
+     */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public boolean isIncoming() {
+        return false;
     }
 }

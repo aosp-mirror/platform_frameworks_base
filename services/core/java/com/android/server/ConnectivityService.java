@@ -38,7 +38,6 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
-import static android.net.NetworkStack.NETWORKSTACK_PACKAGE_NAME;
 import static android.net.shared.NetworkMonitorUtils.isValidationRequired;
 import static android.net.shared.NetworkParcelableUtil.toStableParcelable;
 import static android.os.Process.INVALID_UID;
@@ -60,7 +59,6 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityManager;
-import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.IConnectivityManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetd;
@@ -93,6 +91,7 @@ import android.net.NetworkWatchlistManager;
 import android.net.PrivateDnsConfigParcel;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
+import android.net.SocketKeepalive;
 import android.net.UidRange;
 import android.net.Uri;
 import android.net.VpnService;
@@ -1832,14 +1831,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
-    private void enforceAnyPermissionOf(String... permissions) {
+    private boolean checkAnyPermissionOf(String... permissions) {
         for (String permission : permissions) {
             if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
-                return;
+                return true;
             }
         }
-        throw new SecurityException(
-            "Requires one of the following permissions: " + String.join(", ", permissions) + ".");
+        return false;
+    }
+
+    private void enforceAnyPermissionOf(String... permissions) {
+        if (!checkAnyPermissionOf(permissions)) {
+            throw new SecurityException("Requires one of the following permissions: "
+                    + String.join(", ", permissions) + ".");
+        }
     }
 
     private void enforceInternetPermission() {
@@ -1859,19 +1864,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceSettingsPermission() {
-        mContext.enforceCallingOrSelfPermission(
+        enforceAnyPermissionOf(
                 android.Manifest.permission.NETWORK_SETTINGS,
-                "ConnectivityService");
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private boolean checkSettingsPermission() {
-        return PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.NETWORK_SETTINGS);
+        return checkAnyPermissionOf(
+                android.Manifest.permission.NETWORK_SETTINGS,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private boolean checkSettingsPermission(int pid, int uid) {
         return PERMISSION_GRANTED == mContext.checkPermission(
-                android.Manifest.permission.NETWORK_SETTINGS, pid, uid);
+                android.Manifest.permission.NETWORK_SETTINGS, pid, uid)
+                || PERMISSION_GRANTED == mContext.checkPermission(
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, pid, uid);
     }
 
     private void enforceTetherAccessPermission() {
@@ -1881,9 +1889,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceConnectivityInternalPermission() {
-        mContext.enforceCallingOrSelfPermission(
+        enforceAnyPermissionOf(
                 android.Manifest.permission.CONNECTIVITY_INTERNAL,
-                "ConnectivityService");
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private void enforceControlAlwaysOnVpnPermission() {
@@ -1894,20 +1902,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void enforceNetworkStackSettingsOrSetup() {
         enforceAnyPermissionOf(
-            android.Manifest.permission.NETWORK_SETTINGS,
-            android.Manifest.permission.NETWORK_SETUP_WIZARD,
-            android.Manifest.permission.NETWORK_STACK);
-    }
-
-    private void enforceNetworkStackPermission() {
-        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.NETWORK_SETTINGS,
+                android.Manifest.permission.NETWORK_SETUP_WIZARD,
                 android.Manifest.permission.NETWORK_STACK,
-                "ConnectivityService");
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private boolean checkNetworkStackPermission() {
-        return PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.NETWORK_STACK);
+        return checkAnyPermissionOf(
+                android.Manifest.permission.NETWORK_STACK,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private void enforceConnectivityRestrictedNetworksPermission() {
@@ -2487,8 +2491,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     nai.networkMisc.acceptUnvalidated = msg.arg1 == 1;
                     break;
                 }
-                case NetworkAgent.EVENT_PACKET_KEEPALIVE: {
-                    mKeepaliveTracker.handleEventPacketKeepalive(nai, msg);
+                case NetworkAgent.EVENT_SOCKET_KEEPALIVE: {
+                    mKeepaliveTracker.handleEventSocketKeepalive(nai, msg);
                     break;
                 }
             }
@@ -2661,9 +2665,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         @Override
-        public void showProvisioningNotification(String action) {
+        public void showProvisioningNotification(String action, String packageName) {
             final Intent intent = new Intent(action);
-            intent.setPackage(NETWORKSTACK_PACKAGE_NAME);
+            intent.setPackage(packageName);
 
             final PendingIntent pendingIntent;
             // Only the system server can register notifications with package "android"
@@ -2853,8 +2857,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // sending all CALLBACK_LOST messages (for requests, not listens) at the end
         // of rematchAllNetworksAndRequests
         notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOST);
-        mKeepaliveTracker.handleStopAllKeepalives(nai,
-                ConnectivityManager.PacketKeepalive.ERROR_INVALID_NETWORK);
+        mKeepaliveTracker.handleStopAllKeepalives(nai, SocketKeepalive.ERROR_INVALID_NETWORK);
         for (String iface : nai.linkProperties.getAllInterfaceNames()) {
             // Disable wakeup packet monitoring for each interface.
             wakeupModifyInterface(iface, nai.networkCapabilities, false);
@@ -3231,6 +3234,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         });
     }
 
+    /**
+     * NetworkStack endpoint to start the captive portal app. The NetworkStack needs to use this
+     * endpoint as it does not have INTERACT_ACROSS_USERS_FULL itself.
+     * @param appExtras Bundle to use as intent extras for the captive portal application.
+     *                  Must be treated as opaque to avoid preventing the captive portal app to
+     *                  update its arguments.
+     */
+    @Override
+    public void startCaptivePortalAppInternal(Bundle appExtras) {
+        mContext.checkCallingOrSelfPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+
+        final Intent appIntent = new Intent(ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
+        appIntent.putExtras(appExtras);
+        appIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Binder.withCleanCallingIdentity(() ->
+                mContext.startActivityAsUser(appIntent, UserHandle.CURRENT));
+    }
+
     public boolean avoidBadWifi() {
         return mMultinetworkPolicyTracker.getAvoidBadWifi();
     }
@@ -3446,12 +3468,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 // Sent by KeepaliveTracker to process an app request on the state machine thread.
-                case NetworkAgent.CMD_START_PACKET_KEEPALIVE: {
+                case NetworkAgent.CMD_START_SOCKET_KEEPALIVE: {
                     mKeepaliveTracker.handleStartKeepalive(msg);
                     break;
                 }
                 // Sent by KeepaliveTracker to process an app request on the state machine thread.
-                case NetworkAgent.CMD_STOP_PACKET_KEEPALIVE: {
+                case NetworkAgent.CMD_STOP_SOCKET_KEEPALIVE: {
                     NetworkAgentInfo nai = getNetworkAgentInfoForNetwork((Network) msg.obj);
                     int slot = msg.arg1;
                     int reason = msg.arg2;
@@ -6315,7 +6337,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mKeepaliveTracker.startNattKeepalive(
                 getNetworkAgentInfoForNetwork(network),
                 intervalSeconds, messenger, binder,
-                srcAddr, srcPort, dstAddr, ConnectivityManager.PacketKeepalive.NATT_PORT);
+                srcAddr, srcPort, dstAddr, NattSocketKeepalive.NATT_PORT);
     }
 
     @Override
@@ -6330,9 +6352,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
+    public void startTcpKeepalive(Network network, FileDescriptor fd, int intervalSeconds,
+            Messenger messenger, IBinder binder) {
+        enforceKeepalivePermission();
+        mKeepaliveTracker.startTcpKeepalive(
+                getNetworkAgentInfoForNetwork(network), fd, intervalSeconds, messenger, binder);
+    }
+
+    @Override
     public void stopKeepalive(Network network, int slot) {
         mHandler.sendMessage(mHandler.obtainMessage(
-                NetworkAgent.CMD_STOP_PACKET_KEEPALIVE, slot, PacketKeepalive.SUCCESS, network));
+                NetworkAgent.CMD_STOP_SOCKET_KEEPALIVE, slot, SocketKeepalive.SUCCESS, network));
     }
 
     @Override

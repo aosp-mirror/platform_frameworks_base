@@ -15,33 +15,15 @@
  */
 package android.telephony.ims;
 
-import static android.telephony.ims.RcsMessageStore.TAG;
-
-import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.WorkerThread;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.telephony.Rlog;
-import android.telephony.ims.aidl.IRcs;
-import android.text.TextUtils;
-
-import com.android.internal.util.Preconditions;
 
 /**
  * RcsParticipant is an RCS capable contact that can participate in {@link RcsThread}s.
- * @hide - TODO(sahinc) make this public
  */
-public class RcsParticipant implements Parcelable {
+public class RcsParticipant {
     // The row ID of this participant in the database
     private int mId;
-    // The phone number of this participant
-    private String mCanonicalAddress;
-    // The RCS alias of this participant. This is different than the name of the contact in the
-    // Contacts app - i.e. RCS protocol allows users to define aliases for themselves that doesn't
-    // require other users to add them as contacts and give them a name.
-    private String mAlias;
 
     /**
      * Constructor for {@link com.android.internal.telephony.ims.RcsMessageStoreController}
@@ -49,68 +31,87 @@ public class RcsParticipant implements Parcelable {
      *
      * @hide
      */
-    public RcsParticipant(int id, @NonNull String canonicalAddress) {
+    public RcsParticipant(int id) {
         mId = id;
-        mCanonicalAddress = canonicalAddress;
     }
 
     /**
-     * @return Returns the canonical address (i.e. normalized phone number) for this participant
+     * @return Returns the canonical address (i.e. normalized phone number) for this
+     * {@link RcsParticipant}
+     * @throws RcsMessageStoreException if the value could not be read from the storage
      */
-    public String getCanonicalAddress() {
-        return mCanonicalAddress;
+    @Nullable
+    @WorkerThread
+    public String getCanonicalAddress() throws RcsMessageStoreException {
+        return RcsControllerCall.call(iRcs -> iRcs.getRcsParticipantCanonicalAddress(mId));
     }
 
     /**
-     * Sets the canonical address for this participant and updates it in storage.
-     * @param canonicalAddress the canonical address to update to.
+     * @return Returns the alias for this {@link RcsParticipant}. Alias is usually the real name of
+     * the person themselves. Please see US5-15 - GSMA RCC.71 (RCS Universal Profile Service
+     * Definition Document)
+     * @throws RcsMessageStoreException if the value could not be read from the storage
+     */
+    @Nullable
+    @WorkerThread
+    public String getAlias() throws RcsMessageStoreException {
+        return RcsControllerCall.call(iRcs -> iRcs.getRcsParticipantAlias(mId));
+    }
+
+    /**
+     * Sets the alias for this {@link RcsParticipant} and persists it in storage. Alias is usually
+     * the real name of the person themselves. Please see US5-15 - GSMA RCC.71 (RCS Universal
+     * Profile Service Definition Document)
+     *
+     * @param alias The alias to set to.
+     * @throws RcsMessageStoreException if the value could not be persisted into storage
      */
     @WorkerThread
-    public void setCanonicalAddress(@NonNull String canonicalAddress) {
-        Preconditions.checkNotNull(canonicalAddress);
-        if (canonicalAddress.equals(mCanonicalAddress)) {
-            return;
-        }
-
-        mCanonicalAddress = canonicalAddress;
-
-        try {
-            IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService("ircs"));
-            if (iRcs != null) {
-                iRcs.updateRcsParticipantCanonicalAddress(mId, mCanonicalAddress);
-            }
-        } catch (RemoteException re) {
-            Rlog.e(TAG, "RcsParticipant: Exception happened during setCanonicalAddress", re);
-        }
+    public void setAlias(String alias) throws RcsMessageStoreException {
+        RcsControllerCall.callWithNoReturn(iRcs -> iRcs.setRcsParticipantAlias(mId, alias));
     }
 
     /**
-     * @return Returns the alias for this participant. Alias is usually the real name of the person
-     * themselves.
+     * @return Returns the contact ID for this {@link RcsParticipant}. Contact ID is a unique ID for
+     * an {@link RcsParticipant} that is RCS provisioned. Please see 4.4.5 - GSMA RCC.53 (RCS Device
+     * API 1.6 Specification)
+     * @throws RcsMessageStoreException if the value could not be read from the storage
      */
-    public String getAlias() {
-        return mAlias;
+    @Nullable
+    @WorkerThread
+    public String getContactId() throws RcsMessageStoreException {
+        return RcsControllerCall.call(iRcs -> iRcs.getRcsParticipantContactId(mId));
     }
 
     /**
-     * Sets the alias for this participant and persists it in storage. Alias is usually the real
-     * name of the person themselves.
+     * Sets the contact ID for this {@link RcsParticipant}. Contact ID is a unique ID for
+     * an {@link RcsParticipant} that is RCS provisioned. Please see 4.4.5 - GSMA RCC.53 (RCS Device
+     * API 1.6 Specification)
+     *
+     * @param contactId The contact ID to set to.
+     * @throws RcsMessageStoreException if the value could not be persisted into storage
      */
     @WorkerThread
-    public void setAlias(String alias) {
-        if (TextUtils.equals(mAlias, alias)) {
-            return;
-        }
-        mAlias = alias;
+    public void setContactId(String contactId) throws RcsMessageStoreException {
+        RcsControllerCall.callWithNoReturn(iRcs -> iRcs.setRcsParticipantContactId(mId, contactId));
+    }
 
-        try {
-            IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService("ircs"));
-            if (iRcs != null) {
-                iRcs.updateRcsParticipantAlias(mId, mAlias);
-            }
-        } catch (RemoteException re) {
-            Rlog.e(TAG, "RcsParticipant: Exception happened during setCanonicalAddress", re);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
+        if (!(obj instanceof RcsParticipant)) {
+            return false;
+        }
+        RcsParticipant other = (RcsParticipant) obj;
+
+        return mId == other.mId;
+    }
+
+    @Override
+    public int hashCode() {
+        return mId;
     }
 
     /**
@@ -120,35 +121,5 @@ public class RcsParticipant implements Parcelable {
      */
     public int getId() {
         return mId;
-    }
-
-    public static final Creator<RcsParticipant> CREATOR = new Creator<RcsParticipant>() {
-        @Override
-        public RcsParticipant createFromParcel(Parcel in) {
-            return new RcsParticipant(in);
-        }
-
-        @Override
-        public RcsParticipant[] newArray(int size) {
-            return new RcsParticipant[size];
-        }
-    };
-
-    protected RcsParticipant(Parcel in) {
-        mId = in.readInt();
-        mCanonicalAddress = in.readString();
-        mAlias = in.readString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mId);
-        dest.writeString(mCanonicalAddress);
-        dest.writeString(mAlias);
     }
 }

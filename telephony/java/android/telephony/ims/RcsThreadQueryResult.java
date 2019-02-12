@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,28 @@
 
 package android.telephony.ims;
 
+import static android.provider.Telephony.RcsColumns.RcsUnifiedThreadColumns.THREAD_TYPE_1_TO_1;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.ims.RcsTypeIdPair;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The result of a {@link RcsMessageStore#getRcsThreads(RcsThreadQueryContinuationToken,
- * RcsThreadQueryParameters)}
+ * The result of a {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParams)}
  * call. This class allows getting the token for querying the next batch of threads in order to
  * prevent handling large amounts of data at once.
- *
- * @hide
  */
-public class RcsThreadQueryResult implements Parcelable {
-    private RcsThreadQueryContinuationToken mContinuationToken;
-    private List<RcsThread> mRcsThreads;
+public final class RcsThreadQueryResult implements Parcelable {
+    // A token for the caller to continue their query for the next batch of results
+    private RcsQueryContinuationToken mContinuationToken;
+    // The list of thread IDs returned with this query
+    private List<RcsTypeIdPair> mRcsThreadIds;
 
     /**
      * Internal constructor for {@link com.android.internal.telephony.ims.RcsMessageStoreController}
@@ -40,31 +46,47 @@ public class RcsThreadQueryResult implements Parcelable {
      * @hide
      */
     public RcsThreadQueryResult(
-            RcsThreadQueryContinuationToken continuationToken, List<RcsThread> rcsThreads) {
+            RcsQueryContinuationToken continuationToken,
+            List<RcsTypeIdPair> rcsThreadIds) {
         mContinuationToken = continuationToken;
-        mRcsThreads = rcsThreads;
+        mRcsThreadIds = rcsThreadIds;
     }
 
     /**
      * Returns a token to call
-     * {@link RcsMessageStore#getRcsThreads(RcsThreadQueryContinuationToken)}
+     * {@link RcsMessageStore#getRcsThreads(RcsQueryContinuationToken)}
      * to get the next batch of {@link RcsThread}s.
      */
-    public RcsThreadQueryContinuationToken nextChunkToken() {
+    @Nullable
+    public RcsQueryContinuationToken getContinuationToken() {
         return mContinuationToken;
     }
 
     /**
      * Returns all the RcsThreads in the current query result. Call {@link
-     * RcsMessageStore#getRcsThreads(RcsThreadQueryContinuationToken)} to get the next batch of
+     * RcsMessageStore#getRcsThreads(RcsQueryContinuationToken)} to get the next batch of
      * {@link RcsThread}s.
      */
+    @NonNull
     public List<RcsThread> getThreads() {
-        return mRcsThreads;
+        List<RcsThread> rcsThreads = new ArrayList<>();
+
+        for (RcsTypeIdPair typeIdPair : mRcsThreadIds) {
+            if (typeIdPair.getType() == THREAD_TYPE_1_TO_1) {
+                rcsThreads.add(new Rcs1To1Thread(typeIdPair.getId()));
+            } else {
+                rcsThreads.add(new RcsGroupThread(typeIdPair.getId()));
+            }
+        }
+
+        return rcsThreads;
     }
 
-    protected RcsThreadQueryResult(Parcel in) {
-        // TODO - implement
+    private RcsThreadQueryResult(Parcel in) {
+        mContinuationToken = in.readParcelable(
+            RcsQueryContinuationToken.class.getClassLoader());
+        mRcsThreadIds = new ArrayList<>();
+        in.readList(mRcsThreadIds, Integer.class.getClassLoader());
     }
 
     public static final Creator<RcsThreadQueryResult> CREATOR =
@@ -87,6 +109,7 @@ public class RcsThreadQueryResult implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        // TODO - implement
+        dest.writeParcelable(mContinuationToken, flags);
+        dest.writeList(mRcsThreadIds);
     }
 }
