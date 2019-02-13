@@ -206,20 +206,6 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
-    public synchronized void onBtClassChanged(BluetoothDevice device) {
-        CachedBluetoothDevice cachedDevice = findDevice(device);
-        if (cachedDevice != null) {
-            cachedDevice.dispatchAttributesChanged();
-        }
-    }
-
-    public synchronized void onUuidChanged(BluetoothDevice device) {
-        CachedBluetoothDevice cachedDevice = findDevice(device);
-        if (cachedDevice != null) {
-            cachedDevice.onUuidChanged();
-        }
-    }
-
     public synchronized void onBluetoothStateChanged(int bluetoothState) {
         // When Bluetooth is turning off, we need to clear the non-bonded devices
         // Otherwise, they end up showing up on the next BT enable
