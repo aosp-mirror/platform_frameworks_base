@@ -249,7 +249,8 @@ public:
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
-    virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
+    virtual void interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
+            uint32_t& policyFlags);
     virtual nsecs_t interceptKeyBeforeDispatching(
             const sp<IBinder>& token,
             const KeyEvent* keyEvent, uint32_t policyFlags);
@@ -1066,7 +1067,8 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
     }
 }
 
-void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
+void NativeInputManager::interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
+        uint32_t& policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
@@ -1084,7 +1086,7 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
             JNIEnv* env = jniEnv();
             jint wmActions = env->CallIntMethod(mServiceObj,
                         gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive,
-                        when, policyFlags);
+                        displayId, when, policyFlags);
             if (checkAndClearExceptionFromCallback(env,
                     "interceptMotionBeforeQueueingNonInteractive")) {
                 wmActions = 0;
@@ -1794,7 +1796,7 @@ int register_android_server_InputManager(JNIEnv* env) {
             "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;I)I");
 
     GET_METHOD_ID(gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive, clazz,
-            "interceptMotionBeforeQueueingNonInteractive", "(JI)I");
+            "interceptMotionBeforeQueueingNonInteractive", "(IJI)I");
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",

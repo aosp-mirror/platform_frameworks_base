@@ -1003,11 +1003,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * affect the power state of the device, for example, waking on motions.
      * Generally, it's best to keep as little as possible in the queue thread
      * because it's the most fragile.
+     * @param displayId The display ID of the motion event.
      * @param policyFlags The policy flags associated with the motion.
      *
      * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
-    public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags);
+    int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
+            int policyFlags);
 
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.
