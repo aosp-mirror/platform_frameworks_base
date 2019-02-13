@@ -30,6 +30,7 @@ public final class CellIdentityNr extends CellIdentity {
     private final int mNrArfcn;
     private final int mPci;
     private final int mTac;
+    private final long mNci;
 
     /**
      *
@@ -44,11 +45,12 @@ public final class CellIdentityNr extends CellIdentity {
      * @hide
      */
     public CellIdentityNr(int pci, int tac, int nrArfcn,  String mccStr, String mncStr,
-            String alphal, String alphas) {
+            long nci, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
         mPci = pci;
         mTac = tac;
         mNrArfcn = nrArfcn;
+        mNci = nci;
     }
 
     /**
@@ -62,7 +64,7 @@ public final class CellIdentityNr extends CellIdentity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), mPci, mTac, mNrArfcn);
+        return Objects.hash(super.hashCode(), mPci, mTac, mNrArfcn, mNci);
     }
 
     @Override
@@ -72,7 +74,17 @@ public final class CellIdentityNr extends CellIdentity {
         }
 
         CellIdentityNr o = (CellIdentityNr) other;
-        return super.equals(o) && mPci == o.mPci && mTac == o.mTac && mNrArfcn == o.mNrArfcn;
+        return super.equals(o) && mPci == o.mPci && mTac == o.mTac && mNrArfcn == o.mNrArfcn
+                && mNci == o.mNci;
+    }
+
+    /**
+     * Get the NR Cell Identity.
+     *
+     * @return The NR Cell Identity in range [0, 68719476735] or Long.MAX_VALUE if unknown.
+     */
+    public long getNci() {
+        return mNci;
     }
 
     /**
@@ -122,6 +134,7 @@ public final class CellIdentityNr extends CellIdentity {
                 .append(" mNrArfcn = ").append(mNrArfcn)
                 .append(" mMcc = ").append(mMccStr)
                 .append(" mMnc = ").append(mMncStr)
+                .append(" mNci = ").append(mNci)
                 .append(" mAlphaLong = ").append(mAlphaLong)
                 .append(" mAlphaShort = ").append(mAlphaShort)
                 .append(" }")
@@ -134,6 +147,7 @@ public final class CellIdentityNr extends CellIdentity {
         dest.writeInt(mPci);
         dest.writeInt(mTac);
         dest.writeInt(mNrArfcn);
+        dest.writeLong(mNci);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -142,6 +156,7 @@ public final class CellIdentityNr extends CellIdentity {
         mPci = in.readInt();
         mTac = in.readInt();
         mNrArfcn = in.readInt();
+        mNci = in.readLong();
     }
 
     /** Implement the Parcelable interface */
