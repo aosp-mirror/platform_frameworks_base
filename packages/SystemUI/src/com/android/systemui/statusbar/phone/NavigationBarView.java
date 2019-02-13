@@ -45,6 +45,8 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
+import android.graphics.Region.Op;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -128,8 +130,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Rect mBackButtonBounds = new Rect();
     private Rect mRecentsButtonBounds = new Rect();
     private Rect mRotationButtonBounds = new Rect();
+    private final Region mActiveRegion = new Region();
     private int[] mTmpPosition = new int[2];
-    private Rect mTmpRect = new Rect();
 
     private KeyButtonDrawable mBackIcon;
     private KeyButtonDrawable mHomeDefaultIcon;
@@ -954,17 +956,22 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        updateButtonLocationOnScreen(getBackButton(), mBackButtonBounds);
-        updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
-        updateButtonLocationOnScreen(getRecentsButton(), mRecentsButtonBounds);
-        updateButtonLocationOnScreen(getRotateSuggestionButton(), mRotationButtonBounds);
+
+        mActiveRegion.setEmpty();
+        updateButtonLocation(getBackButton(), mBackButtonBounds, true);
+        updateButtonLocation(getHomeButton(), mHomeButtonBounds, false);
+        updateButtonLocation(getRecentsButton(), mRecentsButtonBounds, false);
+        updateButtonLocation(getRotateSuggestionButton(), mRotationButtonBounds, true);
+        // TODO: Handle button visibility changes
+        mOverviewProxyService.onActiveNavBarRegionChanges(mActiveRegion);
         if (mGestureHelper != null) {
             mGestureHelper.onLayout(changed, left, top, right, bottom);
         }
         mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }
 
-    private void updateButtonLocationOnScreen(ButtonDispatcher button, Rect buttonBounds) {
+    private void updateButtonLocation(ButtonDispatcher button, Rect buttonBounds,
+            boolean isActive) {
         View view = button.getCurrentView();
         if (view == null) {
             buttonBounds.setEmpty();
@@ -975,6 +982,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final float posY = view.getTranslationY();
         view.setTranslationX(0);
         view.setTranslationY(0);
+
+        if (isActive) {
+            view.getLocationOnScreen(mTmpPosition);
+            buttonBounds.set(mTmpPosition[0], mTmpPosition[1],
+                    mTmpPosition[0] + view.getMeasuredWidth(),
+                    mTmpPosition[1] + view.getMeasuredHeight());
+            mActiveRegion.op(buttonBounds, Op.UNION);
+        }
         view.getLocationInWindow(mTmpPosition);
         buttonBounds.set(mTmpPosition[0], mTmpPosition[1],
                 mTmpPosition[0] + view.getMeasuredWidth(),
