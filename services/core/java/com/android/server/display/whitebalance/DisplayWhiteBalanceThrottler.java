@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 /**
  * The DisplayWhiteBalanceController uses the DisplayWhiteBalanceThrottler to decide whether the
- * screen color temperature should be updated, suppressing changes that are too frequent or too
+ * display color temperature should be updated, suppressing changes that are too frequent or too
  * minor.
  */
 class DisplayWhiteBalanceThrottler {

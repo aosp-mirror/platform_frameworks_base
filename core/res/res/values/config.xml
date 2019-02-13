@@ -3906,19 +3906,19 @@
 
     <!-- See DisplayWhiteBalanceController.
          A float array containing a list of ambient color temperatures, in Kelvin. This array,
-         together with config_displayWhiteBalanceDisplayTemperatureValues, is used to generate a
+         together with config_displayWhiteBalanceDisplayColorTemperatures, is used to generate a
          lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
          ambient color temperature readings to a target color temperature for the display.
          This table is optional. If used, this array must,
          1) Contain at least two entries
-         2) Be the same length as config_displayWhiteBalanceDisplayTemperatureValues. -->
-    <array name="config_displayWhiteBalanceAmbientTemperatureValues">
+         2) Be the same length as config_displayWhiteBalanceDisplayColorTemperatures. -->
+    <array name="config_displayWhiteBalanceAmbientColorTemperatures">
     </array>
 
     <!-- See DisplayWhiteBalanceController.
          An array containing a list of display color temperatures, in Kelvin. See
-         config_displayWhiteBalanceAmbientTemperatureValues for additional details.
+         config_displayWhiteBalanceAmbientColorTemperatures for additional details.
          The same restrictions apply to this array. -->
-    <array name="config_displayWhiteBalanceDisplayTemperatureValues">
+    <array name="config_displayWhiteBalanceDisplayColorTemperatures">
     </array>
 </resources>
