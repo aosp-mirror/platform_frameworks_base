@@ -186,6 +186,7 @@ java_defaults {
         "core/java/android/hardware/radio/ITunerCallback.aidl",
         "core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl",
         "core/java/android/hardware/usb/IUsbManager.aidl",
+        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/IConnectivityManager.aidl",
         "core/java/android/net/IIpConnectivityMetrics.aidl",
         "core/java/android/net/IEthernetManager.aidl",
@@ -815,7 +816,6 @@ aidl_interface {
     srcs: [
         "core/java/android/net/ApfCapabilitiesParcelable.aidl",
         "core/java/android/net/DhcpResultsParcelable.aidl",
-        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/INetworkMonitor.aidl",
         "core/java/android/net/INetworkMonitorCallbacks.aidl",
         "core/java/android/net/IIpMemoryStore.aidl",

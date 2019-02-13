@@ -3911,15 +3911,16 @@ public class ConnectivityManager {
      *
      * <p>This endpoint is exclusively for use by the NetworkStack and is protected by the
      * corresponding permission.
+     * @param network Network on which the captive portal was detected.
      * @param appExtras Extras to include in the app start intent.
      * @hide
      */
     @SystemApi
     @TestApi
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
-    public void startCaptivePortalApp(Bundle appExtras) {
+    public void startCaptivePortalApp(Network network, Bundle appExtras) {
         try {
-            mService.startCaptivePortalAppInternal(appExtras);
+            mService.startCaptivePortalAppInternal(network, appExtras);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
