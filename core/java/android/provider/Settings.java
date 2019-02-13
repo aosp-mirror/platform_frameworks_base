@@ -14368,6 +14368,7 @@ public final class Settings {
          * <pre>
          *     num_buckets          (int)
          *     collected_uids       (string)
+         *     minimum_total_cpu_usage_millis (int)
          * </pre>
          *
          * @hide
