@@ -590,11 +590,6 @@ public class NotificationPanelView extends PanelView implements
                     mClockPositionResult.clockX, CLOCK_ANIMATION_PROPERTIES, animateClock);
             PropertyAnimator.setProperty(mKeyguardStatusView, AnimatableProperty.Y,
                     mClockPositionResult.clockY, CLOCK_ANIMATION_PROPERTIES, animateClock);
-            // Move big clock up while pulling up the bouncer
-            PropertyAnimator.setProperty(mBigClockContainer, AnimatableProperty.Y,
-                    MathUtils.lerp(-mBigClockContainer.getHeight(), 0,
-                          Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(getExpandedFraction())),
-                    CLOCK_ANIMATION_PROPERTIES, animateClock);
             updateClock();
             stackScrollerPadding = mClockPositionResult.stackScrollerPadding;
         }
@@ -1334,8 +1329,7 @@ public class NotificationPanelView extends PanelView implements
         }
     };
 
-    private void setKeyguardBottomAreaVisibility(int statusBarState,
-            boolean goingToFullShade) {
+    private void setKeyguardBottomAreaVisibility(int statusBarState, boolean goingToFullShade) {
         mKeyguardBottomArea.animate().cancel();
         if (goingToFullShade) {
             mKeyguardBottomArea.animate()
@@ -1438,6 +1432,7 @@ public class NotificationPanelView extends PanelView implements
         if (mBarState == StatusBarState.SHADE_LOCKED
                 || mBarState == StatusBarState.KEYGUARD) {
             updateKeyguardBottomAreaAlpha();
+            updateBigClockAlpha();
         }
         if (mBarState == StatusBarState.SHADE && mQsExpanded
                 && !mStackScrollerOverscrolling && mQsScrimEnabled) {
@@ -1881,6 +1876,19 @@ public class NotificationPanelView extends PanelView implements
         if (ambientIndicationContainer != null) {
             ambientIndicationContainer.setAlpha(alpha);
         }
+    }
+
+    /**
+     * Custom clock fades away when user drags up to unlock or pulls down quick settings.
+     *
+     * Updates alpha of custom clock to match the alpha of the KeyguardBottomArea. See
+     * {@link updateKeyguardBottomAreaAlpha}.
+     */
+    private void updateBigClockAlpha() {
+        float expansionAlpha = MathUtils.map(isUnlockHintRunning()
+                ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f, 0f, 1f, getExpandedFraction());
+        float alpha = Math.min(expansionAlpha, 1 - getQsExpansionFraction());
+        mBigClockContainer.setAlpha(alpha);
     }
 
     private float getNotificationsTopY() {
@@ -2597,6 +2605,7 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();
+        updateBigClockAlpha();
         updateStatusBarIcons();
     }
 
