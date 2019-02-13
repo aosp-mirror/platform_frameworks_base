@@ -186,7 +186,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     };
 
-    public PackageInstallerService(Context context, PackageManagerService pm) {
+    public PackageInstallerService(Context context, PackageManagerService pm, ApexManager am) {
         mContext = context;
         mPm = pm;
         mPermissionManager = LocalServices.getService(PermissionManagerInternal.class);
@@ -204,7 +204,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSessionsDir = new File(Environment.getDataSystemDirectory(), "install_sessions");
         mSessionsDir.mkdirs();
 
-        mStagingManager = new StagingManager(pm, this);
+        mStagingManager = new StagingManager(pm, this, am);
     }
 
     private void setBootCompleted()  {
