@@ -866,7 +866,8 @@ public class SubscriptionManager {
         }
 
         /**
-         * Callback invoked when there is any change to any SubscriptionInfo. Typically
+         * Callback invoked when there is any change to any SubscriptionInfo, as well as once on
+         * registering for changes with {@link #addOnSubscriptionsChangedListener}. Typically
          * this method would invoke {@link #getActiveSubscriptionInfoList}
          */
         public void onSubscriptionsChanged() {
@@ -918,7 +919,9 @@ public class SubscriptionManager {
     /**
      * Register for changes to the list of active {@link SubscriptionInfo} records or to the
      * individual records themselves. When a change occurs the onSubscriptionsChanged method of
-     * the listener will be invoked immediately if there has been a notification.
+     * the listener will be invoked immediately if there has been a notification. The
+     * onSubscriptionChanged method will also be triggered once initially when calling this
+     * function.
      *
      * @param listener an instance of {@link OnSubscriptionsChangedListener} with
      *                 onSubscriptionsChanged overridden.
