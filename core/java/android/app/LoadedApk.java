@@ -870,8 +870,9 @@ public final class LoadedApk {
             }
         }
 
-        // /vendor/lib, /odm/lib and /product/lib are added to the native lib search
-        // paths of the classloader. Note that this is done AFTER the classloader is
+        // /aepx/com.android.runtime/lib, /vendor/lib, /odm/lib and /product/lib
+        // are added to the native lib search paths of the classloader.
+        // Note that this is done AFTER the classloader is
         // created by ApplicationLoaders.getDefault().getClassLoader(...). The
         // reason is because if we have added the paths when creating the classloader
         // above, the paths are also added to the search path of the linker namespace
@@ -888,8 +889,11 @@ public final class LoadedApk {
         // System.loadLibrary(). In order to prevent the problem, we explicitly
         // add the paths only to the classloader, and not to the native loader
         // (linker namespace).
-        List<String> extraLibPaths = new ArrayList<>(3);
+        List<String> extraLibPaths = new ArrayList<>(4);
         String abiSuffix = VMRuntime.getRuntime().is64Bit() ? "64" : "";
+        if (!defaultSearchPaths.contains("/apex/com.android.runtime/lib")) {
+            extraLibPaths.add("/apex/com.android.runtime/lib" + abiSuffix);
+        }
         if (!defaultSearchPaths.contains("/vendor/lib")) {
             extraLibPaths.add("/vendor/lib" + abiSuffix);
         }
