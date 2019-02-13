@@ -30,12 +30,15 @@ import android.app.IActivityTaskManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.view.Display;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -48,6 +51,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
@@ -171,6 +175,12 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         mActivityTaskManager = ActivityTaskManager.getService();
         mTaskStackListener = new BubbleTaskStackListener();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
+
+        try {
+            WindowManagerWrapper.getInstance().addPinnedStackListener(new BubblesImeListener());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         mBubbleData = data;
     }
@@ -542,5 +552,38 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     private static boolean areBubblesEnabled(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 ENABLE_BUBBLES, 1) != 0;
+    }
+
+    /** PinnedStackListener that dispatches IME visibility updates to the stack. */
+    private class BubblesImeListener extends IPinnedStackListener.Stub {
+
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) throws RemoteException {
+        }
+
+        @Override
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) throws RemoteException {}
+
+        @Override
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight)
+                throws RemoteException {
+            if (mStackView != null) {
+                mStackView.post(() -> {
+                    mStackView.onImeVisibilityChanged(imeVisible, imeHeight);
+                });
+            }
+        }
+
+        @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight)
+                throws RemoteException {}
+
+        @Override
+        public void onMinimizedStateChanged(boolean isMinimized) throws RemoteException {}
+
+        @Override
+        public void onActionsChanged(ParceledListSlice actions) throws RemoteException {}
     }
 }

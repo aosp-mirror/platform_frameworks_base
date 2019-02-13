@@ -100,6 +100,7 @@ public class BubbleStackView extends FrameLayout {
     private int mExpandedAnimateYDistance;
     private int mStatusBarHeight;
     private int mPipDismissHeight;
+    private int mImeOffset;
 
     private Bubble mExpandedBubble;
     private boolean mIsExpanded;
@@ -162,6 +163,7 @@ public class BubbleStackView extends FrameLayout {
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mPipDismissHeight = mContext.getResources().getDimensionPixelSize(
                 R.dimen.pip_dismiss_gradient_height);
+        mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -550,8 +552,15 @@ public class BubbleStackView extends FrameLayout {
                 : null;
     }
 
-    public PointF getStackPosition() {
-        return mStackAnimationController.getStackPosition();
+    /** Moves the bubbles out of the way if they're going to be over the keyboard. */
+    public void onImeVisibilityChanged(boolean visible, int height) {
+        if (!mIsExpanded) {
+            if (visible) {
+                mStackAnimationController.updateBoundsForVisibleImeAndAnimate(height + mImeOffset);
+            } else {
+                mStackAnimationController.updateBoundsForInvisibleImeAndAnimate();
+            }
+        }
     }
 
     /** Called when a drag operation on an individual bubble has started. */
@@ -806,6 +815,10 @@ public class BubbleStackView extends FrameLayout {
         return new BigDecimal(getStackPosition().y / mDisplaySize.y)
                 .setScale(4, RoundingMode.CEILING.HALF_UP)
                 .floatValue();
+    }
+
+    public PointF getStackPosition() {
+        return mStackAnimationController.getStackPosition();
     }
 
     /**

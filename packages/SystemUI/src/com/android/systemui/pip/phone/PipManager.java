@@ -16,8 +16,6 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
@@ -33,8 +31,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
@@ -57,7 +53,6 @@ public class PipManager implements BasePipManager {
     private Context mContext;
     private IActivityManager mActivityManager;
     private IActivityTaskManager mActivityTaskManager;
-    private IWindowManager mWindowManager;
     private Handler mHandler = new Handler();
 
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
@@ -178,10 +173,9 @@ public class PipManager implements BasePipManager {
         mContext = context;
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
-        mWindowManager = WindowManagerGlobal.getWindowManagerService();
 
         try {
-            mWindowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
+            WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }

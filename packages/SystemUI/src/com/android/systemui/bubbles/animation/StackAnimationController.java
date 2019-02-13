@@ -66,6 +66,15 @@ public class StackAnimationController extends
      */
     private PointF mStackPosition = new PointF();
 
+    /** The height of the most recently visible IME. */
+    private float mImeHeight = 0f;
+
+    /**
+     * The Y position of the stack before the IME became visible, or {@link Float#MIN_VALUE} if the
+     * IME is not visible or the user moved the stack since the IME became visible.
+     */
+    private float mPreImeY = Float.MIN_VALUE;
+
     /**
      * Animations on the stack position itself, which would have been started in
      * {@link #flingThenSpringFirstBubbleWithStackFollowing}. These animations dispatch to
@@ -108,6 +117,10 @@ public class StackAnimationController extends
      * it with the 'following' effect.
      */
     public void moveFirstBubbleWithStackFollowing(float x, float y) {
+        // If we manually move the bubbles with the IME open, clear the return point since we don't
+        // want the stack to snap away from the new position.
+        mPreImeY = Float.MIN_VALUE;
+
         moveFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_X, x);
         moveFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_Y, y);
     }
@@ -189,6 +202,44 @@ public class StackAnimationController extends
     }
 
     /**
+     * Save the IME height so that the allowable stack bounds reflect the now-visible IME, and
+     * animate the stack out of the way if necessary.
+     */
+    public void updateBoundsForVisibleImeAndAnimate(int imeHeight) {
+        mImeHeight = imeHeight;
+
+        final float maxBubbleY = getAllowableStackPositionRegion().bottom;
+        if (mStackPosition.y > maxBubbleY && mPreImeY == Float.MIN_VALUE) {
+            mPreImeY = mStackPosition.y;
+
+            springFirstBubbleWithStackFollowing(
+                    DynamicAnimation.TRANSLATION_Y,
+                    getSpringForce(DynamicAnimation.TRANSLATION_Y, /* view */ null)
+                            .setStiffness(SpringForce.STIFFNESS_LOW),
+                    /* startVel */ 0f,
+                    maxBubbleY);
+        }
+    }
+
+    /**
+     * Clear the IME height from the bounds and animate the stack back to its original position,
+     * assuming it wasn't moved in the meantime.
+     */
+    public void updateBoundsForInvisibleImeAndAnimate() {
+        mImeHeight = 0;
+
+        if (mPreImeY > Float.MIN_VALUE) {
+            springFirstBubbleWithStackFollowing(
+                    DynamicAnimation.TRANSLATION_Y,
+                    getSpringForce(DynamicAnimation.TRANSLATION_Y, /* view */ null)
+                        .setStiffness(SpringForce.STIFFNESS_LOW),
+                    /* startVel */ 0f,
+                    mPreImeY);
+            mPreImeY = Float.MIN_VALUE;
+        }
+    }
+
+    /**
      * Returns the region within which the stack is allowed to rest. This goes slightly off the left
      * and right sides of the screen, below the status bar/cutout and above the navigation bar.
      * While the stack is not allowed to rest outside of these bounds, it can temporarily be
@@ -228,6 +279,7 @@ public class StackAnimationController extends
                     mLayout.getHeight()
                             - mIndividualBubbleSize
                             - mBubblePadding
+                            - (mImeHeight > Float.MIN_VALUE ? mImeHeight + mBubblePadding : 0f)
                             - Math.max(
                             insets.getSystemWindowInsetBottom(),
                             insets.getDisplayCutout() != null
@@ -389,8 +441,8 @@ public class StackAnimationController extends
             float vel, float finalPosition) {
 
         Log.d(TAG, String.format("Springing %s to final position %f.",
-                        PhysicsAnimationLayout.getReadablePropertyName(property),
-                        finalPosition));
+                PhysicsAnimationLayout.getReadablePropertyName(property),
+                finalPosition));
 
         StackPositionProperty firstBubbleProperty = new StackPositionProperty(property);
         SpringAnimation springAnimation =
