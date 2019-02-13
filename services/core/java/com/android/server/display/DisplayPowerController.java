@@ -803,9 +803,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && mAutomaticBrightnessController != null;
 
         final boolean userSetBrightnessChanged = updateUserSetScreenBrightness();
-        if (userSetBrightnessChanged) {
-            mTemporaryScreenBrightness = -1;
-        }
 
         // Use the temporary screen brightness if there isn't an override, either from
         // WindowManager or based on the display state.
@@ -1526,11 +1523,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         if (mCurrentScreenBrightnessSetting == mPendingScreenBrightnessSetting) {
             mPendingScreenBrightnessSetting = -1;
+            mTemporaryScreenBrightness = -1;
             return false;
         }
         mCurrentScreenBrightnessSetting = mPendingScreenBrightnessSetting;
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;
         mPendingScreenBrightnessSetting = -1;
+        mTemporaryScreenBrightness = -1;
         return true;
     }
 
