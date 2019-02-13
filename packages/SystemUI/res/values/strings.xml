@@ -2323,7 +2323,7 @@
     <!-- Action for accepting the Ongoing privacy dialog [CHAR LIMIT=10]-->
     <string name="ongoing_privacy_dialog_ok">Got it</string>
 
-    <!-- Action on Ongoing Privacy Dialog to open privacy hub [CHAR LIMIT=20]-->
+    <!-- Action on Ongoing Privacy Dialog to open privacy hub [CHAR LIMIT=23]-->
     <string name="ongoing_privacy_dialog_open_settings">Privacy settings</string>
 
     <!-- Text for item in Ongoing Privacy Dialog title when only one app is using app ops [CHAR LIMIT=NONE] -->
