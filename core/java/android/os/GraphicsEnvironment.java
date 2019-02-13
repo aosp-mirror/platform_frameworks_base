@@ -25,10 +25,15 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.gamedriver.GameDriverProto.Blacklist;
+import android.gamedriver.GameDriverProto.Blacklists;
 import android.opengl.EGL14;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.android.framework.protobuf.InvalidProtocolBufferException;
 
 import dalvik.system.VMRuntime;
 
@@ -64,6 +69,8 @@ public class GraphicsEnvironment {
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
+    private static final String GAME_DRIVER_BLACKLIST_FLAG = "blacklist";
+    private static final int BASE64_FLAGS = Base64.NO_PADDING | Base64.NO_WRAP;
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -632,12 +639,34 @@ public class GraphicsEnvironment {
                 return false;
             }
 
-            // If the application is not opted-in and check whether it's on the blacklist,
-            // terminate early if it's on the blacklist and fallback to system driver.
-            if (!isOptIn
-                    && getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_BLACKLIST)
-                            .contains(ai.packageName)) {
-                return false;
+            if (!isOptIn) {
+                // At this point, the application is on the whitelist only, check whether it's
+                // on the blacklist, terminate early when it's on the blacklist.
+                try {
+                    // TODO(b/121350991) Switch to DeviceConfig with property listener.
+                    final String base64String =
+                            coreSettings.getString(Settings.Global.GAME_DRIVER_BLACKLIST);
+                    if (base64String != null && !base64String.isEmpty()) {
+                        final Blacklists blacklistsProto =
+                                Blacklists.parseFrom(Base64.decode(base64String, BASE64_FLAGS));
+                        final List<Blacklist> blacklists = blacklistsProto.getBlacklistsList();
+                        final long driverVersionCode = driverAppInfo.longVersionCode;
+                        for (Blacklist blacklist : blacklists) {
+                            if (blacklist.getVersionCode() == driverVersionCode) {
+                                for (String pkgName : blacklist.getPackageNamesList()) {
+                                    if (pkgName == packageName) {
+                                        return false;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } catch (InvalidProtocolBufferException e) {
+                    if (DEBUG) {
+                        Log.w(TAG, "Can't parse blacklist, skip and continue...");
+                    }
+                }
             }
         }
 
