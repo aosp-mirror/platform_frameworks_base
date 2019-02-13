@@ -160,7 +160,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
            }
 
       }))  {
-    mUidMap = new UidMap();
+    mUidMap = UidMap::getInstance();
     mPullerManager = new StatsPullerManager();
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();

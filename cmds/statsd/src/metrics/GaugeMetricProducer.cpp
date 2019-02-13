@@ -485,8 +485,8 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
                 gaugeVal = value.long_value;
             }
             for (auto& tracker : mAnomalyTrackers) {
-                tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey,
-                                                 gaugeVal);
+                tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, mMetricId,
+                                                 eventKey, gaugeVal);
             }
         }
     }

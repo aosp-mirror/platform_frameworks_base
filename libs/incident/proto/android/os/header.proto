@@ -37,4 +37,9 @@ message IncidentHeaderProto {
       optional int64 id = 2; // The unique id of the statsd config.
     }
     optional StatsdConfigKey config_key = 3;
+
+    // Details about the trigger. com.android.os.AlertTriggerDetails
+    // Only use bytes type here to avoid indirect dependency on atoms.proto
+    // And this header passes through incidentd without incidentd parsing it.
+    optional bytes trigger_details = 4;
 }

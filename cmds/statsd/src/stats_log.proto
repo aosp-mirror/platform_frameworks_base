@@ -456,3 +456,17 @@ message StatsdStatsReport {
     }
     repeated LogLossStats detected_log_loss = 16;
 }
+
+message AlertTriggerDetails {
+    message MetricValue {
+        optional int64 metric_id = 1;
+        optional DimensionsValue dimension_in_what = 2;
+        optional DimensionsValue dimension_in_condition = 3;
+        optional int64 value = 4;
+    }
+    oneof value {
+        MetricValue trigger_metric = 1;
+        EventMetricData trigger_event = 2;
+    }
+    optional UidMapping.PackageInfoSnapshot package_info = 3;
+}

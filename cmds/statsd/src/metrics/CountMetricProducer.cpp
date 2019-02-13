@@ -303,7 +303,7 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
         if (prev != mCurrentFullCounters->end()) {
             countWholeBucket += prev->second;
         }
-        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey,
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, mMetricId, eventKey,
                                          countWholeBucket);
     }
 
