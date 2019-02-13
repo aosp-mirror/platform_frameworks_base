@@ -70,6 +70,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -1484,19 +1485,50 @@ public class UserBackupManagerService {
     }
 
     /**
-     * Clear an application's data, blocking until the operation completes or times out. If {@code
-     * keepSystemState} is {@code true}, we intentionally do not clear system state that would
-     * ordinarily also be cleared, because we aren't actually wiping the app back to empty; we're
-     * bringing it into the actual expected state related to the already-restored notification state
-     * etc.
+     * Clear an application's data after a failed restore, blocking until the operation completes or
+     * times out.
      */
-    public void clearApplicationDataSynchronous(String packageName, boolean keepSystemState) {
-        // Don't wipe packages marked allowClearUserData=false
+    public void clearApplicationDataAfterRestoreFailure(String packageName) {
+        clearApplicationDataSynchronous(packageName, true, false);
+    }
+
+    /**
+     * Clear an application's data before restore, blocking until the operation completes or times
+     * out.
+     */
+    public void clearApplicationDataBeforeRestore(String packageName) {
+        clearApplicationDataSynchronous(packageName, false, true);
+    }
+
+    /**
+     * Clear an application's data, blocking until the operation completes or times out.
+     *
+     * @param checkFlagAllowClearUserDataOnFailedRestore if {@code true} uses
+     *    {@link ApplicationInfo#PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE} to decide if
+     *    clearing data is allowed after a failed restore.
+     *
+     * @param keepSystemState if {@code true}, we don't clear system state such as already restored
+     *    notification settings, permission grants, etc.
+     */
+    private void clearApplicationDataSynchronous(String packageName,
+            boolean checkFlagAllowClearUserDataOnFailedRestore, boolean keepSystemState) {
         try {
-            PackageInfo info = mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
-            if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA) == 0) {
+            ApplicationInfo applicationInfo = mPackageManager.getPackageInfoAsUser(
+                    packageName, 0, mUserId).applicationInfo;
+
+            boolean shouldClearData;
+            if (checkFlagAllowClearUserDataOnFailedRestore
+                    && applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
+                shouldClearData = (applicationInfo.privateFlags
+                    & ApplicationInfo.PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE) != 0;
+            } else {
+                shouldClearData =
+                    (applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA) != 0;
+            }
+
+            if (!shouldClearData) {
                 if (MORE_DEBUG) {
-                    Slog.i(TAG, "allowClearUserData=false so not wiping "
+                    Slog.i(TAG, "Clearing app data is not allowed so not wiping "
                             + packageName);
                 }
                 return;
@@ -1511,8 +1543,8 @@ public class UserBackupManagerService {
         synchronized (mClearDataLock) {
             mClearingData = true;
             try {
-                mActivityManager.clearApplicationUserData(
-                        packageName, keepSystemState, observer, mUserId);
+                mActivityManager.clearApplicationUserData(packageName, keepSystemState, observer,
+                        mUserId);
             } catch (RemoteException e) {
                 // can't happen because the activity manager is in this process
             }
