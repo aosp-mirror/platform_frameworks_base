@@ -578,6 +578,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onDensityOrFontScaleChanged() {
+        reinflateViews();
+    }
+
+    private void reinflateViews() {
         inflateFooterView();
         inflateEmptyShadeView();
         updateFooter();
@@ -608,6 +612,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mCornerRadius = newRadius;
             invalidate();
         }
+        reinflateViews();
     }
 
     @VisibleForTesting
