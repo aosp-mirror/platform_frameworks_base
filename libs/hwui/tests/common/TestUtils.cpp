@@ -100,7 +100,7 @@ void TestUtils::TestTask::run() {
     // RenderState only valid once RenderThread is running, so queried here
     renderthread::RenderThread& renderThread = renderthread::RenderThread::getInstance();
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        renderThread.vulkanManager().initialize();
+        renderThread.requireVkContext();
     } else {
         renderThread.requireGlContext();
     }

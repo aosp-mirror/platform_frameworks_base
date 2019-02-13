@@ -112,6 +112,7 @@ public:
     void dumpGraphicsMemory(int fd);
 
     void requireGlContext();
+    void requireVkContext();
     void destroyRenderingContext();
 
     /**
@@ -121,6 +122,8 @@ public:
      * @return true only if isCurrent is invoked from the render thread.
      */
     static bool isCurrent();
+
+    static void initGrContextOptions(GrContextOptions& options);
 
 protected:
     virtual bool threadLoop() override;
