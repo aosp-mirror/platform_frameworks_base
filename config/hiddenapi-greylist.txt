@@ -603,8 +603,6 @@ Landroid/net/IConnectivityManager;->getTetherableWifiRegexs()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->getTetheredIfaces()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->getTetheringErroredIfaces()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->startLegacyVpn(Lcom/android/internal/net/VpnProfile;)V
-Landroid/net/INetd$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetd;
-Landroid/net/INetd;->interfaceAddAddress(Ljava/lang/String;Ljava/lang/String;I)V
 Landroid/net/INetworkManagementEventObserver$Stub;-><init>()V
 Landroid/net/INetworkPolicyListener$Stub;-><init>()V
 Landroid/net/INetworkPolicyManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkPolicyManager;

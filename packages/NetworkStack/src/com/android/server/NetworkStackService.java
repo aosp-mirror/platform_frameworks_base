@@ -114,7 +114,8 @@ public class NetworkStackService extends Service {
 
         NetworkStackConnector(Context context) {
             mContext = context;
-            mNetd = (INetd) context.getSystemService(Context.NETD_SERVICE);
+            mNetd = INetd.Stub.asInterface(
+                    (IBinder) context.getSystemService(Context.NETD_SERVICE));
             mObserverRegistry = new NetworkObserverRegistry();
             mCm = context.getSystemService(ConnectivityManager.class);
 
