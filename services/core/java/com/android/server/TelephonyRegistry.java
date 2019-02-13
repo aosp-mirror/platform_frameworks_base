@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -246,7 +247,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private PreciseDataConnectionState mPreciseDataConnectionState =
                 new PreciseDataConnectionState();
 
-    static final int ENFORCE_COARSE_LOCATION_PERMISSION_MASK =
+    // Nothing here yet, but putting it here in case we want to add more in the future.
+    static final int ENFORCE_COARSE_LOCATION_PERMISSION_MASK = 0;
+
+    static final int ENFORCE_FINE_LOCATION_PERMISSION_MASK =
             PhoneStateListener.LISTEN_CELL_LOCATION
                     | PhoneStateListener.LISTEN_CELL_INFO;
 
@@ -637,8 +641,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
                         try {
                             if (VDBG) log("listen: call onSSC state=" + mServiceState[phoneId]);
-                            r.callback.onServiceStateChanged(
-                                    new ServiceState(mServiceState[phoneId]));
+                            ServiceState rawSs = new ServiceState(mServiceState[phoneId]);
+                            if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                r.callback.onServiceStateChanged(rawSs);
+                            } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                r.callback.onServiceStateChanged(rawSs.sanitizeLocationInfo(false));
+                            } else {
+                                r.callback.onServiceStateChanged(rawSs.sanitizeLocationInfo(true));
+                            }
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -673,7 +683,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         try {
                             if (DBG_LOC) log("listen: mCellLocation = "
                                     + mCellLocation[phoneId]);
-                            if (checkLocationAccess(r)) {
+                            if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                                 r.callback.onCellLocationChanged(
                                         new Bundle(mCellLocation[phoneId]));
                             }
@@ -722,7 +732,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         try {
                             if (DBG_LOC) log("listen: mCellInfo[" + phoneId + "] = "
                                     + mCellInfo.get(phoneId));
-                            if (checkLocationAccess(r)) {
+                            if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                                 r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
                             }
                         } catch (RemoteException ex) {
@@ -1009,13 +1019,22 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_SERVICE_STATE) &&
                             idMatch(r.subId, subId, phoneId)) {
+
                         try {
+                            ServiceState stateToSend;
+                            if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                stateToSend = new ServiceState(state);
+                            } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                stateToSend = state.sanitizeLocationInfo(false);
+                            } else {
+                                stateToSend = state.sanitizeLocationInfo(true);
+                            }
                             if (DBG) {
                                 log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
                                         + " state=" + state);
                             }
-                            r.callback.onServiceStateChanged(new ServiceState(state));
+                            r.callback.onServiceStateChanged(stateToSend);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -1198,7 +1217,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO) &&
                             idMatch(r.subId, subId, phoneId) &&
-                            checkLocationAccess(r)) {
+                            checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
@@ -1500,7 +1519,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION) &&
                             idMatch(r.subId, subId, phoneId) &&
-                            checkLocationAccess(r)) {
+                            checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellLocation: cellLocation=" + cellLocation
@@ -2109,12 +2128,35 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean checkListenerPermission(
             int events, int subId, String callingPackage, String message) {
+        LocationAccessPolicy.LocationPermissionQuery.Builder locationQueryBuilder =
+                new LocationAccessPolicy.LocationPermissionQuery.Builder()
+                .setCallingPackage(callingPackage)
+                .setMethod(message + " events: " + events)
+                .setCallingPid(Binder.getCallingPid())
+                .setCallingUid(Binder.getCallingUid());
+
+        boolean shouldCheckLocationPermissions = false;
         if ((events & ENFORCE_COARSE_LOCATION_PERMISSION_MASK) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
-            if (mAppOps.noteOp(AppOpsManager.OP_COARSE_LOCATION, Binder.getCallingUid(),
-                    callingPackage) != AppOpsManager.MODE_ALLOWED) {
-                return false;
+            locationQueryBuilder.setMinSdkVersionForCoarse(0);
+            shouldCheckLocationPermissions = true;
+        }
+
+        if ((events & ENFORCE_FINE_LOCATION_PERMISSION_MASK) != 0) {
+            // Everything that requires fine location started in Q. So far...
+            locationQueryBuilder.setMinSdkVersionForFine(Build.VERSION_CODES.Q);
+            shouldCheckLocationPermissions = true;
+        }
+
+        if (shouldCheckLocationPermissions) {
+            LocationAccessPolicy.LocationPermissionResult result =
+                    LocationAccessPolicy.checkLocationPermission(
+                            mContext, locationQueryBuilder.build());
+            switch (result) {
+                case DENIED_HARD:
+                    throw new SecurityException("Unable to listen for events " + events + " due to "
+                            + "insufficient location permissions.");
+                case DENIED_SOFT:
+                    return false;
             }
         }
 
@@ -2229,15 +2271,38 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    private boolean checkLocationAccess(Record r) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            return LocationAccessPolicy.canAccessCellLocation(mContext,
-                    r.callingPackage, r.callerUid, r.callerPid,
-                    /*throwOnDeniedPermission*/ false);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+    private boolean checkFineLocationAccess(Record r, int minSdk) {
+        LocationAccessPolicy.LocationPermissionQuery query =
+                new LocationAccessPolicy.LocationPermissionQuery.Builder()
+                        .setCallingPackage(r.callingPackage)
+                        .setCallingPid(r.callerPid)
+                        .setCallingUid(r.callerUid)
+                        .setMethod("TelephonyRegistry push")
+                        .setMinSdkVersionForFine(minSdk)
+                        .build();
+
+        return Binder.withCleanCallingIdentity(() -> {
+            LocationAccessPolicy.LocationPermissionResult locationResult =
+                    LocationAccessPolicy.checkLocationPermission(mContext, query);
+            return locationResult == LocationAccessPolicy.LocationPermissionResult.ALLOWED;
+        });
+    }
+
+    private boolean checkCoarseLocationAccess(Record r, int minSdk) {
+        LocationAccessPolicy.LocationPermissionQuery query =
+                new LocationAccessPolicy.LocationPermissionQuery.Builder()
+                        .setCallingPackage(r.callingPackage)
+                        .setCallingPid(r.callerPid)
+                        .setCallingUid(r.callerUid)
+                        .setMethod("TelephonyRegistry push")
+                        .setMinSdkVersionForCoarse(minSdk)
+                        .build();
+
+        return Binder.withCleanCallingIdentity(() -> {
+            LocationAccessPolicy.LocationPermissionResult locationResult =
+                    LocationAccessPolicy.checkLocationPermission(mContext, query);
+            return locationResult == LocationAccessPolicy.LocationPermissionResult.ALLOWED;
+        });
     }
 
     private void checkPossibleMissNotify(Record r, int phoneId) {
@@ -2287,7 +2352,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     log("checkPossibleMissNotify: onCellInfoChanged[" + phoneId + "] = "
                             + mCellInfo.get(phoneId));
                 }
-                if (checkLocationAccess(r)) {
+                if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                     r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
                 }
             } catch (RemoteException ex) {
@@ -2337,7 +2402,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             try {
                 if (DBG_LOC) log("checkPossibleMissNotify: onCellLocationChanged mCellLocation = "
                         + mCellLocation[phoneId]);
-                if (checkLocationAccess(r)) {
+                if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                     r.callback.onCellLocationChanged(new Bundle(mCellLocation[phoneId]));
                 }
             } catch (RemoteException ex) {
