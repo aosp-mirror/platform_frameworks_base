@@ -72,6 +72,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
@@ -3250,6 +3251,35 @@ public class TelephonyManager {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    /**
+     * Get the mapping from logical slots to physical slots. The mapping represent by a pair list.
+     * The key of the piar is the logical slot id and the value of the pair is the physical
+     * slots id mapped to this logical slot id.
+     *
+     * @return an pair list indicates the mapping from logical slots to physical slots. The size of
+     * the list should be {@link #getPhoneCount()} if success, otherwise return an empty list.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public List<Pair<Integer, Integer>> getLogicalToPhysicalSlotMapping() {
+        List<Pair<Integer, Integer>> slotMapping = new ArrayList<>();
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                int[] slotMappingArray = telephony.getSlotsMapping();
+                for (int i = 0; i < slotMappingArray.length; i++) {
+                    slotMapping.add(new Pair(i, slotMappingArray[i]));
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "getSlotsMapping RemoteException", e);
+        }
+        return slotMapping;
     }
 
     //

@@ -1848,9 +1848,15 @@ interface ITelephony {
      * @hide
      */
     int getNumOfActiveSims();
+
     /**
      * Get if reboot is required upon altering modems configurations
      * @hide
      */
     boolean isRebootRequiredForModemConfigChange();
+
+    /**
+     * Get the mapping from logical slots to physical slots.
+     */
+    int[] getSlotsMapping();
 }
