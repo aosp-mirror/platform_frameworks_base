@@ -36,8 +36,8 @@ import com.android.systemui.plugins.ActivityStarter
 import java.util.concurrent.TimeUnit
 
 class OngoingPrivacyDialog constructor(
-    val context: Context,
-    val dialogBuilder: PrivacyDialogBuilder
+    private val context: Context,
+    private val dialogBuilder: PrivacyDialogBuilder
 ) {
 
     private val iconSize = context.resources.getDimensionPixelSize(

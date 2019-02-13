@@ -35,7 +35,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PrivacyItemController @Inject constructor(val context: Context) {
+class PrivacyItemController @Inject constructor(private val context: Context) {
 
     companion object {
         val OPS = intArrayOf(AppOpsManager.OP_CAMERA,
