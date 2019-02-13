@@ -31,6 +31,7 @@ import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
@@ -382,6 +383,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.presentationDeadlineNanos = phys.presentationDeadlineNanos;
                 mInfo.state = mState;
                 mInfo.uniqueId = getUniqueId();
+                mInfo.address = DisplayAddress.fromPhysicalDisplayId(mPhysicalDisplayId);
 
                 // Assume that all built-in displays that have secure output (eg. HDCP) also
                 // support compositing from gralloc protected buffers.

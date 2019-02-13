@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -225,8 +226,12 @@ abstract class DisplayDevice {
         viewport.deviceHeight = isRotated ? info.width : info.height;
 
         viewport.uniqueId = info.uniqueId;
-        // TODO(b/112898898) Use an actual port here.
-        viewport.physicalPort = null;
+
+        if (info.address instanceof DisplayAddress.Physical) {
+            viewport.physicalPort = ((DisplayAddress.Physical) info.address).getPort();
+        } else {
+            viewport.physicalPort = null;
+        }
     }
 
     /**

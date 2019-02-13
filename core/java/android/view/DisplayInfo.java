@@ -61,7 +61,7 @@ public final class DisplayInfo implements Parcelable {
      * Display address, or null if none.
      * Interpretation varies by display type.
      */
-    public String address;
+    public DisplayAddress address;
 
     /**
      * The human-readable name of the display.
@@ -385,7 +385,7 @@ public final class DisplayInfo implements Parcelable {
         layerStack = source.readInt();
         flags = source.readInt();
         type = source.readInt();
-        address = source.readString();
+        address = source.readParcelable(null);
         name = source.readString();
         appWidth = source.readInt();
         appHeight = source.readInt();
@@ -432,7 +432,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(layerStack);
         dest.writeInt(this.flags);
         dest.writeInt(type);
-        dest.writeString(address);
+        dest.writeParcelable(address, flags);
         dest.writeString(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
