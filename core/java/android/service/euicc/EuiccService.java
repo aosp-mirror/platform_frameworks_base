@@ -76,6 +76,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * filter with the appropriate action, the {@link #CATEGORY_EUICC_UI} category, and a non-zero
  * priority.
  *
+ * <p>Old implementations of EuiccService may support passing in slot IDs equal to
+ * {@link android.telephony.SubscriptionManager#INVALID_SIM_SLOT_INDEX}, which allows the LPA to
+ * decide which eUICC to target when there are multiple eUICCs. This behavior is not supported in
+ * Android Q or later.
+ *
  * @hide
  */
 @SystemApi
@@ -546,7 +551,7 @@ public abstract class EuiccService extends Service {
                         int resultCode = EuiccService.this.onDownloadSubscription(
                                 slotId, subscription, switchAfterDownload, forceDeactivateSim);
                         result = new DownloadSubscriptionResult(resultCode,
-                            0 /* resolvableErrors */, TelephonyManager.INVALID_CARD_ID);
+                            0 /* resolvableErrors */, TelephonyManager.UNSUPPORTED_CARD_ID);
                     }
                     try {
                         callback.onComplete(result);
