@@ -864,8 +864,9 @@ public class SmsMessage extends SmsMessageBase {
             Rlog.d(LOG_TAG, "MO raw BearerData = '" + HexDump.toHexString(encodedBearerData) + "'");
         }
 
-        int teleservice = bearerData.hasUserDataHeader ?
-                SmsEnvelope.TELESERVICE_WEMT : SmsEnvelope.TELESERVICE_WMT;
+        int teleservice = (bearerData.hasUserDataHeader
+                && userData.msgEncoding != UserData.ENCODING_7BIT_ASCII)
+                ? SmsEnvelope.TELESERVICE_WEMT : SmsEnvelope.TELESERVICE_WMT;
 
         SmsEnvelope envelope = new SmsEnvelope();
         envelope.messageType = SmsEnvelope.MESSAGE_TYPE_POINT_TO_POINT;
