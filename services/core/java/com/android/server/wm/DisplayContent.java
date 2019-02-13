@@ -37,7 +37,6 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -173,7 +172,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -3257,9 +3255,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateImeParent() {
-        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE) {
-            return;
-        }
         final SurfaceControl newParent = computeImeParent();
         if (newParent != null) {
             mPendingTransaction.reparent(mImeWindowsContainers.mSurfaceControl, newParent);
