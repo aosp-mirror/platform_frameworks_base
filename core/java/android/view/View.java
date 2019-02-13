@@ -6456,6 +6456,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         arr.recycle();
     }
 
+    private void initializeScrollBarDrawable() {
+        initScrollCache();
+
+        if (mScrollCache.scrollBar == null) {
+            mScrollCache.scrollBar = new ScrollBarDrawable();
+            mScrollCache.scrollBar.setState(getDrawableState());
+            mScrollCache.scrollBar.setCallback(this);
+        }
+    }
+
     /**
      * <p>
      * Initializes the scrollbars from a given set of styled attributes. This
@@ -6539,6 +6549,106 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Re-apply user/background padding so that scrollbar(s) get added
         resolvePadding();
+    }
+
+    /**
+     * Defines the vertical scrollbar thumb drawable
+     * @attr ref android.R.styleable#View_scrollbarThumbVertical
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public void setVerticalScrollbarThumbDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setVerticalThumbDrawable(drawable);
+    }
+
+    /**
+     * Defines the vertical scrollbar track drawable
+     * @attr ref android.R.styleable#View_scrollbarTrackVertical
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public void setVerticalScrollbarTrackDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setVerticalTrackDrawable(drawable);
+    }
+
+    /**
+     * Defines the horizontal thumb drawable
+     * @attr ref android.R.styleable#View_scrollbarThumbHorizontal
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public void setHorizontalScrollbarThumbDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setHorizontalThumbDrawable(drawable);
+    }
+
+    /**
+     * Defines the horizontal track drawable
+     * @attr ref android.R.styleable#View_scrollbarTrackHorizontal
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public void setHorizontalScrollbarTrackDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setHorizontalTrackDrawable(drawable);
+    }
+
+    /**
+     * Returns the currently configured Drawable for the thumb of the vertical scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getVerticalScrollbarThumbDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getVerticalThumbDrawable() : null;
+    }
+
+    /**
+     * Returns the currently configured Drawable for the track of the vertical scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getVerticalScrollbarTrackDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getVerticalTrackDrawable() : null;
+    }
+
+    /**
+     * Returns the currently configured Drawable for the thumb of the horizontal scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getHorizontalScrollbarThumbDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getHorizontalThumbDrawable() : null;
+    }
+
+    /**
+     * Returns the currently configured Drawable for the track of the horizontal scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getHorizontalScrollbarTrackDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getHorizontalTrackDrawable() : null;
     }
 
     private void initializeScrollIndicatorsInternal() {
