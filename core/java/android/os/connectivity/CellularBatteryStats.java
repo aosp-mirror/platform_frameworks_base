@@ -44,6 +44,7 @@ public final class CellularBatteryStats implements Parcelable {
   private long[] mTimeInRatMs;
   private long[] mTimeInRxSignalStrengthLevelMs;
   private long[] mTxTimeMs;
+  private long mMonitoredRailChargeConsumedMaMs;
 
   public static final Parcelable.Creator<CellularBatteryStats> CREATOR = new
       Parcelable.Creator<CellularBatteryStats>() {
@@ -74,6 +75,7 @@ public final class CellularBatteryStats implements Parcelable {
     out.writeLongArray(mTimeInRatMs);
     out.writeLongArray(mTimeInRxSignalStrengthLevelMs);
     out.writeLongArray(mTxTimeMs);
+    out.writeLong(mMonitoredRailChargeConsumedMaMs);
   }
 
   public void readFromParcel(Parcel in) {
@@ -90,6 +92,7 @@ public final class CellularBatteryStats implements Parcelable {
     in.readLongArray(mTimeInRatMs);
     in.readLongArray(mTimeInRxSignalStrengthLevelMs);
     in.readLongArray(mTxTimeMs);
+    mMonitoredRailChargeConsumedMaMs = in.readLong();
   }
 
   public long getLoggingDurationMs() {
@@ -142,6 +145,10 @@ public final class CellularBatteryStats implements Parcelable {
 
   public long[] getTxTimeMs() {
     return mTxTimeMs;
+  }
+
+  public long getMonitoredRailChargeConsumedMaMs() {
+    return mMonitoredRailChargeConsumedMaMs;
   }
 
   public void setLoggingDurationMs(long t) {
@@ -211,6 +218,11 @@ public final class CellularBatteryStats implements Parcelable {
     return;
   }
 
+  public void setMonitoredRailChargeConsumedMaMs(long monitoredRailEnergyConsumedMaMs) {
+    mMonitoredRailChargeConsumedMaMs = monitoredRailEnergyConsumedMaMs;
+    return;
+  }
+
   public int describeContents() {
     return 0;
   }
@@ -237,6 +249,7 @@ public final class CellularBatteryStats implements Parcelable {
     Arrays.fill(mTimeInRxSignalStrengthLevelMs, 0);
     mTxTimeMs = new long[ModemActivityInfo.TX_POWER_LEVELS];
     Arrays.fill(mTxTimeMs, 0);
+    mMonitoredRailChargeConsumedMaMs = 0;
     return;
   }
 }
