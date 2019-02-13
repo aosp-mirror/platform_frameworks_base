@@ -336,7 +336,7 @@ public final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             final View root = findViewByAccessibilityId(accessibilityViewId);
-            if (root != null) {
+            if (root != null && isShown(root)) {
                 mPrefetcher.prefetchAccessibilityNodeInfos(
                         root, virtualDescendantId, flags, infos, arguments);
             }
@@ -448,7 +448,7 @@ public final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             final View root = findViewByAccessibilityId(accessibilityViewId);
-            if (root != null) {
+            if (root != null && isShown(root)) {
                 AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                 if (provider != null) {
                     infos = provider.findAccessibilityNodeInfosByText(text,
@@ -531,7 +531,7 @@ public final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             final View root = findViewByAccessibilityId(accessibilityViewId);
-            if (root != null) {
+            if (root != null && isShown(root)) {
                 switch (focusType) {
                     case AccessibilityNodeInfo.FOCUS_ACCESSIBILITY: {
                         View host = mViewRootImpl.mAccessibilityFocusedHost;
@@ -621,7 +621,7 @@ public final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             final View root = findViewByAccessibilityId(accessibilityViewId);
-            if (root != null) {
+            if (root != null && isShown(root)) {
                 View nextView = root.focusSearch(direction);
                 if (nextView != null) {
                     next = nextView.createAccessibilityNodeInfo();
@@ -676,7 +676,7 @@ public final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             final View target = findViewByAccessibilityId(accessibilityViewId);
-            if (target != null) {
+            if (target != null && isShown(target)) {
                 if (action == R.id.accessibilityActionClickOnClickableSpan) {
                     // Handle this hidden action separately
                     succeeded = handleClickableSpanActionUiThread(
@@ -759,9 +759,7 @@ public final class AccessibilityInteractionController {
         if (accessibilityId == AccessibilityNodeInfo.ROOT_ITEM_ID) {
             return mViewRootImpl.mView;
         } else {
-            final View foundView =
-                    AccessibilityNodeIdManager.getInstance().findView(accessibilityId);
-            return isShown(foundView) ? foundView : null;
+            return AccessibilityNodeIdManager.getInstance().findView(accessibilityId);
         }
     }
 
