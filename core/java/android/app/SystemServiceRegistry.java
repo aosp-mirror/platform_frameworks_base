@@ -101,7 +101,6 @@ import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
 import android.net.IIpMemoryStore;
 import android.net.IIpSecService;
-import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.IpMemoryStore;
 import android.net.IpSecManager;
@@ -330,11 +329,10 @@ final class SystemServiceRegistry {
                 return new ConnectivityManager(context, service);
             }});
 
-        registerService(Context.NETD_SERVICE, INetd.class, new StaticServiceFetcher<INetd>() {
+        registerService(Context.NETD_SERVICE, IBinder.class, new StaticServiceFetcher<IBinder>() {
             @Override
-            public INetd createService() throws ServiceNotFoundException {
-                return INetd.Stub.asInterface(
-                        ServiceManager.getServiceOrThrow(Context.NETD_SERVICE));
+            public IBinder createService() throws ServiceNotFoundException {
+                return ServiceManager.getServiceOrThrow(Context.NETD_SERVICE);
             }
         });
 

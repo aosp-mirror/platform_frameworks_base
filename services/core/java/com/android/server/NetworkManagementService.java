@@ -20,18 +20,18 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.SHUTDOWN;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.INetd.FIREWALL_BLACKLIST;
+import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
+import static android.net.INetd.FIREWALL_CHAIN_NONE;
+import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
+import static android.net.INetd.FIREWALL_RULE_ALLOW;
+import static android.net.INetd.FIREWALL_RULE_DENY;
+import static android.net.INetd.FIREWALL_WHITELIST;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NONE;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_POWERSAVE;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_STANDBY;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
-import static android.net.NetworkPolicyManager.FIREWALL_TYPE_BLACKLIST;
-import static android.net.NetworkPolicyManager.FIREWALL_TYPE_WHITELIST;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_ALL;
@@ -1946,7 +1946,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         int numUids = 0;
         if (DBG) Slog.d(TAG, "Closing sockets after enabling chain " + chainName);
-        if (getFirewallType(chain) == FIREWALL_TYPE_WHITELIST) {
+        if (getFirewallType(chain) == FIREWALL_WHITELIST) {
             // Close all sockets on all non-system UIDs...
             ranges = new UidRange[] {
                 // TODO: is there a better way of finding all existing users? If so, we could
@@ -1958,7 +1958,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 final SparseIntArray rules = getUidFirewallRulesLR(chain);
                 exemptUids = new int[rules.size()];
                 for (int i = 0; i < exemptUids.length; i++) {
-                    if (rules.valueAt(i) == NetworkPolicyManager.FIREWALL_RULE_ALLOW) {
+                    if (rules.valueAt(i) == FIREWALL_RULE_ALLOW) {
                         exemptUids[numUids] = rules.keyAt(i);
                         numUids++;
                     }
@@ -1980,7 +1980,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 final SparseIntArray rules = getUidFirewallRulesLR(chain);
                 ranges = new UidRange[rules.size()];
                 for (int i = 0; i < ranges.length; i++) {
-                    if (rules.valueAt(i) == NetworkPolicyManager.FIREWALL_RULE_DENY) {
+                    if (rules.valueAt(i) == FIREWALL_RULE_DENY) {
                         int uid = rules.keyAt(i);
                         ranges[numUids] = new UidRange(uid, uid);
                         numUids++;
@@ -2052,13 +2052,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private int getFirewallType(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_STANDBY:
-                return FIREWALL_TYPE_BLACKLIST;
+                return FIREWALL_BLACKLIST;
             case FIREWALL_CHAIN_DOZABLE:
-                return FIREWALL_TYPE_WHITELIST;
+                return FIREWALL_WHITELIST;
             case FIREWALL_CHAIN_POWERSAVE:
-                return FIREWALL_TYPE_WHITELIST;
+                return FIREWALL_WHITELIST;
             default:
-                return isFirewallEnabled() ? FIREWALL_TYPE_WHITELIST : FIREWALL_TYPE_BLACKLIST;
+                return isFirewallEnabled() ? FIREWALL_WHITELIST : FIREWALL_BLACKLIST;
         }
     }
 
@@ -2160,14 +2160,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private @NonNull String getFirewallRuleName(int chain, int rule) {
         String ruleName;
-        if (getFirewallType(chain) == FIREWALL_TYPE_WHITELIST) {
-            if (rule == NetworkPolicyManager.FIREWALL_RULE_ALLOW) {
+        if (getFirewallType(chain) == FIREWALL_WHITELIST) {
+            if (rule == FIREWALL_RULE_ALLOW) {
                 ruleName = "allow";
             } else {
                 ruleName = "deny";
             }
         } else { // Blacklist mode
-            if (rule == NetworkPolicyManager.FIREWALL_RULE_DENY) {
+            if (rule == FIREWALL_RULE_DENY) {
                 ruleName = "deny";
             } else {
                 ruleName = "allow";
@@ -2194,7 +2194,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private int getFirewallRuleType(int chain, int rule) {
         if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
-            return getFirewallType(chain) == FIREWALL_TYPE_WHITELIST
+            return getFirewallType(chain) == FIREWALL_WHITELIST
                     ? INetd.FIREWALL_RULE_DENY : INetd.FIREWALL_RULE_ALLOW;
         }
         return rule;
