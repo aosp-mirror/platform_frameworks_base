@@ -34,6 +34,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
@@ -171,16 +172,11 @@ public abstract class ContentCaptureService extends Service {
     @Deprecated
     public final void setContentCaptureWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> activities) {
-        final IContentCaptureServiceCallback callback = mCallback;
-        if (callback == null) {
-            Log.w(TAG, "setContentCaptureWhitelist(): no server callback");
-            return;
-        }
-        try {
-            callback.setContentCaptureWhitelist(packages, activities);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
+        setContentCaptureWhitelist(toSet(packages), toSet(activities));
+    }
+
+    private <T> ArraySet<T> toSet(@Nullable List<T> set) {
+        return set == null ? null : new ArraySet<T>(set);
     }
 
     /**
@@ -197,7 +193,17 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureWhitelist(@Nullable Set<String> packages,
             @Nullable Set<ComponentName> activities) {
-        setContentCaptureWhitelist(toList(packages), toList(activities));
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "setContentCaptureWhitelist(): no server callback");
+            return;
+        }
+
+        try {
+            callback.setContentCaptureWhitelist(toList(packages), toList(activities));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     private <T> ArrayList<T> toList(@Nullable Set<T> set) {
