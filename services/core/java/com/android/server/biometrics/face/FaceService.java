@@ -588,6 +588,11 @@ public class FaceService extends BiometricServiceBase {
                         throws RemoteException {
                     // TODO
                 }
+
+                @Override
+                public void onLockoutChanged(long duration) {
+
+                }
             };
 
     /**
