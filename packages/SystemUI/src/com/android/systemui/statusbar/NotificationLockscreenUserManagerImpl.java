@@ -550,12 +550,6 @@ public class NotificationLockscreenUserManagerImpl implements
         return mKeyguardMonitor.isSecure() || mLockPatternUtils.isSecure(userId);
     }
 
-    public void destroy() {
-        mContext.unregisterReceiver(mBaseBroadcastReceiver);
-        mContext.unregisterReceiver(mAllUsersReceiver);
-        mListeners.clear();
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NotificationLockscreenUserManager state:");

@@ -221,30 +221,6 @@ public class CarStatusBar extends StatusBar implements
         }
     }
 
-    @Override
-    public void destroy() {
-        mCarBatteryController.stopListening();
-        mConnectedDeviceSignalController.stopListening();
-        mActivityManagerWrapper.unregisterTaskStackListener(mTaskStackListener);
-        mDrivingStateHelper.disconnectFromCarService();
-
-        if (mNavigationBarWindow != null) {
-            mWindowManager.removeViewImmediate(mNavigationBarWindow);
-            mNavigationBarView = null;
-        }
-
-        if (mLeftNavigationBarWindow != null) {
-            mWindowManager.removeViewImmediate(mLeftNavigationBarWindow);
-            mLeftNavigationBarView = null;
-        }
-
-        if (mRightNavigationBarWindow != null) {
-            mWindowManager.removeViewImmediate(mRightNavigationBarWindow);
-            mRightNavigationBarView = null;
-        }
-        super.destroy();
-    }
-
 
     @Override
     protected void makeStatusBarView() {

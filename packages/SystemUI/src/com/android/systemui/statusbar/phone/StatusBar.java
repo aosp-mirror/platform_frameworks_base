@@ -2843,38 +2843,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         startActivityDismissingKeyguard(intent, onlyProvisioned, true /* dismissShade */);
     }
 
-    public void destroy() {
-        // Begin old BaseStatusBar.destroy().
-        mContext.unregisterReceiver(mBannerActionBroadcastReceiver);
-        mLockscreenUserManager.destroy();
-        try {
-            mNotificationListener.unregisterAsSystemService();
-        } catch (RemoteException e) {
-            // Ignore.
-        }
-        mNotificationListController.destroy();
-        // End old BaseStatusBar.destroy().
-        if (mStatusBarWindow != null) {
-            mWindowManager.removeViewImmediate(mStatusBarWindow);
-            mStatusBarWindow = null;
-        }
-        mNavigationBarController.destroy();
-        mContext.unregisterReceiver(mBroadcastReceiver);
-        mContext.unregisterReceiver(mDemoReceiver);
-        mAssistManager.destroy();
-        mHeadsUpManager.destroy();
-        mStatusBarStateController.removeCallback(this);
-
-        if (mQSPanel != null && mQSPanel.getHost() != null) {
-            mQSPanel.getHost().destroy();
-        }
-        Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(null);
-        mDeviceProvisionedController.removeCallback(mUserSetupObserver);
-        Dependency.get(ConfigurationController.class).removeCallback(this);
-        mZenController.removeCallback(this);
-        mAppOpsController.removeCallback(APP_OPS, this);
-    }
-
     private boolean mDemoModeAllowed;
     private boolean mDemoMode;
 

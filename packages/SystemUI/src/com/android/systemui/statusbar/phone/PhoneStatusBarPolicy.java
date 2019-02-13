@@ -284,25 +284,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         });
     }
 
-    public void destroy() {
-        mRotationLockController.removeCallback(this);
-        mBluetooth.removeCallback(this);
-        mProvisionedController.removeCallback(this);
-        mZenController.removeCallback(this);
-        mCast.removeCallback(mCastCallback);
-        mHotspot.removeCallback(mHotspotCallback);
-        mNextAlarmController.removeCallback(mNextAlarmCallback);
-        mDataSaver.removeCallback(this);
-        mKeyguardMonitor.removeCallback(this);
-        mPrivacyItemController.removeCallback(this);
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallback(this);
-        mContext.unregisterReceiver(mIntentReceiver);
-
-        NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
-        mCurrentNotifs.forEach(v -> noMan.cancelAsUser(v.first, SystemMessage.NOTE_INSTANT_APPS,
-                new UserHandle(v.second)));
-    }
-
     @Override
     public void onZenChanged(int zen) {
         updateVolumeZen();
