@@ -34,6 +34,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.util.SparseBooleanArray;
 
 import com.android.server.wm.LockTaskController.LockTaskToken;
@@ -43,6 +44,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Constructor;
 
+@Presubmit
 public class KeyguardDisableHandlerTest {
 
     private KeyguardDisableHandler mKeyguardDisable;

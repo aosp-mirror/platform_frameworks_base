@@ -34,10 +34,12 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.IActivityTaskManager;
 import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -50,6 +52,8 @@ import org.junit.Test;
  *  atest WmTests:TaskPositionerTests
  */
 @SmallTest
+@Presubmit
+@FlakyTest
 public class TaskPositionerTests extends WindowTestsBase {
 
     private static final boolean DEBUGGING = false;
