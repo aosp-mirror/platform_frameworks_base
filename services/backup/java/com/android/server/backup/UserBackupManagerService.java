@@ -130,6 +130,7 @@ import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
+import com.android.server.backup.utils.FileUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
 
 import com.google.android.collect.Sets;
@@ -2319,6 +2320,7 @@ public class UserBackupManagerService {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "setAncestralSerialNumber");
         Slog.v(TAG, "Setting ancestral work profile id to " + ancestralSerialNumber);
+        // TODO (b/124359804)
         try (RandomAccessFile af = getAncestralSerialNumberFile()) {
             af.writeLong(ancestralSerialNumber);
         } catch (IOException e) {
@@ -2331,6 +2333,7 @@ public class UserBackupManagerService {
      * {@link #setAncestralSerialNumber(long)}. Will return {@code -1} if not set.
      */
     public long getAncestralSerialNumber() {
+        // TODO (b/124359804)
         try (RandomAccessFile af = getAncestralSerialNumberFile()) {
             return af.readLong();
         } catch (IOException e) {
@@ -2344,13 +2347,7 @@ public class UserBackupManagerService {
             mAncestralSerialNumberFile = new File(
                 UserBackupManagerFiles.getBaseStateDir(getUserId()),
                 SERIAL_ID_FILE);
-            if (!mAncestralSerialNumberFile.exists()) {
-                try {
-                    mAncestralSerialNumberFile.createNewFile();
-                } catch (IOException e) {
-                    Slog.w(TAG, "serial number mapping file creation failed", e);
-                }
-            }
+            FileUtils.createNewFile(mAncestralSerialNumberFile);
         }
         return new RandomAccessFile(mAncestralSerialNumberFile, "rwd");
     }
