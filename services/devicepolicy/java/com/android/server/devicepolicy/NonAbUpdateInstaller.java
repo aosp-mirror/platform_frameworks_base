@@ -16,7 +16,7 @@
 
 package com.android.server.devicepolicy;
 
-import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
@@ -45,7 +45,7 @@ class NonAbUpdateInstaller extends UpdateInstaller {
         } catch (IOException e) {
             Log.w(TAG, "IO error while trying to install non AB update.", e);
             notifyCallbackOnError(
-                    DevicePolicyManager.InstallUpdateCallback.UPDATE_ERROR_UNKNOWN,
+                    InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN,
                     Log.getStackTraceString(e));
         }
     }

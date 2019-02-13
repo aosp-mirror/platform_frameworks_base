@@ -2125,7 +2125,7 @@ public class DevicePolicyManager {
      * Callback used in {@link #installSystemUpdate} to indicate that there was an error while
      * trying to install an update.
      */
-    public abstract static class InstallUpdateCallback {
+    public abstract static class InstallSystemUpdateCallback {
         /** Represents an unknown error while trying to install an update. */
         public static final int UPDATE_ERROR_UNKNOWN = 1;
 
@@ -2144,7 +2144,12 @@ public class DevicePolicyManager {
         /** Represents the battery being too low to apply an update. */
         public static final int UPDATE_ERROR_BATTERY_LOW = 5;
 
-        /** Method invoked when there was an error while installing an update. */
+        /**
+         * Method invoked when there was an error while installing an update.
+         *
+         * <p>The given error message is not intended to be user-facing. It is intended to be
+         * reported back to the IT admin to be read.
+         */
         public void onInstallUpdateError(
                 @InstallUpdateCallbackErrorConstants int errorCode, String errorMessage) {
         }
@@ -2154,11 +2159,11 @@ public class DevicePolicyManager {
      * @hide
      */
     @IntDef(prefix = { "UPDATE_ERROR_" }, value = {
-            InstallUpdateCallback.UPDATE_ERROR_UNKNOWN,
-            InstallUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION,
-            InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
-            InstallUpdateCallback.UPDATE_ERROR_FILE_NOT_FOUND,
-            InstallUpdateCallback.UPDATE_ERROR_BATTERY_LOW
+            InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN,
+            InstallSystemUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION,
+            InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
+            InstallSystemUpdateCallback.UPDATE_ERROR_FILE_NOT_FOUND,
+            InstallSystemUpdateCallback.UPDATE_ERROR_BATTERY_LOW
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallUpdateCallbackErrorConstants {}
@@ -10431,9 +10436,9 @@ public class DevicePolicyManager {
      * doesn't necessarily mean that the update has been applied successfully. The caller should
      * additionally check the system version with {@link android.os.Build#FINGERPRINT} or {@link
      * android.os.Build.VERSION}. If an error occurs during processing the OTA before the reboot,
-     * the caller will be notified by {@link InstallUpdateCallback}. If device does not have
+     * the caller will be notified by {@link InstallSystemUpdateCallback}. If device does not have
      * sufficient battery level, the installation will fail with error {@link
-     * InstallUpdateCallback#UPDATE_ERROR_BATTERY_LOW}.
+     * InstallSystemUpdateCallback#UPDATE_ERROR_BATTERY_LOW}.
      *
      * @param admin The {@link DeviceAdminReceiver} that this request is associated with.
      * @param updateFilePath An Uri of the file that contains the update. The file should be
@@ -10445,7 +10450,7 @@ public class DevicePolicyManager {
     public void installSystemUpdate(
             @NonNull ComponentName admin, @NonNull Uri updateFilePath,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull InstallUpdateCallback callback) {
+            @NonNull InstallSystemUpdateCallback callback) {
         throwIfParentInstance("installUpdate");
         if (mService == null) {
             return;
@@ -10465,19 +10470,20 @@ public class DevicePolicyManager {
         } catch (FileNotFoundException e) {
             Log.w(TAG, e);
             executeCallback(
-                    InstallUpdateCallback.UPDATE_ERROR_FILE_NOT_FOUND, Log.getStackTraceString(e),
+                    InstallSystemUpdateCallback.UPDATE_ERROR_FILE_NOT_FOUND,
+                    Log.getStackTraceString(e),
                     executor, callback);
         } catch (IOException e) {
             Log.w(TAG, e);
             executeCallback(
-                    InstallUpdateCallback.UPDATE_ERROR_UNKNOWN, Log.getStackTraceString(e),
+                    InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN, Log.getStackTraceString(e),
                     executor, callback);
         }
     }
 
     private void executeCallback(int errorCode, String errorMessage,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull InstallUpdateCallback callback) {
+            @NonNull InstallSystemUpdateCallback callback) {
         executor.execute(() -> callback.onInstallUpdateError(errorCode, errorMessage));
     }
 

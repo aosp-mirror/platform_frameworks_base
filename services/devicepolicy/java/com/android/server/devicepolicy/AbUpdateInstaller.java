@@ -16,7 +16,7 @@
 
 package com.android.server.devicepolicy;
 
-import android.app.admin.DevicePolicyManager.InstallUpdateCallback;
+import android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
@@ -62,41 +62,43 @@ class AbUpdateInstaller extends UpdateInstaller {
 
     private static Map<Integer, Integer> buildErrorCodesMap() {
         Map<Integer, Integer> map = new HashMap<>();
-        map.put(UpdateEngine.ErrorCodeConstants.ERROR, InstallUpdateCallback.UPDATE_ERROR_UNKNOWN);
+        map.put(
+                UpdateEngine.ErrorCodeConstants.ERROR,
+                InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN);
         map.put(
                 DOWNLOAD_STATE_INITIALIZATION_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION);
+                InstallSystemUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION);
         map.put(
                 UpdateEngine.ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION);
+                InstallSystemUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION);
 
         // Error constants corresponding to errors related to bad update file.
         map.put(
                 UpdateEngine.ErrorCodeConstants.DOWNLOAD_PAYLOAD_VERIFICATION_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
         map.put(
                 UpdateEngine.ErrorCodeConstants.PAYLOAD_SIZE_MISMATCH_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
         map.put(
                 UpdateEngine.ErrorCodeConstants.PAYLOAD_MISMATCHED_TYPE_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
         map.put(
                 UpdateEngine.ErrorCodeConstants.PAYLOAD_HASH_MISMATCH_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
 
         // Error constants corresponding to errors related to devices bad state.
         map.put(
                 UpdateEngine.ErrorCodeConstants.POST_INSTALL_RUNNER_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_UNKNOWN);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN);
         map.put(
                 UpdateEngine.ErrorCodeConstants.INSTALL_DEVICE_OPEN_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_UNKNOWN);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN);
         map.put(
                 UpdateEngine.ErrorCodeConstants.DOWNLOAD_TRANSFER_ERROR,
-                InstallUpdateCallback.UPDATE_ERROR_UNKNOWN);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN);
         map.put(
                 UpdateEngine.ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE,
-                InstallUpdateCallback.UPDATE_ERROR_UNKNOWN);
+                InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN);
 
         return map;
     }
@@ -153,12 +155,13 @@ class AbUpdateInstaller extends UpdateInstaller {
         } catch (ZipException e) {
             Log.w(UpdateInstaller.TAG, e);
             notifyCallbackOnError(
-                    InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
+                    InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
                     Log.getStackTraceString(e));
         } catch (IOException e) {
             Log.w(UpdateInstaller.TAG, e);
             notifyCallbackOnError(
-                    InstallUpdateCallback.UPDATE_ERROR_UNKNOWN, Log.getStackTraceString(e));
+                    InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN,
+                    Log.getStackTraceString(e));
         }
     }
 
@@ -185,7 +188,7 @@ class AbUpdateInstaller extends UpdateInstaller {
         if (mSizeForUpdate == -1) {
             Log.w(UpdateInstaller.TAG, "Failed to find payload entry in the given package.");
             notifyCallbackOnError(
-                    InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
+                    InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
                     "Failed to find payload entry in the given package.");
             return;
         }
@@ -210,7 +213,7 @@ class AbUpdateInstaller extends UpdateInstaller {
                 if (entry.getMethod() != ZipEntry.STORED) {
                     Log.w(UpdateInstaller.TAG, "Invalid compression method.");
                     notifyCallbackOnError(
-                            InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
+                            InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
                             "Invalid compression method.");
                     return false;
                 }
@@ -263,7 +266,7 @@ class AbUpdateInstaller extends UpdateInstaller {
             } else {
                 mUpdateInstaller.notifyCallbackOnError(
                         errorCodesMap.getOrDefault(
-                                errorCode, InstallUpdateCallback.UPDATE_ERROR_UNKNOWN),
+                                errorCode, InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN),
                         errorStringsMap.getOrDefault(errorCode, UNKNOWN_ERROR + errorCode));
             }
         }
