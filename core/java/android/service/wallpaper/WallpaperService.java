@@ -1068,9 +1068,13 @@ public abstract class WallpaperService extends Service {
          * For multiple display environment, multiple engines can be created to render on each
          * display, but these displays may have different densities. Use this context to get the
          * corresponding resources for currently display, avoiding the context of the service.
+         * <p>
+         * The display context will never be {@code null} after
+         * {@link Engine#onCreate(SurfaceHolder)} has been called.
          *
          * @return A {@link Context} for current display.
          */
+        @Nullable
         public Context getDisplayContext() {
             return mDisplayContext;
         }
