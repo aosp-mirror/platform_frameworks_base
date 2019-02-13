@@ -2794,8 +2794,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         } catch (RemoteException e) {
             // if the remote process registering the listener is already dead, just swallow the
             // exception and return
-            Log.w(TAG, "Could not link " + linkedListener.mListenerName + " death callback.",
-                    e);
+            Log.w(TAG, "Could not link " + linkedListener.mListenerName + " death callback.", e);
             return false;
         }
     }
@@ -2808,8 +2807,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         } catch (NoSuchElementException e) {
             // if the death callback isn't connected (it should be...), log error,
             // swallow the exception and return
-            Log.w(TAG, "Could not unlink " + linkedListener.mListenerName + " death callback.",
-                    e);
+            Log.w(TAG, "Could not unlink " + linkedListener.mListenerName + " death callback.", e);
             return false;
         }
     }
