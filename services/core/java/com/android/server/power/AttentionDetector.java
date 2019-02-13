@@ -145,7 +145,7 @@ public class AttentionDetector {
             if (DEBUG) {
                 Slog.d(TAG, "Do not check for attention yet, wait " + (whenToCheck - now));
             }
-            return nextScreenDimming;
+            return whenToCheck;
         } else if (whenToStopExtending < whenToCheck) {
             if (DEBUG) {
                 Slog.d(TAG, "Let device sleep to avoid false results and improve security "

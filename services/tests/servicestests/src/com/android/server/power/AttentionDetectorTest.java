@@ -98,6 +98,15 @@ public class AttentionDetectorTest extends AndroidTestCase {
     }
 
     @Test
+    public void testUpdateUserActivity_schedulesTheNextCheck() {
+        long now = SystemClock.uptimeMillis();
+        mNextDimming = now;
+        mAttentionDetector.onUserActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH);
+        long nextTimeout = mAttentionDetector.updateUserActivity(mNextDimming + 5000L);
+        assertThat(nextTimeout).isEqualTo(mNextDimming + 5000L);
+    }
+
+    @Test
     public void testOnUserActivity_ignoresAfterMaximumExtension() {
         long now = SystemClock.uptimeMillis();
         mAttentionDetector.onUserActivity(now - 15000L, PowerManager.USER_ACTIVITY_EVENT_TOUCH);
