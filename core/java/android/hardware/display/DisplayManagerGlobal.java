@@ -16,6 +16,8 @@
 
 package android.hardware.display;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -229,7 +231,17 @@ public final class DisplayManagerGlobal {
         return getCompatibleDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
 
-    public void registerDisplayListener(DisplayListener listener, Handler handler) {
+    /**
+     * Register a listener for display-related changes.
+     *
+     * @param listener The listener that will be called when display changes occur.
+     * @param handler Handler for the thread that will be receiving the callbacks. May be null.
+     * If null, listener will use the handler for the current thread, and if still null,
+     * the handler for the main thread.
+     * If that is still null, a runtime exception will be thrown.
+     */
+    public void registerDisplayListener(@NonNull DisplayListener listener,
+            @Nullable Handler handler) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -237,7 +249,8 @@ public final class DisplayManagerGlobal {
         synchronized (mLock) {
             int index = findDisplayListenerLocked(listener);
             if (index < 0) {
-                mDisplayListeners.add(new DisplayListenerDelegate(listener, handler));
+                Looper looper = getLooperForHandler(handler);
+                mDisplayListeners.add(new DisplayListenerDelegate(listener, looper));
                 registerCallbackIfNeededLocked();
             }
         }
@@ -256,6 +269,17 @@ public final class DisplayManagerGlobal {
                 mDisplayListeners.remove(index);
             }
         }
+    }
+
+    private static Looper getLooperForHandler(@Nullable Handler handler) {
+        Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
+        if (looper == null) {
+            looper = Looper.getMainLooper();
+        }
+        if (looper == null) {
+            throw new RuntimeException("Could not get Looper for the UI thread.");
+        }
+        return looper;
     }
 
     private int findDisplayListenerLocked(DisplayListener listener) {
@@ -636,8 +660,8 @@ public final class DisplayManagerGlobal {
     private static final class DisplayListenerDelegate extends Handler {
         public final DisplayListener mListener;
 
-        public DisplayListenerDelegate(DisplayListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper(), null, true /*async*/);
+        DisplayListenerDelegate(DisplayListener listener, @NonNull Looper looper) {
+            super(looper, null, true /*async*/);
             mListener = listener;
         }
 
