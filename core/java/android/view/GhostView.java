@@ -20,6 +20,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
+import android.os.Build;
 import android.widget.FrameLayout;
 
 import java.util.ArrayList;
@@ -135,12 +136,12 @@ public class GhostView extends View {
         return ghostView;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static GhostView addGhost(View view, ViewGroup viewGroup) {
         return addGhost(view, viewGroup, null);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void removeGhost(View view) {
         GhostView ghostView = view.mGhostView;
         if (ghostView != null) {

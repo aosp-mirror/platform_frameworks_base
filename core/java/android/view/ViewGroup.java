@@ -4301,6 +4301,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return i;
     }
 
+    /**
+     * The public version of getChildDrawingOrder().
+     *
+     * Returns the index of the child to draw for this iteration.
+     *
+     * @param i The current iteration.
+     * @return The index of the child to draw this iteration.
+     *
+     * @see #getChildDrawingOrder(int, int)}
+     */
+    public final int getChildDrawingOrder(int i) {
+        return getChildDrawingOrder(getChildCount(), i);
+    }
+
     private boolean hasChildWithZ() {
         for (int i = 0; i < mChildrenCount; i++) {
             if (mChildren[i].getZ() != 0) return true;
