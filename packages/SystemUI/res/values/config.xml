@@ -315,6 +315,7 @@
         <item>com.android.systemui.biometrics.BiometricDialogImpl</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
         <item>com.android.systemui.SizeCompatModeActivityController</item>
+        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
     </string-array>
 
     <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->
