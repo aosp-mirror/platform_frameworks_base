@@ -505,31 +505,6 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void setContentCaptureFeatureEnabled(boolean enabled,
-                @NonNull IResultReceiver result) {
-            final int userId = UserHandle.getCallingUserId();
-            final boolean isService;
-            synchronized (mLock) {
-                isService = assertCalledByServiceLocked("setContentCaptureFeatureEnabled()", userId,
-                        Binder.getCallingUid(), result);
-            }
-            if (!isService) return;
-
-            final long token = Binder.clearCallingIdentity();
-            try {
-                Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                        Settings.Secure.CONTENT_CAPTURE_ENABLED, Boolean.toString(enabled), userId);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            try {
-                result.send(ContentCaptureManager.RESULT_CODE_TRUE, /* resultData= */null);
-            } catch (RemoteException e) {
-                Slog.w(mTag, "Unable to send setContentCaptureFeatureEnabled(): " + e);
-            }
-        }
-
-        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), mTag, pw)) return;
 

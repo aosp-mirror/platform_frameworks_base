@@ -67,9 +67,4 @@ oneway interface IContentCaptureManager {
      * Returns whether the content capture feature is enabled for the calling user.
      */
     void isContentCaptureFeatureEnabled(in IResultReceiver result);
-
-    /**
-     * Sets whether the content capture feature is enabled for the given user.
-     */
-    void setContentCaptureFeatureEnabled(boolean enabled, in IResultReceiver result);
 }

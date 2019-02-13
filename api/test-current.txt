@@ -2114,6 +2114,7 @@ package android.service.contentcapture {
 
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
+    method public final void disableContentCaptureServices();
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
@@ -2758,7 +2759,6 @@ package android.view.contentcapture {
 
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
-    method public void setContentCaptureFeatureEnabled(boolean);
     field public static final String DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY = "idle_flush_frequency";
     field public static final String DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL = "logging_level";
     field public static final String DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE = "log_history_size";

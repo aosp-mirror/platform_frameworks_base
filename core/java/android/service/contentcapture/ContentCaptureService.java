@@ -284,6 +284,24 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
+     * Disables the Content Capture service for the given user.
+     */
+    public final void disableContentCaptureServices() {
+        if (DEBUG) Log.d(TAG, "disableContentCaptureServices()");
+
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "disableContentCaptureServices(): no server callback");
+            return;
+        }
+        try {
+            callback.disableSelf();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called when the Android system disconnects from the service.
      *
      * <p> At this point this service may no longer be an active {@link AutofillService}.
