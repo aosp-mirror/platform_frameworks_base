@@ -31,7 +31,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingManager;
-import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -227,16 +226,6 @@ public class SystemUIFactory {
     @Provides
     public ShadeController provideShadeController(Context context) {
         return SysUiServiceProvider.getComponent(context, StatusBar.class);
-    }
-
-    /**
-     * Provides DockManager.
-     */
-    @Singleton
-    @Provides
-    @Nullable
-    public DockManager providesDockManager(Context context) {
-        return SysUiServiceProvider.getComponent(context, DockManager.class);
     }
 
     @Module
