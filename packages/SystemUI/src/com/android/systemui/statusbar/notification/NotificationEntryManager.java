@@ -345,8 +345,7 @@ public class NotificationEntryManager implements
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
         // Construct the expanded view.
-        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
-                mNotificationData.get(entry.key) != null);
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification));
 
         abortExistingInflation(key);
 
@@ -387,8 +386,7 @@ public class NotificationEntryManager implements
             listener.onPreEntryUpdated(entry);
         }
 
-        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
-                mNotificationData.get(entry.key) != null);
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification));
         updateNotifications();
 
         if (DEBUG) {
@@ -446,8 +444,7 @@ public class NotificationEntryManager implements
                     entry,
                     oldImportances.get(entry.key),
                     oldAdjustments.get(entry.key),
-                    NotificationUiAdjustment.extractFromNotificationEntry(entry),
-                    mNotificationData.get(entry.key) != null);
+                    NotificationUiAdjustment.extractFromNotificationEntry(entry));
         }
 
         updateNotifications();
