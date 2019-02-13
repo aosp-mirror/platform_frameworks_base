@@ -188,7 +188,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     } else {
                         stack.onBubbleDragFinish(mBubbleDraggingOut, x, y, velX, velY);
                     }
-                } else if (floatingView.equals(stack.getExpandedBubble())) {
+                } else if (floatingView.equals(stack.getExpandedBubbleView())) {
                     stack.collapseStack();
                 } else if (isBubbleStack) {
                     if (stack.isExpanded()) {
@@ -197,7 +197,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                         stack.expandStack();
                     }
                 } else {
-                    stack.setExpandedBubble((BubbleView) floatingView);
+                    stack.setExpandedBubble(((BubbleView) floatingView).getKey());
                 }
                 cleanUpDismissTarget();
                 mVelocityTracker.recycle();
