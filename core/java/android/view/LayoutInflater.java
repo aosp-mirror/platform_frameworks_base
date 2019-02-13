@@ -129,7 +129,7 @@ public abstract class LayoutInflater {
     static final Class<?>[] mConstructorSignature = new Class[] {
             Context.class, AttributeSet.class};
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769490)
     private static final HashMap<String, Constructor<? extends View>> sConstructorMap =
             new HashMap<String, Constructor<? extends View>>();
 
