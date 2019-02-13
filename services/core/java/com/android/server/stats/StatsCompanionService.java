@@ -167,6 +167,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     public static final int CODE_DATA_BROADCAST = 1;
     public static final int CODE_SUBSCRIBER_BROADCAST = 1;
+    public static final int CODE_ACTIVE_CONFIGS_BROADCAST = 1;
     /**
      * The last report time is provided with each intent registered to
      * StatsManager#setFetchReportsOperation. This allows easy de-duping in the receiver if
@@ -352,6 +353,22 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             intentSender.sendIntent(mContext, CODE_DATA_BROADCAST, intent, null, null);
         } catch (IntentSender.SendIntentException e) {
             Slog.w(TAG, "Unable to send using IntentSender");
+        }
+    }
+
+    @Override
+    public void sendActiveConfigsChangedBroadcast(IBinder intentSenderBinder, long[] configIds) {
+        enforceCallingPermission();
+        IntentSender intentSender = new IntentSender(intentSenderBinder);
+        Intent intent = new Intent();
+        intent.putExtra(StatsManager.EXTRA_STATS_ACTIVE_CONFIG_KEYS, configIds);
+        try {
+            intentSender.sendIntent(mContext, CODE_ACTIVE_CONFIGS_BROADCAST, intent, null, null);
+            if (DEBUG) {
+                Slog.d(TAG, "Sent broadcast with config ids " + Arrays.toString(configIds));
+            }
+        } catch (IntentSender.SendIntentException e) {
+            Slog.w(TAG, "Unable to send active configs changed broadcast using IntentSender");
         }
     }
 

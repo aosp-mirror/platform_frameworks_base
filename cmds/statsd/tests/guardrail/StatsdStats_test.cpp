@@ -133,6 +133,13 @@ TEST(StatsdStatsTest, TestSubStats) {
     stats.noteMetricsReportSent(key, 0);
     stats.noteMetricsReportSent(key, 0);
 
+    // activation_time_sec -> 2
+    stats.noteActiveStatusChanged(key, true);
+    stats.noteActiveStatusChanged(key, true);
+
+    // deactivation_time_sec -> 1
+    stats.noteActiveStatusChanged(key, false);
+
     vector<uint8_t> output;
     stats.dumpStats(&output, true);  // Dump and reset stats
     StatsdStatsReport report;
@@ -146,6 +153,8 @@ TEST(StatsdStatsTest, TestSubStats) {
     EXPECT_EQ(123, configReport.data_drop_bytes(0));
     EXPECT_EQ(3, configReport.dump_report_time_sec_size());
     EXPECT_EQ(3, configReport.dump_report_data_size_size());
+    EXPECT_EQ(2, configReport.activation_time_sec_size());
+    EXPECT_EQ(1, configReport.deactivation_time_sec_size());
     EXPECT_EQ(1, configReport.annotation_size());
     EXPECT_EQ(123, configReport.annotation(0).field_int64());
     EXPECT_EQ(456, configReport.annotation(0).field_int32());
@@ -344,6 +353,8 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
         stats.noteDataDropped(key, timestamps[i]);
         stats.noteBroadcastSent(key, timestamps[i]);
         stats.noteMetricsReportSent(key, 0, timestamps[i]);
+        stats.noteActiveStatusChanged(key, true, timestamps[i]);
+        stats.noteActiveStatusChanged(key, false, timestamps[i]);
     }
 
     int32_t newTimestamp = 10000;
@@ -352,6 +363,8 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     stats.noteDataDropped(key, 123, 10000);
     stats.noteBroadcastSent(key, 10000);
     stats.noteMetricsReportSent(key, 0, 10000);
+    stats.noteActiveStatusChanged(key, true, 10000);
+    stats.noteActiveStatusChanged(key, false, 10000);
 
     EXPECT_TRUE(stats.mConfigStats.find(key) != stats.mConfigStats.end());
     const auto& configStats = stats.mConfigStats[key];
@@ -360,17 +373,23 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     EXPECT_EQ(maxCount, configStats->broadcast_sent_time_sec.size());
     EXPECT_EQ(maxCount, configStats->data_drop_time_sec.size());
     EXPECT_EQ(maxCount, configStats->dump_report_stats.size());
+    EXPECT_EQ(maxCount, configStats->activation_time_sec.size());
+    EXPECT_EQ(maxCount, configStats->deactivation_time_sec.size());
 
     // the oldest timestamp is the second timestamp in history
     EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
-    EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
-    EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
+    EXPECT_EQ(1, configStats->data_drop_bytes.front());
+    EXPECT_EQ(1, configStats->dump_report_stats.front().first);
+    EXPECT_EQ(1, configStats->activation_time_sec.front());
+    EXPECT_EQ(1, configStats->deactivation_time_sec.front());
 
     // the last timestamp is the newest timestamp.
     EXPECT_EQ(newTimestamp, configStats->broadcast_sent_time_sec.back());
     EXPECT_EQ(newTimestamp, configStats->data_drop_time_sec.back());
     EXPECT_EQ(123, configStats->data_drop_bytes.back());
     EXPECT_EQ(newTimestamp, configStats->dump_report_stats.back().first);
+    EXPECT_EQ(newTimestamp, configStats->activation_time_sec.back());
+    EXPECT_EQ(newTimestamp, configStats->deactivation_time_sec.back());
 }
 
 TEST(StatsdStatsTest, TestSystemServerCrash) {

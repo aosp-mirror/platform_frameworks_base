@@ -82,6 +82,8 @@ const int FIELD_ID_CONFIG_STATS_METRIC_STATS = 15;
 const int FIELD_ID_CONFIG_STATS_ALERT_STATS = 16;
 const int FIELD_ID_CONFIG_STATS_METRIC_DIMENSION_IN_CONDITION_STATS = 17;
 const int FIELD_ID_CONFIG_STATS_ANNOTATION = 18;
+const int FIELD_ID_CONFIG_STATS_ACTIVATION = 22;
+const int FIELD_ID_CONFIG_STATS_DEACTIVATION = 23;
 const int FIELD_ID_CONFIG_STATS_ANNOTATION_INT64 = 1;
 const int FIELD_ID_CONFIG_STATS_ANNOTATION_INT32 = 2;
 
@@ -204,6 +206,25 @@ void StatsdStats::noteBroadcastSent(const ConfigKey& key, int32_t timeSec) {
         it->second->broadcast_sent_time_sec.pop_front();
     }
     it->second->broadcast_sent_time_sec.push_back(timeSec);
+}
+
+void StatsdStats::noteActiveStatusChanged(const ConfigKey& key, bool activated) {
+    noteActiveStatusChanged(key, activated, getWallClockSec());
+}
+
+void StatsdStats::noteActiveStatusChanged(const ConfigKey& key, bool activated, int32_t timeSec) {
+    lock_guard<std::mutex> lock(mLock);
+    auto it = mConfigStats.find(key);
+    if (it == mConfigStats.end()) {
+        ALOGE("Config key %s not found!", key.ToString().c_str());
+        return;
+    }
+    auto& vec = activated ? it->second->activation_time_sec
+                          : it->second->deactivation_time_sec;
+    if (vec.size() == kMaxTimestampCount) {
+        vec.pop_front();
+    }
+    vec.push_back(timeSec);
 }
 
 void StatsdStats::noteDataDropped(const ConfigKey& key, const size_t totalBytes) {
@@ -501,6 +522,8 @@ void StatsdStats::resetInternalLocked() {
     mLogLossStats.clear();
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
+        config.second->activation_time_sec.clear();
+        config.second->deactivation_time_sec.clear();
         config.second->data_drop_time_sec.clear();
         config.second->data_drop_bytes.clear();
         config.second->dump_report_stats.clear();
@@ -558,6 +581,14 @@ void StatsdStats::dumpStats(int out) const {
             dprintf(out, "\tbroadcast time: %d\n", broadcastTime);
         }
 
+        for (const int& activationTime : configStats->activation_time_sec) {
+            dprintf(out, "\tactivation time: %d\n", activationTime);
+        }
+
+        for (const int& deactivationTime : configStats->deactivation_time_sec) {
+            dprintf(out, "\tdeactivation time: %d\n", deactivationTime);
+        }
+
         auto dropTimePtr = configStats->data_drop_time_sec.begin();
         auto dropBytesPtr = configStats->data_drop_bytes.begin();
         for (int i = 0; i < (int)configStats->data_drop_time_sec.size();
@@ -584,6 +615,14 @@ void StatsdStats::dumpStats(int out) const {
         for (const auto& broadcastTime : configStats->broadcast_sent_time_sec) {
             dprintf(out, "\tbroadcast time: %s(%lld)\n", buildTimeString(broadcastTime).c_str(),
                     (long long)broadcastTime);
+        }
+
+        for (const int& activationTime : configStats->activation_time_sec) {
+            dprintf(out, "\tactivation time: %d\n", activationTime);
+        }
+
+        for (const int& deactivationTime : configStats->deactivation_time_sec) {
+            dprintf(out, "\tdeactivation time: %d\n", deactivationTime);
         }
 
         auto dropTimePtr = configStats->data_drop_time_sec.begin();
@@ -694,6 +733,16 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     for (const auto& broadcast : configStats.broadcast_sent_time_sec) {
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_BROADCAST | FIELD_COUNT_REPEATED,
                      broadcast);
+    }
+
+    for (const auto& activation : configStats.activation_time_sec) {
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_ACTIVATION | FIELD_COUNT_REPEATED,
+                     activation);
+    }
+
+    for (const auto& deactivation : configStats.deactivation_time_sec) {
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DEACTIVATION | FIELD_COUNT_REPEATED,
+                     deactivation);
     }
 
     for (const auto& drop_time : configStats.data_drop_time_sec) {

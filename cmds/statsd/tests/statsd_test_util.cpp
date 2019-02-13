@@ -461,7 +461,8 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const in
                 [](const sp<IStatsCompanionService>&){});
     sp<StatsLogProcessor> processor =
             new StatsLogProcessor(uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
-                                  timeBaseNs, [](const ConfigKey&) { return true; });
+                                  timeBaseNs, [](const ConfigKey&) { return true; },
+                                  [](const int&, const vector<int64_t>&) {return true;});
     processor->OnConfigUpdated(currentTimeNs, key, config);
     return processor;
 }

@@ -65,7 +65,8 @@ TEST(StatsLogProcessorTest, TestRateLimitByteSize) {
     sp<AlarmMonitor> periodicAlarmMonitor;
     // Construct the processor with a dummy sendBroadcast function that does nothing.
     StatsLogProcessor p(m, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor, 0,
-                        [](const ConfigKey& key) { return true; });
+                        [](const ConfigKey& key) { return true; },
+                        [](const int&, const vector<int64_t>&) {return true;});
 
     MockMetricsManager mockMetricsManager;
 
@@ -88,7 +89,8 @@ TEST(StatsLogProcessorTest, TestRateLimitBroadcast) {
                         [&broadcastCount](const ConfigKey& key) {
                             broadcastCount++;
                             return true;
-                        });
+                        },
+                        [](const int&, const vector<int64_t>&) {return true;});
 
     MockMetricsManager mockMetricsManager;
 
@@ -118,7 +120,8 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
                         [&broadcastCount](const ConfigKey& key) {
                             broadcastCount++;
                             return true;
-                        });
+                        },
+                        [](const int&, const vector<int64_t>&) {return true;});
 
     MockMetricsManager mockMetricsManager;
 
@@ -162,7 +165,8 @@ TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
                         [&broadcastCount](const ConfigKey& key) {
                             broadcastCount++;
                             return true;
-                        });
+                        },
+                        [](const int&, const vector<int64_t>&) {return true;});
     ConfigKey key(3, 4);
     StatsdConfig config = MakeConfig(true);
     p.OnConfigUpdated(0, key, config);
@@ -192,7 +196,8 @@ TEST(StatsLogProcessorTest, TestEmptyConfigHasNoUidMap) {
                         [&broadcastCount](const ConfigKey& key) {
                             broadcastCount++;
                             return true;
-                        });
+                        },
+                        [](const int&, const vector<int64_t>&) {return true;});
     ConfigKey key(3, 4);
     StatsdConfig config = MakeConfig(false);
     p.OnConfigUpdated(0, key, config);
@@ -218,7 +223,8 @@ TEST(StatsLogProcessorTest, TestReportIncludesSubConfig) {
                         [&broadcastCount](const ConfigKey& key) {
                             broadcastCount++;
                             return true;
-                        });
+                        },
+                        [](const int&, const vector<int64_t>&) {return true;});
     ConfigKey key(3, 4);
     StatsdConfig config;
     auto annotation = config.add_annotation();
