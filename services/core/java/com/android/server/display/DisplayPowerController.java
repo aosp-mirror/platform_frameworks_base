@@ -16,16 +16,11 @@
 
 package com.android.server.display;
 
-import android.app.ActivityManager;
-import com.android.internal.app.IBatteryStats;
-import com.android.server.LocalServices;
-import com.android.server.am.BatteryStatsService;
-import com.android.server.policy.WindowManagerPolicy;
-
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
@@ -53,6 +48,11 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.Display;
+
+import com.android.internal.app.IBatteryStats;
+import com.android.server.LocalServices;
+import com.android.server.am.BatteryStatsService;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 
@@ -422,14 +422,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.fraction.config_screenAutoBrightnessDozeScaleFactor,
                     1, 1);
 
-            int[] brightLevels = resources.getIntArray(
-                    com.android.internal.R.array.config_dynamicHysteresisBrightLevels);
-            int[] darkLevels = resources.getIntArray(
-                    com.android.internal.R.array.config_dynamicHysteresisDarkLevels);
-            int[] luxHysteresisLevels = resources.getIntArray(
-                    com.android.internal.R.array.config_dynamicHysteresisLuxLevels);
-            HysteresisLevels hysteresisLevels = new HysteresisLevels(
-                    brightLevels, darkLevels, luxHysteresisLevels);
+            int[] ambientBrighteningThresholds = resources.getIntArray(
+                    com.android.internal.R.array.config_ambientBrighteningThresholds);
+            int[] ambientDarkeningThresholds = resources.getIntArray(
+                    com.android.internal.R.array.config_ambientDarkeningThresholds);
+            int[] ambientThresholdLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_ambientThresholdLevels);
+            HysteresisLevels ambientBrightnessThresholds = new HysteresisLevels(
+                    ambientBrighteningThresholds, ambientDarkeningThresholds,
+                    ambientThresholdLevels);
+
+            int[] screenBrighteningThresholds = resources.getIntArray(
+                    com.android.internal.R.array.config_screenBrighteningThresholds);
+            int[] screenDarkeningThresholds = resources.getIntArray(
+                    com.android.internal.R.array.config_screenDarkeningThresholds);
+            int[] screenThresholdLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_screenThresholdLevels);
+            HysteresisLevels screenBrightnessThresholds = new HysteresisLevels(
+                    screenBrighteningThresholds, screenDarkeningThresholds, screenThresholdLevels);
+
 
             long brighteningLightDebounce = resources.getInteger(
                     com.android.internal.R.integer.config_autoBrightnessBrighteningLightDebounce);
@@ -459,7 +470,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         lightSensorWarmUpTimeConfig, mScreenBrightnessRangeMinimum,
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
-                        autoBrightnessResetAmbientLuxAfterWarmUp, hysteresisLevels);
+                        autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
+                        screenBrightnessThresholds);
             } else {
                 mUseSoftwareAutoBrightnessConfig = false;
             }
