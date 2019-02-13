@@ -37,10 +37,10 @@ import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -58,6 +58,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
+import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
@@ -78,6 +79,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     private final HashMap<View, PendingIntent> mClickActions;
     private Uri mKeyguardSliceUri;
+    @VisibleForTesting
+    TextView mTitle;
     private Row mRow;
     private int mTextColor;
     private float mDarkAmount = 0;
@@ -91,6 +94,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private Runnable mContentChangeListener;
     private Slice mSlice;
     private boolean mHasHeader;
+    private final int mRowWithHeaderPadding;
+    private final int mRowPadding;
 
     public KeyguardSliceView(Context context) {
         this(context, null, 0);
@@ -107,6 +112,9 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         tunerService.addTunable(this, Settings.Secure.KEYGUARD_SLICE_URI);
 
         mClickActions = new HashMap<>();
+        mRowPadding = context.getResources().getDimensionPixelSize(R.dimen.subtitle_clock_padding);
+        mRowWithHeaderPadding = context.getResources()
+                .getDimensionPixelSize(R.dimen.header_subtitle_padding);
 
         LayoutTransition transition = new LayoutTransition();
         transition.setStagger(LayoutTransition.CHANGE_APPEARING, DEFAULT_ANIM_DURATION / 2);
@@ -117,13 +125,13 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.FAST_OUT_SLOW_IN);
         transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
         transition.setAnimateParentHierarchy(false);
-        transition.addTransitionListener(new SliceViewTransitionListener());
         setLayoutTransition(transition);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mTitle = findViewById(R.id.title);
         mRow = findViewById(R.id.row);
         mTextColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
         mIconSize = (int) mContext.getResources().getDimension(R.dimen.widget_icon_size);
@@ -160,6 +168,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private void showSlice() {
         Trace.beginSection("KeyguardSliceView#showSlice");
         if (mSlice == null) {
+            mTitle.setVisibility(GONE);
             mRow.setVisibility(GONE);
             mHasHeader = false;
             if (mContentChangeListener != null) {
@@ -170,8 +179,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
         ListContent lc = new ListContent(getContext(), mSlice);
         SliceContent headerContent = lc.getHeader();
-        mHasHeader = headerContent != null
-                && !headerContent.getSliceItem().hasHint(HINT_LIST_ITEM);
+        mHasHeader = headerContent != null && !headerContent.getSliceItem().hasHint(HINT_LIST_ITEM);
         List<SliceContent> subItems = new ArrayList<>();
         for (int i = 0; i < lc.getRowItems().size(); i++) {
             SliceContent subItem = lc.getRowItems().get(i);
@@ -181,12 +189,26 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                 subItems.add(subItem);
             }
         }
+        if (!mHasHeader) {
+            mTitle.setVisibility(GONE);
+        } else {
+            mTitle.setVisibility(VISIBLE);
+
+            RowContent header = lc.getHeader();
+            SliceItem mainTitle = header.getTitleItem();
+            CharSequence title = mainTitle != null ? mainTitle.getText() : null;
+            mTitle.setText(title);
+        }
 
         mClickActions.clear();
         final int subItemsCount = subItems.size();
         final int blendedColor = getTextColor();
         final int startIndex = mHasHeader ? 1 : 0; // First item is header; skip it
         mRow.setVisibility(subItemsCount > 0 ? VISIBLE : GONE);
+        LinearLayout.LayoutParams layoutParams = (LayoutParams) mRow.getLayoutParams();
+        layoutParams.topMargin = mHasHeader ? mRowWithHeaderPadding : mRowPadding;
+        mRow.setLayoutParams(layoutParams);
+
         for (int i = startIndex; i < subItemsCount; i++) {
             RowContent rc = (RowContent) subItems.get(i);
             SliceItem item = rc.getSliceItem();
@@ -250,6 +272,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     private void updateTextColors() {
         final int blendedColor = getTextColor();
+        mTitle.setTextColor(blendedColor);
         int childCount = mRow.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View v = mRow.getChildAt(i);
@@ -294,7 +317,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         setupUri(newValue);
     }
 
-    private void setupUri(String uriString) {
+    /**
+     * Sets the slice provider Uri.
+     */
+    public void setupUri(String uriString) {
         if (uriString == null) {
             uriString = KeyguardSliceProvider.KEYGUARD_SLICE_URI;
         }
@@ -510,31 +536,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                     drawable.setTint(color);
                 }
             }
-        }
-    }
-
-    private class SliceViewTransitionListener implements LayoutTransition.TransitionListener {
-        @Override
-        public void startTransition(LayoutTransition transition, ViewGroup container, View view,
-                int transitionType) {
-            switch (transitionType) {
-                case  LayoutTransition.APPEARING:
-                    int translation = getResources().getDimensionPixelSize(
-                            R.dimen.pulsing_notification_appear_translation);
-                    view.setTranslationY(translation);
-                    view.animate()
-                            .translationY(0)
-                            .setDuration(DEFAULT_ANIM_DURATION)
-                            .setInterpolator(Interpolators.ALPHA_IN)
-                            .start();
-                    break;
-            }
-        }
-
-        @Override
-        public void endTransition(LayoutTransition transition, ViewGroup container, View view,
-                int transitionType) {
-
         }
     }
 }

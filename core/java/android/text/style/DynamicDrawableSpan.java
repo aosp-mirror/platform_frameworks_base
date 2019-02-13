@@ -77,6 +77,13 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
      */
     public static final int ALIGN_BASELINE = 1;
 
+    /**
+     * A constant indicating that this span should be vertically centered between
+     * the top and the lowest descender.
+     * @hide
+     */
+    public static final int ALIGN_CENTER = 2;
+
     protected final int mVerticalAlignment;
 
     @UnsupportedAppUsage
@@ -142,6 +149,8 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
         int transY = bottom - b.getBounds().bottom;
         if (mVerticalAlignment == ALIGN_BASELINE) {
             transY -= paint.getFontMetricsInt().descent;
+        } else if (mVerticalAlignment == ALIGN_CENTER) {
+            transY = (bottom - top) / 2 - b.getBounds().height() / 2;
         }
 
         canvas.translate(x, transY);
