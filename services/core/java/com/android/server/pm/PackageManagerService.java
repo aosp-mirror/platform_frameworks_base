@@ -123,6 +123,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppDetailsActivity;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
@@ -1044,12 +1045,17 @@ public class PackageManagerService extends IPackageManager.Stub
             verificationIntent.setComponent(mIntentFilterVerifierComponent);
             verificationIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
+            final long whitelistTimeout = getVerificationTimeout();
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setTemporaryAppWhitelistDuration(whitelistTimeout);
+
             DeviceIdleController.LocalService idleController = getDeviceIdleController();
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
-                    mIntentFilterVerifierComponent.getPackageName(), getVerificationTimeout(),
+                    mIntentFilterVerifierComponent.getPackageName(), whitelistTimeout,
                     UserHandle.USER_SYSTEM, true, "intent filter verifier");
 
-            mContext.sendBroadcastAsUser(verificationIntent, UserHandle.SYSTEM);
+            mContext.sendBroadcastAsUser(verificationIntent, UserHandle.SYSTEM,
+                    null, options.toBundle());
             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
                     "Sending IntentFilter verification broadcast");
         }
