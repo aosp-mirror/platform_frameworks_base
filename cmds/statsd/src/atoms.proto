@@ -162,6 +162,7 @@ message Atom {
         BluetoothBondStateChanged bluetooth_bond_state_changed = 165;
         BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported = 166;
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
+        ProcessStartTime process_start_time = 169;
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
     }
 
@@ -2989,3 +2990,59 @@ message SeOmapiReported {
 
     optional string package_name = 3;
 }
+
+/*
+* Logs number of milliseconds it takes to start a process.
+* The definition of app process start time is from the app launch time to
+* the time that Zygote finished forking the app process and loaded the
+* application package's java classes.
+
+* This metric is different from AppStartOccurred which is for foreground
+* activity only.
+
+* ProcessStartTime can report all processes (both foreground and background)
+* start time.
+*
+* Logged from:
+*   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+*/
+message ProcessStartTime {
+    // The uid of the ProcessRecord.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process pid.
+    optional int32 pid = 2;
+
+    // The process name.
+    // Usually package name, "system" for system server.
+    // Provided by ActivityManagerService.
+    optional string process_name = 3;
+
+    enum StartType {
+        UNKNOWN = 0;
+        WARM = 1;
+        HOT = 2;
+        COLD = 3;
+    }
+
+    // The start type.
+    optional StartType type = 4;
+
+    // The elapsed realtime at the start of the process.
+    optional int64 process_start_time_millis = 5;
+
+    // Number of milliseconds it takes to reach bind application.
+    optional int32 bind_application_delay_millis = 6;
+
+    // Number of milliseconds it takes to finish start of the process.
+    optional int32 process_start_delay_millis = 7;
+
+    // hostingType field in ProcessRecord, the component type such as "activity",
+    // "service", "content provider", "broadcast" or other strings.
+    optional string hosting_type = 8;
+
+    // hostingNameStr field in ProcessRecord. The component class name that runs
+    // in this process.
+    optional string hosting_name = 9;
+}
+

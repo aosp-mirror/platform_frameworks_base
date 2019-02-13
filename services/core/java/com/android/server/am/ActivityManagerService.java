@@ -7429,6 +7429,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // next app record if we are emulating process with anonymous threads.
         ProcessRecord app;
         long startTime = SystemClock.uptimeMillis();
+        long bindApplicationTimeMillis;
         if (pid != MY_PID && pid >= 0) {
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
@@ -7659,6 +7660,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
+            bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
@@ -7776,6 +7778,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             updateOomAdjLocked();
             checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
         }
+
+        StatsLog.write(
+                StatsLog.PROCESS_START_TIME,
+                app.info.uid,
+                app.pid,
+                app.info.packageName,
+                StatsLog.PROCESS_START_TIME__TYPE__COLD,
+                app.startTime,
+                (int) (bindApplicationTimeMillis - app.startTime),
+                (int) (SystemClock.elapsedRealtime() - app.startTime),
+                app.hostingType,
+                (app.hostingNameStr != null ? app.hostingNameStr : ""));
 
         return true;
     }
