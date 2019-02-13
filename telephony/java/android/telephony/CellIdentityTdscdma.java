@@ -141,6 +141,14 @@ public final class CellIdentityTdscdma extends CellIdentity {
         return mCpid;
     }
 
+    /**
+     * @return 16-bit UMTS Absolute RF Channel Number,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
+     */
+    public int getUarfcn() {
+        return mUarfcn;
+    }
+
     /** @hide */
     @Override
     public int getChannelNumber() {
