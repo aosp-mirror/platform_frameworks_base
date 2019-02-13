@@ -120,7 +120,7 @@ bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
 }
 
 DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
-    mVkManager.initialize();
+    mRenderThread.requireVkContext();
 
     return new DeferredLayerUpdater(mRenderThread.renderState());
 }
@@ -136,8 +136,9 @@ bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
 
     setSurfaceColorProperties(colorMode);
     if (surface) {
+        mRenderThread.requireVkContext();
         mVkSurface = mVkManager.createSurface(surface, colorMode, mSurfaceColorSpace,
-                                              mSurfaceColorType);
+                                              mSurfaceColorType, mRenderThread.getGrContext());
     }
 
     return mVkSurface != nullptr;

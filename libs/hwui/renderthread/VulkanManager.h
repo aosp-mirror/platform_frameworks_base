@@ -22,6 +22,8 @@
 #endif
 #include <vulkan/vulkan.h>
 
+#include <GrContextOptions.h>
+#include <vk/GrVkExtensions.h>
 #include <SkSurface.h>
 #include <ui/Fence.h>
 #include <utils/StrongPointer.h>
@@ -39,9 +41,9 @@ class RenderThread;
 class VulkanSurface {
 public:
     VulkanSurface(ColorMode colorMode, ANativeWindow* window, sk_sp<SkColorSpace> colorSpace,
-                  SkColorType colorType)
+                  SkColorType colorType, GrContext* grContext)
             : mColorMode(colorMode), mNativeWindow(window), mColorSpace(colorSpace),
-              mColorType(colorType) {}
+              mColorType(colorType), mGrContext(grContext) {}
 
     sk_sp<SkSurface> getBackBufferSurface() { return mBackbuffer; }
 
@@ -93,6 +95,7 @@ private:
     SkColorType mColorType;
     VkSurfaceTransformFlagBitsKHR mTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     SkMatrix mPreTransform;
+    GrContext* mGrContext;
 };
 
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,
@@ -100,6 +103,9 @@ private:
 // windowing contexts. The VulkanManager must be initialized before use.
 class VulkanManager {
 public:
+    explicit VulkanManager() {}
+    ~VulkanManager() { destroy(); }
+
     // Sets up the vulkan context that is shared amonst all clients of the VulkanManager. This must
     // be call once before use of the VulkanManager. Multiple calls after the first will simiply
     // return.
@@ -112,7 +118,8 @@ public:
     // VulkanSurface object which is returned.
     VulkanSurface* createSurface(ANativeWindow* window, ColorMode colorMode,
                                  sk_sp<SkColorSpace> surfaceColorSpace,
-                                 SkColorType surfaceColorType);
+                                 SkColorType surfaceColorType,
+                                 GrContext* grContext);
 
     // Destroy the VulkanSurface and all associated vulkan objects.
     void destroySurface(VulkanSurface* surface);
@@ -143,12 +150,9 @@ public:
     // Returned pointers are owned by VulkanManager.
     VkFunctorInitParams getVkFunctorInitParams() const;
 
+    sk_sp<GrContext> createContext(GrContextOptions options);
+
 private:
-    friend class RenderThread;
-
-    explicit VulkanManager(RenderThread& thread);
-    ~VulkanManager() { destroy(); }
-
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
     // VkPhysicalDeviceFeatures struct.
     void setupDevice(GrVkExtensions&, VkPhysicalDeviceFeatures2&);
@@ -231,8 +235,6 @@ private:
     VkPtr<PFN_vkWaitForFences> mWaitForFences;
     VkPtr<PFN_vkResetFences> mResetFences;
 
-    RenderThread& mRenderThread;
-
     VkInstance mInstance = VK_NULL_HANDLE;
     VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
     VkDevice mDevice = VK_NULL_HANDLE;
@@ -256,6 +258,7 @@ private:
         BufferAge,
     };
     SwapBehavior mSwapBehavior = SwapBehavior::Discard;
+    GrVkExtensions mExtensions;
 };
 
 } /* namespace renderthread */

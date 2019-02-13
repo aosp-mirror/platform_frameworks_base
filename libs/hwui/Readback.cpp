@@ -107,7 +107,7 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         mRenderThread.requireGlContext();
     } else {
-        mRenderThread.vulkanManager().initialize();
+        mRenderThread.requireVkContext();
     }
     if (!image.get()) {
         return CopyResult::UnknownError;

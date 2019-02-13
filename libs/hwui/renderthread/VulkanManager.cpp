@@ -55,11 +55,7 @@ static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& fe
 #define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
 #define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(mDevice, "vk" #F)
 
-VulkanManager::VulkanManager(RenderThread& thread) : mRenderThread(thread) {}
-
 void VulkanManager::destroy() {
-    mRenderThread.setGrContext(nullptr);
-
     // We don't need to explicitly free the command buffer since it automatically gets freed when we
     // delete the VkCommandPool below.
     mDummyCB = VK_NULL_HANDLE;
@@ -333,28 +329,9 @@ void VulkanManager::initialize() {
     LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&instanceVersion));
     LOG_ALWAYS_FATAL_IF(instanceVersion < VK_MAKE_VERSION(1, 1, 0));
 
-    GrVkExtensions extensions;
-    this->setupDevice(extensions, mPhysicalDeviceFeatures2);
+    this->setupDevice(mExtensions, mPhysicalDeviceFeatures2);
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
-
-    auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
-        if (device != VK_NULL_HANDLE) {
-            return vkGetDeviceProcAddr(device, proc_name);
-        }
-        return vkGetInstanceProcAddr(instance, proc_name);
-    };
-
-    GrVkBackendContext backendContext;
-    backendContext.fInstance = mInstance;
-    backendContext.fPhysicalDevice = mPhysicalDevice;
-    backendContext.fDevice = mDevice;
-    backendContext.fQueue = mGraphicsQueue;
-    backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
-    backendContext.fMaxAPIVersion = mAPIVersion;
-    backendContext.fVkExtensions = &extensions;
-    backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
-    backendContext.fGetProc = std::move(getProc);
 
     // create the command pool for the command buffers
     if (VK_NULL_HANDLE == mCommandPool) {
@@ -376,20 +353,33 @@ void VulkanManager::initialize() {
     }
     LOG_ALWAYS_FATAL_IF(mDummyCB == VK_NULL_HANDLE);
 
-
     mGetDeviceQueue(mDevice, mPresentQueueIndex, 0, &mPresentQueue);
-
-    GrContextOptions options;
-    options.fDisableDistanceFieldPaths = true;
-    // TODO: get a string describing the SPIR-V compiler version and use it here
-    mRenderThread.cacheManager().configureContext(&options, nullptr, 0);
-    sk_sp<GrContext> grContext(GrContext::MakeVulkan(backendContext, options));
-    LOG_ALWAYS_FATAL_IF(!grContext.get());
-    mRenderThread.setGrContext(grContext);
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;
     }
+}
+
+sk_sp<GrContext> VulkanManager::createContext(GrContextOptions options) {
+    auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
+        if (device != VK_NULL_HANDLE) {
+            return vkGetDeviceProcAddr(device, proc_name);
+        }
+        return vkGetInstanceProcAddr(instance, proc_name);
+    };
+
+    GrVkBackendContext backendContext;
+    backendContext.fInstance = mInstance;
+    backendContext.fPhysicalDevice = mPhysicalDevice;
+    backendContext.fDevice = mDevice;
+    backendContext.fQueue = mGraphicsQueue;
+    backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
+    backendContext.fMaxAPIVersion = mAPIVersion;
+    backendContext.fVkExtensions = &mExtensions;
+    backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
+    backendContext.fGetProc = std::move(getProc);
+
+    return GrContext::MakeVulkan(backendContext, options);
 }
 
 VkFunctorInitParams VulkanManager::getVkFunctorInitParams() const {
@@ -470,8 +460,9 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface** surfaceOut) {
         ColorMode colorMode = surface->mColorMode;
         sk_sp<SkColorSpace> colorSpace = surface->mColorSpace;
         SkColorType colorType = surface->mColorType;
+        GrContext* grContext = surface->mGrContext;
         destroySurface(surface);
-        *surfaceOut = createSurface(window, colorMode, colorSpace, colorType);
+        *surfaceOut = createSurface(window, colorMode, colorSpace, colorType, grContext);
         surface = *surfaceOut;
         if (!surface) {
             return nullptr;
@@ -650,7 +641,7 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
 
         VulkanSurface::ImageInfo& imageInfo = surface->mImageInfos[i];
         imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(
-                mRenderThread.getGrContext(), backendRT, kTopLeft_GrSurfaceOrigin,
+                surface->mGrContext, backendRT, kTopLeft_GrSurfaceOrigin,
                 surface->mColorType, surface->mColorSpace, &props);
     }
 
@@ -880,15 +871,15 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
 
 VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode,
                                             sk_sp<SkColorSpace> surfaceColorSpace,
-                                            SkColorType surfaceColorType) {
-    initialize();
-
+                                            SkColorType surfaceColorType,
+                                            GrContext* grContext) {
+    LOG_ALWAYS_FATAL_IF(!hasVkContext(), "Not initialized");
     if (!window) {
         return nullptr;
     }
 
     VulkanSurface* surface = new VulkanSurface(colorMode, window, surfaceColorSpace,
-                                               surfaceColorType);
+                                               surfaceColorType, grContext);
 
     VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
     memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
