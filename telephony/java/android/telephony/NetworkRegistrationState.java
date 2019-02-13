@@ -27,6 +27,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Description of a mobile network registration state
@@ -360,7 +361,34 @@ public class NetworkRegistrationState implements Parcelable {
         return 0;
     }
 
-    private static String regStateToString(int regState) {
+    /**
+     * Convert service type to string
+     *
+     * @hide
+     *
+     * @param serviceType The service type
+     * @return The service type in string format
+     */
+    public static String serviceTypeToString(@ServiceType int serviceType) {
+        switch (serviceType) {
+            case SERVICE_TYPE_VOICE: return "VOICE";
+            case SERVICE_TYPE_DATA: return "DATA";
+            case SERVICE_TYPE_SMS: return "SMS";
+            case SERVICE_TYPE_VIDEO: return "VIDEO";
+            case SERVICE_TYPE_EMERGENCY: return "EMERGENCY";
+        }
+        return "Unknown service type " + serviceType;
+    }
+
+    /**
+     * Convert registration state to string
+     *
+     * @hide
+     *
+     * @param regState The registration state
+     * @return The reg state in string
+     */
+    public static String regStateToString(@RegState int regState) {
         switch (regState) {
             case REG_STATE_NOT_REG_NOT_SEARCHING: return "NOT_REG_NOT_SEARCHING";
             case REG_STATE_HOME: return "HOME";
@@ -389,14 +417,17 @@ public class NetworkRegistrationState implements Parcelable {
     public String toString() {
         return new StringBuilder("NetworkRegistrationState{")
                 .append(" domain=").append((mDomain == DOMAIN_CS) ? "CS" : "PS")
-                .append("transportType=").append(mTransportType)
+                .append(" transportType=").append(TransportType.toString(mTransportType))
                 .append(" regState=").append(regStateToString(mRegState))
-                .append(" roamingType=").append(mRoamingType)
+                .append(" roamingType=").append(ServiceState.roamingTypeToString(mRoamingType))
                 .append(" accessNetworkTechnology=")
                 .append(TelephonyManager.getNetworkTypeName(mAccessNetworkTechnology))
                 .append(" rejectCause=").append(mRejectCause)
                 .append(" emergencyEnabled=").append(mEmergencyOnly)
-                .append(" supportedServices=").append(mAvailableServices)
+                .append(" availableServices=").append("[" + (mAvailableServices != null
+                        ? Arrays.stream(mAvailableServices)
+                        .mapToObj(type -> serviceTypeToString(type))
+                        .collect(Collectors.joining(",")) : null) + "]")
                 .append(" cellIdentity=").append(mCellIdentity)
                 .append(" voiceSpecificStates=").append(mVoiceSpecificStates)
                 .append(" dataSpecificStates=").append(mDataSpecificStates)
