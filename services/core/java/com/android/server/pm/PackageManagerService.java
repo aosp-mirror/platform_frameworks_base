@@ -12803,7 +12803,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public String[] setDistractingPackageRestrictionsAsUser(String[] packageNames,
             int restrictionFlags, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
-                "setPackagesSuspendedAsUser");
+                "setDistractingPackageRestrictionsAsUser");
 
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
