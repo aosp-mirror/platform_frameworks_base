@@ -3,7 +3,6 @@ java_library {
 
     srcs: [
         ":updatable-media-srcs",
-        ":framework-media-annotation-srcs",
     ],
 
     aidl: {
@@ -28,7 +27,12 @@ java_library {
     installable: true,
 
     // Make sure that the implementaion only relies on SDK or system APIs.
-    sdk_version: "system_current",
+    no_framework_libs: true,
+    libs: [
+        // The order matters. android_system_* library should come later.
+        "framework_media_annotation",
+        "android_system_stubs_current",
+    ],
 }
 
 filegroup {
@@ -125,3 +129,8 @@ java_library {
     sdk_version: "28",
 }
 
+java_library {
+    name: "framework_media_annotation",
+    srcs: [":framework-media-annotation-srcs"],
+    installable: false,
+}

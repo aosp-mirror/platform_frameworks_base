@@ -45,8 +45,8 @@ import android.util.Size;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import com.android.framework.protobuf.InvalidProtocolBufferException;
 import com.android.internal.annotations.GuardedBy;
+import com.android.media.protobuf.InvalidProtocolBufferException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
