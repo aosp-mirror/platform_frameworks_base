@@ -23,7 +23,7 @@ namespace uirenderer {
 
 class FrameMetricsObserver : public VirtualLightRefBase {
 public:
-    virtual void notify(const int64_t* buffer);
+    virtual void notify(const int64_t* buffer) = 0;
 };
 
 }  // namespace uirenderer
