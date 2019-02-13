@@ -49,6 +49,7 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String GAME_DRIVER_WHITELIST_ALL = "*";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -208,9 +209,10 @@ public class GraphicsEnvironment {
             final boolean isOptIn =
                     getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
                             .contains(ai.packageName);
-            if (!isOptIn
-                    && !getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_WHITELIST)
-                        .contains(ai.packageName)) {
+            final List<String> whitelist = getGlobalSettingsString(coreSettings,
+                    Settings.Global.GAME_DRIVER_WHITELIST);
+            if (!isOptIn && whitelist.indexOf(GAME_DRIVER_WHITELIST_ALL) != 0
+                    && !whitelist.contains(ai.packageName)) {
                 if (DEBUG) {
                     Log.w(TAG, ai.packageName + " is not on the whitelist.");
                 }
