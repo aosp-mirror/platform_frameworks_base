@@ -246,6 +246,12 @@ public class NetworkStackService extends Service {
         }
 
         @Override
+        public void notifyCaptivePortalAppFinished(int response) {
+            checkNetworkStackCallingPermission();
+            mNm.notifyCaptivePortalAppFinished(response);
+        }
+
+        @Override
         public void forceReevaluation(int uid) {
             checkNetworkStackCallingPermission();
             mNm.forceReevaluation(uid);
