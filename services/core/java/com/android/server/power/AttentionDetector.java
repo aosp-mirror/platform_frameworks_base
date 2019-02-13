@@ -123,6 +123,9 @@ public class AttentionDetector {
     public AttentionDetector(Runnable onUserAttention, Object lock) {
         mOnUserAttention = onUserAttention;
         mLock = lock;
+
+        // Device starts with an awake state upon boot.
+        mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
     }
 
     public void systemReady(Context context) {
