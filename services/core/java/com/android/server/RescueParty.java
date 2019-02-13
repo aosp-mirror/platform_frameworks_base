@@ -37,6 +37,7 @@ import android.util.SparseArray;
 import android.util.StatsLog;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.utils.FlagNamespaceUtils;
 
 import java.io.File;
 
@@ -194,6 +195,8 @@ public class RescueParty {
                 RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
                 break;
         }
+        FlagNamespaceUtils.addToKnownResetNamespaces(
+                FlagNamespaceUtils.NAMESPACE_NO_PACKAGE);
     }
 
     private static void resetAllSettings(Context context, int mode) throws Exception {
@@ -203,14 +206,19 @@ public class RescueParty {
         final ContentResolver resolver = context.getContentResolver();
         try {
             Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
-        } catch (Throwable t) {
-            res = new RuntimeException("Failed to reset global settings", t);
+        } catch (Exception e) {
+            res = new RuntimeException("Failed to reset global settings", e);
+        }
+        try {
+            FlagNamespaceUtils.resetDeviceConfig(mode);
+        } catch (Exception e) {
+            res = new RuntimeException("Failed to reset config settings", e);
         }
         for (int userId : getAllUserIds()) {
             try {
                 Settings.Secure.resetToDefaultsAsUser(resolver, null, mode, userId);
-            } catch (Throwable t) {
-                res = new RuntimeException("Failed to reset secure settings for " + userId, t);
+            } catch (Exception e) {
+                res = new RuntimeException("Failed to reset secure settings for " + userId, e);
             }
         }
         if (res != null) {
