@@ -372,6 +372,13 @@ public class StatusBarNotification implements Parcelable {
     /**
      * @hide
      */
+    public void clearPackageContext() {
+        mContext = null;
+    }
+
+    /**
+     * @hide
+     */
     @UnsupportedAppUsage
     public Context getPackageContext(Context context) {
         if (mContext == null) {
