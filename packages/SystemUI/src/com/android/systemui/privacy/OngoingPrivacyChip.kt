@@ -21,7 +21,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.android.systemui.Dependency
 import com.android.systemui.R
+import com.android.systemui.statusbar.policy.KeyguardMonitor
 
 class OngoingPrivacyChip @JvmOverloads constructor(
     context: Context,
@@ -49,6 +51,8 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                 updateView()
             }
         }
+    @Suppress("DEPRECATION")
+    private val keyguardMonitor = Dependency.get(KeyguardMonitor::class.java)
     var builder = PrivacyDialogBuilder(context, emptyList<PrivacyItem>())
     var privacyList = emptyList<PrivacyItem>()
         set(value) {
@@ -90,16 +94,7 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         if (!privacyList.isEmpty()) {
             generateContentDescription()
             setIcons(builder, iconsContainer)
-            text.visibility = if (builder.types.size == 1 && expanded) VISIBLE else GONE
-            if (builder.types.size == 1 && expanded) {
-                if (builder.app != null) {
-                    text.setText(builder.app?.applicationName)
-                } else {
-                    text.text = context.resources.getQuantityString(
-                            R.plurals.ongoing_privacy_chip_multiple_apps,
-                            builder.appsAndTypes.size, builder.appsAndTypes.size)
-                }
-            }
+            setApplicationText()
         } else {
             text.visibility = GONE
             iconsContainer.removeAllViews()
@@ -107,13 +102,28 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         requestLayout()
     }
 
+    private fun setApplicationText() {
+        text.visibility = if (builder.types.size == 1 && expanded) VISIBLE else GONE
+        if (builder.types.size == 1 && expanded) {
+            if (builder.app != null && !amISecure()) {
+                text.setText(builder.app?.applicationName)
+            } else {
+                text.text = context.resources.getQuantityString(
+                        R.plurals.ongoing_privacy_chip_multiple_apps,
+                        builder.appsAndTypes.size, builder.appsAndTypes.size)
+            }
+        }
+    }
+
+    private fun amISecure() = keyguardMonitor.isShowing && keyguardMonitor.isSecure
+
     private fun generateContentDescription() {
         val typesText = builder.joinTypes()
         if (builder.types.size > 1) {
             contentDescription = context.getString(
                     R.string.ongoing_privacy_chip_content_multiple_apps, typesText)
         } else {
-            if (builder.app != null) {
+            if (builder.app != null && !amISecure()) {
                 contentDescription =
                         context.getString(R.string.ongoing_privacy_chip_content_single_app,
                                 builder.app?.applicationName, typesText)
