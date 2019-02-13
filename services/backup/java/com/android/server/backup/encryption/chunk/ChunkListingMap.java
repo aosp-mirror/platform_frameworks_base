@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,13 +11,14 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.backup.encryption.chunk;
 
 import android.annotation.Nullable;
 import android.util.proto.ProtoInputStream;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,16 +31,16 @@ import java.util.Map;
  * It can then tell the server to use that chunk, through telling it the position and length of the
  * chunk in the previous backup's blob.
  */
-public class ChunkListing {
+public class ChunkListingMap {
     /**
-     * Reads a ChunkListing from a {@link ProtoInputStream}. Expects the message to be of format
+     * Reads a ChunkListingMap from a {@link ProtoInputStream}. Expects the message to be of format
      * {@link ChunksMetadataProto.ChunkListing}.
      *
      * @param inputStream Currently at a {@link ChunksMetadataProto.ChunkListing} message.
      * @throws IOException when the message is not structured as expected or a field can not be
      *     read.
      */
-    public static ChunkListing readFromProto(ProtoInputStream inputStream) throws IOException {
+    public static ChunkListingMap readFromProto(ProtoInputStream inputStream) throws IOException {
         Map<ChunkHash, Entry> entries = new HashMap();
 
         long start = 0;
@@ -54,12 +55,12 @@ public class ChunkListing {
             }
         }
 
-        return new ChunkListing(entries);
+        return new ChunkListingMap(entries);
     }
 
     private final Map<ChunkHash, Entry> mChunksByHash;
 
-    private ChunkListing(Map<ChunkHash, Entry> chunksByHash) {
+    private ChunkListingMap(Map<ChunkHash, Entry> chunksByHash) {
         mChunksByHash = Collections.unmodifiableMap(new HashMap<>(chunksByHash));
     }
 

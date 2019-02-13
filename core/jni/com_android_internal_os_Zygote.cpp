@@ -742,7 +742,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
         return;
     }
 
-    if (GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, false))) {
+    if (GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, true))) {
         if (mount_mode == MOUNT_EXTERNAL_FULL || mount_mode == MOUNT_EXTERNAL_LEGACY) {
             storageSource = (mount_mode == MOUNT_EXTERNAL_FULL)
                     ? "/mnt/runtime/full" : "/mnt/runtime/write";

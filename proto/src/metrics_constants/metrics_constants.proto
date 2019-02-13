@@ -6975,6 +6975,23 @@ message MetricsEvent {
     // formerly: histogram system_cost_for_smart_sharing
     FIELD_TIME_TO_APP_TARGETS = 1653;
 
+    // Open: Settings > Panel for Internet Connectivity
+    PANEL_INTERNET_CONNECTIVITY = 1654;
+
+    // Open: Settings > Panel for Volume
+    PANEL_VOLUME = 1655;
+
+    // Open: Settings > Panel for NFC
+    PANEL_NFC = 1656;
+
+    // Open: Settings > Panel for Media Output
+    PANEL_MEDIA_OUTPUT = 1657;
+
+    // ACTION: An interaction with a Slice or other component in the Panel.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_PANEL_INTERACTION = 1658;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

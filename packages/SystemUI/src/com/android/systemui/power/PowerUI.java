@@ -54,6 +54,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.concurrent.Future;
 
 public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";
@@ -80,6 +81,7 @@ public class PowerUI extends SystemUI {
     private Estimate mLastEstimate;
     private boolean mLowWarningShownThisChargeCycle;
     private boolean mSevereWarningShownThisChargeCycle;
+    private Future mLastShowWarningTask;
 
     private int mLowBatteryAlertCloseLevel;
     private final int[] mLowBatteryReminderLevels = new int[2];
@@ -247,7 +249,10 @@ public class PowerUI extends SystemUI {
                 }
 
                 // Show the correct version of low battery warning if needed
-                ThreadUtils.postOnBackgroundThread(() -> {
+                if (mLastShowWarningTask != null) {
+                    mLastShowWarningTask.cancel(true);
+                }
+                mLastShowWarningTask = ThreadUtils.postOnBackgroundThread(() -> {
                     maybeShowBatteryWarning(
                             oldBatteryLevel, plugged, oldPlugged, oldBucket, bucket);
                 });
@@ -276,7 +281,7 @@ public class PowerUI extends SystemUI {
                 estimate = mEnhancedEstimates.getEstimate();
                 mLastEstimate = estimate;
             }
-            // Turbo is not always booted once SysUI is running so we have ot make sure we actually
+            // Turbo is not always booted once SysUI is running so we have to make sure we actually
             // get data back
             if (estimate != null) {
                 mTimeRemaining = estimate.estimateMillis;
@@ -355,13 +360,26 @@ public class PowerUI extends SystemUI {
         // Only show the low warning once per charge cycle & no battery saver
         final boolean canShowWarning = !mLowWarningShownThisChargeCycle && !isPowerSaver
                 && (timeRemaining < mEnhancedEstimates.getLowWarningThreshold()
-                        || mBatteryLevel <= warnLevel);
+                || mBatteryLevel <= warnLevel);
 
         // Only show the severe warning once per charge cycle
         final boolean canShowSevereWarning = !mSevereWarningShownThisChargeCycle
                 && (timeRemaining < mEnhancedEstimates.getSevereWarningThreshold()
-                        || mBatteryLevel <= critLevel);
+                || mBatteryLevel <= critLevel);
 
+        final boolean canShow = canShowWarning || canShowSevereWarning;
+        if (DEBUG) {
+            Slog.d(TAG, "Enhanced trigger is: " + canShow + "\nwith values: "
+                    + " mLowWarningShownThisChargeCycle: " + mLowWarningShownThisChargeCycle
+                    + " mSevereWarningShownThisChargeCycle: " + mSevereWarningShownThisChargeCycle
+                    + " mEnhancedEstimates.timeremaining: " + timeRemaining
+                    + " mBatteryLevel: " + mBatteryLevel
+                    + " canShowWarning: " + canShowWarning
+                    + " canShowSevereWarning: " + canShowSevereWarning
+                    + " plugged: " + plugged
+                    + " batteryStatus: " + batteryStatus
+                    + " isPowerSaver: " + isPowerSaver);
+        }
         return canShowWarning || canShowSevereWarning;
     }
 

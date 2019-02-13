@@ -448,6 +448,11 @@ message GlobalSettingsProto {
         optional SettingProto game_driver_whitelist = 12;
         // ANGLE - List of Apps that can check ANGLE rules
         optional SettingProto angle_whitelist = 13;
+        // Game Driver - List of blacklists, each blacklist is a blacklist for
+        // a specific Game Driver version
+        optional SettingProto game_driver_blacklists = 14;
+        // ANGLE - Show a dialog box when ANGLE is selected for the currently running PKG
+        optional SettingProto show_angle_in_use_dialog = 15;
     }
     optional Gpu gpu = 59;
 

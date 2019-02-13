@@ -10,14 +10,6 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
-    },
-    {
-      "name": "CtsViewTestCases",
-      "options": [
-        {
-          "include-filter": "android.view.textclassifier.cts"
-        }
-      ]
     }
   ]
 }

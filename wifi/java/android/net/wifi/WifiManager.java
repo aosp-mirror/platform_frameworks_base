@@ -1149,9 +1149,6 @@ public class WifiManager {
      * Return a list of all the networks configured for the current foreground
      * user.
      *
-     * Requires the same permissions as {@link #getScanResults}.
-     * If such access is not allowed, this API will always return an empty list.
-     *
      * Not all fields of WifiConfiguration are returned. Only the following
      * fields are filled in:
      * <ul>
@@ -1176,8 +1173,12 @@ public class WifiManager {
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
      * {@link android.os.Build.VERSION_CODES#Q} or above, this API will return an empty list,
-     * except to callers with Carrier privilege which will receive a restricted list only
-     * containing configurations which they created.
+     * except for:
+     * <ul>
+     * <li>Device Owner (DO) & Profile Owner (PO) apps will have access to the full list.
+     * <li>Callers with Carrier privilege will receive a restricted list only containing
+     * configurations which they created.
+     * </ul>
      */
     @Deprecated
     @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE})
@@ -4721,7 +4722,6 @@ public class WifiManager {
      *
      * @hide
      */
-    @SystemApi
     private static class EasyConnectCallbackProxy extends IDppCallback.Stub {
         private final Executor mExecutor;
         private final EasyConnectStatusCallback mEasyConnectStatusCallback;

@@ -59,6 +59,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
+import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
@@ -72,6 +73,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -2573,17 +2575,35 @@ public class SubscriptionManager {
      *              {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}, it means
      *              it's unset and {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *              is used to determine which modem is preferred.
+     * @param needValidation whether validation is needed before switch happens.
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
+     *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
+     *                 for more details. Pass null if don't care about the result.
+     *
      * @hide
      *
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setPreferredDataSubscriptionId(int subId) {
+    public void setPreferredDataSubscriptionId(int subId, boolean needValidation,
+            @NonNull @CallbackExecutor Executor executor, Consumer<Integer> callback) {
         if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                iSub.setPreferredDataSubscriptionId(subId);
-            }
+            if (iSub == null) return;
+
+            ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
+                @Override
+                public void onComplete(int result) {
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        if (callback != null) {
+                            callback.accept(result);
+                        }
+                    }));
+                }
+            };
+            iSub.setPreferredDataSubscriptionId(subId, needValidation, callbackStub);
         } catch (RemoteException ex) {
             // ignore it
         }

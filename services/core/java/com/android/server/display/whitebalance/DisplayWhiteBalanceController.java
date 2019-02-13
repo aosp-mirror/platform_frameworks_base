@@ -18,6 +18,7 @@ package com.android.server.display.whitebalance;
 
 import android.annotation.NonNull;
 import android.util.Slog;
+import android.util.Spline;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -75,6 +76,9 @@ public class DisplayWhiteBalanceController implements
     // Override the ambient color temperature for debugging purposes.
     private float mAmbientColorTemperatureOverride;
 
+    // A piecewise linear relationship between ambient and display color temperatures
+    private Spline.LinearSpline mAmbientToDisplayTemperatureSpline;
+
     /**
      * @param brightnessSensor
      *      The sensor used to detect changes in the ambient brightness.
@@ -109,7 +113,8 @@ public class DisplayWhiteBalanceController implements
             @NonNull AmbientSensor.AmbientColorTemperatureSensor colorTemperatureSensor,
             @NonNull AmbientFilter colorTemperatureFilter,
             @NonNull DisplayWhiteBalanceThrottler throttler,
-            float lowLightAmbientBrightnessThreshold, float lowLightAmbientColorTemperature) {
+            float lowLightAmbientBrightnessThreshold, float lowLightAmbientColorTemperature,
+            float[] ambientTemperatures, float[] displayTemperatures) {
         validateArguments(brightnessSensor, brightnessFilter, colorTemperatureSensor,
                 colorTemperatureFilter, throttler);
         mLoggingEnabled = false;
@@ -127,6 +132,14 @@ public class DisplayWhiteBalanceController implements
         mLastAmbientColorTemperature = -1.0f;
         mAmbientColorTemperatureHistory = new History(HISTORY_SIZE);
         mAmbientColorTemperatureOverride = -1.0f;
+
+        try {
+            mAmbientToDisplayTemperatureSpline = new Spline.LinearSpline(ambientTemperatures,
+                    displayTemperatures);
+        } catch (Exception e) {
+            mAmbientToDisplayTemperatureSpline = null;
+        }
+
         mColorDisplayServiceInternal = LocalServices.getService(ColorDisplayServiceInternal.class);
     }
 
@@ -227,6 +240,9 @@ public class DisplayWhiteBalanceController implements
         writer.println("  mLastAmbientColorTemperature=" + mLastAmbientColorTemperature);
         writer.println("  mAmbientColorTemperatureHistory=" + mAmbientColorTemperatureHistory);
         writer.println("  mAmbientColorTemperatureOverride=" + mAmbientColorTemperatureOverride);
+        writer.println("  mAmbientToDisplayTemperatureSpline="
+                + (mAmbientToDisplayTemperatureSpline == null ? "unused" :
+                    mAmbientToDisplayTemperatureSpline));
     }
 
     @Override // AmbientSensor.AmbientBrightnessSensor.Callbacks
@@ -249,6 +265,11 @@ public class DisplayWhiteBalanceController implements
     public void updateAmbientColorTemperature() {
         final long time = System.currentTimeMillis();
         float ambientColorTemperature = mColorTemperatureFilter.getEstimate(time);
+
+        if (mAmbientToDisplayTemperatureSpline != null) {
+            ambientColorTemperature =
+                mAmbientToDisplayTemperatureSpline.interpolate(ambientColorTemperature);
+        }
 
         final float ambientBrightness = mBrightnessFilter.getEstimate(time);
         if (ambientBrightness < mLowLightAmbientBrightnessThreshold) {

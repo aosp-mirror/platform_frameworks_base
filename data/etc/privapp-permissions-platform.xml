@@ -209,21 +209,14 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.mainline.networkstack">
         <permission name="android.permission.ACCESS_NETWORK_CONDITIONS"/>
-        <permission name="android.permission.CHANGE_BACKGROUND_DATA_SETTING"/>
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
         <permission name="android.permission.CONTROL_VPN"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
-        <permission name="android.permission.MANAGE_IPSEC_TUNNELS"/>
-        <permission name="android.permission.MANAGE_NETWORK_POLICY"/>
         <permission name="android.permission.MANAGE_SUBSCRIPTION_PLANS"/>
         <permission name="android.permission.MANAGE_USB"/>
-        <permission name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"/>
-        <permission name="android.permission.NETWORK_SETTINGS"/>
-        <permission name="android.permission.NETWORK_STACK" />
-        <permission name="android.permission.NET_TUNNELING"/>
         <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD"/>
-        <permission name="android.permission.PEERS_MAC_ADDRESS"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
         <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -261,6 +254,7 @@ applications that come with the platform
         <permission name="android.permission.CHANGE_LOWPAN_STATE"/>
         <permission name="android.permission.CHANGE_OVERLAY_PACKAGES"/>
         <permission name="android.permission.CLEAR_APP_CACHE"/>
+        <permission name="android.permission.ACCESS_INSTANT_APPS" />
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.DELETE_CACHE_FILES"/>
         <permission name="android.permission.DELETE_PACKAGES"/>

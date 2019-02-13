@@ -17,8 +17,8 @@
 package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
-import static android.Manifest.permission.GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+import static android.Manifest.permission.REQUEST_SCREEN_LOCK_COMPLEXITY;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
@@ -247,6 +247,7 @@ import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserRestrictionsUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import com.google.android.collect.Sets;
 
@@ -1870,7 +1871,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Owners newOwners() {
             return new Owners(getUserManager(), getUserManagerInternal(),
-                    getPackageManagerInternal());
+                    getPackageManagerInternal(), getActivityTaskManagerInternal());
         }
 
         UserManager getUserManager() {
@@ -1883,6 +1884,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         PackageManagerInternal getPackageManagerInternal() {
             return LocalServices.getService(PackageManagerInternal.class);
+        }
+
+        ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+            return LocalServices.getService(ActivityTaskManagerInternal.class);
         }
 
         UsageStatsManagerInternal getUsageStatsManagerInternal() {
@@ -4773,8 +4778,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         enforceUserUnlocked(callingUserId);
         mContext.enforceCallingOrSelfPermission(
-                GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY,
-                "Must have " + GET_AND_REQUEST_SCREEN_LOCK_COMPLEXITY + " permission.");
+                REQUEST_SCREEN_LOCK_COMPLEXITY,
+                "Must have " + REQUEST_SCREEN_LOCK_COMPLEXITY + " permission.");
 
         synchronized (getLockObject()) {
             int targetUserId = getCredentialOwner(callingUserId, /* parent= */ false);

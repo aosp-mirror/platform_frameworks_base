@@ -491,8 +491,10 @@ public class SettingsBackupTest {
                     Settings.Global.GAME_DRIVER_ALL_APPS,
                     Settings.Global.GAME_DRIVER_OPT_IN_APPS,
                     Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
+                    Settings.Global.GAME_DRIVER_BLACKLISTS,
                     Settings.Global.GAME_DRIVER_BLACKLIST,
                     Settings.Global.GAME_DRIVER_WHITELIST,
+                    Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX,
                     Settings.Global.GPU_DEBUG_LAYER_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
@@ -619,6 +621,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DISABLED_PRINT_SERVICES,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DISPLAY_DENSITY_FORCED,
+                 Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                  Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P

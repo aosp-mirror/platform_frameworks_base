@@ -610,6 +610,11 @@ enum Action {
     // CATEGORY: SETTINGS
     // OS: Q
     ACTION_SET_NEW_PARENT_PROFILE_PASSWORD = 1646;
+
+    // ACTION: An interaction with a Slice or other component in the Panel.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_PANEL_INTERACTION = 1658;
 }
 
 /**
@@ -2214,4 +2219,16 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     SET_NEW_PASSWORD_ACTIVITY = 1644;
+
+    // Panel for Internet Connectivity
+    PANEL_INTERNET_CONNECTIVITY = 1654;
+
+    // Panel for Volume
+    PANEL_VOLUME = 1655;
+
+    // Panel for NFC
+    PANEL_NFC = 1656;
+
+    // Panel for Media Output
+    PANEL_MEDIA_OUTPUT = 1657;
 }

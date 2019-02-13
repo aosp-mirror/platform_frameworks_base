@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package android.media.session;
+package android.os;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
+import android.os.StatsLogEventWrapper;
 
 /**
- * Abstract class for mainline module services.
- *
- * @hide  // TODO: Make it as a @SystemApi
- */
-public abstract class MediaSessionProviderService extends Service {
+  * Binder interface to pull atoms for the stats service.
+  * {@hide}
+  */
+interface IStatsPullerCallback {
+    /**
+     * Pull data for the specified atom tag. Returns an array of StatsLogEventWrapper containing
+     * the data.
+     *
+     * Note: These pulled atoms should not have uid/attribution chain. Additionally, the event
+     * timestamps will be truncated to the nearest 5 minutes.
+     */
+    StatsLogEventWrapper[] pullData(int atomTag, long elapsedNanos, long wallClocknanos);
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return IMediaSessionProviderService.Stub()
-        return null;
-    }
 }

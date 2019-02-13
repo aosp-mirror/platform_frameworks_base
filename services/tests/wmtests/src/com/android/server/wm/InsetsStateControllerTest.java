@@ -35,7 +35,6 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 
 @SmallTest
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 @Presubmit
 public class InsetsStateControllerTest extends WindowTestsBase {
 
@@ -48,6 +47,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(getController().getInsetsForDispatch(app).getSource(TYPE_TOP_BAR));
     }
 
+    @FlakyTest(bugId = 69229402)
     @Test
     public void testStripForDispatch_own() {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
@@ -57,6 +57,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertEquals(new InsetsState(), getController().getInsetsForDispatch(topBar));
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testStripForDispatch_navBar() {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
@@ -68,6 +69,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertEquals(new InsetsState(), getController().getInsetsForDispatch(navBar));
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testBarControllingWinChanged() {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
@@ -80,6 +82,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertEquals(2, controls.length);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testControlRevoked() {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
@@ -91,6 +94,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(getController().getControlsForDispatch(app));
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testControlRevoked_animation() {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");

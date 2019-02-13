@@ -102,7 +102,7 @@ public class ChildZygoteInit {
         // are just isolated UIDs in the range, because for the webview zygote, there is no
         // single range that captures all possible isolated UIDs.
         // TODO(b/123615476) narrow this down
-        if (uidGidMin < Process.FIRST_ISOLATED_UID) {
+        if (uidGidMin < Process.FIRST_APP_ZYGOTE_ISOLATED_UID) {
             throw new RuntimeException("Passed in UID range does not map to isolated processes.");
         }
 

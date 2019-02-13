@@ -492,4 +492,9 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Returns true if uid has a visible window or its process is in a top state. */
     public abstract boolean isUidForeground(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the package name of the device owner.
+     */
+    public abstract void setDeviceOwnerPackageName(String deviceOwnerPkg);
 }

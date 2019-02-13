@@ -239,6 +239,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
+    /**
+     * The scale to fit at least one side of the activity to its parent. If the activity uses
+     * 1920x1080, and the actually size on the screen is 960x540, then the scale is 0.5.
+     */
+    private float mSizeCompatScale = 1f;
+    /**
+     * The bounds in global coordinates for activity in size compatibility mode.
+     * @see ActivityRecord#inSizeCompatMode
+     */
+    private Rect mSizeCompatBounds;
+
     private boolean mDisablePreviewScreenshots;
 
     private Task mLastParent;
@@ -884,6 +895,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             dc.setFocusedApp(null);
             mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
         }
+        if (mLetterbox != null) {
+            mLetterbox.destroy();
+            mLetterbox = null;
+        }
 
         if (!delayed) {
             updateReportedVisibilityLocked();
@@ -1297,6 +1312,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 }
             }
         }
+
+        if (prevDc != mDisplayContent && mLetterbox != null) {
+            mLetterbox.onMovedToDisplay(mDisplayContent.getDisplayId());
+        }
     }
 
     /**
@@ -1555,11 +1574,52 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return mOrientation;
     }
 
+    /** @return {@code true} if the compatibility bounds is taking effect. */
+    boolean inSizeCompatMode() {
+        return mSizeCompatBounds != null;
+    }
+
+    @Override
+    float getSizeCompatScale() {
+        return inSizeCompatMode() ? mSizeCompatScale : super.getSizeCompatScale();
+    }
+
+    /**
+     * @return Non-empty bounds if the activity has override bounds.
+     * @see ActivityRecord#resolveOverrideConfiguration(Configuration)
+     */
+    Rect getResolvedOverrideBounds() {
+        // Get bounds from resolved override configuration because it is computed with orientation.
+        return getResolvedOverrideConfiguration().windowConfiguration.getBounds();
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWinMode = getWindowingMode();
         mTmpPrevBounds.set(getBounds());
         super.onConfigurationChanged(newParentConfig);
+
+        final Task task = getTask();
+        final Rect overrideBounds = getResolvedOverrideBounds();
+        if (task != null && !overrideBounds.isEmpty()
+                // If the changes come from change-listener, the incoming parent configuration is
+                // still the old one. Make sure their orientations are the same to reduce computing
+                // the compatibility bounds for the intermediate state.
+                && getResolvedOverrideConfiguration().orientation == newParentConfig.orientation) {
+            final Rect taskBounds = task.getBounds();
+            // Since we only center the activity horizontally, if only the fixed height is smaller
+            // than its container, the override bounds don't need to take effect.
+            if ((overrideBounds.width() != taskBounds.width()
+                    || overrideBounds.height() > taskBounds.height())) {
+                calculateCompatBoundsTransformation(newParentConfig);
+                updateSurfacePosition();
+            } else if (mSizeCompatBounds != null) {
+                mSizeCompatBounds = null;
+                mSizeCompatScale = 1f;
+                updateSurfacePosition();
+            }
+        }
+
         final int winMode = getWindowingMode();
 
         if (prevWinMode == winMode) {
@@ -1657,8 +1717,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final ActivityManager.TaskSnapshot snapshot = snapshotCtrl.getSnapshot(
                     getTask().mTaskId, getTask().mUserId, false /* restoreFromDisk */,
                     false /* reducedResolution */);
-            mThumbnail = new AppWindowThumbnail(t, this, snapshot.getSnapshot(),
-                    true /* relative */);
+            if (snapshot != null) {
+                mThumbnail = new AppWindowThumbnail(t, this, snapshot.getSnapshot(),
+                        true /* relative */);
+            }
         }
     }
 
@@ -1669,6 +1731,54 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @VisibleForTesting
     AppWindowThumbnail getThumbnail() {
         return mThumbnail;
+    }
+
+    /**
+     * Calculates the scale and offset to horizontal center the size compatibility bounds into the
+     * region which is available to application.
+     */
+    private void calculateCompatBoundsTransformation(Configuration newParentConfig) {
+        final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
+        final Rect viewportBounds = parentAppBounds != null
+                ? parentAppBounds : newParentConfig.windowConfiguration.getBounds();
+        final Rect contentBounds = getResolvedOverrideBounds();
+        final float contentW = contentBounds.width();
+        final float contentH = contentBounds.height();
+        final float viewportW = viewportBounds.width();
+        final float viewportH = viewportBounds.height();
+        // Only allow to scale down.
+        mSizeCompatScale = (contentW <= viewportW && contentH <= viewportH)
+                ? 1 : Math.min(viewportW / contentW, viewportH / contentH);
+        final int offsetX = (int) ((viewportW - contentW * mSizeCompatScale + 1) * 0.5f)
+                + viewportBounds.left;
+
+        if (mSizeCompatBounds == null) {
+            mSizeCompatBounds = new Rect();
+        }
+        mSizeCompatBounds.set(contentBounds);
+        mSizeCompatBounds.offsetTo(0, 0);
+        mSizeCompatBounds.scale(mSizeCompatScale);
+        mSizeCompatBounds.left += offsetX;
+        mSizeCompatBounds.right += offsetX;
+    }
+
+    @Override
+    public Rect getBounds() {
+        if (mSizeCompatBounds != null) {
+            return mSizeCompatBounds;
+        }
+        return super.getBounds();
+    }
+
+    @Override
+    public boolean matchParentBounds() {
+        if (super.matchParentBounds()) {
+            return true;
+        }
+        // An activity in size compatibility mode may have override bounds which equals to its
+        // parent bounds, so the exact bounds should also be checked.
+        final WindowContainer parent = getParent();
+        return parent == null || parent.getBounds().equals(getResolvedOverrideBounds());
     }
 
     @Override
@@ -1844,6 +1954,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (needsLetterbox) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));
+                mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
             mLetterbox.layout(getParent().getBounds(), w.getFrameLw(), mTmpPoint);
@@ -2863,6 +2974,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (mPendingRelaunchCount != 0) {
             pw.print(prefix); pw.print("mPendingRelaunchCount="); pw.println(mPendingRelaunchCount);
+        }
+        if (mSizeCompatScale != 1f || mSizeCompatBounds != null) {
+            pw.println(prefix + "mSizeCompatScale=" + mSizeCompatScale + " mSizeCompatBounds="
+                    + mSizeCompatBounds);
         }
         if (mRemovingFromDisplay) {
             pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);

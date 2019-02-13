@@ -641,7 +641,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
     method @Deprecated @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public boolean setActiveProfileOwner(@NonNull android.content.ComponentName, String) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setDeviceProvisioningConfigApplied();
-    method public void setProfileOwnerCanAccessDeviceIdsForUser(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
+    method @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIdsForUser(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
     field public static final String ACTION_PROVISION_FINALIZATION = "android.app.action.PROVISION_FINALIZATION";
@@ -1535,6 +1535,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }
 
   public class PackageItemInfo {
@@ -5779,6 +5780,16 @@ package android.provider {
     field public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
   }
 
+  public static interface DeviceConfig.Rollback {
+    field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
+    field public static final String NAMESPACE = "rollback";
+  }
+
+  public static interface DeviceConfig.Runtime {
+    field public static final String NAMESPACE = "runtime";
+    field public static final String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
+  }
+
   public static interface DeviceConfig.RuntimeNative {
     field public static final String NAMESPACE = "runtime_native";
   }
@@ -7754,6 +7765,7 @@ package android.telephony {
     method public void requestEmbeddedSubscriptionInfoListRefresh(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultDataSubId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultSmsSubId(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @NonNull java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
     field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff

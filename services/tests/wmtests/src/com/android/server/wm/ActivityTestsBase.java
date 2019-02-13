@@ -42,7 +42,6 @@ import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -437,7 +436,6 @@ class ActivityTestsBase {
             spyOn(getLifecycleManager());
             spyOn(getLockTaskController());
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
-            doReturn(mock(DevicePolicyManager.class)).when(this).getDevicePolicyManager();
             // allow background activity starts by default
             doReturn(true).when(this).isBackgroundActivityStartsEnabled();
             doNothing().when(this).updateCpuStats();

@@ -16,7 +16,7 @@
 
 <shape android:shape="rectangle" xmlns:android="http://schemas.android.com/apk/res/android">
     <corners
-        android:topLeftRadius="?attr/dialogCornerRadius"
-        android:topRightRadius="?attr/dialogCornerRadius" />
+        android:topLeftRadius="@dimen/config_bottomDialogCornerRadius"
+        android:topRightRadius="@dimen/config_bottomDialogCornerRadius"/>
     <solid android:color="?attr/colorBackgroundFloating" />
 </shape>

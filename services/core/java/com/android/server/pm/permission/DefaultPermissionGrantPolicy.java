@@ -645,7 +645,7 @@ public final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
                         LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }

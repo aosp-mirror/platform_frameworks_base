@@ -2273,7 +2273,8 @@ public final class ShortcutInfo implements Parcelable {
             CharSequence disabledMessage, int disabledMessageResId, String disabledMessageResName,
             Set<String> categories, Intent[] intentsWithExtras, int rank, PersistableBundle extras,
             long lastChangedTimestamp,
-            int flags, int iconResId, String iconResName, String bitmapPath, int disabledReason) {
+            int flags, int iconResId, String iconResName, String bitmapPath, int disabledReason,
+            Person[] persons) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
@@ -2299,5 +2300,6 @@ public final class ShortcutInfo implements Parcelable {
         mIconResName = iconResName;
         mBitmapPath = bitmapPath;
         mDisabledReason = disabledReason;
+        mPersons = persons;
     }
 }

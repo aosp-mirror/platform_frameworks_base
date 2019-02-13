@@ -2439,7 +2439,6 @@ Lcom/android/internal/telephony/cat/CatService;->isStkAppInstalled()Z
 Lcom/android/internal/telephony/cat/CatService;->mCmdIf:Lcom/android/internal/telephony/CommandsInterface;
 Lcom/android/internal/telephony/cat/CatService;->mContext:Landroid/content/Context;
 Lcom/android/internal/telephony/cat/CatService;->mCurrntCmd:Lcom/android/internal/telephony/cat/CatCmdMessage;
-Lcom/android/internal/telephony/cat/CatService;->mHandlerThread:Landroid/os/HandlerThread;
 Lcom/android/internal/telephony/cat/CatService;->mMenuCmd:Lcom/android/internal/telephony/cat/CatCmdMessage;
 Lcom/android/internal/telephony/cat/CatService;->mMsgDecoder:Lcom/android/internal/telephony/cat/RilMessageDecoder;
 Lcom/android/internal/telephony/cat/CatService;->mSlotId:I

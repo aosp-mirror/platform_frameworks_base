@@ -238,6 +238,7 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.PermissionControllerManager;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -14564,14 +14565,19 @@ public class PackageManagerService extends IPackageManager.Stub
                             new BroadcastReceiver() {
                                 @Override
                                 public void onReceive(Context context, Intent intent) {
-                                    // TODO(ruhler) b/112431924 Have a configurable setting to
-                                    // allow changing the timeout and fall back to the default
-                                    // if no such specified.
+                                    // the duration to wait for rollback to be enabled, in millis
+                                    long rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT;
+                                    try {
+                                        rollbackTimeout = Long.valueOf(
+                                            DeviceConfig.getProperty(
+                                                DeviceConfig.Rollback.NAMESPACE,
+                                                DeviceConfig.Rollback.ENABLE_ROLLBACK_TIMEOUT));
+                                    } catch (NumberFormatException ignore) {
+                                    }
                                     final Message msg = mHandler.obtainMessage(
                                             ENABLE_ROLLBACK_TIMEOUT);
                                     msg.arg1 = enableRollbackToken;
-                                    mHandler.sendMessageDelayed(msg,
-                                            DEFAULT_ENABLE_ROLLBACK_TIMEOUT);
+                                    mHandler.sendMessageDelayed(msg, rollbackTimeout);
                                 }
                             }, null, 0, null, null);
 

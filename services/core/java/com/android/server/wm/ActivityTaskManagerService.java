@@ -151,7 +151,6 @@ import android.app.RemoteAction;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
-import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.usage.UsageStatsManagerInternal;
@@ -363,7 +362,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowManagerService mWindowManager;
     private UserManagerService mUserManager;
     private AppOpsService mAppOpsService;
-    private DevicePolicyManager mDpm;
     /** All active uids in the system. */
     private final SparseArray<Integer> mActiveUids = new SparseArray<>();
     private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
@@ -623,6 +621,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private FontScaleSettingObserver mFontScaleSettingObserver;
 
+    private String mDeviceOwnerPackageName;
+
     private final class FontScaleSettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
         private final Uri mHideErrorDialogsUri = Settings.Global.getUriFor(HIDE_ERROR_DIALOGS);
@@ -836,13 +836,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAppOpsService = (AppOpsService) IAppOpsService.Stub.asInterface(b);
         }
         return mAppOpsService;
-    }
-
-    DevicePolicyManager getDevicePolicyManager() {
-        if (mDpm == null) {
-            mDpm = mContext.getSystemService(DevicePolicyManager.class);
-        }
-        return mDpm;
     }
 
     boolean hasUserRestriction(String restriction, int userId) {
@@ -1720,7 +1713,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
-            return r.getRequestedOrientation();
+            return r.getOrientation();
         }
     }
 
@@ -2452,6 +2445,40 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    @Override
+    public void offsetPinnedStackBounds(int stackId, Rect compareBounds, int xOffset, int yOffset,
+            int animationDuration) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "offsetPinnedStackBounds()");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (xOffset == 0 && yOffset == 0) {
+                    return;
+                }
+                final ActivityStack stack = mRootActivityContainer.getStack(stackId);
+                if (stack == null) {
+                    Slog.w(TAG, "offsetPinnedStackBounds: stackId " + stackId + " not found.");
+                    return;
+                }
+                if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                    throw new IllegalArgumentException("Stack: " + stackId
+                            + " doesn't support animated resize.");
+                }
+                final Rect destBounds = new Rect();
+                stack.getAnimationOrCurrentBounds(destBounds);
+                if (!destBounds.isEmpty() || !destBounds.equals(compareBounds)) {
+                    Slog.w(TAG, "The current stack bounds does not matched! It may be obsolete.");
+                    return;
+                }
+                destBounds.offset(xOffset, yOffset);
+                stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
+                        animationDuration, false /* fromFullscreen */);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
     /**
      * Moves the specified task to the primary-split-screen stack.
      *
@@ -5691,6 +5718,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
+    boolean isDeviceOwner(String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        return packageName.equals(mDeviceOwnerPackageName);
+    }
+
+    void setDeviceOwnerPackageName(String deviceOwnerPkg) {
+        mDeviceOwnerPackageName = deviceOwnerPkg;
+    }
+
     /**
      * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
      * the whitelist
@@ -7106,6 +7144,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean isUidForeground(int uid) {
             synchronized (mGlobalLock) {
                 return ActivityTaskManagerService.this.isUidForeground(uid);
+            }
+        }
+
+        @Override
+        public void setDeviceOwnerPackageName(String deviceOwnerPkg) {
+            synchronized (mGlobalLock) {
+                ActivityTaskManagerService.this.setDeviceOwnerPackageName(deviceOwnerPkg);
             }
         }
     }

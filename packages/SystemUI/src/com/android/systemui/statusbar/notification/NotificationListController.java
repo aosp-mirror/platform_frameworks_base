@@ -61,11 +61,6 @@ public class NotificationListController {
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
     }
 
-    /** Should be called when the list controller is being destroyed. */
-    public void destroy() {
-        mDeviceProvisionedController.removeCallback(mDeviceProvisionedListener);
-    }
-
     @SuppressWarnings("FieldCanBeLocal")
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override

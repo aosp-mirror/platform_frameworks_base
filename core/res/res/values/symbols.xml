@@ -50,6 +50,11 @@
   <java-symbol type="id" name="characterPicker" />
   <java-symbol type="id" name="clearDefaultHint" />
   <java-symbol type="id" name="contentPanel" />
+  <java-symbol type="id" name="content_preview_file_area" />
+  <java-symbol type="id" name="content_preview_file_icon" />
+  <java-symbol type="id" name="content_preview_file_layout" />
+  <java-symbol type="id" name="content_preview_file_thumbnail" />
+  <java-symbol type="id" name="content_preview_filename" />
   <java-symbol type="id" name="content_preview_image_area" />
   <java-symbol type="id" name="content_preview_image_1_large" />
   <java-symbol type="id" name="content_preview_image_2_large" />
@@ -62,6 +67,7 @@
   <java-symbol type="id" name="content_preview_title" />
   <java-symbol type="id" name="content_preview_title_layout" />
   <java-symbol type="id" name="copy_button" />
+  <java-symbol type="id" name="file_copy_button" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -1266,6 +1272,7 @@
   <java-symbol type="string" name="tooltip_popup_title" />
 
   <java-symbol type="plurals" name="bugreport_countdown" />
+  <java-symbol type="plurals" name="file_count" />
   <java-symbol type="plurals" name="last_num_days" />
   <java-symbol type="plurals" name="matches_found" />
   <java-symbol type="plurals" name="restr_pin_countdown" />
@@ -1307,6 +1314,7 @@
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />
   <java-symbol type="drawable" name="indicator_input_error" />
+  <java-symbol type="drawable" name="ic_file_copy" />
   <java-symbol type="drawable" name="popup_bottom_dark" />
   <java-symbol type="drawable" name="popup_bottom_bright" />
   <java-symbol type="drawable" name="popup_bottom_medium" />
@@ -3643,6 +3651,7 @@
   <java-symbol type="array" name="config_displayWhiteBalanceDecreaseThresholds" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperature" />
-
+  <java-symbol type="array" name="config_displayWhiteBalanceAmbientTemperatureValues" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDisplayTemperatureValues" />
   <java-symbol type="drawable" name="ic_action_open" />
 </resources>

@@ -20,7 +20,15 @@ import static android.view.SurfaceControl.HIDDEN;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Binder;
+import android.os.Process;
+import android.view.InputChannel;
+import android.view.InputEventReceiver;
+import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
+
+import com.android.server.UiThread;
 
 import java.util.function.Supplier;
 
@@ -40,6 +48,7 @@ public class Letterbox {
     private final LetterboxSurface mLeft = new LetterboxSurface("left");
     private final LetterboxSurface mBottom = new LetterboxSurface("bottom");
     private final LetterboxSurface mRight = new LetterboxSurface("right");
+    private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
 
     /**
      * Constructs a Letterbox.
@@ -87,8 +96,12 @@ public class Letterbox {
      * Returns true if any part of the letterbox overlaps with the given {@code rect}.
      */
     public boolean isOverlappingWith(Rect rect) {
-        return mTop.isOverlappingWith(rect) || mLeft.isOverlappingWith(rect)
-                || mBottom.isOverlappingWith(rect) || mRight.isOverlappingWith(rect);
+        for (LetterboxSurface surface : mSurfaces) {
+            if (surface.isOverlappingWith(rect)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -107,25 +120,94 @@ public class Letterbox {
         mOuter.setEmpty();
         mInner.setEmpty();
 
-        mTop.remove();
-        mLeft.remove();
-        mBottom.remove();
-        mRight.remove();
+        for (LetterboxSurface surface : mSurfaces) {
+            surface.remove();
+        }
     }
 
     /** Returns whether a call to {@link #applySurfaceChanges} would change the surface. */
     public boolean needsApplySurfaceChanges() {
-        return mTop.needsApplySurfaceChanges()
-                || mLeft.needsApplySurfaceChanges()
-                || mBottom.needsApplySurfaceChanges()
-                || mRight.needsApplySurfaceChanges();
+        for (LetterboxSurface surface : mSurfaces) {
+            if (surface.needsApplySurfaceChanges()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void applySurfaceChanges(SurfaceControl.Transaction t) {
-        mTop.applySurfaceChanges(t);
-        mLeft.applySurfaceChanges(t);
-        mBottom.applySurfaceChanges(t);
-        mRight.applySurfaceChanges(t);
+        for (LetterboxSurface surface : mSurfaces) {
+            surface.applySurfaceChanges(t);
+        }
+    }
+
+    /** Enables touches to slide into other neighboring surfaces. */
+    void attachInput(WindowState win) {
+        for (LetterboxSurface surface : mSurfaces) {
+            surface.attachInput(win);
+        }
+    }
+
+    void onMovedToDisplay(int displayId) {
+        for (LetterboxSurface surface : mSurfaces) {
+            if (surface.mInputInterceptor != null) {
+                surface.mInputInterceptor.mWindowHandle.displayId = displayId;
+            }
+        }
+    }
+
+    private static class InputInterceptor {
+        final InputChannel mServerChannel;
+        final InputChannel mClientChannel;
+        final InputWindowHandle mWindowHandle;
+        final InputEventReceiver mInputEventReceiver;
+        final WindowManagerService mWmService;
+
+        InputInterceptor(String namePrefix, WindowState win) {
+            mWmService = win.mWmService;
+            final String name = namePrefix + (win.mAppToken != null ? win.mAppToken : win);
+            final InputChannel[] channels = InputChannel.openInputChannelPair(name);
+            mServerChannel = channels[0];
+            mClientChannel = channels[1];
+            mInputEventReceiver = new SimpleInputReceiver(mClientChannel);
+
+            final Binder token = new Binder();
+            mWmService.mInputManager.registerInputChannel(mServerChannel, token);
+
+            mWindowHandle = new InputWindowHandle(null /* inputApplicationHandle */,
+                    null /* clientWindow */, win.getDisplayId());
+            mWindowHandle.name = name;
+            mWindowHandle.token = token;
+            mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                    | WindowManager.LayoutParams.FLAG_SLIPPERY;
+            mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
+            mWindowHandle.dispatchingTimeoutNanos =
+                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+            mWindowHandle.visible = true;
+            mWindowHandle.ownerPid = Process.myPid();
+            mWindowHandle.ownerUid = Process.myUid();
+            mWindowHandle.scaleFactor = 1.0f;
+        }
+
+        void updateTouchableRegion(Rect frame) {
+            mWindowHandle.touchableRegion.set(frame);
+            mWindowHandle.touchableRegion.translate(-frame.left, -frame.top);
+        }
+
+        void dispose() {
+            mWmService.mInputManager.unregisterInputChannel(mServerChannel);
+            mInputEventReceiver.dispose();
+            mServerChannel.dispose();
+            mClientChannel.dispose();
+        }
+
+        private static class SimpleInputReceiver extends InputEventReceiver {
+            SimpleInputReceiver(InputChannel inputChannel) {
+                super(inputChannel, UiThread.getHandler().getLooper());
+            }
+        }
     }
 
     private class LetterboxSurface {
@@ -136,6 +218,8 @@ public class Letterbox {
         private final Rect mSurfaceFrameRelative = new Rect();
         private final Rect mLayoutFrameGlobal = new Rect();
         private final Rect mLayoutFrameRelative = new Rect();
+
+        private InputInterceptor mInputInterceptor;
 
         public LetterboxSurface(String type) {
             mType = type;
@@ -154,10 +238,21 @@ public class Letterbox {
             mSurface.setColor(new float[]{0, 0, 0});
         }
 
+        void attachInput(WindowState win) {
+            if (mInputInterceptor != null) {
+                mInputInterceptor.dispose();
+            }
+            mInputInterceptor = new InputInterceptor("Letterbox_" + mType + "_", win);
+        }
+
         public void remove() {
             if (mSurface != null) {
                 mSurface.remove();
                 mSurface = null;
+            }
+            if (mInputInterceptor != null) {
+                mInputInterceptor.dispose();
+                mInputInterceptor = null;
             }
         }
 
@@ -193,6 +288,10 @@ public class Letterbox {
                 t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
                 t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),
                         mSurfaceFrameRelative.height());
+                if (mInputInterceptor != null) {
+                    mInputInterceptor.updateTouchableRegion(mSurfaceFrameRelative);
+                    t.setInputWindowInfo(mSurface, mInputInterceptor.mWindowHandle);
+                }
                 t.show(mSurface);
             } else if (mSurface != null) {
                 t.hide(mSurface);

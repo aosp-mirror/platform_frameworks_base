@@ -174,7 +174,7 @@ public final class AccessibilityManager {
 
     final Handler.Callback mCallback;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     boolean mIsEnabled;
 
     int mRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;

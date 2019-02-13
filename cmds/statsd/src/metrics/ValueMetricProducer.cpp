@@ -450,6 +450,17 @@ void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<Log
     }
     mMatchedMetricDimensionKeys.clear();
     mHasGlobalBase = true;
+
+    // If we reach the guardrail, we might have dropped some data which means the bucket is
+    // incomplete.
+    //
+    // The base also needs to be reset. If we do not have the full data, we might
+    // incorrectly compute the diff when mUseZeroDefaultBase is true since an existing key
+    // might be missing from mCurrentSlicedBucket.
+    if (hasReachedGuardRailLimit()) {
+        invalidateCurrentBucket();
+        mCurrentSlicedBucket.clear();
+    }
 }
 
 void ValueMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
@@ -471,6 +482,10 @@ void ValueMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
     }
 }
 
+bool ValueMetricProducer::hasReachedGuardRailLimit() const {
+    return mCurrentSlicedBucket.size() >= mDimensionHardLimit;
+}
+
 bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     // ===========GuardRail==============
     // 1. Report the tuple count if the tuple count > soft limit
@@ -481,7 +496,7 @@ bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
         size_t newTupleCount = mCurrentSlicedBucket.size() + 1;
         StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetricId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
-        if (newTupleCount > mDimensionHardLimit) {
+        if (hasReachedGuardRailLimit()) {
             ALOGE("ValueMetric %lld dropping data for dimension key %s", (long long)mMetricId,
                   newKey.toString().c_str());
             StatsdStats::getInstance().noteHardDimensionLimitReached(mMetricId);

@@ -6103,7 +6103,7 @@ public final class Settings {
          * Indicates which clock face to show on lock screen and AOD while docked.
          * @hide
          */
-        private static final String DOCKED_CLOCK_FACE = "docked_clock_face";
+        public static final String DOCKED_CLOCK_FACE = "docked_clock_face";
 
         /**
          * Set by the system to track if the user needs to see the call to action for
@@ -12318,6 +12318,14 @@ public final class Settings {
                 "angle_whitelist";
 
         /**
+         * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX =
+                "show_angle_in_use_dialog_box";
+
+        /**
          * Game Driver global preference for all Apps.
          * 0 = Default
          * 1 = All Apps use Game Driver
@@ -12345,6 +12353,12 @@ public final class Settings {
          * @hide
          */
         public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
+
+        /**
+         * List of blacklists, each blacklist is a blacklist for a specific version of Game Driver.
+         * @hide
+         */
+        public static final String GAME_DRIVER_BLACKLISTS = "game_driver_blacklists";
 
         /**
          * Apps on the whitelist that are allowed to use Game Driver.
@@ -13343,6 +13357,14 @@ public final class Settings {
         public static final String ISOLATED_STORAGE_REMOTE = "isolated_storage_remote";
 
         /**
+         * Indicates whether aware is available in the current location.
+         * @hide
+         */
+        public static final String AWARE_ALLOWED = "aware_allowed";
+
+        private static final Validator AWARE_ALLOWED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -13388,6 +13410,7 @@ public final class Settings {
             SOFT_AP_TIMEOUT_ENABLED,
             ZEN_DURATION,
             CHARGING_VIBRATION_ENABLED,
+            AWARE_ALLOWED,
         };
 
         /**
@@ -13448,6 +13471,7 @@ public final class Settings {
             VALIDATORS.put(WIFI_PNO_RECENCY_SORTING_ENABLED,
                     WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR);
             VALIDATORS.put(WIFI_LINK_PROBING_ENABLED, WIFI_LINK_PROBING_ENABLED_VALIDATOR);
+            VALIDATORS.put(AWARE_ALLOWED, AWARE_ALLOWED_VALIDATOR);
         }
 
         /**

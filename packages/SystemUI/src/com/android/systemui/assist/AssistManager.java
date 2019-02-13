@@ -290,10 +290,6 @@ public class AssistManager implements ConfigurationChangedReceiver {
         return mAssistUtils.isSessionRunning();
     }
 
-    public void destroy() {
-        mWindowManager.removeViewImmediate(mView);
-    }
-
     private void maybeSwapSearchIcon(@NonNull ComponentName assistComponent, boolean isService) {
         replaceDrawable(mView.getOrb().getLogo(), assistComponent, ASSIST_ICON_METADATA_NAME,
                 isService);

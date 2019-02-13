@@ -49,7 +49,7 @@ import org.junit.Test;
  * Test class to for {@link android.app.WindowConfiguration}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowConfigurationTests
+ *  atest WmTests:WindowConfigurationTests
  */
 @SmallTest
 @Presubmit

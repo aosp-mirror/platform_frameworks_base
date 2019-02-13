@@ -123,6 +123,21 @@ public final class DeviceConfig {
     }
 
     /**
+     * Namespace for all runtime related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Runtime {
+        String NAMESPACE = "runtime";
+
+        /**
+         * Whether or not we use the precompiled layout.
+         */
+        String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
+    }
+
+    /**
      * Namespace for all runtime native related features.
      *
      * @hide
@@ -290,6 +305,21 @@ public final class DeviceConfig {
 
         /** Allows a CTS to inject a fake implementation. */
         String COMPONENT_NAME = "component_name";
+    }
+
+    /**
+     * Namespace for Rollback.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface Rollback {
+        String NAMESPACE = "rollback";
+
+        /**
+         * Timeout in milliseconds for enabling package rollback.
+         */
+        String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
     }
 
     /**

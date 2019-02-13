@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,9 +36,7 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseIntArray;
-import android.util.proto.ProtoOutputStream;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;

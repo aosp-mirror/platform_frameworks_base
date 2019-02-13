@@ -19,6 +19,7 @@ import static androidx.test.InstrumentationRegistry.getContext;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -51,6 +52,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
@@ -82,6 +86,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -104,6 +109,8 @@ public class DeviceIdleControllerTest {
     private ConnectivityService mConnectivityService;
     @Mock
     private ContentResolver mContentResolver;
+    @Mock
+    private DeviceIdleController.MyHandler mHandler;
     @Mock
     private IActivityManager mIActivityManager;
     @Mock
@@ -154,7 +161,7 @@ public class DeviceIdleControllerTest {
 
         @Override
         DeviceIdleController.MyHandler getHandler(DeviceIdleController controller) {
-            return mock(DeviceIdleController.MyHandler.class, Answers.RETURNS_DEEP_STUBS);
+            return mHandler;
         }
 
         @Override
@@ -232,10 +239,12 @@ public class DeviceIdleControllerTest {
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(ActivityTaskManagerInternal.class))
                 .when(() -> LocalServices.getService(ActivityTaskManagerInternal.class));
+        doReturn(mock(AlarmManagerInternal.class))
+                .when(() -> LocalServices.getService(AlarmManagerInternal.class));
         doReturn(mPowerManagerInternal)
                 .when(() -> LocalServices.getService(PowerManagerInternal.class));
-        when(mPowerManagerInternal.getLowPowerState(anyInt())).thenReturn(
-                mock(PowerSaveState.class));
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(mock(PowerSaveState.class));
         doReturn(mock(NetworkPolicyManagerInternal.class))
                 .when(() -> LocalServices.getService(NetworkPolicyManagerInternal.class));
         when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
@@ -246,8 +255,11 @@ public class DeviceIdleControllerTest {
         doReturn(true).when(mSensorManager).registerListener(any(), any(), anyInt());
         mAppStateTracker = new AppStateTrackerForTest(getContext(), Looper.getMainLooper());
         mAnyMotionDetector = new AnyMotionDetectorForTest();
+        mHandler = mock(DeviceIdleController.MyHandler.class, Answers.RETURNS_DEEP_STUBS);
+        doNothing().when(mHandler).handleMessage(any());
         mInjector = new InjectorForTest(getContext());
         doNothing().when(mContentResolver).registerContentObserver(any(), anyBoolean(), any());
+
         mDeviceIdleController = new DeviceIdleController(getContext(), mInjector);
         spyOn(mDeviceIdleController);
         doNothing().when(mDeviceIdleController).publishBinderService(any(), any());
@@ -418,6 +430,29 @@ public class DeviceIdleControllerTest {
 
         // State should stay ACTIVE with screen on.
         // Note the different operation order here makes sure the state doesn't change before test.
+        setScreenOn(true);
+        setChargingOn(false);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_ACTIVE);
+
+        mConstants.WAIT_FOR_UNLOCK = false;
+        setScreenLocked(true);
+        setScreenOn(true);
+        setChargingOn(false);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_ACTIVE);
+
+        setScreenLocked(false);
+        setScreenOn(true);
+        setChargingOn(false);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_ACTIVE);
+
+        mConstants.WAIT_FOR_UNLOCK = true;
+        setScreenLocked(false);
         setScreenOn(true);
         setChargingOn(false);
 
@@ -1307,7 +1342,7 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
-    public void testbecomeActiveLocked_deep() {
+    public void testBecomeActiveLocked_deep() {
         // becomeActiveLocked should put everything into ACTIVE.
 
         enterDeepState(STATE_ACTIVE);
@@ -1344,7 +1379,7 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
-    public void testbecomeActiveLocked_light() {
+    public void testBecomeActiveLocked_light() {
         // becomeActiveLocked should put everything into ACTIVE.
 
         enterLightState(LIGHT_STATE_ACTIVE);
@@ -1374,6 +1409,163 @@ public class DeviceIdleControllerTest {
         enterLightState(LIGHT_STATE_OVERRIDE);
         mDeviceIdleController.becomeActiveLocked("test", 1000);
         verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+    }
+
+    /** Test based on b/119058625. */
+    @Test
+    public void testExitNotifiesDependencies_WaitForUnlockOn_KeyguardOn_ScreenThenMotion() {
+        mConstants.WAIT_FOR_UNLOCK = true;
+        enterDeepState(STATE_IDLE);
+        reset(mAlarmManager);
+        spyOn(mDeviceIdleController);
+
+        mDeviceIdleController.keyguardShowingLocked(true);
+        setScreenOn(true);
+        // With WAIT_FOR_UNLOCK = true and the screen locked, turning the screen on by itself
+        // shouldn't bring the device out of deep IDLE.
+        verifyStateConditions(STATE_IDLE);
+        mDeviceIdleController.handleMotionDetectedLocked(1000, "test");
+        // Motion should bring the device out of Doze. Since the screen is still locked (albeit
+        // on), the states should go back into INACTIVE.
+        verifyStateConditions(STATE_INACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+        verify(mAlarmManager).cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        verify(mDeviceIdleController).scheduleReportActiveLocked(anyString(), anyInt());
+    }
+
+    /** Test based on b/119058625. */
+    @Test
+    public void testExitNotifiesDependencies_WaitForUnlockOn_KeyguardOff_ScreenThenMotion() {
+        mConstants.WAIT_FOR_UNLOCK = true;
+        enterDeepState(STATE_IDLE);
+        reset(mAlarmManager);
+        spyOn(mDeviceIdleController);
+
+        mDeviceIdleController.keyguardShowingLocked(false);
+        setScreenOn(true);
+        // With WAIT_FOR_UNLOCK = true and the screen unlocked, turning the screen on by itself
+        // should bring the device out of deep IDLE.
+        verifyStateConditions(STATE_ACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+        verify(mAlarmManager).cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        verify(mDeviceIdleController).scheduleReportActiveLocked(anyString(), anyInt());
+    }
+
+    /** Test based on b/119058625. */
+    @Test
+    public void testExitNotifiesDependencies_WaitForUnlockOn_KeyguardOn_MotionThenScreen() {
+        mConstants.WAIT_FOR_UNLOCK = true;
+        enterDeepState(STATE_IDLE);
+        reset(mAlarmManager);
+        spyOn(mDeviceIdleController);
+
+        InOrder alarmManagerInOrder = inOrder(mAlarmManager);
+        InOrder controllerInOrder = inOrder(mDeviceIdleController);
+
+        mDeviceIdleController.keyguardShowingLocked(true);
+        mDeviceIdleController.handleMotionDetectedLocked(1000, "test");
+        // The screen is still off, so motion should result in the INACTIVE state.
+        verifyStateConditions(STATE_INACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        controllerInOrder.verify(mDeviceIdleController)
+                .scheduleReportActiveLocked(anyString(), anyInt());
+
+        setScreenOn(true);
+        // With WAIT_FOR_UNLOCK = true and the screen locked, turning the screen on by itself
+        // shouldn't bring the device all the way to ACTIVE.
+        verifyStateConditions(STATE_INACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+        alarmManagerInOrder.verify(mAlarmManager, never()).cancel(
+                eq(mDeviceIdleController.mDeepAlarmListener));
+
+        // User finally unlocks the device. Device should be fully active.
+        mDeviceIdleController.keyguardShowingLocked(false);
+        verifyStateConditions(STATE_ACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        controllerInOrder.verify(mDeviceIdleController)
+                .scheduleReportActiveLocked(anyString(), anyInt());
+    }
+
+    /** Test based on b/119058625. */
+    @Test
+    public void testExitNotifiesDependencies_WaitForUnlockOn_KeyguardOff_MotionThenScreen() {
+        mConstants.WAIT_FOR_UNLOCK = true;
+        enterDeepState(STATE_IDLE);
+        reset(mAlarmManager);
+        spyOn(mDeviceIdleController);
+
+        InOrder alarmManagerInOrder = inOrder(mAlarmManager);
+        InOrder controllerInOrder = inOrder(mDeviceIdleController);
+
+        mDeviceIdleController.keyguardShowingLocked(false);
+        mDeviceIdleController.handleMotionDetectedLocked(1000, "test");
+        // The screen is still off, so motion should result in the INACTIVE state.
+        verifyStateConditions(STATE_INACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        controllerInOrder.verify(mDeviceIdleController)
+                .scheduleReportActiveLocked(anyString(), anyInt());
+
+        setScreenOn(true);
+        // With WAIT_FOR_UNLOCK = true and the screen unlocked, turning the screen on by itself
+        // should bring the device out of deep IDLE.
+        verifyStateConditions(STATE_ACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        controllerInOrder.verify(mDeviceIdleController)
+                .scheduleReportActiveLocked(anyString(), anyInt());
+    }
+
+    @Test
+    public void testExitNotifiesDependencies_WaitForUnlockOff_Screen() {
+        mConstants.WAIT_FOR_UNLOCK = false;
+        enterDeepState(STATE_IDLE);
+        reset(mAlarmManager);
+        spyOn(mDeviceIdleController);
+
+        setScreenOn(true);
+        // With WAIT_FOR_UNLOCK = false and the screen locked, turning the screen on by itself
+        // should bring the device out of deep IDLE.
+        verifyStateConditions(STATE_ACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+        verify(mAlarmManager).cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        verify(mDeviceIdleController).scheduleReportActiveLocked(anyString(), anyInt());
+    }
+
+    @Test
+    public void testExitNotifiesDependencies_WaitForUnlockOff_MotionThenScreen() {
+        mConstants.WAIT_FOR_UNLOCK = false;
+        enterDeepState(STATE_IDLE);
+        reset(mAlarmManager);
+        spyOn(mDeviceIdleController);
+
+        InOrder alarmManagerInOrder = inOrder(mAlarmManager);
+        InOrder controllerInOrder = inOrder(mDeviceIdleController);
+
+        mDeviceIdleController.handleMotionDetectedLocked(1000, "test");
+        // The screen is still off, so motion should result in the INACTIVE state.
+        verifyStateConditions(STATE_INACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        controllerInOrder.verify(mDeviceIdleController)
+                .scheduleReportActiveLocked(anyString(), anyInt());
+
+        setScreenOn(true);
+        // With WAIT_FOR_UNLOCK = false and the screen locked, turning the screen on by itself
+        // should bring the device out of deep IDLE.
+        verifyStateConditions(STATE_ACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .cancel(eq(mDeviceIdleController.mDeepAlarmListener));
+        controllerInOrder.verify(mDeviceIdleController)
+                .scheduleReportActiveLocked(anyString(), anyInt());
     }
 
     @Test
@@ -1508,6 +1700,10 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.updateChargingLocked(on);
     }
 
+    private void setScreenLocked(boolean locked) {
+        mDeviceIdleController.keyguardShowingLocked(locked);
+    }
+
     private void setScreenOn(boolean on) {
         doReturn(on).when(mPowerManager).isInteractive();
         mDeviceIdleController.updateInteractivityLocked();
@@ -1549,7 +1745,8 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.mMotionListener.isActive());
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 break;
             case STATE_IDLE_PENDING:
                 assertEquals(
@@ -1557,7 +1754,8 @@ public class DeviceIdleControllerTest {
                         mDeviceIdleController.mMotionListener.isActive());
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 break;
             case STATE_SENSING:
                 assertEquals(
@@ -1567,14 +1765,16 @@ public class DeviceIdleControllerTest {
                         mDeviceIdleController.hasMotionSensor(),
                         mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 break;
             case STATE_LOCATING:
                 assertEquals(
                         mDeviceIdleController.hasMotionSensor(),
                         mDeviceIdleController.mMotionListener.isActive());
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 break;
             case STATE_IDLE:
                 if (mDeviceIdleController.hasMotionSensor()) {
@@ -1584,7 +1784,8 @@ public class DeviceIdleControllerTest {
                 }
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 // Light state should be OVERRIDE at this point.
                 verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
                 break;
@@ -1596,14 +1797,16 @@ public class DeviceIdleControllerTest {
                 }
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 break;
             case STATE_QUICK_DOZE_DELAY:
                 // If quick doze is enabled, the motion listener should NOT be active.
                 assertFalse(mDeviceIdleController.mMotionListener.isActive());
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 break;
             default:
                 fail("Conditions for " + stateToString(expectedState) + " unknown.");
@@ -1632,7 +1835,8 @@ public class DeviceIdleControllerTest {
             case LIGHT_STATE_IDLE_MAINTENANCE:
             case LIGHT_STATE_OVERRIDE:
                 assertFalse(mDeviceIdleController.isCharging());
-                assertFalse(mDeviceIdleController.isScreenOn());
+                assertFalse(mDeviceIdleController.isScreenOn()
+                        && !mDeviceIdleController.isKeyguardShowing());
                 break;
             default:
                 fail("Conditions for " + lightStateToString(expectedLightState) + " unknown.");

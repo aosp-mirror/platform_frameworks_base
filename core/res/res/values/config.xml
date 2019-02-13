@@ -3425,8 +3425,14 @@
     -->
     <string-array translatable="false" name="config_convert_to_emergency_number_map" />
 
-    <!-- An array of packages for which notifications cannot be blocked. -->
-    <string-array translatable="false" name="config_nonBlockableNotificationPackages" />
+    <!-- An array of packages for which notifications cannot be blocked.
+         Should only be used for core device functionality that must not be
+         rendered inoperative for safety reasons, like the phone dialer and
+         SMS handler. -->
+    <string-array translatable="false" name="config_nonBlockableNotificationPackages">
+        <item>com.android.dialer</item>
+        <item>com.android.messaging</item>
+    </string-array>
 
     <!-- An array of packages which can listen for notifications on low ram devices. -->
     <string-array translatable="false" name="config_allowedManagedServicesOnLowRamDevices" />
@@ -3897,4 +3903,22 @@
          The ambient color temperature (in cct) to which we fall back when the ambient brightness
          drops beneath a certain threshold. -->
     <item name="config_displayWhiteBalanceLowLightAmbientColorTemperature" format="float" type="dimen">6500.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         A float array containing a list of ambient color temperatures, in Kelvin. This array,
+         together with config_displayWhiteBalanceDisplayTemperatureValues, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient color temperature readings to a target color temperature for the display.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceDisplayTemperatureValues. -->
+    <array name="config_displayWhiteBalanceAmbientTemperatureValues">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         An array containing a list of display color temperatures, in Kelvin. See
+         config_displayWhiteBalanceAmbientTemperatureValues for additional details.
+         The same restrictions apply to this array. -->
+    <array name="config_displayWhiteBalanceDisplayTemperatureValues">
+    </array>
 </resources>

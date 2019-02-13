@@ -602,6 +602,7 @@ java_defaults {
         "telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl",
+        "telephony/java/com/android/internal/telephony/ISetOpportunisticDataCallback.aidl",
         "telephony/java/com/android/internal/telephony/ISms.aidl",
         "telephony/java/com/android/internal/telephony/ISub.aidl",
         "telephony/java/com/android/internal/telephony/IOns.aidl",
@@ -741,7 +742,6 @@ java_defaults {
 
     static_libs: [
         "apex_aidl_interface-java",
-        "networkstack-aidl-interfaces-java",
         "framework-protos",
         "game-driver-protos",
         "mediaplayer2-protos",
@@ -804,6 +804,7 @@ filegroup {
     srcs: [
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
+        "core/java/android/os/IStatsPullerCallback.aidl",
     ],
 }
 
@@ -1186,52 +1187,6 @@ packages_to_document = [
     "org/apache/http/conn",
     "org/apache/http/params",
 ]
-
-// The since flag (-since N.xml API_LEVEL) is used to add API Level information
-// to the reference documentation. Must be in order of oldest to newest.
-//
-// Conscrypt (com.android.org.conscrypt) is an implementation detail and should
-// not be referenced in the documentation.
-framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xml) " +
-     "-hidePackage com.android.internal " +
-     "-hidePackage com.android.internal.util " +
-     "-hidePackage com.android.okhttp " +
-     "-hidePackage com.android.org.conscrypt " +
-     "-hidePackage com.android.server " +
-     "-since $(location 1/public/api/android.xml) 1 " +
-     "-since $(location 2/public/api/android.xml) 2 " +
-     "-since $(location 3/public/api/android.xml) 3 " +
-     "-since $(location 4/public/api/android.xml) 4 " +
-     "-since $(location 5/public/api/android.xml) 5 " +
-     "-since $(location 6/public/api/android.xml) 6 " +
-     "-since $(location 7/public/api/android.xml) 7 " +
-     "-since $(location 8/public/api/android.xml) 8 " +
-     "-since $(location 9/public/api/android.xml) 9 " +
-     "-since $(location 10/public/api/android.xml) 10 " +
-     "-since $(location 11/public/api/android.xml) 11 " +
-     "-since $(location 12/public/api/android.xml) 12 " +
-     "-since $(location 13/public/api/android.xml) 13 " +
-     "-since $(location 14/public/api/android.txt) 14 " +
-     "-since $(location 15/public/api/android.txt) 15 " +
-     "-since $(location 16/public/api/android.txt) 16 " +
-     "-since $(location 17/public/api/android.txt) 17 " +
-     "-since $(location 18/public/api/android.txt) 18 " +
-     "-since $(location 19/public/api/android.txt) 19 " +
-     "-since $(location 20/public/api/android.txt) 20 " +
-     "-since $(location 21/public/api/android.txt) 21 " +
-     "-since $(location 22/public/api/android.txt) 22 " +
-     "-since $(location 23/public/api/android.txt) 23 " +
-     "-since $(location 24/public/api/android.txt) 24 " +
-     "-since $(location 25/public/api/android.txt) 25 " +
-     "-since $(location 26/public/api/android.txt) 26 " +
-     "-since $(location 27/public/api/android.txt) 27 " +
-     "-since $(location 28/public/api/android.txt) 28 " +
-     "-since $(location api/current.txt) Q " +
-     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
-     "-overview $(location core/java/overview.html) " +
-     // Federate Support Library references against local API file.
-     "-federate SupportLib https://developer.android.com " +
-     "-federationapi SupportLib $(location current/support-api.txt) "
 
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
      "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +

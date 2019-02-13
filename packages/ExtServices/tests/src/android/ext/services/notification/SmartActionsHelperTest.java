@@ -19,7 +19,9 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,8 +55,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Instant;
@@ -71,9 +73,12 @@ import javax.annotation.Nullable;
 public class SmartActionsHelperTest {
     private static final String NOTIFICATION_KEY = "key";
     private static final String RESULT_ID = "id";
+    private static final float SCORE = 0.7f;
+    private static final CharSequence SMART_REPLY = "Home";
     private static final ConversationAction REPLY_ACTION =
             new ConversationAction.Builder(ConversationAction.TYPE_TEXT_REPLY)
-                    .setTextReply("Home")
+                    .setTextReply(SMART_REPLY)
+                    .setConfidenceScore(SCORE)
                     .build();
     private static final String MESSAGE = "Where are you?";
 
@@ -197,8 +202,16 @@ public class SmartActionsHelperTest {
 
         List<ConversationActions.Message> messages =
                 runSuggestAndCaptureRequest().getConversation();
+
         assertThat(messages).hasSize(1);
         MessageSubject.assertThat(messages.get(0)).hasText(MESSAGE);
+        ArgumentCaptor<TextClassifierEvent> argumentCaptor =
+                ArgumentCaptor.forClass(TextClassifierEvent.class);
+        verify(mTextClassifier).onTextClassifierEvent(argumentCaptor.capture());
+        TextClassifierEvent textClassifierEvent = argumentCaptor.getValue();
+        assertTextClassifierEvent(textClassifierEvent, TextClassifierEvent.TYPE_ACTIONS_GENERATED);
+        assertThat(textClassifierEvent.getEntityTypes()).asList()
+                .containsExactly(ConversationAction.TYPE_TEXT_REPLY);
     }
 
     @Test
@@ -249,6 +262,14 @@ public class SmartActionsHelperTest {
         MessageSubject.assertThat(fourthMessage).hasPerson(userB);
         MessageSubject.assertThat(fourthMessage)
                 .hasReferenceTime(createZonedDateTimeFromMsUtc(4000));
+
+        ArgumentCaptor<TextClassifierEvent> argumentCaptor =
+                ArgumentCaptor.forClass(TextClassifierEvent.class);
+        verify(mTextClassifier).onTextClassifierEvent(argumentCaptor.capture());
+        TextClassifierEvent textClassifierEvent = argumentCaptor.getValue();
+        assertTextClassifierEvent(textClassifierEvent, TextClassifierEvent.TYPE_ACTIONS_GENERATED);
+        assertThat(textClassifierEvent.getEntityTypes()).asList()
+                .containsExactly(ConversationAction.TYPE_TEXT_REPLY);
     }
 
     @Test
@@ -299,13 +320,15 @@ public class SmartActionsHelperTest {
 
         mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onSuggestedReplySent(
-                NOTIFICATION_KEY, MESSAGE, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
+                NOTIFICATION_KEY, SMART_REPLY, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
-        verify(mTextClassifier).onTextClassifierEvent(argumentCaptor.capture());
-        TextClassifierEvent textClassifierEvent = argumentCaptor.getValue();
-        assertTextClassifierEvent(textClassifierEvent, TextClassifierEvent.TYPE_SMART_ACTION);
+        verify(mTextClassifier, times(2)).onTextClassifierEvent(argumentCaptor.capture());
+        List<TextClassifierEvent> events = argumentCaptor.getAllValues();
+        assertTextClassifierEvent(events.get(0), TextClassifierEvent.TYPE_ACTIONS_GENERATED);
+        assertTextClassifierEvent(events.get(1), TextClassifierEvent.TYPE_SMART_ACTION);
+        assertThat(events.get(1).getScore()).isEqualTo(SCORE);
     }
 
     @Test
@@ -317,24 +340,22 @@ public class SmartActionsHelperTest {
         mSmartActionsHelper.onSuggestedReplySent(
                 "something_else", MESSAGE, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
-        verify(mTextClassifier, never())
-                .onTextClassifierEvent(Mockito.any(TextClassifierEvent.class));
+        verify(mTextClassifier, never()).onTextClassifierEvent(
+                argThat(new TextClassifierEventMatcher(TextClassifierEvent.TYPE_SMART_ACTION)));
     }
 
     @Test
     public void testOnSuggestedReplySent_missingResultId() {
         when(mTextClassifier.suggestConversationActions(any(ConversationActions.Request.class)))
-                .thenReturn(new ConversationActions(Collections.emptyList(), null));
-
+                .thenReturn(new ConversationActions(Collections.singletonList(REPLY_ACTION), null));
         Notification notification = createMessageNotification();
         when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onSuggestedReplySent(
-                "something_else", MESSAGE, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
+                NOTIFICATION_KEY, SMART_REPLY, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
-        verify(mTextClassifier, never())
-                .onTextClassifierEvent(Mockito.any(TextClassifierEvent.class));
+        verify(mTextClassifier, never()).onTextClassifierEvent(any(TextClassifierEvent.class));
     }
 
     @Test
@@ -347,9 +368,10 @@ public class SmartActionsHelperTest {
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
-        verify(mTextClassifier).onTextClassifierEvent(argumentCaptor.capture());
-        TextClassifierEvent textClassifierEvent = argumentCaptor.getValue();
-        assertTextClassifierEvent(textClassifierEvent, TextClassifierEvent.TYPE_MANUAL_REPLY);
+        verify(mTextClassifier, times(2)).onTextClassifierEvent(argumentCaptor.capture());
+        List<TextClassifierEvent> events = argumentCaptor.getAllValues();
+        assertTextClassifierEvent(events.get(0), TextClassifierEvent.TYPE_ACTIONS_GENERATED);
+        assertTextClassifierEvent(events.get(1), TextClassifierEvent.TYPE_MANUAL_REPLY);
     }
 
     @Test
@@ -362,9 +384,10 @@ public class SmartActionsHelperTest {
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
-        verify(mTextClassifier).onTextClassifierEvent(argumentCaptor.capture());
-        TextClassifierEvent textClassifierEvent = argumentCaptor.getValue();
-        assertTextClassifierEvent(textClassifierEvent, TextClassifierEvent.TYPE_ACTIONS_SHOWN);
+        verify(mTextClassifier, times(2)).onTextClassifierEvent(argumentCaptor.capture());
+        List<TextClassifierEvent> events = argumentCaptor.getAllValues();
+        assertTextClassifierEvent(events.get(0), TextClassifierEvent.TYPE_ACTIONS_GENERATED);
+        assertTextClassifierEvent(events.get(1), TextClassifierEvent.TYPE_ACTIONS_SHOWN);
     }
 
     @Test
@@ -376,7 +399,7 @@ public class SmartActionsHelperTest {
         mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), false, false);
 
         verify(mTextClassifier, never()).onTextClassifierEvent(
-                Mockito.any(TextClassifierEvent.class));
+                argThat(new TextClassifierEventMatcher(TextClassifierEvent.TYPE_ACTIONS_SHOWN)));
     }
 
     @Test
@@ -389,9 +412,10 @@ public class SmartActionsHelperTest {
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
-        verify(mTextClassifier).onTextClassifierEvent(argumentCaptor.capture());
-        TextClassifierEvent textClassifierEvent = argumentCaptor.getValue();
-        assertTextClassifierEvent(textClassifierEvent, TextClassifierEvent.TYPE_ACTIONS_SHOWN);
+        verify(mTextClassifier, times(2)).onTextClassifierEvent(argumentCaptor.capture());
+        List<TextClassifierEvent> events = argumentCaptor.getAllValues();
+        assertTextClassifierEvent(events.get(0), TextClassifierEvent.TYPE_ACTIONS_GENERATED);
+        assertTextClassifierEvent(events.get(1), TextClassifierEvent.TYPE_ACTIONS_SHOWN);
     }
 
     private ZonedDateTime createZonedDateTimeFromMsUtc(long msUtc) {
@@ -488,6 +512,23 @@ public class SmartActionsHelperTest {
 
         private static MessageSubject assertThat(ConversationActions.Message message) {
             return assertAbout(FACTORY).that(message);
+        }
+    }
+
+    private final class TextClassifierEventMatcher implements ArgumentMatcher<TextClassifierEvent> {
+
+        private int mType;
+
+        private TextClassifierEventMatcher(int type) {
+            mType = type;
+        }
+
+        @Override
+        public boolean matches(TextClassifierEvent textClassifierEvent) {
+            if (textClassifierEvent == null) {
+                return false;
+            }
+            return mType == textClassifierEvent.getEventType();
         }
     }
 }

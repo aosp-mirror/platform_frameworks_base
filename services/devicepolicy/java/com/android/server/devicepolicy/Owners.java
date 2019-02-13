@@ -41,6 +41,7 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.LocalServices;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -104,6 +105,7 @@ class Owners {
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
     private boolean mSystemReady;
 
@@ -129,18 +131,22 @@ class Owners {
 
     public Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
-            PackageManagerInternal packageManagerInternal) {
-        this(userManager, userManagerInternal, packageManagerInternal, new Injector());
+            PackageManagerInternal packageManagerInternal,
+            ActivityTaskManagerInternal activityTaskManagerInternal) {
+        this(userManager, userManagerInternal, packageManagerInternal,
+                activityTaskManagerInternal, new Injector());
     }
 
     @VisibleForTesting
     Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal,
+            ActivityTaskManagerInternal activityTaskManagerInternal,
             Injector injector) {
         mUserManager = userManager;
         mUserManagerInternal = userManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
+        mActivityTaskManagerInternal = activityTaskManagerInternal;
         mInjector = injector;
     }
 
@@ -187,6 +193,7 @@ class Owners {
                         getDeviceOwnerUserId()));
             }
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -199,6 +206,11 @@ class Owners {
         mPackageManagerInternal.setDeviceAndProfileOwnerPackages(
                 mDeviceOwnerUserId, (mDeviceOwner != null ? mDeviceOwner.packageName : null),
                 po);
+    }
+
+    private void pushToActivityTaskManagerLocked() {
+        mActivityTaskManagerInternal.setDeviceOwnerPackageName(mDeviceOwner != null
+                ? mDeviceOwner.packageName : null);
     }
 
     String getDeviceOwnerPackageName() {
@@ -275,6 +287,7 @@ class Owners {
 
             mUserManagerInternal.setDeviceManaged(true);
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -286,6 +299,7 @@ class Owners {
 
             mUserManagerInternal.setDeviceManaged(false);
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -333,6 +347,7 @@ class Owners {
                     mDeviceOwner.remoteBugreportHash, /* canAccessDeviceIds =*/
                     mDeviceOwner.canAccessDeviceIds);
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }

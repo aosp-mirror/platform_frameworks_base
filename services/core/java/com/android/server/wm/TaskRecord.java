@@ -119,6 +119,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1288,22 +1289,7 @@ class TaskRecord extends ConfigurationContainer {
                 || top == null) {
             return getRequestedOverrideConfiguration().orientation;
         }
-        int screenOrientation = top.getOrientation();
-        if (screenOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
-            // NOSENSOR means the display's "natural" orientation, so return that.
-            ActivityDisplay display = mStack != null ? mStack.getDisplay() : null;
-            if (display != null && display.mDisplayContent != null) {
-                return mStack.getDisplay().mDisplayContent.getNaturalOrientation();
-            }
-        } else if (screenOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
-            // LOCKED means the activity's orientation remains unchanged, so return existing value.
-            return top.getConfiguration().orientation;
-        } else if (ActivityInfo.isFixedOrientationLandscape(screenOrientation)) {
-            return ORIENTATION_LANDSCAPE;
-        } else if (ActivityInfo.isFixedOrientationPortrait(screenOrientation)) {
-            return ORIENTATION_PORTRAIT;
-        }
-        return ORIENTATION_UNDEFINED;
+        return top.getRequestedConfigurationOrientation();
     }
 
     /**
@@ -2084,6 +2070,11 @@ class TaskRecord extends ConfigurationContainer {
         return Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
     }
 
+    void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
+            @NonNull Configuration parentConfig) {
+        computeConfigResourceOverrides(inOutConfig, parentConfig, true /* insideParentBounds */);
+    }
+
     /**
      * Calculates configuration values used by the client to get resources. This should be run
      * using app-facing bounds (bounds unmodified by animations or transient interactions).
@@ -2093,7 +2084,7 @@ class TaskRecord extends ConfigurationContainer {
      * just be inherited from the parent configuration.
      **/
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig) {
+            @NonNull Configuration parentConfig, boolean insideParentBounds) {
         int windowingMode = inOutConfig.windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = parentConfig.windowConfiguration.getWindowingMode();
@@ -2111,7 +2102,7 @@ class TaskRecord extends ConfigurationContainer {
             inOutConfig.windowConfiguration.setAppBounds(bounds);
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         }
-        if (windowingMode != WINDOWING_MODE_FREEFORM) {
+        if (insideParentBounds && windowingMode != WINDOWING_MODE_FREEFORM) {
             final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
             if (parentAppBounds != null && !parentAppBounds.isEmpty()) {
                 outAppBounds.intersect(parentAppBounds);
@@ -2120,7 +2111,7 @@ class TaskRecord extends ConfigurationContainer {
 
         if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED
                 || inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-            if (mStack != null) {
+            if (insideParentBounds && mStack != null) {
                 final DisplayInfo di = new DisplayInfo();
                 mStack.getDisplay().mDisplay.getDisplayInfo(di);
 
@@ -2135,12 +2126,16 @@ class TaskRecord extends ConfigurationContainer {
             }
 
             if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
-                inOutConfig.screenWidthDp = Math.min((int) (mTmpStableBounds.width() / density),
-                        parentConfig.screenWidthDp);
+                final int overrideScreenWidthDp = (int) (mTmpStableBounds.width() / density);
+                inOutConfig.screenWidthDp = insideParentBounds
+                        ? Math.min(overrideScreenWidthDp, parentConfig.screenWidthDp)
+                        : overrideScreenWidthDp;
             }
             if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-                inOutConfig.screenHeightDp = Math.min((int) (mTmpStableBounds.height() / density),
-                        parentConfig.screenHeightDp);
+                final int overrideScreenHeightDp = (int) (mTmpStableBounds.height() / density);
+                inOutConfig.screenHeightDp = insideParentBounds
+                        ? Math.min(overrideScreenHeightDp, parentConfig.screenWidthDp)
+                        : overrideScreenHeightDp;
             }
 
             if (inOutConfig.smallestScreenWidthDp
@@ -2162,7 +2157,7 @@ class TaskRecord extends ConfigurationContainer {
 
         if (inOutConfig.orientation == ORIENTATION_UNDEFINED) {
             inOutConfig.orientation = (inOutConfig.screenWidthDp <= inOutConfig.screenHeightDp)
-                    ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
+                    ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         }
         if (inOutConfig.screenLayout == Configuration.SCREENLAYOUT_UNDEFINED) {
             // For calculating screen layout, we need to use the non-decor inset screen area for the
@@ -2332,6 +2327,7 @@ class TaskRecord extends ConfigurationContainer {
         info.userId = userId;
         info.stackId = getStackId();
         info.taskId = taskId;
+        info.displayId = mStack == null ? Display.INVALID_DISPLAY : mStack.mDisplayId;
         info.isRunning = getTopActivity() != null;
         info.baseIntent = new Intent(getBaseIntent());
         info.baseActivity = reuseActivitiesReport.base != null

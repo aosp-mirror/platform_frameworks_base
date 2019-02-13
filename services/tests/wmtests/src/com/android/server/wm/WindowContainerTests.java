@@ -47,7 +47,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
@@ -59,11 +58,10 @@ import java.util.Comparator;
  * Test class for {@link WindowContainer}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowContainerTests
+ *  atest WmTests:WindowContainerTests
  */
 @SmallTest
 @Presubmit
-@FlakyTest(bugId = 74078662)
 public class WindowContainerTests extends WindowTestsBase {
 
     @Test

@@ -151,6 +151,7 @@ public class WindowTestUtils {
     /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
     public static class TestAppWindowToken extends AppWindowToken {
         boolean mOnTop = false;
+        private boolean mSkipPrepareSurfaces;
         private Transaction mPendingTransactionOverride;
         boolean mSkipOnParentChanged = true;
 
@@ -211,6 +212,17 @@ public class WindowTestUtils {
         @Override
         boolean isOnTop() {
             return mOnTop;
+        }
+
+        @Override
+        void prepareSurfaces() {
+            if (!mSkipPrepareSurfaces) {
+                super.prepareSurfaces();
+            }
+        }
+
+        void setSkipPrepareSurfaces(boolean ignore) {
+            mSkipPrepareSurfaces = ignore;
         }
 
         void setPendingTransaction(Transaction transaction) {

@@ -182,6 +182,14 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     /**
+     * @return The scale for applications running in compatibility mode. Multiply the size in the
+     *         application by this scale will be the size in the screen.
+     */
+    float getSizeCompatScale() {
+        return mDisplayContent.mCompatibleScreenScale;
+    }
+
+    /**
      * Returns true if the new window is considered greater than the existing window in terms of
      * z-order.
      */

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import android.app.ActivityOptions;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import org.junit.Test;

@@ -973,7 +973,10 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
         JavaObject& object) {
     translateSingleGnssMeasurement(&(measurement_V2_0->v1_1), object);
 
-    SET(CodeType, (static_cast<int32_t>(measurement_V2_0->codeType)));
+    SET(CodeType, static_cast<int32_t>(measurement_V2_0->codeType));
+
+    // Overwrite with v2_0.state since v2_0->v1_1->v1_0.state is deprecated.
+    SET(State, static_cast<int32_t>(measurement_V2_0->state));
 }
 
 jobject GnssMeasurementCallback::translateGnssClock(

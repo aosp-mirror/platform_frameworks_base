@@ -16,20 +16,25 @@
 
 package com.android.internal.util;
 
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.ImageDecoder;
+import android.graphics.ImageDecoder.ImageInfo;
+import android.graphics.ImageDecoder.Source;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
+import android.util.Size;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Utility class for image analysis and processing.
@@ -166,21 +171,18 @@ public class ImageUtils {
     /**
      * @see https://developer.android.com/topic/performance/graphics/load-bitmap
      */
-    public static int calculateInSampleSize(BitmapFactory.Options options,
-            int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
+    public static int calculateSampleSize(Size currentSize, Size requestedSize) {
         int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
+        if (currentSize.getHeight() > requestedSize.getHeight()
+                || currentSize.getWidth() > requestedSize.getWidth()) {
+            final int halfHeight = currentSize.getHeight() / 2;
+            final int halfWidth = currentSize.getWidth() / 2;
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight
-                    && (halfWidth / inSampleSize) >= reqWidth) {
+            while ((halfHeight / inSampleSize) >= requestedSize.getHeight()
+                    && (halfWidth / inSampleSize) >= requestedSize.getWidth()) {
                 inSampleSize *= 2;
             }
         }
@@ -190,27 +192,27 @@ public class ImageUtils {
 
     /**
      * Load a bitmap, and attempt to downscale to the required size, to save
-     * on memory.
+     * on memory. Updated to use newer and more compatible ImageDecoder.
      *
      * @see https://developer.android.com/topic/performance/graphics/load-bitmap
      */
-    public static Bitmap decodeSampledBitmapFromStream(ContentResolver resolver,
-            Uri uri, int reqWidth, int reqHeight) throws IOException {
+    public static Bitmap loadThumbnail(ContentResolver resolver, Uri uri, Size size)
+            throws IOException {
 
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        try (InputStream is = resolver.openInputStream(uri)) {
-            // First decode with inJustDecodeBounds=true to check dimensions
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(is, null, options);
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(uri)) {
+            final Bundle opts = new Bundle();
+            opts.putParcelable(ContentResolver.EXTRA_SIZE, Point.convert(size));
 
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-        }
+            return ImageDecoder.decodeBitmap(ImageDecoder.createSource(() -> {
+                return client.openTypedAssetFile(uri, "image/*", opts, null);
+            }), (ImageDecoder decoder, ImageInfo info, Source source) -> {
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
 
-        // need to do this twice as the InputStream is consumed in the first call,
-        // and not all InputStreams support marks
-        try (InputStream is = resolver.openInputStream(uri)) {
-            options.inJustDecodeBounds = false;
-            return BitmapFactory.decodeStream(is, null, options);
+                    final int sample = calculateSampleSize(info.getSize(), size);
+                    if (sample > 1) {
+                        decoder.setTargetSampleSize(sample);
+                    }
+                });
         }
     }
 }

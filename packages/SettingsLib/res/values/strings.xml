@@ -337,6 +337,9 @@
     <string name="data_usage_uninstalled_apps">Removed apps</string>
     <!-- Title of data usage item that represents all uninstalled applications or removed users. [CHAR LIMIT=48] -->
     <string name="data_usage_uninstalled_apps_users">Removed apps and users</string>
+    <!-- Title of data usage item that represents system updates (OTAs). [CHAR LIMIT=48] -->
+    <string name="data_usage_ota">System updates</string>
+
 
     <!-- Tethering controls, item title to go into the tethering settings -->
     <!-- Tethering controls, item title to go into the tethering settings when only USB tethering is available [CHAR LIMIT=25]-->

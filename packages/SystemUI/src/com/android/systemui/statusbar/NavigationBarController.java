@@ -158,18 +158,6 @@ public class NavigationBarController implements DisplayListener, Callbacks {
         });
     }
 
-    /** Removes navigation bars. */
-    public void destroy() {
-        mDisplayManager.unregisterDisplayListener(this);
-        if (mNavigationBars.size() > 0) {
-            for (int i = 0; i < mNavigationBars.size(); i++) {
-                int displayId = mNavigationBars.keyAt(i);
-                removeNavigationBar(displayId);
-            }
-            mNavigationBars.clear();
-        }
-    }
-
     private void removeNavigationBar(int displayId) {
         NavigationBarFragment navBar = mNavigationBars.get(displayId);
         if (navBar != null) {

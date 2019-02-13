@@ -27,8 +27,8 @@
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <!-- Signature permission defined in NetworkStackStub -->
     <uses-permission android:name="android.permission.MAINLINE_NETWORK_STACK" />
-    <!-- Launch captive portal app as specific user -->
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <!-- Send latency broadcast as current user -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.NETWORK_STACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
