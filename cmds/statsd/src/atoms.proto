@@ -31,6 +31,7 @@ import "frameworks/base/core/proto/android/bluetooth/hfp/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/smp/enums.proto";
 import "frameworks/base/core/proto/android/debug/enums.proto";
 import "frameworks/base/core/proto/android/hardware/biometrics/enums.proto";
+import "frameworks/base/core/proto/android/hardware/sensor/assist/enums.proto";
 import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
@@ -241,6 +242,9 @@ message Atom {
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
         DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
         BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
+        AssistGestureStageReported assist_gesture_stage_reported = 174;
+        AssistGestureFeedbackReported assist_gesture_feedback_reported = 175;
+        AssistGestureProgressReported assist_gesture_progress_reported = 176;
     }
 
     // Pulled events will start at field 10000.
@@ -5521,4 +5525,36 @@ message TrainInfo {
     optional int64 train_version_code = 1;
 
     optional TrainExperimentIds train_experiment_id = 2;
+}
+
+/**
+ * Logs the gesture stage changed event.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/
+ */
+message AssistGestureStageReported {
+  optional android.hardware.sensor.assist.AssistGestureStageEnum gesture_stage = 1;
+}
+
+/**
+ * Logs the feedback type.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/
+ */
+message AssistGestureFeedbackReported {
+  // Whether or not the gesture was used.
+  optional android.hardware.sensor.assist.AssistGestureFeedbackEnum feedback_type = 1;
+}
+
+/**
+ * Logs the progress.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/
+ */
+message AssistGestureProgressReported {
+  // [0,100] progress for the assist gesture.
+  optional int32 progress = 1;
 }
