@@ -17,6 +17,7 @@
 package android.view;
 
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
@@ -267,6 +268,16 @@ public final class WindowManagerGlobal {
             }
         }
         return views;
+    }
+
+    /**
+     * @return the list of all views attached to the global window manager
+     */
+    @NonNull
+    public ArrayList<View> getWindowViews() {
+        synchronized (mLock) {
+            return new ArrayList<>(mViews);
+        }
     }
 
     public View getWindowView(IBinder windowToken) {
