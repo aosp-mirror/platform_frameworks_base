@@ -2998,7 +2998,9 @@ public abstract class ContentResolver implements ContentInterface {
      *
      * @param key the key to add
      * @param value the value to add
+     * {@hide}
      */
+    @SystemApi
     public void putCache(Uri key, Bundle value) {
         try {
             getContentService().putCache(mContext.getPackageName(), key, value,
@@ -3014,7 +3016,9 @@ public abstract class ContentResolver implements ContentInterface {
      * @param key the key to get the value
      * @return the matched value. If the key doesn't exist, will return null.
      * @see #putCache(Uri, Bundle)
+     * {@hide}
      */
+    @SystemApi
     public Bundle getCache(Uri key) {
         try {
             final Bundle bundle = getContentService().getCache(mContext.getPackageName(), key,
