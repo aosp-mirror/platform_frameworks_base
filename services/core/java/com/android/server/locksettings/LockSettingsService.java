@@ -192,6 +192,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     protected IGateKeeperService mGateKeeperService;
     protected IAuthSecret mAuthSecretService;
 
+    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
+
     /**
      * The UIDs that are used for system credential storage in keystore.
      */
@@ -405,6 +407,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         public int binderGetCallingUid() {
             return Binder.getCallingUid();
+        }
+
+        public boolean isGsiRunning() {
+            return SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
         }
     }
 
@@ -2215,6 +2221,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             mSpCache.put(userId, auth);
         }
         tryRemoveUserFromSpCacheLater(userId);
+
+        if (mInjector.isGsiRunning()) {
+            Slog.w(TAG, "AuthSecret disabled in GSI");
+            return;
+        }
 
         // Pass the primary user's auth secret to the HAL
         if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {

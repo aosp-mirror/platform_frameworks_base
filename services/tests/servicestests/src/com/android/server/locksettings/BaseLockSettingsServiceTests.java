@@ -87,6 +87,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     MockSyntheticPasswordManager mSpManager;
     IAuthSecret mAuthSecretService;
     WindowManagerInternal mMockWindowManager;
+    FakeGsiService mGsiService;
     protected boolean mHasSecureLockScreen;
 
     @Override
@@ -101,6 +102,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mDevicePolicyManager = mock(DevicePolicyManager.class);
         mDevicePolicyManagerInternal = mock(DevicePolicyManagerInternal.class);
         mMockWindowManager = mock(WindowManagerInternal.class);
+        mGsiService = new FakeGsiService();
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -137,7 +139,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mAuthSecretService = mock(IAuthSecret.class);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
-                mSpManager, mAuthSecretService);
+                mSpManager, mAuthSecretService, mGsiService);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);
