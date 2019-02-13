@@ -150,7 +150,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     }
 
     @Inject
-    public BubbleController(Context context, StatusBarWindowController statusBarWindowController) {
+    public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
+            BubbleData data) {
         mContext = context;
 
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
@@ -171,7 +172,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         mTaskStackListener = new BubbleTaskStackListener();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
-        mBubbleData = BubbleData.getInstance();
+        mBubbleData = data;
     }
 
     /**
@@ -253,7 +254,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             mStackView.updateBubble(notif, updatePosition);
         } else {
             if (mStackView == null) {
-                mStackView = new BubbleStackView(mContext);
+                mStackView = new BubbleStackView(mContext, mBubbleData);
                 ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
                 // XXX: Bug when you expand the shade on top of expanded bubble, there is no scrim
                 // between bubble and the shade
