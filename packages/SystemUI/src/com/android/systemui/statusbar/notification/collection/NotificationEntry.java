@@ -622,10 +622,6 @@ public final class NotificationEntry {
         return null;
     }
 
-    public boolean hasLowPriorityStateUpdated() {
-        return row != null && row.hasLowPriorityStateUpdated();
-    }
-
     public void removeRow() {
         if (row != null) row.setRemoved();
     }
@@ -648,10 +644,6 @@ public final class NotificationEntry {
 
     public boolean isChildInGroup() {
         return parent == null;
-    }
-
-    public void setLowPriorityStateUpdated(boolean updated) {
-        if (row != null) row.setLowPriorityStateUpdated(updated);
     }
 
     /**

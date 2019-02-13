@@ -230,7 +230,6 @@ public class NotificationEntryManager implements
                 }
             }
         }
-        entry.setLowPriorityStateUpdated(false);
     }
 
     @Override
@@ -346,8 +345,7 @@ public class NotificationEntryManager implements
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
         // Construct the expanded view.
-        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
-                mNotificationData.get(entry.key) != null);
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification));
 
         abortExistingInflation(key);
 
@@ -384,13 +382,11 @@ public class NotificationEntryManager implements
 
         mNotificationData.update(entry, ranking, notification);
 
-        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification),
-                mNotificationData.get(entry.key) != null);
-
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
         }
 
+        getRowBinder().inflateViews(entry, () -> performRemoveNotification(notification));
         updateNotifications();
 
         if (DEBUG) {
@@ -422,6 +418,7 @@ public class NotificationEntryManager implements
         }
     }
 
+    @Override
     public void updateNotificationRanking(NotificationListenerService.RankingMap rankingMap) {
         List<NotificationEntry> entries = new ArrayList<>();
         entries.addAll(mNotificationData.getActiveNotifications());
@@ -447,8 +444,7 @@ public class NotificationEntryManager implements
                     entry,
                     oldImportances.get(entry.key),
                     oldAdjustments.get(entry.key),
-                    NotificationUiAdjustment.extractFromNotificationEntry(entry),
-                    mNotificationData.get(entry.key) != null);
+                    NotificationUiAdjustment.extractFromNotificationEntry(entry));
         }
 
         updateNotifications();
