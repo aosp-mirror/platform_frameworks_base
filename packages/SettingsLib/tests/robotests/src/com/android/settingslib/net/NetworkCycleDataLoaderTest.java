@@ -46,6 +46,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -99,6 +100,20 @@ public class NetworkCycleDataLoaderTest {
     }
 
     @Test
+    public void loadInBackground_hasCyclePeriod_shouldLoadDataForSpecificCycles() {
+        mLoader = spy(new NetworkCycleDataTestLoader(mContext));
+        doNothing().when(mLoader).loadDataForSpecificCycles();
+        final ArrayList<Long> cycles = new ArrayList<>();
+        cycles.add(67890L);
+        cycles.add(12345L);
+        ReflectionHelpers.setField(mLoader, "mCycles", cycles);
+
+        mLoader.loadInBackground();
+
+        verify(mLoader).loadDataForSpecificCycles();
+    }
+
+    @Test
     public void loadPolicyData_shouldRecordUsageFromPolicyCycle() {
         final int networkType = ConnectivityManager.TYPE_MOBILE;
         final String subId = "TestSubscriber";
@@ -137,6 +152,27 @@ public class NetworkCycleDataLoaderTest {
         mLoader.loadFourWeeksData();
 
         verify(mLoader).recordUsage(fourWeeksAgo, now);
+    }
+
+    @Test
+    public void loadDataForSpecificCycles_shouldRecordUsageForSpecifiedTime() {
+        mLoader = spy(new NetworkCycleDataTestLoader(mContext));
+        final long now = System.currentTimeMillis();
+        final long tenDaysAgo = now - (DateUtils.DAY_IN_MILLIS * 10);
+        final long twentyDaysAgo = now - (DateUtils.DAY_IN_MILLIS * 20);
+        final long thirtyDaysAgo = now - (DateUtils.DAY_IN_MILLIS * 30);
+        final ArrayList<Long> cycles = new ArrayList<>();
+        cycles.add(now);
+        cycles.add(tenDaysAgo);
+        cycles.add(twentyDaysAgo);
+        cycles.add(thirtyDaysAgo);
+        ReflectionHelpers.setField(mLoader, "mCycles", cycles);
+
+        mLoader.loadDataForSpecificCycles();
+
+        verify(mLoader).recordUsage(tenDaysAgo, now);
+        verify(mLoader).recordUsage(twentyDaysAgo, tenDaysAgo);
+        verify(mLoader).recordUsage(thirtyDaysAgo, twentyDaysAgo);
     }
 
     public class NetworkCycleDataTestLoader extends NetworkCycleDataLoader<List<NetworkCycleData>> {
