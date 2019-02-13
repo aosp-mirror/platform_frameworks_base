@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 
@@ -27,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
@@ -201,7 +203,33 @@ public class NetworkStack {
         final ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
         intent.setComponent(comp);
 
-        if (comp == null || !context.bindServiceAsUser(intent, new NetworkStackConnection(),
+        if (comp == null) {
+            Slog.wtf(TAG, "Could not resolve the network stack with " + intent);
+            // TODO: crash/reboot system server ?
+            return;
+        }
+
+        final PackageManager pm = context.getPackageManager();
+        int uid = -1;
+        try {
+            uid = pm.getPackageUid(comp.getPackageName(), UserHandle.USER_SYSTEM);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.wtf("Network stack package not found", e);
+            // Fall through
+        }
+
+        if (uid != Process.NETWORK_STACK_UID) {
+            throw new SecurityException("Invalid network stack UID: " + uid);
+        }
+
+        final int hasPermission =
+                pm.checkPermission(PERMISSION_MAINLINE_NETWORK_STACK, comp.getPackageName());
+        if (hasPermission != PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "Network stack does not have permission " + PERMISSION_MAINLINE_NETWORK_STACK);
+        }
+
+        if (!context.bindServiceAsUser(intent, new NetworkStackConnection(),
                 Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT, UserHandle.SYSTEM)) {
             Slog.wtf(TAG,
                     "Could not bind to network stack in-process, or in app with " + intent);
