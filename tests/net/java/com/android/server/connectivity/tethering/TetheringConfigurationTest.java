@@ -22,10 +22,12 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.server.connectivity.tethering.TetheringConfiguration.DUN_NOT_REQUIRED;
 import static com.android.server.connectivity.tethering.TetheringConfiguration.DUN_REQUIRED;
 import static com.android.server.connectivity.tethering.TetheringConfiguration.DUN_UNSPECIFIED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -44,25 +46,38 @@ import android.test.mock.MockContentResolver;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 
-import java.util.Iterator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Iterator;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class TetheringConfigurationTest {
     private final SharedLog mLog = new SharedLog("TetheringConfigurationTest");
+
+    private static final String[] PROVISIONING_APP_NAME = {"some", "app"};
     @Mock private Context mContext;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private Resources mResources;
+    @Mock private Resources mResourcesForSubId;
     private MockContentResolver mContentResolver;
     private Context mMockContext;
     private boolean mHasTelephonyManager;
+
+    private class MockTetheringConfiguration extends TetheringConfiguration {
+        MockTetheringConfiguration(Context ctx, SharedLog log, int id) {
+            super(ctx, log, id);
+        }
+
+        @Override
+        protected Resources getResourcesForSubIdWrapper(Context ctx, int subId) {
+            return mResourcesForSubId;
+        }
+    }
 
     private class MockContext extends BroadcastInterceptingContext {
         MockContext(Context base) {
@@ -99,6 +114,9 @@ public class TetheringConfigurationTest {
                 .thenReturn(new String[0]);
         when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
                 .thenReturn(new int[0]);
+        when(mResources.getStringArray(
+                com.android.internal.R.array.config_mobile_hotspot_provision_app))
+                .thenReturn(new String[0]);
         mContentResolver = new MockContentResolver();
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mMockContext = new MockContext(mContext);
@@ -111,7 +129,8 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = true;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_REQUIRED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         assertTrue(cfg.isDunRequired);
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN));
         assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE));
@@ -127,7 +146,8 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = true;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_NOT_REQUIRED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         assertFalse(cfg.isDunRequired);
         assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN));
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE));
@@ -143,7 +163,8 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = false;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         assertTrue(cfg.isDunRequired);
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN));
         // Just to prove we haven't clobbered Wi-Fi:
@@ -160,7 +181,8 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = false;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         final Iterator<Integer> upstreamIterator = cfg.preferredUpstreamIfaceTypes.iterator();
         assertTrue(upstreamIterator.hasNext());
         assertEquals(TYPE_ETHERNET, upstreamIterator.next().intValue());
@@ -181,7 +203,8 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = false;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         final Iterator<Integer> upstreamIterator = cfg.preferredUpstreamIfaceTypes.iterator();
         assertTrue(upstreamIterator.hasNext());
         assertEquals(TYPE_ETHERNET, upstreamIterator.next().intValue());
@@ -199,7 +222,8 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = false;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         final Iterator<Integer> upstreamIterator = cfg.preferredUpstreamIfaceTypes.iterator();
         assertTrue(upstreamIterator.hasNext());
         assertEquals(TYPE_WIFI, upstreamIterator.next().intValue());
@@ -214,7 +238,8 @@ public class TetheringConfigurationTest {
     public void testNewDhcpServerDisabled() {
         Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 1);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         assertTrue(cfg.enableLegacyDhcpServer);
     }
 
@@ -222,7 +247,41 @@ public class TetheringConfigurationTest {
     public void testNewDhcpServerEnabled() {
         Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
         assertFalse(cfg.enableLegacyDhcpServer);
     }
+
+    @Test
+    public void testGetResourcesBySubId() {
+        setUpResourceForSubId();
+        final TetheringConfiguration cfg = new TetheringConfiguration(
+                mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+        assertTrue(cfg.provisioningApp.length == 0);
+        final int anyValidSubId = 1;
+        final MockTetheringConfiguration mockCfg =
+                new MockTetheringConfiguration(mMockContext, mLog, anyValidSubId);
+        assertEquals(mockCfg.provisioningApp[0], PROVISIONING_APP_NAME[0]);
+        assertEquals(mockCfg.provisioningApp[1], PROVISIONING_APP_NAME[1]);
+    }
+
+    private void setUpResourceForSubId() {
+        when(mResourcesForSubId.getStringArray(
+                com.android.internal.R.array.config_tether_dhcp_range)).thenReturn(new String[0]);
+        when(mResourcesForSubId.getStringArray(
+                com.android.internal.R.array.config_tether_usb_regexs)).thenReturn(new String[0]);
+        when(mResourcesForSubId.getStringArray(
+                com.android.internal.R.array.config_tether_wifi_regexs))
+                .thenReturn(new String[]{ "test_wlan\\d" });
+        when(mResourcesForSubId.getStringArray(
+                com.android.internal.R.array.config_tether_bluetooth_regexs))
+                .thenReturn(new String[0]);
+        when(mResourcesForSubId.getIntArray(
+                com.android.internal.R.array.config_tether_upstream_types))
+                .thenReturn(new int[0]);
+        when(mResourcesForSubId.getStringArray(
+                com.android.internal.R.array.config_mobile_hotspot_provision_app))
+                .thenReturn(PROVISIONING_APP_NAME);
+    }
+
 }
