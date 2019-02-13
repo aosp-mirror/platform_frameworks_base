@@ -1164,6 +1164,25 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     }
 }
 
+static jboolean nativeGetDisplayBrightnessSupport(JNIEnv* env, jclass clazz,
+        jobject displayTokenObject) {
+    sp<IBinder> displayToken(ibinderForJavaObject(env, displayTokenObject));
+    if (displayToken == nullptr) {
+        return JNI_FALSE;
+    }
+    return static_cast<jboolean>(SurfaceComposerClient::getDisplayBrightnessSupport(displayToken));
+}
+
+static jboolean nativeSetDisplayBrightness(JNIEnv* env, jclass clazz, jobject displayTokenObject,
+        jfloat brightness) {
+    sp<IBinder> displayToken(ibinderForJavaObject(env, displayTokenObject));
+    if (displayToken == nullptr) {
+        return JNI_FALSE;
+    }
+    status_t error = SurfaceComposerClient::setDisplayBrightness(displayToken, brightness);
+    return error == OK ? JNI_TRUE : JNI_FALSE;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1308,7 +1327,11 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
             (void*)nativeSetGeometry },
     {"nativeSyncInputWindows", "(J)V",
-            (void*)nativeSyncInputWindows }
+            (void*)nativeSyncInputWindows },
+    {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",
+            (void*)nativeGetDisplayBrightnessSupport },
+    {"nativeSetDisplayBrightness", "(Landroid/os/IBinder;F)Z",
+            (void*)nativeSetDisplayBrightness },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

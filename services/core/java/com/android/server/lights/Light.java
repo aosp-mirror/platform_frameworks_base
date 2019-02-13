@@ -16,8 +16,8 @@
 
 package com.android.server.lights;
 
-import android.hardware.light.V2_0.Flash;
 import android.hardware.light.V2_0.Brightness;
+import android.hardware.light.V2_0.Flash;
 
 public abstract class Light {
     public static final int LIGHT_FLASH_NONE = Flash.NONE;
@@ -39,8 +39,16 @@ public abstract class Light {
      */
     public static final int BRIGHTNESS_MODE_LOW_PERSISTENCE = Brightness.LOW_PERSISTENCE;
 
+    /**
+     * Set the brightness of a display.
+     */
     public abstract void setBrightness(int brightness);
+
+    /**
+     * Set the brightness and mode of a display.
+     */
     public abstract void setBrightness(int brightness, int brightnessMode);
+
     public abstract void setColor(int color);
     public abstract void setFlashing(int color, int mode, int onMS, int offMS);
     public abstract void pulse();

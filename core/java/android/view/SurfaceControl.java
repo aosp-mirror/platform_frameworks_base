@@ -63,6 +63,7 @@ import libcore.util.NativeAllocationRegistry;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 
 /**
  * Handle to an on-screen Surface managed by the system compositor. The SurfaceControl is
@@ -196,6 +197,9 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeGetProtectedContentSupport();
     private static native void nativeSetMetadata(long transactionObj, int key, Parcel data);
     private static native void nativeSyncInputWindows(long transactionObj);
+    private static native boolean nativeGetDisplayBrightnessSupport(IBinder displayToken);
+    private static native boolean nativeSetDisplayBrightness(IBinder displayToken,
+            float brightness);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -1955,6 +1959,47 @@ public final class SurfaceControl implements Parcelable {
      */
     public static boolean getProtectedContentSupport() {
         return nativeGetProtectedContentSupport();
+    }
+
+    /**
+     * Returns whether brightness operations are supported on a display.
+     *
+     * @param displayToken
+     *      The token for the display.
+     *
+     * @return Whether brightness operations are supported on the display.
+     *
+     * @hide
+     */
+    public static boolean getDisplayBrightnessSupport(IBinder displayToken) {
+        return nativeGetDisplayBrightnessSupport(displayToken);
+    }
+
+    /**
+     * Sets the brightness of a display.
+     *
+     * @param displayToken
+     *      The token for the display whose brightness is set.
+     * @param brightness
+     *      A number between 0.0f (minimum brightness) and 1.0f (maximum brightness), or -1.0f to
+     *      turn the backlight off.
+     *
+     * @return Whether the method succeeded or not.
+     *
+     * @throws IllegalArgumentException if:
+     *      - displayToken is null;
+     *      - brightness is NaN or greater than 1.0f.
+     *
+     * @hide
+     */
+    public static boolean setDisplayBrightness(IBinder displayToken, float brightness) {
+        Objects.requireNonNull(displayToken);
+        if (Float.isNaN(brightness) || brightness > 1.0f
+                || (brightness < 0.0f && brightness != -1.0f)) {
+            throw new IllegalArgumentException("brightness must be a number between 0.0f and 1.0f,"
+                    + " or -1 to turn the backlight off.");
+        }
+        return nativeSetDisplayBrightness(displayToken, brightness);
     }
 
     /**
