@@ -28,8 +28,8 @@
 #include "android/media/midi/BpMidiDeviceServer.h"
 #include "media/MidiDeviceInfo.h"
 
-#include "include/midi.h"
-#include "midi_internal.h"
+#include "include/amidi/AMidi.h"
+#include "amidi_internal.h"
 
 using namespace android::media::midi;
 

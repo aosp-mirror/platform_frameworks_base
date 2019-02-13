@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_MEDIA_MIDI_INTERNAL_H_
-#define ANDROID_MEDIA_MIDI_INTERNAL_H_
+#ifndef ANDROID_MEDIA_AMIDI_INTERNAL_H_
+#define ANDROID_MEDIA_AMIDI_INTERNAL_H_
 
 #include <jni.h>
 
@@ -38,4 +38,4 @@ struct AMidiDevice {
     AMidiDeviceInfo deviceInfo; /* Attributes of the device. */
 };
 
-#endif // ANDROID_MEDIA_MIDI_INTERNAL_H_
+#endif // ANDROID_MEDIA_AMIDI_INTERNAL_H_
