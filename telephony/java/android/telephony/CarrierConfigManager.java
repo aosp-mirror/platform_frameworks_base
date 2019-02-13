@@ -1092,6 +1092,19 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * String to override sim country iso.
+     * Sim country iso is based on sim MCC which is coarse and doesn't work with dual IMSI SIM where
+     * a SIM can have multiple MCC from different countries.
+     * Instead, each sim carrier should have a single country code, apply per carrier based iso
+     * code as an override. The overridden value can be read from
+     * {@link TelephonyManager#getSimCountryIso()} and {@link SubscriptionInfo#getCountryIso()}
+     *
+     * @hide
+     */
+    public static final String KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING =
+            "sim_country_iso_override_string";
+
+    /**
      * Override the registered PLMN name using #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING.
      *
      * If true, then the registered PLMN name (only for CDMA/CDMA-LTE and only when not roaming)
@@ -2237,6 +2250,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putString(KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, "");
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
