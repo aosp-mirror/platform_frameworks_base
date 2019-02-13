@@ -887,6 +887,24 @@ public class ServiceState implements Parcelable {
     }
 
     /**
+     * Convert roaming type to string
+     *
+     * @param roamingType roaming type
+     * @return The roaming type in string format
+     *
+     * @hide
+     */
+    public static String roamingTypeToString(@RoamingType int roamingType) {
+        switch (roamingType) {
+            case ROAMING_TYPE_NOT_ROAMING: return "NOT_ROAMING";
+            case ROAMING_TYPE_UNKNOWN: return "UNKNOWN";
+            case ROAMING_TYPE_DOMESTIC: return "DOMESTIC";
+            case ROAMING_TYPE_INTERNATIONAL: return "INTERNATIONAL";
+        }
+        return "Unknown roaming type " + roamingType;
+    }
+
+    /**
      * Convert radio technology to String
      *
      * @param rt radioTechnology
