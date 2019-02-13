@@ -196,66 +196,81 @@ public class SmartReplyView extends ViewGroup {
     }
 
     /**
+     * Add buttons to the {@link SmartReplyView} - these buttons must have been preinflated using
+     * one of the methods in this class.
+     */
+    public void addPreInflatedButtons(List<Button> smartSuggestionButtons) {
+        for (Button button : smartSuggestionButtons) {
+            addView(button);
+        }
+        reallocateCandidateButtonQueueForSqueezing();
+    }
+
+    /**
      * Add smart replies to this view, using the provided {@link RemoteInput} and
      * {@link PendingIntent} to respond when the user taps a smart reply. Only the replies that fit
      * into the notification are shown.
      */
-    public void addRepliesFromRemoteInput(
-            SmartReplies smartReplies,
+    public List<Button> inflateRepliesFromRemoteInput(
+            @NonNull SmartReplies smartReplies,
             SmartReplyController smartReplyController, NotificationEntry entry) {
+        List<Button> buttons = new ArrayList<>();
+
         if (smartReplies.remoteInput != null && smartReplies.pendingIntent != null) {
             if (smartReplies.choices != null) {
                 for (int i = 0; i < smartReplies.choices.length; ++i) {
-                    Button replyButton = inflateReplyButton(
-                            getContext(), this, i, smartReplies, smartReplyController, entry);
-                    addView(replyButton);
+                    buttons.add(inflateReplyButton(
+                            this, getContext(), i, smartReplies, smartReplyController, entry));
                 }
                 this.mSmartRepliesGeneratedByAssistant = smartReplies.fromAssistant;
             }
         }
-        reallocateCandidateButtonQueueForSqueezing();
+        return buttons;
     }
 
     /**
      * Add smart actions to be shown next to smart replies. Only the actions that fit into the
      * notification are shown.
      */
-    public void addSmartActions(SmartActions smartActions,
+    public List<Button> inflateSmartActions(@NonNull SmartActions smartActions,
             SmartReplyController smartReplyController, NotificationEntry entry,
             HeadsUpManager headsUpManager) {
+        List<Button> buttons = new ArrayList<>();
         int numSmartActions = smartActions.actions.size();
         for (int n = 0; n < numSmartActions; n++) {
             Notification.Action action = smartActions.actions.get(n);
             if (action.actionIntent != null) {
-                Button actionButton = inflateActionButton(
-                        getContext(), this, n, smartActions, smartReplyController, entry,
-                        headsUpManager);
-                addView(actionButton);
+                buttons.add(inflateActionButton(
+                        this, getContext(), n, smartActions, smartReplyController, entry,
+                        headsUpManager));
             }
         }
-        reallocateCandidateButtonQueueForSqueezing();
+        return buttons;
     }
 
-    public static SmartReplyView inflate(Context context, ViewGroup root) {
-        return (SmartReplyView)
-                LayoutInflater.from(context).inflate(R.layout.smart_reply_view, root, false);
+    /**
+     * Inflate an instance of this class.
+     */
+    public static SmartReplyView inflate(Context context) {
+        return (SmartReplyView) LayoutInflater.from(context).inflate(
+                R.layout.smart_reply_view, null /* root */);
     }
 
     @VisibleForTesting
-    Button inflateReplyButton(Context context, ViewGroup root, int replyIndex,
-            SmartReplies smartReplies, SmartReplyController smartReplyController,
+    static Button inflateReplyButton(SmartReplyView smartReplyView, Context context,
+            int replyIndex, SmartReplies smartReplies, SmartReplyController smartReplyController,
             NotificationEntry entry) {
         Button b = (Button) LayoutInflater.from(context).inflate(
-                R.layout.smart_reply_button, root, false);
+                R.layout.smart_reply_button, smartReplyView, false);
         CharSequence choice = smartReplies.choices[replyIndex];
         b.setText(choice);
 
         OnDismissAction action = () -> {
-            if (mConstants.getEffectiveEditChoicesBeforeSending(
+            if (smartReplyView.mConstants.getEffectiveEditChoicesBeforeSending(
                     smartReplies.remoteInput.getEditChoicesBeforeSending())) {
                 EditedSuggestionInfo editedSuggestionInfo =
                         new EditedSuggestionInfo(choice, replyIndex);
-                mRemoteInputManager.activateRemoteInput(b,
+                smartReplyView.mRemoteInputManager.activateRemoteInput(b,
                         new RemoteInput[] { smartReplies.remoteInput }, smartReplies.remoteInput,
                         smartReplies.pendingIntent, editedSuggestionInfo);
                 return false;
@@ -276,33 +291,41 @@ public class SmartReplyView extends ViewGroup {
             } catch (PendingIntent.CanceledException e) {
                 Log.w(TAG, "Unable to send smart reply", e);
             }
-            mSmartReplyContainer.setVisibility(View.GONE);
+            // Note that as inflateReplyButton is called mSmartReplyContainer is null, but when the
+            // reply Button is added to the SmartReplyView mSmartReplyContainer will be set. So, it
+            // will not be possible for a user to trigger this on-click-listener without
+            // mSmartReplyContainer being set.
+            smartReplyView.mSmartReplyContainer.setVisibility(View.GONE);
             return false; // do not defer
         };
 
         b.setOnClickListener(view -> {
-            mKeyguardDismissUtil.executeWhenUnlocked(action);
+            smartReplyView.mKeyguardDismissUtil.executeWhenUnlocked(action);
         });
 
         b.setAccessibilityDelegate(new AccessibilityDelegate() {
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
-                String label = getResources().getString(R.string.accessibility_send_smart_reply);
+                String label = smartReplyView.getResources().getString(
+                        R.string.accessibility_send_smart_reply);
                 info.addAction(new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, label));
             }
         });
 
-        setColors(b, mCurrentBackgroundColor, mDefaultStrokeColor, mDefaultTextColor, mRippleColor);
+        SmartReplyView.setButtonColors(b, smartReplyView.mCurrentBackgroundColor,
+                smartReplyView.mDefaultStrokeColor, smartReplyView.mDefaultTextColor,
+                smartReplyView.mRippleColor, smartReplyView.mStrokeWidth);
         return b;
     }
 
     @VisibleForTesting
-    Button inflateActionButton(Context context, ViewGroup root, int actionIndex,
-            SmartActions smartActions, SmartReplyController smartReplyController,
-            NotificationEntry entry, HeadsUpManager headsUpManager) {
+    static Button inflateActionButton(SmartReplyView smartReplyView, Context context,
+            int actionIndex, SmartActions smartActions,
+            SmartReplyController smartReplyController, NotificationEntry entry,
+            HeadsUpManager headsUpManager) {
         Notification.Action action = smartActions.actions.get(actionIndex);
         Button button = (Button) LayoutInflater.from(context).inflate(
-                R.layout.smart_action_button, root, false);
+                R.layout.smart_action_button, smartReplyView, false);
         button.setText(action.title);
 
         Drawable iconDrawable = action.getIcon().loadDrawable(context);
@@ -313,7 +336,7 @@ public class SmartReplyView extends ViewGroup {
         button.setCompoundDrawables(iconDrawable, null, null, null);
 
         button.setOnClickListener(view ->
-                getActivityStarter().startPendingIntentDismissingKeyguard(
+                smartReplyView.getActivityStarter().startPendingIntentDismissingKeyguard(
                         action.actionIntent,
                         () -> {
                             smartReplyController.smartActionClicked(
@@ -803,12 +826,13 @@ public class SmartReplyView extends ViewGroup {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final Button child = (Button) getChildAt(i);
-            setColors(child, backgroundColor, strokeColor, textColor, rippleColor);
+            setButtonColors(child, backgroundColor, strokeColor, textColor, rippleColor,
+                    mStrokeWidth);
         }
     }
 
-    private void setColors(Button button, int backgroundColor, int strokeColor, int textColor,
-            int rippleColor) {
+    private static void setButtonColors(Button button, int backgroundColor, int strokeColor,
+            int textColor, int rippleColor, int strokeWidth) {
         Drawable drawable = button.getBackground();
         if (drawable instanceof RippleDrawable) {
             // Mutate in case other notifications are using this drawable.
@@ -821,7 +845,7 @@ public class SmartReplyView extends ViewGroup {
                 if (background instanceof GradientDrawable) {
                     GradientDrawable gradientDrawable = (GradientDrawable) background;
                     gradientDrawable.setColor(backgroundColor);
-                    gradientDrawable.setStroke(mStrokeWidth, strokeColor);
+                    gradientDrawable.setStroke(strokeWidth, strokeColor);
                 }
             }
             button.setBackground(drawable);
