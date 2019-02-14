@@ -5780,8 +5780,10 @@ package android.provider {
   }
 
   public static interface DeviceConfig.Rollback {
+    field public static final String BOOT_NAMESPACE = "rollback_boot";
     field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
     field public static final String NAMESPACE = "rollback";
+    field public static final String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
   }
 
   public static interface DeviceConfig.Runtime {
