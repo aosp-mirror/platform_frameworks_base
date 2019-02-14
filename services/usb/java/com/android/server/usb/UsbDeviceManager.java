@@ -69,6 +69,8 @@ import android.os.storage.StorageVolume;
 import android.provider.Settings;
 import android.service.usb.UsbDeviceManagerProto;
 import android.service.usb.UsbHandlerProto;
+import android.sysprop.AdbProperties;
+import android.sysprop.VoldProperties;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -284,8 +286,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         }
         mControlFds.put(UsbManager.FUNCTION_PTP, ptpFd);
 
-        boolean secureAdbEnabled = SystemProperties.getBoolean("ro.adb.secure", false);
-        boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
+        boolean secureAdbEnabled = AdbProperties.secure().orElse(false);
+        boolean dataEncrypted = "1".equals(VoldProperties.decrypt().orElse(""));
         if (secureAdbEnabled && !dataEncrypted) {
             mDebuggingManager = new UsbDebuggingManager(context);
         }
