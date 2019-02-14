@@ -77,6 +77,14 @@ public class SQLiteQueryBuilder {
     }
 
     /**
+     * Get if the query is marked as DISTINCT, as last configured by
+     * {@link #setDistinct(boolean)}.
+     */
+    public boolean getDistinct() {
+        return mDistinct;
+    }
+
+    /**
      * Returns the list of tables being queried
      *
      * @return the list of tables being queried
@@ -167,6 +175,14 @@ public class SQLiteQueryBuilder {
     }
 
     /**
+     * Gets the projection map for the query, as last configured by
+     * {@link #setProjectionMap(Map)}.
+     */
+    public Map<String, String> getProjectionMap() {
+        return mProjectionMap;
+    }
+
+    /**
      * Sets a projection greylist of columns that will be allowed through, even
      * when {@link #setStrict(boolean)} is enabled. This provides a way for
      * abusive custom columns like {@code COUNT(*)} to continue working.
@@ -178,6 +194,16 @@ public class SQLiteQueryBuilder {
     }
 
     /**
+     * Gets the projection greylist for the query, as last configured by
+     * {@link #setProjectionGreylist(List)}.
+     *
+     * @hide
+     */
+    public List<Pattern> getProjectionGreylist() {
+        return mProjectionGreylist;
+    }
+
+    /**
      * Sets the cursor factory to be used for the query.  You can use
      * one factory for all queries on a database but it is normally
      * easier to specify the factory when doing this query.
@@ -186,6 +212,14 @@ public class SQLiteQueryBuilder {
      */
     public void setCursorFactory(SQLiteDatabase.CursorFactory factory) {
         mFactory = factory;
+    }
+
+    /**
+     * Sets the cursor factory to be used for the query, as last configured by
+     * {@link #setCursorFactory(android.database.sqlite.SQLiteDatabase.CursorFactory)}.
+     */
+    public SQLiteDatabase.CursorFactory getCursorFactory() {
+        return mFactory;
     }
 
     /**
@@ -211,6 +245,14 @@ public class SQLiteQueryBuilder {
      */
     public void setStrict(boolean flag) {
         mStrict = flag;
+    }
+
+    /**
+     * Get if the query is marked as strict, as last configured by
+     * {@link #setStrict(boolean)}.
+     */
+    public boolean getStrict() {
+        return mStrict;
     }
 
     /**
