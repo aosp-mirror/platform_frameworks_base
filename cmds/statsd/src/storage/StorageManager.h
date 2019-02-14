@@ -49,7 +49,7 @@ public:
     /**
      * Reads train info.
      */
-    static bool readTrainInfo(TrainInfo& trainInfo);
+    static bool readTrainInfo(InstallTrainInfo& trainInfo);
 
     /**
      * Reads the file content to the buffer.

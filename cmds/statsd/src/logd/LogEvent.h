@@ -55,6 +55,11 @@ struct AttributionNodeInternal {
     int32_t mUid;
     std::string mTag;
 };
+
+struct InstallTrainInfo {
+    int64_t trainVersionCode;
+    std::vector<uint8_t> experimentIds;
+};
 /**
  * Wrapper for the log_msg structure.
  */
@@ -131,6 +136,9 @@ public:
 
     explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                       const VendorAtom& vendorAtom);
+
+    explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                      const InstallTrainInfo& installTrainInfo);
 
     ~LogEvent();
 

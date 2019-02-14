@@ -29,10 +29,11 @@
 #include "../statscompanion_util.h"
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
-#include "StatsCompanionServicePuller.h"
 #include "StatsCallbackPuller.h"
+#include "StatsCompanionServicePuller.h"
 #include "StatsPullerManager.h"
 #include "SubsystemSleepStatePuller.h"
+#include "TrainInfoPuller.h"
 #include "statslog.h"
 
 #include <iostream>
@@ -152,7 +153,7 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
                   new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
         // temperature
         {android::util::TEMPERATURE,
-          {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
+         {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
         // binder_calls
         {android::util::BINDER_CALLS,
          {.additiveFields = {4, 5, 6, 8, 12},
@@ -231,6 +232,8 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // PermissionState.
         {android::util::DANGEROUS_PERMISSION_STATE,
          {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
+        // TrainInfo.
+        {android::util::TRAIN_INFO, {.puller = new TrainInfoPuller()}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

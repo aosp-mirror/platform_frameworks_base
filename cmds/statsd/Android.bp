@@ -76,6 +76,7 @@ cc_defaults {
         "src/external/SubsystemSleepStatePuller.cpp",
         "src/external/PowerStatsPuller.cpp",
         "src/external/ResourceHealthManagerPuller.cpp",
+        "src/external/TrainInfoPuller.cpp",
         "src/external/StatsPullerManager.cpp",
         "src/external/puller_util.cpp",
         "src/logd/LogEvent.cpp",
