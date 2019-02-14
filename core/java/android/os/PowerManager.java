@@ -1784,7 +1784,7 @@ public final class PowerManager {
      *
      * see {@link #registerThermalStatusCallback}
      */
-    public void unregisterThermalStatusCallback(ThermalStatusCallback callback) {
+    public void unregisterThermalStatusCallback(@NonNull ThermalStatusCallback callback) {
         Preconditions.checkNotNull(callback, "callback cannnot be null");
         synchronized (this) {
             if (mThermalService == null) {
