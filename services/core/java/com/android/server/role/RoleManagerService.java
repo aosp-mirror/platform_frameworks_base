@@ -111,7 +111,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     /** @see #getRoleHolders(String, int) */
     public interface RoleHoldersResolver {
         /** @return a list of packages that hold a given role for a given user */
-        List<String> getRoleHolders(String roleName, int userId);
+        @NonNull
+        List<String> getRoleHolders(@NonNull String roleName, @UserIdInt int userId);
     }
 
     /**
@@ -154,6 +155,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
         packageManagerInternal.setDefaultBrowserProvider(new DefaultBrowserProvider());
+        packageManagerInternal.setDefaultHomeProvider(new DefaultHomeProvider());
 
         registerUserRemovedReceiver();
     }
@@ -738,6 +740,35 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Slog.e(LOG_TAG, "Exception while setting default browser: " + packageName, e);
                 return false;
+            }
+        }
+    }
+
+    private class DefaultHomeProvider implements PackageManagerInternal.DefaultHomeProvider {
+
+        @Nullable
+        @Override
+        public String getDefaultHome(@UserIdInt int userId) {
+            return CollectionUtils.firstOrNull(getOrCreateUserState(userId).getRoleHolders(
+                    RoleManager.ROLE_HOME));
+        }
+
+        @Override
+        public void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId) {
+            IRoleManagerCallback callback = new IRoleManagerCallback.Stub() {
+                @Override
+                public void onSuccess() {}
+                @Override
+                public void onFailure() {
+                    Slog.e(LOG_TAG, "Failed to set default home: " + packageName);
+                }
+            };
+            if (packageName != null) {
+                getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_HOME,
+                        packageName, 0, callback);
+            } else {
+                getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_HOME, 0,
+                        callback);
             }
         }
     }
