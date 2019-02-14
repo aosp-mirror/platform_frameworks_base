@@ -1892,6 +1892,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             mStatusBarWindow.cancelExpandHelper();
             mStatusBarView.collapsePanel(true /* animate */, delayed, speedUpFactor);
+        } else {
+            mBubbleController.collapseStack();
         }
     }
 
@@ -2532,6 +2534,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (mRemoteInputManager.getController() != null) {
                     mRemoteInputManager.getController().closeRemoteInputs();
                 }
+                if (mBubbleController.isStackExpanded()) {
+                    mBubbleController.collapseStack();
+                }
                 if (mLockscreenUserManager.isCurrentProfile(getSendingUserId())) {
                     int flags = CommandQueue.FLAG_EXCLUDE_NONE;
                     String reason = intent.getStringExtra("reason");
@@ -2544,6 +2549,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 if (mStatusBarWindowController != null) {
                     mStatusBarWindowController.setNotTouchable(false);
+                }
+                if (mBubbleController.isStackExpanded()) {
+                    mBubbleController.collapseStack();
                 }
                 finishBarAnimations();
                 resetUserExpandedStates();
