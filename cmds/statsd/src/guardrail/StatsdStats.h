@@ -409,6 +409,11 @@ public:
     void noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs);
 
     /**
+     * Number of buckets with unknown condition.
+     */
+    void noteBucketUnknownCondition(int64_t metricId);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -458,6 +463,7 @@ public:
         long bucketDropped = 0;
         int64_t minBucketBoundaryDelayNs = 0;
         int64_t maxBucketBoundaryDelayNs = 0;
+        long bucketUnknownCondition = 0;
     } AtomMetricStats;
 
 private:

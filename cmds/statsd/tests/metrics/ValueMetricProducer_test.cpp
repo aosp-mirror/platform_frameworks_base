@@ -2176,7 +2176,7 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullFailBeforeConditionChange) {
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
-    valueProducer.mCondition = true;
+    valueProducer.mCondition = ConditionState::kTrue;
 
     vector<shared_ptr<LogEvent>> allData;
     valueProducer.onDataPulled(allData, /** succeed */ false, bucketStartTimeNs);
@@ -2226,7 +2226,7 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullDelayExceeded) {
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
-    valueProducer.mCondition = false;
+    valueProducer.mCondition = ConditionState::kFalse;
 
     // Max delay is set to 0 so pull will exceed max delay.
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 1);
@@ -2257,7 +2257,7 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate) {
                                       eventMatcherWizard, tagId, bucket2StartTimeNs,
                                       bucket2StartTimeNs, pullerManager);
 
-    valueProducer.mCondition = false;
+    valueProducer.mCondition = ConditionState::kFalse;
 
     // Event should be skipped since it is from previous bucket.
     // Pull should not be called.
@@ -2299,7 +2299,7 @@ TEST(ValueMetricProducerTest, TestBaseSetOnConditionChange) {
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
-    valueProducer.mCondition = false;
+    valueProducer.mCondition = ConditionState::kFalse;
     valueProducer.mHasGlobalBase = false;
 
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 1);
@@ -2351,7 +2351,7 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed) {
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
-    valueProducer.mCondition = true;
+    valueProducer.mCondition = ConditionState::kTrue;
 
     // Bucket start.
     vector<shared_ptr<LogEvent>> allData;
@@ -2429,7 +2429,7 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenGuardRailHit) {
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
-    valueProducer.mCondition = false;
+    valueProducer.mCondition = ConditionState::kFalse;
     valueProducer.onConditionChanged(true, bucket2StartTimeNs + 2);
     EXPECT_EQ(true, valueProducer.mCurrentBucketIsInvalid);
     EXPECT_EQ(0UL, valueProducer.mCurrentSlicedBucket.size());
@@ -2481,7 +2481,7 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed) {
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
-    valueProducer.mCondition = true;
+    valueProducer.mCondition = ConditionState::kTrue;
 
     // Bucket start.
     vector<shared_ptr<LogEvent>> allData;
@@ -2564,7 +2564,7 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed) {
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
-    valueProducer.mCondition = true;
+    valueProducer.mCondition = ConditionState::kTrue;
 
     // Bucket start.
     vector<shared_ptr<LogEvent>> allData;

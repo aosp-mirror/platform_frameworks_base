@@ -250,7 +250,7 @@ void CountMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
 void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
-    mCondition = conditionMet;
+    mCondition = conditionMet ? ConditionState::kTrue : ConditionState::kFalse;
 }
 
 bool CountMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {

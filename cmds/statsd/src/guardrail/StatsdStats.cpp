@@ -478,6 +478,11 @@ void StatsdStats::noteBucketDropped(int64_t metricId) {
     getAtomMetricStats(metricId).bucketDropped++;
 }
 
+void StatsdStats::noteBucketUnknownCondition(int64_t metricId) {
+    lock_guard<std::mutex> lock(mLock);
+    getAtomMetricStats(metricId).bucketUnknownCondition++;
+}
+
 void StatsdStats::noteConditionChangeInNextBucket(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).conditionChangeInNextBucket++;
