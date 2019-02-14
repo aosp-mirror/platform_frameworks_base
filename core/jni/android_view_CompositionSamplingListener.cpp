@@ -41,15 +41,22 @@ struct {
 
 struct CompositionSamplingListener : public BnRegionSamplingListener {
     CompositionSamplingListener(JNIEnv* env, jobject listener)
-            : mListener(env->NewGlobalRef(listener)) {}
+            : mListener(env->NewWeakGlobalRef(listener)) {}
 
     void onSampleCollected(float medianLuma) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onSampleCollected.");
 
+        jobject listener = env->NewGlobalRef(mListener);
+        if (listener == NULL) {
+            // Weak reference went out of scope
+            return;
+        }
         env->CallStaticVoidMethod(gListenerClassInfo.mClass,
-                gListenerClassInfo.mDispatchOnSampleCollected, mListener,
+                gListenerClassInfo.mDispatchOnSampleCollected, listener,
                 static_cast<jfloat>(medianLuma));
+        env->DeleteGlobalRef(listener);
+
         if (env->ExceptionCheck()) {
             ALOGE("CompositionSamplingListener.onSampleCollected() failed.");
             LOGE_EX(env);
@@ -60,11 +67,11 @@ struct CompositionSamplingListener : public BnRegionSamplingListener {
 protected:
     virtual ~CompositionSamplingListener() {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        env->DeleteGlobalRef(mListener);
+        env->DeleteWeakGlobalRef(mListener);
     }
 
 private:
-    jobject mListener;
+    jweak mListener;
 };
 
 jlong nativeCreate(JNIEnv* env, jclass clazz, jobject obj) {
