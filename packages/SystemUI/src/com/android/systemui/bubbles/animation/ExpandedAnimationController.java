@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles.animation;
 
+import android.content.res.Resources;
 import android.graphics.PointF;
 import android.view.View;
 import android.view.WindowInsets;
@@ -55,16 +56,19 @@ public class ExpandedAnimationController
     private float mBubblePaddingPx;
     /** Size of each bubble. */
     private float mBubbleSizePx;
+    /** Height of the status bar. */
+    private float mStatusBarHeight;
 
     @Override
     protected void setLayout(PhysicsAnimationLayout layout) {
         super.setLayout(layout);
-        mStackOffsetPx = layout.getResources().getDimensionPixelSize(
-                R.dimen.bubble_stack_offset);
-        mBubblePaddingPx = layout.getResources().getDimensionPixelSize(
-                R.dimen.bubble_padding);
-        mBubbleSizePx = layout.getResources().getDimensionPixelSize(
-                R.dimen.individual_bubble_size);
+
+        final Resources res = layout.getResources();
+        mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mBubblePaddingPx = res.getDimensionPixelSize(R.dimen.bubble_padding);
+        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mStatusBarHeight =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
     }
 
     /**
@@ -103,7 +107,7 @@ public class ExpandedAnimationController
         final WindowInsets insets = mLayout.getRootWindowInsets();
         if (insets != null) {
             return mBubblePaddingPx + Math.max(
-                    insets.getSystemWindowInsetTop(),
+                    mStatusBarHeight,
                     insets.getDisplayCutout() != null
                             ? insets.getDisplayCutout().getSafeInsetTop()
                             : 0);

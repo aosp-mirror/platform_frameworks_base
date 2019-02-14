@@ -98,6 +98,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     private int mBubblePadding;
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
+    private int mStatusBarHeight;
 
     private Bubble mExpandedBubble;
     private boolean mIsExpanded;
@@ -155,6 +156,8 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_x_distance);
         mExpandedAnimateYDistance =
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_y_distance);
+        mStatusBarHeight =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
 
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -678,7 +681,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         if (getRootWindowInsets() != null) {
             WindowInsets insets = getRootWindowInsets();
             return Math.max(
-                    insets.getSystemWindowInsetTop(),
+                    mStatusBarHeight,
                     insets.getDisplayCutout() != null
                             ? insets.getDisplayCutout().getSafeInsetTop()
                             : 0);
