@@ -1109,6 +1109,15 @@ packages_to_document = [
     "org/apache/http/params",
 ]
 
+// Make the api/current.txt file available for use by modules in other
+// directories.
+filegroup {
+    name: "frameworks-base-api-current.txt",
+    srcs: [
+        "api/current.txt",
+    ],
+}
+
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
      "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
      "-overview $(location core/java/overview.html) " +
