@@ -103,7 +103,7 @@ public:
 
     virtual void setPresentation(Presentation presentation);
     virtual void setSpots(const PointerCoords* spotCoords,
-            const uint32_t* spotIdToIndex, BitSet32 spotIdBits);
+            const uint32_t* spotIdToIndex, BitSet32 spotIdBits, int32_t displayId);
     virtual void clearSpots();
 
     void updatePointerIcon(int32_t iconId);
@@ -133,7 +133,7 @@ private:
                 : id(id), sprite(sprite), alpha(1.0f), scale(1.0f),
                   x(0.0f), y(0.0f), lastIcon(NULL) { }
 
-        void updateSprite(const SpriteIcon* icon, float x, float y);
+        void updateSprite(const SpriteIcon* icon, float x, float y, int32_t displayId);
 
     private:
         const SpriteIcon* lastIcon;
@@ -180,8 +180,8 @@ private:
 
         int32_t buttonState;
 
-        Vector<Spot*> spots;
-        Vector<sp<Sprite> > recycledSprites;
+        std::map<int32_t /* displayId */, std::vector<Spot*>> spotsByDisplay;
+        std::vector<sp<Sprite> > recycledSprites;
     } mLocked GUARDED_BY(mLock);
 
     bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
@@ -200,9 +200,9 @@ private:
     void removeInactivityTimeoutLocked();
     void updatePointerLocked();
 
-    Spot* getSpotLocked(uint32_t id);
-    Spot* createAndAddSpotLocked(uint32_t id);
-    Spot* removeFirstFadingSpotLocked();
+    Spot* getSpot(uint32_t id, const std::vector<Spot*>& spots);
+    Spot* createAndAddSpotLocked(uint32_t id, std::vector<Spot*>& spots);
+    Spot* removeFirstFadingSpotLocked(std::vector<Spot*>& spots);
     void releaseSpotLocked(Spot* spot);
     void fadeOutAndReleaseSpotLocked(Spot* spot);
     void fadeOutAndReleaseAllSpotsLocked();

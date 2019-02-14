@@ -115,10 +115,14 @@ PointerController::~PointerController() {
 
     mLocked.pointerSprite.clear();
 
-    for (size_t i = 0; i < mLocked.spots.size(); i++) {
-        delete mLocked.spots.itemAt(i);
+    for (auto& it : mLocked.spotsByDisplay) {
+        const std::vector<Spot*>& spots = it.second;
+        size_t numSpots = spots.size();
+        for (size_t i = 0; i < numSpots; i++) {
+            delete spots[i];
+        }
     }
-    mLocked.spots.clear();
+    mLocked.spotsByDisplay.clear();
     mLocked.recycledSprites.clear();
 }
 
@@ -271,21 +275,29 @@ void PointerController::setPresentation(Presentation presentation) {
 }
 
 void PointerController::setSpots(const PointerCoords* spotCoords,
-        const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
+        const uint32_t* spotIdToIndex, BitSet32 spotIdBits, int32_t displayId) {
 #if DEBUG_POINTER_UPDATES
     ALOGD("setSpots: idBits=%08x", spotIdBits.value);
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty(); ) {
         uint32_t id = idBits.firstMarkedBit();
         idBits.clearBit(id);
         const PointerCoords& c = spotCoords[spotIdToIndex[id]];
-        ALOGD(" spot %d: position=(%0.3f, %0.3f), pressure=%0.3f", id,
+        ALOGD(" spot %d: position=(%0.3f, %0.3f), pressure=%0.3f, displayId=%" PRId32 ".", id,
                 c.getAxisValue(AMOTION_EVENT_AXIS_X),
                 c.getAxisValue(AMOTION_EVENT_AXIS_Y),
-                c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
+                c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
+                displayId);
     }
 #endif
 
     AutoMutex _l(mLock);
+
+    std::vector<Spot*> newSpots;
+    std::map<int32_t, std::vector<Spot*>>::const_iterator iter =
+            mLocked.spotsByDisplay.find(displayId);
+    if (iter != mLocked.spotsByDisplay.end()) {
+        newSpots = iter->second;
+    }
 
     mSpriteController->openTransaction();
 
@@ -298,17 +310,17 @@ void PointerController::setSpots(const PointerCoords* spotCoords,
         float x = c.getAxisValue(AMOTION_EVENT_AXIS_X);
         float y = c.getAxisValue(AMOTION_EVENT_AXIS_Y);
 
-        Spot* spot = getSpotLocked(id);
+        Spot* spot = getSpot(id, newSpots);
         if (!spot) {
-            spot = createAndAddSpotLocked(id);
+            spot = createAndAddSpotLocked(id, newSpots);
         }
 
-        spot->updateSprite(&icon, x, y);
+        spot->updateSprite(&icon, x, y, displayId);
     }
 
     // Remove spots for fingers that went up.
-    for (size_t i = 0; i < mLocked.spots.size(); i++) {
-        Spot* spot = mLocked.spots.itemAt(i);
+    for (size_t i = 0; i < newSpots.size(); i++) {
+        Spot* spot = newSpots[i];
         if (spot->id != Spot::INVALID_ID
                 && !spotIdBits.hasBit(spot->id)) {
             fadeOutAndReleaseSpotLocked(spot);
@@ -316,6 +328,7 @@ void PointerController::setSpots(const PointerCoords* spotCoords,
     }
 
     mSpriteController->closeTransaction();
+    mLocked.spotsByDisplay[displayId] = newSpots;
 }
 
 void PointerController::clearSpots() {
@@ -539,21 +552,33 @@ bool PointerController::doFadingAnimationLocked(nsecs_t timestamp) {
     }
 
     // Animate spots that are fading out and being removed.
-    for (size_t i = 0; i < mLocked.spots.size();) {
-        Spot* spot = mLocked.spots.itemAt(i);
-        if (spot->id == Spot::INVALID_ID) {
-            spot->alpha -= float(frameDelay) / SPOT_FADE_DURATION;
-            if (spot->alpha <= 0) {
-                mLocked.spots.removeAt(i);
-                releaseSpotLocked(spot);
-                continue;
-            } else {
-                spot->sprite->setAlpha(spot->alpha);
-                keepAnimating = true;
+    for(auto it = mLocked.spotsByDisplay.begin(); it != mLocked.spotsByDisplay.end();) {
+        std::vector<Spot*>& spots = it->second;
+        size_t numSpots = spots.size();
+        for (size_t i = 0; i < numSpots;) {
+            Spot* spot = spots[i];
+            if (spot->id == Spot::INVALID_ID) {
+                spot->alpha -= float(frameDelay) / SPOT_FADE_DURATION;
+                if (spot->alpha <= 0) {
+                    spots.erase(spots.begin() + i);
+                    releaseSpotLocked(spot);
+                    numSpots--;
+                    continue;
+                } else {
+                    spot->sprite->setAlpha(spot->alpha);
+                    keepAnimating = true;
+                }
             }
+            ++i;
         }
-        ++i;
+
+        if (spots.size() == 0) {
+            it = mLocked.spotsByDisplay.erase(it);
+        } else {
+            ++it;
+        }
     }
+
     return keepAnimating;
 }
 
@@ -655,47 +680,49 @@ void PointerController::updatePointerLocked() REQUIRES(mLock) {
     mSpriteController->closeTransaction();
 }
 
-PointerController::Spot* PointerController::getSpotLocked(uint32_t id) {
-    for (size_t i = 0; i < mLocked.spots.size(); i++) {
-        Spot* spot = mLocked.spots.itemAt(i);
+PointerController::Spot* PointerController::getSpot(uint32_t id, const std::vector<Spot*>& spots) {
+    for (size_t i = 0; i < spots.size(); i++) {
+        Spot* spot = spots[i];
         if (spot->id == id) {
             return spot;
         }
     }
-    return NULL;
+
+    return nullptr;
 }
 
-PointerController::Spot* PointerController::createAndAddSpotLocked(uint32_t id) {
+PointerController::Spot* PointerController::createAndAddSpotLocked(uint32_t id,
+        std::vector<Spot*>& spots) {
     // Remove spots until we have fewer than MAX_SPOTS remaining.
-    while (mLocked.spots.size() >= MAX_SPOTS) {
-        Spot* spot = removeFirstFadingSpotLocked();
+    while (spots.size() >= MAX_SPOTS) {
+        Spot* spot = removeFirstFadingSpotLocked(spots);
         if (!spot) {
-            spot = mLocked.spots.itemAt(0);
-            mLocked.spots.removeAt(0);
+            spot = spots[0];
+            spots.erase(spots.begin());
         }
         releaseSpotLocked(spot);
     }
 
     // Obtain a sprite from the recycled pool.
     sp<Sprite> sprite;
-    if (! mLocked.recycledSprites.isEmpty()) {
-        sprite = mLocked.recycledSprites.top();
-        mLocked.recycledSprites.pop();
+    if (! mLocked.recycledSprites.empty()) {
+        sprite = mLocked.recycledSprites.back();
+        mLocked.recycledSprites.pop_back();
     } else {
         sprite = mSpriteController->createSprite();
     }
 
     // Return the new spot.
     Spot* spot = new Spot(id, sprite);
-    mLocked.spots.push(spot);
+    spots.push_back(spot);
     return spot;
 }
 
-PointerController::Spot* PointerController::removeFirstFadingSpotLocked() {
-    for (size_t i = 0; i < mLocked.spots.size(); i++) {
-        Spot* spot = mLocked.spots.itemAt(i);
+PointerController::Spot* PointerController::removeFirstFadingSpotLocked(std::vector<Spot*>& spots) {
+    for (size_t i = 0; i < spots.size(); i++) {
+        Spot* spot = spots[i];
         if (spot->id == Spot::INVALID_ID) {
-            mLocked.spots.removeAt(i);
+            spots.erase(spots.begin() + i);
             return spot;
         }
     }
@@ -706,7 +733,7 @@ void PointerController::releaseSpotLocked(Spot* spot) {
     spot->sprite->clearIcon();
 
     if (mLocked.recycledSprites.size() < MAX_RECYCLED_SPRITES) {
-        mLocked.recycledSprites.push(spot->sprite);
+        mLocked.recycledSprites.push_back(spot->sprite);
     }
 
     delete spot;
@@ -720,9 +747,13 @@ void PointerController::fadeOutAndReleaseSpotLocked(Spot* spot) {
 }
 
 void PointerController::fadeOutAndReleaseAllSpotsLocked() {
-    for (size_t i = 0; i < mLocked.spots.size(); i++) {
-        Spot* spot = mLocked.spots.itemAt(i);
-        fadeOutAndReleaseSpotLocked(spot);
+    for (auto& it : mLocked.spotsByDisplay) {
+        const std::vector<Spot*>& spots = it.second;
+        size_t numSpots = spots.size();
+        for (size_t i = 0; i < numSpots; i++) {
+            Spot* spot = spots[i];
+            fadeOutAndReleaseSpotLocked(spot);
+        }
     }
 }
 
@@ -743,12 +774,13 @@ void PointerController::loadResourcesLocked() REQUIRES(mLock) {
 
 // --- PointerController::Spot ---
 
-void PointerController::Spot::updateSprite(const SpriteIcon* icon, float x, float y) {
+void PointerController::Spot::updateSprite(const SpriteIcon* icon, float x, float y,
+        int32_t displayId) {
     sprite->setLayer(Sprite::BASE_LAYER_SPOT + id);
     sprite->setAlpha(alpha);
     sprite->setTransformationMatrix(SpriteTransformationMatrix(scale, 0.0f, 0.0f, scale));
     sprite->setPosition(x, y);
-
+    sprite->setDisplayId(displayId);
     this->x = x;
     this->y = y;
 
