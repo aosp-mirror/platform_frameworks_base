@@ -361,6 +361,16 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     }
 }
 
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const InstallTrainInfo& trainInfo) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::TRAIN_INFO;
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(1)), Value(trainInfo.trainVersionCode)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainInfo.experimentIds)));
+}
+
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {

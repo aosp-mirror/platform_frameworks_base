@@ -127,7 +127,7 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode,
     return true;
 }
 
-bool StorageManager::readTrainInfo(TrainInfo& trainInfo) {
+bool StorageManager::readTrainInfo(InstallTrainInfo& trainInfo) {
     std::lock_guard<std::mutex> lock(sTrainInfoMutex);
 
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(TRAIN_INFO_DIR), closedir);

@@ -30,14 +30,14 @@ using std::vector;
 using testing::Contains;
 
 TEST(StorageManagerTest, TrainInfoReadWriteTest) {
-    TrainInfo trainInfo;
+    InstallTrainInfo trainInfo;
     trainInfo.trainVersionCode = 12345;
     const char* expIds = "test_ids";
     trainInfo.experimentIds.assign(expIds, expIds + strlen(expIds));
 
     StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.experimentIds);
 
-    TrainInfo result;
+    InstallTrainInfo result;
     StorageManager::readTrainInfo(result);
     EXPECT_EQ(trainInfo.trainVersionCode, result.trainVersionCode);
     EXPECT_EQ(trainInfo.experimentIds.size(), result.experimentIds.size());

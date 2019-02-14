@@ -55,9 +55,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const int FIELD_ID_EXPERIMENT_ID = 1;
-const int FIELD_ID_EXPERIMENT_ID_MSG = 7;
-
 constexpr const char* kPermissionDump = "android.permission.DUMP";
 constexpr const char* kPermissionUsage = "android.permission.PACKAGE_USAGE_STATS";
 
@@ -67,6 +64,8 @@ constexpr const char* kOpUsage = "android:get_usage_stats";
 
 // for StatsDataDumpProto
 const int FIELD_ID_REPORTS_LIST = 1;
+// for TrainInfo experiment id serialization
+const int FIELD_ID_EXPERIMENT_ID = 1;
 
 static binder::Status ok() {
     return binder::Status::ok();
@@ -1200,12 +1199,10 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     bool requiresLowLatencyMonitor = options | IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
 
     ProtoOutputStream proto;
-    uint64_t protoToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_EXPERIMENT_ID_MSG);
     for (const auto& expId : experimentIds) {
         proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
                     (long long)expId);
     }
-    proto.end(protoToken);
 
     vector<uint8_t> buffer;
     buffer.resize(proto.size());
