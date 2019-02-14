@@ -15,6 +15,7 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_CONTEXT_UPDATED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARING;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_FINISHED;
@@ -269,11 +270,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     private void sendEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
         final int eventType = event.getType();
         if (VERBOSE) Log.v(TAG, "handleSendEvent(" + getDebugState() + "): " + event);
-        if (!hasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED) {
+        if (!hasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED
+                && eventType != ContentCaptureEvent.TYPE_CONTEXT_UPDATED) {
             // TODO(b/120494182): comment when this could happen (dialogs?)
             Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
                     + ContentCaptureEvent.getTypeAsString(eventType)
-                    + "): session not started yet");
+                    + "): dropping because session not started yet");
             return;
         }
         if (mDisabled.get()) {
@@ -476,6 +478,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
     }
 
+    @Override
+    public void updateContentCaptureContext(@Nullable ContentCaptureContext context) {
+        notifyContextUpdated(mId, context);
+    }
+
     /**
      * Resets the buffer and return a {@link ParceledListSlice} with the previous events.
      */
@@ -611,6 +618,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             sendEvent(new ContentCaptureEvent(sessionId, TYPE_INITIAL_VIEW_TREE_APPEARED),
                     FORCE_FLUSH);
         }
+    }
+
+    void notifyContextUpdated(@NonNull String sessionId,
+            @Nullable ContentCaptureContext context) {
+        sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
+                .setClientContext(context));
     }
 
     @Override

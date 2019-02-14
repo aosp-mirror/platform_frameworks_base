@@ -339,7 +339,7 @@ public abstract class ContentCaptureService extends Service {
             }
             switch (event.getType()) {
                 case ContentCaptureEvent.TYPE_SESSION_STARTED:
-                    final ContentCaptureContext clientContext = event.getClientContext();
+                    final ContentCaptureContext clientContext = event.getContentCaptureContext();
                     clientContext.setParentSessionId(event.getParentSessionId());
                     mSessionUids.put(sessionIdString, uid);
                     onCreateContentCaptureSession(clientContext, sessionId);
@@ -383,8 +383,8 @@ public abstract class ContentCaptureService extends Service {
         }
         final Integer rightUid = mSessionUids.get(sessionId);
         if (rightUid == null) {
-            if (DEBUG) {
-                Log.d(TAG, "handleIsRightCallerFor(" + event + "): no session for " + sessionId
+            if (VERBOSE) {
+                Log.v(TAG, "handleIsRightCallerFor(" + event + "): no session for " + sessionId
                         + ": " + mSessionUids);
             }
             // Just ignore, as the session could have been finished already

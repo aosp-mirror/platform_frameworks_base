@@ -91,13 +91,22 @@ public final class ContentCaptureEvent implements Parcelable {
      */
     public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5;
 
+    /**
+     * Called after a call to
+     * {@link ContentCaptureSession#setContentCaptureContext(ContentCaptureContext)}.
+     *
+     * <p>The passed context is available through {@link #getContentCaptureContext()}.
+     */
+    public static final int TYPE_CONTEXT_UPDATED = 6;
+
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_VIEW_APPEARED,
             TYPE_VIEW_DISAPPEARED,
             TYPE_VIEW_TEXT_CHANGED,
             TYPE_INITIAL_VIEW_TREE_APPEARING,
-            TYPE_INITIAL_VIEW_TREE_APPEARED
+            TYPE_INITIAL_VIEW_TREE_APPEARED,
+            TYPE_CONTEXT_UPDATED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType{}
@@ -193,12 +202,13 @@ public final class ContentCaptureEvent implements Parcelable {
     }
 
     /**
-     * Used by {@link #TYPE_SESSION_STARTED}.
+     * Gets the {@link ContentCaptureContext} set calls to
+     * {@link ContentCaptureSession#setContentCaptureContext(ContentCaptureContext)}.
      *
-     * @hide
+     * <p>Only set on {@link #TYPE_CONTEXT_UPDATED} events.
      */
     @Nullable
-    public ContentCaptureContext getClientContext() {
+    public ContentCaptureContext getContentCaptureContext() {
         return mClientContext;
     }
 
@@ -220,8 +230,8 @@ public final class ContentCaptureEvent implements Parcelable {
      * Gets the type of the event.
      *
      * @return one of {@link #TYPE_VIEW_APPEARED}, {@link #TYPE_VIEW_DISAPPEARED},
-     * {@link #TYPE_VIEW_TEXT_CHANGED}, {@link #TYPE_INITIAL_VIEW_TREE_APPEARING}, or
-     * {@link #TYPE_INITIAL_VIEW_TREE_APPEARED}.
+     * {@link #TYPE_VIEW_TEXT_CHANGED}, {@link #TYPE_INITIAL_VIEW_TREE_APPEARING},
+     * {@link #TYPE_INITIAL_VIEW_TREE_APPEARED}, or {@link #TYPE_CONTEXT_UPDATED}.
      */
     public @EventType int getType() {
         return mType;
@@ -299,6 +309,10 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mText != null) {
             pw.print(", text="); pw.println(getSanitizedString(mText));
         }
+        if (mClientContext != null) {
+            pw.print(", context="); mClientContext.dump(pw); pw.println();
+
+        }
     }
 
     @Override
@@ -325,6 +339,9 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mText != null) {
             string.append(", text=").append(getSanitizedString(mText));
         }
+        if (mClientContext != null) {
+            string.append(", context=").append(mClientContext);
+        }
         return string.append(']').toString();
     }
 
@@ -345,7 +362,7 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mType == TYPE_SESSION_STARTED || mType == TYPE_SESSION_FINISHED) {
             parcel.writeString(mParentSessionId);
         }
-        if (mType == TYPE_SESSION_STARTED) {
+        if (mType == TYPE_SESSION_STARTED || mType == TYPE_CONTEXT_UPDATED) {
             parcel.writeParcelable(mClientContext, flags);
         }
     }
@@ -375,7 +392,7 @@ public final class ContentCaptureEvent implements Parcelable {
             if (type == TYPE_SESSION_STARTED || type == TYPE_SESSION_FINISHED) {
                 event.setParentSessionId(parcel.readString());
             }
-            if (type == TYPE_SESSION_STARTED) {
+            if (type == TYPE_SESSION_STARTED || type == TYPE_CONTEXT_UPDATED) {
                 event.setClientContext(parcel.readParcelable(null));
             }
             return event;
@@ -404,6 +421,8 @@ public final class ContentCaptureEvent implements Parcelable {
                 return "INITIAL_VIEW_HIERARCHY_STARTED";
             case TYPE_INITIAL_VIEW_TREE_APPEARED:
                 return "INITIAL_VIEW_HIERARCHY_FINISHED";
+            case TYPE_CONTEXT_UPDATED:
+                return "CONTEXT_UPDATED";
             default:
                 return "UKNOWN_TYPE: " + type;
         }
