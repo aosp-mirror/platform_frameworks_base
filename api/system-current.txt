@@ -120,6 +120,7 @@ package android {
     field public static final String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
     field public static final String OBSERVE_ROLE_HOLDERS = "android.permission.OBSERVE_ROLE_HOLDERS";
+    field public static final String OPEN_ACCESSIBILITY_DETAILS_SETTINGS = "android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final String PACKET_KEEPALIVE_OFFLOAD = "android.permission.PACKET_KEEPALIVE_OFFLOAD";
@@ -5954,6 +5955,7 @@ package android.provider {
   }
 
   public final class Settings {
+    field public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
