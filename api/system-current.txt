@@ -548,15 +548,17 @@ package android.app {
   }
 
   public class StatusBarManager {
-    method public android.util.Pair<java.lang.Integer,java.lang.Integer> getDisableFlags();
+    method public android.app.StatusBarManager.DisableInfo getDisableInfo();
     method public void setDisabledForSetup(boolean);
-    field public static final int DISABLE2_NONE = 0; // 0x0
-    field public static final int DISABLE_EXPAND = 65536; // 0x10000
-    field public static final int DISABLE_HOME = 2097152; // 0x200000
-    field public static final int DISABLE_NONE = 0; // 0x0
-    field public static final int DISABLE_NOTIFICATION_ALERTS = 262144; // 0x40000
-    field public static final int DISABLE_RECENT = 16777216; // 0x1000000
-    field public static final int DISABLE_SEARCH = 33554432; // 0x2000000
+  }
+
+  public static final class StatusBarManager.DisableInfo {
+    method public boolean areNoComponentsDisabled();
+    method public boolean isNavigateToHomeDisabled();
+    method public boolean isNotificationPeekingDisabled();
+    method public boolean isRecentsDisabled();
+    method public boolean isSearchDisabled();
+    method public boolean isStatusBarExpansionDisabled();
   }
 
   public final class Vr2dDisplayProperties implements android.os.Parcelable {

@@ -19,6 +19,7 @@ import static android.app.StatusBarManager.DEFAULT_SETUP_DISABLE_FLAGS;
 import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
 
+import android.app.StatusBarManager.DisableInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
@@ -26,6 +27,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.service.quicksettings.TileService;
+import android.util.Pair;
 
 import java.io.PrintWriter;
 
@@ -68,6 +70,8 @@ public class StatusBarShellCommand extends ShellCommand {
                     return runGetStatusIcons();
                 case "disable-for-setup":
                     return runDisableForSetup();
+                case "send-disable-flag":
+                    return runSendDisableFlag();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -132,6 +136,47 @@ public class StatusBarShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSendDisableFlag() {
+        String pkg = mContext.getPackageName();
+        int disable1 = DISABLE_NONE;
+        int disable2 = DISABLE2_NONE;
+
+        DisableInfo info = new DisableInfo();
+
+        String arg = getNextArg();
+        while (arg != null) {
+            switch (arg) {
+                case "search":
+                    info.setSearchDisabled(true);
+                    break;
+                case "home":
+                    info.setNagivationHomeDisabled(true);
+                    break;
+                case "recents":
+                    info.setRecentsDisabled(true);
+                    break;
+                case "notification-alerts":
+                    info.setNotificationPeekingDisabled(true);
+                    break;
+                case "statusbar-expansion":
+                    info.setStatusBarExpansionDisabled(true);
+                    break;
+
+                default:
+                    break;
+            }
+
+            arg = getNextArg();
+        }
+
+        Pair<Integer, Integer> flagPair = info.toFlags();
+
+        mInterface.disable(flagPair.first, sToken, pkg);
+        mInterface.disable2(flagPair.second, sToken, pkg);
+
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -165,6 +210,17 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  disable-for-setup DISABLE");
         pw.println("    If true, disable status bar components unsuitable for device setup");
+        pw.println("");
+        pw.println("  send-disable-flag FLAG...");
+        pw.println("    Send zero or more disable flags (parsed individually) to StatusBarManager");
+        pw.println("    Valid options:");
+        pw.println("        <blank>             - equivalent to \"none\"");
+        pw.println("        none                - re-enables all components");
+        pw.println("        search              - disable search");
+        pw.println("        home                - disable naviagation home");
+        pw.println("        recents             - disable recents/overview");
+        pw.println("        notification-peek   - disable notification peeking");
+        pw.println("        statusbar-expansion - disable status bar expansion");
         pw.println("");
     }
 
