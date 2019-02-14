@@ -18,7 +18,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.android.systemui.R
 
-class PrivacyDialogBuilder(val context: Context, itemsList: List<PrivacyItem>) {
+class PrivacyDialogBuilder(private val context: Context, itemsList: List<PrivacyItem>) {
 
     val appsAndTypes: List<Pair<PrivacyApplication, List<PrivacyType>>>
     val types: List<PrivacyType>

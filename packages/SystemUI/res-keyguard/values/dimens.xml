@@ -42,18 +42,18 @@
     <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Slice header -->
-    <dimen name="widget_title_font_size">24dp</dimen>
-    <dimen name="widget_title_bottom_margin">14dp</dimen>
-    <dimen name="bottom_text_spacing_digital">0dp</dimen>
+    <dimen name="widget_title_font_size">22dp</dimen>
+    <dimen name="header_subtitle_padding">4dp</dimen>
+    <dimen name="header_icon_size">20dp</dimen>
     <!-- Slice subtitle -->
     <dimen name="widget_label_font_size">16dp</dimen>
     <!-- Clock without header -->
     <dimen name="widget_big_font_size">64dp</dimen>
+    <dimen name="bottom_text_spacing_digital">0dp</dimen>
     <!-- Clock with header -->
-    <dimen name="widget_small_clock_padding">-25dp</dimen>
-    <dimen name="widget_small_font_size">24dp</dimen>
-    <dimen name="widget_small_font_stroke">0.6dp</dimen>
+    <dimen name="widget_small_font_size">22dp</dimen>
     <dimen name="widget_vertical_padding">32dp</dimen>
+    <dimen name="widget_vertical_padding_clock">30dp</dimen>
     <!-- Subtitle paddings -->
     <dimen name="widget_horizontal_padding">8dp</dimen>
     <dimen name="widget_icon_size">16dp</dimen>

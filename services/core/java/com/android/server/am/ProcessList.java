@@ -1681,7 +1681,8 @@ public final class ProcessList {
     public void killAppZygoteIfNeededLocked(AppZygote appZygote) {
         final ApplicationInfo appInfo = appZygote.getAppInfo();
         ArrayList<ProcessRecord> zygoteProcesses = mAppZygoteProcesses.get(appZygote);
-        if (zygoteProcesses.size() == 0) { // Only remove if no longer in use now
+        if (zygoteProcesses != null && zygoteProcesses.size() == 0) {
+            // Only remove if no longer in use now
             mAppZygotes.remove(appInfo.processName, appInfo.uid);
             mAppZygoteProcesses.remove(appZygote);
             mAppIsolatedUidRangeAllocator.freeUidRangeLocked(appInfo);
@@ -1703,6 +1704,7 @@ public final class ProcessList {
             ArrayList<ProcessRecord> zygoteProcesses = mAppZygoteProcesses.get(appZygote);
             zygoteProcesses.remove(app);
             if (zygoteProcesses.size() == 0) {
+                mService.mHandler.removeMessages(KILL_APP_ZYGOTE_MSG);
                 Message msg = mService.mHandler.obtainMessage(KILL_APP_ZYGOTE_MSG);
                 msg.obj = appZygote;
                 mService.mHandler.sendMessageDelayed(msg, KILL_APP_ZYGOTE_DELAY_MS);

@@ -367,6 +367,8 @@ message StatsdStatsReport {
             optional int32 field_int32 = 2;
         }
         repeated Annotation annotation = 18;
+        repeated int32 activation_time_sec = 22;
+        repeated int32 deactivation_time_sec = 23;
     }
 
     repeated ConfigStats config_stats = 3;

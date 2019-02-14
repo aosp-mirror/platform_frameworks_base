@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.telephony.euicc.EuiccManager;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
@@ -762,7 +763,8 @@ public class RecoverySystem {
 
         String reasonArg = null;
         if (!TextUtils.isEmpty(reason)) {
-            reasonArg = "--reason=" + sanitizeArg(reason);
+            String timeStamp = DateFormat.format("yyyy-MM-ddTHH:mm:ssZ", System.currentTimeMillis()).toString();
+            reasonArg = "--reason=" + sanitizeArg(reason + "," + timeStamp);
         }
 
         final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;

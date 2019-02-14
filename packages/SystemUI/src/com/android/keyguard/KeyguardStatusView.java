@@ -16,14 +16,11 @@
 
 package com.android.keyguard;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -37,15 +34,12 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.GridLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import com.google.android.collect.Sets;
@@ -54,14 +48,13 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class KeyguardStatusView extends GridLayout implements
-        ConfigurationController.ConfigurationListener, View.OnLayoutChangeListener {
+        ConfigurationController.ConfigurationListener {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
     private static final int MARQUEE_DELAY_MS = 2000;
 
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
-    private final float mSmallClockScale;
 
     private TextView mLogoutView;
     private KeyguardClockSwitch mClockView;
@@ -74,8 +67,6 @@ public class KeyguardStatusView extends GridLayout implements
     private boolean mPulsing;
     private float mDarkAmount = 0;
     private int mTextColor;
-    private int mLastLayoutHeight;
-    private int mSmallClockPadding;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -135,8 +126,6 @@ public class KeyguardStatusView extends GridLayout implements
         mIActivityManager = ActivityManager.getService();
         mLockPatternUtils = new LockPatternUtils(getContext());
         mHandler = new Handler(Looper.myLooper());
-        mSmallClockScale = getResources().getDimension(R.dimen.widget_small_font_size)
-                / getResources().getDimension(R.dimen.widget_big_font_size);
         onDensityOrFontScaleChanged();
     }
 
@@ -189,9 +178,6 @@ public class KeyguardStatusView extends GridLayout implements
         mVisibleInDoze = Sets.newArraySet(mClockView, mKeyguardSlice);
         mTextColor = mClockView.getCurrentTextColor();
 
-        int clockStroke = getResources().getDimensionPixelSize(R.dimen.widget_small_font_stroke);
-        mClockView.getPaint().setStrokeWidth(clockStroke);
-        mClockView.addOnLayoutChangeListener(this);
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
         onSliceContentChanged();
 
@@ -207,72 +193,20 @@ public class KeyguardStatusView extends GridLayout implements
      * Moves clock, adjusting margins when slice content changes.
      */
     private void onSliceContentChanged() {
-        LinearLayout.LayoutParams layoutParams =
-                (LinearLayout.LayoutParams) mClockView.getLayoutParams();
-        layoutParams.bottomMargin = mKeyguardSlice.hasHeader() ? mSmallClockPadding : 0;
-        mClockView.setLayoutParams(layoutParams);
-    }
-
-    /**
-     * Animate clock when necessary.
-     */
-    @Override
-    public void onLayoutChange(View view, int left, int top, int right, int bottom,
-            int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        boolean smallClock = mKeyguardSlice.hasHeader();
-        int heightOffset = smallClock ? 0 : getHeight() - mLastLayoutHeight;
-        long duration = KeyguardSliceView.DEFAULT_ANIM_DURATION;
-        long delay = smallClock ? 0 : duration / 4;
-
-        boolean shouldAnimate = mKeyguardSlice.getLayoutTransition() != null
-                && mKeyguardSlice.getLayoutTransition().isRunning();
-        if (view == mClockView) {
-            float clockScale = smallClock ? mSmallClockScale : 1;
-            Paint.Style style = smallClock ? Paint.Style.FILL_AND_STROKE : Paint.Style.FILL;
-            mClockView.animate().cancel();
-            if (shouldAnimate) {
-                mClockView.setY(oldTop + heightOffset);
-                mClockView.animate()
-                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                        .setDuration(duration)
-                        .setListener(new ClipChildrenAnimationListener())
-                        .setStartDelay(delay)
-                        .y(top)
-                        .scaleX(clockScale)
-                        .scaleY(clockScale)
-                        .withEndAction(() -> {
-                            mClockView.setStyle(style);
-                            mClockView.invalidate();
-                        })
-                        .start();
-            } else {
-                mClockView.setY(top);
-                mClockView.setScaleX(clockScale);
-                mClockView.setScaleY(clockScale);
-                mClockView.setStyle(style);
-                mClockView.invalidate();
-            }
-        }
+        mClockView.setKeyguardShowingHeader(mKeyguardSlice.hasHeader());
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mClockView.setPivotX(mClockView.getWidth() / 2);
-        mClockView.setPivotY(0);
-        mLastLayoutHeight = getHeight();
         layoutOwnerInfo();
     }
 
     @Override
     public void onDensityOrFontScaleChanged() {
-        mSmallClockPadding = getResources()
-                .getDimensionPixelSize(R.dimen.widget_small_clock_padding);
         if (mClockView != null) {
             mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
-            mClockView.getPaint().setStrokeWidth(
-                    getResources().getDimensionPixelSize(R.dimen.widget_small_font_stroke));
         }
         if (mOwnerInfo != null) {
             mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -459,26 +393,6 @@ public class KeyguardStatusView extends GridLayout implements
             mIActivityManager.stopUser(currentUserId, true /*force*/, null);
         } catch (RemoteException re) {
             Log.e(TAG, "Failed to logout user", re);
-        }
-    }
-
-    private class ClipChildrenAnimationListener extends AnimatorListenerAdapter implements
-            ViewClippingUtil.ClippingParameters {
-
-        ClipChildrenAnimationListener() {
-            ViewClippingUtil.setClippingDeactivated(mClockView, true /* deactivated */,
-                    this /* clippingParams */);
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            ViewClippingUtil.setClippingDeactivated(mClockView, false /* deactivated */,
-                    this /* clippingParams */);
-        }
-
-        @Override
-        public boolean shouldFinish(View view) {
-            return view == getParent();
         }
     }
 }

@@ -744,7 +744,6 @@ java_defaults {
         "apex_aidl_interface-java",
         "framework-protos",
         "game-driver-protos",
-        "mediaplayer2-protos",
         "android.hidl.base-V1.0-java",
         "android.hardware.cas-V1.1-java",
         "android.hardware.cas-V1.0-java",
@@ -1193,7 +1192,7 @@ framework_docs_only_args = " -android -manifest $(location core/res/AndroidManif
      "-overview $(location core/java/overview.html) " +
      // Federate Support Library references against local API file.
      "-federate SupportLib https://developer.android.com " +
-     "-federationapi SupportLib $(location current/support-api.txt) "
+     "-federationapi SupportLib $(location :current-support-api) "
 
 framework_docs_only_libs = [
     "voip-common",

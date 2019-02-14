@@ -1550,12 +1550,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mEntryManager.updateNotificationRanking(null /* rankingMap */);
+        mEntryManager.updateNotifications();
     }
 
     @Override
     public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
-        mEntryManager.updateNotificationRanking(null);
+        mEntryManager.updateNotifications();
         if (isAmbient) {
             mDozeServiceHost.fireNotificationPulse();
         } else if (!mAmbientPulseManager.hasNotifications()) {
@@ -4004,8 +4004,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 float viewY = screenY - mTmpInt2[1];
                 if (0 <= viewX && viewX <= mAmbientIndicationContainer.getWidth()
                         && 0 <= viewY && viewY <= mAmbientIndicationContainer.getHeight()) {
-                    if (mAmbientIndicationContainer instanceof DozeReceiver)
-                    ((DozeReceiver) mAmbientIndicationContainer).onDozeDoubleTap();
+                    dispatchTap(mAmbientIndicationContainer, viewX, viewY);
                 }
             }
         }
@@ -4018,6 +4017,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void setAodDimmingScrim(float scrimOpacity) {
             mScrimController.setAodFrontScrimAlpha(scrimOpacity);
+        }
+
+        private void dispatchTap(View view, float x, float y) {
+            long now = SystemClock.elapsedRealtime();
+            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_DOWN);
+            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_UP);
         }
 
         private void dispatchTouchEvent(View view, float x, float y, long now, int action) {

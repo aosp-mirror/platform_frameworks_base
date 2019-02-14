@@ -6103,7 +6103,7 @@ public final class Settings {
          * Indicates which clock face to show on lock screen and AOD while docked.
          * @hide
          */
-        public static final String DOCKED_CLOCK_FACE = "docked_clock_face";
+        private static final String DOCKED_CLOCK_FACE = "docked_clock_face";
 
         /**
          * Set by the system to track if the user needs to see the call to action for
@@ -14368,6 +14368,7 @@ public final class Settings {
          * <pre>
          *     num_buckets          (int)
          *     collected_uids       (string)
+         *     minimum_total_cpu_usage_millis (int)
          * </pre>
          *
          * @hide

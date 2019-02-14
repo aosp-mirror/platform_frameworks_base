@@ -40,6 +40,7 @@ import androidx.loader.content.AsyncTaskLoader;
 import com.android.settingslib.NetworkPolicyEditor;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -52,6 +53,7 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
     protected final int mNetworkType;
     private final NetworkPolicy mPolicy;
     private final NetworkTemplate mNetworkTemplate;
+    private final ArrayList<Long> mCycles;
     @VisibleForTesting
     final INetworkStatsService mNetworkStatsService;
 
@@ -60,6 +62,7 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
         mSubId = builder.mSubId;
         mNetworkType = builder.mNetworkType;
         mNetworkTemplate = builder.mNetworkTemplate;
+        mCycles = builder.mCycles;
         mNetworkStatsManager = (NetworkStatsManager)
             builder.mContext.getSystemService(Context.NETWORK_STATS_SERVICE);
         mNetworkStatsService = INetworkStatsService.Stub.asInterface(
@@ -77,7 +80,9 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
     }
 
     public D loadInBackground() {
-        if (mPolicy == null) {
+        if (mCycles != null && mCycles.size() > 1) {
+            loadDataForSpecificCycles();
+        } else if (mPolicy == null) {
             loadFourWeeksData();
         } else {
             loadPolicyData();
@@ -132,6 +137,17 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
     }
 
     @VisibleForTesting
+    void loadDataForSpecificCycles() {
+        long cycleEnd = mCycles.get(0);
+        final int lastCycleIndex = mCycles.size() - 1;
+        for (int i = 1; i <= lastCycleIndex; i++) {
+            final long cycleStart = mCycles.get(i);
+            recordUsage(cycleStart, cycleEnd);
+            cycleEnd = cycleStart;
+        }
+    }
+
+    @VisibleForTesting
     abstract void recordUsage(long start, long end);
 
     abstract D getCycleUsage();
@@ -157,11 +173,17 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
         return bytes;
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public ArrayList<Long> getCycles() {
+        return mCycles;
+    }
+
     public static abstract class Builder<T extends NetworkCycleDataLoader> {
         private final Context mContext;
         private String mSubId;
         private int mNetworkType;
         private NetworkTemplate mNetworkTemplate;
+        private ArrayList<Long> mCycles;
 
         public Builder (Context context) {
             mContext = context;
@@ -175,6 +197,16 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
         public Builder<T> setNetworkTemplate(NetworkTemplate template) {
             mNetworkTemplate = template;
             mNetworkType = DataUsageController.getNetworkType(template);
+            return this;
+        }
+
+        /**
+         * Sets the network cycles to be used to query the usage data.
+         * @param cycles the time slots for the network cycle to be used to query the network usage.
+         * @return the builder
+         */
+        public Builder<T> setCycles(ArrayList<Long> cycles) {
+            mCycles = cycles;
             return this;
         }
 

@@ -2466,7 +2466,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @return false if this window desires touch events. */
     boolean cantReceiveTouchInput() {
         return mAppToken != null && mAppToken.getTask() != null
-                && mAppToken.getTask().mStack.shouldIgnoreInput();
+                && (mAppToken.getTask().mStack.shouldIgnoreInput() || mAppToken.hiddenRequested);
     }
 
     @Override

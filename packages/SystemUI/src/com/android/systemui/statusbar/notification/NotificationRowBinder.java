@@ -124,8 +124,7 @@ public class NotificationRowBinder {
      */
     public void inflateViews(
             NotificationEntry entry,
-            Runnable onDismissRunnable,
-            boolean isUpdate)
+            Runnable onDismissRunnable)
             throws InflationException {
         ViewGroup parent = mListContainer.getViewParentForNotification(entry);
         PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
@@ -135,13 +134,13 @@ public class NotificationRowBinder {
         if (entry.rowExists()) {
             entry.updateIcons(mContext, sbn);
             entry.reset();
-            updateNotification(entry, pmUser, sbn, entry.getRow(), isUpdate);
+            updateNotification(entry, pmUser, sbn, entry.getRow());
         } else {
             entry.createIcons(mContext, sbn);
             new RowInflaterTask().inflate(mContext, parent, entry,
                     row -> {
                         bindRow(entry, pmUser, sbn, row, onDismissRunnable);
-                        updateNotification(entry, pmUser, sbn, row, isUpdate);
+                        updateNotification(entry, pmUser, sbn, row);
                     });
         }
     }
@@ -197,15 +196,14 @@ public class NotificationRowBinder {
             NotificationEntry entry,
             @Nullable Integer oldImportance,
             NotificationUiAdjustment oldAdjustment,
-            NotificationUiAdjustment newAdjustment,
-            boolean isUpdate) {
+            NotificationUiAdjustment newAdjustment) {
         if (NotificationUiAdjustment.needReinflate(oldAdjustment, newAdjustment)) {
             if (entry.rowExists()) {
                 entry.reset();
                 PackageManager pmUser = StatusBar.getPackageManagerForUser(
                         mContext,
                         entry.notification.getUser().getIdentifier());
-                updateNotification(entry, pmUser, entry.notification, entry.getRow(), isUpdate);
+                updateNotification(entry, pmUser, entry.notification, entry.getRow());
             } else {
                 // Once the RowInflaterTask is done, it will pick up the updated entry, so
                 // no-op here.
@@ -224,12 +222,8 @@ public class NotificationRowBinder {
             NotificationEntry entry,
             PackageManager pmUser,
             StatusBarNotification sbn,
-            ExpandableNotificationRow row,
-            boolean isUpdate) {
-        boolean isLowPriority = entry.ambient;
-        boolean wasLowPriority = row.isLowPriority();
-        row.setIsLowPriority(isLowPriority);
-        row.setLowPriorityStateUpdated(isUpdate && (wasLowPriority != isLowPriority));
+            ExpandableNotificationRow row) {
+        row.setIsLowPriority(entry.ambient);
         // bind the click event to the content area
         checkNotNull(mNotificationClicker).register(row, sbn);
 

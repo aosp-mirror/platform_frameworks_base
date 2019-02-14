@@ -76,7 +76,7 @@ public final class Display {
     private final int mLayerStack;
     private final int mFlags;
     private final int mType;
-    private final String mAddress;
+    private final DisplayAddress mAddress;
     private final int mOwnerUid;
     private final String mOwnerPackageName;
     private final Resources mResources;
@@ -557,7 +557,7 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
-    public String getAddress() {
+    public DisplayAddress getAddress() {
         return mAddress;
     }
 

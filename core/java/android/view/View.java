@@ -24,6 +24,7 @@ import static java.lang.Math.max;
 
 import android.animation.AnimatorInflater;
 import android.animation.StateListAnimator;
+import android.annotation.AttrRes;
 import android.annotation.CallSuper;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -5108,7 +5109,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private SparseIntArray mAttributeSourceResId;
 
     @Nullable
-    private int[] mAttributeResolutionStack;
+    private SparseArray<int[]> mAttributeResolutionStacks;
 
     @StyleRes
     private int mExplicitStyle;
@@ -5963,11 +5964,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <b>Note:</b> this method will only return actual values if the view attribute debugging
      * is enabled in Android developer options.
      *
+     * @param attribute Attribute resource ID for which the resolution stack should be returned.
      * @return ordered list of resource ID that are considered when resolving attribute values for
      * this {@link View}.
      */
     @NonNull
-    public List<Integer> getAttributeResolutionStack() {
+    public List<Integer> getAttributeResolutionStack(@AttrRes int attribute) {
         ArrayList<Integer> stack = new ArrayList<>();
         if (!sDebugViewAttributes) {
             return stack;
@@ -5975,8 +5977,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mSourceLayoutId != ID_NULL) {
             stack.add(mSourceLayoutId);
         }
-        for (int i = 0; i < mAttributeResolutionStack.length; i++) {
-            stack.add(mAttributeResolutionStack[i]);
+        int[] attributeResolutionStack = mAttributeResolutionStacks.get(attribute);
+        if (attributeResolutionStack == null) {
+            return stack;
+        }
+        for (int i = 0; i < attributeResolutionStack.length; i++) {
+            stack.add(attributeResolutionStack[i]);
         }
         return stack;
     }
@@ -6143,8 +6149,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
-        mAttributeResolutionStack = context.getTheme().getAttributeResolutionStack(
+        int[] attributeResolutionStack = context.getTheme().getAttributeResolutionStack(
                 defStyleAttr, defStyleRes, mExplicitStyle);
+
+        if (mAttributeResolutionStacks == null) {
+            mAttributeResolutionStacks = new SparseArray<>();
+        }
 
         if (mAttributeSourceResId == null) {
             mAttributeSourceResId = new SparseIntArray();
@@ -6154,6 +6164,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         for (int j = 0; j < indexCount; ++j) {
             final int index = t.getIndex(j);
             mAttributeSourceResId.append(styleable[index], t.getSourceResourceId(index, 0));
+            mAttributeResolutionStacks.append(styleable[index], attributeResolutionStack);
         }
     }
 
@@ -6456,6 +6467,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         arr.recycle();
     }
 
+    private void initializeScrollBarDrawable() {
+        initScrollCache();
+
+        if (mScrollCache.scrollBar == null) {
+            mScrollCache.scrollBar = new ScrollBarDrawable();
+            mScrollCache.scrollBar.setState(getDrawableState());
+            mScrollCache.scrollBar.setCallback(this);
+        }
+    }
+
     /**
      * <p>
      * Initializes the scrollbars from a given set of styled attributes. This
@@ -6539,6 +6560,106 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Re-apply user/background padding so that scrollbar(s) get added
         resolvePadding();
+    }
+
+    /**
+     * Defines the vertical scrollbar thumb drawable
+     * @attr ref android.R.styleable#View_scrollbarThumbVertical
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public void setVerticalScrollbarThumbDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setVerticalThumbDrawable(drawable);
+    }
+
+    /**
+     * Defines the vertical scrollbar track drawable
+     * @attr ref android.R.styleable#View_scrollbarTrackVertical
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public void setVerticalScrollbarTrackDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setVerticalTrackDrawable(drawable);
+    }
+
+    /**
+     * Defines the horizontal thumb drawable
+     * @attr ref android.R.styleable#View_scrollbarThumbHorizontal
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public void setHorizontalScrollbarThumbDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setHorizontalThumbDrawable(drawable);
+    }
+
+    /**
+     * Defines the horizontal track drawable
+     * @attr ref android.R.styleable#View_scrollbarTrackHorizontal
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public void setHorizontalScrollbarTrackDrawable(@Nullable Drawable drawable) {
+        initializeScrollBarDrawable();
+        mScrollCache.scrollBar.setHorizontalTrackDrawable(drawable);
+    }
+
+    /**
+     * Returns the currently configured Drawable for the thumb of the vertical scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getVerticalScrollbarThumbDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getVerticalThumbDrawable() : null;
+    }
+
+    /**
+     * Returns the currently configured Drawable for the track of the vertical scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getVerticalScrollbarTrackDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getVerticalTrackDrawable() : null;
+    }
+
+    /**
+     * Returns the currently configured Drawable for the thumb of the horizontal scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getHorizontalScrollbarThumbDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getHorizontalThumbDrawable() : null;
+    }
+
+    /**
+     * Returns the currently configured Drawable for the track of the horizontal scroll bar if it
+     * exists, null otherwise.
+     *
+     * @see #awakenScrollBars(int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     */
+    public @Nullable Drawable getHorizontalScrollbarTrackDrawable() {
+        return mScrollCache != null ? mScrollCache.scrollBar.getHorizontalTrackDrawable() : null;
     }
 
     private void initializeScrollIndicatorsInternal() {

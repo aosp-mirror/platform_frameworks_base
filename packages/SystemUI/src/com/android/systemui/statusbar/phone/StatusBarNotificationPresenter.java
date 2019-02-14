@@ -258,6 +258,11 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         }
     }
 
+    @Override
+    public void onOverlayChanged() {
+        onDensityOrFontScaleChanged();
+    }
+
     private void updateNotificationOnUiModeChanged() {
         ArrayList<NotificationEntry> userNotifications
                 = mEntryManager.getNotificationData().getNotificationsForCurrentUser();

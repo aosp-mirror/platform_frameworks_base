@@ -195,6 +195,9 @@ public class StackScrollAlgorithm {
             return false;
         }
         ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        if (row.isBlockingHelperShowingAndTranslationFinished()) {
+            return true;
+        }
         if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
             return false;
         }

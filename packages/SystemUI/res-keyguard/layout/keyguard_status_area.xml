@@ -28,11 +28,20 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     android:layout_centerHorizontal="true">
+    <TextView
+              android:id="@+id/title"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingStart="64dp"
+              android:paddingEnd="64dp"
+              android:visibility="gone"
+              android:textColor="?attr/wallpaperTextColor"
+              android:theme="@style/TextAppearance.Keyguard"
+    />
     <view class="com.android.keyguard.KeyguardSliceView$Row"
               android:id="@+id/row"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:layout_marginTop="@dimen/subtitle_clock_padding"
               android:orientation="horizontal"
               android:gravity="center"
     />

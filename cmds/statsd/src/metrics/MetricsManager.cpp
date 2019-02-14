@@ -118,6 +118,16 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         ALOGE("This config has too many alerts! Reject!");
         mConfigValid = false;
     }
+
+    mIsAlwaysActive = (mMetricIndexesWithActivation.size() != mAllMetricProducers.size()) ||
+            (mAllMetricProducers.size() == 0);
+    bool isActive = mIsAlwaysActive;
+    for (int metric : mMetricIndexesWithActivation) {
+        isActive |= mAllMetricProducers[metric]->isActive();
+    }
+    mIsActive = isActive;
+    VLOG("mIsActive is initialized to %d", mIsActive)
+
     // no matter whether this config is valid, log it in the stats.
     StatsdStats::getInstance().noteConfigReceived(
             key, mAllMetricProducers.size(), mAllConditionTrackers.size(), mAllAtomMatchers.size(),
@@ -332,11 +342,13 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     int tagId = event.GetTagId();
     int64_t eventTimeNs = event.GetElapsedTimestampNs();
 
-    bool isActive = false;
+    bool isActive = mIsAlwaysActive;
     for (int metric : mMetricIndexesWithActivation) {
         mAllMetricProducers[metric]->flushIfExpire(eventTimeNs);
         isActive |= mAllMetricProducers[metric]->isActive();
     }
+
+    mIsActive = isActive;
 
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...

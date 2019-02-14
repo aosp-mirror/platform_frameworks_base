@@ -1805,9 +1805,10 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
+    private int interceptMotionBeforeQueueingNonInteractive(int displayId,
+            long whenNanos, int policyFlags) {
         return mWindowManagerCallbacks.interceptMotionBeforeQueueingNonInteractive(
-                whenNanos, policyFlags);
+                displayId, whenNanos, policyFlags);
     }
 
     // Native callback.
@@ -2021,7 +2022,13 @@ public class InputManagerService extends IInputManager.Stub
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
-        public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags);
+        /**
+         * Provides an opportunity for the window manager policy to intercept early motion event
+         * processing when the device is in a non-interactive state since these events are normally
+         * dropped.
+         */
+        int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
+                int policyFlags);
 
         public long interceptKeyBeforeDispatching(IBinder token,
                 KeyEvent event, int policyFlags);

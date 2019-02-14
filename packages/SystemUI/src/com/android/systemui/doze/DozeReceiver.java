@@ -25,9 +25,4 @@ public interface DozeReceiver {
      * Invoked every time a minute is elapsed in doze mode
      */
     void dozeTimeTick();
-
-    /**
-     * When view is double tapped in doze mode.
-     */
-    void onDozeDoubleTap();
 }

@@ -15,7 +15,6 @@
  */
 package com.android.keyguard.clock;
 
-import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -26,18 +25,16 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 
-import androidx.annotation.VisibleForTesting;
-
 import com.android.keyguard.R;
-import com.android.systemui.dock.DockManager;
-import com.android.systemui.dock.DockManager.DockEventListener;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -48,6 +45,7 @@ import javax.inject.Singleton;
 @Singleton
 public final class ClockManager {
 
+    private final LayoutInflater mLayoutInflater;
     private final ContentResolver mContentResolver;
 
     private final List<ClockInfo> mClockInfos = new ArrayList<>();
@@ -64,6 +62,7 @@ public final class ClockManager {
                     }
                 }
             };
+
     private final ExtensionController mExtensionController;
     /**
      * Used to select between plugin or default implementations of ClockPlugin interface.
@@ -73,35 +72,13 @@ public final class ClockManager {
      * Consumer that accepts the a new ClockPlugin implementation when the Extension reloads.
      */
     private final Consumer<ClockPlugin> mClockPluginConsumer = this::setClockPlugin;
-    /**
-     * Supplier of default ClockPlugin implementation.
-     */
-    private final DefaultClockSupplier mDefaultClockSupplier;
-    /**
-     * Observe changes to dock state to know when to switch the clock face.
-     */
-    private final DockEventListener mDockEventListener =
-            new DockEventListener() {
-                @Override
-                public void onEvent(int event) {
-                    final boolean isDocked = (event == DockManager.STATE_DOCKED
-                            || event == DockManager.STATE_DOCKED_HIDE);
-                    mDefaultClockSupplier.setDocked(isDocked);
-                    if (mClockExtension != null) {
-                        mClockExtension.reload();
-                    }
-                }
-            };
-    @Nullable
-    private final DockManager mDockManager;
 
     private final List<ClockChangedListener> mListeners = new ArrayList<>();
 
     @Inject
-    public ClockManager(Context context, ExtensionController extensionController,
-            @Nullable DockManager dockManager) {
+    public ClockManager(Context context, ExtensionController extensionController) {
         mExtensionController = extensionController;
-        mDockManager = dockManager;
+        mLayoutInflater = LayoutInflater.from(context);
         mContentResolver = context.getContentResolver();
 
         Resources res = context.getResources();
@@ -133,9 +110,6 @@ public final class ClockManager {
                 .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.type_thumbnail))
                 .setPreview(() -> BitmapFactory.decodeResource(res, R.drawable.type_preview))
                 .build());
-
-        mDefaultClockSupplier = new DefaultClockSupplier(new SettingsWrapper(mContentResolver),
-                LayoutInflater.from(context));
     }
 
     /**
@@ -180,30 +154,39 @@ public final class ClockManager {
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
                 false, mContentObserver);
-        mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.DOCKED_CLOCK_FACE),
-                false, mContentObserver);
-        if (mDockManager != null) {
-            mDockManager.addListener(mDockEventListener);
-        }
         mClockExtension = mExtensionController.newExtension(ClockPlugin.class)
             .withPlugin(ClockPlugin.class)
             .withCallback(mClockPluginConsumer)
-            .withDefault(mDefaultClockSupplier)
+            // Using withDefault even though this isn't the default as a workaround.
+            // ExtensionBuilder doesn't provide the ability to supply a ClockPlugin
+            // instance based off of the value of a setting. Since multiple "default"
+            // can be provided, using a supplier that changes the settings value.
+            // A null return will cause Extension#reload to look at the next "default"
+            // supplier.
+            .withDefault(
+                    new SettingsGattedSupplier(
+                        mContentResolver,
+                        Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
+                        BubbleClockController.class.getName(),
+                            () -> BubbleClockController.build(mLayoutInflater)))
+            .withDefault(
+                    new SettingsGattedSupplier(
+                        mContentResolver,
+                        Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
+                        StretchAnalogClockController.class.getName(),
+                            () -> StretchAnalogClockController.build(mLayoutInflater)))
+            .withDefault(
+                    new SettingsGattedSupplier(
+                        mContentResolver,
+                        Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
+                        TypeClockController.class.getName(),
+                            () -> TypeClockController.build(mLayoutInflater)))
             .build();
     }
 
     private void unregister() {
         mContentResolver.unregisterContentObserver(mContentObserver);
-        if (mDockManager != null) {
-            mDockManager.removeListener(mDockEventListener);
-        }
         mClockExtension.destroy();
-    }
-
-    @VisibleForTesting
-    boolean isDocked() {
-        return mDefaultClockSupplier.isDocked();
     }
 
     /**
@@ -216,5 +199,45 @@ public final class ClockManager {
          * @param clock Custom clock face to use. A null value indicates the default clock face.
          */
         void onClockChanged(ClockPlugin clock);
+    }
+
+    /**
+     * Supplier that only gets an instance when a settings value matches expected value.
+     */
+    private static class SettingsGattedSupplier implements Supplier<ClockPlugin> {
+
+        private final ContentResolver mContentResolver;
+        private final String mKey;
+        private final String mValue;
+        private final Supplier<ClockPlugin> mSupplier;
+
+        /**
+         * Constructs a supplier that changes secure setting key against value.
+         *
+         * @param contentResolver Used to look up settings value.
+         * @param key Settings key.
+         * @param value If the setting matches this values that get supplies a ClockPlugin
+         *        instance.
+         * @param supplier Supplier of ClockPlugin instance, only used if the setting
+         *        matches value.
+         */
+        SettingsGattedSupplier(ContentResolver contentResolver, String key, String value,
+                Supplier<ClockPlugin> supplier) {
+            mContentResolver = contentResolver;
+            mKey = key;
+            mValue = value;
+            mSupplier = supplier;
+        }
+
+        /**
+         * Returns null if the settings value doesn't match the expected value.
+         *
+         * A null return causes Extension#reload to skip this supplier and move to the next.
+         */
+        @Override
+        public ClockPlugin get() {
+            final String currentValue = Settings.Secure.getString(mContentResolver, mKey);
+            return Objects.equals(currentValue, mValue) ? mSupplier.get() : null;
+        }
     }
 }

@@ -28,7 +28,8 @@ import java.util.List;
 /**
  * Not needed anymore...
  *
- * @deprecated
+ * @deprecated ContentCaptureService should use
+ * {@code #onContentCaptureEvent(ContentCaptureSessionId, ContentCaptureEvent)} instead.
  *
  * @hide
  */

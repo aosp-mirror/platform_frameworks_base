@@ -94,7 +94,7 @@ void MetricProducer::flushIfExpire(int64_t elapsedTimestampNs) {
 void MetricProducer::addActivation(int activationTrackerIndex, int64_t ttl_seconds) {
     std::lock_guard<std::mutex> lock(mMutex);
     // When a metric producer does not depend on any activation, its mIsActive is true.
-    // Therefor, if this is the 1st activation, mIsActive will turn to false. Otherwise it does not
+    // Therefore, if this is the 1st activation, mIsActive will turn to false. Otherwise it does not
     // change.
     if  (mEventActivationMap.empty()) {
         mIsActive = false;

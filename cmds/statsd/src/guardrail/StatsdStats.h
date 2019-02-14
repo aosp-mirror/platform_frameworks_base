@@ -42,6 +42,13 @@ struct ConfigStats {
     bool is_valid;
 
     std::list<int32_t> broadcast_sent_time_sec;
+
+    // Times at which this config is activated.
+    std::list<int32_t> activation_time_sec;
+
+    // Times at which this config is deactivated.
+    std::list<int32_t> deactivation_time_sec;
+
     std::list<int32_t> data_drop_time_sec;
     // Number of bytes dropped at corresponding time.
     std::list<int64_t> data_drop_bytes;
@@ -132,6 +139,9 @@ public:
     /* Min period between two checks of byte size per config key in nanoseconds. */
     static const int64_t kMinByteSizeCheckPeriodNs = 60 * NS_PER_SEC;
 
+    /* Minimum period between two activation broadcasts in nanoseconds. */
+    static const int64_t kMinActivationBroadcastPeriodNs = 10 * NS_PER_SEC;
+
     // Maximum age (30 days) that files on disk can exist in seconds.
     static const int kMaxAgeSecond = 60 * 60 * 24 * 30;
 
@@ -173,6 +183,13 @@ public:
      * Report a broadcast has been sent to a config owner to collect the data.
      */
     void noteBroadcastSent(const ConfigKey& key);
+
+    /**
+     * Report that a config has become activated or deactivated.
+     * This can be different from whether or not a broadcast is sent if the
+     * guardrail prevented the broadcast from being sent.
+     */
+    void noteActiveStatusChanged(const ConfigKey& key, bool activate);
 
     /**
      * Report a config's metrics data has been dropped.
@@ -506,6 +523,8 @@ private:
     void noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes, int32_t timeSec);
 
     void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
+
+    void noteActiveStatusChanged(const ConfigKey& key, bool activate, int32_t timeSec);
 
     void addToIceBoxLocked(std::shared_ptr<ConfigStats>& stats);
 

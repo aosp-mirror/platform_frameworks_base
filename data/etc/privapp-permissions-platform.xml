@@ -328,4 +328,9 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_VPN"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.dynandroid">
+        <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.MANAGE_DYNAMIC_ANDROID"/>
+    </privapp-permissions>
+
 </permissions>

@@ -325,13 +325,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * The current position of the selector in the list.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     int mSelectorPosition = INVALID_POSITION;
 
     /**
      * Defines the selector's location and dimension at drawing time
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     Rect mSelectorRect = new Rect();
 
     /**

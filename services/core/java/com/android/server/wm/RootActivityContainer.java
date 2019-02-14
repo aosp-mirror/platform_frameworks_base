@@ -300,7 +300,7 @@ class RootActivityContainer extends ConfigurationContainer
      * corresponding record in display manager.
      */
     // TODO: Look into consolidating with getActivityDisplay()
-    ActivityDisplay getActivityDisplayOrCreate(int displayId) {
+    @Nullable ActivityDisplay getActivityDisplayOrCreate(int displayId) {
         ActivityDisplay activityDisplay = getActivityDisplay(displayId);
         if (activityDisplay != null) {
             return activityDisplay;
@@ -1317,6 +1317,9 @@ class RootActivityContainer extends ConfigurationContainer
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
             final ActivityDisplay display = getActivityDisplayOrCreate(displayId);
+            if (display == null) {
+                return;
+            }
             // Do not start home before booting, or it may accidentally finish booting before it
             // starts. Instead, we expect home activities to be launched when the system is ready
             // (ActivityManagerService#systemReady).

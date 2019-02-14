@@ -103,6 +103,7 @@ public class KernelCpuThreadReaderTest {
         final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
                 8,
                 uid -> 1000 <= uid && uid < 2000,
+                0,
                 mProcDirectory.toPath(),
                 mProcDirectory.toPath().resolve("self/task/" + THREAD_IDS[0] + "/time_in_state"),
                 processUtils);
@@ -144,6 +145,7 @@ public class KernelCpuThreadReaderTest {
         final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
                 8,
                 uidPredicate,
+                0,
                 mProcDirectory.toPath(),
                 mProcDirectory.toPath().resolve(uids[0] + "/task/" + uids[0] + "/time_in_state"),
                 processUtils);
@@ -160,6 +162,60 @@ public class KernelCpuThreadReaderTest {
                     uid, uid, new int[]{uid * 10}, "process" + uid, new String[]{"thread" + uid},
                     new int[]{1000}, new int[][]{{uid}});
         }
+    }
+
+    @Test
+    public void testReader_filtersLowUsage() throws IOException {
+        int[] uids = new int[]{0, 1, 2, 3, 4};
+        int[] cpuUsage = new int[]{10, 0, 2, 100, 3};
+        int[] expectedUids = new int[]{0, 3, 4};
+        Predicate<Integer> uidPredicate = uid -> true;
+        KernelCpuThreadReader.Injector processUtils =
+                new KernelCpuThreadReader.Injector() {
+                    @Override
+                    public int myPid() {
+                        return 0;
+                    }
+
+                    @Override
+                    public int myUid() {
+                        return 0;
+                    }
+
+                    @Override
+                    public int getUidForPid(int pid) {
+                        return pid;
+                    }
+                };
+
+        for (int i = 0; i < uids.length; i++) {
+            int uid = uids[i];
+            setupDirectory(
+                    mProcDirectory.toPath().resolve(String.valueOf(uid)),
+                    new int[]{uid * 10},
+                    "process" + uid,
+                    new String[]{"thread" + uid},
+                    new int[]{1000},
+                    new int[][]{{cpuUsage[i]}});
+        }
+        final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
+                8,
+                uidPredicate,
+                30,
+                mProcDirectory.toPath(),
+                mProcDirectory.toPath().resolve(uids[0] + "/task/" + uids[0] + "/time_in_state"),
+                processUtils);
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsageByUids =
+                kernelCpuThreadReader.getProcessCpuUsageByUids();
+        processCpuUsageByUids.sort(Comparator.comparing(usage -> usage.uid));
+
+        assertEquals(expectedUids.length, processCpuUsageByUids.size());
+        for (int i = 0; i < expectedUids.length; i++) {
+            KernelCpuThreadReader.ProcessCpuUsage processCpuUsage =
+                    processCpuUsageByUids.get(i);
+            assertEquals(expectedUids[i], processCpuUsage.uid);
+        }
+
     }
 
     private void setupDirectory(Path processPath, int[] threadIds, String processName,
@@ -327,7 +383,6 @@ public class KernelCpuThreadReaderTest {
                 frequencyBucketCreator.getBucketedValues(
                         new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
     }
-
 
     @Test
     public void testGetBigFrequenciesStartIndex_simple() {

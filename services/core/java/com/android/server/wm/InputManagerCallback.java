@@ -163,15 +163,12 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         return mService.mPolicy.interceptKeyBeforeQueueing(event, policyFlags);
     }
 
-    /**
-     * Provides an opportunity for the window manager policy to intercept early motion event
-     * processing when the device is in a non-interactive state since these events are normally
-     * dropped.
-     */
+    /** {@inheritDoc} */
     @Override
-    public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
+    public int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
+            int policyFlags) {
         return mService.mPolicy.interceptMotionBeforeQueueingNonInteractive(
-                whenNanos, policyFlags);
+                displayId, whenNanos, policyFlags);
     }
 
     /**

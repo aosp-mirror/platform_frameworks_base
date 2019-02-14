@@ -1,10 +1,19 @@
 package com.android.keyguard;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.transition.ChangeBounds;
+import android.transition.Transition;
+import android.transition.TransitionManager;
+import android.transition.TransitionValues;
 import android.util.AttributeSet;
+import android.util.MathUtils;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -16,6 +25,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -28,6 +38,7 @@ import java.util.TimeZone;
  */
 public class KeyguardClockSwitch extends RelativeLayout {
 
+    private final Transition mTransition;
     /**
      * Optional/alternative clock injected via plugin.
      */
@@ -53,6 +64,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * Maintain state so that a newly connected plugin can be initialized.
      */
     private float mDarkAmount;
+    /**
+     * If the Keyguard Slice has a header (big center-aligned text.)
+     */
+    private boolean mShowingHeader;
     private boolean mSupportsDarkText;
     private int[] mColorPalette;
 
@@ -98,6 +113,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mTransition = new ClockBoundsTransition();
     }
 
     /**
@@ -286,6 +302,26 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
+    /**
+     * Sets if the keyguard slice is showing a center-aligned header. We need a smaller clock
+     * in these cases.
+     */
+    public void setKeyguardShowingHeader(boolean hasHeader) {
+        if (mShowingHeader == hasHeader || hasCustomClock()) {
+            return;
+        }
+        mShowingHeader = hasHeader;
+
+        TransitionManager.beginDelayedTransition((ViewGroup) mClockView.getParent(), mTransition);
+        int fontSize = mContext.getResources().getDimensionPixelSize(mShowingHeader
+                ? R.dimen.widget_small_font_size : R.dimen.widget_big_font_size);
+        int paddingBottom = mContext.getResources().getDimensionPixelSize(mShowingHeader
+                ? R.dimen.widget_vertical_padding_clock : R.dimen.header_subtitle_padding);
+        mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        mClockView.setPadding(mClockView.getPaddingLeft(), mClockView.getPaddingTop(),
+                mClockView.getPaddingRight(), paddingBottom);
+    }
+
     @VisibleForTesting (otherwise = VisibleForTesting.NONE)
     ClockManager.ClockChangedListener getClockChangedListener() {
         return mClockChangedListener;
@@ -294,5 +330,55 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @VisibleForTesting (otherwise = VisibleForTesting.NONE)
     StatusBarStateController.StateListener getStateListener() {
         return mStateListener;
+    }
+
+    /**
+     * Special layout transition that scales the clock view as its bounds change, to make it look
+     * like the text is shrinking.
+     */
+    private class ClockBoundsTransition extends ChangeBounds {
+
+        ClockBoundsTransition() {
+            setDuration(KeyguardSliceView.DEFAULT_ANIM_DURATION / 2);
+            setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        }
+
+        @Override
+        public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
+                TransitionValues endValues) {
+            Animator animator = super.createAnimator(sceneRoot, startValues, endValues);
+            if (animator == null || startValues.view != mClockView) {
+                return animator;
+            }
+
+            ValueAnimator boundsAnimator = null;
+            if (animator instanceof AnimatorSet) {
+                Animator first = ((AnimatorSet) animator).getChildAnimations().get(0);
+                if (first instanceof ValueAnimator) {
+                    boundsAnimator = (ValueAnimator) first;
+                }
+            } else if (animator instanceof ValueAnimator) {
+                boundsAnimator = (ValueAnimator) animator;
+            }
+
+            if (boundsAnimator != null) {
+                float bigFontSize = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.widget_big_font_size);
+                float smallFontSize = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.widget_small_font_size);
+                float startScale = mShowingHeader
+                        ? bigFontSize / smallFontSize : smallFontSize / bigFontSize;
+                boundsAnimator.addUpdateListener(animation -> {
+                    float scale = MathUtils.lerp(startScale, 1f /* stop */,
+                            animation.getAnimatedFraction());
+                    mClockView.setPivotX(mClockView.getWidth() / 2);
+                    mClockView.setPivotY(0);
+                    mClockView.setScaleX(scale);
+                    mClockView.setScaleY(scale);
+                });
+            }
+
+            return animator;
+        }
     }
 }

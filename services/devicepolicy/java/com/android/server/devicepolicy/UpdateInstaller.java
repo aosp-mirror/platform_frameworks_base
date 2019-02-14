@@ -18,7 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyEventLogger;
-import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.content.Context;
 import android.content.Intent;
@@ -66,7 +66,7 @@ abstract class UpdateInstaller {
         mCopiedUpdateFile = null;
         if (!isBatteryLevelSufficient()) {
             notifyCallbackOnError(
-                    DevicePolicyManager.InstallUpdateCallback.UPDATE_ERROR_BATTERY_LOW,
+                    InstallSystemUpdateCallback.UPDATE_ERROR_BATTERY_LOW,
                     "The battery level must be above "
                             + mConstants.BATTERY_THRESHOLD_NOT_CHARGING + " while not charging or"
                             + "above " + mConstants.BATTERY_THRESHOLD_CHARGING + " while charging");
@@ -76,7 +76,7 @@ abstract class UpdateInstaller {
             mCopiedUpdateFile = copyUpdateFileToDataOtaPackageDir();
             if (mCopiedUpdateFile == null) {
                 notifyCallbackOnError(
-                        DevicePolicyManager.InstallUpdateCallback.UPDATE_ERROR_UNKNOWN,
+                        InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN,
                         "Error while copying file.");
                 return;
             }
@@ -111,7 +111,7 @@ abstract class UpdateInstaller {
         } catch (IOException e) {
             Log.w(TAG, "Failed to copy update file to OTA directory", e);
             notifyCallbackOnError(
-                    DevicePolicyManager.InstallUpdateCallback.UPDATE_ERROR_UNKNOWN,
+                    InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN,
                     Log.getStackTraceString(e));
             return null;
         }

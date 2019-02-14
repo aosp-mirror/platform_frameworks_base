@@ -22,7 +22,6 @@ import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.Context.CONTEXT_RESTRICTED;
-import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_HDMI_CEC;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
@@ -36,6 +35,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.STATE_OFF;
+import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
@@ -84,10 +84,8 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
-import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs
-        .CAMERA_LENS_COVER_ABSENT;
-import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs
-        .CAMERA_LENS_UNCOVERED;
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_DELEGATE;
@@ -371,6 +369,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     IStatusBarService mStatusBarService;
     StatusBarManagerInternal mStatusBarManagerInternal;
     AudioManagerInternal mAudioManagerInternal;
+    DisplayManager mDisplayManager;
     boolean mPreloadedRecentApps;
     final Object mServiceAquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
@@ -1717,7 +1716,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
-        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+        mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mHasFeatureWatch = mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH);
         mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK);
         mHasFeatureHdmiCec = mContext.getPackageManager().hasSystemFeature(FEATURE_HDMI_CEC);
@@ -2508,8 +2508,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return context;
         }
 
-        final DisplayManager dm = (DisplayManager) context.getSystemService(DISPLAY_SERVICE);
-        final Display targetDisplay = dm.getDisplay(displayId);
+        final Display targetDisplay = mDisplayManager.getDisplay(displayId);
         if (targetDisplay == null) {
             // Failed to obtain the non-default display where splash screen should be shown,
             // lets not show at all.
@@ -3655,7 +3654,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Reset the pending key
                 mPendingWakeKey = PENDING_KEY_NULL;
             }
-        } else if (!interactive && shouldDispatchInputWhenNonInteractive(event)) {
+        } else if (!interactive && shouldDispatchInputWhenNonInteractive(displayId, keyCode)) {
             // If we're currently dozing with the screen on and the keyguard showing, pass the key
             // to the application but preserve its wake key status to make sure we still move
             // from dozing to fully interactive if we would normally go from off to fully
@@ -4126,7 +4125,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // TODO(b/117479243): handle it in InputPolicy
     /** {@inheritDoc} */
     @Override
-    public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
+    public int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
+            int policyFlags) {
         if ((policyFlags & FLAG_WAKE) != 0) {
             if (wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotion,
                     PowerManager.WAKE_REASON_WAKE_MOTION, "android.policy:MOTION")) {
@@ -4134,7 +4134,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if (shouldDispatchInputWhenNonInteractive(null)) {
+        if (shouldDispatchInputWhenNonInteractive(displayId, KEYCODE_UNKNOWN)) {
             return ACTION_PASS_TO_USER;
         }
 
@@ -4149,9 +4149,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 0;
     }
 
-    private boolean shouldDispatchInputWhenNonInteractive(KeyEvent event) {
-        final boolean displayOff = (mDefaultDisplay == null
-                || mDefaultDisplay.getState() == STATE_OFF);
+    private boolean shouldDispatchInputWhenNonInteractive(int displayId, int keyCode) {
+        // Apply the default display policy to unknown displays as well.
+        final boolean isDefaultDisplay = displayId == DEFAULT_DISPLAY
+                || displayId == INVALID_DISPLAY;
+        final Display display = isDefaultDisplay
+                ? mDefaultDisplay
+                : mDisplayManager.getDisplay(displayId);
+        final boolean displayOff = (display == null
+                || display.getState() == STATE_OFF);
 
         if (displayOff && !mHasFeatureWatch) {
             return false;
@@ -4163,25 +4169,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Watches handle BACK specially
-        if (mHasFeatureWatch
-                && event != null
-                && (event.getKeyCode() == KeyEvent.KEYCODE_BACK
-                        || event.getKeyCode() == KeyEvent.KEYCODE_STEM_PRIMARY)) {
+        if (mHasFeatureWatch && (keyCode == KeyEvent.KEYCODE_BACK
+                || keyCode == KeyEvent.KEYCODE_STEM_PRIMARY)) {
             return false;
         }
 
-        // Send events to a dozing dream even if the screen is off since the dream
-        // is in control of the state of the screen.
-        IDreamManager dreamManager = getDreamManager();
+        // TODO(b/123372519): Refine when dream can support multi display.
+        if (isDefaultDisplay) {
+            // Send events to a dozing dream even if the screen is off since the dream
+            // is in control of the state of the screen.
+            IDreamManager dreamManager = getDreamManager();
 
-        try {
-            if (dreamManager != null && dreamManager.isDreaming()) {
-                return true;
+            try {
+                if (dreamManager != null && dreamManager.isDreaming()) {
+                    return true;
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException when checking if dreaming", e);
             }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when checking if dreaming", e);
         }
-
         // Otherwise, consume events since the user can't see what is being
         // interacted with.
         return false;

@@ -16,7 +16,7 @@ cc_library_shared {
     name: "libamidi",
 
     srcs: [
-        "midi.cpp",
+        "amidi.cpp",
         ":IMidiDeviceServer.aidl",
     ],
 
@@ -48,10 +48,10 @@ ndk_headers {
 
     from: "include",
 
-    to: "amidi",
+    to: "",
 
-    srcs: ["include/midi.h"],
-    license: "include/NOTICE",
+    srcs: ["include/amidi/AMidi.h"],
+    license: "include/amidi/NOTICE",
 }
 
 ndk_library {

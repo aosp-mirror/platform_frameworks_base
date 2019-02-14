@@ -161,7 +161,8 @@ public class DozeTriggers implements DozeMachine.Part {
                 } else {
                     mDozeHost.extendPulse();
                 }
-            }, sensorPerformedProxCheck || mDockManager.isDocked(), pulseReason);
+            }, sensorPerformedProxCheck
+                    || (mDockManager != null && mDockManager.isDocked()), pulseReason);
         }
 
         if (isPickup) {
@@ -224,7 +225,9 @@ public class DozeTriggers implements DozeMachine.Part {
             case INITIALIZED:
                 mBroadcastReceiver.register(mContext);
                 mDozeHost.addCallback(mHostCallback);
-                mDockManager.addListener(mDockEventListener);
+                if (mDockManager != null) {
+                    mDockManager.addListener(mDockEventListener);
+                }
                 checkTriggersAtInit();
                 break;
             case DOZE:
@@ -250,7 +253,9 @@ public class DozeTriggers implements DozeMachine.Part {
             case FINISH:
                 mBroadcastReceiver.unregister(mContext);
                 mDozeHost.removeCallback(mHostCallback);
-                mDockManager.removeListener(mDockEventListener);
+                if (mDockManager != null) {
+                    mDockManager.removeListener(mDockEventListener);
+                }
                 mDozeSensors.setListening(false);
                 mDozeSensors.setProxListening(false);
                 break;

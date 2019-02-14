@@ -45,7 +45,8 @@ TEST(UidMapTest, TestIsolatedUID) {
     sp<AlarmMonitor> subscriberAlarmMonitor;
     // Construct the processor with a dummy sendBroadcast function that does nothing.
     StatsLogProcessor p(m, pullerManager, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
-                        [](const ConfigKey& key) { return true; });
+                        [](const ConfigKey& key) { return true; },
+                        [](const int&, const vector<int64_t>&) {return true;});
     LogEvent addEvent(android::util::ISOLATED_UID_CHANGED, 1);
     addEvent.write(100);  // parent UID
     addEvent.write(101);  // isolated UID
