@@ -19,9 +19,9 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
-import android.hardware.cas.V1_1.ICas;
+import android.hardware.cas.V1_0.ICas;
+import android.hardware.cas.V1_0.IMediaCasService;
 import android.hardware.cas.V1_1.ICasListener;
-import android.hardware.cas.V1_1.IMediaCasService;
 import android.media.MediaCasException.*;
 import android.os.Bundle;
 import android.os.Handler;
@@ -99,23 +99,35 @@ import java.util.ArrayList;
 public final class MediaCas implements AutoCloseable {
     private static final String TAG = "MediaCas";
     private ICas mICas;
+    private android.hardware.cas.V1_1.ICas mICasV11;
     private EventListener mListener;
     private HandlerThread mHandlerThread;
     private EventHandler mEventHandler;
 
-    private static final Singleton<IMediaCasService> gDefault =
-            new Singleton<IMediaCasService>() {
+    private static final Singleton<IMediaCasService> sService = new Singleton<IMediaCasService>() {
         @Override
         protected IMediaCasService create() {
             try {
-                return IMediaCasService.getService(true /*wait*/);
-            } catch (RemoteException e) {}
+                Log.d(TAG, "Tried to get cas@1.1 service");
+                android.hardware.cas.V1_1.IMediaCasService serviceV11 =
+                        android.hardware.cas.V1_1.IMediaCasService.getService(true /*wait*/);
+                if (serviceV11 != null) {
+                    return serviceV11;
+                }
+            } catch (Exception eV1_1) {
+                try {
+                    Log.d(TAG, "Tried to get cas@1.0 service");
+                    return IMediaCasService.getService(true /*wait*/);
+                } catch (Exception eV1_0) {
+                    Log.d(TAG, "Failed to get cas@1.0 service");
+                }
+            }
             return null;
         }
     };
 
     static IMediaCasService getService() {
-        return gDefault.get();
+        return sService.get();
     }
 
     private void validateInternalStates() {
@@ -126,11 +138,12 @@ public final class MediaCas implements AutoCloseable {
 
     private void cleanupAndRethrowIllegalState() {
         mICas = null;
+        mICasV11 = null;
         throw new IllegalStateException();
     }
 
-    private class EventHandler extends Handler
-    {
+    private class EventHandler extends Handler {
+
         private static final int MSG_CAS_EVENT = 0;
         private static final int MSG_CAS_SESSION_EVENT = 1;
         private static final String SESSION_KEY = "sessionId";
@@ -164,7 +177,7 @@ public final class MediaCas implements AutoCloseable {
         }
         @Override
         public void onSessionEvent(@NonNull ArrayList<Byte> sessionId,
-                        int event, int arg, @Nullable ArrayList<Byte> data)
+                int event, int arg, @Nullable ArrayList<Byte> data)
                 throws RemoteException {
             Message msg = mEventHandler.obtainMessage();
             msg.what = EventHandler.MSG_CAS_SESSION_EVENT;
@@ -177,7 +190,6 @@ public final class MediaCas implements AutoCloseable {
             mEventHandler.sendMessage(msg);
         }
     };
-
     /**
      * Describe a CAS plugin with its CA_system_ID and string name.
      *
@@ -338,9 +350,14 @@ public final class MediaCas implements AutoCloseable {
                 throws MediaCasException {
             validateInternalStates();
 
+            if (mICasV11 == null) {
+                Log.d(TAG, "Send Session Event isn't supported by cas@1.0 interface");
+                throw new UnsupportedCasException("Send Session Event is not supported");
+            }
+
             try {
                 MediaCasException.throwExceptionIfNeeded(
-                        mICas.sendSessionEvent(mSessionId, event, arg, toByteArray(data)));
+                        mICasV11.sendSessionEvent(mSessionId, event, arg, toByteArray(data)));
             } catch (RemoteException e) {
                 cleanupAndRethrowIllegalState();
             }
@@ -427,7 +444,16 @@ public final class MediaCas implements AutoCloseable {
      */
     public MediaCas(int CA_system_id) throws UnsupportedCasException {
         try {
-            mICas = getService().createPluginExt(CA_system_id, mBinder);
+            IMediaCasService service = getService();
+            android.hardware.cas.V1_1.IMediaCasService serviceV11 =
+                    android.hardware.cas.V1_1.IMediaCasService.castFrom(service);
+            if (serviceV11 == null) {
+                Log.d(TAG, "Used cas@1_0 interface to create plugin");
+                mICas = service.createPlugin(CA_system_id, mBinder);
+            } else {
+                Log.d(TAG, "Used cas@1.1 interface to create plugin");
+                mICas = mICasV11 = serviceV11.createPluginExt(CA_system_id, mBinder);
+            }
         } catch(Exception e) {
             Log.e(TAG, "Failed to create plugin: " + e);
             mICas = null;
@@ -528,7 +554,7 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
-    private class OpenSessionCallback implements ICas.openSessionCallback {
+    private class OpenSessionCallback implements android.hardware.cas.V1_1.ICas.openSessionCallback{
         public Session mSession;
         public int mStatus;
         @Override
