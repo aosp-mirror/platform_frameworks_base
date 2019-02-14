@@ -23,7 +23,7 @@
     android:layout_marginEnd="16dp"
     android:gravity="center"
     android:clickable="true"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="@*android:drawable/btn_borderless_material"
     android:orientation="vertical">
 
     <ImageView
