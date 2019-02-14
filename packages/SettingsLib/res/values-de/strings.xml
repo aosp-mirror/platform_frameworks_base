@@ -231,7 +231,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Aus"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatisch"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Hostname des privaten DNS-Anbieters"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostnamen des DNS-Anbieters eingeben"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Level für WLAN-Protokollierung erhöhen, in WiFi Picker pro SSID-RSSI anzeigen"</string>

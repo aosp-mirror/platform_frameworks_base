@@ -172,9 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Cambio della rete dell\'operatore"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Visualizza i dettagli relativi alla batteria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteria: <xliff:g id="NUMBER">%d</xliff:g> percento."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batteria in carica, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Impostazioni di sistema."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notifiche."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Visualizza tutte le notifiche"</string>
@@ -273,7 +271,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Ora lo schermo è bloccato nell\'orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Ora lo schermo è bloccato nell\'orientamento verticale."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Vetrina di dolci"</string>
-    <string name="start_dreams" msgid="5640361424498338327">"Screensaver"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Salvaschermo"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Tocca e tieni premuta ciascuna icona per visualizzare altre opzioni"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Non disturbare"</string>

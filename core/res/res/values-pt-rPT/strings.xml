@@ -1278,7 +1278,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Sobrepor a outras aplicações"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"A aplicação <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplic."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se não pretende que a aplicação <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Desligar"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>

@@ -188,7 +188,7 @@ public abstract class Context {
      *
      * <p>This was the legacy (but undocumented) behavior in and
      * before Gingerbread (Android 2.3) and this flag is implied when
-     * targetting such releases.  For applications targetting SDK
+     * targeting such releases.  For applications targeting SDK
      * versions <em>greater than</em> Android 2.3, this flag must be
      * explicitly set if desired.
      *
@@ -2841,7 +2841,7 @@ public abstract class Context {
      *
      * @param service Description of the service to be stopped.  The Intent must be either
      *      fully explicit (supplying a component name) or specify a specific package
-     *      name it is targetted to.
+     *      name it is targeted to.
      *
      * @return If there is a service matching the given Intent that is already
      * running, then it is stopped and {@code true} is returned; else {@code false} is returned.
@@ -3396,7 +3396,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.app.NotificationManager} for controlling keyguard.
+     * {@link android.app.KeyguardManager} for controlling keyguard.
      *
      * @see #getSystemService(String)
      * @see android.app.KeyguardManager

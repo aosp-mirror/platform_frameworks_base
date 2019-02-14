@@ -222,7 +222,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekrāna bloķētājs"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Strāvas padeve ir izslēgta."</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Ārkārtas"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Ārkārtas situācija"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Kļūdu ziņojums"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Beigt sesiju"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Ekrānuzņēmums"</string>
@@ -742,7 +742,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Nospiediet Izvēlne, lai atbloķētu, vai veiciet ārkārtas zvanu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Lai atbloķētu, nospiediet vienumu Izvēlne."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Zīmējiet kombināciju, lai atbloķētu."</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Ārkārtas"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Ārkārtas situācija"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Atpakaļ pie zvana"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Pareizi!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Mēģināt vēlreiz"</string>

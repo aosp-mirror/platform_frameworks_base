@@ -587,7 +587,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitoruj próby odblokowania ekranu"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorowanie prób odblokowania ekranu"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitorowanie, ile razy wpisano niepoprawne hasło podczas odblokowywania ekranu, oraz blokowanie telewizora albo kasowanie na nim wszystkich danych, gdy zbyt wiele razy wpisano niepoprawne hasło."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
@@ -608,11 +608,11 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Kasowanie danych tego użytkownika na tym telefonie bez ostrzeżenia."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ustaw globalny serwer proxy urządzenia"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Ustawianie globalnego serwera proxy urządzenia do użycia przy włączonych zasadach. Tylko właściciel urządzenia może ustawić globalny serwer proxy."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Ustaw czas ważności hasła blokady ekranu"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Ustawianie czasu ważności hasła blokady ekranu"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Zmiana częstotliwości, z jaką należy zmieniać hasło blokady ekranu, kod PIN lub wzór."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ustaw szyfrowanie pamięci"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ustawianie szyfrowania pamięci"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Wymaganie szyfrowania przechowywanych danych aplikacji"</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłącz aparaty"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłączanie aparatów"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zapobieganie używaniu wszystkich aparatów w urządzeniu"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. funkcji blokady ekranu"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zapobieganie użyciu niektórych funkcji blokady ekranu."</string>

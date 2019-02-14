@@ -1277,7 +1277,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карту додано"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Перезапустіть пристрій, щоб отримати доступ до мобільної мережі."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапуск"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапустити"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активувати мобільну службу"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Завантажити додаток оператора, щоб активувати нову SIM-карту"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Щоб активувати нову SIM-карту, завантажте додаток <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

@@ -138,7 +138,7 @@
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWiFi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi de préférence"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Priorité au mobile"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Données mobiles de préférence"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi uniquement"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -602,13 +602,13 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Effacer les informations sur cet utilisateur de ce téléphone sans avertissement"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Définir le proxy global du mobile"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Indiquer le proxy global à utiliser pour l\'appareil lorsque la règle est activée. Seul le propriétaire de l\'appareil peut définir le proxy global."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Config. expir. mot passe verr. écran"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Définir l\'expiration du mot de passe de verrouillage d\'écran"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modifier la fréquence de modification du mot de passe, du code d\'accès ou du schéma de verrouillage de l\'écran"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Définir chiffrement du stockage"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exiger le chiffrement des données d\'application stockées"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Désactiver les appareils photo"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Empêcher l\'utilisation de tous les appareils photos"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Désact. options du verr. écran"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Désactiver les options de verrouillage de l\'écran"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Empêcher l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>

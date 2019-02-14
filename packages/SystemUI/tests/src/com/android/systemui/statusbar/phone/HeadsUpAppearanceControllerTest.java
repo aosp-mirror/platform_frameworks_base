@@ -156,4 +156,26 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         verify(mStackScroller).removeOnExpandedHeightListener(any());
         verify(mStackScroller).removeOnLayoutChangeListener(any());
     }
+
+    @Test
+    public void testHeaderReadFromOldController() {
+        mHeadsUpAppearanceController.setExpandedHeight(1.0f, 1.0f);
+
+        HeadsUpAppearanceController newController = new HeadsUpAppearanceController(
+                mock(NotificationIconAreaController.class),
+                mHeadsUpManager,
+                mHeadsUpStatusBarView,
+                mStackScroller,
+                mPanelView,
+                new View(mContext),
+                new View(mContext));
+        newController.readFrom(mHeadsUpAppearanceController);
+
+        Assert.assertEquals(mHeadsUpAppearanceController.mExpandedHeight,
+                newController.mExpandedHeight, 0.0f);
+        Assert.assertEquals(mHeadsUpAppearanceController.mExpandFraction,
+                newController.mExpandFraction, 0.0f);
+        Assert.assertEquals(mHeadsUpAppearanceController.mIsExpanded,
+                newController.mIsExpanded);
+    }
 }

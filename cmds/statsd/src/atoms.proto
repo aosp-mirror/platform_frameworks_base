@@ -131,6 +131,7 @@ message Atom {
         PhoneServiceStateChanged phone_service_state_changed = 94;
         PhoneStateChanged phone_state_changed = 95;
         LowMemReported low_mem_reported = 81;
+        ThermalThrottlingStateChanged thermal_throttling = 86;
         NetworkDnsEventReported network_dns_event_reported = 116;
         DataStallEvent data_stall_event = 121;
         BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
@@ -236,6 +237,26 @@ message AttributionNode {
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
+
+/**
+ * Logs when the Thermal service HAL notifies the throttling start/stop events.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ */
+message ThermalThrottlingStateChanged {
+    optional android.os.TemperatureTypeEnum sensor_type = 1;
+
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+
+    optional State state = 2;
+
+    optional float temperature = 3;
+}
 
 /**
  * Logs when the screen state changes.

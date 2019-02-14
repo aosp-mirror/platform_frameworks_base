@@ -20,6 +20,8 @@ package com.android.server.wm;
 public interface AppWindowContainerListener extends WindowContainerListener {
     /** Called when the windows associated app window container are drawn. */
     void onWindowsDrawn(long timestamp);
+    /** Called when the windows associated app window container are no longer drawn. */
+    default void onWindowsNotDrawn(long timestamp) {}
     /** Called when the windows associated app window container are visible. */
     void onWindowsVisible();
     /** Called when the windows associated app window container are no longer visible. */
