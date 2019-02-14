@@ -6271,6 +6271,8 @@ package android.service.autofill.augmented {
     ctor public AugmentedAutofillService();
     method protected final void dump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method protected void dump(@NonNull java.io.PrintWriter, @NonNull String[]);
+    method public void onConnected();
+    method public void onDisconnected();
     method public void onFillRequest(@NonNull android.service.autofill.augmented.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.augmented.FillController, @NonNull android.service.autofill.augmented.FillCallback);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
   }
