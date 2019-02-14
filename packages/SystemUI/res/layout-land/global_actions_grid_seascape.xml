@@ -7,30 +7,32 @@
     android:orientation="horizontal"
     android:clipToPadding="false"
     android:theme="@style/qs_theme"
-    android:gravity="bottom|center"
+    android:gravity="top|left"
     android:clipChildren="false"
 >
 
     <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:gravity="bottom | right"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:gravity="bottom|left"
         android:padding="0dp"
-        android:layoutDirection="ltr"
-        android:layout_marginBottom="@dimen/global_actions_grid_container_bottom_margin"
+        android:orientation="vertical"
+        android:layout_marginLeft="@dimen/global_actions_grid_container_bottom_margin"
     >
         <!-- For separated items-->
         <LinearLayout
             android:id="@+id/separated_button"
+            android:layout_gravity="top|left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/global_actions_grid_side_margin"
-            android:layout_marginRight="@dimen/global_actions_grid_side_margin"
-            android:paddingTop="@dimen/global_actions_grid_top_padding"
-            android:paddingLeft="@dimen/global_actions_grid_left_padding"
-            android:paddingBottom="@dimen/global_actions_grid_bottom_padding"
-            android:paddingRight="@dimen/global_actions_grid_right_padding"
-            android:orientation="vertical"
+            android:layout_marginTop="@dimen/global_actions_grid_side_margin"
+            android:layout_marginBottom="@dimen/global_actions_grid_side_margin"
+            android:paddingTop="@dimen/global_actions_grid_left_padding"
+            android:paddingLeft="@dimen/global_actions_grid_top_padding"
+            android:paddingBottom="@dimen/global_actions_grid_right_padding"
+            android:paddingRight="@dimen/global_actions_grid_bottom_padding"
+            android:orientation="horizontal"
+            android:layoutDirection="rtl"
             android:background="?android:attr/colorBackgroundFloating"
             android:translationZ="@dimen/global_actions_translate"
         />
@@ -38,35 +40,41 @@
         <!-- Grid of action items -->
         <com.android.systemui.globalactions.ListGridLayout
             android:id="@android:id/list"
+            android:layout_gravity="bottom|left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layoutDirection="rtl"
-            android:layout_marginRight="@dimen/global_actions_grid_side_margin"
+            android:orientation="vertical"
+            android:layout_marginTop="@dimen/global_actions_grid_side_margin"
             android:translationZ="@dimen/global_actions_translate"
-            android:paddingLeft="@dimen/global_actions_grid_left_padding"
-            android:paddingRight="@dimen/global_actions_grid_right_padding"
-            android:paddingTop="@dimen/global_actions_grid_top_padding"
-            android:paddingBottom="@dimen/global_actions_grid_bottom_padding"
+            android:paddingLeft="@dimen/global_actions_grid_top_padding"
+            android:paddingRight="@dimen/global_actions_grid_bottom_padding"
+            android:paddingTop="@dimen/global_actions_grid_left_padding"
+            android:paddingBottom="@dimen/global_actions_grid_right_padding"
             android:background="?android:attr/colorBackgroundFloating"
         >
             <LinearLayout
+                android:layout_gravity="bottom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:orientation="vertical"
+                android:layoutDirection="rtl"
+                android:orientation="horizontal"
             />
             <LinearLayout
+                android:layout_gravity="bottom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:orientation="vertical"
+                android:layoutDirection="rtl"
+                android:orientation="horizontal"
             />
             <LinearLayout
+                android:layout_gravity="bottom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:orientation="vertical"
+                android:layoutDirection="rtl"
+                android:orientation="horizontal"
             />
         </com.android.systemui.globalactions.ListGridLayout>
     </LinearLayout>

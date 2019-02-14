@@ -17,10 +17,13 @@
 package com.android.systemui;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import com.android.systemui.util.leak.RotationUtils;
 
 /**
  * Layout class representing the Global Actions menu which appears when the power button is held.
@@ -32,8 +35,12 @@ public abstract class MultiListLayout extends LinearLayout {
     protected int mExpectedSeparatedItemCount;
     protected int mExpectedListItemCount;
 
+    protected int mRotation;
+    protected RotationListener mRotationListener;
+
     public MultiListLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mRotation = RotationUtils.getRotation(context);
     }
 
     protected abstract ViewGroup getSeparatedView();
@@ -50,10 +57,12 @@ public abstract class MultiListLayout extends LinearLayout {
      * @param separated Whether or not this index refers to a position in the separated or list
      *                  container.
      * @param index The index of the item within the container.
+     * @param reverse If the MultiListLayout contains sub-lists within the list container, reverse
+     *                the order that they are filled.
      * @return The parent ViewGroup which will be used to contain the specified item
      * after it has been added to the layout.
      */
-    public abstract ViewGroup getParentView(boolean separated, int index);
+    public abstract ViewGroup getParentView(boolean separated, int index, boolean reverse);
 
     /**
      * Sets the divided view, which may have a differently-colored background.
@@ -111,6 +120,26 @@ public abstract class MultiListLayout extends LinearLayout {
         setFocusable(true);
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        int newRotation = RotationUtils.getRotation(mContext);
+        if (newRotation != mRotation) {
+            rotate(mRotation, newRotation);
+            mRotation = newRotation;
+        }
+    }
+
+    protected void rotate(int from, int to) {
+        if (mRotationListener != null) {
+            mRotationListener.onRotate(from, to);
+        }
+    }
+
+    public void setRotationListener(RotationListener listener) {
+        mRotationListener = listener;
+    }
+
     /**
      * Retrieve the MultiListLayout associated with the given view.
      */
@@ -120,5 +149,9 @@ public abstract class MultiListLayout extends LinearLayout {
             return get((View) v.getParent());
         }
         return null;
+    }
+
+    interface RotationListener {
+        void onRotate(int from, int to);
     }
 }

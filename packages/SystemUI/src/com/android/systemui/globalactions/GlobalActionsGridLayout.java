@@ -83,11 +83,11 @@ public class GlobalActionsGridLayout extends MultiListLayout {
     }
 
     @Override
-    public ViewGroup getParentView(boolean separated, int index) {
+    public ViewGroup getParentView(boolean separated, int index, boolean reverseOrder) {
         if (separated) {
             return getSeparatedView();
         } else {
-            return getListView().getParentView(index);
+            return getListView().getParentView(index, reverseOrder);
         }
     }
 
