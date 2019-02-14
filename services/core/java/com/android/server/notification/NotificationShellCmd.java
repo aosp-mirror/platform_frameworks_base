@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -49,12 +50,12 @@ public class NotificationShellCmd extends ShellCommand {
     private static final String USAGE =
               "usage: cmd notification SUBCMD [args]\n\n"
             + "SUBCMDs:\n"
-            + "  allow_listener COMPONENT [user_id]\n"
-            + "  disallow_listener COMPONENT [user_id]\n"
-            + "  allow_assistant COMPONENT\n"
-            + "  remove_assistant COMPONENT\n"
-            + "  allow_dnd PACKAGE\n"
-            + "  disallow_dnd PACKAGE\n"
+            + "  allow_listener COMPONENT [user_id (current user if not specified)]\n"
+            + "  disallow_listener COMPONENT [user_id (current user if not specified)]\n"
+            + "  allow_assistant COMPONENT [user_id (current user if not specified)]\n"
+            + "  remove_assistant COMPONENT [user_id (current user if not specified)]\n"
+            + "  allow_dnd PACKAGE [user_id (current user if not specified)]\n"
+            + "  disallow_dnd PACKAGE [user_id (current user if not specified)]\n"
             + "  suspend_package PACKAGE\n"
             + "  unsuspend_package PACKAGE\n"
             + "  post [--help | flags] TAG TEXT";
@@ -109,14 +110,24 @@ public class NotificationShellCmd extends ShellCommand {
         try {
             switch (cmd.replace('-', '_')) {
                 case "allow_dnd": {
-                    mBinderService.setNotificationPolicyAccessGranted(
-                            getNextArgRequired(), true);
+                    String packageName = getNextArgRequired();
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    mBinderService.setNotificationPolicyAccessGrantedForUser(
+                            packageName, userId, true);
                 }
                 break;
 
                 case "disallow_dnd": {
-                    mBinderService.setNotificationPolicyAccessGranted(
-                            getNextArgRequired(), false);
+                    String packageName = getNextArgRequired();
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    mBinderService.setNotificationPolicyAccessGrantedForUser(
+                            packageName, userId, false);
                 }
                 break;
                 case "allow_listener": {
@@ -125,13 +136,11 @@ public class NotificationShellCmd extends ShellCommand {
                         pw.println("Invalid listener - must be a ComponentName");
                         return -1;
                     }
-                    String userId = getNextArg();
-                    if (userId == null) {
-                        mBinderService.setNotificationListenerAccessGranted(cn, true);
-                    } else {
-                        mBinderService.setNotificationListenerAccessGrantedForUser(
-                                cn, Integer.parseInt(userId), true);
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
                     }
+                    mBinderService.setNotificationListenerAccessGrantedForUser(cn, userId, true);
                 }
                 break;
                 case "disallow_listener": {
@@ -140,13 +149,11 @@ public class NotificationShellCmd extends ShellCommand {
                         pw.println("Invalid listener - must be a ComponentName");
                         return -1;
                     }
-                    String userId = getNextArg();
-                    if (userId == null) {
-                        mBinderService.setNotificationListenerAccessGranted(cn, false);
-                    } else {
-                        mBinderService.setNotificationListenerAccessGrantedForUser(
-                                cn, Integer.parseInt(userId), false);
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
                     }
+                    mBinderService.setNotificationListenerAccessGrantedForUser(cn, userId, false);
                 }
                 break;
                 case "allow_assistant": {
@@ -155,7 +162,11 @@ public class NotificationShellCmd extends ShellCommand {
                         pw.println("Invalid assistant - must be a ComponentName");
                         return -1;
                     }
-                    mBinderService.setNotificationAssistantAccessGranted(cn, true);
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    mBinderService.setNotificationAssistantAccessGrantedForUser(cn, userId, true);
                 }
                 break;
                 case "disallow_assistant": {
@@ -164,7 +175,11 @@ public class NotificationShellCmd extends ShellCommand {
                         pw.println("Invalid assistant - must be a ComponentName");
                         return -1;
                     }
-                    mBinderService.setNotificationAssistantAccessGranted(cn, false);
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    mBinderService.setNotificationAssistantAccessGrantedForUser(cn, userId, false);
                 }
                 break;
                 case "suspend_package": {
@@ -176,6 +191,7 @@ public class NotificationShellCmd extends ShellCommand {
                     // only use for testing
                     mDirectService.simulatePackageSuspendBroadcast(false, getNextArgRequired());
                 }
+                break;
                 case "distract_package": {
                     // only use for testing
                     // Flag values are in
