@@ -664,8 +664,15 @@ public class GraphicsEnvironment {
           .append(abi);
         final String paths = sb.toString();
 
-        if (DEBUG) Log.v(TAG, "gfx driver package libs: " + paths);
-        setDriverPath(paths);
+        final String sphalLibraries =
+                coreSettings.getString(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES);
+
+        if (DEBUG) {
+            Log.v(TAG,
+                    "gfx driver package search path: " + paths
+                            + ", required sphal libraries: " + sphalLibraries);
+        }
+        setDriverPathAndSphalLibraries(paths, sphalLibraries);
 
         if (driverAppInfo.metaData == null) {
             throw new NullPointerException("apk's meta-data cannot be null");
@@ -700,7 +707,7 @@ public class GraphicsEnvironment {
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
     private static native void setDebugLayers(String layers);
     private static native void setDebugLayersGLES(String layers);
-    private static native void setDriverPath(String path);
+    private static native void setDriverPathAndSphalLibraries(String path, String sphalLibraries);
     private static native void setGpuStats(String driverPackageName, String driverVersionName,
             long driverVersionCode, long driverBuildTime, String appPackageName);
     private static native void setAngleInfo(String path, String appPackage, String devOptIn,
