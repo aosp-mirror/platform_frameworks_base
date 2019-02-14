@@ -60,6 +60,8 @@ oneway interface ISessionCallback {
             long pos);
     void notifyRate(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             in Rating rating);
+    void notifySetPlaybackSpeed(String packageName, int pid, int uid,
+            in ControllerCallbackLink caller, float speed);
     void notifyCustomAction(String packageName, int pid, int uid, in ControllerCallbackLink caller,
             String action, in Bundle args);
 

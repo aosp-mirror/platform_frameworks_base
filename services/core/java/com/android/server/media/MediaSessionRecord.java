@@ -1207,6 +1207,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
+        public void setPlaybackSpeed(String packageName, int pid, int uid,
+                ControllerCallbackLink caller, float speed) {
+            try {
+                mCb.notifySetPlaybackSpeed(packageName, pid, uid, caller, speed);
+            } catch (RuntimeException e) {
+                Slog.e(TAG, "Remote failure in setPlaybackSpeed.", e);
+            }
+        }
+
         public void adjustVolume(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, boolean asSystemService, int direction) {
             try {
@@ -1443,6 +1452,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void rate(String packageName, ControllerCallbackLink caller, Rating rating) {
             mSessionCb.rate(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller,
                     rating);
+        }
+
+        @Override
+        public void setPlaybackSpeed(String packageName, ControllerCallbackLink caller,
+                float speed) {
+            mSessionCb.setPlaybackSpeed(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
+                    caller, speed);
         }
 
         @Override

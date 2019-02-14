@@ -462,6 +462,25 @@ public final class SessionCallbackLink implements Parcelable {
     }
 
     /**
+     * Notify session that a controller requests changing playback speed.
+     *
+     * @param packageName the package name of the controller
+     * @param pid the pid of the controller
+     * @param uid the uid of the controller
+     * @param caller the {@link ControllerCallbackLink} of the controller
+     * @param speed the playback speed
+     */
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void notifySetPlaybackSpeed(@NonNull String packageName, int pid, int uid,
+            @NonNull ControllerCallbackLink caller, float speed) {
+        try {
+            mISessionCallback.notifySetPlaybackSpeed(packageName, pid, uid, caller, speed);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Notify session that a controller sends a custom action.
      *
      * @param packageName the package name of the controller
@@ -871,6 +890,23 @@ public final class SessionCallbackLink implements Parcelable {
             }
         }
 
+        @Override
+        public void notifySetPlaybackSpeed(String packageName, int pid, int uid,
+                ControllerCallbackLink caller, float speed) {
+            ensureMediaControlPermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaSessionEngine sessionImpl = mSessionImpl.get();
+                if (sessionImpl != null) {
+                    sessionImpl.dispatchSetPlaybackSpeed(
+                            createRemoteUserInfo(packageName, pid, uid), speed);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void notifyCustomAction(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String action, Bundle args) {
             ensureMediaControlPermission();

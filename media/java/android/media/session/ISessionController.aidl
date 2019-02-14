@@ -76,6 +76,7 @@ interface ISessionController {
     void rewind(String packageName, in ControllerCallbackLink caller);
     void seekTo(String packageName, in ControllerCallbackLink caller, long pos);
     void rate(String packageName, in ControllerCallbackLink caller, in Rating rating);
+    void setPlaybackSpeed(String packageName, in ControllerCallbackLink caller, float speed);
     void sendCustomAction(String packageName, in ControllerCallbackLink caller,
             String action, in Bundle args);
     MediaMetadata getMetadata();
