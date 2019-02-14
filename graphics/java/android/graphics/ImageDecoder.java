@@ -372,7 +372,7 @@ public final class ImageDecoder implements AutoCloseable {
             }
             mResources = res;
             mInputStream = is;
-            mInputDensity = res != null ? inputDensity : Bitmap.DENSITY_NONE;
+            mInputDensity = inputDensity;
         }
 
         final Resources mResources;
