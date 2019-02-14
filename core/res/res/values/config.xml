@@ -3252,7 +3252,7 @@
          skinny aspect ratio that is not expected to be widely used. -->
     <item name="config_pictureInPictureMinAspectRatio" format="float" type="dimen">0.41841004184</item>
 
-    <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture. Any
+    <!-- The maximum aspect ratio (width/height) that is supported for picture-in-picture. Any
          ratio larger than this is considered to wide and short to be usable. Currently 2.39:1. -->
     <item name="config_pictureInPictureMaxAspectRatio" format="float" type="dimen">2.39</item>
 
@@ -3272,6 +3272,11 @@
              2 - 1 snap target: 1:1
     -->
     <integer name="config_dockedStackDividerSnapMode">0</integer>
+
+    <!-- The maximum aspect ratio (longerSide/shorterSide) that is treated as close-to-square. If
+         config_forceDefaultOrientation is set to true, the rotation on a close-to-square display
+         will be fixed. -->
+    <item name="config_closeToSquareDisplayMaxAspectRatio" format="float" type="dimen">1.333</item>
 
     <!-- List of comma separated package names for which we the system will not show crash, ANR,
          etc. dialogs. -->

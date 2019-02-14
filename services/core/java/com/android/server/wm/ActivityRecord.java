@@ -2677,8 +2677,9 @@ final class ActivityRecord extends ConfigurationContainer {
      * Get the configuration orientation by the requested screen orientation
      * ({@link ActivityInfo.ScreenOrientation}) of this activity.
      *
-     * @return orientation in ({@link #ORIENTATION_LANDSCAPE}, {@link #ORIENTATION_PORTRAIT},
-     *         {@link #ORIENTATION_UNDEFINED}).
+     * @return orientation in ({@link Configuration#ORIENTATION_LANDSCAPE},
+     *         {@link Configuration#ORIENTATION_PORTRAIT},
+     *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
     int getRequestedConfigurationOrientation() {
         final int screenOrientation = getOrientation();
@@ -2936,14 +2937,36 @@ final class ActivityRecord extends ConfigurationContainer {
                 // should be given the aspect ratio.
                 activityWidth = (int) ((activityHeight * maxAspectRatio) + 0.5f);
             }
-        } else if (containingRatio < minAspectRatio && minAspectRatio != 0) {
-            if (containingAppWidth < containingAppHeight) {
-                // Width is the shorter side, so we use the height to figure-out what the max. width
-                // should be given the aspect ratio.
+        } else if (containingRatio < minAspectRatio) {
+            boolean adjustWidth;
+            switch (getRequestedConfigurationOrientation()) {
+                case ORIENTATION_LANDSCAPE:
+                    // Width should be the longer side for this landscape app, so we use the width
+                    // to figure-out what the max. height should be given the aspect ratio.
+                    adjustWidth = false;
+                    break;
+                case ORIENTATION_PORTRAIT:
+                    // Height should be the longer side for this portrait app, so we use the height
+                    // to figure-out what the max. width should be given the aspect ratio.
+                    adjustWidth = true;
+                    break;
+                default:
+                    // This app doesn't have a preferred orientation, so we keep the length of the
+                    // longer side, and use it to figure-out the length of the shorter side.
+                    if (containingAppWidth < containingAppHeight) {
+                        // Width is the shorter side, so we use the height to figure-out what the
+                        // max. width should be given the aspect ratio.
+                        adjustWidth = true;
+                    } else {
+                        // Height is the shorter side, so we use the width to figure-out what the
+                        // max. height should be given the aspect ratio.
+                        adjustWidth = false;
+                    }
+                    break;
+            }
+            if (adjustWidth) {
                 activityWidth = (int) ((activityHeight / minAspectRatio) + 0.5f);
             } else {
-                // Height is the shorter side, so we use the width to figure-out what the max.
-                // height should be given the aspect ratio.
                 activityHeight = (int) ((activityWidth / minAspectRatio) + 0.5f);
             }
         }

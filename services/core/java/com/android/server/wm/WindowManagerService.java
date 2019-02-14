@@ -446,7 +446,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
-    final WindowManagerPolicy mPolicy;
+    @VisibleForTesting
+    WindowManagerPolicy mPolicy;
 
     final IActivityManager mActivityManager;
     // TODO: Probably not needed once activities are fully in WM.
@@ -4263,9 +4264,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mMaxUiWidth > 0) {
                 mRoot.forAllDisplays(displayContent -> displayContent.setMaxUiWidth(mMaxUiWidth));
             }
-            applyForcedPropertiesForDefaultDisplay();
+            final boolean changed = applyForcedPropertiesForDefaultDisplay();
             mAnimator.ready();
             mDisplayReady = true;
+            if (changed) {
+                reconfigureDisplayLocked(getDefaultDisplayContentLocked());
+            }
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
         }
@@ -4865,7 +4869,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /** The global settings only apply to default display. */
-    private void applyForcedPropertiesForDefaultDisplay() {
+    private boolean applyForcedPropertiesForDefaultDisplay() {
+        boolean changed = false;
         final DisplayContent displayContent = getDefaultDisplayContentLocked();
         // Display size.
         String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
@@ -4885,6 +4890,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         Slog.i(TAG_WM, "FORCED DISPLAY SIZE: " + width + "x" + height);
                         displayContent.updateBaseDisplayMetrics(width, height,
                                 displayContent.mBaseDisplayDensity);
+                        changed = true;
                     }
                 } catch (NumberFormatException ex) {
                 }
@@ -4893,17 +4899,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Display density.
         final int density = getForcedDisplayDensityForUserLocked(mCurrentUserId);
-        if (density != 0) {
+        if (density != 0 && density != displayContent.mBaseDisplayDensity) {
             displayContent.mBaseDisplayDensity = density;
+            changed = true;
         }
 
         // Display scaling mode.
         int mode = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_SCALING_FORCE, 0);
-        if (mode != 0) {
+        if (displayContent.mDisplayScalingDisabled != (mode != 0)) {
             Slog.i(TAG_WM, "FORCED DISPLAY SCALING DISABLED");
             displayContent.mDisplayScalingDisabled = true;
+            changed = true;
         }
+        return changed;
     }
 
     @Override

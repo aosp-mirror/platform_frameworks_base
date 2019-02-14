@@ -60,6 +60,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.After;
 import org.junit.Before;
@@ -113,6 +114,7 @@ public class DisplayRotationTests {
     public static void setUpOnce() {
         sMockWm = mock(WindowManagerService.class);
         sMockWm.mPowerManagerInternal = mock(PowerManagerInternal.class);
+        sMockWm.mPolicy = mock(WindowManagerPolicy.class);
     }
 
     @Before
@@ -807,6 +809,8 @@ public class DisplayRotationTests {
 
             mMockDisplayContent = mock(WindowTestUtils.TestDisplayContent.class);
             mMockDisplayContent.isDefaultDisplay = mIsDefaultDisplay;
+            when(mMockDisplayContent.calculateDisplayCutoutForRotation(anyInt()))
+                    .thenReturn(WmDisplayCutout.NO_CUTOUT);
 
             mMockDisplayPolicy = mock(DisplayPolicy.class);
 
