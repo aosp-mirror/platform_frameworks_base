@@ -2832,6 +2832,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) {
             log(nai.name() + " got DISCONNECTED, was satisfying " + nai.numNetworkRequests());
         }
+        // Clear all notifications of this network.
+        mNotifier.clearNotification(nai.network.netId);
         // A network agent has disconnected.
         // TODO - if we move the logic to the network agent (have them disconnect
         // because they lost all their requests or because their score isn't good)
