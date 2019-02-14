@@ -506,9 +506,9 @@ static jstring ImageDecoder_nGetMimeType(JNIEnv* env, jobject /*clazz*/, jlong n
 
 static jobject ImageDecoder_nGetColorSpace(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* codec = reinterpret_cast<ImageDecoder*>(nativePtr)->mCodec.get();
-    auto colorType = codec->computeOutputColorType(codec->getInfo().colorType());
+    auto colorType = codec->computeOutputColorType(kN32_SkColorType);
     sk_sp<SkColorSpace> colorSpace = codec->computeOutputColorSpace(colorType);
-    return GraphicsJNI::getColorSpace(env, colorSpace, colorType);
+    return GraphicsJNI::getColorSpace(env, colorSpace.get(), colorType);
 }
 
 static const JNINativeMethod gImageDecoderMethods[] = {

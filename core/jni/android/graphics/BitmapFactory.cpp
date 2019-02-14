@@ -307,7 +307,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         env->SetObjectField(options, gOptions_outConfigFieldID, config);
 
         env->SetObjectField(options, gOptions_outColorSpaceFieldID,
-                GraphicsJNI::getColorSpace(env, decodeColorSpace, decodeColorType));
+                GraphicsJNI::getColorSpace(env, decodeColorSpace.get(), decodeColorType));
 
         if (onlyDecodeSize) {
             return nullptr;

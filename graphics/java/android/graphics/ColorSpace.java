@@ -1475,7 +1475,7 @@ public abstract class ColorSpace {
                 x -> absRcpResponse(x, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4),
                 x -> absResponse(x, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4),
                 -0.799f, 2.399f,
-                null, // FIXME: Use SRGB_TRANSFER_PARAMETERS
+                SRGB_TRANSFER_PARAMETERS,
                 Named.EXTENDED_SRGB.ordinal()
         );
         sNamedColorSpaces[Named.LINEAR_EXTENDED_SRGB.ordinal()] = new ColorSpace.Rgb(
