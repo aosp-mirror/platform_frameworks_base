@@ -18,46 +18,43 @@
      work around this for now with LinearLayouts. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="72dp"
-    android:layout_height="72dp"
-    android:gravity="center"
+    android:layout_width="@dimen/global_actions_grid_item_width"
+    android:layout_height="@dimen/global_actions_grid_item_height"
+    android:gravity="top|center_horizontal"
     android:orientation="vertical"
     android:layout_marginTop="@dimen/global_actions_grid_item_vertical_margin"
     android:layout_marginBottom="@dimen/global_actions_grid_item_vertical_margin"
     android:layout_marginLeft="@dimen/global_actions_grid_item_side_margin"
     android:layout_marginRight="@dimen/global_actions_grid_item_side_margin"
-    android:paddingEnd="4dip"
-    android:paddingStart="4dip">
-
+>
     <ImageView
         android:id="@*android:id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="center"
+        android:layout_width="@dimen/global_actions_grid_item_icon_width"
+        android:layout_height="@dimen/global_actions_grid_item_icon_height"
+        android:layout_marginTop="@dimen/global_actions_grid_item_icon_top_margin"
+        android:layout_marginBottom="@dimen/global_actions_grid_item_icon_bottom_margin"
+        android:layout_marginLeft="@dimen/global_actions_grid_item_icon_side_margin"
+        android:layout_marginRight="@dimen/global_actions_grid_item_icon_side_margin"
         android:scaleType="center"
         android:alpha="?android:attr/primaryContentAlpha"
     />
 
     <TextView
         android:id="@*android:id/message"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:paddingTop="10dp"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="12dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:singleLine="true"
     />
 
     <TextView
+        android:visibility="gone"
         android:id="@*android:id/status"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
         android:gravity="center"
         android:textColor="?android:attr/textColorTertiary"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:singleLine="true"
     />
 </LinearLayout>

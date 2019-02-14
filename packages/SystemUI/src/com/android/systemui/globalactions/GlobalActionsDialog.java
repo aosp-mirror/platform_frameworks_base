@@ -33,7 +33,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -161,8 +160,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final ScreenshotHelper mScreenshotHelper;
     private final ScreenRecordHelper mScreenRecordHelper;
 
-    private int mLastRotation;
-
     /**
      * @param context everything needs a context :(
      */
@@ -204,8 +201,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
         mScreenshotHelper = new ScreenshotHelper(context);
         mScreenRecordHelper = new ScreenRecordHelper(context);
-
-        mLastRotation = RotationUtils.getRotation(mContext);
 
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
@@ -430,15 +425,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @Override
     public void onUiModeChanged() {
         mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
-    }
-
-    @Override
-    public void onConfigChanged(Configuration newConfig) {
-        int rotation = RotationUtils.getRotation(mContext);
-        if (rotation != mLastRotation) {
-            mDialog.onRotate();
-        }
-        mLastRotation = rotation;
     }
 
     public void destroy() {
@@ -1540,13 +1526,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     return true;
                 }
             });
-        }
-
-        public void onRotate() {
-            if (mShowing && isGridEnabled(mContext)) {
-                initializeLayout();
-                updateList();
-            }
+            mGlobalActionsLayout.setRotationListener(this::onRotate);
         }
 
         private int getGlobalActionsLayoutId(Context context) {
@@ -1702,6 +1682,13 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         public void setKeyguardShowing(boolean keyguardShowing) {
             mKeyguardShowing = keyguardShowing;
+        }
+
+        public void onRotate(int from, int to) {
+            if (mShowing && isGridEnabled(mContext)) {
+                initializeLayout();
+                updateList();
+            }
         }
     }
 
