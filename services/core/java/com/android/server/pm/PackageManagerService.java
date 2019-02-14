@@ -3306,7 +3306,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // feature flags should cause us to invalidate any caches.
         final String cacheName = SystemProperties.digestOf(
                 "ro.build.fingerprint",
-                "persist.sys.isolated_storage");
+                StorageManager.PROP_ISOLATED_STORAGE,
+                StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT);
 
         // Reconcile cache directories, keeping only what we'd actually use.
         for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
