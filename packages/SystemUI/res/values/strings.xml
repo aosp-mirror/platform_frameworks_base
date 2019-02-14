@@ -1582,19 +1582,19 @@
     <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
     <string name="inline_keep_showing">Keep showing these notifications?</string>
 
-    <!-- Notification inline controls: block notifications button -->
+    <!-- Notification inline controls: block notifications button [CHAR_LIMIT=25] -->
     <string name="inline_stop_button">Stop notifications</string>
 
     <!-- Notification inline controls: button to deliver notifications silently from this channel [CHAR_LIMIT=35] -->
     <string name="inline_deliver_silently_button">Deliver Silently</string>
 
-    <!-- Notification inline controls: button to block notifications from this channel [CHAR_LIMIT=35] -->
+    <!-- Notification inline controls: button to block notifications from this channel [CHAR_LIMIT=20] -->
     <string name="inline_block_button">Block</string>
 
-    <!-- Notification inline controls: keep getting notifications button -->
+    <!-- Notification inline controls: keep getting notifications button [CHAR_LIMIT=25] -->
     <string name="inline_keep_button">Keep showing</string>
 
-    <!-- Notification inline controls: minimize notifications button -->
+    <!-- Notification inline controls: minimize notifications button [CHAR_LIMIT=20] -->
     <string name="inline_minimize_button">Minimize</string>
 
     <!-- Notification inline controls: button to show notifications silently, without alerting the user [CHAR_LIMIT=35] -->
