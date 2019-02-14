@@ -151,6 +151,7 @@ public class ServiceInfo extends ComponentInfo
      * @hide
      */
     @IntDef(flag = true, prefix = { "FOREGROUND_SERVICE_TYPE_" }, value = {
+            FOREGROUND_SERVICE_TYPE_MANIFEST,
             FOREGROUND_SERVICE_TYPE_NONE,
             FOREGROUND_SERVICE_TYPE_DATA_SYNC,
             FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
@@ -180,10 +181,10 @@ public class ServiceInfo extends ComponentInfo
     }
 
     /**
-     * Return the current foreground service type.
-     * @return the current foreground service type.
+     * Return foreground service type specified in the manifest..
+     * @return foreground service type specified in the manifest.
      */
-    public int getForegroundServiceType() {
+    public @ForegroundServiceType int getForegroundServiceType() {
         return mForegroundServiceType;
     }
 
