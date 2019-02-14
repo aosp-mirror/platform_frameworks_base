@@ -2109,6 +2109,22 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_REVIEW_APP_PERMISSION_USAGE =
             "android.intent.action.REVIEW_APP_PERMISSION_USAGE";
 
+    /**
+     * Activity action: Launch UI to review running accessibility services.
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES =
+            "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).

@@ -314,6 +314,7 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(String, int, String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
+    field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
     field public static final String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
@@ -1379,6 +1380,7 @@ package android.content {
     field public static final String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
+    field public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES = "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
     field @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public static final String ACTION_REVIEW_APP_PERMISSION_USAGE = "android.intent.action.REVIEW_APP_PERMISSION_USAGE";
     field public static final String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
     field public static final String ACTION_REVIEW_PERMISSION_USAGE = "android.intent.action.REVIEW_PERMISSION_USAGE";
