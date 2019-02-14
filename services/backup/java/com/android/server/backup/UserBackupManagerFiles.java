@@ -48,4 +48,9 @@ final class UserBackupManagerFiles {
         // is a staging dir, we dont need to copy below dir to new system user dir
         return new File(Environment.getDownloadCacheDirectory(), BACKUP_STAGING_DIR);
     }
+
+    /** Stored in the system user's directory and the file is indexed by the user it refers to. */
+    static File getStateFileInSystemDir(String prefix, int userId) {
+        return new File(getBaseStateDir(UserHandle.USER_SYSTEM), prefix + "-" + userId);
+    }
 }

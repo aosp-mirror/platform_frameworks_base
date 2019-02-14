@@ -57,6 +57,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.backup.utils.RandomAccessFileUtils;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -125,6 +127,7 @@ public class TrampolineTest {
     private File mTestDir;
     private File mSuppressFile;
     private File mActivatedFile;
+    private File mRememberActivatedFile;
 
     @Before
     public void setUp() throws Exception {
@@ -153,6 +156,8 @@ public class TrampolineTest {
 
         mActivatedFile = new File(mTestDir, "activate-" + NON_USER_SYSTEM);
         TrampolineTestable.sActivatedFiles.append(NON_USER_SYSTEM, mActivatedFile);
+        mRememberActivatedFile = new File(mTestDir, "rem-activate-" + NON_USER_SYSTEM);
+        TrampolineTestable.sRememberActivatedFiles.append(NON_USER_SYSTEM, mRememberActivatedFile);
 
         mTrampoline = new TrampolineTestable(mContextMock);
     }
@@ -408,6 +413,34 @@ public class TrampolineTest {
         assertTrue(mTrampoline.isBackupServiceActive(NON_USER_SYSTEM));
         assertFalse(mTrampoline.isBackupServiceActive(otherUser));
         activateFile.delete();
+    }
+
+    @Test
+    public void setBackupServiceActive_forNonSystemUser_remembersActivated() {
+        mTrampoline.initializeService();
+
+        mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, true);
+
+        assertTrue(RandomAccessFileUtils.readBoolean(mRememberActivatedFile, false));
+    }
+
+    @Test
+    public void setBackupServiceActiveFalse_forNonSystemUser_remembersActivated() {
+        mTrampoline.initializeService();
+
+        mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, false);
+
+        assertFalse(RandomAccessFileUtils.readBoolean(mRememberActivatedFile, true));
+    }
+
+    @Test
+    public void setBackupServiceActiveTwice_forNonSystemUser_remembersLastActivated() {
+        mTrampoline.initializeService();
+
+        mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, true);
+        mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, false);
+
+        assertFalse(RandomAccessFileUtils.readBoolean(mRememberActivatedFile, true));
     }
 
     @Test
@@ -1291,6 +1324,7 @@ public class TrampolineTest {
         static BackupManagerService sBackupManagerServiceMock = null;
         static File sSuppressFile = null;
         static SparseArray<File> sActivatedFiles = new SparseArray<>();
+        static SparseArray<File> sRememberActivatedFiles = new SparseArray<>();
         static UserManager sUserManagerMock = null;
         private int mCreateServiceCallsCount = 0;
 
@@ -1311,6 +1345,11 @@ public class TrampolineTest {
         @Override
         protected File getSuppressFileForSystemUser() {
             return sSuppressFile;
+        }
+
+        @Override
+        protected File getRememberActivatedFileForNonSystemUser(int userId) {
+            return sRememberActivatedFiles.get(userId);
         }
 
         @Override
