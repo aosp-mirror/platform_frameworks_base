@@ -22,23 +22,19 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import java.util.Collection;
 import java.util.HashMap;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Keeps track of active bubbles.
  */
+@Singleton
 class BubbleData {
 
     private HashMap<String, Bubble> mBubbles = new HashMap<>();
 
-    private static BubbleData sBubbleData = null;
-
-    private BubbleData() {}
-
-    public static BubbleData getInstance() {
-        if (sBubbleData == null) {
-            sBubbleData = new BubbleData();
-        }
-        return sBubbleData;
-    }
+    @Inject
+    BubbleData() {}
 
     /**
      * The set of bubbles.

@@ -85,6 +85,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
     private final SpringAnimation mExpandedViewXAnim;
     private final SpringAnimation mExpandedViewYAnim;
+    private final BubbleData mBubbleData;
 
     private PhysicsAnimationLayout mBubbleContainer;
     private StackAnimationController mStackAnimationController;
@@ -92,7 +93,6 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
 
     private FrameLayout mExpandedViewContainer;
 
-    private BubbleData mBubbleData;
 
     private int mBubbleSize;
     private int mBubblePadding;
@@ -140,10 +140,10 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         }
     };
 
-    public BubbleStackView(Context context) {
+    public BubbleStackView(Context context, BubbleData data) {
         super(context);
-        mBubbleData = BubbleData.getInstance();
 
+        mBubbleData = data;
         mInflater = LayoutInflater.from(context);
         mTouchHandler = new BubbleTouchHandler(context);
         setOnTouchListener(mTouchHandler);
