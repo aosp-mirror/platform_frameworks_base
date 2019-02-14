@@ -65,4 +65,7 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert" />
 
     <style name="Theme.DeviceDefault.DayNight" parent="Theme.DeviceDefault" />
+
+    <style name="ThemeOverlay.DeviceDefault.Accent.DayNight"
+           parent="@style/ThemeOverlay.DeviceDefault.Accent" />
 </resources>

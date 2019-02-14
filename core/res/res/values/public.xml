@@ -2951,6 +2951,8 @@
     <public-group type="style" first-id="0x010302e2">
         <!-- @hide @SystemApi -->
         <public name="Theme.DeviceDefault.DocumentsUI" />
+        <public name="Theme.DeviceDefault.DayNight" />
+        <public name="ThemeOverlay.DeviceDefault.Accent.DayNight" />
     </public-group>
 
     <public-group type="id" first-id="0x01020046">
