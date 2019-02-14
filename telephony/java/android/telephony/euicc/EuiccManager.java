@@ -305,7 +305,7 @@ public class EuiccManager {
      */
     @Nullable
     public String getEid() {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             return null;
         }
         try {
@@ -328,7 +328,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public int getOtaStatus() {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             return EUICC_OTA_STATUS_UNAVAILABLE;
         }
         try {
@@ -363,7 +363,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void downloadSubscription(DownloadableSubscription subscription,
             boolean switchAfterDownload, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -425,7 +425,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             PendingIntent callbackIntent =
                     resolutionIntent.getParcelableExtra(
                             EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
@@ -462,7 +462,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDownloadableSubscriptionMetadata(
             DownloadableSubscription subscription, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -492,7 +492,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDefaultDownloadableSubscriptionList(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -511,7 +511,7 @@ public class EuiccManager {
      */
     @Nullable
     public EuiccInfo getEuiccInfo() {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             return null;
         }
         try {
@@ -536,7 +536,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -576,7 +576,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -602,7 +602,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
             int subscriptionId, String nickname, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -626,7 +626,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void eraseSubscriptions(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -656,7 +656,7 @@ public class EuiccManager {
      * @hide
      */
     public void retainSubscriptionsForFactoryReset(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfInvalid()) {
+        if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -667,15 +667,23 @@ public class EuiccManager {
         }
     }
 
-    private boolean refreshCardIdIfInvalid() {
-        if (!isEnabled()) {
-            return false;
-        }
-        // Refresh mCardId if it's invalid.
-        if (mCardId == TelephonyManager.INVALID_CARD_ID) {
+    /**
+     * Refreshes the cardId if its uninitialized, and returns whether we should continue the
+     * operation.
+     * <p>
+     * Note that after a successful refresh, the mCardId may be TelephonyManager.UNSUPPORTED_CARD_ID
+     * on older HALs. For backwards compatability, we continue to the LPA and let it decide which
+     * card to use.
+     */
+    private boolean refreshCardIdIfUninitialized() {
+        // Refresh mCardId if its UNINITIALIZED_CARD_ID
+        if (mCardId == TelephonyManager.UNINITIALIZED_CARD_ID) {
             TelephonyManager tm = (TelephonyManager)
                     mContext.getSystemService(Context.TELEPHONY_SERVICE);
             mCardId = tm.getCardIdForDefaultEuicc();
+        }
+        if (mCardId == TelephonyManager.UNINITIALIZED_CARD_ID) {
+            return false;
         }
         return true;
     }
