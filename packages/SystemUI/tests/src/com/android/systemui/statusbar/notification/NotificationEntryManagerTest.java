@@ -68,8 +68,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -143,7 +143,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         @Override
         public void onAsyncInflationFinished(NotificationEntry entry,
-                @NotificationInflater.InflationFlag int inflatedFlags) {
+                @InflationFlag int inflatedFlags) {
             super.onAsyncInflationFinished(entry, inflatedFlags);
 
             mCountDownLatch.countDown();

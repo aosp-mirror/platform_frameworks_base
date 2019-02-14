@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.notification;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.app.Notification;
 import android.service.notification.StatusBarNotification;
@@ -30,7 +30,7 @@ import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationInflater;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -102,8 +102,7 @@ public class NotificationAlertingManager {
      * @param entry         entry to add
      * @param inflatedFlags flags representing content views that were inflated
      */
-    private void showAlertingView(NotificationEntry entry,
-            @NotificationInflater.InflationFlag int inflatedFlags) {
+    private void showAlertingView(NotificationEntry entry, @InflationFlag int inflatedFlags) {
         if ((inflatedFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
             // Possible for shouldHeadsUp to change between the inflation starting and ending.
             // If it does and we no longer need to heads up, we should free the view.

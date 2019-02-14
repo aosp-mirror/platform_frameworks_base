@@ -38,8 +38,8 @@ import android.widget.RemoteViews;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
-import com.android.systemui.statusbar.notification.row.NotificationInflaterTest;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflaterTest;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -278,7 +278,7 @@ public class NotificationTestHelper {
         entry.channel.setBlockableSystem(true);
         row.setEntry(entry);
         row.getNotificationInflater().addInflationFlags(extraInflationFlags);
-        NotificationInflaterTest.runThenWaitForInflation(
+        NotificationContentInflaterTest.runThenWaitForInflation(
                 () -> row.inflateViews(),
                 row.getNotificationInflater());
 

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,7 +31,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
