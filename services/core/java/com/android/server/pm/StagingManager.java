@@ -156,12 +156,8 @@ public class StagingManager {
         boolean success = true;
 
         // STOPSHIP: TODO(b/123753157): Verify APKs through Package Verifier.
-        if (!sessionContainsApex(session)) {
-            // TODO: Decide whether we want to fail fast by detecting signature mismatches for APKs,
-            // right away.
-            session.setStagedSessionReady();
-            return;
-        }
+        // TODO: Decide whether we want to fail fast by detecting signature mismatches for APKs,
+        // right away.
 
         final ApexInfoList apexInfoList = new ApexInfoList();
         // APEX checks. For single-package sessions, check if they contain an APEX. For
@@ -227,7 +223,8 @@ public class StagingManager {
         }
 
         session.setStagedSessionReady();
-        if (!mApexManager.markStagedSessionReady(session.sessionId)) {
+        if (sessionContainsApex(session)
+                && !mApexManager.markStagedSessionReady(session.sessionId)) {
             session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "APEX staging failed, check logcat messages from apexd for more "
                             + "details.");
