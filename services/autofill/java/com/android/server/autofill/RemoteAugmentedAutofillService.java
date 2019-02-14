@@ -32,6 +32,7 @@ import android.service.autofill.augmented.AugmentedAutofillService;
 import android.service.autofill.augmented.IAugmentedAutofillService;
 import android.service.autofill.augmented.IFillCallback;
 import android.text.format.DateUtils;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
@@ -57,7 +58,7 @@ final class RemoteAugmentedAutofillService
     }
 
     @Nullable
-    public static ComponentName getComponentName(@NonNull String componentName,
+    static Pair<ServiceInfo, ComponentName> getComponentName(@NonNull String componentName,
             @UserIdInt int userId, boolean isTemporary) {
         int flags = PackageManager.GET_META_DATA;
         if (!isTemporary) {
@@ -78,7 +79,7 @@ final class RemoteAugmentedAutofillService
             Slog.e(TAG, "Error getting service info for '" + componentName + "': " + e);
             return null;
         }
-        return serviceComponent;
+        return new Pair<>(serviceInfo, serviceComponent);
     }
 
     @Override // from AbstractRemoteService
