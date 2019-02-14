@@ -128,7 +128,13 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC;
         final long identity = Binder.clearCallingIdentity();
         try {
-            return InputManager.getInstance().injectInputEvent(event, mode);
+            IWindowManager manager = IWindowManager.Stub.asInterface(
+                    ServiceManager.getService(Context.WINDOW_SERVICE));
+            try {
+                return manager.injectInputAfterTransactionsApplied(event, mode);
+            } catch (RemoteException e) {
+            }
+            return false;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
