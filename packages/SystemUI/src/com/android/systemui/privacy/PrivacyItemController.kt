@@ -31,6 +31,9 @@ import com.android.systemui.Dependency.MAIN_HANDLER_NAME
 import com.android.systemui.R
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
+import com.android.systemui.Dumpable
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Named
@@ -42,7 +45,7 @@ class PrivacyItemController @Inject constructor(
         private val appOpsController: AppOpsController,
         @Named(MAIN_HANDLER_NAME) private val uiHandler: Handler,
         @Named(BG_HANDLER_NAME) private val bgHandler: Handler
-) {
+) : Dumpable {
 
     companion object {
         val OPS = intArrayOf(AppOpsManager.OP_CAMERA,
@@ -56,7 +59,10 @@ class PrivacyItemController @Inject constructor(
         const val SYSTEM_UID = 1000
     }
 
-    private var privacyList = emptyList<PrivacyItem>()
+    @VisibleForTesting
+    internal var privacyList = emptyList<PrivacyItem>()
+        get() = field.toList() // Provides a shallow copy of the list
+
     private val userManager = context.getSystemService(UserManager::class.java)
     private var currentUserIds = emptyList<Int>()
     private var listening = false
@@ -187,6 +193,24 @@ class PrivacyItemController @Inject constructor(
     ) : Runnable {
         override fun run() {
             callback?.privacyChanged(list)
+        }
+    }
+
+    override fun dump(fd: FileDescriptor?, pw: PrintWriter?, args: Array<out String>?) {
+        pw?.println("PrivacyItemController state:")
+        pw?.println("  Listening: $listening")
+        pw?.println("  Current user ids: $currentUserIds")
+        pw?.println("  Privacy Items:")
+        privacyList.forEach {
+            pw?.print("    ")
+            pw?.println(it.toString())
+        }
+        pw?.println("  Callbacks:")
+        callbacks.forEach {
+            it.get()?.let {
+                pw?.print("    ")
+                pw?.println(it.toString())
+            }
         }
     }
 }
