@@ -917,7 +917,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         synchronized (mLock) {
             boolean enabled =
                     ((mProviderRequest != null && mProviderRequest.reportLocation
-                            && mProviderRequest.forceLocation) || (
+                            && mProviderRequest.locationSettingsIgnored) || (
                             mContext.getSystemService(LocationManager.class).isLocationEnabled()
                                     && !mDisableGps)) && !mShutdown;
             if (enabled == mEnabled) {

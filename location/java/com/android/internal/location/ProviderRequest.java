@@ -40,7 +40,7 @@ public final class ProviderRequest implements Parcelable {
      * restrictions or any other restricting factors and always satisfy this request to the best of
      * their ability. This flag should only be used in event of an emergency.
      */
-    public boolean forceLocation = false;
+    public boolean locationSettingsIgnored = false;
 
     /**
      * Whether provider shall make stronger than normal tradeoffs to substantially restrict power
@@ -70,6 +70,7 @@ public final class ProviderRequest implements Parcelable {
                     request.reportLocation = in.readInt() == 1;
                     request.interval = in.readLong();
                     request.lowPowerMode = in.readBoolean();
+                    request.locationSettingsIgnored = in.readBoolean();
                     int count = in.readInt();
                     for (int i = 0; i < count; i++) {
                         request.locationRequests.add(LocationRequest.CREATOR.createFromParcel(in));
@@ -93,6 +94,7 @@ public final class ProviderRequest implements Parcelable {
         parcel.writeInt(reportLocation ? 1 : 0);
         parcel.writeLong(interval);
         parcel.writeBoolean(lowPowerMode);
+        parcel.writeBoolean(locationSettingsIgnored);
         parcel.writeInt(locationRequests.size());
         for (LocationRequest request : locationRequests) {
             request.writeToParcel(parcel, flags);
@@ -107,7 +109,12 @@ public final class ProviderRequest implements Parcelable {
             s.append("ON");
             s.append(" interval=");
             TimeUtils.formatDuration(interval, s);
-            s.append(" lowPowerMode=" + lowPowerMode);
+            if (lowPowerMode) {
+                s.append(" lowPowerMode");
+            }
+            if (locationSettingsIgnored) {
+                s.append(" locationSettingsIgnored");
+            }
         } else {
             s.append("OFF");
         }

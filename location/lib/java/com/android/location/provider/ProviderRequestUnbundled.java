@@ -46,15 +46,15 @@ public final class ProviderRequestUnbundled {
         return mRequest.interval;
     }
 
-    public boolean getForceLocation() {
-        return mRequest.forceLocation;
+    public boolean isLocationSettingsIgnored() {
+        return mRequest.locationSettingsIgnored;
     }
 
     /**
      * Never null.
      */
     public List<LocationRequestUnbundled> getLocationRequests() {
-        List<LocationRequestUnbundled> result = new ArrayList<LocationRequestUnbundled>(
+        List<LocationRequestUnbundled> result = new ArrayList<>(
                 mRequest.locationRequests.size());
         for (LocationRequest r : mRequest.locationRequests) {
           result.add(new LocationRequestUnbundled(r));
