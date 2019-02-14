@@ -78,6 +78,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 //TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
@@ -1780,6 +1781,18 @@ public final class AutofillManager {
     }
 
     /**
+     * @deprecated use {@link #setAugmentedAutofillWhitelist(Set, Set)} instead.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @Deprecated
+    public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
+            @Nullable List<ComponentName> activities) {
+        // TODO(b/123100824): implement
+    }
+
+    /**
      * Explicitly limits augmented autofill to the given packages and activities.
      *
      * <p>To reset the whitelist, call it passing {@code null} to both arguments.
@@ -1799,8 +1812,8 @@ public final class AutofillManager {
      */
     @SystemApi
     @TestApi
-    public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
-            @Nullable List<ComponentName> activities) {
+    public void setAugmentedAutofillWhitelist(@Nullable Set<String> packages,
+            @Nullable Set<ComponentName> activities) {
         // TODO(b/123100824): implement
     }
 

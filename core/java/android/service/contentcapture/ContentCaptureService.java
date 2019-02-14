@@ -49,7 +49,9 @@ import com.android.internal.os.IResultReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A service used to capture the content of the screen to provide contextual data in other areas of
@@ -164,17 +166,9 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Explicitly limits content capture to the given packages and activities.
-     *
-     * <p>To reset the whitelist, call it passing {@code null} to both arguments.
-     *
-     * <p>Useful when the service wants to restrict content capture to a category of apps, like
-     * chat apps. For example, if the service wants to support view captures on all activities of
-     * app {@code ChatApp1} and just activities {@code act1} and {@code act2} of {@code ChatApp2},
-     * it would call: {@code setContentCaptureWhitelist(Arrays.asList("ChatApp1"),
-     * Arrays.asList(new ComponentName("ChatApp2", "act1"),
-     * new ComponentName("ChatApp2", "act2")));}
+     * @deprecated use {@link #setContentCaptureWhitelist(Set, Set)} instead
      */
+    @Deprecated
     public final void setContentCaptureWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> activities) {
         final IContentCaptureServiceCallback callback = mCallback;
@@ -187,6 +181,27 @@ public abstract class ContentCaptureService extends Service {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Explicitly limits content capture to the given packages and activities.
+     *
+     * <p>To reset the whitelist, call it passing {@code null} to both arguments.
+     *
+     * <p>Useful when the service wants to restrict content capture to a category of apps, like
+     * chat apps. For example, if the service wants to support view captures on all activities of
+     * app {@code ChatApp1} and just activities {@code act1} and {@code act2} of {@code ChatApp2},
+     * it would call: {@code setContentCaptureWhitelist(Sets.newArraySet("ChatApp1"),
+     * Sets.newArraySet(new ComponentName("ChatApp2", "act1"),
+     * new ComponentName("ChatApp2", "act2")));}
+     */
+    public final void setContentCaptureWhitelist(@Nullable Set<String> packages,
+            @Nullable Set<ComponentName> activities) {
+        setContentCaptureWhitelist(toList(packages), toList(activities));
+    }
+
+    private <T> ArrayList<T> toList(@Nullable Set<T> set) {
+        return set == null ? null : new ArrayList<T>(set);
     }
 
     /**
