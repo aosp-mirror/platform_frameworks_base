@@ -962,7 +962,7 @@ public class MediaPlayer2 implements AutoCloseable
                 return;
             }
         } catch (NullPointerException | SecurityException | IOException ex) {
-            Log.w(TAG, "Couldn't open " + uri + ": " + ex);
+            Log.w(TAG, "Couldn't open " + uri == null ? "null uri" : uri.toSafeString(), ex);
             // Fallback to media server
         }
         handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies, startPos, endPos);
