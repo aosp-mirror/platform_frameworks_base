@@ -5923,14 +5923,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
 
-            synchronized (mGlobalLock) {
-                return getActivityStartController().startActivitiesInPackage(
-                        packageUid, packageName,
-                        intents, resolvedTypes, null /* resultTo */,
-                        SafeActivityOptions.fromBundle(bOptions), userId,
-                        false /* validateIncomingUser */, null /* originatingPendingIntent */,
-                        false /* allowBackgroundActivityStart */);
-            }
+            return getActivityStartController().startActivitiesInPackage(
+                    packageUid, packageName,
+                    intents, resolvedTypes, null /* resultTo */,
+                    SafeActivityOptions.fromBundle(bOptions), userId,
+                    false /* validateIncomingUser */, null /* originatingPendingIntent */,
+                    false /* allowBackgroundActivityStart */);
         }
 
         @Override

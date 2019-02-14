@@ -46,6 +46,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
@@ -368,67 +369,70 @@ public class ActivityStartController {
         }
         final long origId = Binder.clearCallingIdentity();
         try {
+            intents = ArrayUtils.filterNotNull(intents, Intent[]::new);
+            final ActivityStarter[] starters = new ActivityStarter[intents.length];
+            // Do not hold WM global lock on this loop because when resolving intent, it may
+            // potentially acquire activity manager lock that leads to deadlock.
+            for (int i = 0; i < intents.length; i++) {
+                Intent intent = intents[i];
+
+                // Refuse possible leaked file descriptors.
+                if (intent.hasFileDescriptors()) {
+                    throw new IllegalArgumentException("File descriptors passed in Intent");
+                }
+
+                // Don't modify the client's object!
+                intent = new Intent(intent);
+
+                // Collect information about the target of the Intent.
+                ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i],
+                        0 /* startFlags */, null /* profilerInfo */, userId,
+                        ActivityStarter.computeResolveFilterUid(
+                                callingUid, realCallingUid, UserHandle.USER_NULL));
+                aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
+
+                if (aInfo != null && (aInfo.applicationInfo.privateFlags
+                        & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
+                    throw new IllegalArgumentException("FLAG_CANT_SAVE_STATE not supported here");
+                }
+
+                final boolean top = i == intents.length - 1;
+                final SafeActivityOptions checkedOptions = top
+                        ? options
+                        : null;
+                starters[i] = obtainStarter(intent, reason)
+                        .setCaller(caller)
+                        .setResolvedType(resolvedTypes[i])
+                        .setActivityInfo(aInfo)
+                        .setResultTo(resultTo)
+                        .setRequestCode(-1)
+                        .setCallingPid(callingPid)
+                        .setCallingUid(callingUid)
+                        .setCallingPackage(callingPackage)
+                        .setRealCallingPid(realCallingPid)
+                        .setRealCallingUid(realCallingUid)
+                        .setActivityOptions(checkedOptions)
+                        .setComponentSpecified(intent.getComponent() != null)
+
+                        // Top activity decides on animation being run, so we allow only for the
+                        // top one as otherwise an activity below might consume it.
+                        .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
+                        .setOriginatingPendingIntent(originatingPendingIntent)
+                        .setAllowBackgroundActivityStart(allowBackgroundActivityStart);
+            }
+
+            final ActivityRecord[] outActivity = new ActivityRecord[1];
+            // Lock the loop to ensure the activities launched in a sequence.
             synchronized (mService.mGlobalLock) {
-                ActivityRecord[] outActivity = new ActivityRecord[1];
-                for (int i=0; i < intents.length; i++) {
-                    Intent intent = intents[i];
-                    if (intent == null) {
-                        continue;
+                for (int i = 0; i < starters.length; i++) {
+                    final int startResult = starters[i].setOutActivity(outActivity).execute();
+                    if (startResult < START_SUCCESS) {
+                        // Abort by error result and recycle unused starters.
+                        for (int j = i + 1; j < starters.length; j++) {
+                            mFactory.recycle(starters[j]);
+                        }
+                        return startResult;
                     }
-
-                    // Refuse possible leaked file descriptors
-                    if (intent != null && intent.hasFileDescriptors()) {
-                        throw new IllegalArgumentException("File descriptors passed in Intent");
-                    }
-
-                    boolean componentSpecified = intent.getComponent() != null;
-
-                    // Don't modify the client's object!
-                    intent = new Intent(intent);
-
-                    // Collect information about the target of the Intent.
-                    ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i], 0,
-                            null, userId, ActivityStarter.computeResolveFilterUid(
-                                    callingUid, realCallingUid, UserHandle.USER_NULL));
-                    aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
-
-                    if (aInfo != null &&
-                            (aInfo.applicationInfo.privateFlags
-                                    & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)  != 0) {
-                        throw new IllegalArgumentException(
-                                "FLAG_CANT_SAVE_STATE not supported here");
-                    }
-
-                    final boolean top = i == intents.length - 1;
-                    final SafeActivityOptions checkedOptions = top
-                            ? options
-                            : null;
-                    final int res = obtainStarter(intent, reason)
-                            .setCaller(caller)
-                            .setResolvedType(resolvedTypes[i])
-                            .setActivityInfo(aInfo)
-                            .setResultTo(resultTo)
-                            .setRequestCode(-1)
-                            .setCallingPid(callingPid)
-                            .setCallingUid(callingUid)
-                            .setCallingPackage(callingPackage)
-                            .setRealCallingPid(realCallingPid)
-                            .setRealCallingUid(realCallingUid)
-                            .setActivityOptions(checkedOptions)
-                            .setComponentSpecified(componentSpecified)
-                            .setOutActivity(outActivity)
-
-                            // Top activity decides on animation being run, so we allow only for the
-                            // top one as otherwise an activity below might consume it.
-                            .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
-                            .setOriginatingPendingIntent(originatingPendingIntent)
-                            .setAllowBackgroundActivityStart(allowBackgroundActivityStart)
-                            .execute();
-
-                    if (res < 0) {
-                        return res;
-                    }
-
                     resultTo = outActivity[0] != null ? outActivity[0].appToken : null;
                 }
             }
