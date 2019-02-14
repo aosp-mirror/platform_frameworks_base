@@ -651,6 +651,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
+    char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
+
+    if (parseRuntimeOption("dalvik.vm.boot-image", bootImageBuf, "-Ximage:")) {
+        ALOGI("Boot image: '%s'\n", bootImageBuf);
+    }
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
