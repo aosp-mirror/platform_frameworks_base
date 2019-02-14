@@ -1065,7 +1065,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public boolean isSaved() {
-        return networkId != WifiConfiguration.INVALID_NETWORK_ID;
+        return mConfig != null;
     }
 
     public Object getTag() {
