@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
@@ -99,6 +100,11 @@ public class WifiInfo implements Parcelable {
      */
     public static final String LINK_SPEED_UNITS = "Mbps";
     private int mLinkSpeed;
+
+    /**
+     * Constant for unknown link speed.
+     */
+    public static final int LINK_SPEED_UNKNOWN = -1;
 
     /**
      * Tx(transmit) Link speed in Mbps
@@ -204,7 +210,7 @@ public class WifiInfo implements Parcelable {
         mNetworkId = -1;
         mSupplicantState = SupplicantState.UNINITIALIZED;
         mRssi = INVALID_RSSI;
-        mLinkSpeed = -1;
+        mLinkSpeed = LINK_SPEED_UNKNOWN;
         mFrequency = -1;
     }
 
@@ -215,9 +221,9 @@ public class WifiInfo implements Parcelable {
         setSSID(null);
         setNetworkId(-1);
         setRssi(INVALID_RSSI);
-        setLinkSpeed(-1);
-        setTxLinkSpeedMbps(-1);
-        setRxLinkSpeedMbps(-1);
+        setLinkSpeed(LINK_SPEED_UNKNOWN);
+        setTxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
+        setRxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
         setFrequency(-1);
         setMeteredHint(false);
         setEphemeral(false);
@@ -344,8 +350,9 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the current link speed in {@link #LINK_SPEED_UNITS}.
-     * @return the link speed or -1 if there is no valid value.
+     * @return the link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is unknown.
      * @see #LINK_SPEED_UNITS
+     * @see #LINK_SPEED_UNKNOWN
      */
     public int getLinkSpeed() {
         return mLinkSpeed;
@@ -359,8 +366,10 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the current transmit link speed in Mbps.
-     * @return the Tx link speed or -1 if there is no valid value.
+     * @return the Tx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is unknown.
+     * @see #LINK_SPEED_UNKNOWN
      */
+    @IntRange(from = -1)
     public int getTxLinkSpeedMbps() {
         return mTxLinkSpeed;
     }
@@ -375,8 +384,10 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the current receive link speed in Mbps.
-     * @return the Rx link speed or -1 if there is no valid value.
+     * @return the Rx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is unknown.
+     * @see #LINK_SPEED_UNKNOWN
      */
+    @IntRange(from = -1)
     public int getRxLinkSpeedMbps() {
         return mRxLinkSpeed;
     }
