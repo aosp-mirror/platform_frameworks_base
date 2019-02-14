@@ -248,6 +248,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_NOTIFY_VOL_EVENT = 22;
     private static final int MSG_DISPATCH_AUDIO_SERVER_STATE = 23;
     private static final int MSG_ENABLE_SURROUND_FORMATS = 24;
+    private static final int MSG_UPDATE_RINGER_MODE = 25;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -2720,7 +2721,11 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /*package*/ void setUpdateRingerModeServiceInt() {
+    /*package*/ void postUpdateRingerModeServiceInt() {
+        sendMsg(mAudioHandler, MSG_UPDATE_RINGER_MODE, SENDMSG_QUEUE, 0, 0, null, 0);
+    }
+
+    private void onUpdateRingerModeServiceInt() {
         setRingerModeInt(getRingerModeInternal(), false);
     }
 
@@ -4943,6 +4948,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_ENABLE_SURROUND_FORMATS:
                     onEnableSurroundFormats((ArrayList<Integer>) msg.obj);
+                    break;
+
+                case MSG_UPDATE_RINGER_MODE:
+                    onUpdateRingerModeServiceInt();
                     break;
             }
         }
