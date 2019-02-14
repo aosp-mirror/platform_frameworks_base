@@ -1213,6 +1213,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             l.initView();
             l.reInflateViews();
         }
+        mStatusBarNotification.clearPackageContext();
         mNotificationInflater.clearCachesAndReInflate();
         onNotificationUpdated();
     }
