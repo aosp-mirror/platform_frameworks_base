@@ -12393,6 +12393,14 @@ public final class Settings {
         public static final String GAME_DRIVER_WHITELIST = "game_driver_whitelist";
 
         /**
+         * List of libraries in sphal accessible by Game Driver
+         * The string is a list of library names, separated by colon.
+         * i.e. <lib1>:<lib2>:...:<libN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_SPHAL_LIBRARIES = "game_driver_sphal_libraries";
+
+        /**
          * Ordered GPU debug layer list for Vulkan
          * i.e. <layer1>:<layer2>:...:<layerN>
          * @hide

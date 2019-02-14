@@ -724,6 +724,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_BLACKLISTS,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_BLACKLISTS);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_SPHAL_LIBRARIES);
         p.end(gpuToken);
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);
