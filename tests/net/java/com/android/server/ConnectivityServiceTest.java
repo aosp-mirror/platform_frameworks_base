@@ -3817,11 +3817,14 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testNattSocketKeepalives() throws Exception {
+    public void testNattSocketKeepalives_SingleThreadExecutor() throws Exception {
         final ExecutorService executorSingleThread = Executors.newSingleThreadExecutor();
         doTestNattSocketKeepalivesWithExecutor(executorSingleThread);
         executorSingleThread.shutdown();
+    }
 
+    @Test
+    public void testNattSocketKeepalives_InlineExecutor() throws Exception {
         final Executor executorInline = (Runnable r) -> r.run();
         doTestNattSocketKeepalivesWithExecutor(executorInline);
     }
@@ -3963,6 +3966,7 @@ public class ConnectivityServiceTest {
         testSocket2.close();
 
         mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
     }
 
     @Test
