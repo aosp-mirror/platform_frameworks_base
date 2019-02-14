@@ -71,9 +71,6 @@ public class SmsMessage extends SmsMessageBase {
     // e.g. 23.040 9.2.2.1
     private boolean mReplyPathPresent = false;
 
-    /** The address of the receiver. */
-    private GsmSmsAddress mRecipientAddress;
-
     /**
      *  TP-Status - status of a previously submitted SMS.
      *  This field applies to SMS-STATUS-REPORT messages.  0 indicates success;
