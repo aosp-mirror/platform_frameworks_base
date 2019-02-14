@@ -46,6 +46,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 import android.view.IWindowManager;
 
@@ -71,6 +72,7 @@ import java.util.concurrent.TimeUnit;
  *  atest WmTests:AssistDataRequesterTest
  */
 @MediumTest
+@Presubmit
 public class AssistDataRequesterTest extends ActivityTestsBase {
 
     private static final String TAG = AssistDataRequesterTest.class.getSimpleName();

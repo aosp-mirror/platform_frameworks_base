@@ -40,7 +40,6 @@ import android.util.SparseBooleanArray;
 import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
@@ -112,7 +111,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         }
     }
 
-    @FlakyTest(bugId = 117117823)
     @Test
     public void testIncludedApps_expectTargetAndVisible() {
         mWm.setRecentsAnimationController(mController);
