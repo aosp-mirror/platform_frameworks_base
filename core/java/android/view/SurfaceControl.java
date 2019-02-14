@@ -189,6 +189,7 @@ public final class SurfaceControl implements Parcelable {
             IBinder toToken);
     private static native boolean nativeGetProtectedContentSupport();
     private static native void nativeSetMetadata(long transactionObj, int key, Parcel data);
+    private static native void nativeSyncInputWindows(long transactionObj);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -2101,6 +2102,17 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction transferTouchFocus(IBinder fromToken, IBinder toToken) {
             nativeTransferTouchFocus(mNativeObject, fromToken, toToken);
+            return this;
+        }
+
+        /**
+         * Waits until any changes to input windows have been sent from SurfaceFlinger to
+         * InputFlinger before returning.
+         *
+         * @hide
+         */
+        public Transaction syncInputWindows() {
+            nativeSyncInputWindows(mNativeObject);
             return this;
         }
 
