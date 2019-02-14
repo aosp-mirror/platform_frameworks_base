@@ -489,11 +489,11 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
     protoOutput->end(token);
 }
 
-void writeAtomMetricStatsToStream(const std::pair<int, StatsdStats::AtomMetricStats> &pair,
+void writeAtomMetricStatsToStream(const std::pair<int64_t, StatsdStats::AtomMetricStats> &pair,
                                   util::ProtoOutputStream *protoOutput) {
     uint64_t token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOM_METRIC_STATS |
                                         FIELD_COUNT_REPEATED);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_ID, (int32_t)pair.first);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_ID, (long long)pair.first);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_HARD_DIMENSION_LIMIT_REACHED,
                        (long long)pair.second.hardDimensionLimitReached);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_LATE_LOG_EVENT_SKIPPED,

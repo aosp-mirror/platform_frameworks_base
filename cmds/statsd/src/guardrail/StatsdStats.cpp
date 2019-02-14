@@ -497,7 +497,7 @@ void StatsdStats::noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayN
             std::min(pullStats.minBucketBoundaryDelayNs, timeDelayNs);
 }
 
-StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int metricId) {
+StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int64_t metricId) {
     auto atomMetricStatsIter = mAtomMetricStats.find(metricId);
     if (atomMetricStatsIter != mAtomMetricStats.end()) {
         return atomMetricStatsIter->second;

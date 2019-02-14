@@ -488,7 +488,7 @@ private:
     std::map<int, PulledAtomStats> mPulledAtomStats;
 
     // Maps metric ID to its stats. The size is capped by the number of metrics.
-    std::map<int, AtomMetricStats> mAtomMetricStats;
+    std::map<int64_t, AtomMetricStats> mAtomMetricStats;
 
     struct LogLossStats {
         LogLossStats(int32_t sec, int32_t count, int32_t error)
@@ -532,7 +532,7 @@ private:
      * Get a reference to AtomMetricStats for a metric. If none exists, create it. The reference
      * will live as long as `this`.
      */
-    StatsdStats::AtomMetricStats& getAtomMetricStats(int metricId);
+    StatsdStats::AtomMetricStats& getAtomMetricStats(int64_t metricId);
 
     FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);

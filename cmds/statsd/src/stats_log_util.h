@@ -74,7 +74,7 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
                               util::ProtoOutputStream* protoOutput);
 
 // Helper function to write AtomMetricStats to ProtoOutputStream
-void writeAtomMetricStatsToStream(const std::pair<int, StatsdStats::AtomMetricStats> &pair,
+void writeAtomMetricStatsToStream(const std::pair<int64_t, StatsdStats::AtomMetricStats> &pair,
                                   util::ProtoOutputStream *protoOutput);
 
 template<class T>
