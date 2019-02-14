@@ -765,7 +765,7 @@ interface ITelephony {
      * @param subId the id of the subscription.
      * @return CellNetworkScanResult containing status of scan and networks.
      */
-    CellNetworkScanResult getCellNetworkScanResults(int subId);
+    CellNetworkScanResult getCellNetworkScanResults(int subId, String callingPackage);
 
     /**
      * Perform a radio network scan and return the id of this scan.
@@ -774,10 +774,11 @@ interface ITelephony {
      * @param request Defines all the configs for network scan.
      * @param messenger Callback messages will be sent using this messenger.
      * @param binder the binder object instantiated in TelephonyManager.
+     * @param callingPackage the calling package
      * @return An id for this scan.
      */
     int requestNetworkScan(int subId, in NetworkScanRequest request, in Messenger messenger,
-            in IBinder binder);
+            in IBinder binder, in String callingPackage);
 
     /**
      * Stop an existing radio network scan.
