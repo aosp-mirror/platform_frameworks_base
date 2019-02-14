@@ -23,9 +23,12 @@
 
 namespace {
 
-void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
+void setDriverPathAndSphalLibraries_native(JNIEnv* env, jobject clazz, jstring path,
+                                           jstring sphalLibraries) {
     ScopedUtfChars pathChars(env, path);
-    android::GraphicsEnv::getInstance().setDriverPath(pathChars.c_str());
+    ScopedUtfChars sphalLibrariesChars(env, sphalLibraries);
+    android::GraphicsEnv::getInstance().setDriverPathAndSphalLibraries(pathChars.c_str(),
+                                                                       sphalLibrariesChars.c_str());
 }
 
 void setLayerPaths_native(JNIEnv* env, jobject clazz, jobject classLoader, jstring layerPaths) {
@@ -43,7 +46,7 @@ void setDebugLayers_native(JNIEnv* env, jobject clazz, jstring layers) {
 }
 
 const JNINativeMethod g_methods[] = {
-    { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
+    { "setDriverPathAndSphalLibraries", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPathAndSphalLibraries_native) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
     { "setDebugLayers", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayers_native) },
 };
