@@ -2825,7 +2825,6 @@ Lcom/android/internal/telephony/gsm/UsimPhoneBookManager;->reset()V
 Lcom/android/internal/telephony/GsmAlphabet$TextEncodingDetails;-><init>()V
 Lcom/android/internal/telephony/GsmCdmaCall;->attachFake(Lcom/android/internal/telephony/Connection;Lcom/android/internal/telephony/Call$State;)V
 Lcom/android/internal/telephony/GsmCdmaCallTracker;->clearDisconnected()V
-Lcom/android/internal/telephony/GsmCdmaCallTracker;->dialThreeWay(Ljava/lang/String;)Lcom/android/internal/telephony/Connection;
 Lcom/android/internal/telephony/GsmCdmaCallTracker;->disableDataCallInEmergencyCall(Ljava/lang/String;)V
 Lcom/android/internal/telephony/GsmCdmaCallTracker;->fakeHoldForegroundBeforeDial()V
 Lcom/android/internal/telephony/GsmCdmaCallTracker;->getPhone()Lcom/android/internal/telephony/GsmCdmaPhone;
