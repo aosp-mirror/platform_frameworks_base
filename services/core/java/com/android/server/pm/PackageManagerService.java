@@ -19569,8 +19569,17 @@ public class PackageManagerService extends IPackageManager.Stub
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
             restoreFromXml(parser, userId, TAG_DEFAULT_APPS,
                     (parser1, userId1) -> {
+                        String defaultBrowser;
                         synchronized (mPackages) {
                             mSettings.readDefaultAppsLPw(parser1, userId1);
+                            defaultBrowser = mSettings.removeDefaultBrowserPackageNameLPw(userId1);
+                        }
+                        if (defaultBrowser != null) {
+                            PackageManagerInternal.DefaultBrowserProvider provider;
+                            synchronized (mPackages) {
+                                provider = mDefaultBrowserProvider;
+                            }
+                            provider.setDefaultBrowser(defaultBrowser, userId1);
                         }
                     });
         } catch (Exception e) {
