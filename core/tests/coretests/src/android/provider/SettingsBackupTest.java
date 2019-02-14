@@ -450,6 +450,7 @@ public class SettingsBackupTest {
                     Settings.Global.GAME_DRIVER_BLACKLISTS,
                     Settings.Global.GAME_DRIVER_BLACKLIST,
                     Settings.Global.GAME_DRIVER_WHITELIST,
+                    Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
