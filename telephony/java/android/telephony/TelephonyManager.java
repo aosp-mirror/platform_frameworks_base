@@ -229,10 +229,19 @@ public class TelephonyManager {
     public static final int SRVCC_STATE_HANDOVER_CANCELED  = 3;
 
     /**
-     * An invalid UICC card identifier. See {@link #getCardIdForDefaultEuicc()} and
-     * {@link UiccCardInfo#getCardId()}.
+     * A UICC card identifier used if the device does not support the operation.
+     * For example, {@link #getCardIdForDefaultEuicc()} returns this value if the device has no
+     * eUICC, or the eUICC cannot be read.
      */
-    public static final int INVALID_CARD_ID = -1;
+    public static final int UNSUPPORTED_CARD_ID = -1;
+
+    /**
+     * A UICC card identifier used before the UICC card is loaded. See
+     * {@link #getCardIdForDefaultEuicc()} and {@link UiccCardInfo#getCardId()}.
+     * <p>
+     * Note that once the UICC card is loaded, the card ID may become {@link #UNSUPPORTED_CARD_ID}.
+     */
+    public static final int UNINITIALIZED_CARD_ID = -2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -3130,24 +3139,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Get the card ID of the default eUICC card. If there is no eUICC, returns
-     * {@link #INVALID_CARD_ID}.
+     * Get the card ID of the default eUICC card. If the eUICCs have not yet been loaded, returns
+     * {@link #UNINITIALIZED_CARD_ID}. If there is no eUICC or the device does not support card IDs
+     * for eUICCs, returns {@link #UNSUPPORTED_CARD_ID}.
      *
      * <p>The card ID is a unique identifier associated with a UICC or eUICC card. Card IDs are
      * unique to a device, and always refer to the same UICC or eUICC card unless the device goes
      * through a factory reset.
      *
-     * @return card ID of the default eUICC card.
+     * @return card ID of the default eUICC card, if loaded.
      */
     public int getCardIdForDefaultEuicc() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null) {
-                return INVALID_CARD_ID;
+                return UNINITIALIZED_CARD_ID;
             }
             return telephony.getCardIdForDefaultEuicc(mSubId, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            return INVALID_CARD_ID;
+            return UNINITIALIZED_CARD_ID;
         }
     }
 
