@@ -65,6 +65,14 @@ public class BroadcastDispatcher {
             broadcasts.add(br);
         }
 
+        int size() {
+            return broadcasts.size();
+        }
+
+        boolean isEmpty() {
+            return broadcasts.isEmpty();
+        }
+
         void writeToProto(ProtoOutputStream proto, long fieldId) {
             for (BroadcastRecord br : broadcasts) {
                 br.writeToProto(proto, fieldId);
@@ -252,22 +260,48 @@ public class BroadcastDispatcher {
         synchronized (mLock) {
             return mCurrentBroadcast == null
                     && mOrderedBroadcasts.isEmpty()
-                    && mDeferredBroadcasts.isEmpty()
-                    && mAlarmBroadcasts.isEmpty();
+                    && isDeferralsListEmpty(mDeferredBroadcasts)
+                    && isDeferralsListEmpty(mAlarmBroadcasts);
         }
     }
 
-    /**
-     * Not quite the traditional size() measurement; includes any in-process but
-     * not yet retired active outbound broadcast.
-     */
-    public int totalUndelivered() {
-        synchronized (mLock) {
-            return mAlarmBroadcasts.size()
-                    + mDeferredBroadcasts.size()
-                    + mOrderedBroadcasts.size()
-                    + (mCurrentBroadcast == null ? 0 : 1);
+    private static int pendingInDeferralsList(ArrayList<Deferrals> list) {
+        int pending = 0;
+        final int numEntries = list.size();
+        for (int i = 0; i < numEntries; i++) {
+            pending += list.get(i).size();
         }
+        return pending;
+    }
+
+    private static boolean isDeferralsListEmpty(ArrayList<Deferrals> list) {
+        return pendingInDeferralsList(list) == 0;
+    }
+
+    /**
+     * Strictly for logging, describe the currently pending contents in a human-
+     * readable way
+     */
+    public String describeStateLocked() {
+        final StringBuilder sb = new StringBuilder(128);
+        if (mCurrentBroadcast != null) {
+            sb.append("1 in flight, ");
+        }
+        sb.append(mOrderedBroadcasts.size());
+        sb.append(" ordered");
+        int n = pendingInDeferralsList(mAlarmBroadcasts);
+        if (n > 0) {
+            sb.append(", ");
+            sb.append(n);
+            sb.append(" deferrals in alarm recipients");
+        }
+        n = pendingInDeferralsList(mDeferredBroadcasts);
+        if (n > 0) {
+            sb.append(", ");
+            sb.append(n);
+            sb.append(" deferred");
+        }
+        return sb.toString();
     }
 
     // ----------------------------------
@@ -576,6 +610,26 @@ public class BroadcastDispatcher {
                     Slog.i(TAG, "Scheduling deferred broadcast recheck at " + d.deferUntil);
                 }
             }
+        }
+    }
+
+    /**
+     * Cancel all current deferrals; that is, make all currently-deferred broadcasts
+     * immediately deliverable.  Used by the wait-for-broadcast-idle mechanism.
+     */
+    public void cancelDeferrals() {
+        synchronized (mLock) {
+            zeroDeferralTimes(mAlarmBroadcasts);
+            zeroDeferralTimes(mDeferredBroadcasts);
+        }
+    }
+
+    private static void zeroDeferralTimes(ArrayList<Deferrals> list) {
+        final int num = list.size();
+        for (int i = 0; i < num; i++) {
+            Deferrals d = list.get(i);
+            // Safe to do this in-place because it won't break ordering
+            d.deferUntil = d.deferredBy = 0;
         }
     }
 

@@ -18100,8 +18100,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (!queue.isIdle()) {
                         final String msg = "Waiting for queue " + queue + " to become idle...";
                         pw.println(msg);
+                        pw.println(queue.describeState());
                         pw.flush();
                         Slog.v(TAG, msg);
+                        queue.cancelDeferrals();
                         idle = false;
                     }
                 }
