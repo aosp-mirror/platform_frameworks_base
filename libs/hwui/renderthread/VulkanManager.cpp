@@ -360,7 +360,7 @@ void VulkanManager::initialize() {
     }
 }
 
-sk_sp<GrContext> VulkanManager::createContext(GrContextOptions options) {
+sk_sp<GrContext> VulkanManager::createContext(const GrContextOptions& options) {
     auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
         if (device != VK_NULL_HANDLE) {
             return vkGetDeviceProcAddr(device, proc_name);

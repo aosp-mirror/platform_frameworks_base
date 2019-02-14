@@ -131,6 +131,8 @@ public:
 
     ANDROID_API static void disableVsync();
 
+    ANDROID_API static void preload();
+
     static void repackVectorDrawableAtlas();
 
     static void releaseVDAtlasEntries();
