@@ -687,7 +687,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    private void handleRequestLocation(boolean independentFromGnss) {
+    private void handleRequestLocation(boolean independentFromGnss, boolean isUserEmergency) {
         if (isRequestLocationRateLimited()) {
             if (DEBUG) {
                 Log.d(TAG, "RequestLocation is denied due to too frequent requests.");
@@ -723,9 +723,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 String.format(
                         "GNSS HAL Requesting location updates from %s provider for %d millis.",
                         provider, durationMillis));
+
+        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(provider,
+                LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /* minDistance= */ 0,
+                /* singleShot= */ false);
+
+        // Ignore location settings if in emergency mode.
+        if (isUserEmergency && mNIHandler.getInEmergency()) {
+            locationRequest.setLocationSettingsIgnored(true);
+        }
         try {
-            locationManager.requestLocationUpdates(provider,
-                    LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /*minDistance=*/ 0,
+            locationManager.requestLocationUpdates(locationRequest,
                     locationListener, mHandler.getLooper());
             locationListener.mNumLocationUpdateRequest++;
             mHandler.postDelayed(() -> {
@@ -1828,11 +1836,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @NativeEntryPoint
-    private void requestLocation(boolean independentFromGnss) {
+    private void requestLocation(boolean independentFromGnss, boolean isUserEmergency) {
         if (DEBUG) {
-            Log.d(TAG, "requestLocation. independentFromGnss: " + independentFromGnss);
+            Log.d(TAG, "requestLocation. independentFromGnss: " + independentFromGnss
+                    + ", isUserEmergency: "
+                    + isUserEmergency);
         }
-        sendMessage(REQUEST_LOCATION, 0, independentFromGnss);
+        sendMessage(REQUEST_LOCATION, independentFromGnss ? 1 : 0, isUserEmergency);
     }
 
     @NativeEntryPoint
@@ -1923,7 +1933,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     mNtpTimeHelper.retrieveAndInjectNtpTime();
                     break;
                 case REQUEST_LOCATION:
-                    handleRequestLocation((boolean) msg.obj);
+                    handleRequestLocation(msg.arg1 == 1, (boolean) msg.obj);
                     break;
                 case DOWNLOAD_XTRA_DATA:
                     handleDownloadXtraData();

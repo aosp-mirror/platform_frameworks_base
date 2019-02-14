@@ -548,12 +548,15 @@ struct GnssCallback : public IGnssCallback {
     Return<void> gnssReleaseWakelockCb() override;
     Return<void> gnssRequestTimeCb() override;
     Return<void> gnssRequestLocationCb(const bool independentFromGnss) override;
+
     Return<void> gnssSetSystemInfoCb(const IGnssCallback::GnssSystemInfo& info) override;
 
     // New in 1.1
     Return<void> gnssNameCb(const android::hardware::hidl_string& name) override;
 
     // New in 2.0
+    Return<void> gnssRequestLocationCb_2_0(const bool independentFromGnss, const bool isUserEmergency)
+            override;
     Return<void> gnssSetCapabilitiesCb_2_0(uint32_t capabilities) override;
     Return<void> gnssLocationCb_2_0(const GnssLocation_V2_0& location) override;
 
@@ -713,8 +716,15 @@ Return<void> GnssCallback::gnssRequestTimeCb() {
 }
 
 Return<void> GnssCallback::gnssRequestLocationCb(const bool independentFromGnss) {
+    return GnssCallback::gnssRequestLocationCb_2_0(independentFromGnss, /* isUserEmergency= */
+            false);
+}
+
+Return<void> GnssCallback::gnssRequestLocationCb_2_0(const bool independentFromGnss, const bool
+        isUserEmergency) {
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_requestLocation, boolToJbool(independentFromGnss));
+    env->CallVoidMethod(mCallbacksObj, method_requestLocation, boolToJbool(independentFromGnss),
+            boolToJbool(isUserEmergency));
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
@@ -1422,7 +1432,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification",
             "(IIIIILjava/lang/String;Ljava/lang/String;II)V");
-    method_requestLocation = env->GetMethodID(clazz, "requestLocation", "(Z)V");
+    method_requestLocation = env->GetMethodID(clazz, "requestLocation", "(ZZ)V");
     method_requestRefLocation = env->GetMethodID(clazz, "requestRefLocation", "()V");
     method_requestSetID = env->GetMethodID(clazz, "requestSetID", "(I)V");
     method_requestUtcTime = env->GetMethodID(clazz, "requestUtcTime", "()V");
