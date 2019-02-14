@@ -1237,15 +1237,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mButtonDispatchers.valueAt(i).onDestroy();
         }
 
-        if (mPrototypeController.isEnabled()) {
-            WindowManager wm = (WindowManager) getContext()
-                    .getSystemService(Context.WINDOW_SERVICE);
-            if (mLeftEdgePanel != null) {
-                wm.removeView(mLeftEdgePanel);
-            }
-            if (mRightEdgePanel != null) {
-                wm.removeView(mRightEdgePanel);
-            }
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        if (mLeftEdgePanel != null) {
+            wm.removeView(mLeftEdgePanel);
+        }
+        if (mRightEdgePanel != null) {
+            wm.removeView(mRightEdgePanel);
         }
     }
 
