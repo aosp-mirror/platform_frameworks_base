@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubblesTestActivity;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
@@ -290,7 +291,8 @@ public class NotificationTestHelper {
     }
 
     private Notification.BubbleMetadata makeBubbleMetadata() {
-        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+        Intent target = new Intent(mContext, BubblesTestActivity.class);
+        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target, 0);
         return new Notification.BubbleMetadata.Builder()
                 .setIntent(bubbleIntent)
                 .setTitle("bubble title")

@@ -68,6 +68,13 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name="com.android.systemui.bubbles.BubblesTestActivity"
+            android:allowEmbedded="true"
+            android:documentLaunchMode="always"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:resizeableActivity="true" />
+
         <provider
             android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
             tools:replace="android:authorities"
