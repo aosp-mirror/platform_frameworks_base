@@ -156,21 +156,21 @@ public class BiometricManager {
     }
 
     /**
-     * Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
+     * Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
      *
      * @param token an opaque token returned by password confirmation.
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void resetTimeout(byte[] token) {
+    public void resetLockout(byte[] token) {
         if (mService != null) {
             try {
-                mService.resetTimeout(token);
+                mService.resetLockout(token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Slog.w(TAG, "resetTimeout(): Service not connected");
+            Slog.w(TAG, "resetLockout(): Service not connected");
         }
     }
 

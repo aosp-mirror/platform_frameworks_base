@@ -49,8 +49,8 @@ interface IBiometricService {
     // Client lifecycle is still managed in <Biometric>Service.
     void onReadyForAuthentication(int cookie, boolean requireConfirmation, int userId);
 
-    // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetTimeout(in byte [] token);
+    // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
+    void resetLockout(in byte [] token);
 
     // TODO(b/123378871): Remove when moved.
     // CDCA needs to send results to BiometricService if it was invoked using BiometricPrompt's

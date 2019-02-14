@@ -39,6 +39,10 @@ public abstract class EnumerateClient extends ClientMonitor {
     }
 
     @Override
+    public void notifyUserActivity() {
+    }
+
+    @Override
     protected int statsAction() {
         return BiometricsProtoEnums.ACTION_ENUMERATE;
     }
@@ -94,7 +98,9 @@ public abstract class EnumerateClient extends ClientMonitor {
     public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
         try {
-            getListener().onEnumerated(identifier, remaining);
+            if (getListener() != null) {
+                getListener().onEnumerated(identifier, remaining);
+            }
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to notify enumerated:", e);
         }

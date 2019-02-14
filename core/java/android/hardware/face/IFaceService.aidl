@@ -86,8 +86,8 @@ interface IFaceService {
     // Gets the authenticator ID for face
     long getAuthenticatorId(String opPackageName);
 
-    // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetTimeout(in byte [] cryptoToken);
+    // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
+    void resetLockout(in byte [] token);
 
     // Add a callback which gets notified when the face lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
