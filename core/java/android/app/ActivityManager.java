@@ -55,6 +55,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -68,6 +69,7 @@ import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
 
+import com.android.internal.app.LocalePicker;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.TransferPipe;
@@ -84,7 +86,9 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * <p>
@@ -3448,6 +3452,35 @@ public class ActivityManager {
     @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
     public void forceStopPackage(String packageName) {
         forceStopPackageAsUser(packageName, mContext.getUserId());
+    }
+
+    /**
+     * Sets the current locales of the device. Calling app must have the permission
+     * {@code android.permission.CHANGE_CONFIGURATION} and
+     * {@code android.permission.WRITE_SETTINGS}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setDeviceLocales(@NonNull LocaleList locales) {
+        LocalePicker.updateLocales(locales);
+    }
+
+    /**
+     * Returns a list of supported locales by this system. It includes all locales that are
+     * selectable by the user, potentially including locales that the framework does not have
+     * translated resources for. To get locales that the framework has translated resources for, use
+     * {@code Resources.getSystem().getAssets().getLocales()} instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull Collection<Locale> getSupportedLocales() {
+        ArrayList<Locale> locales = new ArrayList<>();
+        for (String localeTag : LocalePicker.getSupportedLocales(mContext)) {
+            locales.add(Locale.forLanguageTag(localeTag));
+        }
+        return locales;
     }
 
     /**

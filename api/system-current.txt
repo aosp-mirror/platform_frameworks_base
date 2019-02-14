@@ -285,9 +285,11 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void forceStopPackage(String);
     method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public static int getCurrentUser();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getPackageImportance(String);
+    method @NonNull public java.util.Collection<java.util.Locale> getSupportedLocales();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
     method @RequiresPermission(android.Manifest.permission.KILL_UID) public void killUid(int, String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
+    method public void setDeviceLocales(@NonNull android.os.LocaleList);
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
   }
@@ -5301,6 +5303,10 @@ package android.os {
     method public void setPrivacyPolicy(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
+  }
+
+  public final class LocaleList implements android.os.Parcelable {
+    method public static boolean isPseudoLocale(@Nullable android.icu.util.ULocale);
   }
 
   public final class NativeHandle implements java.io.Closeable {
