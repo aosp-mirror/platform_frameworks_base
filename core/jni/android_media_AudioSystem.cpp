@@ -1918,7 +1918,6 @@ static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobjec
     for (jint i = 0; i < nb; i++) {
         deviceTypesVector.push_back((audio_devices_t) typesPtr[i]);
     }
-    env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
 
     // check each address is a string and add device type/address to list for device affinity
     Vector<AudioDeviceTypeAddr> deviceVector;
@@ -1932,6 +1931,7 @@ static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobjec
         AudioDeviceTypeAddr dev = AudioDeviceTypeAddr(typesPtr[i], address);
         deviceVector.add(dev);
     }
+    env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
 
     status_t status = AudioSystem::setUidDeviceAffinities((uid_t) uid, deviceVector);
     return (jint) nativeToJavaStatus(status);
