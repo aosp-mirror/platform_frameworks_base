@@ -163,10 +163,17 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
+        if (!mService.isControlEnabled()) {
+            return;
+        }
+        if (mIsActiveSource) {
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
+                mAddress, mService.getPhysicalAddress()));
+        }
         // Invalidate the internal active source record when goes to standby
         // This set will also update mIsActiveSource
         mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
-        if (!mService.isControlEnabled() || initiatedByCec || !mAutoTvOff) {
+        if (initiatedByCec || !mAutoTvOff) {
             return;
         }
         switch (standbyAction) {
@@ -349,11 +356,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
 
         assertRunOnServiceThread();
-        if (!initiatedByCec && mIsActiveSource && mService.isControlEnabled()) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
-                    mAddress, mService.getPhysicalAddress()));
-        }
-        setIsActiveSource(false);
         checkIfPendingActionsCleared();
     }
 
