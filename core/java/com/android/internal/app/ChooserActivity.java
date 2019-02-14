@@ -46,6 +46,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -484,6 +485,27 @@ public class ChooserActivity extends ResolverActivity {
 
             finish();
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        int width = -1;
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            width = getResources().getDimensionPixelSize(R.dimen.chooser_preview_width);
+        }
+
+        updateLayoutWidth(R.id.content_preview_text_layout, width);
+        updateLayoutWidth(R.id.content_preview_title_layout, width);
+        updateLayoutWidth(R.id.content_preview_file_layout, width);
+    }
+
+    private void updateLayoutWidth(int layoutResourceId, int width) {
+        View view = findViewById(layoutResourceId);
+        LayoutParams params = view.getLayoutParams();
+        params.width = width;
+        view.setLayoutParams(params);
     }
 
     private void displayContentPreview(@ContentPreviewType int previewType, Intent targetIntent) {
