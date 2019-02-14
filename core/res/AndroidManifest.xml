@@ -4532,6 +4532,10 @@
     <permission android:name="android.permission.ACCESS_SHARED_LIBRARIES"
                 android:protectionLevel="signature|installer" />
 
+    <!-- Allows input events to be monitored. Very dangerous!  @hide -->
+    <permission android:name="android.permission.MONITOR_INPUT"
+                android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

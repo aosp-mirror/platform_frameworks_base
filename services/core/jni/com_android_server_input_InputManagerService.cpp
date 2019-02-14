@@ -47,6 +47,7 @@
 
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
+#include <ui/Region.h>
 
 #include <inputflinger/InputManager.h>
 
@@ -136,8 +137,6 @@ static struct {
     jmethodID getAffineTransform;
 } gTouchCalibrationClassInfo;
 
-
-
 // --- Global functions ---
 
 template<typename T>
@@ -187,7 +186,6 @@ static std::string getStringElementFromJavaArray(JNIEnv* env, jobjectArray array
     return result;
 }
 
-
 // --- NativeInputManager ---
 
 class NativeInputManager : public virtual RefBase,
@@ -206,8 +204,12 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
-    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel, int32_t displayId);
+    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
+            int32_t displayId);
+    status_t registerInputMonitor(JNIEnv* env, const sp<InputChannel>& inputChannel,
+            int32_t displayId, bool isGestureMonitor);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
+    status_t pilferPointers(const sp<IBinder>& token);
 
     void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
     void setFocusedApplication(JNIEnv* env, int32_t displayId, jobject applicationHandleObj);
@@ -441,10 +443,22 @@ status_t NativeInputManager::registerInputChannel(JNIEnv* /* env */,
             inputChannel, displayId);
 }
 
+status_t NativeInputManager::registerInputMonitor(JNIEnv* /* env */,
+        const sp<InputChannel>& inputChannel, int32_t displayId, bool isGestureMonitor) {
+    ATRACE_CALL();
+    return mInputManager->getDispatcher()->registerInputMonitor(
+            inputChannel, displayId, isGestureMonitor);
+}
+
 status_t NativeInputManager::unregisterInputChannel(JNIEnv* /* env */,
         const sp<InputChannel>& inputChannel) {
     ATRACE_CALL();
     return mInputManager->getDispatcher()->unregisterInputChannel(inputChannel);
+}
+
+status_t NativeInputManager::pilferPointers(const sp<IBinder>& token) {
+    ATRACE_CALL();
+    return mInputManager->getDispatcher()->pilferPointers(token);
 }
 
 void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outConfig) {
@@ -1385,7 +1399,6 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         throwInputChannelNotInitialized(env);
         return;
     }
-    bool monitor = inputChannel->getToken() == nullptr && displayId != ADISPLAY_ID_NONE;
 
     status_t status = im->registerInputChannel(env, inputChannel, displayId);
 
@@ -1396,10 +1409,33 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         return;
     }
 
-    // If inputWindowHandle is null and displayId >= 0, treat inputChannel as monitor.
-    if (!monitor) {
-        android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
-                handleInputChannelDisposed, im);
+    android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
+            handleInputChannelDisposed, im);
+}
+
+static void nativeRegisterInputMonitor(JNIEnv* env, jclass /* clazz */,
+        jlong ptr, jobject inputChannelObj, jint displayId, jboolean isGestureMonitor) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
+            inputChannelObj);
+    if (inputChannel == nullptr) {
+        throwInputChannelNotInitialized(env);
+        return;
+    }
+
+    if (displayId == ADISPLAY_ID_NONE) {
+        std::string message = "InputChannel used as a monitor must be associated with a display";
+        jniThrowRuntimeException(env, message.c_str());
+        return;
+    }
+
+    status_t status = im->registerInputMonitor(env, inputChannel, displayId, isGestureMonitor);
+
+    if (status) {
+        std::string message = StringPrintf("Failed to register input channel.  status=%d", status);
+        jniThrowRuntimeException(env, message.c_str());
+        return;
     }
 }
 
@@ -1423,6 +1459,13 @@ static void nativeUnregisterInputChannel(JNIEnv* env, jclass /* clazz */,
         jniThrowRuntimeException(env, message.c_str());
     }
 }
+
+static void nativePilferPointers(JNIEnv* env, jclass /* clazz */, jlong ptr, jobject tokenObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    sp<IBinder> token = ibinderForJavaObject(env, tokenObj);
+    im->pilferPointers(token);
+}
+
 
 static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jboolean enabled) {
@@ -1686,8 +1729,13 @@ static const JNINativeMethod gInputManagerMethods[] = {
     { "nativeRegisterInputChannel",
             "(JLandroid/view/InputChannel;I)V",
             (void*) nativeRegisterInputChannel },
+    { "nativeRegisterInputMonitor",
+            "(JLandroid/view/InputChannel;IZ)V",
+            (void*) nativeRegisterInputMonitor},
     { "nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
             (void*) nativeUnregisterInputChannel },
+    { "nativePilferPointers", "(JLandroid/os/IBinder;)V",
+            (void*) nativePilferPointers },
     { "nativeSetInputFilterEnabled", "(JZ)V",
             (void*) nativeSetInputFilterEnabled },
     { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
@@ -1781,7 +1829,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
             "notifyInputChannelBroken", "(Landroid/os/IBinder;)V");
-    
+
     GET_METHOD_ID(gServiceClassInfo.notifyFocusChanged, clazz,
             "notifyFocusChanged", "(Landroid/os/IBinder;Landroid/os/IBinder;)V");
 

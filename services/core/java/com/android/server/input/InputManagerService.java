@@ -69,11 +69,13 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
+import android.view.IInputMonitorHost;
 import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.InputMonitor;
 import android.view.InputWindowHandle;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
@@ -202,7 +204,10 @@ public class InputManagerService extends IInputManager.Stub
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel,
             int displayId);
+    private static native void nativeRegisterInputMonitor(long ptr, InputChannel inputChannel,
+            int displayId, boolean isGestureMonitor);
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
+    private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
@@ -489,9 +494,40 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
-        nativeRegisterInputChannel(mPtr, inputChannels[0], displayId);
+        // Give the output channel a token just for identity purposes.
+        inputChannels[0].setToken(new Binder());
+        nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId, false /*isGestureMonitor*/);
         inputChannels[0].dispose(); // don't need to retain the Java object reference
         return inputChannels[1];
+    }
+
+    /**
+     * Creates an input monitor that will receive pointer events for the purposes of system-wide
+     * gesture interpretation.
+     *
+     * @param inputChannelName The input channel name.
+     * @param displayId Target display id.
+     * @return The input channel.
+     */
+    @Override // Binder call
+    public InputMonitor monitorGestureInput(String inputChannelName, int displayId) {
+        if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
+                "monitorInputRegion()")) {
+            throw new SecurityException("Requires MONITOR_INPUT permission");
+        }
+
+        Objects.requireNonNull(inputChannelName, "inputChannelName must not be null.");
+
+        if (displayId < Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("displayId must >= 0.");
+        }
+
+
+        InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
+        InputMonitorHost host = new InputMonitorHost(inputChannels[0]);
+        inputChannels[0].setToken(host.asBinder());
+        nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId, true /*isGestureMonitor*/);
+        return new InputMonitor(inputChannelName, inputChannels[1], host);
     }
 
     /**
@@ -2089,6 +2125,28 @@ public class InputManagerService extends IInputManager.Stub
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
             }
+        }
+    }
+
+    /**
+     * Interface for the system to handle request from InputMonitors.
+     */
+    private final class InputMonitorHost extends IInputMonitorHost.Stub {
+        private final InputChannel mInputChannel;
+
+        InputMonitorHost(InputChannel channel) {
+            mInputChannel = channel;
+        }
+
+        @Override
+        public void pilferPointers() {
+            nativePilferPointers(mPtr, asBinder());
+        }
+
+        @Override
+        public void dispose() {
+            nativeUnregisterInputChannel(mPtr, mInputChannel);
+            mInputChannel.dispose();
         }
     }
 
