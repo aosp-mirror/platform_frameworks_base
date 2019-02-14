@@ -213,7 +213,7 @@
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Sat će se ugasiti."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon će se isključiti."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Da li želite da isključite telefon?"</string>
-    <string name="reboot_safemode_title" msgid="7054509914500140361">"Ponovo pokreni sistem u bezbednom režimu"</string>
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Restartuj sistem u bezbednom režimu"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Da li želite da ponovo pokrenete sistem u bezbednom režimu? Ovo će onemogućiti sve instalirane aplikacije nezavisnih proizvođača. One će biti vraćene kada ponovo pokrenete sistem."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nedavno"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Nema nedavnih aplikacija."</string>
@@ -494,11 +494,11 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogućavanje zaključavanja ekrana"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Dozvoljava aplikaciji da onemogući zaključavanje tastature i sve povezane bezbednosne mere sa lozinkama. Na primer, telefon onemogućava zaključavanje tastature pri prijemu dolaznog telefonskog poziva, a zatim ga ponovo omogućava po završetku poziva."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"koristi biometrijski hardver"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Dozvoljava aplikaciji da koristi biometrijski hardver za potvrdu autentičnosti"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Dozvoljava aplikaciji da koristi biometrijski hardver za potvrdu identiteta"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljaj hardverom za otiske prstiju"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Dozvoljava aplikaciji da aktivira metode za dodavanje i brisanje šablona otisaka prstiju koji će se koristiti."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"koristi hardver za otiske prstiju"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Dozvoljava aplikaciji da koristi hardver za otiske prstiju radi potvrde autentičnosti"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Dozvoljava aplikaciji da koristi hardver za otiske prstiju radi potvrde identiteta"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je delimični otisak prsta. Probajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspela obrada otiska prsta. Probajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor za otiske prstiju je prljav. Očistite ga i pokušajte ponovo."</string>
@@ -835,7 +835,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabričko testiranje nije uspelo"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Radnja FACTORY_TEST je podržana samo za pakete instalirane u direktorijumu /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Nije pronađen nijedan paket koji obezbeđuje radnju FACTORY_TEST."</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"Ponovo pokreni"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"Restartuj"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Na stranici na adresi „<xliff:g id="TITLE">%s</xliff:g>“ piše:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Potvrda navigacije"</string>
@@ -1255,7 +1255,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Gotovo"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kartica je dodata"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Restartujte uređaj da biste mogli da pristupite mobilnoj mreži."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Ponovo pokreni"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Restartuj"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktivirajte mobilnu uslugu"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Preuzmite aplikaciju mobilnog operatera da biste aktivirali novi SIM"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Preuzmite aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g> da biste aktivirali novu SIM karticu"</string>

@@ -591,7 +591,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"স্ক্রিন লক পরিবর্তন করুন"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রিনটি লক করে"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রিন কখন কিভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রিন কখন কীভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"সতর্কীকরণ ছাড়াই একটি ফ্যাক্টরি ডেটা আবার সেট করার দ্বারা টিভির ডেটা মুছে ফেলে৷"</string>
@@ -1815,7 +1815,7 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"অক্ষম করা <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"কনফারেন্স কল"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"টুলটিপ"</string>
-    <string name="app_category_game" msgid="5431836943981492993">"গেম্স"</string>
+    <string name="app_category_game" msgid="5431836943981492993">"গেম"</string>
     <string name="app_category_audio" msgid="1659853108734301647">"মিউজিক ও অডিও"</string>
     <string name="app_category_video" msgid="2728726078629384196">"চলচ্চিত্র ও ভিডিওগুলি"</string>
     <string name="app_category_image" msgid="4867854544519846048">"ফটো ও ছবিগুলি"</string>

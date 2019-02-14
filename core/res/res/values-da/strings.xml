@@ -583,11 +583,11 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Overvåg forsøg på oplåsning af skærm"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Overvåg antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås din tablet, eller slet alle data i den, hvis der er indtastet for mange forkerte adgangskoder."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Overvåg antallet af forkert indtastede adgangskoder ved oplåsning af skærmen, og lås tv\'et eller slet alle dets data, hvis der indtastes for mange forkerte adgangskoder."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Overvåg antallet af forkert indtastede adgangskoder ved oplåsning af skærmen, og lås tv\'et eller slet alle dets data, hvis der angives for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Overvåg antallet af forkerte adgangskoder ved oplåsning af skærmen, og lås telefonen eller slet alle data på telefonen, hvis der er indtastet for mange forkerte adgangskoder."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås din tablet, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås tv-adgangen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Registrer antallet af forkerte adgangskoder, der indtastes ved oplåsning af skærmen, og lås telefonen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås din tablet, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås tv-adgangen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås telefonen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Skifte skærmlås"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifter skærmlås"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Låse skærmen"</string>
@@ -739,7 +739,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tryk på Menu for at låse op eller foretage et nødopkald."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryk på Menu for at låse op."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Tegn oplåsningsmønster"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Nødopkald"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Nødsituation"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Tilbage til opkald"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Rigtigt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Prøv igen"</string>
@@ -887,7 +887,7 @@
     <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Fn+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"plads"</string>
-    <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"indtast"</string>
+    <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"angiv"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"slet"</string>
     <string name="search_go" msgid="8298016669822141719">"Søg"</string>
     <string name="search_hint" msgid="1733947260773056054">"Søg…"</string>

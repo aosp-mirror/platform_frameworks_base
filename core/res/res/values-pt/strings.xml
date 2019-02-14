@@ -1768,7 +1768,7 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Porta USB periférica"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Mais opções"</string>
-    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fechar barra flutuante"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fechar menu flutuante"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximizar"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>

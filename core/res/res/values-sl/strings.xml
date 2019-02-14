@@ -612,7 +612,7 @@
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Spreminjanje tega, kako pogosto je treba spremeniti geslo, kodo PIN ali vzorec za zaklepanje zaslona."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavitev šifriranja shrambe"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Shranjeni podatki aplikacije morajo biti šifrirani."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogoči fotoaparate"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogočanje fotoaparatov"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Prepreči uporabo vseh fotoaparatov v napravi."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogočanje nekaterih funkcij zaklepanja zaslona"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Prepreči uporabo nekaterih funkcij zaklepanja zaslona."</string>

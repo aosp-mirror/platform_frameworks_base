@@ -1870,6 +1870,10 @@
          truncate it after committing the transaction. -->
     <integer name="db_journal_size_limit">524288</integer>
 
+    <!-- When opening a database with WAL enabled and if the wal file already exists and larger
+         than this size in bytes, we'll truncate it. -->
+    <integer name="db_wal_truncate_size">1048576</integer>
+
     <!-- The database synchronization mode when using the default journal mode.
          FULL is safest and preserves durability at the cost of extra fsyncs.
          NORMAL also preserves durability in non-WAL modes and uses checksums to ensure

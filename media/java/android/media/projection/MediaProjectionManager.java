@@ -66,7 +66,7 @@ public final class MediaProjectionManager {
     }
 
     /**
-     * Returns an Intent that <b>must</b> passed to startActivityForResult()
+     * Returns an Intent that <b>must</b> be passed to startActivityForResult()
      * in order to start screen capture. The activity will prompt
      * the user whether to allow screen capture.  The result of this
      * activity should be passed to getMediaProjection.

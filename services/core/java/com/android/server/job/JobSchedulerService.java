@@ -876,14 +876,17 @@ public class JobSchedulerService extends com.android.server.SystemService
             // This may throw a SecurityException.
             jobStatus.prepareLocked(ActivityManager.getService());
 
-            if (toCancel != null) {
-                cancelJobImplLocked(toCancel, jobStatus, "job rescheduled by app");
-            }
             if (work != null) {
                 // If work has been supplied, enqueue it into the new job.
                 jobStatus.enqueueWorkLocked(ActivityManager.getService(), work);
             }
-            startTrackingJobLocked(jobStatus, toCancel);
+
+            if (toCancel != null) {
+                // Implicitly replaces the existing job record with the new instance
+                cancelJobImplLocked(toCancel, jobStatus, "job rescheduled by app");
+            } else {
+                startTrackingJobLocked(jobStatus, null);
+            }
             StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     uId, null, jobStatus.getBatteryName(),
                     StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
@@ -1012,6 +1015,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    /**
+     * Cancel the given job, stopping it if it's currently executing.  If {@code incomingJob}
+     * is null, the cancelled job is removed outright from the system.  If
+     * {@code incomingJob} is non-null, it replaces {@code cancelled} in the store of
+     * currently scheduled jobs.
+     */
     private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob, String reason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
         cancelled.unprepareLocked(ActivityManager.getService());
@@ -1022,6 +1031,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         // Cancel if running.
         stopJobOnServiceContextLocked(cancelled, JobParameters.REASON_CANCELED, reason);
+        // If this is a replacement, bring in the new version of the job
+        if (incomingJob != null) {
+            if (DEBUG) Slog.i(TAG, "Tracking replacement job " + incomingJob.toShortString());
+            startTrackingJobLocked(incomingJob, cancelled);
+        }
         reportActiveLocked();
     }
 

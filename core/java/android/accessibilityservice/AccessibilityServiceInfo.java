@@ -200,8 +200,8 @@ public class AccessibilityServiceInfo implements Parcelable {
      * semantics in the context of the screen content. For example, a three by three
      * grid can be implemented as three horizontal linear layouts and one vertical,
      * or three vertical linear layouts and one horizontal, or one grid layout, etc.
-     * In this context the actual layout mangers used to achieve the grid configuration
-     * are not important, rather it is important that there are nine evenly distributed
+     * In this context, the actual layout managers used to achieve the grid configuration
+     * are not important; rather it is important that there are nine evenly distributed
      * elements.
      * </p>
      */

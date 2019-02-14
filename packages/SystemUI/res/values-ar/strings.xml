@@ -176,7 +176,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"فتح تفاصيل البطارية"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"مستوى البطارية <xliff:g id="NUMBER">%d</xliff:g> في المائة."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> بالمائة."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"إعدادات النظام."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"الإشعارات."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"الاطّلاع على جميع الإشعارات"</string>
@@ -320,7 +320,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏تم تشغيل Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"جارٍ التفعيل…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"إرسال"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"الإرسال"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"جارٍ الإرسال"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"جهاز لا يحمل اسمًا"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"جاهز للإرسال"</string>
@@ -361,7 +361,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"حتى شروق الشمس"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصال القريب المدى (NFC)"</string>
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"ليست هناك عناصر تم استخدامها مؤخرًا"</string>
@@ -836,7 +836,7 @@
     <string name="notification_channel_battery" msgid="5786118169182888462">"البطارية"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"لقطات الشاشة"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"رسائل عامة"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"سعة التخزين"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"مساحة التخزين"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"تلميحات"</string>
     <string name="instant_apps" msgid="6647570248119804907">"التطبيقات الفورية"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"لا تتطلب التطبيقات الفورية إجراء التثبيت."</string>

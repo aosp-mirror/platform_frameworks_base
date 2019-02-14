@@ -53,7 +53,7 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
     private ArrayMap<String, LoaderManager> mAllLoaderManagers;
     /** Whether or not fragment loaders should retain their state */
     private boolean mRetainLoaders;
-    /** The loader manger for the fragment host [i.e. Activity#getLoaderManager()] */
+    /** The loader manager for the fragment host [i.e. Activity#getLoaderManager()] */
     private LoaderManagerImpl mLoaderManager;
     private boolean mCheckedForLoaderManager;
     /** Whether or not the fragment host loader manager was started */
