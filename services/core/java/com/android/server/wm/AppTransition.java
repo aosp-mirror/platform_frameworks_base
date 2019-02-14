@@ -1879,6 +1879,9 @@ public class AppTransition implements Dump {
             mNextAppTransitionAnimationsSpecsFuture = specsFuture;
             mNextAppTransitionScaleUp = scaleUp;
             mNextAppTransitionFutureCallback = callback;
+            if (isReady()) {
+                fetchAppTransitionSpecsFromFuture();
+            }
         }
     }
 
