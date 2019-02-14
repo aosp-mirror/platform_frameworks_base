@@ -107,7 +107,6 @@ import android.net.IpMemoryStore;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
-import android.net.NetworkStack;
 import android.net.NetworkWatchlistManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
@@ -337,13 +336,6 @@ final class SystemServiceRegistry {
                         ServiceManager.getServiceOrThrow(Context.NETD_SERVICE));
             }
         });
-
-        registerService(Context.NETWORK_STACK_SERVICE, NetworkStack.class,
-                new StaticServiceFetcher<NetworkStack>() {
-                    @Override
-                    public NetworkStack createService() {
-                        return new NetworkStack();
-                    }});
 
         registerService(Context.IP_MEMORY_STORE_SERVICE, IpMemoryStore.class,
                 new CachedServiceFetcher<IpMemoryStore>() {

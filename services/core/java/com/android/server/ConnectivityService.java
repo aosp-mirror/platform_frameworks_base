@@ -88,6 +88,7 @@ import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
+import android.net.NetworkStackClient;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.NetworkWatchlistManager;
@@ -5135,7 +5136,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) log("registerNetworkAgent " + nai);
         final long token = Binder.clearCallingIdentity();
         try {
-            mContext.getSystemService(NetworkStack.class).makeNetworkMonitor(
+            getNetworkStack().makeNetworkMonitor(
                     toStableParcelable(nai.network), name, new NetworkMonitorCallbacks(nai));
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -5145,6 +5146,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // NetworkAgent until nai.asyncChannel.connect(), which will be called when finalizing the
         // registration.
         return nai.network.netId;
+    }
+
+    @VisibleForTesting
+    protected NetworkStackClient getNetworkStack() {
+        return NetworkStackClient.getInstance();
     }
 
     private void handleRegisterNetworkAgent(NetworkAgentInfo nai, INetworkMonitor networkMonitor) {
