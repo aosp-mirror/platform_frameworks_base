@@ -996,6 +996,7 @@ package android.net {
     method public int[] getCapabilities();
     method public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(android.net.NetworkCapabilities);
+    field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
   public class NetworkStack {
