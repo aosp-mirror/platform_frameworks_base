@@ -103,6 +103,20 @@ public class FaceService extends BiometricServiceBase {
         public boolean shouldFrameworkHandleLockout() {
             return false;
         }
+
+        @Override
+        public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
+                boolean authenticated, ArrayList<Byte> token) {
+            final boolean result = super.onAuthenticated(identifier, authenticated, token);
+
+            // For face, the authentication lifecycle ends either when
+            // 1) Authenticated == true
+            // 2) Error occurred
+            // 3) Authenticated == false
+            // Fingerprint currently does not end when the third condition is met which is a bug,
+            // but let's leave it as-is for now.
+            return result || !authenticated;
+        }
     }
 
     /**

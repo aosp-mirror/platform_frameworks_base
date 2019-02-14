@@ -273,15 +273,12 @@ public class BiometricService extends SystemService {
          */
         private static final int STATE_AUTH_STARTED = 2;
         /**
-         * Authentication is paused, waiting for the user to press "try again" button. Since the
-         * try again button requires us to cancel authentication, this represents the state where
-         * ERROR_CANCELED is not received yet.
+         * Authentication is paused, waiting for the user to press "try again" button. Only
+         * passive modalities such as Face or Iris should have this state. Note that for passive
+         * modalities, the HAL enters the idle state after onAuthenticated(false) which differs from
+         * fingerprint.
          */
         private static final int STATE_AUTH_PAUSED = 3;
-        /**
-         * Same as above, except the ERROR_CANCELED has been received.
-         */
-        private static final int STATE_AUTH_PAUSED_CANCELED = 4;
         /**
          * Authentication is successful, but we're waiting for the user to press "confirm" button.
          */
@@ -457,11 +454,6 @@ public class BiometricService extends SystemService {
                         // Pause authentication. onBiometricAuthenticated(false) causes the
                         // dialog to show a "try again" button for passive modalities.
                         mCurrentAuthSession.mState = STATE_AUTH_PAUSED;
-                        // Cancel authentication. Skip the token/package check since we are
-                        // cancelling from system server. The interface is permission protected so
-                        // this is fine.
-                        cancelInternal(null /* token */, null /* package */,
-                                false /* fromClient */);
                     }
 
                     mCurrentAuthSession.mClientReceiver.onAuthenticationFailed();
@@ -507,24 +499,15 @@ public class BiometricService extends SystemService {
                                     }
                                 }, BiometricPrompt.HIDE_DIALOG_DELAY);
                             }
-                        } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED
-                                || mCurrentAuthSession.mState == STATE_AUTH_PAUSED_CANCELED) {
-                            if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED
-                                    && error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                                // Skip the first ERROR_CANCELED message when this happens, since
-                                // "try again" requires us to cancel authentication but keep
-                                // the prompt showing.
-                                mCurrentAuthSession.mState = STATE_AUTH_PAUSED_CANCELED;
-                            } else {
-                                // In the "try again" state, we should forward canceled errors to
-                                // the client and and clean up.
-                                mCurrentAuthSession.mClientReceiver.onError(error, message);
-                                mStatusBarService.onBiometricError(message);
-                                mActivityTaskManager.unregisterTaskStackListener(
-                                        mTaskStackListener);
-                                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                                mCurrentAuthSession = null;
-                            }
+                        } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED) {
+                            // In the "try again" state, we should forward canceled errors to
+                            // the client and and clean up.
+                            mCurrentAuthSession.mClientReceiver.onError(error, message);
+                            mStatusBarService.onBiometricError(message);
+                            mActivityTaskManager.unregisterTaskStackListener(
+                                    mTaskStackListener);
+                            mCurrentAuthSession.mState = STATE_AUTH_IDLE;
+                            mCurrentAuthSession = null;
                         } else {
                             Slog.e(TAG, "Impossible session error state: "
                                     + mCurrentAuthSession.mState);
@@ -705,8 +688,7 @@ public class BiometricService extends SystemService {
 
             if (mPendingAuthSession.mModalitiesWaiting.isEmpty()) {
                 final boolean continuing = mCurrentAuthSession != null &&
-                        (mCurrentAuthSession.mState == STATE_AUTH_PAUSED
-                                || mCurrentAuthSession.mState == STATE_AUTH_PAUSED_CANCELED);
+                        (mCurrentAuthSession.mState == STATE_AUTH_PAUSED);
 
                 mCurrentAuthSession = mPendingAuthSession;
                 mPendingAuthSession = null;
