@@ -67,15 +67,9 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.telephony.CellIdentityCdma;
-import android.telephony.CellIdentityGsm;
-import android.telephony.CellIdentityLte;
-import android.telephony.CellIdentityWcdma;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationState;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -1485,10 +1479,6 @@ public class NetworkMonitor extends StateMachine {
      */
     private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
             long requestTimestampMs, long responseTimestampMs) {
-        if (!mWifiManager.isScanAlwaysAvailable()) {
-            return;
-        }
-
         if (!mSystemReady) {
             return;
         }
@@ -1496,6 +1486,10 @@ public class NetworkMonitor extends StateMachine {
         Intent latencyBroadcast =
                 new Intent(NetworkMonitorUtils.ACTION_NETWORK_CONDITIONS_MEASURED);
         if (mNetworkCapabilities.hasTransport(TRANSPORT_WIFI)) {
+            if (!mWifiManager.isScanAlwaysAvailable()) {
+                return;
+            }
+
             WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
             if (currentWifiInfo != null) {
                 // NOTE: getSSID()'s behavior changed in API 17; before that, SSIDs were not
@@ -1515,39 +1509,21 @@ public class NetworkMonitor extends StateMachine {
             }
             latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CONNECTIVITY_TYPE, TYPE_WIFI);
         } else if (mNetworkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            // TODO(b/123893112): Support multi-sim.
             latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_NETWORK_TYPE,
                     mTelephonyManager.getNetworkType());
-            List<CellInfo> info = mTelephonyManager.getAllCellInfo();
-            if (info == null) return;
-            int numRegisteredCellInfo = 0;
-            for (CellInfo cellInfo : info) {
-                if (cellInfo.isRegistered()) {
-                    numRegisteredCellInfo++;
-                    if (numRegisteredCellInfo > 1) {
-                        if (VDBG) {
-                            logw("more than one registered CellInfo."
-                                    + " Can't tell which is active.  Bailing.");
-                        }
-                        return;
-                    }
-                    if (cellInfo instanceof CellInfoCdma) {
-                        CellIdentityCdma cellId = ((CellInfoCdma) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else if (cellInfo instanceof CellInfoGsm) {
-                        CellIdentityGsm cellId = ((CellInfoGsm) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else if (cellInfo instanceof CellInfoLte) {
-                        CellIdentityLte cellId = ((CellInfoLte) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else if (cellInfo instanceof CellInfoWcdma) {
-                        CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else {
-                        if (VDBG) logw("Registered cellinfo is unrecognized");
-                        return;
-                    }
-                }
+            final ServiceState dataSs = mTelephonyManager.getServiceState();
+            if (dataSs == null) {
+                logw("failed to retrieve ServiceState");
+                return;
             }
+            // See if the data sub is registered for PS services on cell.
+            final NetworkRegistrationState nrs = dataSs.getNetworkRegistrationState(
+                    NetworkRegistrationState.DOMAIN_PS,
+                    AccessNetworkConstants.TransportType.WWAN);
+            latencyBroadcast.putExtra(
+                    NetworkMonitorUtils.EXTRA_CELL_ID,
+                    nrs == null ? null : nrs.getCellIdentity());
             latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CONNECTIVITY_TYPE, TYPE_MOBILE);
         } else {
             return;
