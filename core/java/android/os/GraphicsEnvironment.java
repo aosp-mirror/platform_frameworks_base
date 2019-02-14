@@ -64,6 +64,7 @@ public class GraphicsEnvironment {
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
+    private static final String GAME_DRIVER_WHITELIST_ALL = "*";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -623,9 +624,10 @@ public class GraphicsEnvironment {
             final boolean isOptIn =
                     getGlobalSettingsString(null, coreSettings,
                             Settings.Global.GAME_DRIVER_OPT_IN_APPS).contains(packageName);
-            if (!isOptIn
-                    && !getGlobalSettingsString(null, coreSettings,
-                    Settings.Global.GAME_DRIVER_WHITELIST).contains(packageName)) {
+            final List<String> whitelist = getGlobalSettingsString(null, coreSettings,
+                    Settings.Global.GAME_DRIVER_WHITELIST);
+            if (!isOptIn && whitelist.indexOf(GAME_DRIVER_WHITELIST_ALL) != 0
+                    && !whitelist.contains(packageName)) {
                 if (DEBUG) {
                     Log.w(TAG, packageName + " is not on the whitelist.");
                 }
