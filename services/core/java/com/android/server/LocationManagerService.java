@@ -1645,36 +1645,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private abstract static class LinkedListenerBase implements IBinder.DeathRecipient {
-        protected final CallerIdentity mCallerIdentity;
-        protected final String mListenerName;
-
-        private LinkedListenerBase(@NonNull CallerIdentity callerIdentity,
-                @NonNull String listenerName) {
-            mCallerIdentity = callerIdentity;
-            mListenerName = listenerName;
-        }
-    }
-
-    private static class LinkedListener<TListener> extends LinkedListenerBase {
-        private final TListener mListener;
-        private final Consumer<TListener> mBinderDeathCallback;
-
-        private LinkedListener(@NonNull TListener listener, String listenerName,
-                @NonNull CallerIdentity callerIdentity,
-                @NonNull Consumer<TListener> binderDeathCallback) {
-            super(callerIdentity, listenerName);
-            mListener = listener;
-            mBinderDeathCallback = binderDeathCallback;
-        }
-
-        @Override
-        public void binderDied() {
-            if (D) Log.d(TAG, "Remote " + mListenerName + " died.");
-            mBinderDeathCallback.accept(mListener);
-        }
-    }
-
     @Override
     public void removeGnssBatchingCallback() {
         synchronized (mLock) {
@@ -2711,77 +2681,85 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean registerGnssStatusCallback(IGnssStatusListener listener, String packageName) {
-        if (!hasGnssPermissions(packageName) || mGnssStatusProvider == null) {
-            return false;
-        }
-
-        CallerIdentity callerIdentity = new CallerIdentity(Binder.getCallingUid(),
-                Binder.getCallingPid(), packageName);
-        LinkedListener<IGnssStatusListener> linkedListener = new LinkedListener<>(listener,
-                "GnssStatusListener", callerIdentity, this::unregisterGnssStatusCallback);
-        IBinder binder = listener.asBinder();
-        synchronized (mLock) {
-            if (!linkToListenerDeathNotificationLocked(binder, linkedListener)) {
-                return false;
-            }
-
-            mGnssStatusListeners.put(binder, linkedListener);
-            long identity = Binder.clearCallingIdentity();
-            try {
-                if (isThrottlingExemptLocked(callerIdentity)
-                        || isImportanceForeground(
-                        mActivityManager.getPackageImportance(packageName))) {
-                    mGnssStatusProvider.addListener(listener, callerIdentity);
-                }
-                return true;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
+        return addGnssDataListener(listener, packageName, "GnssStatusListener",
+                mGnssStatusProvider, mGnssStatusListeners,
+                this::unregisterGnssStatusCallback);
     }
 
     @Override
     public void unregisterGnssStatusCallback(IGnssStatusListener listener) {
-        if (mGnssStatusProvider == null) {
-            return;
-        }
-
-        IBinder binder = listener.asBinder();
-        synchronized (mLock) {
-            LinkedListener<IGnssStatusListener> linkedListener =
-                    mGnssStatusListeners.remove(binder);
-            if (linkedListener == null) {
-                return;
-            }
-            unlinkFromListenerDeathNotificationLocked(binder, linkedListener);
-            mGnssStatusProvider.removeListener(listener);
-        }
+        removeGnssDataListener(listener, mGnssStatusProvider, mGnssStatusListeners);
     }
 
     @Override
     public boolean addGnssMeasurementsListener(
             IGnssMeasurementsListener listener, String packageName) {
-        if (!hasGnssPermissions(packageName) || mGnssMeasurementsProvider == null) {
+        return addGnssDataListener(listener, packageName, "GnssMeasurementsListener",
+                mGnssMeasurementsProvider, mGnssMeasurementsListeners,
+                this::removeGnssMeasurementsListener);
+    }
+
+    @Override
+    public void removeGnssMeasurementsListener(IGnssMeasurementsListener listener) {
+        removeGnssDataListener(listener, mGnssMeasurementsProvider, mGnssMeasurementsListeners);
+    }
+
+    private abstract static class LinkedListenerBase implements IBinder.DeathRecipient {
+        protected final CallerIdentity mCallerIdentity;
+        protected final String mListenerName;
+
+        private LinkedListenerBase(@NonNull CallerIdentity callerIdentity,
+                @NonNull String listenerName) {
+            mCallerIdentity = callerIdentity;
+            mListenerName = listenerName;
+        }
+    }
+
+    private static class LinkedListener<TListener> extends LinkedListenerBase {
+        private final TListener mListener;
+        private final Consumer<TListener> mBinderDeathCallback;
+
+        private LinkedListener(@NonNull TListener listener, String listenerName,
+                @NonNull CallerIdentity callerIdentity,
+                @NonNull Consumer<TListener> binderDeathCallback) {
+            super(callerIdentity, listenerName);
+            mListener = listener;
+            mBinderDeathCallback = binderDeathCallback;
+        }
+
+        @Override
+        public void binderDied() {
+            if (D) Log.d(TAG, "Remote " + mListenerName + " died.");
+            mBinderDeathCallback.accept(mListener);
+        }
+    }
+
+    private <TListener extends IInterface> boolean addGnssDataListener(
+            TListener listener, String packageName, String listenerName,
+            RemoteListenerHelper<TListener> gnssDataProvider,
+            ArrayMap<IBinder, LinkedListener<TListener>> gnssDataListeners,
+            Consumer<TListener> binderDeathCallback) {
+        if (!hasGnssPermissions(packageName) || gnssDataProvider == null) {
             return false;
         }
 
         CallerIdentity callerIdentity = new CallerIdentity(Binder.getCallingUid(),
                 Binder.getCallingPid(), packageName);
-        LinkedListener<IGnssMeasurementsListener> linkedListener = new LinkedListener<>(listener,
-                "GnssMeasurementsListener", callerIdentity, this::removeGnssMeasurementsListener);
+        LinkedListener<TListener> linkedListener = new LinkedListener<>(listener,
+                listenerName, callerIdentity, binderDeathCallback);
         IBinder binder = listener.asBinder();
         synchronized (mLock) {
             if (!linkToListenerDeathNotificationLocked(binder, linkedListener)) {
                 return false;
             }
 
-            mGnssMeasurementsListeners.put(binder, linkedListener);
+            gnssDataListeners.put(binder, linkedListener);
             long identity = Binder.clearCallingIdentity();
             try {
                 if (isThrottlingExemptLocked(callerIdentity)
                         || isImportanceForeground(
                         mActivityManager.getPackageImportance(packageName))) {
-                    mGnssMeasurementsProvider.addListener(listener, callerIdentity);
+                    gnssDataProvider.addListener(listener, callerIdentity);
                 }
                 return true;
             } finally {
@@ -2790,24 +2768,23 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    @Override
-    public void removeGnssMeasurementsListener(IGnssMeasurementsListener listener) {
-        if (mGnssMeasurementsProvider == null) {
+    private <TListener extends IInterface> void removeGnssDataListener(
+            TListener listener, RemoteListenerHelper<TListener> gnssDataProvider,
+            ArrayMap<IBinder, LinkedListener<TListener>> gnssDataListeners) {
+        if (gnssDataProvider == null) {
             return;
         }
 
         IBinder binder = listener.asBinder();
         synchronized (mLock) {
-            LinkedListener<IGnssMeasurementsListener> linkedListener =
-                    mGnssMeasurementsListeners.remove(binder);
+            LinkedListener<TListener> linkedListener = gnssDataListeners.remove(binder);
             if (linkedListener == null) {
                 return;
             }
             unlinkFromListenerDeathNotificationLocked(binder, linkedListener);
-            mGnssMeasurementsProvider.removeListener(listener);
+            gnssDataProvider.removeListener(listener);
         }
     }
-
 
     private boolean linkToListenerDeathNotificationLocked(IBinder binder,
             LinkedListenerBase linkedListener) {
@@ -2864,52 +2841,15 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public boolean addGnssNavigationMessageListener(
             IGnssNavigationMessageListener listener, String packageName) {
-        if (!hasGnssPermissions(packageName) || mGnssNavigationMessageProvider == null) {
-            return false;
-        }
-
-        CallerIdentity callerIdentity = new CallerIdentity(Binder.getCallingUid(),
-                Binder.getCallingPid(), packageName);
-        LinkedListener<IGnssNavigationMessageListener> linkedListener =
-                new LinkedListener<>(listener, "GnssNavigationMessageListener", callerIdentity,
-                        this::removeGnssNavigationMessageListener);
-        IBinder binder = listener.asBinder();
-        synchronized (mLock) {
-            if (!linkToListenerDeathNotificationLocked(binder, linkedListener)) {
-                return false;
-            }
-
-            mGnssNavigationMessageListeners.put(binder, linkedListener);
-            long identity = Binder.clearCallingIdentity();
-            try {
-                if (isThrottlingExemptLocked(callerIdentity)
-                        || isImportanceForeground(
-                        mActivityManager.getPackageImportance(packageName))) {
-                    mGnssNavigationMessageProvider.addListener(listener, callerIdentity);
-                }
-                return true;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
+        return addGnssDataListener(listener, packageName, "GnssNavigationMessageListener",
+                mGnssNavigationMessageProvider, mGnssNavigationMessageListeners,
+                this::removeGnssNavigationMessageListener);
     }
 
     @Override
     public void removeGnssNavigationMessageListener(IGnssNavigationMessageListener listener) {
-        if (mGnssNavigationMessageProvider == null) {
-            return;
-        }
-
-        IBinder binder = listener.asBinder();
-        synchronized (mLock) {
-            LinkedListener<IGnssNavigationMessageListener> linkedListener =
-                    mGnssNavigationMessageListeners.remove(binder);
-            if (linkedListener == null) {
-                return;
-            }
-            unlinkFromListenerDeathNotificationLocked(binder, linkedListener);
-            mGnssNavigationMessageProvider.removeListener(listener);
-        }
+        removeGnssDataListener(listener, mGnssNavigationMessageProvider,
+                mGnssNavigationMessageListeners);
     }
 
     @Override
