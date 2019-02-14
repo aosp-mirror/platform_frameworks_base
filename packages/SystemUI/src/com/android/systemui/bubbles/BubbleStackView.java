@@ -707,6 +707,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         mExpandedViewContainer.removeAllViews();
         if (mExpandedBubble != null && mIsExpanded) {
             mExpandedViewContainer.addView(mExpandedBubble.expandedView);
+            mExpandedBubble.expandedView.populateActivityView();
             mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         }
     }
