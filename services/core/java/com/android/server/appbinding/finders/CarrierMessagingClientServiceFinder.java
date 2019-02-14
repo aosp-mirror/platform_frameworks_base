@@ -16,14 +16,10 @@
 
 package com.android.server.appbinding.finders;
 
-import static android.provider.Telephony.Sms.Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL;
-
 import android.Manifest.permission;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,7 +31,8 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
-import com.android.internal.telephony.SmsApplication;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.CollectionUtils;
 import com.android.server.appbinding.AppBindingConstants;
 
 import java.util.function.BiConsumer;
@@ -45,10 +42,15 @@ import java.util.function.BiConsumer;
  */
 public class CarrierMessagingClientServiceFinder
         extends AppServiceFinder<CarrierMessagingClientService, ICarrierMessagingClientService> {
+
+    private final RoleManager mRoleManager;
+
     public CarrierMessagingClientServiceFinder(Context context,
             BiConsumer<AppServiceFinder, Integer> listener,
             Handler callbackHandler) {
         super(context, listener, callbackHandler);
+
+        mRoleManager = context.getSystemService(RoleManager.class);
     }
 
     @Override
@@ -84,9 +86,8 @@ public class CarrierMessagingClientServiceFinder
 
     @Override
     public String getTargetPackage(int userId) {
-        final ComponentName cn = SmsApplication.getDefaultSmsApplicationAsUser(
-                mContext, /* updateIfNeeded= */ true, userId);
-        String ret = cn == null ? null : cn.getPackageName();
+        final String ret = CollectionUtils.firstOrNull(mRoleManager.getRoleHoldersAsUser(
+                RoleManager.ROLE_SMS, UserHandle.of(userId)));
 
         if (DEBUG) {
             Slog.d(TAG, "getTargetPackage()=" + ret);
@@ -97,9 +98,8 @@ public class CarrierMessagingClientServiceFinder
 
     @Override
     public void startMonitoring() {
-        final IntentFilter filter = new IntentFilter(ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
-        mContext.registerReceiverAsUser(mSmsAppChangedWatcher, UserHandle.ALL, filter,
-                /* permission= */ null, mHandler);
+        mRoleManager.addOnRoleHoldersChangedListenerAsUser(
+                mContext.getMainExecutor(), mRoleHolderChangedListener, UserHandle.ALL);
     }
 
     @Override
@@ -118,12 +118,11 @@ public class CarrierMessagingClientServiceFinder
         return constants.SMS_APP_BIND_FLAGS;
     }
 
-    private final BroadcastReceiver mSmsAppChangedWatcher = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL.equals(intent.getAction())) {
-                mListener.accept(CarrierMessagingClientServiceFinder.this, getSendingUserId());
-            }
+    private final OnRoleHoldersChangedListener mRoleHolderChangedListener = (role, user) -> {
+        if (RoleManager.ROLE_SMS.equals(role)) {
+            BackgroundThread.getHandler().post(() -> {
+                mListener.accept(CarrierMessagingClientServiceFinder.this, user.getIdentifier());
+            });
         }
     };
 }

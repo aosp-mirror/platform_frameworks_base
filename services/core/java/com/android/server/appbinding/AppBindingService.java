@@ -177,13 +177,12 @@ public class AppBindingService extends Binder {
      * Handle boot phase PHASE_ACTIVITY_MANAGER_READY.
      */
     private void onPhaseActivityManagerReady() {
+        // RoleManager doesn't tell us about upgrade, so we still need to listen for app upgrades.
+        // (app uninstall/disable will be notified by RoleManager.)
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addDataScheme("package");
 
-        packageFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mPackageUserMonitor, UserHandle.ALL,
                 packageFilter, null, mHandler);
 
@@ -255,14 +254,6 @@ public class AppBindingService extends Binder {
                     if (replacing) {
                         handlePackageAddedReplacing(packageName, userId);
                     }
-                    break;
-                case Intent.ACTION_PACKAGE_REMOVED:
-                    if (!replacing) {
-                        handlePackageRemoved(packageName, userId);
-                    }
-                    break;
-                case Intent.ACTION_PACKAGE_CHANGED:
-                    handlePackageChanged(packageName, userId);
                     break;
             }
         }
@@ -367,31 +358,6 @@ public class AppBindingService extends Binder {
             if (finder != null) {
                 unbindServicesLocked(userId, finder, "package update");
                 bindServicesLocked(userId, finder, "package update");
-            }
-        }
-    }
-
-    private void handlePackageRemoved(String packageName, int userId) {
-        if (DEBUG) {
-            Slog.d(TAG, "handlePackageRemoved: u" + userId + " " + packageName);
-        }
-        synchronized (mLock) {
-            final AppServiceFinder finder = findFinderLocked(userId, packageName);
-            if (finder != null) {
-                unbindServicesLocked(userId, finder, "package uninstall");
-            }
-        }
-    }
-
-    private void handlePackageChanged(String packageName, int userId) {
-        if (DEBUG) {
-            Slog.d(TAG, "handlePackageChanged: u" + userId + " " + packageName);
-        }
-        synchronized (mLock) {
-            final AppServiceFinder finder = findFinderLocked(userId, packageName);
-            if (finder != null) {
-                unbindServicesLocked(userId, finder, "package changed");
-                bindServicesLocked(userId, finder, "package changed");
             }
         }
     }
