@@ -63,10 +63,8 @@ import java.io.PrintWriter;
  */
 @SystemApi
 @TestApi
-//TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-//in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillWindow implements AutoCloseable {
-    private static final String TAG = "FillWindow";
+    private static final String TAG = FillWindow.class.getSimpleName();
 
     private final Object mLock = new Object();
     private final CloseGuard mCloseGuard = CloseGuard.get();
