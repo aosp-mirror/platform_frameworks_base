@@ -773,7 +773,7 @@ java_defaults {
         "android.hardware.vibrator-V1.3-java",
         "android.hardware.wifi-V1.0-java-constants",
         "networkstack-aidl-interfaces-java",
-        "netd_aidl_interface-java",
+        "netd_aidl_parcelables-java",
         "devicepolicyprotosnano",
     ],
 
