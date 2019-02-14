@@ -3712,7 +3712,7 @@
     <string name="ext_media_browse_action">Explore</string>
 
     <!-- Notification action to transfer media [CHAR LIMIT=40] -->
-    <string name="ext_media_seamless_action">Seamless transfer</string>
+    <string name="ext_media_seamless_action">Switch output</string>
 
     <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
     <string name="ext_media_missing_title"><xliff:g id="name" example="SD card">%s</xliff:g> missing</string>
