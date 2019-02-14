@@ -633,40 +633,46 @@ public class ChooserActivity extends ResolverActivity {
         // due to permissions issues
         findViewById(R.id.file_copy_button).setVisibility(View.GONE);
 
-        ContentResolver resolver = getContentResolver();
-        TextView fileNameView = findViewById(R.id.content_preview_filename);
-        String action = targetIntent.getAction();
-        if (Intent.ACTION_SEND.equals(action)) {
-            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+        try {
+            ContentResolver resolver = getContentResolver();
+            TextView fileNameView = findViewById(R.id.content_preview_filename);
+            String action = targetIntent.getAction();
+            if (Intent.ACTION_SEND.equals(action)) {
+                Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 
-            FileInfo fileInfo = extractFileInfo(uri, resolver);
-            fileNameView.setText(fileInfo.name);
+                FileInfo fileInfo = extractFileInfo(uri, resolver);
+                fileNameView.setText(fileInfo.name);
 
-            if (fileInfo.hasThumbnail) {
-                loadUriIntoView(R.id.content_preview_file_thumbnail, uri);
+                if (fileInfo.hasThumbnail) {
+                    loadUriIntoView(R.id.content_preview_file_thumbnail, uri);
+                } else {
+                    ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
+                    fileIconView.setVisibility(View.VISIBLE);
+                    fileIconView.setImageResource(R.drawable.ic_doc_generic);
+                }
             } else {
+                List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                if (uris.size() == 0) {
+                    contentPreviewLayout.setVisibility(View.GONE);
+                    Log.i(TAG,
+                            "Appears to be no uris available in EXTRA_STREAM, removing preview "
+                                    + "area");
+                    return;
+                }
+
+                FileInfo fileInfo = extractFileInfo(uris.get(0), resolver);
+                int remFileCount = uris.size() - 1;
+                String fileName = getResources().getQuantityString(R.plurals.file_count,
+                        remFileCount, fileInfo.name, remFileCount);
+
+                fileNameView.setText(fileName);
                 ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
                 fileIconView.setVisibility(View.VISIBLE);
-                fileIconView.setImageResource(R.drawable.ic_doc_generic);
+                fileIconView.setImageResource(R.drawable.ic_file_copy);
             }
-        } else {
-            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-            if (uris.size() == 0) {
-                contentPreviewLayout.setVisibility(View.GONE);
-                Log.i(TAG,
-                        "Appears to be no uris available in EXTRA_STREAM, removing preview area");
-                return;
-            }
-
-            FileInfo fileInfo = extractFileInfo(uris.get(0), resolver);
-            int remFileCount = uris.size() - 1;
-            String fileName = getResources().getQuantityString(R.plurals.file_count,
-                    remFileCount, fileInfo.name, remFileCount);
-
-            fileNameView.setText(fileName);
-            ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
-            fileIconView.setVisibility(View.VISIBLE);
-            fileIconView.setImageResource(R.drawable.ic_file_copy);
+        } catch (SecurityException e) {
+            Log.w(TAG, "Error loading file preview", e);
+            contentPreviewLayout.setVisibility(View.GONE);
         }
     }
 
