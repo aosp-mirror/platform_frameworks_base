@@ -46,6 +46,7 @@ import com.android.internal.os.BatteryStatsHelper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -262,6 +263,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final long BYTES_PER_KB = 1024;
     private static final long BYTES_PER_MB = 1048576; // 1024^2
     private static final long BYTES_PER_GB = 1073741824; //1024^3
+    public static final double MILLISECONDS_IN_HOUR = 3600 * 1000;
 
     private static final String VERSION_DATA = "vers";
     private static final String UID_DATA = "uid";
@@ -482,6 +484,13 @@ public abstract class BatteryStats implements Parcelable {
          * yield a value of 0 if the device doesn't support power calculations.
          */
         public abstract LongCounter getPowerCounter();
+
+        /**
+         * @return a non-null {@link LongCounter} representing total power monitored on the rails
+         * in mAms (miliamps-milliseconds). The counter may always yield a value of 0 if the device
+         * doesn't support power rail monitoring.
+         */
+        public abstract LongCounter getMonitoredRailChargeConsumedMaMs();
     }
 
     /**
@@ -1526,6 +1535,9 @@ public abstract class BatteryStats implements Parcelable {
         // The charge of the battery in micro-Ampere-hours.
         public int batteryChargeUAh;
 
+        public double modemRailChargeMah;
+        public double wifiRailChargeMah;
+
         // Constants from SCREEN_BRIGHTNESS_*
         public static final int STATE_BRIGHTNESS_SHIFT = 0;
         public static final int STATE_BRIGHTNESS_MASK = 0x7;
@@ -1738,6 +1750,8 @@ public abstract class BatteryStats implements Parcelable {
                     | ((((int)batteryVoltage)<<16)&0xffff0000);
             dest.writeInt(bat);
             dest.writeInt(batteryChargeUAh);
+            dest.writeDouble(modemRailChargeMah);
+            dest.writeDouble(wifiRailChargeMah);
             dest.writeInt(states);
             dest.writeInt(states2);
             if (wakelockTag != null) {
@@ -1767,6 +1781,8 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = (short)(bat2&0xffff);
             batteryVoltage = (char)((bat2>>16)&0xffff);
             batteryChargeUAh = src.readInt();
+            modemRailChargeMah = src.readDouble();
+            wifiRailChargeMah = src.readDouble();
             states = src.readInt();
             states2 = src.readInt();
             if ((bat&0x10000000) != 0) {
@@ -1807,6 +1823,8 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = 0;
             batteryVoltage = 0;
             batteryChargeUAh = 0;
+            modemRailChargeMah = 0;
+            wifiRailChargeMah = 0;
             states = 0;
             states2 = 0;
             wakelockTag = null;
@@ -1835,6 +1853,8 @@ public abstract class BatteryStats implements Parcelable {
             batteryTemperature = o.batteryTemperature;
             batteryVoltage = o.batteryVoltage;
             batteryChargeUAh = o.batteryChargeUAh;
+            modemRailChargeMah = o.modemRailChargeMah;
+            wifiRailChargeMah = o.wifiRailChargeMah;
             states = o.states;
             states2 = o.states2;
             if (o.wakelockTag != null) {
@@ -1867,6 +1887,8 @@ public abstract class BatteryStats implements Parcelable {
                     && batteryTemperature == o.batteryTemperature
                     && batteryVoltage == o.batteryVoltage
                     && batteryChargeUAh == o.batteryChargeUAh
+                    && modemRailChargeMah == o.modemRailChargeMah
+                    && wifiRailChargeMah == o.wifiRailChargeMah
                     && states == o.states
                     && states2 == o.states2
                     && currentTime == o.currentTime;
@@ -3311,7 +3333,8 @@ public abstract class BatteryStats implements Parcelable {
 
         if (counter.getIdleTimeCounter().getCountLocked(which) != 0
                 || counter.getRxTimeCounter().getCountLocked(which) != 0
-                || counter.getPowerCounter().getCountLocked(which) != 0) {
+                || counter.getPowerCounter().getCountLocked(which) != 0
+                || counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which) != 0) {
             return true;
         }
 
@@ -3345,7 +3368,10 @@ public abstract class BatteryStats implements Parcelable {
         pw.print(",");
         pw.print(counter.getRxTimeCounter().getCountLocked(which));
         pw.print(",");
-        pw.print(counter.getPowerCounter().getCountLocked(which) / (1000 * 60 * 60));
+        pw.print(counter.getPowerCounter().getCountLocked(which) / (MILLISECONDS_IN_HOUR));
+        pw.print(",");
+        pw.print(counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which)
+                / (MILLISECONDS_IN_HOUR));
         for (LongCounter c : counter.getTxTimeCounters()) {
             pw.print(",");
             pw.print(c.getCountLocked(which));
@@ -3370,7 +3396,10 @@ public abstract class BatteryStats implements Parcelable {
         proto.write(ControllerActivityProto.RX_DURATION_MS,
                 counter.getRxTimeCounter().getCountLocked(which));
         proto.write(ControllerActivityProto.POWER_MAH,
-                counter.getPowerCounter().getCountLocked(which) / (1000 * 60 * 60));
+                counter.getPowerCounter().getCountLocked(which) / (MILLISECONDS_IN_HOUR));
+        proto.write(ControllerActivityProto.MONITORED_RAIL_CHARGE_MAH,
+                counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which)
+                        / (MILLISECONDS_IN_HOUR));
 
         long tToken;
         LongCounter[] txCounters = counter.getTxTimeCounters();
@@ -3400,6 +3429,8 @@ public abstract class BatteryStats implements Parcelable {
         final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(which);
         final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(which);
         final long powerDrainMaMs = counter.getPowerCounter().getCountLocked(which);
+        final long monitoredRailChargeConsumedMaMs =
+                counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which);
         // Battery real time
         final long totalControllerActivityTimeMs
             = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which) / 1000;
@@ -3522,8 +3553,20 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("     ");
             sb.append(controllerName);
             sb.append(" Battery drain: ").append(
-                BatteryStatsHelper.makemAh(powerDrainMaMs / (double) (1000*60*60)));
+                    BatteryStatsHelper.makemAh(powerDrainMaMs / MILLISECONDS_IN_HOUR));
             sb.append("mAh");
+            pw.println(sb.toString());
+        }
+
+        if (monitoredRailChargeConsumedMaMs > 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("     ");
+            sb.append(controllerName);
+            sb.append(" Monitored rail energy drain: ").append(
+                    new DecimalFormat("#.##").format(
+                            monitoredRailChargeConsumedMaMs / MILLISECONDS_IN_HOUR));
+            sb.append(" mAh");
             pw.println(sb.toString());
         }
     }
@@ -6103,6 +6146,8 @@ public abstract class BatteryStats implements Parcelable {
         int oldTemp = -1;
         int oldVolt = -1;
         int oldChargeMAh = -1;
+        double oldModemRailChargeMah = -1;
+        double oldWifiRailChargeMah = -1;
         long lastTime = -1;
 
         void reset() {
@@ -6114,6 +6159,8 @@ public abstract class BatteryStats implements Parcelable {
             oldTemp = -1;
             oldVolt = -1;
             oldChargeMAh = -1;
+            oldModemRailChargeMah = -1;
+            oldWifiRailChargeMah = -1;
         }
 
         public void printNextItem(PrintWriter pw, HistoryItem rec, long baseTime, boolean checkin,
@@ -6298,6 +6345,16 @@ public abstract class BatteryStats implements Parcelable {
                     oldChargeMAh = chargeMAh;
                     item.append(checkin ? ",Bcc=" : " charge=");
                     item.append(oldChargeMAh);
+                }
+                if (oldModemRailChargeMah != rec.modemRailChargeMah) {
+                    oldModemRailChargeMah = rec.modemRailChargeMah;
+                    item.append(checkin ? ",Mrc=" : " modemRailChargemAh=");
+                    item.append(new DecimalFormat("#.##").format(oldModemRailChargeMah));
+                }
+                if (oldWifiRailChargeMah != rec.wifiRailChargeMah) {
+                    oldWifiRailChargeMah = rec.wifiRailChargeMah;
+                    item.append(checkin ? ",Wrc=" : " wifiRailChargemAh=");
+                    item.append(new DecimalFormat("#.##").format(oldWifiRailChargeMah));
                 }
                 printBitDescriptions(item, oldState, rec.states, rec.wakelockTag,
                         HISTORY_STATE_DESCRIPTIONS, !checkin);

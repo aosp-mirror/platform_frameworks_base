@@ -17,6 +17,7 @@
 #define LOG_TAG "BatteryStatsService"
 //#define LOG_NDEBUG 0
 
+#include <climits>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -28,6 +29,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <utility>
 
 #include <android/hardware/power/1.0/IPower.h>
 #include <android/hardware/power/1.1/IPower.h>
@@ -86,6 +88,15 @@ sp<android::hardware::power::stats::V1_0::IPowerStats> gPowerStatsHalV1_0 = null
 std::function<void(JNIEnv*, jobject)> gGetLowPowerStatsImpl = {};
 std::function<jint(JNIEnv*, jobject)> gGetPlatformLowPowerStatsImpl = {};
 std::function<jint(JNIEnv*, jobject)> gGetSubsystemLowPowerStatsImpl = {};
+
+// Cellular/Wifi power monitor rail information
+static jmethodID jupdateRailData = NULL;
+static jmethodID jsetRailStatsAvailability = NULL;
+
+std::function<void(JNIEnv*, jobject)> gGetRailEnergyPowerStatsImpl = {};
+
+std::unordered_map<uint32_t, std::pair<std::string, std::string>> gPowerStatsHalRailNames = {};
+static bool power_monitor_available = false;
 
 // The caller must be holding gPowerHalMutex.
 static void deinitPowerStatsLocked() {
@@ -258,6 +269,7 @@ static bool initializePowerStats() {
     gPowerStatsHalStateNames.clear();
     gPowerStatsHalPlatformIds.clear();
     gPowerStatsHalSubsystemIds.clear();
+    gPowerStatsHalRailNames.clear();
 
     Return<void> ret;
     ret = gPowerStatsHalV1_0->getPowerEntityInfo([](auto infos, auto status) {
@@ -295,6 +307,27 @@ static bool initializePowerStats() {
                     state.powerEntityStateName);
             }
             gPowerStatsHalStateNames.emplace(stateSpace.powerEntityId, stateNames);
+        }
+    });
+    if (!checkResultLocked(ret, __func__)) {
+        return false;
+    }
+
+    // Get Power monitor rails available
+    ret = gPowerStatsHalV1_0->getRailInfo([](auto rails, auto status) {
+        if (status != Status::SUCCESS) {
+            ALOGW("Rail information is not available");
+            power_monitor_available = false;
+            return;
+        }
+
+        // Fill out rail names/subsystems into gPowerStatsHalRailNames
+        for (auto rail : rails) {
+            gPowerStatsHalRailNames.emplace(rail.index,
+                std::make_pair(rail.railName, rail.subsysName));
+        }
+        if (!gPowerStatsHalRailNames.empty()) {
+            power_monitor_available = true;
         }
     });
     if (!checkResultLocked(ret, __func__)) {
@@ -515,6 +548,50 @@ static jint getPowerStatsHalSubsystemData(JNIEnv* env, jobject outBuf) {
 
     total_added += 1;
     return total_added;
+}
+
+static void getPowerStatsHalRailEnergyData(JNIEnv* env, jobject jrailStats) {
+    using android::hardware::power::stats::V1_0::Status;
+    using android::hardware::power::stats::V1_0::EnergyData;
+
+    if (!getPowerStatsHalLocked()) {
+        ALOGE("failed to get power stats");
+        return;
+    }
+
+    if (!power_monitor_available) {
+        env->CallVoidMethod(jrailStats, jsetRailStatsAvailability, false);
+        ALOGW("Rail energy data is not available");
+        return;
+    }
+
+    // Get power rail energySinceBoot data
+    Return<void> ret = gPowerStatsHalV1_0->getEnergyData({},
+        [&env, &jrailStats](auto energyData, auto status) {
+            if (status == Status::NOT_SUPPORTED) {
+                ALOGW("getEnergyData is not supported");
+                return;
+            }
+
+            for (auto data : energyData) {
+                if (!(data.timestamp > LLONG_MAX || data.energy > LLONG_MAX)) {
+                    env->CallVoidMethod(jrailStats,
+                        jupdateRailData,
+                        data.index,
+                        env->NewStringUTF(
+                            gPowerStatsHalRailNames.at(data.index).first.c_str()),
+                        env->NewStringUTF(
+                            gPowerStatsHalRailNames.at(data.index).second.c_str()),
+                        data.timestamp,
+                        data.energy);
+                } else {
+                    ALOGE("Java long overflow seen. Rail index %d not updated", data.index);
+                }
+            }
+        });
+    if (!checkResultLocked(ret, __func__)) {
+        ALOGE("getEnergyData failed");
+    }
 }
 
 // The caller must be holding powerHalMutex.
@@ -761,11 +838,13 @@ static void setUpPowerStatsLocked() {
         gGetLowPowerStatsImpl = getPowerStatsHalLowPowerData;
         gGetPlatformLowPowerStatsImpl = getPowerStatsHalPlatformData;
         gGetSubsystemLowPowerStatsImpl = getPowerStatsHalSubsystemData;
+        gGetRailEnergyPowerStatsImpl = getPowerStatsHalRailEnergyData;
     } else if (android::hardware::power::V1_0::IPower::getService() != nullptr) {
         ALOGI("Using power HAL");
         gGetLowPowerStatsImpl = getPowerHalLowPowerData;
         gGetPlatformLowPowerStatsImpl = getPowerHalPlatformData;
         gGetSubsystemLowPowerStatsImpl = getPowerHalSubsystemData;
+        gGetRailEnergyPowerStatsImpl = NULL;
     }
 }
 
@@ -835,11 +914,44 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
     return -1;
 }
 
+static void getRailEnergyPowerStats(JNIEnv* env, jobject /* clazz */, jobject jrailStats) {
+    if (jrailStats == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException",
+                "The railstats jni input jobject jrailStats is null.");
+        return;
+    }
+    if (jupdateRailData == NULL) {
+        ALOGE("A railstats jni jmethodID is null.");
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(gPowerHalMutex);
+
+    if (!gGetRailEnergyPowerStatsImpl) {
+        setUpPowerStatsLocked();
+    }
+
+    if (gGetRailEnergyPowerStatsImpl)  {
+        gGetRailEnergyPowerStatsImpl(env, jrailStats);
+        return;
+    }
+
+    if (jsetRailStatsAvailability == NULL) {
+        ALOGE("setRailStatsAvailability jni jmethodID is null.");
+        return;
+    }
+    env->CallVoidMethod(jrailStats, jsetRailStatsAvailability, false);
+    ALOGE("Unable to load Power.Stats.HAL. Setting rail availability to false");
+    return;
+}
+
 static const JNINativeMethod method_table[] = {
     { "nativeWaitWakeup", "(Ljava/nio/ByteBuffer;)I", (void*)nativeWaitWakeup },
     { "getLowPowerStats", "(Lcom/android/internal/os/RpmStats;)V", (void*)getLowPowerStats },
     { "getPlatformLowPowerStats", "(Ljava/nio/ByteBuffer;)I", (void*)getPlatformLowPowerStats },
     { "getSubsystemLowPowerStats", "(Ljava/nio/ByteBuffer;)I", (void*)getSubsystemLowPowerStats },
+    { "getRailEnergyPowerStats", "(Lcom/android/internal/os/RailStats;)V",
+        (void*)getRailEnergyPowerStats },
 };
 
 int register_android_server_BatteryStatsService(JNIEnv *env)
@@ -850,8 +962,9 @@ int register_android_server_BatteryStatsService(JNIEnv *env)
             env->FindClass("com/android/internal/os/RpmStats$PowerStatePlatformSleepState");
     jclass clsPowerStateSubsystem =
             env->FindClass("com/android/internal/os/RpmStats$PowerStateSubsystem");
+    jclass clsRailStats = env->FindClass("com/android/internal/os/RailStats");
     if (clsRpmStats == NULL || clsPowerStatePlatformSleepState == NULL
-            || clsPowerStateSubsystem == NULL) {
+            || clsPowerStateSubsystem == NULL || clsRailStats == NULL) {
         ALOGE("A rpmstats jni jclass is null.");
     } else {
         jgetAndUpdatePlatformState = env->GetMethodID(clsRpmStats, "getAndUpdatePlatformState",
@@ -862,6 +975,10 @@ int register_android_server_BatteryStatsService(JNIEnv *env)
                 "(Ljava/lang/String;JI)V");
         jputState = env->GetMethodID(clsPowerStateSubsystem, "putState",
                 "(Ljava/lang/String;JI)V");
+        jupdateRailData = env->GetMethodID(clsRailStats, "updateRailData",
+                "(JLjava/lang/String;Ljava/lang/String;JJ)V");
+        jsetRailStatsAvailability = env->GetMethodID(clsRailStats, "setRailStatsAvailability",
+                "(Z)V");
     }
 
     return jniRegisterNativeMethods(env, "com/android/server/am/BatteryStatsService",

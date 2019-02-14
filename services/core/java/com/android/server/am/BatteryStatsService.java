@@ -59,6 +59,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.ParseUtils;
@@ -84,7 +85,8 @@ import java.util.concurrent.Future;
  */
 public final class BatteryStatsService extends IBatteryStats.Stub
         implements PowerManagerInternal.LowPowerModeListener,
-        BatteryStatsImpl.PlatformIdleStateCallback {
+        BatteryStatsImpl.PlatformIdleStateCallback,
+        BatteryStatsImpl.RailEnergyDataCallback {
     static final String TAG = "BatteryStatsService";
     static final boolean DBG = false;
 
@@ -98,6 +100,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private native void getLowPowerStats(RpmStats rpmStats);
     private native int getPlatformLowPowerStats(ByteBuffer outBuffer);
     private native int getSubsystemLowPowerStats(ByteBuffer outBuffer);
+    private native void getRailEnergyPowerStats(RailStats railStats);
     private CharsetDecoder mDecoderStat = StandardCharsets.UTF_8
                     .newDecoder()
                     .onMalformedInput(CodingErrorAction.REPLACE)
@@ -117,6 +120,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             getLowPowerStats(rpmStats);
         } finally {
             if (DBG) Slog.d(TAG, "end getLowPowerStats");
+        }
+    }
+
+    @Override
+    public void fillRailDataStats(RailStats railStats) {
+        if (DBG) Slog.d(TAG, "begin getRailEnergyPowerStats");
+        try {
+            getRailEnergyPowerStats(railStats);
+        } finally {
+            if (DBG) Slog.d(TAG, "end getRailEnergyPowerStats");
         }
     }
 
@@ -177,7 +190,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return (umi != null) ? umi.getUserIds() : null;
             }
         };
-        mStats = new BatteryStatsImpl(systemDir, handler, this, mUserManagerUserInfoProvider);
+        mStats = new BatteryStatsImpl(systemDir, handler, this,
+                this, mUserManagerUserInfoProvider);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
@@ -1460,7 +1474,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
-                                        null, mStats.mHandler, null, mUserManagerUserInfoProvider);
+                                        null, mStats.mHandler, null, null,
+                                        mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpProtoLocked(
@@ -1498,7 +1513,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
-                                        null, mStats.mHandler, null, mUserManagerUserInfoProvider);
+                                        null, mStats.mHandler, null, null,
+                                        mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpCheckinLocked(mContext, pw, apps, flags,
