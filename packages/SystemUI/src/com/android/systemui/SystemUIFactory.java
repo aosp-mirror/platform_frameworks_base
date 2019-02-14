@@ -42,7 +42,6 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.ScrimView;
-import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -152,15 +151,6 @@ public class SystemUIFactory {
 
     public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
         return new VolumeDialogComponent(systemUi, context);
-    }
-
-    /**
-     * Provides status bar state controller implementation
-     */
-    @Singleton
-    @Provides
-    public StatusBarStateController provideStatusBarStateController(Context context) {
-        return new StatusBarStateControllerImpl();
     }
 
     @Singleton
