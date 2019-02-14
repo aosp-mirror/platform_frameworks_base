@@ -1863,7 +1863,7 @@ public class SubscriptionManager {
                 iSub.setDefaultSmsSubId(subscriptionId);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            ex.rethrowFromSystemServer();
         }
     }
 
