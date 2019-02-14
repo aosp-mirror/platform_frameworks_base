@@ -196,4 +196,25 @@ interface IStatsManager {
     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
     */
    oneway void unregisterPullerCallback(int atomTag, String packageName);
+
+    /**
+     * The install requires staging.
+     */
+    const int FLAG_REQUIRE_STAGING = 0x01;
+
+    /**
+     * Rollback is enabled with this install.
+     */
+    const int FLAG_ROLLBACK_ENABLED = 0x02;
+
+    /**
+     * Requires low latency monitoring.
+     */
+    const int FLAG_REQUIRE_LOW_LATENCY_MONITOR = 0x04;
+
+    /**
+     * Logs an event for binary push for module updates.
+     */
+     oneway void sendBinaryPushStateChangedAtom(in String trainName, in long trainVersionCode,
+         in int options, in int state, in long[] experimentId);
 }

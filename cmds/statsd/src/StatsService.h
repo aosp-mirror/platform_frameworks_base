@@ -31,6 +31,7 @@
 #include <android/frameworks/stats/1.0/types.h>
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
+#include <android/os/IStatsManager.h>
 #include <binder/IResultReceiver.h>
 #include <utils/Looper.h>
 
@@ -184,6 +185,13 @@ public:
      * Binder call to unregister any existing callback function for a vendor pulled atom.
      */
     virtual Status unregisterPullerCallback(int32_t atomTag, const String16& packageName) override;
+
+    /**
+     * Binder call to log BinaryPushStateChanged atom.
+     */
+    virtual Status sendBinaryPushStateChangedAtom(
+            const android::String16& trainName, int64_t trainVersionCode, int options,
+            int32_t state, const std::vector<int64_t>& experimentIds) override;
 
     /**
      * Binder call to get SpeakerImpedance atom.

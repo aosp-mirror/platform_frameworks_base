@@ -27,3 +27,4 @@ on post-fs-data
     mkdir /data/misc/stats-data/ 0770 statsd system
     mkdir /data/misc/stats-service/ 0770 statsd system
     mkdir /data/misc/stats-active-metric/ 0770 statsd system
+    mkdir /data/misc/train-info/ 0770 statsd system
