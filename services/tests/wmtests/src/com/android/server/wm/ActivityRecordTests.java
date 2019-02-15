@@ -27,9 +27,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -156,35 +153,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
 
         assertTrue(mActivity.isState(STOPPED));
-    }
-
-    @Test
-    public void testPositionLimitedAspectRatioNavBarBottom() {
-        verifyPositionWithLimitedAspectRatio(NAV_BAR_BOTTOM, new Rect(0, 0, 1000, 2000), 1.5f,
-                new Rect(0, 0, 1000, 1500));
-    }
-
-    @Test
-    public void testPositionLimitedAspectRatioNavBarLeft() {
-        verifyPositionWithLimitedAspectRatio(NAV_BAR_LEFT, new Rect(0, 0, 2000, 1000), 1.5f,
-                new Rect(500, 0, 2000, 1000));
-    }
-
-    @Test
-    public void testPositionLimitedAspectRatioNavBarRight() {
-        verifyPositionWithLimitedAspectRatio(NAV_BAR_RIGHT, new Rect(0, 0, 2000, 1000), 1.5f,
-                new Rect(0, 0, 1500, 1000));
-    }
-
-    private void verifyPositionWithLimitedAspectRatio(int navBarPosition, Rect taskBounds,
-            float aspectRatio, Rect expectedActivityBounds) {
-        // Verify with nav bar on the right.
-        when(mService.mWindowManager.getNavBarPosition(mActivity.getDisplayId()))
-                .thenReturn(navBarPosition);
-        mTask.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
-        mActivity.info.maxAspectRatio = aspectRatio;
-        ensureActivityConfiguration();
-        assertEquals(expectedActivityBounds, mActivity.getBounds());
     }
 
     private void ensureActivityConfiguration() {
