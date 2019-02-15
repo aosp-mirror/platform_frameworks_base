@@ -1236,7 +1236,7 @@ public class SubscriptionManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
-        return getActiveSubscriptionInfoList(false);
+        return getActiveSubscriptionInfoList(/* userVisibleonly */true);
     }
 
     /**
@@ -2858,15 +2858,24 @@ public class SubscriptionManager {
     /**
      * Whether system UI should hide a subscription. If it's a bundled opportunistic
      * subscription, it shouldn't show up in anywhere in Settings app, dialer app,
-     * or status bar.
+     * or status bar. Exception is if caller is carrier app, in which case they will
+     * want to see their own hidden subscriptions.
      *
      * @param info the subscriptionInfo to check against.
      * @return true if this subscription should be hidden.
      *
      * @hide
      */
-    public static boolean shouldHideSubscription(SubscriptionInfo info) {
-        return (info != null && !TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic());
+    private boolean shouldHideSubscription(SubscriptionInfo info) {
+        if (info == null) return false;
+
+        // If hasCarrierPrivileges or canManageSubscription returns true, it means caller
+        // has carrier privilege.
+        boolean hasCarrierPrivilegePermission = (info.isEmbedded() && canManageSubscription(info))
+                || TelephonyManager.from(mContext).hasCarrierPrivileges(info.getSubscriptionId());
+
+        return (!TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic()
+                && !hasCarrierPrivilegePermission);
     }
 
     /**
