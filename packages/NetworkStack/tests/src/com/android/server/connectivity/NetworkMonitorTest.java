@@ -16,8 +16,7 @@
 
 package com.android.server.connectivity;
 
-import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
-import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL;
+import static android.net.CaptivePortal.APP_RETURN_DISMISSED;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
@@ -41,8 +40,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
 import android.net.INetworkMonitorCallbacks;
 import android.net.InetAddresses;
@@ -54,10 +51,10 @@ import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.SharedLog;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -487,19 +484,23 @@ public class NetworkMonitorTest {
         // Check that startCaptivePortalApp sends the expected intent.
         nm.launchCaptivePortalApp();
 
-        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .startActivityAsUser(intentCaptor.capture(), eq(UserHandle.CURRENT));
-        final Intent intent = intentCaptor.getValue();
-        assertEquals(ACTION_CAPTIVE_PORTAL_SIGN_IN, intent.getAction());
-        final Network network = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK);
-        assertEquals(TEST_NETID, network.netId);
+        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        final ArgumentCaptor<Network> networkCaptor = ArgumentCaptor.forClass(Network.class);
+        verify(mCm, timeout(HANDLER_TIMEOUT_MS).times(1))
+                .startCaptivePortalApp(networkCaptor.capture(), bundleCaptor.capture());
+        final Bundle bundle = bundleCaptor.getValue();
+        final Network bundleNetwork = bundle.getParcelable(ConnectivityManager.EXTRA_NETWORK);
+        assertEquals(TEST_NETID, bundleNetwork.netId);
+        // network is passed both in bundle and as parameter, as the bundle is opaque to the
+        // framework and only intended for the captive portal app, but the framework needs
+        // the network to identify the right NetworkMonitor.
+        assertEquals(TEST_NETID, networkCaptor.getValue().netId);
 
         // Have the app report that the captive portal is dismissed, and check that we revalidate.
         setStatus(mHttpsConnection, 204);
         setStatus(mHttpConnection, 204);
-        final CaptivePortal captivePortal = intent.getParcelableExtra(EXTRA_CAPTIVE_PORTAL);
-        captivePortal.reportCaptivePortalDismissed();
+
+        nm.notifyCaptivePortalAppFinished(APP_RETURN_DISMISSED);
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
                 .notifyNetworkTested(NETWORK_TEST_RESULT_VALID, null);
     }

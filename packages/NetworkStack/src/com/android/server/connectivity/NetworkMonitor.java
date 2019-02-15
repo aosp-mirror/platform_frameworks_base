@@ -39,9 +39,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
-import android.net.ICaptivePortal;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.LinkProperties;
@@ -460,6 +458,13 @@ public class NetworkMonitor extends StateMachine {
         sendMessage(CMD_LAUNCH_CAPTIVE_PORTAL_APP);
     }
 
+    /**
+     * Notify that the captive portal app was closed with the provided response code.
+     */
+    public void notifyCaptivePortalAppFinished(int response) {
+        sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
+    }
+
     @Override
     protected void log(String s) {
         if (DBG) Log.d(TAG + "/" + mNetwork.toString(), s);
@@ -671,29 +676,8 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_LAUNCH_CAPTIVE_PORTAL_APP:
                     final Bundle appExtras = new Bundle();
                     // OneAddressPerFamilyNetwork is not parcelable across processes.
-                    appExtras.putParcelable(
-                            ConnectivityManager.EXTRA_NETWORK, new Network(mNetwork));
-                    appExtras.putParcelable(ConnectivityManager.EXTRA_CAPTIVE_PORTAL,
-                            new CaptivePortal(new ICaptivePortal.Stub() {
-                                @Override
-                                public void appResponse(int response) {
-                                    if (response == APP_RETURN_WANTED_AS_IS) {
-                                        mContext.enforceCallingPermission(
-                                                PERMISSION_NETWORK_SETTINGS,
-                                                "CaptivePortal");
-                                    }
-                                    sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
-                                }
-
-                                @Override
-                                public void logEvent(int eventId, String packageName)
-                                        throws RemoteException {
-                                    mContext.enforceCallingPermission(
-                                            PERMISSION_NETWORK_SETTINGS,
-                                            "CaptivePortal");
-                                    mCallback.logCaptivePortalLoginEvent(eventId, packageName);
-                                }
-                            }));
+                    final Network network = new Network(mNetwork);
+                    appExtras.putParcelable(ConnectivityManager.EXTRA_NETWORK, network);
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
                     appExtras.putString(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
                     if (probeRes.probeSpec != null) {
@@ -702,7 +686,7 @@ public class NetworkMonitor extends StateMachine {
                     }
                     appExtras.putString(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT,
                             mCaptivePortalUserAgent);
-                    mCm.startCaptivePortalApp(appExtras);
+                    mCm.startCaptivePortalApp(network, appExtras);
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
