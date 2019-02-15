@@ -15,6 +15,7 @@
      limitations under the License.
 -->
 
+
 <com.android.systemui.privacy.OngoingPrivacyChip
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/privacy_chip"
@@ -22,47 +23,39 @@
     android:layout_width="wrap_content"
     android:layout_marginLeft="@dimen/ongoing_appops_chip_margin"
     android:layout_marginRight="@dimen/ongoing_appops_chip_margin"
-    android:layout_marginTop="@dimen/ongoing_appops_top_chip_margin"
-    android:layout_marginBottom="@dimen/ongoing_appops_top_chip_margin"
-    android:gravity="center_vertical|center_horizontal"
     android:layout_gravity="center_vertical|start"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/ongoing_appops_chip_side_padding"
-    android:paddingEnd="@dimen/ongoing_appops_chip_side_padding"
     android:focusable="true">
 
-        <TextView
-            android:id="@+id/in_use_text"
-            android:layout_height="match_parent"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginEnd="@dimen/ongoing_appops_chip_icon_margin_collapsed"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-            android:textColor="@color/status_bar_clock_color"
-            android:text="@string/ongoing_privacy_chip_in_use"
-            />
-
         <LinearLayout
-            android:id="@+id/icons_container"
-            android:layout_height="match_parent"
+            android:id="@+id/background"
+            android:layout_height="@dimen/ongoing_appops_chip_height"
             android:layout_width="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical"
-            />
+        >
+                <LinearLayout
+                    android:id="@+id/icons_container"
+                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="@dimen/ongoing_appops_chip_items_margin"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    />
 
-        <TextView
-            android:id="@+id/text_container"
-            android:layout_height="match_parent"
-            android:layout_width="wrap_content"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:lines="1"
-            android:layout_gravity="center_vertical|end"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-            android:textColor="@color/status_bar_clock_color"
-            android:layout_marginStart="@dimen/ongoing_appops_chip_icon_margin_collapsed"
-            android:layout_marginEnd="@dimen/ongoing_appops_chip_icon_margin_collapsed"
-        />
+                <TextView
+                    android:id="@+id/text_container"
+                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:paddingStart="@dimen/ongoing_appops_chip_text_padding"
+                    android:paddingEnd="@dimen/ongoing_appops_chip_text_padding"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                    android:textSize="@dimen/ongoing_appops_chip_text_size"
+                    android:textColor="@color/status_bar_clock_color"
+                />
+          </LinearLayout>
 </com.android.systemui.privacy.OngoingPrivacyChip>

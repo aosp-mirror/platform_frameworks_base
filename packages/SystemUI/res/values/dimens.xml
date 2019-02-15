@@ -980,26 +980,32 @@
     <dimen name="ongoing_appops_dialog_items_bottom_margin">24dp</dimen>
     <!-- Top and bottom margin of title in Ongoing App Ops dialog -->
     <dimen name="ongoing_appops_dialog_title_margin_top_bottom">18dp</dimen>
-    <!-- Side margins around the Ongoing App Ops chip-->
-    <dimen name="ongoing_appops_chip_margin">12dp</dimen>
-    <!-- Top and bottom margins around the Ongoing App Ops chip -->
-    <dimen name="ongoing_appops_top_chip_margin">12dp</dimen>
-    <!-- Start and End padding for Ongoing App Ops chip -->
-    <dimen name="ongoing_appops_chip_side_padding">6dp</dimen>
-    <!-- Padding between background of Ongoing App Ops chip and content -->
-    <dimen name="ongoing_appops_chip_bg_padding">0dp</dimen>
-    <!-- Margin between icons of Ongoing App Ops chip when QQS-->
-    <dimen name="ongoing_appops_chip_icon_margin_collapsed">0dp</dimen>
-    <!-- Margin between icons of Ongoing App Ops chip when QS-->
-    <dimen name="ongoing_appops_chip_icon_margin_expanded">8dp</dimen>
-    <!-- Icon size of Ongoing App Ops chip -->
-    <dimen name="ongoing_appops_chip_icon_size">18dp</dimen>
-    <!-- Radius of Ongoing App Ops chip corners -->
-    <dimen name="ongoing_appops_chip_bg_corner_radius">4dp</dimen>
     <!-- Text size for Ongoing App Ops dialog title -->
     <dimen name="ongoing_appops_dialog_title_size">20sp</dimen>
     <!-- Text size for Ongoing App Ops dialog items -->
     <dimen name="ongoing_appops_dialog_item_size">16sp</dimen>
+    <!-- Side margins around the Ongoing App Ops chip-->
+    <dimen name="ongoing_appops_chip_margin">0dp</dimen>
+    <!-- Height of the Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_height">32dp</dimen>
+    <!-- Start and End padding for Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_text_padding">8dp</dimen>
+    <!-- Padding between background of Ongoing App Ops chip and content -->
+    <dimen name="ongoing_appops_chip_bg_padding">0dp</dimen>
+    <!-- Side padding between background of Ongoing App Ops chip and content -->
+    <dimen name="ongoing_appops_chip_side_padding">8dp</dimen>
+    <!-- Margin between icons of Ongoing App Ops chip when QQS-->
+    <dimen name="ongoing_appops_chip_icon_margin_collapsed">0dp</dimen>
+    <!-- Margin between icons of Ongoing App Ops chip when QS-->
+    <dimen name="ongoing_appops_chip_icon_margin_expanded">2dp</dimen>
+    <!-- Icon size of Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_icon_size">@*android:dimen/status_bar_icon_size</dimen>
+    <!-- Radius of Ongoing App Ops chip corners -->
+    <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
+    <!-- Size of text of Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_text_size">12sp</dimen>
+    <!-- Margin between items in Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_items_margin">8dp</dimen>
 
     <!-- How much a bubble is elevated -->
     <dimen name="bubble_elevation">8dp</dimen>
