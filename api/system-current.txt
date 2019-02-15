@@ -3475,7 +3475,7 @@ package android.media {
     field public static final int PLAYER_TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
-  public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting {
+  public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
     ctor public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
   }
 
