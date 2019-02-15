@@ -1509,6 +1509,9 @@ public final class Bitmap implements Parcelable {
      * Convenience method that returns the width of this bitmap divided
      * by the density scale factor.
      *
+     * Returns the bitmap's width multiplied by the ratio of the target density to the bitmap's
+     * source density
+     *
      * @param targetDensity The density of the target canvas of the bitmap.
      * @return The scaled width of this bitmap, according to the density scale factor.
      */
@@ -1519,6 +1522,9 @@ public final class Bitmap implements Parcelable {
     /**
      * Convenience method that returns the height of this bitmap divided
      * by the density scale factor.
+     *
+     * Returns the bitmap's height multiplied by the ratio of the target density to the bitmap's
+     * source density
      *
      * @param targetDensity The density of the target canvas of the bitmap.
      * @return The scaled height of this bitmap, according to the density scale factor.
