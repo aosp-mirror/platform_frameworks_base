@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator
 import android.util.FloatProperty
 import android.view.animation.Interpolator
 import com.android.systemui.Interpolators
+import com.android.systemui.statusbar.AmbientPulseManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 
@@ -27,7 +28,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NotificationWakeUpCoordinator @Inject constructor() {
+class NotificationWakeUpCoordinator @Inject constructor(
+        private val mAmbientPulseManager: AmbientPulseManager) {
 
     private val mNotificationVisibility
             = object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
@@ -130,7 +132,18 @@ class NotificationWakeUpCoordinator @Inject constructor() {
         }
     }
 
-    fun setPulseWakeUpHeight(height: Float): Float {
-        return mStackScroller.setPulseWakeUpHeight(height)
+    fun setPulseHeight(height: Float): Float {
+        return mStackScroller.setPulseHeight(height)
+    }
+
+    fun setPulsing(pulsing: Boolean) {
+        val hasAmbientNotifications = mAmbientPulseManager.hasNotifications();
+        if (pulsing && hasAmbientNotifications) {
+            setNotificationsVisible(true /* visible */, true /* animate */,
+                    false /* increaseSpeed */)
+        } else if (!pulsing && !hasAmbientNotifications) {
+            setNotificationsVisible(false /* visible */, true /* animate */,
+                    false /* increaseSpeed */)
+        }
     }
 }

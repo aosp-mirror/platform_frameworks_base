@@ -196,6 +196,7 @@ import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationListController;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
@@ -366,6 +367,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     InjectionInflationController mInjectionInflater;
     @Inject
     PulseExpansionHandler mPulseExpansionHandler;
+    @Inject
+    NotificationWakeUpCoordinator mWakeUpCoordinator;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -3901,6 +3904,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                     updateScrimController();
                     mPulseExpansionHandler.setPulsing(pulsing);
+                    mWakeUpCoordinator.setPulsing(pulsing);
                 }
             }, reason);
             // DozeScrimController is in pulse state, now let's ask ScrimController to start

@@ -290,6 +290,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 && !mAmbientState.isPanelTracking();
         int baseZHeight = mAmbientState.getBaseZHeight();
         int backgroundTop = 0;
+        int clipTopAmount = 0;
         float firstElementRoundness = 0.0f;
         ExpandableNotificationRow previousRow = null;
 
@@ -319,7 +320,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                             rowTranslationY + getNotificationMergeSize());
                 }
             }
-            updateNotificationClipHeight(row, notificationClipEnd);
+            int clipTop = updateNotificationClipHeight(row, notificationClipEnd, notGoneIndex);
+            clipTopAmount = Math.max(clipTop, clipTopAmount);
             float inShelfAmount = updateIconAppearance(row, expandAmount, scrolling, scrollingFast,
                     expandingAnimated, isLastChild);
             numViewsInShelf += inShelfAmount;
@@ -379,9 +381,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
             previousColor = ownColorUntinted;
             previousRow = row;
         }
-
         clipTransientViews();
 
+        setClipTopAmount(clipTopAmount);
         setBackgroundTop(backgroundTop);
         setFirstElementRoundness(firstElementRoundness);
         mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
@@ -415,7 +417,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             View transientView = mHostLayout.getTransientView(i);
             if (transientView instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow transientRow = (ExpandableNotificationRow) transientView;
-                updateNotificationClipHeight(transientRow, getTranslationY());
+                updateNotificationClipHeight(transientRow, getTranslationY(), -1);
             } else {
                 Log.e(TAG, "NotificationShelf.clipTransientViews(): "
                         + "Trying to clip non-row transient view");
@@ -432,9 +434,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     private void updateIconClipAmount(ExpandableNotificationRow row) {
         float maxTop = row.getTranslationY();
+        if (getClipTopAmount() != 0) {
+            // if the shelf is clipped, lets make sure we also clip the icon
+            maxTop = Math.max(maxTop, getTranslationY() + getClipTopAmount());
+        }
         StatusBarIconView icon = row.getEntry().expandedIcon;
         float shelfIconPosition = getTranslationY() + icon.getTop() + icon.getTranslationY();
-        if (shelfIconPosition < maxTop && !mAmbientState.isDark()) {
+        if (shelfIconPosition < maxTop && !mAmbientState.isFullyDark()) {
             int top = (int) (maxTop - shelfIconPosition);
             Rect clipRect = new Rect(0, top, icon.getWidth(), Math.max(top, icon.getHeight()));
             icon.setClipBounds(clipRect);
@@ -485,8 +491,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
     }
 
-    private void updateNotificationClipHeight(ExpandableNotificationRow row,
-            float notificationClipEnd) {
+    private int updateNotificationClipHeight(ExpandableNotificationRow row,
+            float notificationClipEnd, int childIndex) {
         float viewEnd = row.getTranslationY() + row.getActualHeight();
         boolean isPinned = (row.isPinned() || row.isHeadsUpAnimatingAway())
                 && !mAmbientState.isDozingAndNotPulsing(row);
@@ -497,10 +503,17 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 clipBottomAmount = Math.min(row.getIntrinsicHeight() - row.getCollapsedHeight(),
                         clipBottomAmount);
             }
-            row.setClipBottomAmount(clipBottomAmount);
+            if (!row.isAmbientPulsing()
+                    && (!mAmbientState.isPulseExpanding() || childIndex != 0)) {
+                row.setClipBottomAmount(clipBottomAmount);
+            } else {
+                row.setClipBottomAmount(0);
+                return clipBottomAmount;
+            }
         } else {
             row.setClipBottomAmount(0);
         }
+        return 0;
     }
 
     @Override

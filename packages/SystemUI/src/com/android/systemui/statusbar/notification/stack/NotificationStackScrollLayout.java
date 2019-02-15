@@ -2270,9 +2270,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         float previousPaddingAmount = 0.0f;
         int numShownItems = 0;
         boolean finish = false;
-        int maxDisplayedNotifications = mAmbientState.isFullyDark()
-                ? (hasPulsingNotifications() ? 1 : 0)
-                : mMaxDisplayedNotifications;
+        int maxDisplayedNotifications = mMaxDisplayedNotifications;
 
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
@@ -2281,11 +2279,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     && !expandableView.hasNoContentHeight() && !footerViewOnLockScreen) {
                 boolean limitReached = maxDisplayedNotifications != -1
                         && numShownItems >= maxDisplayedNotifications;
-                boolean notificationOnAmbientThatIsNotPulsing = mAmbientState.isFullyDark()
-                        && hasPulsingNotifications()
-                        && expandableView instanceof ExpandableNotificationRow
-                        && !isPulsing(((ExpandableNotificationRow) expandableView).getEntry());
-                if (limitReached || notificationOnAmbientThatIsNotPulsing) {
+                if (limitReached) {
                     expandableView = mShelf;
                     finish = true;
                 }
@@ -5626,8 +5620,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * @param height the new wake up height
      * @return the overflow how much the height is further than he lowest notification
      */
-    public float setPulseWakeUpHeight(float height) {
-        mAmbientState.setPulseWakeUpHeight(height);
+    public float setPulseHeight(float height) {
+        mAmbientState.setPulseHeight(height);
         requestChildrenUpdate();
         return Math.max(0, height - mAmbientState.getInnerHeight(true /* ignorePulseHeight */));
     }

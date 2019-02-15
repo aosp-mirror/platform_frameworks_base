@@ -168,14 +168,13 @@ constructor(context: Context,
         } else {
             if (!mAmbientPulseManager.hasNotifications()) {
                 // No pulsing notifications, we need to make notifications visible
-                val target = if (mReachedWakeUpHeight) (mWakeUpHeight / 2.0f) else 0.0f
-
+                val target = if (mReachedWakeUpHeight) mWakeUpHeight else 0.0f
                 mWakeUpCoordinator.setNotificationsVisible(height > target, true /* animate */,
                         true /* increaseSpeed */)
             }
             expansionHeight = max(mWakeUpHeight, expansionHeight)
         }
-        val emptyDragAmount = mWakeUpCoordinator.setPulseWakeUpHeight(expansionHeight)
+        val emptyDragAmount = mWakeUpCoordinator.setPulseHeight(expansionHeight)
         setEmptyDragAmount(emptyDragAmount * RUBBERBAND_FACTOR_STATIC)
     }
 
@@ -261,15 +260,6 @@ constructor(context: Context,
 
     fun setPulsing(pulsing: Boolean) {
         mPulsing = pulsing
-        val hasAmbientNotifications = mAmbientPulseManager.hasNotifications();
-        if (pulsing && hasAmbientNotifications) {
-            mWakeUpCoordinator.setNotificationsVisible(true /* visible */, true /* animate */,
-                    false /* increaseSpeed */)
-        } else if (!pulsing && !hasAmbientNotifications) {
-            // TODO: figure out the optimal UX for this, should we extend the pulse instead?
-            mWakeUpCoordinator.setNotificationsVisible(false /* visible */, true /* animate */,
-                    false /* increaseSpeed */)
-        }
     }
 
     fun onStartedWakingUp() {

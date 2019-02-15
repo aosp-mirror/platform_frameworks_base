@@ -101,6 +101,7 @@ public class StackScrollAlgorithm {
         updateZValuesForState(algorithmState, ambientState);
 
         updateHeadsUpStates(algorithmState, ambientState);
+        updatePulsingStates(algorithmState, ambientState);
 
         updateDimmedActivatedHideSensitive(ambientState, algorithmState);
         updateClipping(algorithmState, ambientState);
@@ -475,6 +476,23 @@ public class StackScrollAlgorithm {
     protected int getPaddingAfterChild(StackScrollAlgorithmState algorithmState,
             ExpandableView child) {
         return algorithmState.getPaddingAfterChild(child);
+    }
+
+    private void updatePulsingStates(StackScrollAlgorithmState algorithmState,
+            AmbientState ambientState) {
+        int childCount = algorithmState.visibleChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            View child = algorithmState.visibleChildren.get(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (!row.isAmbientPulsing() || (i == 0 && ambientState.isPulseExpanding())) {
+                continue;
+            }
+            ExpandableViewState viewState = row.getViewState();
+            viewState.hidden = false;
+        }
     }
 
     private void updateHeadsUpStates(StackScrollAlgorithmState algorithmState,

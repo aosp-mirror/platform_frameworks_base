@@ -40,6 +40,7 @@ import java.util.List;
 public class AmbientState {
 
     private static final int NO_SECTION_BOUNDARY = -1;
+    private static final float MAX_PULSE_HEIGHT = 100000f;
 
     private ArrayList<ExpandableView> mDraggedViews = new ArrayList<>();
     private int mScrollY;
@@ -80,7 +81,7 @@ public class AmbientState {
     private ExpandableNotificationRow mExpandingNotification;
     private float mDarkAmount;
     private boolean mAppearing;
-    private float mPulseWakeUpHeight = Float.MAX_VALUE;
+    private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
 
     public AmbientState(Context context) {
@@ -185,6 +186,9 @@ public class AmbientState {
     /** Dark ratio of the status bar **/
     public void setDarkAmount(float darkAmount) {
         mDarkAmount = darkAmount;
+        if (darkAmount == 1.0f) {
+            mPulseHeight = MAX_PULSE_HEIGHT;
+        }
     }
 
     /** Returns the dark ratio of the status bar */
@@ -290,13 +294,20 @@ public class AmbientState {
      * @return the inner height of the algorithm.
      */
     public int getInnerHeight(boolean ignorePulseHeight) {
+        if (mDozeAmount == 1.0f && !isPulseExpanding()) {
+            return mShelf.getHeight();
+        }
         int height = Math.max(mLayoutMinHeight,
                 Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding);
         if (ignorePulseHeight) {
             return height;
         }
-        float pulseHeight = Math.min(mPulseWakeUpHeight, (float) height);
+        float pulseHeight = Math.min(mPulseHeight, (float) height);
         return (int) MathUtils.lerp(height, pulseHeight, mDozeAmount);
+    }
+
+    public boolean isPulseExpanding() {
+        return mPulseHeight != MAX_PULSE_HEIGHT && mDarkAmount != 1.0f;
     }
 
     public boolean isShadeExpanded() {
@@ -506,15 +517,16 @@ public class AmbientState {
         return mAppearing;
     }
 
-    public void setPulseWakeUpHeight(float height) {
-        mPulseWakeUpHeight = height;
+    public void setPulseHeight(float height) {
+        mPulseHeight = height;
     }
 
     public void setDozeAmount(float dozeAmount) {
         if (dozeAmount != mDozeAmount) {
             mDozeAmount = dozeAmount;
-            if (dozeAmount == 0.0f || dozeAmount == 1.0f) {
-                mPulseWakeUpHeight = Float.MAX_VALUE;
+            if (dozeAmount == 1.0f) {
+                // We woke all the way up, let's reset the pulse height
+                mPulseHeight = MAX_PULSE_HEIGHT;
             }
         }
     }

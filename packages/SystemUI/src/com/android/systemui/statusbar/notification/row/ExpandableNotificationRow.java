@@ -721,6 +721,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    @Override
     public boolean isAmbientPulsing() {
         return mIsAmbientPulsing;
     }
@@ -3004,9 +3005,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public boolean isAboveShelf() {
-        return !isOnKeyguard()
+        return isAmbientPulsing() || (!isOnKeyguard()
                 && (mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf)
-                || mExpandAnimationRunning || mChildIsExpanding);
+                || mExpandAnimationRunning || mChildIsExpanding));
     }
 
     public void setOnAmbient(boolean onAmbient) {
