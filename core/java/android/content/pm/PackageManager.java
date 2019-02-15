@@ -2943,6 +2943,7 @@ public abstract class PackageManager {
     * @hide
     */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_USER_SET = 1 << 0;
 
     /**
@@ -2953,6 +2954,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_USER_FIXED =  1 << 1;
 
     /**
@@ -2976,6 +2978,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE =  1 << 3;
 
     /**
@@ -3005,6 +3008,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_REVIEW_REQUIRED =  1 << 6;
 
     /**
@@ -3014,6 +3018,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED =  1 << 7;
 
     /**
@@ -3795,6 +3800,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
@@ -3815,6 +3821,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS

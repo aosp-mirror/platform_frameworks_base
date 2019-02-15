@@ -16,6 +16,9 @@
                 },
                 {
                     "include-filter": "android.permission.cts.SplitPermissionTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionFlagsTest"
                 }
             ]
         },

@@ -516,13 +516,20 @@ package android.content.pm {
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
     method public abstract String getPermissionControllerPackageName();
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method public String getWellbeingPackageName();
     method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract void updatePermissionFlags(String, String, int, int, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
+    field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
+    field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
+    field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80
+    field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
+    field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_KNOWN_PACKAGES = 4202496; // 0x402000
     field public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";

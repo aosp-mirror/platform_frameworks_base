@@ -19,10 +19,6 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
@@ -249,23 +245,6 @@ public final class Settings {
     private static final String ATTR_SDK_VERSION = "sdkVersion";
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
 
-    // Bookkeeping for restored permission grants
-    private static final String TAG_RESTORED_RUNTIME_PERMISSIONS = "restored-perms";
-    // package name: ATTR_PACKAGE_NAME
-    private static final String TAG_PERMISSION_ENTRY = "perm";
-    // permission name: ATTR_NAME
-    // permission granted (boolean): ATTR_GRANTED
-    private static final String ATTR_USER_SET = "set";
-    private static final String ATTR_USER_FIXED = "fixed";
-    private static final String ATTR_REVOKE_ON_UPGRADE = "rou";
-    private static final String ATTR_REVOKE_WHEN_REQUESTED = "rwr";
-
-    // Flag mask of restored permission grants that are applied at install time
-    private static final int USER_RUNTIME_GRANT_MASK =
-            FLAG_PERMISSION_USER_SET
-            | FLAG_PERMISSION_USER_FIXED
-            | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
-
     private final Object mLock;
 
     private final RuntimePermissionPersistence mRuntimePermissionsPersistence;
@@ -302,26 +281,6 @@ public final class Settings {
         int appId;
         int[] excludedUserIds;
     }
-
-    // Bookkeeping for restored user permission grants
-    final class RestoredPermissionGrant {
-        String permissionName;
-        boolean granted;
-        int grantBits;
-
-        RestoredPermissionGrant(String name, boolean isGranted, int theGrantBits) {
-            permissionName = name;
-            granted = isGranted;
-            grantBits = theGrantBits;
-        }
-    }
-
-    // This would be more compact as a flat array of restored grants or something, but we
-    // may have quite a few, especially during early device lifetime, and avoiding all those
-    // linear lookups will be important.
-    private final SparseArray<ArrayMap<String, ArraySet<RestoredPermissionGrant>>>
-            mRestoredUserGrants =
-                new SparseArray<ArrayMap<String, ArraySet<RestoredPermissionGrant>>>();
 
     private static int mFirstAvailableUid = 0;
 
@@ -459,43 +418,6 @@ public final class Settings {
 
     String addRenamedPackageLPw(String pkgName, String origPkgName) {
         return mRenamedPackages.put(pkgName, origPkgName);
-    }
-
-    void applyPendingPermissionGrantsLPw(String packageName, int userId) {
-        ArrayMap<String, ArraySet<RestoredPermissionGrant>> grantsByPackage =
-                mRestoredUserGrants.get(userId);
-        if (grantsByPackage == null || grantsByPackage.size() == 0) {
-            return;
-        }
-
-        ArraySet<RestoredPermissionGrant> grants = grantsByPackage.get(packageName);
-        if (grants == null || grants.size() == 0) {
-            return;
-        }
-
-        final PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            Slog.e(TAG, "Can't find supposedly installed package " + packageName);
-            return;
-        }
-        final PermissionsState perms = ps.getPermissionsState();
-
-        for (RestoredPermissionGrant grant : grants) {
-            BasePermission bp = mPermissions.getPermission(grant.permissionName);
-            if (bp != null) {
-                if (grant.granted) {
-                    perms.grantRuntimePermission(bp, userId);
-                }
-                perms.updatePermissionFlags(bp, userId, USER_RUNTIME_GRANT_MASK, grant.grantBits);
-            }
-        }
-
-        // And remove it from the pending-grant bookkeeping
-        grantsByPackage.remove(packageName);
-        if (grantsByPackage.size() < 1) {
-            mRestoredUserGrants.remove(userId);
-        }
-        writeRuntimePermissionsForUserLPr(userId, false);
     }
 
     public boolean canPropagatePermissionToInstantApp(String permName) {
@@ -1980,13 +1902,6 @@ public final class Settings {
                 XmlUtils.skipCurrentTag(parser);
             }
         }
-    }
-
-    // Specifically for backup/restore
-    public void processRestoredPermissionGrantLPr(String pkgName, String permission,
-            boolean isGranted, int restoredFlagSet, int userId) {
-        mRuntimePermissionsPersistence.rememberRestoredUserGrantLPr(
-                pkgName, permission, isGranted, restoredFlagSet, userId);
     }
 
     void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
@@ -5014,51 +4929,6 @@ public final class Settings {
         pw.print(mReadMessages.toString());
     }
 
-    void dumpRestoredPermissionGrantsLPr(PrintWriter pw, DumpState dumpState) {
-        if (mRestoredUserGrants.size() > 0) {
-            pw.println();
-            pw.println("Restored (pending) permission grants:");
-            for (int userIndex = 0; userIndex < mRestoredUserGrants.size(); userIndex++) {
-                ArrayMap<String, ArraySet<RestoredPermissionGrant>> grantsByPackage =
-                        mRestoredUserGrants.valueAt(userIndex);
-                if (grantsByPackage != null && grantsByPackage.size() > 0) {
-                    final int userId = mRestoredUserGrants.keyAt(userIndex);
-                    pw.print("  User "); pw.println(userId);
-
-                    for (int pkgIndex = 0; pkgIndex < grantsByPackage.size(); pkgIndex++) {
-                        ArraySet<RestoredPermissionGrant> grants = grantsByPackage.valueAt(pkgIndex);
-                        if (grants != null && grants.size() > 0) {
-                            final String pkgName = grantsByPackage.keyAt(pkgIndex);
-                            pw.print("    "); pw.print(pkgName); pw.println(" :");
-
-                            for (RestoredPermissionGrant g : grants) {
-                                pw.print("      ");
-                                pw.print(g.permissionName);
-                                if (g.granted) {
-                                    pw.print(" GRANTED");
-                                }
-                                if ((g.grantBits&FLAG_PERMISSION_USER_SET) != 0) {
-                                    pw.print(" user_set");
-                                }
-                                if ((g.grantBits&FLAG_PERMISSION_USER_FIXED) != 0) {
-                                    pw.print(" user_fixed");
-                                }
-                                if ((g.grantBits&FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0) {
-                                    pw.print(" revoke_on_upgrade");
-                                }
-                                if ((g.grantBits & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
-                                    pw.print(" revoke_when_requested");
-                                }
-                                pw.println();
-                            }
-                        }
-                    }
-                }
-            }
-            pw.println();
-        }
-    }
-
     private static void dumpSplitNames(PrintWriter pw, PackageParser.Package pkg) {
         if (pkg == null) {
             pw.print("unknown");
@@ -5328,55 +5198,6 @@ public final class Settings {
 
                 serializer.endTag(null, TAG_RUNTIME_PERMISSIONS);
 
-                // Now any restored permission grants that are waiting for the apps
-                // in question to be installed.  These are stored as per-package
-                // TAG_RESTORED_RUNTIME_PERMISSIONS blocks, each containing some
-                // number of individual permission grant entities.
-                if (mRestoredUserGrants.get(userId) != null) {
-                    ArrayMap<String, ArraySet<RestoredPermissionGrant>> restoredGrants =
-                            mRestoredUserGrants.get(userId);
-                    if (restoredGrants != null) {
-                        final int pkgCount = restoredGrants.size();
-                        for (int i = 0; i < pkgCount; i++) {
-                            final ArraySet<RestoredPermissionGrant> pkgGrants =
-                                    restoredGrants.valueAt(i);
-                            if (pkgGrants != null && pkgGrants.size() > 0) {
-                                final String pkgName = restoredGrants.keyAt(i);
-                                serializer.startTag(null, TAG_RESTORED_RUNTIME_PERMISSIONS);
-                                serializer.attribute(null, ATTR_PACKAGE_NAME, pkgName);
-
-                                final int N = pkgGrants.size();
-                                for (int z = 0; z < N; z++) {
-                                    RestoredPermissionGrant g = pkgGrants.valueAt(z);
-                                    serializer.startTag(null, TAG_PERMISSION_ENTRY);
-                                    serializer.attribute(null, ATTR_NAME, g.permissionName);
-
-                                    if (g.granted) {
-                                        serializer.attribute(null, ATTR_GRANTED, "true");
-                                    }
-
-                                    if ((g.grantBits&FLAG_PERMISSION_USER_SET) != 0) {
-                                        serializer.attribute(null, ATTR_USER_SET, "true");
-                                    }
-                                    if ((g.grantBits&FLAG_PERMISSION_USER_FIXED) != 0) {
-                                        serializer.attribute(null, ATTR_USER_FIXED, "true");
-                                    }
-                                    if ((g.grantBits&FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0) {
-                                        serializer.attribute(null, ATTR_REVOKE_ON_UPGRADE, "true");
-                                    }
-                                    if ((g.grantBits & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED)
-                                            != 0) {
-                                        serializer.attribute(null, ATTR_REVOKE_WHEN_REQUESTED,
-                                                "true");
-                                    }
-                                    serializer.endTag(null, TAG_PERMISSION_ENTRY);
-                                }
-                                serializer.endTag(null, TAG_RESTORED_RUNTIME_PERMISSIONS);
-                            }
-                        }
-                    }
-                }
-
                 serializer.endDocument();
                 destination.finishWrite(out);
 
@@ -5455,29 +5276,6 @@ public final class Settings {
             }
         }
 
-        // Backup/restore support
-
-        public void rememberRestoredUserGrantLPr(String pkgName, String permission,
-                boolean isGranted, int restoredFlagSet, int userId) {
-            // This change will be remembered at write-settings time
-            ArrayMap<String, ArraySet<RestoredPermissionGrant>> grantsByPackage =
-                    mRestoredUserGrants.get(userId);
-            if (grantsByPackage == null) {
-                grantsByPackage = new ArrayMap<String, ArraySet<RestoredPermissionGrant>>();
-                mRestoredUserGrants.put(userId, grantsByPackage);
-            }
-
-            ArraySet<RestoredPermissionGrant> grants = grantsByPackage.get(pkgName);
-            if (grants == null) {
-                grants = new ArraySet<RestoredPermissionGrant>();
-                grantsByPackage.put(pkgName, grants);
-            }
-
-            RestoredPermissionGrant grant = new RestoredPermissionGrant(permission,
-                    isGranted, restoredFlagSet);
-            grants.add(grant);
-        }
-
         // Private internals
 
         @GuardedBy("Settings.this.mLock")
@@ -5519,50 +5317,6 @@ public final class Settings {
                             continue;
                         }
                         parsePermissionsLPr(parser, sus.getPermissionsState(), userId);
-                    } break;
-
-                    case TAG_RESTORED_RUNTIME_PERMISSIONS: {
-                        final String pkgName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                        parseRestoredRuntimePermissionsLPr(parser, pkgName, userId);
-                    } break;
-                }
-            }
-        }
-
-        private void parseRestoredRuntimePermissionsLPr(XmlPullParser parser,
-                final String pkgName, final int userId) throws IOException, XmlPullParserException {
-            final int outerDepth = parser.getDepth();
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-
-                switch (parser.getName()) {
-                    case TAG_PERMISSION_ENTRY: {
-                        final String permName = parser.getAttributeValue(null, ATTR_NAME);
-                        final boolean isGranted = "true".equals(
-                                parser.getAttributeValue(null, ATTR_GRANTED));
-
-                        int permBits = 0;
-                        if ("true".equals(parser.getAttributeValue(null, ATTR_USER_SET))) {
-                            permBits |= FLAG_PERMISSION_USER_SET;
-                        }
-                        if ("true".equals(parser.getAttributeValue(null, ATTR_USER_FIXED))) {
-                            permBits |= FLAG_PERMISSION_USER_FIXED;
-                        }
-                        if ("true".equals(parser.getAttributeValue(null, ATTR_REVOKE_ON_UPGRADE))) {
-                            permBits |= FLAG_PERMISSION_REVOKE_ON_UPGRADE;
-                        }
-                        if ("true".equals(parser.getAttributeValue(null,
-                                ATTR_REVOKE_WHEN_REQUESTED))) {
-                            permBits |= FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
-                        }
-
-                        if (isGranted || permBits != 0) {
-                            rememberRestoredUserGrantLPr(pkgName, permName, isGranted, permBits, userId);
-                        }
                     } break;
                 }
             }
