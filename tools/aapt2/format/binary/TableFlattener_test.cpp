@@ -671,9 +671,6 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayablePolicies) {
   overlayable_item_two.policies |= OverlayableItem::Policy::kSystem;
   overlayable_item_two.policies |= OverlayableItem::Policy::kVendor;
 
-  std::string name_three = "com.app.test:integer/overlayable_three_item";
-  OverlayableItem overlayable_item_three(overlayable);
-
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.test", 0x7f)
@@ -683,8 +680,6 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayablePolicies) {
           .SetOverlayable(name_one, overlayable_item_one)
           .AddSimple(name_two, ResourceId(0x7f020002))
           .SetOverlayable(name_two, overlayable_item_two)
-          .AddSimple(name_three, ResourceId(0x7f020003))
-          .SetOverlayable(name_three, overlayable_item_three)
           .Build();
 
   ResourceTable output_table;
@@ -713,16 +708,6 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayablePolicies) {
   EXPECT_EQ(overlayable_item.policies, OverlayableItem::Policy::kSystem
                                        | OverlayableItem::Policy::kProduct
                                        | OverlayableItem::Policy::kVendor);
-
-  search_result = output_table.FindResource(test::ParseNameOrDie(name_three));
-  ASSERT_TRUE(search_result);
-  ASSERT_THAT(search_result.value().entry, NotNull());
-  ASSERT_TRUE(search_result.value().entry->overlayable_item);
-  overlayable_item = search_result.value().entry->overlayable_item.value();
-  EXPECT_EQ(overlayable_item.policies, OverlayableItem::Policy::kPublic);
-  EXPECT_EQ(overlayable_item.overlayable->name, "TestName");
-  EXPECT_EQ(overlayable_item.overlayable->actor, "overlay://theme");
-  EXPECT_EQ(overlayable_item.policies, OverlayableItem::Policy::kPublic);
 }
 
 TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
@@ -745,6 +730,8 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
 
   std::string name_three = "com.app.test:integer/overlayable_three";
   OverlayableItem overlayable_item_three(group_one);
+  overlayable_item_three.policies |= OverlayableItem::Policy::kSignature;
+
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.test", 0x7f)
@@ -793,7 +780,22 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   result_overlayable = search_result.value().entry->overlayable_item.value();
   EXPECT_EQ(result_overlayable.overlayable->name, "OtherName");
   EXPECT_EQ(result_overlayable.overlayable->actor, "overlay://customization");
-  EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kPublic);
+  EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kSignature);
+}
+
+TEST_F(TableFlattenerTest, FlattenOverlayableNoPolicyFails) {
+  auto group = std::make_shared<Overlayable>("TestName", "overlay://theme");
+  std::string name_zero = "com.app.test:integer/overlayable_zero";
+  OverlayableItem overlayable_item_zero(group);
+
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
+          .AddSimple(name_zero, ResourceId(0x7f020000))
+          .SetOverlayable(name_zero, overlayable_item_zero)
+          .Build();
+  ResourceTable output_table;
+  ASSERT_FALSE(Flatten(context_.get(), {}, table.get(), &output_table));
 }
 
 }  // namespace aapt
