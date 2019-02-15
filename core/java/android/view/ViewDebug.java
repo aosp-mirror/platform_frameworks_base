@@ -846,9 +846,11 @@ public class ViewDebug {
      * Returns null if the capture stream cannot be started, such as if there's no
      * HardwareRenderer for the given view tree.
      * @hide
+     * @deprecated use {@link #startRenderingCommandsCapture(View, Executor, Callable)} instead.
      */
     @TestApi
     @Nullable
+    @Deprecated
     public static AutoCloseable startRenderingCommandsCapture(View tree, Executor executor,
             Function<Picture, Boolean> callback) {
         final View.AttachInfo attachInfo = tree.mAttachInfo;
@@ -862,6 +864,67 @@ public class ViewDebug {
         final HardwareRenderer renderer = attachInfo.mThreadedRenderer;
         if (renderer != null) {
             return new PictureCallbackHandler(renderer, callback, executor);
+        }
+        return null;
+    }
+
+    /**
+     * Begins capturing the entire rendering commands for the view tree referenced by the given
+     * view. The view passed may be any View in the tree as long as it is attached. That is,
+     * {@link View#isAttachedToWindow()} must be true.
+     *
+     * Every time a frame is rendered the callback will be invoked on the given executor to
+     * provide an OutputStream to serialize to. As long as the callback returns a valid
+     * OutputStream the capturing will continue. The system will only invoke the callback at a rate
+     * that the callback & OutputStream is able to keep up with. That is, if it takes 48ms for the
+     * callback & serialization to complete and there is a 60fps animation running
+     * then the callback will only receive 33% of the frames produced.
+     *
+     * This method must be called on the same thread as the View tree.
+     *
+     * @param tree The View tree to capture the rendering commands.
+     * @param callback The callback to invoke on every frame produced. Should return an
+     *                 OutputStream to write the data to. Return null to cancel capture. The
+     *                 same stream may be returned each time as the serialized data contains
+     *                 start & end markers. The callback will not be invoked while a previous
+     *                 serialization is being performed, so if a single continuous stream is being
+     *                 used it is valid for the callback to write its own metadata to that stream
+     *                 in response to callback invocation.
+     * @param executor The executor to invoke the callback on. Recommend using a background thread
+     *                 to avoid stalling the UI thread. Must be an asynchronous invoke or an
+     *                 exception will be thrown.
+     * @return a closeable that can be used to stop capturing. May be invoked on any thread. Note
+     * that the callback may continue to receive another frame or two depending on thread timings.
+     * Returns null if the capture stream cannot be started, such as if there's no
+     * HardwareRenderer for the given view tree.
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public static AutoCloseable startRenderingCommandsCapture(View tree, Executor executor,
+            Callable<OutputStream> callback) {
+        final View.AttachInfo attachInfo = tree.mAttachInfo;
+        if (attachInfo == null) {
+            throw new IllegalArgumentException("Given view isn't attached");
+        }
+        if (attachInfo.mHandler.getLooper() != Looper.myLooper()) {
+            throw new IllegalStateException("Called on the wrong thread."
+                    + " Must be called on the thread that owns the given View");
+        }
+        final HardwareRenderer renderer = attachInfo.mThreadedRenderer;
+        if (renderer != null) {
+            return new PictureCallbackHandler(renderer, (picture -> {
+                try {
+                    OutputStream stream = callback.call();
+                    if (stream != null) {
+                        picture.writeToStream(stream);
+                        return true;
+                    }
+                } catch (Exception ex) {
+                    // fall through
+                }
+                return false;
+            }), executor);
         }
         return null;
     }

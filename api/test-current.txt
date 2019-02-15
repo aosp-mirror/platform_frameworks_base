@@ -2634,7 +2634,8 @@ package android.view {
   }
 
   public class ViewDebug {
-    method @Nullable public static AutoCloseable startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.function.Function<android.graphics.Picture,java.lang.Boolean>);
+    method @Deprecated @Nullable public static AutoCloseable startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.function.Function<android.graphics.Picture,java.lang.Boolean>);
+    method @Nullable public static AutoCloseable startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.concurrent.Callable<java.io.OutputStream>);
   }
 
   public interface WindowManager extends android.view.ViewManager {
