@@ -15,9 +15,10 @@
  */
 package android.view.contentcapture;
 
-import static android.view.contentcapture.ContentCaptureHelper.DEBUG;
-import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
+import static android.view.contentcapture.ContentCaptureHelper.sDebug;
+import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -38,6 +39,8 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * TODO(b/123577059): add javadocs / mention it can be null
@@ -78,6 +81,75 @@ public final class ContentCaptureManager {
     public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED =
             "service_explicitly_enabled";
 
+    /**
+     * Maximum number of events that are buffered before sent to the app.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE = "max_buffer_size";
+
+    /**
+     * Frequency (in ms) of buffer flushes when no events are received.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY = "idle_flush_frequency";
+
+    /**
+     * Frequency (in ms) of buffer flushes when no events are received and the last one was a
+     * text change event.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY =
+            "text_change_flush_frequency";
+
+    /**
+     * Size of events that are logging on {@code dump}.
+     *
+     * <p>Set it to {@code 0} or less to disable history.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE = "log_history_size";
+
+    /**
+     * Sets the logging level for {@code logcat} statements.
+     *
+     * <p>Valid values are: {@link #LOGGING_LEVEL_OFF}, {@value #LOGGING_LEVEL_DEBUG}, and
+     * {@link #LOGGING_LEVEL_VERBOSE}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL = "logging_level";
+
+
+    /** @hide */
+    @TestApi
+    public static final int LOGGING_LEVEL_OFF = 0;
+
+    /** @hide */
+    @TestApi
+    public static final int LOGGING_LEVEL_DEBUG = 1;
+
+    /** @hide */
+    @TestApi
+    public static final int LOGGING_LEVEL_VERBOSE = 2;
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            LOGGING_LEVEL_OFF,
+            LOGGING_LEVEL_DEBUG,
+            LOGGING_LEVEL_VERBOSE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LoggingLevel {}
+
     private final Object mLock = new Object();
 
     @NonNull
@@ -101,9 +173,15 @@ public final class ContentCaptureManager {
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
             @NonNull IContentCaptureManager service) {
-        if (VERBOSE) Log.v(TAG, "Constructor for " + context.getPackageName());
         mContext = Preconditions.checkNotNull(context, "context cannot be null");
         mService = Preconditions.checkNotNull(service, "service cannot be null");
+
+        // TODO(b/123096662): right now we're reading the device config values here, but ideally
+        // it should be read on ContentCaptureManagerService and passed back when the activity
+        // started.
+        ContentCaptureHelper.setLoggingLevel();
+
+        if (sVerbose) Log.v(TAG, "Constructor for " + context.getPackageName());
 
         // TODO(b/119220549): we might not even need a handler, as the IPCs are oneway. But if we
         // do, then we should optimize it to run the tests after the Choreographer finishes the most
@@ -126,7 +204,7 @@ public final class ContentCaptureManager {
         synchronized (mLock) {
             if (mMainSession == null) {
                 mMainSession = new MainContentCaptureSession(mContext, this, mHandler, mService);
-                if (VERBOSE) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
+                if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
         }
@@ -210,7 +288,7 @@ public final class ContentCaptureManager {
      * it on {@link android.app.Activity#onCreate(android.os.Bundle, android.os.PersistableBundle)}.
      */
     public void setContentCaptureEnabled(boolean enabled) {
-        if (DEBUG) {
+        if (sDebug) {
             Log.d(TAG, "setContentCaptureEnabled(): setting to " + enabled + " for " + mContext);
         }
 
@@ -264,7 +342,7 @@ public final class ContentCaptureManager {
     @SystemApi
     @TestApi
     public void setContentCaptureFeatureEnabled(boolean enabled) {
-        if (DEBUG) Log.d(TAG, "setContentCaptureFeatureEnabled(): setting to " + enabled);
+        if (sDebug) Log.d(TAG, "setContentCaptureFeatureEnabled(): setting to " + enabled);
 
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
         final int resultCode;
@@ -308,10 +386,12 @@ public final class ContentCaptureManager {
         synchronized (mLock) {
             pw.print(prefix2); pw.print("isContentCaptureEnabled(): ");
             pw.println(isContentCaptureEnabled());
-            pw.print(prefix2); pw.print("Context: "); pw.println(mContext);
-            pw.print(prefix2); pw.print("User: "); pw.println(mContext.getUserId());
-            pw.print(prefix2); pw.print("Service: "); pw.println(mService);
-            pw.print(prefix2); pw.print("Flags: "); pw.println(mFlags);
+            pw.print(prefix); pw.print("Debug: "); pw.print(sDebug);
+            pw.print(" Verbose: "); pw.println(sVerbose);
+            pw.print(prefix); pw.print("Context: "); pw.println(mContext);
+            pw.print(prefix); pw.print("User: "); pw.println(mContext.getUserId());
+            pw.print(prefix); pw.print("Service: "); pw.println(mService);
+            pw.print(prefix); pw.print("Flags: "); pw.println(mFlags);
             if (mMainSession != null) {
                 final String prefix3 = prefix2 + "  ";
                 pw.print(prefix2); pw.println("Main session:");

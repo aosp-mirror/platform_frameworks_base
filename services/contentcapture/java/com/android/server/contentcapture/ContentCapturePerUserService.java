@@ -187,13 +187,15 @@ final class ContentCapturePerUserService
         final ComponentName componentName = activityPresentationInfo.componentName;
         final ComponentName serviceComponentName = getServiceComponentName();
         final boolean enabled = isEnabledLocked();
-        final String historyItem =
-                "id=" + sessionId + " uid=" + uid
-                + " a=" + ComponentName.flattenToShortString(componentName)
-                + " t=" + taskId + " d=" + displayId
-                + " s=" + ComponentName.flattenToShortString(serviceComponentName)
-                + " u=" + mUserId + " f=" + flags + (enabled ? "" : " (disabled)");
-        mMaster.logRequestLocked(historyItem);
+        if (mMaster.mRequestsHistory != null) {
+            final String historyItem =
+                    "id=" + sessionId + " uid=" + uid
+                    + " a=" + ComponentName.flattenToShortString(componentName)
+                    + " t=" + taskId + " d=" + displayId
+                    + " s=" + ComponentName.flattenToShortString(serviceComponentName)
+                    + " u=" + mUserId + " f=" + flags + (enabled ? "" : " (disabled)");
+            mMaster.mRequestsHistory.log(historyItem);
+        }
 
         if (!enabled) {
             // TODO: it would be better to split in differet reasons, like

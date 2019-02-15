@@ -2748,7 +2748,15 @@ package android.view.contentcapture {
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
     method public void setContentCaptureFeatureEnabled(boolean);
+    field public static final String DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY = "idle_flush_frequency";
+    field public static final String DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL = "logging_level";
+    field public static final String DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE = "log_history_size";
+    field public static final String DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE = "max_buffer_size";
     field public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED = "service_explicitly_enabled";
+    field public static final String DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY = "text_change_flush_frequency";
+    field public static final int LOGGING_LEVEL_DEBUG = 1; // 0x1
+    field public static final int LOGGING_LEVEL_OFF = 0; // 0x0
+    field public static final int LOGGING_LEVEL_VERBOSE = 2; // 0x2
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
