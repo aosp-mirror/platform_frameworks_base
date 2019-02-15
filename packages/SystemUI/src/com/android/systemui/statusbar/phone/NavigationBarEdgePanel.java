@@ -114,7 +114,7 @@ public class NavigationBarEdgePanel extends View {
         lp.accessibilityTitle = context.getString(R.string.nav_bar_edge_panel);
         lp.windowAnimations = 0;
         NavigationBarEdgePanel panel = new NavigationBarEdgePanel(
-                context, (gravity & Gravity.LEFT) != 0);
+                context, (gravity & Gravity.LEFT) == Gravity.LEFT);
         panel.setLayoutParams(lp);
         return panel;
     }
@@ -269,12 +269,21 @@ public class NavigationBarEdgePanel extends View {
                 dist));
 
         if (dist < mGestureLength) {
-            setLegProgress(MathUtils.constrainedMap(
+            float calculatedLegProgress = MathUtils.constrainedMap(
                     0f, POINTEDNESS_BEFORE_SNAP_RATIO,
                     mGestureLength * START_POINTING_RATIO, mGestureLength,
-                    dist));
+                    dist);
 
-            mGestureDetected = false;
+            // Blend animated value with drag calculated value, allow the gesture to continue
+            // while the animation is playing with jump cuts in the animation.
+            setLegProgress(MathUtils.lerp(calculatedLegProgress, mLegProgress, mDragProgress));
+
+            if (mGestureDetected) {
+                mGestureDetected = false;
+
+                mLegAnimator.setFloatValues(POINTEDNESS_BEFORE_SNAP_RATIO);
+                mLegAnimator.start();
+            }
         } else {
             if (!mGestureDetected) {
                 performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
