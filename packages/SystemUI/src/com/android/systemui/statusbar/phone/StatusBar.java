@@ -117,7 +117,6 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.DateTimeView;
-import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -460,9 +459,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected boolean mDozing;
     private boolean mDozingRequested;
 
-    protected BackDropView mBackdrop;
-    protected ImageView mBackdropFront, mBackdropBack;
-
     private NotificationMediaManager mMediaManager;
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
@@ -492,7 +488,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     private Runnable mLaunchTransitionEndRunnable;
-    protected boolean mLaunchTransitionFadingAway;
     private NotificationEntry mDraggedDownEntry;
     private boolean mLaunchCameraOnScreenTurningOn;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
@@ -932,11 +927,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
         mDozeScrimController = new DozeScrimController(DozeParameters.getInstance(context));
 
-        mBackdrop = mStatusBarWindow.findViewById(R.id.backdrop);
-        mBackdropFront = mBackdrop.findViewById(R.id.backdrop_front);
-        mBackdropBack = mBackdrop.findViewById(R.id.backdrop_back);
-        mMediaManager.setup(mBackdrop, mBackdropFront, mBackdropBack,
-                mScrimController, mLockscreenWallpaper);
+        BackDropView backdrop = mStatusBarWindow.findViewById(R.id.backdrop);
+        mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
+                backdrop.findViewById(R.id.backdrop_back), mScrimController, mLockscreenWallpaper);
 
         // Other icons
         mVolumeComponent = getComponent(VolumeComponent.class);
@@ -1590,10 +1583,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean isPulsing() {
         return mPulsing;
-    }
-
-    public boolean isLaunchTransitionFadingAway() {
-        return mLaunchTransitionFadingAway;
     }
 
     public boolean hideStatusBarIconsWhenExpanded() {
@@ -2966,7 +2955,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void showKeyguardImpl() {
         mIsKeyguard = true;
-        if (mLaunchTransitionFadingAway) {
+        if (mKeyguardMonitor.isLaunchTransitionFadingAway()) {
             mNotificationPanel.animate().cancel();
             onLaunchTransitionFadingEnded();
         }
@@ -2998,7 +2987,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
-        mLaunchTransitionFadingAway = false;
+        mKeyguardMonitor.setLaunchTransitionFadingAway(false);
         mPresenter.updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
@@ -3024,7 +3013,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mLaunchTransitionEndRunnable = endRunnable;
         Runnable hideRunnable = () -> {
             mKeyguardMonitor.setLaunchTransitionFadingAway(true);
-            mLaunchTransitionFadingAway = true;
             if (beforeFading != null) {
                 beforeFading.run();
             }
