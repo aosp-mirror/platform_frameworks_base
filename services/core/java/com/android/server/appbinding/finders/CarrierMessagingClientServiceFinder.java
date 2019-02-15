@@ -99,7 +99,7 @@ public class CarrierMessagingClientServiceFinder
     @Override
     public void startMonitoring() {
         mRoleManager.addOnRoleHoldersChangedListenerAsUser(
-                mContext.getMainExecutor(), mRoleHolderChangedListener, UserHandle.ALL);
+                BackgroundThread.getExecutor(), mRoleHolderChangedListener, UserHandle.ALL);
     }
 
     @Override
@@ -120,9 +120,7 @@ public class CarrierMessagingClientServiceFinder
 
     private final OnRoleHoldersChangedListener mRoleHolderChangedListener = (role, user) -> {
         if (RoleManager.ROLE_SMS.equals(role)) {
-            BackgroundThread.getHandler().post(() -> {
-                mListener.accept(CarrierMessagingClientServiceFinder.this, user.getIdentifier());
-            });
+            mListener.accept(CarrierMessagingClientServiceFinder.this, user.getIdentifier());
         }
     };
 }
