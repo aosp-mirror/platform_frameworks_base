@@ -24,6 +24,7 @@ import android.content.res.ColorStateList
 import android.os.UserHandle
 import android.provider.Settings
 import android.util.IconDrawableFactory
+import android.util.StatsLog
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -55,7 +56,13 @@ class OngoingPrivacyDialog constructor(
 
     fun createDialog(): Dialog {
         val builder = AlertDialog.Builder(context).apply {
-            setPositiveButton(R.string.ongoing_privacy_dialog_ok, null)
+            setPositiveButton(R.string.ongoing_privacy_dialog_ok,
+                    object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    StatsLog.write(StatsLog.PRIVACY_INDICATORS_INTERACTED,
+                            StatsLog.PRIVACY_INDICATORS_INTERACTED__TYPE__DIALOG_DISMISS)
+                }
+            })
             setNeutralButton(R.string.ongoing_privacy_dialog_open_settings,
                     object : DialogInterface.OnClickListener {
                         val intent = Intent(Settings.ACTION_PRIVACY_SETTINGS).putExtra(
@@ -63,6 +70,8 @@ class OngoingPrivacyDialog constructor(
 
                         @Suppress("DEPRECATION")
                         override fun onClick(dialog: DialogInterface?, which: Int) {
+                            StatsLog.write(StatsLog.PRIVACY_INDICATORS_INTERACTED, StatsLog
+                                    .PRIVACY_INDICATORS_INTERACTED__TYPE__DIALOG_PRIVACY_SETTINGS)
                             Dependency.get(ActivityStarter::class.java)
                                     .postStartActivityDismissingKeyguard(intent, 0)
                         }
@@ -136,6 +145,9 @@ class OngoingPrivacyDialog constructor(
                         .putExtra(Intent.EXTRA_PACKAGE_NAME, app.packageName)
                         .putExtra(Intent.EXTRA_USER, UserHandle.getUserHandleForUid(app.uid))
                 override fun onClick(v: View?) {
+                    StatsLog.write(StatsLog.PRIVACY_INDICATORS_INTERACTED,
+                            StatsLog.PRIVACY_INDICATORS_INTERACTED__TYPE__DIALOG_LINE_ITEM,
+                            app.packageName)
                     Dependency.get(ActivityStarter::class.java)
                             .postStartActivityDismissingKeyguard(intent, 0)
                     dismissDialog?.invoke()

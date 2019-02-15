@@ -41,6 +41,7 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.StatsLog;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
@@ -156,6 +157,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
     };
     private boolean mHasTopCutout = false;
+    private boolean mPrivacyChipLogged = false;
 
     /**
      * Runnable for automatically fading out the long press tooltip (as if it were animating away).
@@ -209,6 +211,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mPrivacyChip.setOnClickListener(this);
         mCarrierGroup = findViewById(R.id.carrier_group);
+
 
         updateResources();
 
@@ -265,6 +268,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private void setChipVisibility(boolean chipVisible) {
         if (chipVisible) {
             mPrivacyChip.setVisibility(View.VISIBLE);
+            // Makes sure that the chip is logged as viewed at most once each time QS is opened
+            // mListening makes sure that the callback didn't return after the user closed QS
+            if (!mPrivacyChipLogged && mListening) {
+                mPrivacyChipLogged = true;
+                StatsLog.write(StatsLog.PRIVACY_INDICATORS_INTERACTED,
+                        StatsLog.PRIVACY_INDICATORS_INTERACTED__TYPE__CHIP_VIEWED);
+            }
         } else {
             mPrivacyChip.setVisibility(View.GONE);
         }
@@ -534,6 +544,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mAlarmController.removeCallback(this);
             mPrivacyItemController.removeCallback(mPICCallback);
             mContext.unregisterReceiver(mRingerReceiver);
+            mPrivacyChipLogged = false;
         }
     }
 
@@ -547,6 +558,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             PrivacyDialogBuilder builder = mPrivacyChip.getBuilder();
             if (builder.getAppsAndTypes().size() == 0) return;
             Handler mUiHandler = new Handler(Looper.getMainLooper());
+            StatsLog.write(StatsLog.PRIVACY_INDICATORS_INTERACTED,
+                    StatsLog.PRIVACY_INDICATORS_INTERACTED__TYPE__CHIP_CLICKED);
             mUiHandler.post(() -> {
                 Dialog mDialog = new OngoingPrivacyDialog(mContext, builder).createDialog();
                 SystemUIDialog.setShowForAllUsers(mDialog, false);

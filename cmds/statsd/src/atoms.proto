@@ -249,6 +249,7 @@ message Atom {
         TouchGestureClassified touch_gesture_classified = 177;
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
         StyleUIChanged style_ui_changed = 179;
+        PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
     }
 
     // Pulled events will start at field 10000.
@@ -3393,6 +3394,32 @@ message HiddenApiUsed {
 
     // Whether the access was prevented or not.
     optional bool access_denied = 4;
+}
+
+/**
+ * Logs user interaction with the Privacy Indicators added in Q. In particular:
+ * - When user sees privacy chip
+ * - When user clicks privacy chip
+ * - How does the user exit the Privacy Dialog
+ * Logged from:
+ *   packages/SystemUI/src/com/android/systemui/privacy/OngoingPrivacyDialog.kt
+ *   packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java
+ */
+message PrivacyIndicatorsInteracted {
+
+    enum Type {
+        UNKNOWN = 0;
+        CHIP_VIEWED = 1;
+        CHIP_CLICKED = 2;
+        DIALOG_PRIVACY_SETTINGS = 3;
+        DIALOG_DISMISS = 4;
+        DIALOG_LINE_ITEM = 5;
+    }
+
+    optional Type type = 1 [(state_field_option).option = EXCLUSIVE];
+
+    // Used if the type is LINE_ITEM
+    optional string package_name = 2;
 }
 
 //////////////////////////////////////////////////////////////////////
