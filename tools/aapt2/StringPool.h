@@ -166,8 +166,7 @@ class StringPool {
 
   // Adds a string to the pool, unless it already exists, with a context object that can be used
   // when sorting the string pool. Returns a reference to the string in the pool.
-  Ref MakeRef(const android::StringPiece& str, const Context& context,
-              Maybe<size_t> index = {});
+  Ref MakeRef(const android::StringPiece& str, const Context& context);
 
   // Adds a string from another string pool. Returns a reference to the string in the string pool.
   Ref MakeRef(const Ref& ref);
@@ -211,8 +210,7 @@ class StringPool {
 
   static bool Flatten(BigBuffer* out, const StringPool& pool, bool utf8, IDiagnostics* diag);
 
-  Ref MakeRefImpl(const android::StringPiece& str, const Context& context, bool unique,
-                  Maybe<size_t> index = {});
+  Ref MakeRefImpl(const android::StringPiece& str, const Context& context, bool unique);
   void ReAssignIndices();
 
   std::vector<std::unique_ptr<Entry>> strings_;

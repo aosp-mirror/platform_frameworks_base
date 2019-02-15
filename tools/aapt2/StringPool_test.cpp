@@ -84,24 +84,6 @@ TEST(StringPoolTest, MaintainInsertionOrderIndex) {
   EXPECT_THAT(ref_c.index(), Eq(2u));
 }
 
-TEST(StringPoolTest, AssignStringIndex) {
-  StringPool pool;
-
-  StringPool::Ref ref_a = pool.MakeRef("0", StringPool::Context{}, 0u);
-  StringPool::Ref ref_b = pool.MakeRef("1", StringPool::Context{}, 1u);
-  StringPool::Ref ref_c = pool.MakeRef("5", StringPool::Context{}, 5u);
-  StringPool::Ref ref_d = pool.MakeRef("2", StringPool::Context{}, 2u);
-  StringPool::Ref ref_e = pool.MakeRef("4", StringPool::Context{}, 4u);
-  StringPool::Ref ref_f = pool.MakeRef("3", StringPool::Context{}, 3u);
-
-  EXPECT_THAT(ref_a.index(), Eq(0u));
-  EXPECT_THAT(ref_b.index(), Eq(1u));
-  EXPECT_THAT(ref_d.index(), Eq(2u));
-  EXPECT_THAT(ref_f.index(), Eq(3u));
-  EXPECT_THAT(ref_e.index(), Eq(4u));
-  EXPECT_THAT(ref_c.index(), Eq(5u));
-}
-
 TEST(StringPoolTest, PruneStringsWithNoReferences) {
   StringPool pool;
 
