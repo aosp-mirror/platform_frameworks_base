@@ -6522,6 +6522,15 @@ package android.service.euicc {
 
 package android.service.notification {
 
+  public final class Adjustment implements android.os.Parcelable {
+    ctor protected Adjustment(android.os.Parcel);
+    field public static final String KEY_PEOPLE = "key_people";
+  }
+
+  public final class NotificationStats implements android.os.Parcelable {
+    ctor protected NotificationStats(android.os.Parcel);
+  }
+
   public final class SnoozeCriterion implements android.os.Parcelable {
     ctor public SnoozeCriterion(String, CharSequence, CharSequence);
     ctor protected SnoozeCriterion(android.os.Parcel);
