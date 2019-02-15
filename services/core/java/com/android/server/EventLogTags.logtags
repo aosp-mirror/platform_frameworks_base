@@ -145,7 +145,7 @@ option java_package com.android.server
 # ---------------------------
 # SystemServer.run() starts:
 3010 boot_progress_system_run (time|2|3)
-
+3011 system_server_start (start_count|1),(uptime|2|3),(elapse_time|2|3)
 
 # ---------------------------
 # PackageManagerService.java
