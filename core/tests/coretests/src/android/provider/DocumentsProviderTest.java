@@ -60,7 +60,8 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
                 DocumentsContract.buildDocumentUri(TestDocumentsProvider.AUTHORITY, DOCUMENT_ID);
         try (ContentProviderClient client =
                      mResolver.acquireUnstableContentProviderClient(docUri)) {
-            final Path actual = DocumentsContract.findDocumentPath(client, docUri);
+            final Path actual = DocumentsContract.findDocumentPath(
+                    ContentResolver.wrap(client), docUri);
             assertEquals(expected, actual);
         }
     }

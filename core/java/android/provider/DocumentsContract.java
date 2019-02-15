@@ -1281,8 +1281,9 @@ public final class DocumentsContract {
      * @see DocumentsProvider#openDocumentThumbnail(String, Point,
      *      android.os.CancellationSignal)
      */
-    public static Bitmap getDocumentThumbnail(ContentInterface content, Uri documentUri, Point size,
-            CancellationSignal signal) throws FileNotFoundException {
+    public static @Nullable Bitmap getDocumentThumbnail(@NonNull ContentResolver content,
+            @NonNull Uri documentUri, @NonNull Point size, @Nullable CancellationSignal signal)
+            throws FileNotFoundException {
         try {
             return ContentResolver.loadThumbnail(content, documentUri, Point.convert(size), signal,
                     ImageDecoder.ALLOCATOR_SOFTWARE);
@@ -1295,12 +1296,6 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static Bitmap getDocumentThumbnail(ContentResolver content, Uri documentUri, Point size,
-            CancellationSignal signal) throws FileNotFoundException {
-        return getDocumentThumbnail((ContentInterface) content, documentUri, size, signal);
-    }
-
     /**
      * Create a new document with given MIME type and display name.
      *
@@ -1309,8 +1304,9 @@ public final class DocumentsContract {
      * @param displayName name of new document
      * @return newly created document, or {@code null} if failed
      */
-    public static Uri createDocument(ContentInterface content, Uri parentDocumentUri,
-            String mimeType, String displayName) throws FileNotFoundException {
+    public static @Nullable Uri createDocument(@NonNull ContentResolver content,
+            @NonNull Uri parentDocumentUri, @NonNull String mimeType, @NonNull String displayName)
+            throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, parentDocumentUri);
@@ -1327,12 +1323,6 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static Uri createDocument(ContentResolver content, Uri parentDocumentUri,
-            String mimeType, String displayName) throws FileNotFoundException {
-        return createDocument((ContentInterface) content, parentDocumentUri, mimeType, displayName);
-    }
-
     /**
      * Test if a document is descendant (child, grandchild, etc) from the given
      * parent.
@@ -1342,7 +1332,7 @@ public final class DocumentsContract {
      * @return if given document is a descendant of the given parent.
      * @see Root#FLAG_SUPPORTS_IS_CHILD
      */
-    public static boolean isChildDocument(@NonNull ContentInterface content,
+    public static boolean isChildDocument(@NonNull ContentResolver content,
             @NonNull Uri parentDocumentUri, @NonNull Uri childDocumentUri)
             throws FileNotFoundException {
         Preconditions.checkNotNull(content, "content can not be null");
@@ -1369,12 +1359,6 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static boolean isChildDocument(ContentResolver content, Uri parentDocumentUri,
-            Uri childDocumentUri) throws FileNotFoundException {
-        return isChildDocument((ContentInterface) content, parentDocumentUri, childDocumentUri);
-    }
-
     /**
      * Change the display name of an existing document.
      * <p>
@@ -1388,8 +1372,8 @@ public final class DocumentsContract {
      * @return the existing or new document after the rename, or {@code null} if
      *         failed.
      */
-    public static Uri renameDocument(ContentInterface content, Uri documentUri,
-            String displayName) throws FileNotFoundException {
+    public static @Nullable Uri renameDocument(@NonNull ContentResolver content,
+            @NonNull Uri documentUri, @NonNull String displayName) throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
@@ -1406,19 +1390,13 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static Uri renameDocument(ContentResolver content, Uri documentUri,
-            String displayName) throws FileNotFoundException {
-        return renameDocument((ContentInterface) content, documentUri, displayName);
-    }
-
     /**
      * Delete the given document.
      *
      * @param documentUri document with {@link Document#FLAG_SUPPORTS_DELETE}
      * @return if the document was deleted successfully.
      */
-    public static boolean deleteDocument(ContentInterface content, Uri documentUri)
+    public static boolean deleteDocument(@NonNull ContentResolver content, @NonNull Uri documentUri)
             throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
@@ -1434,12 +1412,6 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static boolean deleteDocument(ContentResolver content, Uri documentUri)
-            throws FileNotFoundException {
-        return deleteDocument((ContentInterface) content, documentUri);
-    }
-
     /**
      * Copies the given document.
      *
@@ -1448,8 +1420,9 @@ public final class DocumentsContract {
      *         document's copy.
      * @return the copied document, or {@code null} if failed.
      */
-    public static Uri copyDocument(ContentInterface content, Uri sourceDocumentUri,
-            Uri targetParentDocumentUri) throws FileNotFoundException {
+    public static @Nullable Uri copyDocument(@NonNull ContentResolver content,
+            @NonNull Uri sourceDocumentUri, @NonNull Uri targetParentDocumentUri)
+            throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, sourceDocumentUri);
@@ -1465,12 +1438,6 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static Uri copyDocument(ContentResolver content, Uri sourceDocumentUri,
-            Uri targetParentDocumentUri) throws FileNotFoundException {
-        return copyDocument((ContentInterface) content, sourceDocumentUri, targetParentDocumentUri);
-    }
-
     /**
      * Moves the given document under a new parent.
      *
@@ -1480,8 +1447,9 @@ public final class DocumentsContract {
      *         document.
      * @return the moved document, or {@code null} if failed.
      */
-    public static Uri moveDocument(ContentInterface content, Uri sourceDocumentUri,
-            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws FileNotFoundException {
+    public static @Nullable Uri moveDocument(@NonNull ContentResolver content,
+            @NonNull Uri sourceDocumentUri, @NonNull Uri sourceParentDocumentUri,
+            @NonNull Uri targetParentDocumentUri) throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, sourceDocumentUri);
@@ -1498,13 +1466,6 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static Uri moveDocument(ContentResolver content, Uri sourceDocumentUri,
-            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws FileNotFoundException {
-        return moveDocument((ContentInterface) content, sourceDocumentUri, sourceParentDocumentUri,
-                targetParentDocumentUri);
-    }
-
     /**
      * Removes the given document from a parent directory.
      *
@@ -1515,8 +1476,8 @@ public final class DocumentsContract {
      * @param parentDocumentUri parent document of the document to remove.
      * @return true if the document was removed successfully.
      */
-    public static boolean removeDocument(ContentInterface content, Uri documentUri,
-            Uri parentDocumentUri) throws FileNotFoundException {
+    public static boolean removeDocument(@NonNull ContentResolver content, @NonNull Uri documentUri,
+            @NonNull Uri parentDocumentUri) throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
@@ -1532,32 +1493,21 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static boolean removeDocument(ContentResolver content, Uri documentUri,
-            Uri parentDocumentUri) throws FileNotFoundException {
-        return removeDocument((ContentInterface) content, documentUri, parentDocumentUri);
-    }
-
     /**
      * Ejects the given root. It throws {@link IllegalStateException} when ejection failed.
      *
      * @param rootUri root with {@link Root#FLAG_SUPPORTS_EJECT} to be ejected
      */
-    public static void ejectRoot(ContentInterface content, Uri rootUri) {
+    public static void ejectRoot(@NonNull ContentResolver content, @NonNull Uri rootUri) {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, rootUri);
 
             content.call(rootUri.getAuthority(),
                     METHOD_EJECT_ROOT, null, in);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to eject", e);
         }
-    }
-
-    @Deprecated
-    public static void ejectRoot(ContentResolver content, Uri rootUri) {
-        ejectRoot((ContentInterface) content, rootUri);
     }
 
     /**
@@ -1590,7 +1540,7 @@ public final class DocumentsContract {
      * @param documentUri a Document URI
      * @return a Bundle of Bundles.
      */
-    public static @Nullable Bundle getDocumentMetadata(@NonNull ContentInterface content,
+    public static @Nullable Bundle getDocumentMetadata(@NonNull ContentResolver content,
             @NonNull Uri documentUri) throws FileNotFoundException {
         Preconditions.checkNotNull(content, "content can not be null");
         Preconditions.checkNotNull(documentUri, "documentUri can not be null");
@@ -1607,12 +1557,6 @@ public final class DocumentsContract {
         }
     }
 
-    @Deprecated
-    public static Bundle getDocumentMetadata(ContentResolver content, Uri documentUri)
-            throws FileNotFoundException {
-        return getDocumentMetadata((ContentInterface) content, documentUri);
-    }
-
     /**
      * Finds the canonical path from the top of the document tree.
      *
@@ -1626,8 +1570,8 @@ public final class DocumentsContract {
      * @return the path of the document, or {@code null} if failed.
      * @see DocumentsProvider#findDocumentPath(String, String)
      */
-    public static Path findDocumentPath(ContentInterface content, Uri treeUri)
-            throws FileNotFoundException {
+    public static @Nullable Path findDocumentPath(@NonNull ContentResolver content,
+            @NonNull Uri treeUri) throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, treeUri);
@@ -1640,12 +1584,6 @@ public final class DocumentsContract {
             rethrowIfNecessary(e);
             return null;
         }
-    }
-
-    @Deprecated
-    public static Path findDocumentPath(ContentResolver content, Uri treeUri)
-            throws FileNotFoundException {
-        return findDocumentPath((ContentInterface) content, treeUri);
     }
 
     /**
@@ -1699,8 +1637,8 @@ public final class DocumentsContract {
      * @see DocumentsProvider#createWebLinkIntent(String, Bundle)
      * @see Intent#EXTRA_EMAIL
      */
-    public static IntentSender createWebLinkIntent(ContentInterface content, Uri uri,
-            Bundle options) throws FileNotFoundException {
+    public static @Nullable IntentSender createWebLinkIntent(@NonNull ContentResolver content,
+            @NonNull Uri uri, @Nullable Bundle options) throws FileNotFoundException {
         try {
             final Bundle in = new Bundle();
             in.putParcelable(DocumentsContract.EXTRA_URI, uri);
@@ -1719,12 +1657,6 @@ public final class DocumentsContract {
             rethrowIfNecessary(e);
             return null;
         }
-    }
-
-    @Deprecated
-    public static IntentSender createWebLinkIntent(ContentResolver content, Uri uri,
-            Bundle options) throws FileNotFoundException {
-        return createWebLinkIntent((ContentInterface) content, uri, options);
     }
 
     /**
