@@ -1652,6 +1652,7 @@ easier.
 
     <style name="Theme.DeviceDefault.Settings.Dialog.NoActionBar" parent="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
 
+    <!-- DeviceDefault theme for day/night activities. -->
     <style name="Theme.DeviceDefault.DayNight" parent="Theme.DeviceDefault.Light" />
 
     <!-- Theme used for the intent picker activity. -->
@@ -1696,6 +1697,10 @@ easier.
     <style name="ThemeOverlay.DeviceDefault.Accent.Light">
         <item name="colorAccent">@color/accent_device_default_light</item>
     </style>
+
+    <!-- Theme overlay that replaces colorAccent with the colorAccent from {@link #Theme_DeviceDefault_DayNight}. -->
+    <style name="ThemeOverlay.DeviceDefault.Accent.DayNight"
+           parent="@style/ThemeOverlay.DeviceDefault.Accent.Light" />
 
     <style name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" parent="ThemeOverlay.Material.Dark.ActionBar">
         <item name="colorAccent">@color/accent_device_default_dark</item>
