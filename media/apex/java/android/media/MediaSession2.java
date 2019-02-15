@@ -259,6 +259,20 @@ public class MediaSession2 implements AutoCloseable {
         }
     }
 
+    /**
+     * Gets the list of the connected controllers
+     *
+     * @return list of the connected controllers.
+     */
+    @NonNull
+    public List<ControllerInfo> getConnectedControllers() {
+        List<ControllerInfo> controllers = new ArrayList<>();
+        synchronized (mLock) {
+            controllers.addAll(mConnectedControllers.values());
+        }
+        return controllers;
+    }
+
     boolean isClosed() {
         synchronized (mLock) {
             return mClosed;
@@ -317,13 +331,6 @@ public class MediaSession2 implements AutoCloseable {
                 if (DEBUG) {
                     Log.d(TAG, "Accepting connection: " + controllerInfo);
                 }
-                synchronized (mLock) {
-                    if (mConnectedControllers.containsKey(controller)) {
-                        Log.w(TAG, "Controller " + controllerInfo + " has sent connection"
-                                + " request multiple times");
-                    }
-                    mConnectedControllers.put(controller, controllerInfo);
-                }
                 // If connection is accepted, notify the current state to the controller.
                 // It's needed because we cannot call synchronous calls between
                 // session/controller.
@@ -339,6 +346,13 @@ public class MediaSession2 implements AutoCloseable {
                     return;
                 }
                 controllerInfo.notifyConnected(connectionResult);
+                synchronized (mLock) {
+                    if (mConnectedControllers.containsKey(controller)) {
+                        Log.w(TAG, "Controller " + controllerInfo + " has sent connection"
+                                + " request multiple times");
+                    }
+                    mConnectedControllers.put(controller, controllerInfo);
+                }
                 connected = true;
             } finally {
                 if (!connected) {
@@ -415,14 +429,6 @@ public class MediaSession2 implements AutoCloseable {
             return;
         }
         controllerInfo.removeRequestedCommandSeqNumber(seq);
-    }
-
-    private List<ControllerInfo> getConnectedControllers() {
-        List<ControllerInfo> controllers = new ArrayList<>();
-        synchronized (mLock) {
-            controllers.addAll(mConnectedControllers.values());
-        }
-        return controllers;
     }
 
     /**
