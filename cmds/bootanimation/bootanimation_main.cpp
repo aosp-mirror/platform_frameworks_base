@@ -44,14 +44,16 @@ int main()
         sp<ProcessState> proc(ProcessState::self());
         ProcessState::self()->startThreadPool();
 
+        // create the boot animation object (may take up to 200ms for 2MB zip)
+        sp<BootAnimation> boot = new BootAnimation(audioplay::createAnimationCallbacks());
+
         waitForSurfaceFlinger();
 
-        // create the boot animation object
-        sp<BootAnimation> boot = new BootAnimation(audioplay::createAnimationCallbacks());
+        boot->run("BootAnimation", PRIORITY_DISPLAY);
+
         ALOGV("Boot animation set up. Joining pool.");
 
         IPCThreadState::self()->joinThreadPool();
     }
-    ALOGV("Boot animation exit");
     return 0;
 }
