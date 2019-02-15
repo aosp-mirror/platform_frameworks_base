@@ -15,6 +15,7 @@
  */
 package android.service.notification;
 
+import android.annotation.SystemApi;
 import android.app.Notification;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -36,13 +37,13 @@ public final class Adjustment implements Parcelable {
      * See {@link android.app.Notification.Builder#addPerson(String)}.
      * @hide
      */
+    @SystemApi
     public static final String KEY_PEOPLE = "key_people";
     /**
      * Parcelable {@code ArrayList} of {@link SnoozeCriterion}. These criteria may be visible to
      * users. If a user chooses to snooze a notification until one of these criterion, the
      * assistant will be notified via
      * {@link NotificationAssistantService#onNotificationSnoozedUntilContext}.
-     * @hide
      */
     public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
     /**
@@ -111,7 +112,11 @@ public final class Adjustment implements Parcelable {
         mUser = user;
     }
 
-    private Adjustment(Parcel in) {
+    /**
+     * @hide
+     */
+    @SystemApi
+    protected Adjustment(Parcel in) {
         if (in.readInt() == 1) {
             mPackage = in.readString();
         } else {

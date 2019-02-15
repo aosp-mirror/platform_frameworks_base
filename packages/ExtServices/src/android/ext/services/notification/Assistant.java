@@ -221,6 +221,12 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
+    public Adjustment onNotificationEnqueued(StatusBarNotification sbn) {
+        // we use the version with channel, so this is never called.
+        return null;
+    }
+
+    @Override
     public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
             NotificationChannel channel) {
         if (DEBUG) Log.i(TAG, "ENQUEUED " + sbn.getKey() + " on " + channel.getId());
