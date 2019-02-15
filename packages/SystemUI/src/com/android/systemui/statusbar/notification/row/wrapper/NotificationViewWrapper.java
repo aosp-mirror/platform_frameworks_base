@@ -26,12 +26,15 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
@@ -108,6 +111,11 @@ public abstract class NotificationViewWrapper implements TransformableView {
             return false;
         }
 
+        // Apps targeting Q should fix their dark mode bugs.
+        if (mRow.getEntry().targetSdk >= Build.VERSION_CODES.Q) {
+            return false;
+        }
+
         int background = getBackgroundColor(view);
         if (background == Color.TRANSPARENT) {
             background = defaultBackgroundColor;
@@ -138,17 +146,19 @@ public abstract class NotificationViewWrapper implements TransformableView {
         }
     }
 
-    private boolean childrenNeedInversion(@ColorInt int parentBackground, ViewGroup viewGroup) {
+    @VisibleForTesting
+    boolean childrenNeedInversion(@ColorInt int parentBackground, ViewGroup viewGroup) {
         if (viewGroup == null) {
             return false;
         }
 
+        int backgroundColor = getBackgroundColor(viewGroup);
+        if (Color.alpha(backgroundColor) != 255) {
+            backgroundColor = ContrastColorUtil.compositeColors(backgroundColor, parentBackground);
+            backgroundColor = ColorUtils.setAlphaComponent(backgroundColor, 255);
+        }
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
             View child = viewGroup.getChildAt(i);
-            int backgroundColor = getBackgroundColor(viewGroup);
-            if (backgroundColor == Color.TRANSPARENT) {
-                backgroundColor = parentBackground;
-            }
             if (child instanceof TextView) {
                 int foreground = ((TextView) child).getCurrentTextColor();
                 if (ColorUtils.calculateContrast(foreground, backgroundColor) < 3) {
