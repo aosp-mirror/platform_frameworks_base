@@ -16,7 +16,6 @@ package com.android.systemui.privacy
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -40,10 +39,12 @@ class OngoingPrivacyChip @JvmOverloads constructor(
             context.resources.getDimensionPixelSize(R.dimen.ongoing_appops_chip_icon_size)
     private val iconColor = context.resources.getColor(
             R.color.status_bar_clock_color, context.theme)
+    private val sidePadding =
+            context.resources.getDimensionPixelSize(R.dimen.ongoing_appops_chip_side_padding)
     private val backgroundDrawable = context.getDrawable(R.drawable.privacy_chip_bg)
     private lateinit var text: TextView
     private lateinit var iconsContainer: LinearLayout
-    private lateinit var inUseText: TextView
+    private lateinit var back: LinearLayout
     var expanded = false
         set(value) {
             if (value != field) {
@@ -64,15 +65,15 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        inUseText = findViewById(R.id.in_use_text)
+        back = findViewById(R.id.background)
         text = findViewById(R.id.text_container)
         iconsContainer = findViewById(R.id.icons_container)
     }
 
     // Should only be called if the builder icons or app changed
     private fun updateView() {
-        inUseText.visibility = if (expanded) View.GONE else View.VISIBLE
-        background = if (expanded) backgroundDrawable else null
+        back.background = if (expanded) backgroundDrawable else null
+        back.setPaddingRelative(0, 0, if (expanded) sidePadding else 0, 0)
         fun setIcons(dialogBuilder: PrivacyDialogBuilder, iconsContainer: ViewGroup) {
             iconsContainer.removeAllViews()
             dialogBuilder.generateIcons().forEachIndexed { i, it ->

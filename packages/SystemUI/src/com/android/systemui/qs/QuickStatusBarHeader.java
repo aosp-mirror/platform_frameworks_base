@@ -387,15 +387,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         setLayoutParams(lp);
 
-        if (mPrivacyChip != null) {
-            MarginLayoutParams lm = (MarginLayoutParams) mPrivacyChip.getLayoutParams();
-            int sideMargins = lm.leftMargin;
-            int topBottomMargins = resources.getDimensionPixelSize(
-                    R.dimen.ongoing_appops_top_chip_margin);
-            lm.setMargins(sideMargins, topBottomMargins, sideMargins, topBottomMargins);
-            mPrivacyChip.setLayoutParams(lm);
-        }
-
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
         updatePrivacyChipAlphaAnimator();
