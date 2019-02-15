@@ -72,6 +72,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
+import android.provider.Downloads;
 import android.provider.OpenableColumns;
 import android.service.chooser.ChooserTarget;
 import android.service.chooser.ChooserTargetService;
@@ -620,27 +621,39 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    /**
+     * Wrapping the ContentResolver call to expose for easier mocking,
+     * and to avoid mocking Android core classes.
+     */
+    @VisibleForTesting
+    public Cursor queryResolver(ContentResolver resolver, Uri uri) {
+        return resolver.query(uri, null, null, null, null);
+    }
+
     private FileInfo extractFileInfo(Uri uri, ContentResolver resolver) {
         String fileName = null;
         boolean hasThumbnail = false;
-        Cursor cursor = null;
 
-        try {
-            cursor = resolver.query(uri, null, null, null, null);
+        try (Cursor cursor = queryResolver(resolver, uri)) {
+            if (cursor != null && cursor.getCount() > 0) {
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                int titleIndex = cursor.getColumnIndex(Downloads.Impl.COLUMN_TITLE);
+                int flagsIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_FLAGS);
+
+                cursor.moveToFirst();
+                if (nameIndex != -1) {
+                    fileName = cursor.getString(nameIndex);
+                } else if (titleIndex != -1) {
+                    fileName = cursor.getString(titleIndex);
+                }
+
+                if (flagsIndex != -1) {
+                    hasThumbnail = (cursor.getInt(flagsIndex)
+                            & DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
+                }
+            }
         } catch (SecurityException e) {
             Log.w(TAG, "Error loading file preview", e);
-        }
-
-        if (cursor != null && cursor.getCount() > 0) {
-            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-            int flagsIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_FLAGS);
-
-            cursor.moveToFirst();
-            fileName = cursor.getString(nameIndex);
-            if (flagsIndex != -1) {
-                hasThumbnail = (cursor.getInt(flagsIndex)
-                        & DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
-            }
         }
 
         if (TextUtils.isEmpty(fileName)) {
