@@ -100,7 +100,7 @@ public class TaskStackChangedListenerTest {
     }
 
     @Test
-    @FlakyTest(bugId = 119893767)
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     public void testTaskDescriptionChanged() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch latch = new CountDownLatch(1);
@@ -122,14 +122,18 @@ public class TaskStackChangedListenerTest {
                 }
             }
         });
-        final Activity activity = startTestActivity(ActivityTaskDescriptionChange.class);
+
+        int taskId;
+        synchronized (sLock) {
+            taskId = startTestActivity(ActivityTaskDescriptionChange.class).getTaskId();
+        }
         waitForCallback(latch);
-        assertEquals(activity.getTaskId(), params[0]);
+        assertEquals(taskId, params[0]);
         assertEquals("Test Label", ((TaskDescription) params[1]).getLabel());
     }
 
     @Test
-    @FlakyTest(bugId = 119893767)
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     public void testActivityRequestedOrientationChanged() throws Exception {
         final int[] params = new int[2];
         final CountDownLatch latch = new CountDownLatch(1);
@@ -142,9 +146,12 @@ public class TaskStackChangedListenerTest {
                 latch.countDown();
             }
         });
-        final Activity activity = startTestActivity(ActivityRequestedOrientationChange.class);
+        int taskId;
+        synchronized (sLock) {
+            taskId = startTestActivity(ActivityRequestedOrientationChange.class).getTaskId();
+        }
         waitForCallback(latch);
-        assertEquals(activity.getTaskId(), params[0]);
+        assertEquals(taskId, params[0]);
         assertEquals(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, params[1]);
     }
 
@@ -152,7 +159,7 @@ public class TaskStackChangedListenerTest {
      * Tests for onTaskCreated, onTaskMovedToFront, onTaskRemoved and onTaskRemovalStarted.
      */
     @Test
-    @FlakyTest(bugId = 119893767)
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     public void testTaskChangeCallBacks() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch taskCreatedLaunchLatch = new CountDownLatch(1);
@@ -245,7 +252,7 @@ public class TaskStackChangedListenerTest {
 
     private void waitForCallback(CountDownLatch latch) {
         try {
-            final boolean result = latch.await(2, TimeUnit.SECONDS);
+            final boolean result = latch.await(4, TimeUnit.SECONDS);
             if (!result) {
                 throw new RuntimeException("Timed out waiting for task stack change notification");
             }
@@ -324,7 +331,11 @@ public class TaskStackChangedListenerTest {
         protected void onPostResume() {
             super.onPostResume();
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            finish();
+            synchronized (sLock) {
+                // Hold the lock to ensure no one is trying to access fields of this Activity in
+                // this test.
+                finish();
+            }
         }
     }
 
@@ -333,7 +344,11 @@ public class TaskStackChangedListenerTest {
         protected void onPostResume() {
             super.onPostResume();
             setTaskDescription(new TaskDescription("Test Label"));
-            finish();
+            synchronized (sLock) {
+                // Hold the lock to ensure no one is trying to access fields of this Activity in
+                // this test.
+                finish();
+            }
         }
     }
 
