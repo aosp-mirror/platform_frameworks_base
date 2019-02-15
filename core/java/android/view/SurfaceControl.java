@@ -88,7 +88,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeDisconnect(long nativeObject);
 
     private static native GraphicBuffer nativeScreenshot(IBinder displayToken,
-            Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation);
+            Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
+            boolean captureSecureLayers);
     private static native GraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
             Rect sourceCrop, float frameScale);
 
@@ -1853,7 +1854,29 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("displayToken must not be null");
         }
 
-        return nativeScreenshot(display, sourceCrop, width, height, useIdentityTransform, rotation);
+        return nativeScreenshot(display, sourceCrop, width, height, useIdentityTransform, rotation,
+                false /* captureSecureLayers */);
+    }
+
+    /**
+     * Like screenshotToBuffer, but if the caller is AID_SYSTEM, allows
+     * for the capture of secure layers. This is used for the screen rotation
+     * animation where the system server takes screenshots but does
+     * not persist them or allow them to leave the server. However in other
+     * cases in the system server, we mostly want to omit secure layers
+     * like when we take a screenshot on behalf of the assistant.
+     *
+     * @hide
+     */
+    public static GraphicBuffer screenshotToBufferWithSecureLayersUnsafe(IBinder display,
+            Rect sourceCrop, int width, int height, boolean useIdentityTransform,
+            int rotation) {
+        if (display == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        return nativeScreenshot(display, sourceCrop, width, height, useIdentityTransform, rotation,
+                true /* captureSecureLayers */);
     }
 
     private static void rotateCropForSF(Rect crop, int rot) {
