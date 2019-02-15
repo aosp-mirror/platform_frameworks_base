@@ -762,7 +762,10 @@ public class BubbleStackView extends FrameLayout {
      * @return the index of the bubble view within the bubble stack. The range of the position
      * is between 0 and the bubble count minus 1.
      */
-    int getBubbleIndex(Bubble bubble) {
+    int getBubbleIndex(@Nullable Bubble bubble) {
+        if (bubble == null) {
+            return 0;
+        }
         return mBubbleContainer.indexOfChild(bubble.iconView);
     }
 
