@@ -4608,7 +4608,10 @@ package android.net.wifi {
   }
 
   public class WifiInfo implements android.os.Parcelable {
+    method @Nullable public String getFqdn();
+    method @Nullable public String getProviderFriendlyName();
     method public boolean isOsuAp();
+    method public boolean isPasspointAp();
   }
 
   public class WifiManager {
