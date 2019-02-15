@@ -37,6 +37,7 @@ import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
+import android.net.NetworkStackClient;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -1240,9 +1241,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartNetworkStack");
             try {
-                final android.net.NetworkStack networkStack =
-                        context.getSystemService(android.net.NetworkStack.class);
-                networkStack.start(context);
+                NetworkStackClient.getInstance().start(context);
             } catch (Throwable e) {
                 reportWtf("starting Network Stack", e);
             }

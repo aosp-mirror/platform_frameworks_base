@@ -23,8 +23,7 @@ import android.content.Context;
 import android.net.DhcpResultsParcelable;
 import android.net.LinkProperties;
 import android.net.LinkPropertiesParcelable;
-import android.net.NetworkStack;
-import android.net.ip.IIpClientCallbacks;
+import android.net.NetworkStackClient;
 import android.os.ConditionVariable;
 
 import java.io.FileDescriptor;
@@ -76,30 +75,17 @@ public class IpClientUtil {
      *
      * <p>This is a convenience method to allow clients to use {@link IpClientCallbacks} instead of
      * {@link IIpClientCallbacks}.
-     * @see {@link NetworkStack#makeIpClient(String, IIpClientCallbacks)}
+     * @see {@link NetworkStackClient#makeIpClient(String, IIpClientCallbacks)}
      */
     public static void makeIpClient(Context context, String ifName, IpClientCallbacks callback) {
-        context.getSystemService(NetworkStack.class)
-                .makeIpClient(ifName, new IpClientCallbacksProxy(callback));
-    }
-
-    /**
-     * Create a new IpClient.
-     *
-     * <p>This is a convenience method to allow clients to use {@link IpClientCallbacksProxy}
-     * instead of {@link IIpClientCallbacks}.
-     * @see {@link NetworkStack#makeIpClient(String, IIpClientCallbacks)}
-     */
-    public static void makeIpClient(
-            Context context, String ifName, IpClientCallbacksProxy callback) {
-        context.getSystemService(NetworkStack.class)
-                .makeIpClient(ifName, callback);
+        // TODO: migrate clients and remove context argument
+        NetworkStackClient.getInstance().makeIpClient(ifName, new IpClientCallbacksProxy(callback));
     }
 
     /**
      * Wrapper to relay calls from {@link IIpClientCallbacks} to {@link IpClientCallbacks}.
      */
-    public static class IpClientCallbacksProxy extends IIpClientCallbacks.Stub {
+    private static class IpClientCallbacksProxy extends IIpClientCallbacks.Stub {
         protected final IpClientCallbacks mCb;
 
         /**
