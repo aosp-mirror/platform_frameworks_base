@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
+
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkUtils;
 import android.os.IBinder;
@@ -23,21 +25,19 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.Proxy;
-import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
+import java.net.Proxy;
+import java.net.URL;
 import java.net.UnknownServiceException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** @hide */
 public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
@@ -67,6 +67,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     // from com.squareup.okhttp.internal.http
     private final static int HTTP_TEMP_REDIRECT = 307;
     private final static int MAX_REDIRECTS = 20;
+    private AtomicBoolean mIsConnected = new AtomicBoolean(false);
 
     @UnsupportedAppUsage
     public MediaHTTPConnection() {
@@ -90,6 +91,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             mAllowCrossDomainRedirect = true;
             mURL = new URL(uri);
             mHeaders = convertHeaderStringToMap(headers);
+            mIsConnected.set(true);
         } catch (MalformedURLException e) {
             return null;
         }
@@ -140,7 +142,14 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     @Override
     @UnsupportedAppUsage
     public void disconnect() {
-        teardownConnection();
+        if (mIsConnected.getAndSet(false)) {
+            (new Thread() {
+                @Override
+                public void run() {
+                    teardownConnection();
+                }
+            }).start();
+        }
         mHeaders = null;
         mURL = null;
     }
@@ -325,7 +334,14 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     @Override
     @UnsupportedAppUsage
     public int readAt(long offset, int size) {
-        return native_readAt(offset, size);
+        if (!mIsConnected.get()) {
+            return -1;
+        }
+        int result = native_readAt(offset, size);
+        if (!mIsConnected.get()) {
+            return -1;
+        }
+        return result;
     }
 
     private int readAt(long offset, byte[] data, int size) {
