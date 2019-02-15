@@ -201,11 +201,6 @@ public class AttentionManagerService extends SystemService {
                             StatsLog.write(StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
                                     error);
                         }
-
-                        @Override
-                        public IBinder asBinder() {
-                            return null;
-                        }
                     });
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Cannot call into the AttentionService");
