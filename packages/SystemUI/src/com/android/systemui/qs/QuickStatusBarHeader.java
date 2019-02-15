@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -200,6 +201,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mSystemIconsView = findViewById(R.id.quick_status_bar_system_icons);
         mQuickQsStatusIcons = findViewById(R.id.quick_qs_status_icons);
         StatusIconContainer iconContainer = findViewById(R.id.statusIcons);
+        // Ignore privacy icons because they show in the space above QQS
+        iconContainer.addIgnoredSlots(getIgnoredIconSlots());
         iconContainer.setShouldRestrictIcons(false);
         mIconManager = new TintedIconManager(iconContainer);
 
@@ -239,6 +242,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         // Don't need to worry about tuner settings for this icon
         mBatteryRemainingIcon.setIgnoreTunerUpdates(true);
         updateShowPercent();
+    }
+
+    private List<String> getIgnoredIconSlots() {
+        ArrayList<String> ignored = new ArrayList<>();
+        ignored.add(mContext.getResources().getString(
+                com.android.internal.R.string.status_bar_camera));
+        ignored.add(mContext.getResources().getString(
+                com.android.internal.R.string.status_bar_microphone));
+        ignored.add(mContext.getResources().getString(
+                com.android.internal.R.string.status_bar_location));
+
+        return ignored;
     }
 
     private void updateStatusText() {

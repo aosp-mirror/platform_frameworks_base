@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A container for Status bar system icons. Limits the number of system icons and handles overflow
@@ -67,6 +68,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private ArrayList<StatusIconState> mLayoutStates = new ArrayList<>();
     // So we can count and measure properly
     private ArrayList<View> mMeasureViews = new ArrayList<>();
+    // Any ignored icon will never be added as a child
+    private ArrayList<String> mIgnoredSlots = new ArrayList<>();
 
     public StatusIconContainer(Context context) {
         this(context, null);
@@ -146,7 +149,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         // Collect all of the views which want to be laid out
         for (int i = 0; i < count; i++) {
             StatusIconDisplayable icon = (StatusIconDisplayable) getChildAt(i);
-            if (icon.isIconVisible() && !icon.isIconBlocked()) {
+            if (icon.isIconVisible() && !icon.isIconBlocked()
+                    && !mIgnoredSlots.contains(icon.getSlot())) {
                 mMeasureViews.add((View) icon);
             }
         }
@@ -205,6 +209,47 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     }
 
     /**
+     * Add a name of an icon slot to be ignored. It will not show up nor be measured
+     * @param slotName name of the icon as it exists in
+     * frameworks/base/core/res/res/values/config.xml
+     */
+    public void addIgnoredSlot(String slotName) {
+        addIgnoredSlotInternal(slotName);
+        requestLayout();
+    }
+
+    /**
+     * Add a list of slots to be ignored
+     * @param slots names of the icons to ignore
+     */
+    public void addIgnoredSlots(List<String> slots) {
+        for (String slot : slots) {
+            addIgnoredSlotInternal(slot);
+        }
+
+        requestLayout();
+    }
+
+    private void addIgnoredSlotInternal(String slotName) {
+        if (!mIgnoredSlots.contains(slotName)) {
+            mIgnoredSlots.add(slotName);
+        }
+    }
+
+    /**
+     * Remove a slot from the list of ignored icon slots. It will then be shown when set to visible
+     * by the {@link StatusBarIconController}.
+     * @param slotName name of the icon slot to remove from the ignored list
+     */
+    public void removeIgnoredSlot(String slotName) {
+        if (mIgnoredSlots.contains(slotName)) {
+            mIgnoredSlots.remove(slotName);
+        }
+
+        requestLayout();
+    }
+
+    /**
      * Layout is happening from end -> start
      */
     private void calculateIconTranslations() {
@@ -223,7 +268,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             StatusIconDisplayable iconView = (StatusIconDisplayable) child;
             StatusIconState childState = getViewStateFromChild(child);
 
-            if (!iconView.isIconVisible() || iconView.isIconBlocked()) {
+            if (!iconView.isIconVisible() || iconView.isIconBlocked()
+                    || mIgnoredSlots.contains(iconView.getSlot())) {
                 childState.visibleState = STATE_HIDDEN;
                 if (DEBUG) Log.d(TAG, "skipping child (" + iconView.getSlot() + ") not visible");
                 continue;
