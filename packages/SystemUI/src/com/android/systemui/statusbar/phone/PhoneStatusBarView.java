@@ -73,6 +73,8 @@ public class PhoneStatusBarView extends PanelBar {
     private DarkReceiver mBattery;
     private int mLastOrientation;
     @Nullable
+    private View mCenterIconSpace;
+    @Nullable
     private View mCutoutSpace;
     @Nullable
     private DisplayCutout mDisplayCutout;
@@ -105,6 +107,7 @@ public class PhoneStatusBarView extends PanelBar {
         mBarTransitions.init();
         mBattery = findViewById(R.id.battery);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
+        mCenterIconSpace = findViewById(R.id.centered_icon_area);
 
         updateResources();
     }
@@ -312,10 +315,12 @@ public class PhoneStatusBarView extends PanelBar {
 
         if (mDisplayCutout == null || mDisplayCutout.isEmpty()
                     || mLastOrientation != ORIENTATION_PORTRAIT || cornerCutoutMargins != null) {
+            mCenterIconSpace.setVisibility(View.VISIBLE);
             mCutoutSpace.setVisibility(View.GONE);
             return;
         }
 
+        mCenterIconSpace.setVisibility(View.GONE);
         mCutoutSpace.setVisibility(View.VISIBLE);
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mCutoutSpace.getLayoutParams();
 
