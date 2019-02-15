@@ -39,15 +39,8 @@ import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
 
-/*
- * NOTE: all methods in this class should return right away, or do the real work in a handler
- * thread.
- *
- * Hence, the only field that must be thread-safe is mEnabled, which is called at the beginning
- * of every method.
- */
 /**
- * TODO(b/123577059): add javadocs / implement
+ * TODO(b/123577059): add javadocs / mention it can be null
  */
 @SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
 public final class ContentCaptureManager {
@@ -90,7 +83,7 @@ public final class ContentCaptureManager {
     @NonNull
     private final Context mContext;
 
-    @Nullable
+    @NonNull
     private final IContentCaptureManager mService;
 
     // Flags used for starting session.
@@ -107,11 +100,11 @@ public final class ContentCaptureManager {
 
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
-            @Nullable IContentCaptureManager service) {
-        mContext = Preconditions.checkNotNull(context, "context cannot be null");
+            @NonNull IContentCaptureManager service) {
         if (VERBOSE) Log.v(TAG, "Constructor for " + context.getPackageName());
+        mContext = Preconditions.checkNotNull(context, "context cannot be null");
+        mService = Preconditions.checkNotNull(service, "service cannot be null");
 
-        mService = service;
         // TODO(b/119220549): we might not even need a handler, as the IPCs are oneway. But if we
         // do, then we should optimize it to run the tests after the Choreographer finishes the most
         // important steps of the frame.
@@ -199,8 +192,6 @@ public final class ContentCaptureManager {
      * </ul>
      */
     public boolean isContentCaptureEnabled() {
-        if (mService == null) return false;
-
         final MainContentCaptureSession mainSession;
         synchronized (mLock) {
             mainSession = mMainSession;
@@ -242,8 +233,6 @@ public final class ContentCaptureManager {
     @SystemApi
     @TestApi
     public boolean isContentCaptureFeatureEnabled() {
-        if (mService == null) return false;
-
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
         final int resultCode;
         try {
@@ -314,22 +303,21 @@ public final class ContentCaptureManager {
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.println("ContentCaptureManager");
+        final String prefix2 = prefix + "  ";
         synchronized (mLock) {
-            pw.print(prefix); pw.println("ContentCaptureManager");
-            pw.print(prefix); pw.print("isContentCaptureEnabled(): ");
+            pw.print(prefix2); pw.print("isContentCaptureEnabled(): ");
             pw.println(isContentCaptureEnabled());
-            pw.print(prefix); pw.print("Context: "); pw.println(mContext);
-            pw.print(prefix); pw.print("User: "); pw.println(mContext.getUserId());
-            if (mService != null) {
-                pw.print(prefix); pw.print("Service: "); pw.println(mService);
-            }
-            pw.print(prefix); pw.print("Flags: "); pw.println(mFlags);
+            pw.print(prefix2); pw.print("Context: "); pw.println(mContext);
+            pw.print(prefix2); pw.print("User: "); pw.println(mContext.getUserId());
+            pw.print(prefix2); pw.print("Service: "); pw.println(mService);
+            pw.print(prefix2); pw.print("Flags: "); pw.println(mFlags);
             if (mMainSession != null) {
-                final String prefix2 = prefix + "  ";
-                pw.print(prefix); pw.println("Main session:");
-                mMainSession.dump(prefix2, pw);
+                final String prefix3 = prefix2 + "  ";
+                pw.print(prefix2); pw.println("Main session:");
+                mMainSession.dump(prefix3, pw);
             } else {
-                pw.print(prefix); pw.println("No sessions");
+                pw.print(prefix2); pw.println("No sessions");
             }
         }
     }

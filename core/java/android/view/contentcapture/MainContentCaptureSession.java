@@ -105,14 +105,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * Interface to the system_server binder object - it's only used to start the session (and
      * notify when the session is finished).
      */
-    @Nullable // TODO(b/122959591): shoul never be null, we should make main session null instead
+    @NonNull
     private final IContentCaptureManager mSystemServerInterface;
 
     /**
      * Direct interface to the service binder object - it's used to send the events, including the
      * last ones (when the session is finished)
      */
-    @Nullable
+    @NonNull
     private IContentCaptureDirectManager mDirectServiceInterface;
     @Nullable
     private DeathRecipient mDirectServiceVulture;
@@ -140,7 +140,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /** @hide */
     protected MainContentCaptureSession(@NonNull Context context,
             @NonNull ContentCaptureManager manager, @NonNull Handler handler,
-            @Nullable IContentCaptureManager systemServerInterface) {
+            @NonNull IContentCaptureManager systemServerInterface) {
         mContext = context;
         mManager = manager;
         mHandler = handler;
@@ -193,8 +193,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         try {
-            if (mSystemServerInterface == null) return;
-
             mSystemServerInterface.startSession(mApplicationToken, component, mId, flags,
                     new IResultReceiver.Stub() {
                         @Override
@@ -507,8 +505,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         try {
-            if (mSystemServerInterface == null) return;
-
             mSystemServerInterface.finishSession(mId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error destroying system-service session " + mId + " for "
@@ -628,12 +624,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Override
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
+        super.dump(prefix, pw);
+
         pw.print(prefix); pw.print("mContext: "); pw.println(mContext);
         pw.print(prefix); pw.print("user: "); pw.println(mContext.getUserId());
-        if (mSystemServerInterface != null) {
-            pw.print(prefix); pw.print("mSystemServerInterface: ");
-            pw.println(mSystemServerInterface);
-        }
+        pw.print(prefix); pw.print("mSystemServerInterface: ");
         if (mDirectServiceInterface != null) {
             pw.print(prefix); pw.print("mDirectServiceInterface: ");
             pw.println(mDirectServiceInterface);
@@ -667,8 +662,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         pw.print(prefix); pw.println("flush history:");
         mFlushHistory.reverseDump(/* fd= */ null, pw, /* args= */ null); pw.println();
-
-        super.dump(prefix, pw);
     }
 
     /**

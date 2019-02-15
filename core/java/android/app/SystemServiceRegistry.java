@@ -1137,7 +1137,11 @@ final class SystemServiceRegistry {
                     IBinder b = ServiceManager
                             .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
                     IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(b);
-                    return new ContentCaptureManager(outerContext, service);
+                    if (service != null) {
+                        // When feature is disabled, we return a null manager to apps so the
+                        // performance impact is practically zero
+                        return new ContentCaptureManager(outerContext, service);
+                    }
                 }
                 return null;
             }});
