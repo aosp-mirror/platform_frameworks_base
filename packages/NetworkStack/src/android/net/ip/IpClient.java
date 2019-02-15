@@ -46,6 +46,7 @@ import android.net.shared.ProvisioningConfiguration;
 import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
 import android.os.ConditionVariable;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -380,6 +381,13 @@ public class IpClient extends StateMachine {
         public InterfaceParams getInterfaceParams(String ifname) {
             return InterfaceParams.getByName(ifname);
         }
+
+        /**
+         * Get a INetd connector.
+         */
+        public INetd getNetd(Context context) {
+            return INetd.Stub.asInterface((IBinder) context.getSystemService(Context.NETD_SERVICE));
+        }
     }
 
     public IpClient(Context context, String ifName, IIpClientCallbacks callback,
@@ -413,7 +421,7 @@ public class IpClient extends StateMachine {
 
         // TODO: Consider creating, constructing, and passing in some kind of
         // InterfaceController.Dependencies class.
-        mNetd = mContext.getSystemService(INetd.class);
+        mNetd = deps.getNetd(mContext);
         mInterfaceCtrl = new InterfaceController(mInterfaceName, mNetd, mLog);
 
         mLinkObserver = new IpClientLinkObserver(
