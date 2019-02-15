@@ -266,6 +266,7 @@ bool CountMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("CountMetric %lld dropping data for dimension key %s",
                 (long long)mMetricId, newKey.toString().c_str());
+            StatsdStats::getInstance().noteHardDimensionLimitReached(mMetricId);
             return true;
         }
     }

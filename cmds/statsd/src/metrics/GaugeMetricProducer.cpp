@@ -433,6 +433,7 @@ bool GaugeMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
         if (newTupleCount > mDimensionHardLimit) {
             ALOGE("GaugeMetric %lld dropping data for dimension key %s",
                 (long long)mMetricId, newKey.toString().c_str());
+            StatsdStats::getInstance().noteHardDimensionLimitReached(mMetricId);
             return true;
         }
     }

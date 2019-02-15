@@ -637,6 +637,7 @@ bool DurationMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey
             if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
                 ALOGE("DurationMetric %lld dropping data for condition dimension key %s",
                     (long long)mMetricId, newKey.getDimensionKeyInCondition().toString().c_str());
+                StatsdStats::getInstance().noteHardDimensionLimitReached(mMetricId);
                 return true;
             }
         }
@@ -650,6 +651,7 @@ bool DurationMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey
             if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
                 ALOGE("DurationMetric %lld dropping data for what dimension key %s",
                     (long long)mMetricId, newKey.getDimensionKeyInWhat().toString().c_str());
+                StatsdStats::getInstance().noteHardDimensionLimitReached(mMetricId);
                 return true;
             }
         }
