@@ -17,9 +17,6 @@
 package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NONE;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.provider.Settings.ACTION_VPN_SETTINGS;
 
 import android.app.Notification;
@@ -30,17 +27,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.LinkProperties;
 import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
-import android.net.NetworkPolicyManager;
 import android.os.INetworkManagementService;
-import android.os.RemoteException;
 import android.security.Credentials;
 import android.security.KeyStore;
-import android.system.Os;
 import android.text.TextUtils;
 import android.util.Slog;
 
