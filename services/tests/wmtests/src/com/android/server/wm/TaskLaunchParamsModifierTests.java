@@ -29,13 +29,11 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
@@ -471,6 +469,22 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void testUsesFullscreenWhenRequestedOnFreeformDisplay() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(freeformDisplay.mDisplayId);
+        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, options, mCurrent, mResult));
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
+                WINDOWING_MODE_FREEFORM);
     }
 
     @Test
