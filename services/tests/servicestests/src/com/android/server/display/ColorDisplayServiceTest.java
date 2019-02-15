@@ -98,6 +98,8 @@ public class ColorDisplayServiceTest {
 
         mColorDisplayService = new ColorDisplayService(mContext);
         mBinderService = mColorDisplayService.new BinderService();
+        LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
+                        mColorDisplayService.new ColorDisplayServiceInternal());
     }
 
     @After
@@ -110,6 +112,8 @@ public class ColorDisplayServiceTest {
 
         mUserId = UserHandle.USER_NULL;
         mContext = null;
+
+        LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
     }
 
     @AfterClass
@@ -979,6 +983,99 @@ public class ColorDisplayServiceTest {
         assertActiveColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
     }
 
+    @Test
+    public void displayWhiteBalance_enable() {
+        setWhiteBalance(true /* Enable DWB Setting */);
+        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        startService();
+        assertDwbActive(true);
+    }
+
+    @Test
+    public void displayWhiteBalance_disableAfterNightDisplayEnable() {
+        setWhiteBalance(true /* Enable DWB Setting */);
+
+        startService();
+        /* Enable nightlight */
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        /* Since we are using FakeSettingsProvider which could not trigger observer change,
+         * force an update here.*/
+        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(false);
+    }
+
+    @Test
+    public void displayWhiteBalance_enableAfterNightDisplayDisable() {
+        setWhiteBalance(true /* Enable DWB Setting */);
+        startService();
+        /* Enable nightlight */
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(false);
+
+        /* Disable nightlight */
+        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(true);
+    }
+
+    @Test
+    public void displayWhiteBalance_enableAfterLinearColorMode() {
+        setWhiteBalance(true /* Enable DWB Setting */);
+        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        startService();
+        mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+
+        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(true);
+    }
+
+    @Test
+    public void displayWhiteBalance_setTemperatureOverMax() {
+        int max = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMax;
+
+        ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
+                        ColorDisplayService.ColorDisplayServiceInternal.class);
+        cdsInternal.setDisplayWhiteBalanceColorTemperature(max+1);
+
+        assertWithMessage("Unexpected temperature set")
+                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .isEqualTo(max);
+    }
+
+    @Test
+    public void displayWhiteBalance_setTemperatureBelowMin() {
+        int min = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMin;
+
+        ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
+                        ColorDisplayService.ColorDisplayServiceInternal.class);
+        cdsInternal.setDisplayWhiteBalanceColorTemperature(min - 1);
+
+        assertWithMessage("Unexpected temperature set")
+                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .isEqualTo(min);
+    }
+
+    @Test
+    public void displayWhiteBalance_setValidTemperature() {
+        int min = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMin;
+        int max = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMax;
+        int valToSet = (min + max) / 2;
+
+        ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
+                        ColorDisplayService.ColorDisplayServiceInternal.class);
+        cdsInternal.setDisplayWhiteBalanceColorTemperature(valToSet);
+
+        assertWithMessage("Unexpected temperature set")
+                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .isEqualTo(valToSet);
+    }
+
     /**
      * Configures Night display to use a custom schedule.
      *
@@ -1038,6 +1135,16 @@ public class ColorDisplayServiceTest {
     private void setAccessibilityColorInversion(boolean state) {
         Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, state ? 1 : 0, mUserId);
+    }
+
+    /**
+     * Configures the Display White Balance setting state.
+     *
+     * @param state {@code true} if display white balance should be enabled
+     */
+    private void setWhiteBalance(boolean state) {
+        Secure.putIntForUser(mContext.getContentResolver(),
+                Secure.DISPLAY_WHITE_BALANCE_ENABLED, state ? 1 : 0, mUserId);
     }
 
     /**
@@ -1108,6 +1215,17 @@ public class ColorDisplayServiceTest {
         assertWithMessage("Unexpected color mode setting")
                 .that(actualMode)
                 .isEqualTo(mode);
+    }
+
+    /**
+     * Convenience method for asserting that the DWB active status matches expectation.
+     *
+     * @param enabled the expected active status.
+     */
+    private void assertDwbActive(boolean enabled) {
+        assertWithMessage("Incorrect Display White Balance state")
+                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.isActivated())
+                .isEqualTo(enabled);
     }
 
     /**
