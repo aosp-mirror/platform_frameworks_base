@@ -289,6 +289,19 @@ public class TelecomManager {
             "android.telecom.extra.OUTGOING_CALL_EXTRAS";
 
     /**
+     * An optional boolean extra on {@link android.content.Intent#ACTION_CALL_EMERGENCY} to tell
+     * whether the user's dial intent is emergency; this is required to specify when the dialed
+     * number is ambiguous, identified as both emergency number and any other non-emergency number;
+     * e.g. in some situation, 611 could be both an emergency number in a country and a
+     * non-emergency number of a carrier's customer service hotline.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_IS_USER_INTENT_EMERGENCY_CALL =
+            "android.telecom.extra.IS_USER_INTENT_EMERGENCY_CALL";
+
+    /**
      * @hide
      */
     public static final String EXTRA_UNKNOWN_CALL_HANDLE =
