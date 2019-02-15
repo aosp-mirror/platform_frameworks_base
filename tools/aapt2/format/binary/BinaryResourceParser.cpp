@@ -401,7 +401,6 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
     if (entry->flags & ResTable_entry::FLAG_PUBLIC) {
       Visibility visibility;
       visibility.level = Visibility::Level::kPublic;
-      visibility.source = source_.WithLine(0);
       if (!table_->SetVisibilityWithIdMangled(name, visibility, res_id, diag_)) {
         return false;
       }
@@ -448,7 +447,6 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
                                                       arraysize(header->name)));
   overlayable->actor = util::Utf16ToUtf8(strcpy16_dtoh((const char16_t*)header->actor,
                                                        arraysize(header->name)));
-  overlayable->source = source_.WithLine(0);
 
   ResChunkPullParser parser(GetChunkData(chunk),
                             GetChunkDataLen(chunk));
@@ -495,7 +493,6 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
         }
 
         OverlayableItem overlayable_item(overlayable);
-        overlayable_item.source = source_.WithLine(0);
         overlayable_item.policies = policies;
         if (!table_->SetOverlayable(iter->second, overlayable_item, diag_)) {
           return false;
