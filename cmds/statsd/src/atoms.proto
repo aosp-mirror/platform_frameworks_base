@@ -303,6 +303,7 @@ message Atom {
         DangerousPermissionState dangerous_permission_state = 10050;
         TrainInfo train_info = 10051;
         TimeZoneDataInfo time_zone_data_info = 10052;
+        SDCardInfo sdcard_info = 10053;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3229,6 +3230,28 @@ message UsbPortOverheatEvent {
 message BatteryCycleCount {
     /* Number of total charge and discharge cycles on the system battery. */
     optional int32 cycle_count = 1;
+}
+
+/**
+ * Logs that an SD card is mounted and information about it, its type (public or private) and the
+ * size in bytes.
+ * Pulled from:
+ *   StatsCompanionService
+ */
+
+message SDCardInfo {
+
+    enum Type {
+        UNKNOWN = 0;
+        TYPE_PUBLIC = 1;
+        TYPE_PRIVATE = 2;
+        OTHERS = 3;
+    }
+
+    // Type of the SD card: TYPE_PUBLIC if portable and TYPE_PRIVATE if internal.
+    optional Type type = 1;
+    // Total size of the sd card in bytes.
+    optional int64 size_bytes = 2;
 }
 
 /*
