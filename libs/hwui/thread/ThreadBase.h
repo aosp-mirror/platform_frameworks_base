@@ -68,10 +68,12 @@ protected:
     void processQueue() { mQueue.process(); }
 
     virtual bool threadLoop() override {
+        Looper::setForThread(mLooper);
         while (!exitPending()) {
             waitForWork();
             processQueue();
         }
+        Looper::setForThread(nullptr);
         return false;
     }
 
