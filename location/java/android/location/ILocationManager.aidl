@@ -114,6 +114,7 @@ interface ILocationManager
     // for reporting callback completion
     void locationCallbackFinished(ILocationListener listener);
 
-    // used by gts tests to verify throttling whitelist
+    // used by gts tests to verify whitelists
     String[] getBackgroundThrottlingWhitelist();
+    String[] getIgnoreSettingsWhitelist();
 }

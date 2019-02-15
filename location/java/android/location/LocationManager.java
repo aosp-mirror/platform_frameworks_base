@@ -414,6 +414,18 @@ public class LocationManager {
     }
 
     /**
+     * @hide
+     */
+    @TestApi
+    public String[] getIgnoreSettingsWhitelist() {
+        try {
+            return mService.getIgnoreSettingsWhitelist();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide - hide this constructor because it has a parameter
      * of type ILocationManager, which is a system private class. The
      * right way to create an instance of this class is using the
