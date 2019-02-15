@@ -1384,8 +1384,8 @@ static jlong CalculateCapabilities(JNIEnv* env, jint uid, jint gid, jintArray gi
       RuntimeAbort(env, __LINE__, "Bad gids array");
     }
 
-    for (int gid_index = gids_num; --gids_num >= 0;) {
-      if (native_gid_proxy[gid_index] == AID_WAKELOCK) {
+    for (int gids_index = 0; gids_index < gids_num; ++gids_index) {
+      if (native_gid_proxy[gids_index] == AID_WAKELOCK) {
         gid_wakelock_found = true;
         break;
       }
