@@ -280,9 +280,9 @@ import java.util.ArrayList;
                     AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource);
             sendIILMsgNoDelay(MSG_IIL_SET_FORCE_USE, SENDMSG_QUEUE,
                     AudioSystem.FOR_RECORD, mForcedUseForComm, eventSource);
-            // Un-mute ringtone stream volume
-            mAudioService.setUpdateRingerModeServiceInt();
         }
+        // Un-mute ringtone stream volume
+        mAudioService.postUpdateRingerModeServiceInt();
     }
 
     /*package*/ AudioRoutesInfo startWatchingRoutes(IAudioRoutesObserver observer) {
