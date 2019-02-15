@@ -36,8 +36,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.row.NotificationInflater;
-import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
@@ -56,7 +56,7 @@ import java.util.Map;
  */
 public class NotificationEntryManager implements
         Dumpable,
-        NotificationInflater.InflationCallback,
+        NotificationContentInflater.InflationCallback,
         NotificationUpdateHandler,
         VisualStabilityManager.Callback {
     private static final String TAG = "NotificationEntryMgr";

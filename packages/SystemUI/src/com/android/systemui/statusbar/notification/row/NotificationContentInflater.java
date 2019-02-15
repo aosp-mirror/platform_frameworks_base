@@ -55,9 +55,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A utility that inflates the right kind of contentView based on the state
  */
-public class NotificationInflater {
+public class NotificationContentInflater {
 
-    public static final String TAG = "NotificationInflater";
+    public static final String TAG = "NotifContentInflater";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
@@ -127,7 +127,7 @@ public class NotificationInflater {
     private boolean mRedactAmbient;
     private final ArrayMap<Integer, RemoteViews> mCachedContentViews = new ArrayMap<>();
 
-    public NotificationInflater(ExpandableNotificationRow row) {
+    public NotificationContentInflater(ExpandableNotificationRow row) {
         mRow = row;
     }
 
@@ -232,8 +232,7 @@ public class NotificationInflater {
      * will reinflate it.
      *
      * @param reInflateFlags flags which views should be inflated. Should be a subset of
-     *                       {@link NotificationInflater#mInflationFlags} as only those will be
-     *                       inflated/reinflated.
+     *                       {@link #mInflationFlags} as only those will be inflated/reinflated.
      */
     private void inflateNotificationViews(@InflationFlag int reInflateFlags) {
         if (mRow.isRemoved()) {

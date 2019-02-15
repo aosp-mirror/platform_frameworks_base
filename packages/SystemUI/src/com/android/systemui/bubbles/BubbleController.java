@@ -52,7 +52,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationInflater;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.util.List;
@@ -315,8 +315,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         }
 
         @Override
-        public void onEntryInflated(NotificationEntry entry,
-                @NotificationInflater.InflationFlag int inflatedFlags) {
+        public void onEntryInflated(NotificationEntry entry, @InflationFlag int inflatedFlags) {
             if (!areBubblesEnabled(mContext)) {
                 return;
             }
