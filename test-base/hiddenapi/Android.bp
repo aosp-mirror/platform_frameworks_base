@@ -1,0 +1,29 @@
+//
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// Provided solely to contribute information about which hidden parts of the android.test.base
+// library are used by apps. The source files are stubs of the actual files in ../src which use the
+// UnsupportedAppUsage annotation to tag those methods that are accessible via the hiddenapi.
+// Relies on the convention that modules with name <x>-hiddenapi provide hiddenapi information for
+// module <x> that is on the bootclasspath.
+java_library {
+    name: "android.test.base-hiddenapi",
+    compile_dex: true,
+
+    srcs: ["src/**/*.java"],
+
+    libs: ["android.test.base"],
+}
