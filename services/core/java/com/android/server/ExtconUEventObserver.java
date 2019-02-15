@@ -68,7 +68,7 @@ public abstract class ExtconUEventObserver extends UEventObserver {
      * Subclasses of ExtconUEventObserver should override this method to handle UEvents.
      *
      * @param extconInfo that matches the {@code DEVPATH} of {@code event}
-     * @param event the event
+     * @param event      the event
      */
     protected abstract void onUEvent(ExtconInfo extconInfo, UEvent event);
 
@@ -91,6 +91,9 @@ public abstract class ExtconUEventObserver extends UEventObserver {
 
         /** Returns a new list of all external connections whose name matches {@code regex}. */
         public static List<ExtconInfo> getExtconInfos(@Nullable String regex) {
+            if (!extconExists()) {
+                return new ArrayList<>(0);  // Always return a new list.
+            }
             Pattern p = regex == null ? null : Pattern.compile(regex);
             File file = new File("/sys/class/extcon");
             File[] files = file.listFiles();
