@@ -623,7 +623,14 @@ public class ChooserActivity extends ResolverActivity {
     private FileInfo extractFileInfo(Uri uri, ContentResolver resolver) {
         String fileName = null;
         boolean hasThumbnail = false;
-        Cursor cursor = resolver.query(uri, null, null, null, null);
+        Cursor cursor = null;
+
+        try {
+            cursor = resolver.query(uri, null, null, null, null);
+        } catch (SecurityException e) {
+            Log.w(TAG, "Error loading file preview", e);
+        }
+
         if (cursor != null && cursor.getCount() > 0) {
             int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
             int flagsIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_FLAGS);
@@ -655,46 +662,50 @@ public class ChooserActivity extends ResolverActivity {
         // due to permissions issues
         findViewById(R.id.file_copy_button).setVisibility(View.GONE);
 
-        try {
-            ContentResolver resolver = getContentResolver();
-            TextView fileNameView = findViewById(R.id.content_preview_filename);
-            String action = targetIntent.getAction();
-            if (Intent.ACTION_SEND.equals(action)) {
-                Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+        String action = targetIntent.getAction();
+        if (Intent.ACTION_SEND.equals(action)) {
+            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            loadFileUriIntoView(uri);
+        } else {
+            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            int uriCount = uris.size();
 
-                FileInfo fileInfo = extractFileInfo(uri, resolver);
-                fileNameView.setText(fileInfo.name);
-
-                if (fileInfo.hasThumbnail) {
-                    loadUriIntoView(R.id.content_preview_file_thumbnail, uri);
-                } else {
-                    ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
-                    fileIconView.setVisibility(View.VISIBLE);
-                    fileIconView.setImageResource(R.drawable.ic_doc_generic);
-                }
+            if (uriCount == 0) {
+                contentPreviewLayout.setVisibility(View.GONE);
+                Log.i(TAG,
+                        "Appears to be no uris available in EXTRA_STREAM, removing "
+                                + "preview area");
+                return;
+            } else if (uriCount == 1) {
+                loadFileUriIntoView(uris.get(0));
             } else {
-                List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-                if (uris.size() == 0) {
-                    contentPreviewLayout.setVisibility(View.GONE);
-                    Log.i(TAG,
-                            "Appears to be no uris available in EXTRA_STREAM, removing preview "
-                                    + "area");
-                    return;
-                }
-
-                FileInfo fileInfo = extractFileInfo(uris.get(0), resolver);
-                int remFileCount = uris.size() - 1;
+                FileInfo fileInfo = extractFileInfo(uris.get(0), getContentResolver());
+                int remUriCount = uriCount - 1;
                 String fileName = getResources().getQuantityString(R.plurals.file_count,
-                        remFileCount, fileInfo.name, remFileCount);
+                        remUriCount, fileInfo.name, remUriCount);
 
+                TextView fileNameView = findViewById(R.id.content_preview_filename);
                 fileNameView.setText(fileName);
+
                 ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
                 fileIconView.setVisibility(View.VISIBLE);
                 fileIconView.setImageResource(R.drawable.ic_file_copy);
             }
-        } catch (SecurityException e) {
-            Log.w(TAG, "Error loading file preview", e);
-            contentPreviewLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void loadFileUriIntoView(Uri uri) {
+        FileInfo fileInfo = extractFileInfo(uri, getContentResolver());
+
+        TextView fileNameView = findViewById(R.id.content_preview_filename);
+        fileNameView.setText(fileInfo.name);
+
+        if (fileInfo.hasThumbnail) {
+            loadUriIntoView(R.id.content_preview_file_thumbnail, uri);
+        } else {
+            ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
+            fileIconView.setVisibility(View.VISIBLE);
+            fileIconView.setImageResource(R.drawable.ic_doc_generic);
         }
     }
 
