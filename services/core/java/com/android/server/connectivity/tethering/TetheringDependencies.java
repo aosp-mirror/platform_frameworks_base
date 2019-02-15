@@ -61,8 +61,8 @@ public class TetheringDependencies {
     /**
      * Get dependencies to be used by IpServer.
      */
-    public IpServer.Dependencies getIpServerDependencies(Context context) {
-        return new IpServer.Dependencies(context);
+    public IpServer.Dependencies getIpServerDependencies() {
+        return new IpServer.Dependencies();
     }
 
     /**
