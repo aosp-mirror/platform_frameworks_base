@@ -74,7 +74,8 @@ public class SurfaceControl implements Parcelable {
             boolean allLayers, boolean useIdentityTransform, int rotation);
     private static native GraphicBuffer nativeScreenshotToBuffer(IBinder displayToken,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
-            boolean allLayers, boolean useIdentityTransform, int rotation);
+            boolean allLayers, boolean useIdentityTransform, int rotation,
+            boolean captureSecureLayers);
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform);
@@ -1249,7 +1250,28 @@ public class SurfaceControl implements Parcelable {
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
         return nativeScreenshotToBuffer(displayToken, sourceCrop, width, height,
-                minLayer, maxLayer, false, useIdentityTransform, rotation);
+                minLayer, maxLayer, false, useIdentityTransform, rotation,
+                false /* captureSecureLayers */);
+    }
+
+    /**
+     * Like screenshotToBuffer, but if the caller is AID_SYSTEM, allows
+     * for the capture of secure layers. This is used for the screen rotation
+     * animation where the system server takes screenshots but does
+     * not persist them or allow them to leave the server. However in other
+     * cases in the system server, we mostly want to omit secure layers
+     * like when we take a screenshot on behalf of the assistant.
+     *
+     * @hide
+     */
+    public static GraphicBuffer screenshotToBufferWithSecureLayersUnsafe(Rect sourceCrop,
+            int width, int height, int minLayer, int maxLayer, boolean useIdentityTransform,
+            int rotation) {
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(
+                SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+        return nativeScreenshotToBuffer(displayToken, sourceCrop, width, height,
+                minLayer, maxLayer, false, useIdentityTransform, rotation,
+                true /* captureSecureLayers */);
     }
 
     /**
