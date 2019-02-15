@@ -90,7 +90,8 @@ void detectAndDeclareAnomalies(AnomalyTracker& tracker,
                                const std::shared_ptr<DimToValMap>& bucket,
                                const int64_t& eventTimestamp) {
     for (const auto& kv : *bucket) {
-        tracker.detectAndDeclareAnomaly(eventTimestamp, bucketNum, kv.first, kv.second);
+        tracker.detectAndDeclareAnomaly(eventTimestamp, bucketNum, 0 /*metric_id*/, kv.first,
+                                        kv.second);
     }
 }
 

@@ -697,8 +697,8 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
             wholeBucketVal += prev->second;
         }
         for (auto& tracker : mAnomalyTrackers) {
-            tracker->detectAndDeclareAnomaly(
-                eventTimeNs, mCurrentBucketNum, eventKey, wholeBucketVal);
+            tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, mMetricId, eventKey,
+                                             wholeBucketVal);
         }
     }
 }
