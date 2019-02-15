@@ -2136,6 +2136,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
+    @Override
+    public String[] getIgnoreSettingsWhitelist() {
+        synchronized (mLock) {
+            return mIgnoreSettingsPackageWhitelist.toArray(new String[0]);
+        }
+    }
+
     @GuardedBy("mLock")
     private boolean isThrottlingExemptLocked(CallerIdentity callerIdentity) {
         if (callerIdentity.mUid == Process.SYSTEM_UID) {

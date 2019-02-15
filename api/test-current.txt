@@ -802,6 +802,7 @@ package android.location {
 
   public class LocationManager {
     method public String[] getBackgroundThrottlingWhitelist();
+    method public String[] getIgnoreSettingsWhitelist();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, android.os.UserHandle);
