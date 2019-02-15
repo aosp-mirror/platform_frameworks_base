@@ -174,6 +174,8 @@ public class Am extends BaseCommand {
                 instrument.noWindowAnimation = true;
             } else if (opt.equals("--no-hidden-api-checks")) {
                 instrument.disableHiddenApiChecks = true;
+            } else if (opt.equals("--no-isolated-storage")) {
+                // NOTE: currently a no-op in this branch
             } else if (opt.equals("--user")) {
                 instrument.userId = parseUserArg(nextArgRequired());
             } else if (opt.equals("--abi")) {
