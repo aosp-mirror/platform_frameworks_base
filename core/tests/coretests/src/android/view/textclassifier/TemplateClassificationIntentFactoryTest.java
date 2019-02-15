@@ -40,7 +40,7 @@ import java.util.List;
 public class TemplateClassificationIntentFactoryTest {
 
     private static final String TEXT = "text";
-    private static final String TITLE = "Map";
+    private static final String TITLE_WITHOUT_ENTITY = "Map";
     private static final String DESCRIPTION = "Opens in Maps";
     private static final String ACTION = Intent.ACTION_VIEW;
 
@@ -69,9 +69,12 @@ public class TemplateClassificationIntentFactoryTest {
                         null,
                         null,
                         null,
+                        null,
+                        null,
+                        null,
                         createRemoteActionTemplates());
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateClassificationIntentFactory.create(
                         InstrumentationRegistry.getContext(),
                         TEXT,
@@ -80,14 +83,14 @@ public class TemplateClassificationIntentFactoryTest {
                         classificationResult);
 
         assertThat(intents).hasSize(2);
-        TextClassifierImpl.LabeledIntent labeledIntent = intents.get(0);
-        assertThat(labeledIntent.getTitle()).isEqualTo(TITLE);
-        Intent intent = labeledIntent.getIntent();
+        LabeledIntent labeledIntent = intents.get(0);
+        assertThat(labeledIntent.titleWithoutEntity).isEqualTo(TITLE_WITHOUT_ENTITY);
+        Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(ACTION);
         assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
 
         labeledIntent = intents.get(1);
-        intent = labeledIntent.getIntent();
+        intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(Intent.ACTION_TRANSLATE);
         assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
@@ -105,9 +108,12 @@ public class TemplateClassificationIntentFactoryTest {
                         null,
                         null,
                         null,
+                        null,
+                        null,
+                        null,
                         createRemoteActionTemplates());
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateClassificationIntentFactory.create(
                         InstrumentationRegistry.getContext(),
                         TEXT,
@@ -116,9 +122,9 @@ public class TemplateClassificationIntentFactoryTest {
                         classificationResult);
 
         assertThat(intents).hasSize(1);
-        TextClassifierImpl.LabeledIntent labeledIntent = intents.get(0);
-        assertThat(labeledIntent.getTitle()).isEqualTo(TITLE);
-        Intent intent = labeledIntent.getIntent();
+        LabeledIntent labeledIntent = intents.get(0);
+        assertThat(labeledIntent.titleWithoutEntity).isEqualTo(TITLE_WITHOUT_ENTITY);
+        Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(ACTION);
         assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
@@ -126,7 +132,8 @@ public class TemplateClassificationIntentFactoryTest {
     private static RemoteActionTemplate[] createRemoteActionTemplates() {
         return new RemoteActionTemplate[]{
                 new RemoteActionTemplate(
-                        TITLE,
+                        TITLE_WITHOUT_ENTITY,
+                        null,
                         DESCRIPTION,
                         ACTION,
                         null,

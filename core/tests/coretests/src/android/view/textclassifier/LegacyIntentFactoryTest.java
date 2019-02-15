@@ -58,9 +58,12 @@ public class LegacyIntentFactoryTest {
                         null,
                         null,
                         null,
+                        null,
+                        null,
+                        null,
                         null);
 
-        List<TextClassifierImpl.LabeledIntent> intents = mLegacyIntentFactory.create(
+        List<LabeledIntent> intents = mLegacyIntentFactory.create(
                 InstrumentationRegistry.getContext(),
                 TEXT,
                 /* foreignText */ false,
@@ -68,8 +71,8 @@ public class LegacyIntentFactoryTest {
                 classificationResult);
 
         assertThat(intents).hasSize(1);
-        TextClassifierImpl.LabeledIntent labeledIntent = intents.get(0);
-        Intent intent = labeledIntent.getIntent();
+        LabeledIntent labeledIntent = intents.get(0);
+        Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(Intent.ACTION_DEFINE);
         assertThat(intent.getStringExtra(Intent.EXTRA_TEXT)).isEqualTo(TEXT);
         assertThat(
@@ -89,9 +92,12 @@ public class LegacyIntentFactoryTest {
                         null,
                         null,
                         null,
+                        null,
+                        null,
+                        null,
                         null);
 
-        List<TextClassifierImpl.LabeledIntent> intents = mLegacyIntentFactory.create(
+        List<LabeledIntent> intents = mLegacyIntentFactory.create(
                 InstrumentationRegistry.getContext(),
                 TEXT,
                 /* foreignText */ true,
@@ -99,7 +105,7 @@ public class LegacyIntentFactoryTest {
                 classificationResult);
 
         assertThat(intents).hasSize(2);
-        assertThat(intents.get(0).getIntent().getAction()).isEqualTo(Intent.ACTION_DEFINE);
-        assertThat(intents.get(1).getIntent().getAction()).isEqualTo(Intent.ACTION_TRANSLATE);
+        assertThat(intents.get(0).intent.getAction()).isEqualTo(Intent.ACTION_DEFINE);
+        assertThat(intents.get(1).intent.getAction()).isEqualTo(Intent.ACTION_TRANSLATE);
     }
 }

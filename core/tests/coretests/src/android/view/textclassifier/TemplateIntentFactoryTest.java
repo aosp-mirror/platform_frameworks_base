@@ -38,7 +38,8 @@ import java.util.List;
 public class TemplateIntentFactoryTest {
 
     private static final String TEXT = "text";
-    private static final String TITLE = "Map";
+    private static final String TITLE_WITHOUT_ENTITY = "Map";
+    private static final String TITLE_WITH_ENTITY = "Map NW14D1";
     private static final String DESCRIPTION = "Check the map";
     private static final String ACTION = Intent.ACTION_VIEW;
     private static final String DATA = Uri.parse("http://www.android.com").toString();
@@ -69,7 +70,8 @@ public class TemplateIntentFactoryTest {
     @Test
     public void create_full() {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
+                TITLE_WITHOUT_ENTITY,
+                TITLE_WITH_ENTITY,
                 DESCRIPTION,
                 ACTION,
                 DATA,
@@ -81,15 +83,16 @@ public class TemplateIntentFactoryTest {
                 REQUEST_CODE
         );
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[]{remoteActionTemplate});
 
         assertThat(intents).hasSize(1);
-        TextClassifierImpl.LabeledIntent labeledIntent = intents.get(0);
-        assertThat(labeledIntent.getTitle()).isEqualTo(TITLE);
-        assertThat(labeledIntent.getDescription()).isEqualTo(DESCRIPTION);
-        assertThat(labeledIntent.getRequestCode()).isEqualTo(REQUEST_CODE);
-        Intent intent = labeledIntent.getIntent();
+        LabeledIntent labeledIntent = intents.get(0);
+        assertThat(labeledIntent.titleWithoutEntity).isEqualTo(TITLE_WITHOUT_ENTITY);
+        assertThat(labeledIntent.titleWithEntity).isEqualTo(TITLE_WITH_ENTITY);
+        assertThat(labeledIntent.description).isEqualTo(DESCRIPTION);
+        assertThat(labeledIntent.requestCode).isEqualTo(REQUEST_CODE);
+        Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(ACTION);
         assertThat(intent.getData().toString()).isEqualTo(DATA);
         assertThat(intent.getType()).isEqualTo(TYPE);
@@ -104,7 +107,8 @@ public class TemplateIntentFactoryTest {
     @Test
     public void normalizesScheme() {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
+                TITLE_WITHOUT_ENTITY,
+                TITLE_WITH_ENTITY,
                 DESCRIPTION,
                 ACTION,
                 "HTTp://www.android.com",
@@ -116,17 +120,18 @@ public class TemplateIntentFactoryTest {
                 REQUEST_CODE
         );
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[] {remoteActionTemplate});
 
-        String data = intents.get(0).getIntent().getData().toString();
+        String data = intents.get(0).intent.getData().toString();
         assertThat(data).isEqualTo("http://www.android.com");
     }
 
     @Test
     public void create_minimal() {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
+                TITLE_WITHOUT_ENTITY,
+                null,
                 DESCRIPTION,
                 ACTION,
                 null,
@@ -138,16 +143,17 @@ public class TemplateIntentFactoryTest {
                 null
         );
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[]{remoteActionTemplate});
 
         assertThat(intents).hasSize(1);
-        TextClassifierImpl.LabeledIntent labeledIntent = intents.get(0);
-        assertThat(labeledIntent.getTitle()).isEqualTo(TITLE);
-        assertThat(labeledIntent.getDescription()).isEqualTo(DESCRIPTION);
-        assertThat(labeledIntent.getRequestCode()).isEqualTo(
-                TextClassifierImpl.LabeledIntent.DEFAULT_REQUEST_CODE);
-        Intent intent = labeledIntent.getIntent();
+        LabeledIntent labeledIntent = intents.get(0);
+        assertThat(labeledIntent.titleWithoutEntity).isEqualTo(TITLE_WITHOUT_ENTITY);
+        assertThat(labeledIntent.titleWithEntity).isNull();
+        assertThat(labeledIntent.description).isEqualTo(DESCRIPTION);
+        assertThat(labeledIntent.requestCode).isEqualTo(
+                LabeledIntent.DEFAULT_REQUEST_CODE);
+        Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(ACTION);
         assertThat(intent.getData()).isNull();
         assertThat(intent.getType()).isNull();
@@ -161,7 +167,7 @@ public class TemplateIntentFactoryTest {
     public void invalidTemplate_nullTemplate() {
         RemoteActionTemplate remoteActionTemplate = null;
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[] {remoteActionTemplate});
 
         assertThat(intents).isEmpty();
@@ -170,7 +176,8 @@ public class TemplateIntentFactoryTest {
     @Test
     public void invalidTemplate_nonEmptyPackageName() {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
+                TITLE_WITHOUT_ENTITY,
+                TITLE_WITH_ENTITY,
                 DESCRIPTION,
                 ACTION,
                 DATA,
@@ -182,7 +189,7 @@ public class TemplateIntentFactoryTest {
                 REQUEST_CODE
         );
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[] {remoteActionTemplate});
 
         assertThat(intents).isEmpty();
@@ -192,6 +199,7 @@ public class TemplateIntentFactoryTest {
     public void invalidTemplate_emptyTitle() {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
                 null,
+                null,
                 DESCRIPTION,
                 ACTION,
                 null,
@@ -203,7 +211,7 @@ public class TemplateIntentFactoryTest {
                 null
         );
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[] {remoteActionTemplate});
 
         assertThat(intents).isEmpty();
@@ -212,7 +220,8 @@ public class TemplateIntentFactoryTest {
     @Test
     public void invalidTemplate_emptyDescription() {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
+                TITLE_WITHOUT_ENTITY,
+                TITLE_WITH_ENTITY,
                 null,
                 ACTION,
                 null,
@@ -224,7 +233,7 @@ public class TemplateIntentFactoryTest {
                 null
         );
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[] {remoteActionTemplate});
 
         assertThat(intents).isEmpty();
@@ -233,7 +242,8 @@ public class TemplateIntentFactoryTest {
     @Test
     public void invalidTemplate_emptyIntentAction() {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
-                TITLE,
+                TITLE_WITHOUT_ENTITY,
+                TITLE_WITH_ENTITY,
                 DESCRIPTION,
                 null,
                 null,
@@ -245,7 +255,7 @@ public class TemplateIntentFactoryTest {
                 null
         );
 
-        List<TextClassifierImpl.LabeledIntent> intents =
+        List<LabeledIntent> intents =
                 mTemplateIntentFactory.create(new RemoteActionTemplate[] {remoteActionTemplate});
 
         assertThat(intents).isEmpty();
