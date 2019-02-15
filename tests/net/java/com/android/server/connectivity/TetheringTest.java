@@ -195,10 +195,6 @@ public class TetheringTest {
     }
 
     public class MockIpServerDependencies extends IpServer.Dependencies {
-        MockIpServerDependencies() {
-            super(null);
-        }
-
         @Override
         public RouterAdvertisementDaemon getRouterAdvertisementDaemon(
                 InterfaceParams ifParams) {
@@ -266,7 +262,7 @@ public class TetheringTest {
         }
 
         @Override
-        public IpServer.Dependencies getIpServerDependencies(Context context) {
+        public IpServer.Dependencies getIpServerDependencies() {
             return mIpServerDependencies;
         }
 

@@ -49,7 +49,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.NetworkStack;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -3647,11 +3646,10 @@ public abstract class Context {
     public static final String NETD_SERVICE = "netd";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link NetworkStack} for communicating with the network stack
+     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
+     * {@link NetworkStackClient} IBinder for communicating with the network stack
      * @hide
-     * @see #getSystemService(String)
-     * @see NetworkStack
+     * @see NetworkStackClient
      */
     public static final String NETWORK_STACK_SERVICE = "network_stack";
 

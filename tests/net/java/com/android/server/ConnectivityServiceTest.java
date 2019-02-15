@@ -123,7 +123,7 @@ import android.net.NetworkMisc;
 import android.net.NetworkParcelable;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
-import android.net.NetworkStack;
+import android.net.NetworkStackClient;
 import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
@@ -245,7 +245,7 @@ public class ConnectivityServiceTest {
     @Mock INetworkStatsService mStatsService;
     @Mock INetworkPolicyManager mNpm;
     @Mock INetd mMockNetd;
-    @Mock NetworkStack mNetworkStack;
+    @Mock NetworkStackClient mNetworkStack;
 
     private ArgumentCaptor<String[]> mStringArrayCaptor = ArgumentCaptor.forClass(String[].class);
 
@@ -1074,6 +1074,11 @@ public class ConnectivityServiceTest {
 
         public WrappedMultinetworkPolicyTracker getMultinetworkPolicyTracker() {
             return (WrappedMultinetworkPolicyTracker) mMultinetworkPolicyTracker;
+        }
+
+        @Override
+        protected NetworkStackClient getNetworkStack() {
+            return mNetworkStack;
         }
 
         @Override

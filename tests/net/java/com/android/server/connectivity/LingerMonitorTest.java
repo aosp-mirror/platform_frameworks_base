@@ -38,7 +38,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
-import android.net.NetworkStack;
 import android.os.INetworkManagementService;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -75,16 +74,12 @@ public class LingerMonitorTest {
     @Mock NetworkMisc mMisc;
     @Mock NetworkNotificationManager mNotifier;
     @Mock Resources mResources;
-    @Mock NetworkStack mNetworkStack;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mCtx.getResources()).thenReturn(mResources);
         when(mCtx.getPackageName()).thenReturn("com.android.server.connectivity");
-        when(mCtx.getSystemServiceName(NetworkStack.class))
-                .thenReturn(Context.NETWORK_STACK_SERVICE);
-        when(mCtx.getSystemService(Context.NETWORK_STACK_SERVICE)).thenReturn(mNetworkStack);
 
         mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, HIGH_RATE_LIMIT);
     }
