@@ -4349,14 +4349,18 @@
         <attr name="indeterminate" format="boolean" />
         <!-- Restricts to ONLY indeterminate mode (state-keeping progress mode will not work). -->
         <attr name="indeterminateOnly" format="boolean" />
-        <!-- Drawable used for the indeterminate mode. -->
+        <!-- Drawable used for the indeterminate mode. One that implements Animatable offers more
+             control over the animation.-->
         <attr name="indeterminateDrawable" format="reference" />
         <!-- Drawable used for the progress mode. -->
         <attr name="progressDrawable" format="reference" />
-        <!-- Duration of the indeterminate animation. -->
+        <!-- Duration of the indeterminate animation. Only affects the indeterminate animation
+             if the indeterminate Drawable does not implement
+             android.graphics.drawable.Animatable. -->
         <attr name="indeterminateDuration" format="integer" min="1" />
-        <!-- Defines how the indeterminate mode should behave when the progress
-        reaches max. -->
+        <!-- Defines how the indeterminate mode should behave when the progress reaches max. Only
+             affects the indeterminate animation if the indeterminate Drawable does not implement
+             android.graphics.drawable.Animatable. -->
         <attr name="indeterminateBehavior">
             <!-- Progress starts over from 0. -->
             <enum name="repeat" value="1" />
@@ -4367,6 +4371,9 @@
         <attr name="maxWidth" />
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" />
+        <!-- Sets the acceleration curve for the indeterminate animation. Defaults to a linear
+             interpolation. Only affects the indeterminate animation if the indeterminate Drawable
+             does not implement android.graphics.drawable.Animatable.-->
         <attr name="interpolator" format="reference" />
         <!-- Timeout between frames of animation in milliseconds.
              {@deprecated Not used by the framework}. -->
