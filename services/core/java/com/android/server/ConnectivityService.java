@@ -57,8 +57,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.net.CaptivePortal;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityManager;
+import android.net.ICaptivePortal;
 import android.net.IConnectivityManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetd;
@@ -2690,11 +2692,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_HIDE,
                     mNai.network.netId));
         }
-
-        @Override
-        public void logCaptivePortalLoginEvent(int eventId, String packageName) {
-            new MetricsLogger().action(eventId, packageName);
-        }
     }
 
     private boolean networkRequiresValidation(NetworkAgentInfo nai) {
@@ -3249,20 +3246,61 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * NetworkStack endpoint to start the captive portal app. The NetworkStack needs to use this
      * endpoint as it does not have INTERACT_ACROSS_USERS_FULL itself.
+     * @param network Network on which the captive portal was detected.
      * @param appExtras Bundle to use as intent extras for the captive portal application.
      *                  Must be treated as opaque to avoid preventing the captive portal app to
      *                  update its arguments.
      */
     @Override
-    public void startCaptivePortalAppInternal(Bundle appExtras) {
+    public void startCaptivePortalAppInternal(Network network, Bundle appExtras) {
         mContext.checkCallingOrSelfPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
 
         final Intent appIntent = new Intent(ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
         appIntent.putExtras(appExtras);
+        appIntent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL,
+                new CaptivePortal(new CaptivePortalImpl(network).asBinder()));
         appIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
 
         Binder.withCleanCallingIdentity(() ->
                 mContext.startActivityAsUser(appIntent, UserHandle.CURRENT));
+    }
+
+    private class CaptivePortalImpl extends ICaptivePortal.Stub {
+        private final Network mNetwork;
+
+        private CaptivePortalImpl(Network network) {
+            mNetwork = network;
+        }
+
+        @Override
+        public void appResponse(final int response) throws RemoteException {
+            if (response == CaptivePortal.APP_RETURN_WANTED_AS_IS) {
+                enforceSettingsPermission();
+            }
+
+            // getNetworkAgentInfoForNetwork is thread-safe
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(mNetwork);
+            if (nai == null) return;
+
+            // nai.networkMonitor() is thread-safe
+            final INetworkMonitor nm = nai.networkMonitor();
+            if (nm == null) return;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                nm.notifyCaptivePortalAppFinished(response);
+            } finally {
+                // Not using Binder.withCleanCallingIdentity() to keep the checked RemoteException
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void logEvent(int eventId, String packageName) {
+            enforceSettingsPermission();
+
+            new MetricsLogger().action(eventId, packageName);
+        }
     }
 
     public boolean avoidBadWifi() {
