@@ -104,8 +104,8 @@ public class IpClientTest {
 
         when(mContext.getSystemService(eq(Context.ALARM_SERVICE))).thenReturn(mAlarm);
         when(mContext.getSystemService(eq(ConnectivityManager.class))).thenReturn(mCm);
-        when(mContext.getSystemService(INetd.class)).thenReturn(mNetd);
         when(mContext.getResources()).thenReturn(mResources);
+        when(mDependencies.getNetd(any())).thenReturn(mNetd);
         when(mResources.getInteger(R.integer.config_networkAvoidBadWifi))
                 .thenReturn(DEFAULT_AVOIDBADWIFI_CONFIG_VALUE);
 

@@ -36,8 +36,9 @@ public class InterfaceConfiguration implements Parcelable {
     private LinkAddress mAddr;
     private HashSet<String> mFlags = Sets.newHashSet();
 
-    private static final String FLAG_UP = INetd.IF_STATE_UP;
-    private static final String FLAG_DOWN = INetd.IF_STATE_DOWN;
+    // Must be kept in sync with constant in INetd.aidl
+    private static final String FLAG_UP = "up";
+    private static final String FLAG_DOWN = "down";
 
     private static final  String[] EMPTY_STRING_ARRAY = new String[0];
 
