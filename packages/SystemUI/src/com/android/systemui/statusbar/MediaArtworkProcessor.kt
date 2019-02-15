@@ -49,7 +49,7 @@ class MediaArtworkProcessor @Inject constructor() {
 
         context.display.getSize(mTmpSize)
         val renderScript = RenderScript.create(context)
-        val rect = Rect(0, 0,artwork.width, artwork.height)
+        val rect = Rect(0, 0, artwork.width, artwork.height)
         MathUtils.fitRect(rect, Math.max(mTmpSize.x / DOWNSAMPLE, mTmpSize.y / DOWNSAMPLE))
         val inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),
                 true /* filter */)
@@ -67,6 +67,7 @@ class MediaArtworkProcessor @Inject constructor() {
         input.destroy()
         output.destroy()
         inBitmap.recycle()
+        blur.destroy()
 
         val canvas = Canvas(outBitmap)
         canvas.drawColor(ColorUtils.setAlphaComponent(color, COLOR_ALPHA))
