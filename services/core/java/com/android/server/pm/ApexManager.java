@@ -167,6 +167,27 @@ class ApexManager {
     }
 
     /**
+     * Marks a staged session as successful.
+     *
+     * <p>Only activated session can be marked as successful.
+     *
+     * @param sessionId the identifier of the {@link PackageInstallerSession} being marked as
+     *                  successful.
+     */
+    void markStagedSessionSuccessful(int sessionId) {
+        try {
+            mApexService.markStagedSessionSuccessful(sessionId);
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Unable to contact apexservice", re);
+            throw new RuntimeException(re);
+        } catch (Exception e) {
+            // It is fine to just log an exception in this case. APEXd will be able to recover in
+            // case markStagedSessionSuccessful fails.
+            Slog.e(TAG, "Failed to mark session " + sessionId + " as successful", e);
+        }
+    }
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -196,7 +217,7 @@ class ApexManager {
             ipw.increaseIndent();
             final ApexSessionInfo[] sessions = mApexService.getSessions();
             for (ApexSessionInfo si : sessions) {
-                ipw.println("Session ID: " + Integer.toString(si.sessionId));
+                ipw.println("Session ID: " + si.sessionId);
                 ipw.increaseIndent();
                 if (si.isUnknown) {
                     ipw.println("State: UNKNOWN");
