@@ -67,7 +67,7 @@ public class WifiP2pGroup implements Parcelable {
     /** The network id in the wpa_supplicant */
     private int mNetId;
 
-    /** The frequency used by this group */
+    /** The frequency (in MHz) used by this group */
     private int mFrequency;
 
     /** P2P group started string pattern */
@@ -273,7 +273,7 @@ public class WifiP2pGroup implements Parcelable {
         this.mNetId = netId;
     }
 
-    /** Get the operating frequency of the p2p group */
+    /** Get the operating frequency (in MHz) of the p2p group */
     public int getFrequency() {
         return mFrequency;
     }
