@@ -36,11 +36,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 
 /**
- * Test class for {@link WindowTraceBuffer} and {@link WindowTraceQueueBuffer}.
+ * Test class for {@link WindowTraceBuffer}.
  *
  * Build/Install/Run:
  *  atest WmTests:WindowTraceBufferTest
@@ -49,12 +48,15 @@ import java.io.IOException;
 @Presubmit
 public class WindowTraceBufferTest {
     private File mFile;
+    private WindowTraceBuffer mBuffer;
 
     @Before
     public void setUp() throws Exception {
         final Context testContext = getInstrumentation().getContext();
         mFile = testContext.getFileStreamPath("tracing_test.dat");
         mFile.delete();
+
+        mBuffer = new WindowTraceBuffer(10);
     }
 
     @After
@@ -63,145 +65,112 @@ public class WindowTraceBufferTest {
     }
 
     @Test
-    public void testTraceQueueBuffer_addItem() throws Exception {
-        ProtoOutputStream toWrite1 = getDummy(1);
-        ProtoOutputStream toWrite2 = getDummy(2);
-        ProtoOutputStream toWrite3 = getDummy(3);
-        final int objectSize = toWrite1.getRawSize();
-        final int bufferCapacity = objectSize * 2;
-
-        final WindowTraceBuffer buffer = buildQueueBuffer(bufferCapacity);
-
-        buffer.add(toWrite1);
-        byte[] toWrite1Bytes = toWrite1.getBytes();
-        assertTrue("First element should be in the list",
-                buffer.contains(toWrite1Bytes));
-
-        buffer.add(toWrite2);
-        byte[] toWrite2Bytes = toWrite2.getBytes();
-        assertTrue("First element should be in the list",
-                buffer.contains(toWrite1Bytes));
-        assertTrue("Second element should be in the list",
-                buffer.contains(toWrite2Bytes));
-
-        buffer.add(toWrite3);
-        byte[] toWrite3Bytes = toWrite3.getBytes();
-        assertTrue("First element should be in the list",
-                buffer.contains(toWrite1Bytes));
-        assertTrue("Second element should be in the list",
-                buffer.contains(toWrite2Bytes));
-        assertTrue("Third element should not be in the list",
-                !buffer.contains(toWrite3Bytes));
-
-        assertEquals("Buffer should have 2 elements", buffer.mBuffer.size(), 2);
-        assertEquals(String.format("Buffer is full, used space should be %d", bufferCapacity),
-                buffer.mBufferSize, bufferCapacity);
-        assertEquals("Buffer is full, available space should be 0",
-                buffer.getAvailableSpace(), 0);
-    }
-
-    @Test
-    public void testTraceRingBuffer_addItem() throws Exception {
+    public void test_addItem() {
         ProtoOutputStream toWrite = getDummy(1);
         final int objectSize = toWrite.getRawSize();
+        mBuffer.setCapacity(objectSize);
+        mBuffer.resetBuffer();
 
-        final WindowTraceBuffer buffer = buildRingBuffer(objectSize);
+        Preconditions.checkArgument(mBuffer.size() == 0);
 
-        Preconditions.checkArgument(buffer.mBuffer.isEmpty());
+        mBuffer.add(toWrite);
 
-        buffer.add(toWrite);
-
-        assertEquals("Item was not added to the buffer", buffer.mBuffer.size(), 1);
+        assertEquals("Item was not added to the buffer", 1, mBuffer.size());
         assertEquals("Total buffer getSize differs from inserted object",
-                buffer.mBufferSize, objectSize);
-        assertEquals("Available buffer space does not match used one",
-                buffer.getAvailableSpace(), 0);
+                mBuffer.getBufferSize(), objectSize);
+        assertEquals("Available buffer space does not match used one", 0,
+                mBuffer.getAvailableSpace());
     }
 
     @Test
-    public void testTraceRingBuffer_addItemMustOverwriteOne() throws Exception {
+    public void test_addItemMustOverwriteOne() {
         ProtoOutputStream toWrite1 = getDummy(1);
         ProtoOutputStream toWrite2 = getDummy(2);
         ProtoOutputStream toWrite3 = getDummy(3);
         final int objectSize = toWrite1.getRawSize();
-
         final int bufferCapacity = objectSize * 2 + 1;
-        final WindowTraceBuffer buffer = buildRingBuffer(bufferCapacity);
+        mBuffer.setCapacity(bufferCapacity);
+        mBuffer.resetBuffer();
 
-        buffer.add(toWrite1);
+        mBuffer.add(toWrite1);
         byte[] toWrite1Bytes = toWrite1.getBytes();
         assertTrue("First element should be in the list",
-                buffer.contains(toWrite1Bytes));
+                mBuffer.contains(toWrite1Bytes));
 
-        buffer.add(toWrite2);
+        mBuffer.add(toWrite2);
         byte[] toWrite2Bytes = toWrite2.getBytes();
         assertTrue("First element should be in the list",
-                buffer.contains(toWrite1Bytes));
+                mBuffer.contains(toWrite1Bytes));
         assertTrue("Second element should be in the list",
-                buffer.contains(toWrite2Bytes));
+                mBuffer.contains(toWrite2Bytes));
 
-        buffer.add(toWrite3);
+        mBuffer.add(toWrite3);
         byte[] toWrite3Bytes = toWrite3.getBytes();
         assertTrue("First element should not be in the list",
-                !buffer.contains(toWrite1Bytes));
+                !mBuffer.contains(toWrite1Bytes));
         assertTrue("Second element should be in the list",
-                buffer.contains(toWrite2Bytes));
+                mBuffer.contains(toWrite2Bytes));
         assertTrue("Third element should be in the list",
-                buffer.contains(toWrite3Bytes));
-        assertEquals("Buffer should have 2 elements", buffer.mBuffer.size(), 2);
+                mBuffer.contains(toWrite3Bytes));
+        assertEquals("Buffer should have 2 elements", 2, mBuffer.size());
         assertEquals(String.format("Buffer is full, used space should be %d", bufferCapacity),
-                buffer.mBufferSize, bufferCapacity - 1);
-        assertEquals(" Buffer is full, available space should be 0",
-                buffer.getAvailableSpace(), 1);
+                mBuffer.getBufferSize(), bufferCapacity - 1);
+        assertEquals(" Buffer is full, available space should be 0", 1,
+                mBuffer.getAvailableSpace());
     }
 
     @Test
-    public void testTraceRingBuffer_addItemMustOverwriteMultiple() throws Exception {
+    public void test_addItemMustOverwriteMultiple() {
         ProtoOutputStream toWriteSmall1 = getDummy(1);
         ProtoOutputStream toWriteSmall2 = getDummy(2);
         final int objectSize = toWriteSmall1.getRawSize();
-
         final int bufferCapacity = objectSize * 2;
-        final WindowTraceBuffer buffer = buildRingBuffer(bufferCapacity);
+        mBuffer.setCapacity(bufferCapacity);
+        mBuffer.resetBuffer();
 
         ProtoOutputStream toWriteBig = new ProtoOutputStream();
         toWriteBig.write(MAGIC_NUMBER, 1);
         toWriteBig.write(MAGIC_NUMBER, 2);
 
-        buffer.add(toWriteSmall1);
+        mBuffer.add(toWriteSmall1);
         byte[] toWriteSmall1Bytes = toWriteSmall1.getBytes();
         assertTrue("First element should be in the list",
-                buffer.contains(toWriteSmall1Bytes));
+                mBuffer.contains(toWriteSmall1Bytes));
 
-        buffer.add(toWriteSmall2);
+        mBuffer.add(toWriteSmall2);
         byte[] toWriteSmall2Bytes = toWriteSmall2.getBytes();
         assertTrue("First element should be in the list",
-                buffer.contains(toWriteSmall1Bytes));
+                mBuffer.contains(toWriteSmall1Bytes));
         assertTrue("Second element should be in the list",
-                buffer.contains(toWriteSmall2Bytes));
+                mBuffer.contains(toWriteSmall2Bytes));
 
-        buffer.add(toWriteBig);
+        mBuffer.add(toWriteBig);
         byte[] toWriteBigBytes = toWriteBig.getBytes();
         assertTrue("Third element should overwrite all others",
-                !buffer.contains(toWriteSmall1Bytes));
+                !mBuffer.contains(toWriteSmall1Bytes));
         assertTrue("Third element should overwrite all others",
-                !buffer.contains(toWriteSmall2Bytes));
+                !mBuffer.contains(toWriteSmall2Bytes));
         assertTrue("Third element should overwrite all others",
-                buffer.contains(toWriteBigBytes));
+                mBuffer.contains(toWriteBigBytes));
 
-        assertEquals(" Buffer should have only 1 big element", buffer.mBuffer.size(), 1);
+        assertEquals(" Buffer should have only 1 big element", 1, mBuffer.size());
         assertEquals(String.format(" Buffer is full, used space should be %d", bufferCapacity),
-                buffer.mBufferSize, bufferCapacity);
-        assertEquals(" Buffer is full, available space should be 0",
-                buffer.getAvailableSpace(), 0);
+                mBuffer.getBufferSize(), bufferCapacity);
+        assertEquals(" Buffer is full, available space should be 0", 0,
+                mBuffer.getAvailableSpace());
     }
 
-    private WindowTraceBuffer buildRingBuffer(int capacity) throws IOException {
-        return new WindowTraceBuffer.Builder()
-                .setContinuousMode(true)
-                .setBufferCapacity(capacity)
-                .setTraceFile(mFile)
-                .build();
+    @Test
+    public void test_startResetsBuffer() {
+        ProtoOutputStream toWrite = getDummy(1);
+        mBuffer.resetBuffer();
+        Preconditions.checkArgument(mBuffer.size() == 0);
+
+        mBuffer.add(toWrite);
+        assertEquals("Item was not added to the buffer", 1, mBuffer.size());
+        mBuffer.resetBuffer();
+        assertEquals("Buffer should be empty after reset", 0, mBuffer.size());
+        assertEquals("Buffer size should be 0 after reset", 0, mBuffer.getBufferSize());
     }
 
     private ProtoOutputStream getDummy(int value) {
@@ -212,7 +181,4 @@ public class WindowTraceBufferTest {
         return toWrite;
     }
 
-    private WindowTraceBuffer buildQueueBuffer(int size) throws IOException {
-        return new WindowTraceQueueBuffer(size, mFile, false);
-    }
 }

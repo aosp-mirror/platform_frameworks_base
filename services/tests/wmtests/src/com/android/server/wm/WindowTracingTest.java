@@ -88,8 +88,7 @@ public class WindowTracingTest {
         mFile.delete();
 
         mWindowTracing = new WindowTracing(mFile, mWmMock, mChoreographer,
-                new WindowManagerGlobalLock());
-        mWindowTracing.setContinuousMode(false /* continuous */, null /* pw */);
+                new WindowManagerGlobalLock(), 1024);
     }
 
     @After
@@ -103,13 +102,13 @@ public class WindowTracingTest {
     }
 
     @Test
-    public void isEnabled_returnsTrueAfterStart() throws Exception {
+    public void isEnabled_returnsTrueAfterStart() {
         mWindowTracing.startTrace(mock(PrintWriter.class));
         assertTrue(mWindowTracing.isEnabled());
     }
 
     @Test
-    public void isEnabled_returnsFalseAfterStop() throws Exception {
+    public void isEnabled_returnsFalseAfterStop() {
         mWindowTracing.startTrace(mock(PrintWriter.class));
         mWindowTracing.stopTrace(mock(PrintWriter.class));
         assertFalse(mWindowTracing.isEnabled());
@@ -132,6 +131,8 @@ public class WindowTracingTest {
     public void traceFile_startsWithMagicHeader() throws Exception {
         mWindowTracing.startTrace(mock(PrintWriter.class));
         mWindowTracing.stopTrace(mock(PrintWriter.class));
+
+        assertTrue("Trace file should exist", mFile.exists());
 
         byte[] header = new byte[MAGIC_HEADER.length];
         try (InputStream is = new FileInputStream(mFile)) {
