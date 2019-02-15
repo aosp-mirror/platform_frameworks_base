@@ -19,9 +19,13 @@ package com.android.server.power;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
 import android.content.Context;
+import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.attention.AttentionService;
 import android.util.Slog;
 import android.util.StatsLog;
@@ -43,6 +47,8 @@ public class AttentionDetector {
 
     private static final String TAG = "AttentionDetector";
     private static final boolean DEBUG = false;
+
+    private boolean mIsSettingEnabled;
 
     /**
      * Invoked whenever user attention is detected.
@@ -128,15 +134,35 @@ public class AttentionDetector {
         mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
     }
 
+    @VisibleForTesting
+    void updateEnabledFromSettings(Context context) {
+        mIsSettingEnabled = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT) == 1;
+    }
+
     public void systemReady(Context context) {
+        updateEnabledFromSettings(context);
         mAttentionManager = LocalServices.getService(AttentionManagerInternal.class);
         mMaximumExtensionMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_attentionMaximumExtension);
         mMaxAttentionApiTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_attentionApiTimeout);
+
+        context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                Settings.System.ADAPTIVE_SLEEP),
+                false, new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateEnabledFromSettings(context);
+                    }
+                }, UserHandle.USER_ALL);
     }
 
     public long updateUserActivity(long nextScreenDimming) {
+        if (!mIsSettingEnabled) {
+            return nextScreenDimming;
+        }
+
         if (!isAttentionServiceSupported()) {
             return nextScreenDimming;
         }
@@ -182,7 +208,7 @@ public class AttentionDetector {
      * the activity happened.
      *
      * @param eventTime Activity time, in uptime millis.
-     * @param event Activity type as defined in {@link PowerManager}.
+     * @param event     Activity type as defined in {@link PowerManager}.
      * @return 0 when activity was ignored, 1 when handled, -1 when invalid.
      */
     public int onUserActivity(long eventTime, int event) {
