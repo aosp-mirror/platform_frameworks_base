@@ -302,6 +302,7 @@ message Atom {
         RoleHolder role_holder = 10049;
         DangerousPermissionState dangerous_permission_state = 10050;
         TrainInfo train_info = 10051;
+        TimeZoneDataInfo time_zone_data_info = 10052;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -5563,4 +5564,12 @@ message AssistGestureFeedbackReported {
 message AssistGestureProgressReported {
   // [0,100] progress for the assist gesture.
   optional int32 progress = 1;
+}
+
+/*
+ * Information about the time zone data on a device.
+ */
+message TimeZoneDataInfo {
+    // A version identifier for the data set on device. e.g. "2018i"
+    optional string tzdb_version = 1;
 }
