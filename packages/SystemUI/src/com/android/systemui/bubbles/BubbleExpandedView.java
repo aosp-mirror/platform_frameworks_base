@@ -304,8 +304,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             mPermissionView.setVisibility(VISIBLE);
             ((ImageView) mPermissionView.findViewById(R.id.pkgicon)).setImageDrawable(mAppIcon);
             ((TextView) mPermissionView.findViewById(R.id.pkgname)).setText(mAppName);
-            logBubbleClickEvent(mEntry.notification,
-                    StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_DIALOG_SHOWN);
         }
     }
 

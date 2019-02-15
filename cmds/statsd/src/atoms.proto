@@ -5366,7 +5366,7 @@ message BubbleUIChanged {
         HEADER_GO_TO_SETTINGS = 9;
         PERMISSION_OPT_IN = 10;
         PERMISSION_OPT_OUT = 11;
-        PERMISSION_DIALOG_SHOWN = 12;
+        PERMISSION_IGNORED = 12;
         SWIPE_LEFT = 13;
         SWIPE_RIGHT = 14;
         STACK_EXPANDED = 15;
