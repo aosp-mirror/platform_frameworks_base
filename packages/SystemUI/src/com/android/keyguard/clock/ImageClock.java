@@ -37,7 +37,7 @@ public class ImageClock extends FrameLayout {
 
     private ImageView mHourHand;
     private ImageView mMinuteHand;
-    private Calendar mTime;
+    private final Calendar mTime = Calendar.getInstance(TimeZone.getDefault());
     private String mDescFormat;
     private TimeZone mTimeZone;
 
@@ -51,7 +51,6 @@ public class ImageClock extends FrameLayout {
 
     public ImageClock(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mTime = Calendar.getInstance();
         mDescFormat = ((SimpleDateFormat) DateFormat.getTimeFormat(context)).toLocalizedPattern();
     }
 
@@ -98,7 +97,7 @@ public class ImageClock extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mTime = Calendar.getInstance(mTimeZone != null ? mTimeZone : TimeZone.getDefault());
+        mTime.setTimeZone(mTimeZone != null ? mTimeZone : TimeZone.getDefault());
         onTimeChanged();
     }
 }
