@@ -104,8 +104,7 @@ public class AttentionManagerService extends SystemService {
 
     @Override
     public void onSwitchUser(int userId) {
-        cancelAndUnbindLocked(peekUserStateLocked(userId),
-                AttentionService.ATTENTION_FAILURE_UNKNOWN);
+        cancelAndUnbindLocked(peekUserStateLocked(userId));
     }
 
     /** Resolves and sets up the attention service if it had not been done yet. */
@@ -152,7 +151,8 @@ public class AttentionManagerService extends SystemService {
         }
 
         synchronized (mLock) {
-            unbindAfterTimeoutLocked();
+            final long now = SystemClock.uptimeMillis();
+            freeIfInactiveLocked();
 
             final UserState userState = getOrCreateCurrentUserStateLocked();
             // lazily start the service, which should be very lightweight to start
@@ -172,7 +172,7 @@ public class AttentionManagerService extends SystemService {
                 try {
                     // throttle frequent requests
                     final AttentionCheckCache attentionCheckCache = userState.mAttentionCheckCache;
-                    if (attentionCheckCache != null && SystemClock.uptimeMillis()
+                    if (attentionCheckCache != null && now
                             < attentionCheckCache.mLastComputed + STALE_AFTER_MILLIS) {
                         callback.onSuccess(requestCode, attentionCheckCache.mResult,
                                 attentionCheckCache.mTimestamp);
@@ -190,6 +190,7 @@ public class AttentionManagerService extends SystemService {
                                 userState.mAttentionCheckCache = new AttentionCheckCache(
                                         SystemClock.uptimeMillis(), result,
                                         timestamp);
+                                userState.mCurrentAttentionCheckIsFulfilled = true;
                             }
                             StatsLog.write(StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
                                     result);
@@ -198,6 +199,7 @@ public class AttentionManagerService extends SystemService {
                         @Override
                         public void onFailure(int requestCode, int error) {
                             callback.onFailure(requestCode, error);
+                            userState.mCurrentAttentionCheckIsFulfilled = true;
                             StatsLog.write(StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
                                     error);
                         }
@@ -214,7 +216,10 @@ public class AttentionManagerService extends SystemService {
     /** Cancels the specified attention check. */
     public void cancelAttentionCheck(int requestCode) {
         synchronized (mLock) {
-            final UserState userState = getOrCreateCurrentUserStateLocked();
+            final UserState userState = peekCurrentUserStateLocked();
+            if (userState == null) {
+                return;
+            }
             if (userState.mService == null) {
                 if (userState.mPendingAttentionCheck != null
                         && userState.mPendingAttentionCheck.mRequestCode == requestCode) {
@@ -231,8 +236,12 @@ public class AttentionManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    private void unbindAfterTimeoutLocked() {
-        mAttentionHandler.sendEmptyMessageDelayed(AttentionHandler.CONNECTION_EXPIRED,
+    private void freeIfInactiveLocked() {
+        // If we are called here, it means someone used the API again - reset the timer then.
+        mAttentionHandler.removeMessages(AttentionHandler.CHECK_CONNECTION_EXPIRATION);
+
+        // Schedule resources cleanup if no one calls the API again.
+        mAttentionHandler.sendEmptyMessageDelayed(AttentionHandler.CHECK_CONNECTION_EXPIRATION,
                 CONNECTION_TTL_MILLIS);
     }
 
@@ -259,12 +268,14 @@ public class AttentionManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    UserState peekCurrentUserStateLocked() {
+    @Nullable
+    private UserState peekCurrentUserStateLocked() {
         return peekUserStateLocked(ActivityManager.getCurrentUser());
     }
 
     @GuardedBy("mLock")
-    UserState peekUserStateLocked(int userId) {
+    @Nullable
+    private UserState peekUserStateLocked(int userId) {
         return mUserStates.get(userId);
     }
 
@@ -401,6 +412,8 @@ public class AttentionManagerService extends SystemService {
         @GuardedBy("mLock")
         int mCurrentAttentionCheckRequestCode;
         @GuardedBy("mLock")
+        boolean mCurrentAttentionCheckIsFulfilled;
+        @GuardedBy("mLock")
         PendingAttentionCheck mPendingAttentionCheck;
 
         @GuardedBy("mLock")
@@ -496,7 +509,7 @@ public class AttentionManagerService extends SystemService {
     }
 
     private class AttentionHandler extends Handler {
-        private static final int CONNECTION_EXPIRED = 1;
+        private static final int CHECK_CONNECTION_EXPIRATION = 1;
         private static final int ATTENTION_CHECK_TIMEOUT = 2;
 
         AttentionHandler() {
@@ -506,19 +519,26 @@ public class AttentionManagerService extends SystemService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 // Do not occupy resources when not in use - unbind proactively.
-                case CONNECTION_EXPIRED: {
+                case CHECK_CONNECTION_EXPIRATION: {
                     for (int i = 0; i < mUserStates.size(); i++) {
-                        cancelAndUnbindLocked(mUserStates.valueAt(i),
-                                AttentionService.ATTENTION_FAILURE_UNKNOWN);
+                        cancelAndUnbindLocked(mUserStates.valueAt(i));
                     }
-
                 }
                 break;
 
                 // Callee is no longer interested in the attention check result - cancel.
                 case ATTENTION_CHECK_TIMEOUT: {
-                    cancelAndUnbindLocked(peekCurrentUserStateLocked(),
-                            AttentionService.ATTENTION_FAILURE_TIMED_OUT);
+                    synchronized (mLock) {
+                        final UserState userState = peekCurrentUserStateLocked();
+                        if (userState != null) {
+                            // If not called back already.
+                            if (!userState.mCurrentAttentionCheckIsFulfilled) {
+                                cancel(userState,
+                                        AttentionService.ATTENTION_FAILURE_TIMED_OUT);
+                            }
+
+                        }
+                    }
                 }
                 break;
 
@@ -528,25 +548,29 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
-    @GuardedBy("mLock")
-    private void cancelAndUnbindLocked(UserState userState,
-            @AttentionFailureCodes int failureCode) {
-        synchronized (mLock) {
-            if (userState != null && userState.mService != null) {
-                try {
-                    userState.mService.cancelAttentionCheck(
-                            userState.mCurrentAttentionCheckRequestCode);
-                } catch (RemoteException e) {
-                    Slog.e(LOG_TAG, "Unable to cancel attention check");
-                }
-
-                if (userState.mPendingAttentionCheck != null) {
-                    userState.mPendingAttentionCheck.cancel(failureCode);
-                }
-                mContext.unbindService(userState.mConnection);
-                userState.mConnection.cleanupService();
-                mUserStates.remove(userState.mUserId);
+    private void cancel(UserState userState, @AttentionFailureCodes int failureCode) {
+        if (userState != null && userState.mService != null) {
+            try {
+                userState.mService.cancelAttentionCheck(
+                        userState.mCurrentAttentionCheckRequestCode);
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Unable to cancel attention check");
             }
+
+            if (userState.mPendingAttentionCheck != null) {
+                userState.mPendingAttentionCheck.cancel(failureCode);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void cancelAndUnbindLocked(UserState userState) {
+        synchronized (mLock) {
+            cancel(userState, AttentionService.ATTENTION_FAILURE_UNKNOWN);
+
+            mContext.unbindService(userState.mConnection);
+            userState.mConnection.cleanupService();
+            mUserStates.remove(userState.mUserId);
         }
     }
 
@@ -558,8 +582,7 @@ public class AttentionManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                cancelAndUnbindLocked(peekCurrentUserStateLocked(),
-                        AttentionService.ATTENTION_FAILURE_UNKNOWN);
+                cancelAndUnbindLocked(peekCurrentUserStateLocked());
             }
         }
     }
