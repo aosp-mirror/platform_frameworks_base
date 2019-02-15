@@ -794,7 +794,8 @@ public class LauncherApps {
      * @throws SecurityException when the caller is not the active launcher.
      */
     @Nullable
-    public LauncherApps.AppUsageLimit getAppUsageLimit(String packageName, UserHandle user) {
+    public LauncherApps.AppUsageLimit getAppUsageLimit(@NonNull String packageName,
+            @NonNull UserHandle user) {
         try {
             return mService.getAppUsageLimit(mContext.getPackageName(), packageName, user);
         } catch (RemoteException re) {
