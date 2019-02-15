@@ -601,18 +601,24 @@ public class SmsMessage extends SmsMessageBase {
 
                             } else if (addr.numberMode == CdmaSmsAddress.NUMBER_MODE_DATA_NETWORK) {
                                 if (numberType == 2)
-                                    Rlog.e(LOG_TAG, "TODO: Originating Addr is email id");
+                                    Rlog.e(LOG_TAG, "TODO: Addr is email id");
                                 else
                                     Rlog.e(LOG_TAG,
-                                          "TODO: Originating Addr is data network address");
+                                          "TODO: Addr is data network address");
                             } else {
-                                Rlog.e(LOG_TAG, "Originating Addr is of incorrect type");
+                                Rlog.e(LOG_TAG, "Addr is of incorrect type");
                             }
                         } else {
                             Rlog.e(LOG_TAG, "Incorrect Digit mode");
                         }
                         addr.origBytes = data;
-                        Rlog.i(LOG_TAG, "Originating Addr=" + addr.toString());
+                        Rlog.pii(LOG_TAG, "Addr=" + addr.toString());
+                        mOriginatingAddress = addr;
+                        if (parameterId == DESTINATION_ADDRESS) {
+                            // Original address awlays indicates one sender's address for 3GPP2
+                            // Here add recipient address support along with 3GPP
+                            mRecipientAddress = addr;
+                        }
                         break;
                     case ORIGINATING_SUB_ADDRESS:
                     case DESTINATION_SUB_ADDRESS:
@@ -667,7 +673,7 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Parses a SMS message from its BearerData stream. (mobile-terminated only)
+     * Parses a SMS message from its BearerData stream.
      */
     public void parseSms() {
         // Message Waiting Info Record defined in 3GPP2 C.S-0005, 3.7.5.6
@@ -697,14 +703,13 @@ public class SmsMessage extends SmsMessageBase {
         }
 
         if (mOriginatingAddress != null) {
-            mOriginatingAddress.address = new String(mOriginatingAddress.origBytes);
-            if (mOriginatingAddress.ton == CdmaSmsAddress.TON_INTERNATIONAL_OR_IP) {
-                if (mOriginatingAddress.address.charAt(0) != '+') {
-                    mOriginatingAddress.address = "+" + mOriginatingAddress.address;
-                }
-            }
+            decodeSmsDisplayAddress(mOriginatingAddress);
             if (VDBG) Rlog.v(LOG_TAG, "SMS originating address: "
                     + mOriginatingAddress.address);
+        }
+
+        if (mRecipientAddress != null) {
+            decodeSmsDisplayAddress(mRecipientAddress);
         }
 
         if (mBearerData.msgCenterTimeStamp != null) {
@@ -731,7 +736,8 @@ public class SmsMessage extends SmsMessageBase {
                 status = mBearerData.errorClass << 8;
                 status |= mBearerData.messageStatus;
             }
-        } else if (mBearerData.messageType != BearerData.MESSAGE_TYPE_DELIVER) {
+        } else if (mBearerData.messageType != BearerData.MESSAGE_TYPE_DELIVER
+                && mBearerData.messageType != BearerData.MESSAGE_TYPE_SUBMIT) {
             throw new RuntimeException("Unsupported message type: " + mBearerData.messageType);
         }
 
@@ -741,6 +747,16 @@ public class SmsMessage extends SmsMessageBase {
         } else if ((mUserData != null) && VDBG) {
             Rlog.v(LOG_TAG, "SMS payload: '" + IccUtils.bytesToHexString(mUserData) + "'");
         }
+    }
+
+    private void decodeSmsDisplayAddress(SmsAddress addr) {
+        addr.address = new String(addr.origBytes);
+        if (addr.ton == CdmaSmsAddress.TON_INTERNATIONAL_OR_IP) {
+            if (addr.address.charAt(0) != '+') {
+                addr.address = "+" + addr.address;
+            }
+        }
+        Rlog.pii(LOG_TAG, " decodeSmsDisplayAddress = " + addr.address);
     }
 
     /**
