@@ -704,7 +704,7 @@ java_defaults {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.wifi-V1.0-java-constants",
-        "networkstack-aidl-interfaces-java",
+        "networkstack-aidl-framework-java",
         "netd_aidl_parcelables-java",
     ],
 
@@ -818,7 +818,6 @@ aidl_interface {
         "core/java/android/net/DhcpResultsParcelable.aidl",
         "core/java/android/net/INetworkMonitor.aidl",
         "core/java/android/net/INetworkMonitorCallbacks.aidl",
-        "core/java/android/net/IIpMemoryStore.aidl",
         "core/java/android/net/INetworkStackConnector.aidl",
         "core/java/android/net/INetworkStackStatusCallback.aidl",
         "core/java/android/net/InitialConfigurationParcelable.aidl",
@@ -837,6 +836,16 @@ aidl_interface {
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
         "core/java/android/net/ip/IIpClient.aidl",
         "core/java/android/net/ip/IIpClientCallbacks.aidl",
+    ],
+    api_dir: "aidl/networkstack",
+}
+
+aidl_interface {
+    name: "networkstack-aidl-framework",
+    local_include_dir: "core/java",
+    srcs: [
+        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
+        "core/java/android/net/IIpMemoryStore.aidl",
         "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
