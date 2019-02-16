@@ -43,7 +43,8 @@ namespace aapt {
 
 class IApkSerializer {
  public:
-  IApkSerializer(IAaptContext* context, const Source& source) : context_(context), source_(source) {}
+  IApkSerializer(IAaptContext* context, const Source& source) : context_(context),
+                                                                source_(source) {}
 
   virtual bool SerializeXml(const xml::XmlResource* xml, const std::string& path, bool utf16,
                             IArchiveWriter* writer, uint32_t compression_flags) = 0;
@@ -167,7 +168,7 @@ class ProtoApkSerializer : public IApkSerializer {
       std::unique_ptr<io::IData> data = file->file->OpenAsData();
       if (!data) {
         context_->GetDiagnostics()->Error(DiagMessage(source_)
-                                         << "failed to open file " << *file->path);
+                                          << "failed to open file " << *file->path);
         return false;
       }
 
@@ -175,7 +176,7 @@ class ProtoApkSerializer : public IApkSerializer {
       std::unique_ptr<xml::XmlResource> xml = xml::Inflate(data->data(), data->size(), &error);
       if (xml == nullptr) {
         context_->GetDiagnostics()->Error(DiagMessage(source_) << "failed to parse binary XML: "
-                                          << error);
+                                                               << error);
         return false;
       }
 
@@ -256,9 +257,6 @@ class Context : public IAaptContext {
 int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer,
             ApkFormat output_format, TableFlattenerOptions table_flattener_options,
             XmlFlattenerOptions xml_flattener_options) {
-  // Do not change the ordering of strings in the values string pool
-  table_flattener_options.sort_stringpool_entries = false;
-
   unique_ptr<IApkSerializer> serializer;
   if (output_format == ApkFormat::kBinary) {
     serializer.reset(new BinaryApkSerializer(context, apk->GetSource(), table_flattener_options,
@@ -274,7 +272,7 @@ int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer
   io::IFile* manifest = apk->GetFileCollection()->FindFile(kAndroidManifestPath);
   if (!serializer->SerializeXml(apk->GetManifest(), kAndroidManifestPath, true /*utf16*/,
                                 output_writer, (manifest != nullptr && manifest->WasCompressed())
-                                ? ArchiveEntry::kCompress : 0u)) {
+                                               ? ArchiveEntry::kCompress : 0u)) {
     context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
                                      << "failed to serialize AndroidManifest.xml");
     return 1;
@@ -303,8 +301,7 @@ int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer
               if (files_written.insert(*file->path).second) {
                 if (!serializer->SerializeFile(file, output_writer)) {
                   context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                                       << "failed to serialize file "
-                                                       << *file->path);
+                                                   << "failed to serialize file " << *file->path);
                   return 1;
                 }
               }
@@ -338,7 +335,7 @@ int Convert(IAaptContext* context, LoadedApk* apk, IArchiveWriter* output_writer
 
     if (!io::CopyFileToArchivePreserveCompression(context, file, path, output_writer)) {
       context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                       << "failed to copy file " << path);
+                                           << "failed to copy file " << path);
       return 1;
     }
   }

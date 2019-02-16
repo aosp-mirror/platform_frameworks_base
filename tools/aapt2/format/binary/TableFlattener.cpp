@@ -710,17 +710,15 @@ class PackageFlattener {
 }  // namespace
 
 bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
-  if (options_.sort_stringpool_entries) {
-    // We must do this before writing the resources, since the string pool IDs may change.
-    table->string_pool.Prune();
-    table->string_pool.Sort([](const StringPool::Context &a, const StringPool::Context &b) -> int {
-      int diff = util::compare(a.priority, b.priority);
-      if (diff == 0) {
-        diff = a.config.compare(b.config);
-      }
-      return diff;
-    });
-  }
+  // We must do this before writing the resources, since the string pool IDs may change.
+  table->string_pool.Prune();
+  table->string_pool.Sort([](const StringPool::Context& a, const StringPool::Context& b) -> int {
+    int diff = util::compare(a.priority, b.priority);
+    if (diff == 0) {
+      diff = a.config.compare(b.config);
+    }
+    return diff;
+  });
 
   // Write the ResTable header.
   ChunkWriter table_writer(buffer_);
