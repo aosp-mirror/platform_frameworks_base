@@ -15,8 +15,8 @@
  */
 package android.view.contentcapture;
 
-import static android.view.contentcapture.ContentCaptureHelper.DEBUG;
-import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
+import static android.view.contentcapture.ContentCaptureHelper.sDebug;
+import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -233,7 +233,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public final ContentCaptureSession createContentCaptureSession(
             @NonNull ContentCaptureContext context) {
         final ContentCaptureSession child = newChild(context);
-        if (DEBUG) {
+        if (sDebug) {
             Log.d(TAG, "createContentCaptureSession(" + context + ": parent=" + mId + ", child="
                     + child.mId);
         }
@@ -285,20 +285,20 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public final void destroy() {
         synchronized (mLock) {
             if (mDestroyed) {
-                if (DEBUG) Log.d(TAG, "destroy(" + mId + "): already destroyed");
+                if (sDebug) Log.d(TAG, "destroy(" + mId + "): already destroyed");
                 return;
             }
             mDestroyed = true;
 
             // TODO(b/111276913): check state (for example, how to handle if it's waiting for remote
             // id) and send it to the cache of batched commands
-            if (VERBOSE) {
+            if (sVerbose) {
                 Log.v(TAG, "destroy(): state=" + getStateAsString(mState) + ", mId=" + mId);
             }
             // Finish children first
             if (mChildren != null) {
                 final int numberChildren = mChildren.size();
-                if (VERBOSE) Log.v(TAG, "Destroying " + numberChildren + " children first");
+                if (sVerbose) Log.v(TAG, "Destroying " + numberChildren + " children first");
                 for (int i = 0; i < numberChildren; i++) {
                     final ContentCaptureSession child = mChildren.get(i);
                     try {

@@ -15,16 +15,29 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL;
+import static android.view.contentcapture.ContentCaptureManager.LOGGING_LEVEL_DEBUG;
+import static android.view.contentcapture.ContentCaptureManager.LOGGING_LEVEL_OFF;
+import static android.view.contentcapture.ContentCaptureManager.LOGGING_LEVEL_VERBOSE;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Build;
+import android.provider.DeviceConfig;
+import android.util.Log;
+import android.view.contentcapture.ContentCaptureManager.LoggingLevel;
 
 /**
- * Helpe class for this package.
+ * Helper class for this package and server's.
+ *
+ * @hide
  */
-final class ContentCaptureHelper {
+public final class ContentCaptureHelper {
 
-    // TODO(b/121044306): define a way to dynamically set them(for example, using settings?)
-    static final boolean VERBOSE = false;
-    static final boolean DEBUG = true; // STOPSHIP if not set to false
+    private static final String TAG = ContentCaptureHelper.class.getSimpleName();
+
+    public static boolean sVerbose = false;
+    public static boolean sDebug = true;
 
     /**
      * Used to log text that could contain PII.
@@ -32,6 +45,61 @@ final class ContentCaptureHelper {
     @Nullable
     public static String getSanitizedString(@Nullable CharSequence text) {
         return text == null ? null : text.length() + "_chars";
+    }
+
+    /**
+     * Gets the value of a device config property from the Content Capture namespace.
+     */
+    public static int getIntDeviceConfigProperty(@NonNull String key, int defaultValue) {
+        final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE, key);
+        if (value == null) return defaultValue;
+
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception e) {
+            Log.w(TAG, "error parsing value (" + value + ") of property " + key + ": " + e);
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Sets the value of the static logging level constants based on device config.
+     */
+    public static void setLoggingLevel() {
+        final int defaultLevel = Build.IS_DEBUGGABLE ? LOGGING_LEVEL_DEBUG : LOGGING_LEVEL_OFF;
+        final int level = getIntDeviceConfigProperty(DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL,
+                defaultLevel);
+        Log.i(TAG, "Setting logging level to " + getLoggingLevelAsString(level));
+        sVerbose = sDebug = false;
+        switch (level) {
+            case LOGGING_LEVEL_VERBOSE:
+                sVerbose = true;
+                // fall through
+            case LOGGING_LEVEL_DEBUG:
+                sDebug = true;
+                return;
+            case LOGGING_LEVEL_OFF:
+                // You log nothing, Jon Snow!
+                return;
+            default:
+                Log.w(TAG, "setLoggingLevel(): invalud level: " + level);
+        }
+    }
+
+    /**
+     * Gets a user-friendly value for a content capture logging level.
+     */
+    public static String getLoggingLevelAsString(@LoggingLevel int level) {
+        switch (level) {
+            case LOGGING_LEVEL_OFF:
+                return "OFF";
+            case LOGGING_LEVEL_DEBUG:
+                return "DEBUG";
+            case LOGGING_LEVEL_VERBOSE:
+                return "VERBOSE";
+            default:
+                return "UNKNOWN-" + level;
+        }
     }
 
     private ContentCaptureHelper() {
