@@ -344,6 +344,11 @@ public final class OverlayManagerService extends SystemService {
     private final class PackageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
+            final String action = intent.getAction();
+            if (action == null) {
+                Slog.e(TAG, "Cannot handle package broadcast with null action");
+                return;
+            }
             final Uri data = intent.getData();
             if (data == null) {
                 Slog.e(TAG, "Cannot handle package broadcast with null data");
@@ -361,7 +366,7 @@ public final class OverlayManagerService extends SystemService {
                 userIds = new int[] { UserHandle.getUserId(extraUid) };
             }
 
-            switch (intent.getAction()) {
+            switch (action) {
                 case ACTION_PACKAGE_ADDED:
                     if (replacing) {
                         onPackageUpgraded(packageName, userIds);
