@@ -130,7 +130,7 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"আঁতৰোৱা এপ্‌সমূহ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"আঁতৰোৱা এপ্‌ আৰু ব্যৱহাৰকাৰীসমূহ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"ইউএছবি টেডাৰিং"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"প\'ৰ্টেবল হ\'টস্প\'ট"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"প\'ৰ্টেবল হটস্পট"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ব্লুটুথ টেডাৰিং"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"টেডাৰ কৰি থকা হৈছে"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"টেডাৰিং আৰু প\'ৰ্টেবল হটস্পট"</string>
