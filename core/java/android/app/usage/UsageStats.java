@@ -465,8 +465,6 @@ public final class UsageStats implements Parcelable {
                 mActivities.put(instanceId, eventType);
                 break;
             case ACTIVITY_STOPPED:
-                mActivities.put(instanceId, eventType);
-                break;
             case ACTIVITY_DESTROYED:
                 // remove activity from the map.
                 mActivities.delete(instanceId);
