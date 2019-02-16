@@ -38,27 +38,20 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s মাধ্যমেদি স্বয়ংক্ৰিয়ভাৱে সংযোগ কৰা হৈছে"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"নেটৱৰ্ক ৰেটিং প্ৰদানকাৰীৰ জৰিয়তে স্বয়ং সংয়োগ কৰা হ’ল"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s-ৰ মাধ্যমেদি সংযোগ কৰা হৈছে"</string>
-    <!-- no translation found for connected_via_app (5571999941988929520) -->
-    <skip />
+    <string name="connected_via_app" msgid="5571999941988929520">"<xliff:g id="NAME">%1$s</xliff:g>ৰ জৰিয়তে সংযুক্ত"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$sৰ মাধ্যমেৰে উপলব্ধ"</string>
-    <!-- no translation found for tap_to_sign_up (6449724763052579434) -->
-    <skip />
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"ছাইন আপ কৰিবলৈ টিপক"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"সংযোজিত, ইণ্টাৰনেট নাই"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"ইণ্টাৰনেট সংযোগ নাই"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ছাইন ইন কৰা দৰকাৰী"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"একচেছ পইণ্ট কিছু সময়ৰ বাবে পূৰ্ণ হৈ আছে"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$sৰ যোগেৰে সংযোজিত"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$sৰ মাধ্যমেৰে উপলব্ধ"</string>
-    <!-- no translation found for osu_opening_provider (5488997661548640424) -->
-    <skip />
-    <!-- no translation found for osu_connect_failed (2187750899158158934) -->
-    <skip />
-    <!-- no translation found for osu_completing_sign_up (9037638564719197082) -->
-    <skip />
-    <!-- no translation found for osu_sign_up_failed (7296159750352873260) -->
-    <skip />
-    <!-- no translation found for osu_sign_up_complete (8207626049093289203) -->
-    <skip />
+    <string name="osu_opening_provider" msgid="5488997661548640424">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> খুলি থকা হৈছে"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"সংযোগ কৰিব পৰা নগ’ল"</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"ছাইন আপ সম্পূৰ্ণ কৰি থকা হৈছে…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"ছাইন আপ সম্পূৰ্ণ কৰিব পৰা নগ’ল। আকৌ চেষ্টা কৰিবলৈ টিপক।"</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"ছাইন আপ সম্পূৰ্ণ হৈছে সংযোগ কৰি থকা হৈছে…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"অতি লেহেম"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"লেহেমীয়া"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ঠিক"</string>
@@ -94,8 +87,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ছিম প্ৰৱেশ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"এইচ্ছডি অডি\'অ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"এইচ্ছডি অডিঅ’"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"শ্ৰৱণ যন্ত্ৰ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"শ্ৰৱণ যন্ত্ৰৰ লগত সংযোগ কৰা হ’ল"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"শ্ৰৱণ যন্ত্ৰ"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"শ্ৰৱণ যন্ত্ৰলৈ সংযোগ কৰা হৈছে"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"মিডিয়া অডিঅ’লৈ সংযোগ হৈছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ফ’ন অডিঅ\'ৰ লগত সংযোগ কৰা হ’ল"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ফাইল ট্ৰান্সফাৰ ছাৰ্ভাৰৰ সৈতে সংযোজিত হৈ আছে"</string>
@@ -112,7 +105,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ফ\'ন অডিঅ\'ৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ফাইল স্থানান্তৰ কৰিবলৈ ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ইনপুটৰ বাবে ব্যৱহাৰ কৰক"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"শ্ৰৱণ যন্ত্ৰৰ বাবে ব্যৱহাৰ কৰক"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"শ্ৰৱণ যন্ত্ৰৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"যোৰা লগাওক"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"যোৰা লগাওক"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"বাতিল কৰক"</string>
@@ -143,8 +136,10 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"আঁতৰোৱা এপ্‌সমূহ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"আঁতৰোৱা এপ্‌ আৰু ব্যৱহাৰকাৰীসমূহ"</string>
+    <!-- no translation found for data_usage_ota (5377889154805560860) -->
+    <skip />
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"ইউএছবি টেডাৰিং"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"প\'ৰ্টেবল হ\'টস্প\'ট"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"প\'ৰ্টেবল হটস্পট"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ব্লুটুথ টেডাৰিং"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"টেডাৰ কৰি থকা হৈছে"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"টেডাৰিং আৰু প\'ৰ্টেবল হটস্পট"</string>

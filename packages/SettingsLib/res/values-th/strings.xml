@@ -87,8 +87,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"การเข้าถึงซิม"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"เสียง HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"เสียง HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"เครื่องช่วยการได้ยิน"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"เชื่อมต่อเครื่องช่วยการได้ยินแล้ว"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"เครื่องช่วยการได้ยิน"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"เชื่อมต่อกับเครื่องช่วยการได้ยินแล้ว"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"เชื่อมต่อกับระบบเสียงของสื่อแล้ว"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"เชื่อมต่อกับระบบเสียงของโทรศัพท์แล้ว"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"เชื่อมต่อกับเซิร์ฟเวอร์สำหรับโอนไฟล์แล้ว"</string>
@@ -105,7 +105,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ใช้สำหรับระบบเสียงของโทรศัพท์"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ใช้สำหรับการโอนไฟล์"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ใช้สำหรับการป้อนข้อมูล"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"ใช้สำหรับเครื่องช่วยการได้ยิน"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"ใช้สำหรับเครื่องช่วยการได้ยิน"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"จับคู่อุปกรณ์"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"จับคู่อุปกรณ์"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ยกเลิก"</string>
@@ -136,6 +136,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"ระบบปฏิบัติการของ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"แอปพลิเคชันที่นำออก"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"แอปพลิเคชันและผู้ใช้ที่นำออก"</string>
+    <string name="data_usage_ota" msgid="5377889154805560860">"การอัปเดตระบบ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"ปล่อยสัญญาณผ่าน USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ฮอตสปอตแบบพกพาได้"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ปล่อยสัญญาณบลูทูธ"</string>
