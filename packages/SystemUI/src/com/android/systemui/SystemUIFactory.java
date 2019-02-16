@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
@@ -141,7 +142,7 @@ public class SystemUIFactory {
             StatusBar statusBar, StatusBarStateController statusBarStateController,
             NotificationListener listener) {
         return new NotificationIconAreaController(context, statusBar, statusBarStateController,
-                listener);
+                listener, Dependency.get(NotificationMediaManager.class));
     }
 
     public KeyguardIndicationController createKeyguardIndicationController(Context context,
