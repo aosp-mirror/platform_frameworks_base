@@ -134,7 +134,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     private boolean mNoPerms;
     private boolean mSingleUser;
 
-    private final ThreadLocal<String> mCallingPackage = new ThreadLocal<>();
+    private ThreadLocal<String> mCallingPackage;
 
     private Transport mTransport = new Transport();
 
@@ -2034,6 +2034,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
     private void attachInfo(Context context, ProviderInfo info, boolean testing) {
         mNoPerms = testing;
+        mCallingPackage = new ThreadLocal<>();
 
         /*
          * Only allow it to be set once, so after the content service gives
