@@ -34,13 +34,16 @@ void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
 
 void setGpuStats_native(JNIEnv* env, jobject clazz, jstring driverPackageName,
                         jstring driverVersionName, jlong driverVersionCode,
-                        jstring appPackageName) {
+                        jstring driverBuildDate, jstring appPackageName) {
     ScopedUtfChars driverPackageNameChars(env, driverPackageName);
     ScopedUtfChars driverVersionNameChars(env, driverVersionName);
+    ScopedUtfChars driverBuildDateChars(env, driverBuildDate);
     ScopedUtfChars appPackageNameChars(env, appPackageName);
     android::GraphicsEnv::getInstance().setGpuStats(driverPackageNameChars.c_str(),
                                                     driverVersionNameChars.c_str(),
-                                                    driverVersionCode, appPackageNameChars.c_str());
+                                                    driverVersionCode,
+                                                    driverBuildDateChars.c_str(),
+                                                    appPackageNameChars.c_str());
 }
 
 void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appName, jstring devOptIn,
@@ -84,7 +87,7 @@ void setDebugLayersGLES_native(JNIEnv* env, jobject clazz, jstring layers) {
 const JNINativeMethod g_methods[] = {
     { "getCanLoadSystemLibraries", "()I", reinterpret_cast<void*>(getCanLoadSystemLibraries_native) },
     { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
-    { "setGpuStats", "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V", reinterpret_cast<void*>(setGpuStats_native) },
+    { "setGpuStats", "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void*>(setGpuStats_native) },
     { "setAngleInfo", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/FileDescriptor;JJ)V", reinterpret_cast<void*>(setAngleInfo_native) },
     { "getShouldUseAngle", "(Ljava/lang/String;)Z", reinterpret_cast<void*>(shouldUseAngle_native) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },

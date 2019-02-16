@@ -61,6 +61,7 @@ public class GraphicsEnvironment {
     private static final String SYSTEM_DRIVER_VERSION_NAME = "";
     private static final long SYSTEM_DRIVER_VERSION_CODE = 0;
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String PROPERTY_GFX_DRIVER_BUILD_DATE = "ro.gfx.driver.build_date";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
@@ -79,8 +80,9 @@ public class GraphicsEnvironment {
         setupGpuLayers(context, coreSettings, pm, packageName);
         setupAngle(context, coreSettings, pm, packageName);
         if (!chooseDriver(context, coreSettings, pm, packageName)) {
+            final String driverBuildDate = SystemProperties.get(PROPERTY_GFX_DRIVER_BUILD_DATE);
             setGpuStats(SYSTEM_DRIVER_NAME, SYSTEM_DRIVER_VERSION_NAME, SYSTEM_DRIVER_VERSION_CODE,
-                    packageName);
+                    driverBuildDate == null ? "" : driverBuildDate, packageName);
         }
     }
 
@@ -574,8 +576,8 @@ public class GraphicsEnvironment {
 
         final PackageInfo driverPackageInfo;
         try {
-            driverPackageInfo =
-                    pm.getPackageInfo(driverPackageName, PackageManager.MATCH_SYSTEM_ONLY);
+            driverPackageInfo = pm.getPackageInfo(driverPackageName,
+                    PackageManager.MATCH_SYSTEM_ONLY | PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
             return false;
@@ -655,9 +657,6 @@ public class GraphicsEnvironment {
             return false;
         }
 
-        setGpuStats(driverPackageName, driverPackageInfo.versionName, driverAppInfo.longVersionCode,
-                packageName);
-
         final StringBuilder sb = new StringBuilder();
         sb.append(driverAppInfo.nativeLibraryDir)
           .append(File.pathSeparator);
@@ -668,6 +667,12 @@ public class GraphicsEnvironment {
 
         if (DEBUG) Log.v(TAG, "gfx driver package libs: " + paths);
         setDriverPath(paths);
+
+        final String driverBuildDate = driverAppInfo.metaData == null
+                ? ""
+                : driverAppInfo.metaData.getString("driver_build_date");
+        setGpuStats(driverPackageName, driverPackageInfo.versionName, driverAppInfo.longVersionCode,
+                driverBuildDate == null ? "" : driverBuildDate, packageName);
 
         return true;
     }
@@ -710,7 +715,7 @@ public class GraphicsEnvironment {
     private static native void setDebugLayersGLES(String layers);
     private static native void setDriverPath(String path);
     private static native void setGpuStats(String driverPackageName, String driverVersionName,
-            long driverVersionCode, String appPackageName);
+            long driverVersionCode, String driverBuildDate, String appPackageName);
     private static native void setAngleInfo(String path, String appPackage, String devOptIn,
             FileDescriptor rulesFd, long rulesOffset, long rulesLength);
     private static native boolean getShouldUseAngle(String packageName);
