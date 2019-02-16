@@ -2174,9 +2174,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>The remote device will be authenticated and communication on this socket will be
      * encrypted.
      * <p> Use this socket if an authenticated socket link is possible. Authentication refers
-     * to the authentication of the link key to prevent man-in-the-middle type of attacks. When a
-     * secure socket connection is not possible, use {@link createInsecureLeL2capCocSocket(int,
-     * int)}.
+     * to the authentication of the link key to prevent man-in-the-middle type of attacks.
      *
      * @param psm dynamic PSM value from remote device
      * @return a CoC #BluetoothSocket ready for an outgoing connection
