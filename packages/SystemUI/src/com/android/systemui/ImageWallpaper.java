@@ -28,7 +28,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
+import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Trace;
 import android.service.wallpaper.WallpaperService;
@@ -39,6 +41,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -73,10 +76,78 @@ public class ImageWallpaper extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
-        mEngine = new DrawableEngine();
-        return mEngine;
+        if (Build.IS_DEBUGGABLE) {
+            Log.v(TAG, "We are using GLEngine");
+        }
+        return new GLEngine(this);
     }
 
+    class GLEngine extends Engine {
+        private GLWallpaperSurfaceView mWallpaperSurfaceView;
+
+        GLEngine(Context context) {
+            mWallpaperSurfaceView = new GLWallpaperSurfaceView(context);
+            mWallpaperSurfaceView.setRenderer(
+                    new ImageWallpaperRenderer(context, mWallpaperSurfaceView));
+            mWallpaperSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+            setOffsetNotificationsEnabled(true);
+        }
+
+        @Override
+        public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
+            if (mWallpaperSurfaceView != null) {
+                mWallpaperSurfaceView.notifyAmbientModeChanged(inAmbientMode, animationDuration);
+            }
+        }
+
+        @Override
+        public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep,
+                float yOffsetStep, int xPixelOffset, int yPixelOffset) {
+            if (mWallpaperSurfaceView != null) {
+                mWallpaperSurfaceView.notifyOffsetsChanged(xOffset, yOffset);
+            }
+        }
+
+        private class GLWallpaperSurfaceView extends GLSurfaceView implements ImageGLView {
+            private WallpaperStatusListener mWallpaperChangedListener;
+
+            GLWallpaperSurfaceView(Context context) {
+                super(context);
+                setEGLContextClientVersion(2);
+            }
+
+            @Override
+            public SurfaceHolder getHolder() {
+                return getSurfaceHolder();
+            }
+
+            @Override
+            public void setRenderer(Renderer renderer) {
+                super.setRenderer(renderer);
+                mWallpaperChangedListener = (WallpaperStatusListener) renderer;
+            }
+
+            private void notifyAmbientModeChanged(boolean inAmbient, long duration) {
+                if (mWallpaperChangedListener != null) {
+                    mWallpaperChangedListener.onAmbientModeChanged(inAmbient, duration);
+                }
+            }
+
+            private void notifyOffsetsChanged(float xOffset, float yOffset) {
+                if (mWallpaperChangedListener != null) {
+                    mWallpaperChangedListener.onOffsetsChanged(
+                            xOffset, yOffset, getHolder().getSurfaceFrame());
+                }
+            }
+
+            @Override
+            public void render() {
+                requestRender();
+            }
+        }
+    }
+
+    // TODO: Remove this engine, tracking on b/123617158.
     class DrawableEngine extends Engine {
         private final Runnable mUnloadWallpaperCallback = () -> {
             unloadWallpaper(false /* forgetSize */);
@@ -563,5 +634,36 @@ public class ImageWallpaper extends WallpaperService {
                 }
             }
         }
+    }
+
+    /**
+     * A listener to trace status of image wallpaper.
+     */
+    public interface WallpaperStatusListener {
+
+        /**
+         * Called back while ambient mode changes.
+         * @param inAmbientMode true if is in ambient mode, false otherwise.
+         * @param duration the duration of animation.
+         */
+        void onAmbientModeChanged(boolean inAmbientMode, long duration);
+
+        /**
+         * Called back while wallpaper offsets.
+         * @param xOffset The offset portion along x.
+         * @param yOffset The offset portion along y.
+         */
+        void onOffsetsChanged(float xOffset, float yOffset, Rect frame);
+    }
+
+    /**
+     * An abstraction for view of GLRenderer.
+     */
+    public interface ImageGLView {
+
+        /**
+         * Ask the view to render.
+         */
+        void render();
     }
 }

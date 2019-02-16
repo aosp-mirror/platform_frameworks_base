@@ -479,8 +479,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateAodMaskVisibility(deviceSupportsAodWallpaper && aodImageWallpaperEnabled);
             // If WallpaperInfo is null, it must be ImageWallpaper.
             final boolean supportsAmbientMode = deviceSupportsAodWallpaper
-                    && (info == null && aodImageWallpaperEnabled
-                        || info != null && info.supportsAmbientMode());
+                    && (info == null || info.supportsAmbientMode());
 
             mStatusBarWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
