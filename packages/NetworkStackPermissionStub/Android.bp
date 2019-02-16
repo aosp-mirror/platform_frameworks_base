@@ -21,7 +21,7 @@ android_app {
     // a classes.dex.
     srcs: ["src/**/*.java"],
     platform_apis: true,
-    certificate: "platform",
+    certificate: "networkstack",
     privileged: true,
     manifest: "AndroidManifest.xml",
 }
