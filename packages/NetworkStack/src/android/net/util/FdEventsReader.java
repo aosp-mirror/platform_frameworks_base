@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package android.net.shared;
+package android.net.util;
 
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.util.SocketUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;

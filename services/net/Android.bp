@@ -3,6 +3,7 @@ java_library_static {
     srcs: ["java/**/*.java"],
     static_libs: [
         "netd_aidl_interface-java",
+        "networkstack-aidl-interfaces-java",
     ]
 }
 
