@@ -125,6 +125,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.HdmiAudioSystemClient;
@@ -1858,7 +1859,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         readConfigurationDependentBehaviors();
 
         if (mLidControlsDisplayFold) {
-            mDisplayFoldController = DisplayFoldController.create(DEFAULT_DISPLAY);
+            mDisplayFoldController = DisplayFoldController.create(context, DEFAULT_DISPLAY);
         } else if (SystemProperties.getBoolean("persist.debug.force_foldable", false)) {
             mDisplayFoldController = DisplayFoldController.createWithProxSensor(context,
                     DEFAULT_DISPLAY);
@@ -3218,6 +3219,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mDisplayFoldController != null) {
             mDisplayFoldController.unregisterDisplayFoldListener(listener);
         }
+    }
+
+    @Override
+    public void setOverrideFoldedArea(Rect area) {
+        if (mDisplayFoldController != null) {
+            mDisplayFoldController.setOverrideFoldedArea(area);
+        }
+    }
+
+    @Override
+    public Rect getFoldedArea() {
+        if (mDisplayFoldController != null) {
+            return mDisplayFoldController.getFoldedArea();
+        }
+        return new Rect();
     }
 
     @Override

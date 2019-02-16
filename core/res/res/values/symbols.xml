@@ -3586,7 +3586,10 @@
   <java-symbol type="integer" name="config_defaultRingVibrationIntensity" />
 
   <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
+
+  <!-- For Foldables -->
   <java-symbol type="bool" name="config_lidControlsDisplayFold" />
+  <java-symbol type="string" name="config_foldedArea" />
 
   <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
   <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
