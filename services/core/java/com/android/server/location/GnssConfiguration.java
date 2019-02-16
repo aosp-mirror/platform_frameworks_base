@@ -52,7 +52,6 @@ class GnssConfiguration {
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    //TODO(b/33112647): Create gps_debug.conf with commented career parameters.
     private static final String DEBUG_PROPERTIES_FILE = "/etc/gps_debug.conf";
 
     // config.xml properties
@@ -191,8 +190,6 @@ class GnssConfiguration {
             return Collections.EMPTY_LIST;
         }
 
-        // TODO(b/122856486): Validate proxy app names so that a system app or some popular app
-        //                    with location permission is not specified as a proxy app.
         ArrayList proxyApps = new ArrayList(proxyAppsArray.length);
         for (String proxyApp : proxyAppsArray) {
             proxyApps.add(proxyApp);

@@ -18,7 +18,6 @@ package com.android.server.location;
 
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,11 +31,11 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.StatsLog;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,9 +75,9 @@ class GnssVisibilityControl {
     private boolean mIsDeviceLocationSettingsEnabled;
 
     // Number of non-framework location access proxy apps is expected to be small (< 5).
-    private static final int HASH_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
-    private HashMap<String, Boolean> mProxyAppToLocationPermissions = new HashMap<>(
-            HASH_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS);
+    private static final int ARRAY_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
+    private ArrayMap<String, Boolean> mProxyAppToLocationPermissions = new ArrayMap<>(
+            ARRAY_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS);
 
     private PackageManager.OnPermissionsChangedListener mOnPermissionsChangedListener =
             uid -> runOnHandler(() -> handlePermissionsChanged(uid));
@@ -97,10 +96,6 @@ class GnssVisibilityControl {
     }
 
     void updateProxyApps(List<String> nfwLocationAccessProxyApps) {
-        // NOTE: This class doesn't explicitly register and listen for SIM_STATE_CHANGED event
-        //       but rather piggy backs on the GnssLocationProvider SIM_STATE_CHANGED handling
-        //       so that the order of processing is preserved. GnssLocationProvider should
-        //       first load the new config parameters for the new SIM and then call this method.
         runOnHandler(() -> handleUpdateProxyApps(nfwLocationAccessProxyApps));
     }
 
@@ -246,15 +241,7 @@ class GnssVisibilityControl {
 
     // Represents NfwNotification structure in IGnssVisibilityControlCallback.hal
     private static class NfwNotification {
-        private static final String KEY_PROTOCOL_STACK = "ProtocolStack";
-        private static final String KEY_OTHER_PROTOCOL_STACK_NAME = "OtherProtocolStackName";
-        private static final String KEY_REQUESTOR = "Requestor";
-        private static final String KEY_REQUESTOR_ID = "RequestorId";
-        private static final String KEY_RESPONSE_TYPE = "ResponseType";
-        private static final String KEY_IN_EMERGENCY_MODE = "InEmergencyMode";
-        private static final String KEY_IS_CACHED_LOCATION = "IsCachedLocation";
-
-        // This must match with NfwResponseType enum in IGnssVisibilityControlCallback.hal.
+        // These must match with NfwResponseType enum in IGnssVisibilityControlCallback.hal.
         private static final byte NFW_RESPONSE_TYPE_REJECTED = 0;
         private static final byte NFW_RESPONSE_TYPE_ACCEPTED_NO_LOCATION_PROVIDED = 1;
         private static final byte NFW_RESPONSE_TYPE_ACCEPTED_LOCATION_PROVIDED = 2;
@@ -281,30 +268,14 @@ class GnssVisibilityControl {
             mIsCachedLocation = isCachedLocation;
         }
 
-        private void copyFieldsToIntent(Intent intent) {
-            intent.putExtra(KEY_PROTOCOL_STACK, mProtocolStack);
-            if (!TextUtils.isEmpty(mOtherProtocolStackName)) {
-                intent.putExtra(KEY_OTHER_PROTOCOL_STACK_NAME, mOtherProtocolStackName);
-            }
-            intent.putExtra(KEY_REQUESTOR, mRequestor);
-            if (!TextUtils.isEmpty(mRequestorId)) {
-                intent.putExtra(KEY_REQUESTOR_ID, mRequestorId);
-            }
-            intent.putExtra(KEY_RESPONSE_TYPE, mResponseType);
-            intent.putExtra(KEY_IN_EMERGENCY_MODE, mInEmergencyMode);
-            if (mResponseType == NFW_RESPONSE_TYPE_ACCEPTED_LOCATION_PROVIDED) {
-                intent.putExtra(KEY_IS_CACHED_LOCATION, mIsCachedLocation);
-            }
-        }
-
         @SuppressLint("DefaultLocale")
         public String toString() {
             return String.format(
-                    "[Notification] proxyAppPackageName: %s, protocolStack: %d"
-                            + ", otherProtocolStackName: %s, requestor: %d, requestorId: %s"
-                            + ", responseType: %d, inEmergencyMode: %b, isCachedLocation: %b",
-                    mProxyAppPackageName, mProtocolStack, mOtherProtocolStackName,
-                    mRequestor, mRequestorId, mResponseType, mInEmergencyMode, mIsCachedLocation);
+                    "{proxyAppPackageName: %s, protocolStack: %d, otherProtocolStackName: %s, "
+                            + "requestor: %d, requestorId: %s, responseType: %s, inEmergencyMode:"
+                            + " %b, isCachedLocation: %b}",
+                    mProxyAppPackageName, mProtocolStack, mOtherProtocolStackName, mRequestor,
+                    mRequestorId, getResponseTypeAsString(), mInEmergencyMode, mIsCachedLocation);
         }
 
         private String getResponseTypeAsString() {
@@ -405,7 +376,7 @@ class GnssVisibilityControl {
     }
 
     private void handleNfwNotification(NfwNotification nfwNotification) {
-        if (DEBUG) Log.d(TAG, nfwNotification.toString());
+        if (DEBUG) Log.d(TAG, "Non-framework location access notification: " + nfwNotification);
 
         final String proxyAppPackageName = nfwNotification.mProxyAppPackageName;
         Boolean isLocationPermissionEnabled = mProxyAppToLocationPermissions.get(
@@ -421,39 +392,27 @@ class GnssVisibilityControl {
         logEvent(nfwNotification, isPermissionMismatched);
 
         if (TextUtils.isEmpty(proxyAppPackageName)) {
-            Log.e(TAG, "ProxyAppPackageName field is not set. Not sending intent to proxy app for "
-                    + nfwNotification);
+            Log.e(TAG, "ProxyAppPackageName field is not set. AppOps service not notified "
+                    + "for non-framework location access notification: " + nfwNotification);
             return;
         }
 
         if (isLocationPermissionEnabled == null) {
-            // App is not in the configured list.
-            Log.e(TAG, "Could not find proxy app with name: " + proxyAppPackageName + " in the "
+            Log.w(TAG, "Could not find proxy app with name: " + proxyAppPackageName + " in the "
                     + "value specified for config parameter: "
-                    + GnssConfiguration.CONFIG_NFW_PROXY_APPS + ". Not sending intent to proxy app"
-                    + " for " + nfwNotification);
-            return;
-        }
-
-        // Send intent to non-framework location proxy app with notification information.
-        final Intent intent = new Intent(
-                proxyAppPackageName + NFW_INTENT_ACTION_NFW_LOCATION_ACCESS_SUFFIX);
-        final String proxAppActivityName =
-                proxyAppPackageName + NFW_PROXY_APP_PKG_ACTIVITY_NAME_SUFFIX;
-        intent.setClassName(proxyAppPackageName, proxAppActivityName);
-        intent.setType(NFW_INTENT_TYPE);
-        nfwNotification.copyFieldsToIntent(intent);
-
-        // Check if the proxy app is still installed.
-        final Integer clsAppUid = getApplicationUid(proxyAppPackageName);
-        if (clsAppUid == null || intent.resolveActivity(mPackageManager) == null) {
-            Log.i(TAG, "Proxy application " + proxyAppPackageName + " and/or activity "
-                    + proxAppActivityName + " is not found. Not sending"
-                    + " intent to proxy app for " + nfwNotification);
+                    + GnssConfiguration.CONFIG_NFW_PROXY_APPS + ". AppOps service not notified "
+                    + "for non-framework location access notification: " + nfwNotification);
             return;
         }
 
         // Display location icon attributed to this proxy app.
+        final Integer clsAppUid = getApplicationUid(proxyAppPackageName);
+        if (clsAppUid == null) {
+            Log.e(TAG, "Proxy app " + proxyAppPackageName + " is not found. AppOps service not "
+                    + "notified for non-framework location access notification: "
+                    + nfwNotification);
+            return;
+        }
         mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, clsAppUid, proxyAppPackageName);
 
         // Log proxy app permission mismatch between framework and GNSS HAL.
@@ -461,18 +420,8 @@ class GnssVisibilityControl {
             Log.w(TAG, "Permission mismatch. Framework proxy app " + proxyAppPackageName
                     + " location permission is set to " + isLocationPermissionEnabled
                     + " but GNSS non-framework location access response type is "
-                    + nfwNotification.getResponseTypeAsString() + " for " + nfwNotification);
-        }
-
-        // Notify proxy app.
-        try {
-            if (DEBUG) {
-                Log.d(TAG, "Sending non-framework location access notification intent: " + intent);
-            }
-            mContext.startActivityAsUser(intent, UserHandle.getUserHandleForUid(clsAppUid));
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "Activity not found. Failed to send non-framework location access"
-                    + " notification intent to proxy app activity: " + proxAppActivityName);
+                    + nfwNotification.getResponseTypeAsString() + " for notification: "
+                    + nfwNotification);
         }
     }
 
