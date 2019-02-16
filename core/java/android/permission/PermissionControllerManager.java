@@ -51,6 +51,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
@@ -85,9 +86,11 @@ public final class PermissionControllerManager {
 
     private static final Object sLock = new Object();
 
-    /** App global remote service used by all {@link PermissionControllerManager managers} */
+    /**
+     * Global remote services (per user) used by all {@link PermissionControllerManager managers}
+     */
     @GuardedBy("sLock")
-    private static RemoteService sRemoteService;
+    private static SparseArray<RemoteService> sRemoteServices = new SparseArray<>(1);
 
     /**
      * The key for retrieving the result from the returned bundle.
@@ -203,6 +206,7 @@ public final class PermissionControllerManager {
     }
 
     private final @NonNull Context mContext;
+    private final @NonNull RemoteService mRemoteService;
 
     /**
      * Create a new {@link PermissionControllerManager}.
@@ -213,14 +217,18 @@ public final class PermissionControllerManager {
      */
     public PermissionControllerManager(@NonNull Context context) {
         synchronized (sLock) {
-            if (sRemoteService == null) {
+            RemoteService remoteService = sRemoteServices.get(context.getUserId(), null);
+            if (remoteService == null) {
                 Intent intent = new Intent(SERVICE_INTERFACE);
                 intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
                 ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
 
-                sRemoteService = new RemoteService(context.getApplicationContext(),
-                        serviceInfo.getComponentInfo().getComponentName());
+                remoteService = new RemoteService(context.getApplicationContext(),
+                        serviceInfo.getComponentInfo().getComponentName(), context.getUser());
+                sRemoteServices.put(context.getUserId(), remoteService);
             }
+
+            mRemoteService = remoteService;
         }
 
         mContext = context;
@@ -255,7 +263,7 @@ public final class PermissionControllerManager {
                     + " required");
         }
 
-        sRemoteService.scheduleRequest(new PendingRevokeRuntimePermissionRequest(sRemoteService,
+        mRemoteService.scheduleRequest(new PendingRevokeRuntimePermissionRequest(mRemoteService,
                 request, doDryRun, reason, mContext.getPackageName(), executor, callback));
     }
 
@@ -276,7 +284,7 @@ public final class PermissionControllerManager {
         checkNotNull(executor);
         checkNotNull(callback);
 
-        sRemoteService.scheduleRequest(new PendingGetRuntimePermissionBackup(sRemoteService,
+        mRemoteService.scheduleRequest(new PendingGetRuntimePermissionBackup(mRemoteService,
                 user, executor, callback));
     }
 
@@ -294,8 +302,8 @@ public final class PermissionControllerManager {
         checkNotNull(backup);
         checkNotNull(user);
 
-        sRemoteService.scheduleAsyncRequest(
-                new PendingRestoreRuntimePermissionBackup(sRemoteService, backup, user));
+        mRemoteService.scheduleAsyncRequest(
+                new PendingRestoreRuntimePermissionBackup(mRemoteService, backup, user));
     }
 
     /**
@@ -318,8 +326,8 @@ public final class PermissionControllerManager {
         checkNotNull(executor);
         checkNotNull(callback);
 
-        sRemoteService.scheduleRequest(
-                new PendingRestoreDelayedRuntimePermissionBackup(sRemoteService, packageName,
+        mRemoteService.scheduleRequest(
+                new PendingRestoreDelayedRuntimePermissionBackup(mRemoteService, packageName,
                         user, executor, callback));
     }
 
@@ -338,8 +346,8 @@ public final class PermissionControllerManager {
         checkNotNull(packageName);
         checkNotNull(callback);
 
-        sRemoteService.scheduleRequest(new PendingGetAppPermissionRequest(sRemoteService,
-                packageName, callback, handler == null ? sRemoteService.getHandler() : handler));
+        mRemoteService.scheduleRequest(new PendingGetAppPermissionRequest(mRemoteService,
+                packageName, callback, handler == null ? mRemoteService.getHandler() : handler));
     }
 
     /**
@@ -356,7 +364,7 @@ public final class PermissionControllerManager {
         checkNotNull(packageName);
         checkNotNull(permissionName);
 
-        sRemoteService.scheduleAsyncRequest(new PendingRevokeAppPermissionRequest(packageName,
+        mRemoteService.scheduleAsyncRequest(new PendingRevokeAppPermissionRequest(packageName,
                 permissionName));
     }
 
@@ -379,9 +387,9 @@ public final class PermissionControllerManager {
         checkFlagsArgument(flags, COUNT_WHEN_SYSTEM | COUNT_ONLY_WHEN_GRANTED);
         checkNotNull(callback);
 
-        sRemoteService.scheduleRequest(new PendingCountPermissionAppsRequest(sRemoteService,
+        mRemoteService.scheduleRequest(new PendingCountPermissionAppsRequest(mRemoteService,
                 permissionNames, flags, callback,
-                handler == null ? sRemoteService.getHandler() : handler));
+                handler == null ? mRemoteService.getHandler() : handler));
     }
 
     /**
@@ -402,7 +410,7 @@ public final class PermissionControllerManager {
         checkNotNull(executor);
         checkNotNull(callback);
 
-        sRemoteService.scheduleRequest(new PendingGetPermissionUsagesRequest(sRemoteService,
+        mRemoteService.scheduleRequest(new PendingGetPermissionUsagesRequest(mRemoteService,
                 countSystem, numMillis, executor, callback));
     }
 
@@ -424,8 +432,8 @@ public final class PermissionControllerManager {
         checkNotNull(executor);
         checkNotNull(callback);
 
-        sRemoteService.scheduleRequest(new PendingIsApplicationQualifiedForRoleRequest(
-                sRemoteService, roleName, packageName, executor, callback));
+        mRemoteService.scheduleRequest(new PendingIsApplicationQualifiedForRoleRequest(
+                mRemoteService, roleName, packageName, executor, callback));
     }
 
     /**
@@ -441,11 +449,12 @@ public final class PermissionControllerManager {
          *
          * @param context A context to use
          * @param componentName The component of the service to connect to
+         * @param user User the remote service should be connected as
          */
-        RemoteService(@NonNull Context context, @NonNull ComponentName componentName) {
-            super(context, SERVICE_INTERFACE, componentName, UserHandle.myUserId(),
-                    service -> Log.e(TAG, "RuntimePermPresenterService " + service + " died"),
-                    false, false, 1);
+        RemoteService(@NonNull Context context, @NonNull ComponentName componentName,
+                @NonNull UserHandle user) {
+            super(context, SERVICE_INTERFACE, componentName, user.getIdentifier(),
+                    service -> Log.e(TAG, "RemoteService " + service + " died"), false, false, 1);
         }
 
         /**
