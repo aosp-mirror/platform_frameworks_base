@@ -40,6 +40,7 @@ android_app {
     static_libs: [
         "NetworkStackLib"
     ],
+    jarjar_rules: "jarjar-rules-shared.txt",
     manifest: "AndroidManifest.xml",
     required: ["NetworkStackPermissionStub"],
 }
