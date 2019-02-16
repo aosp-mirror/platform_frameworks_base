@@ -87,8 +87,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ការចូលដំណើរការស៊ីម"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"សំឡេងកម្រិត HD៖ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"សំឡេងកម្រិត HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"បាន​ភ្ជាប់ទៅ​ឧបករណ៍​ជំនួយការ​ស្តាប់"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"បាន​ភ្ជាប់ទៅ​ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"បា​ន​ភ្ជាប់​ទៅ​អូឌីយ៉ូ​មេឌៀ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"តភ្ជាប់​ទៅ​អូឌីយ៉ូ​ទូរស័ព្ទ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"បាន​តភ្ជាប់​ទៅ​ម៉ាស៊ីន​មេ​ផ្ទេរ​ឯកសារ"</string>
@@ -105,7 +105,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ប្រើ​សម្រាប់​​អូឌីយ៉ូ​ទូរស័ព្ទ"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ប្រើ​សម្រាប់​ផ្ទេរ​ឯកសារ"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ប្រើ​សម្រាប់​បញ្ចូល"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"ប្រើ​សម្រាប់​ឧបករណ៍​ជំនួយការ​ស្តាប់"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"ប្រើ​សម្រាប់​ឧបករណ៍​ជំនួយការ​ស្តាប់"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ផ្គូផ្គង"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ផ្គូផ្គង"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"បោះ​បង់​"</string>
@@ -136,6 +136,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"ប្រព័ន្ធ​ប្រតិបត្តិការ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"កម្មវិធី​ដែល​បាន​លុប"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"បាន​លុប​កម្មវិធី និង​អ្នកប្រើ"</string>
+    <string name="data_usage_ota" msgid="5377889154805560860">"បច្ចុប្បន្នភាព​ប្រព័ន្ធ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"ការ​ភ្ជាប់តាម USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ហតស្ពត​ចល័ត"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ការ​ភ្ជាប់ប៊្លូធូស"</string>

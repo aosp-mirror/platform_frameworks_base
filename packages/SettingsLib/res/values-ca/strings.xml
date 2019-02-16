@@ -87,8 +87,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Accés a la SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Àudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Àudio HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Audiòfon"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"S\'ha connectat a l\'audiòfon"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Audiòfons"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"S\'ha connectat als audiòfons"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Connectat a l\'àudio del mitjà"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Connectat a àudio del telèfon"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Connectat al servidor de transferència de fitxers"</string>
@@ -105,7 +105,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Utilitza-ho per a l\'àudio del telèfon"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Utilitza per a la transferència de fitxers"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Utilitza per a entrada"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Utilitza per a l\'audiòfon"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Utilitza per als audiòfons"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Vincula"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"VINCULA"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Cancel·la"</string>
@@ -136,6 +136,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicacions eliminades"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicacions i usuaris eliminats"</string>
+    <string name="data_usage_ota" msgid="5377889154805560860">"Actualitzacions del sistema"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"Compartició de xarxa per USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Punt d\'accés Wi-Fi"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Compartició de xarxa per Bluetooth"</string>

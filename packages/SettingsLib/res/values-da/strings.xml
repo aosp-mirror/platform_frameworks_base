@@ -87,8 +87,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-adgang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-lyd: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-lyd"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Høreapparat"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Der er oprettet forbindelse til høreapparat"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Høreapparater"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Forbundet til høreapparater"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Forbundet til medielyd"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Forbundet til telefonlyd"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Forbundet til filoverførselsserver"</string>
@@ -105,7 +105,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Brug til telefonlyd"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Brug til filoverførsel"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Brug til input"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Anvend til høreapparat"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Brug til høreapparater"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Par"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ACCEPTÉR PARRING"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Annuller"</string>
@@ -136,6 +136,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Fjernede apps"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Fjernede apps og brugere"</string>
+    <string name="data_usage_ota" msgid="5377889154805560860">"Systemopdateringer"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"Netdeling via USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Netdeling via Bluetooth"</string>
