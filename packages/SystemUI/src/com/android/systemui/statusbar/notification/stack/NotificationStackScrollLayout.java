@@ -2450,129 +2450,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             return;
         }
-        int top = getSectionTopOrFinalTop(getFirstVisibleSection(), mAnimateNextBackgroundTop);
+        int minTopPosition = 0;
         NotificationSection lastSection = getLastVisibleSection();
-        ActivatableNotificationView lastView =
-                mShelf.hasItemsInStableShelf() && mShelf.getVisibility() != GONE
-                        ? mShelf
-                        : lastSection == null ? null : lastSection.getLastVisibleChild();
-        int bottom;
-        if (lastView != null) {
-            bottom = getSectionBottomOrFinalBottom(
-                    lastSection, lastView, mAnimateNextBackgroundBottom);
-        } else {
-            top = mTopPadding;
-            bottom = top;
-        }
         if (mStatusBarState != StatusBarState.KEYGUARD) {
-            top = (int) Math.max(mTopPadding + mStackTranslation, top);
-        } else {
-            // otherwise the animation from the shade to the keyguard will jump as it's maxed
-            top = Math.max(0, top);
+            minTopPosition = (int) (mTopPadding + mStackTranslation);
+        } else if (lastSection == null) {
+            minTopPosition = mTopPadding;
         }
-        bottom = Math.max(bottom, top);
-
-        setSectionBoundsByPriority(left, right, top, bottom, mSections[0], mSections[1]);
-    }
-
-    private int getSectionTopOrFinalTop(
-            @Nullable NotificationSection section, boolean alreadyAnimating) {
-        int top = 0;
-        if (section != null) {
-            ActivatableNotificationView firstView = section.getFirstVisibleChild();
-            if (firstView != null) {
-                // Round Y up to avoid seeing the background during animation
-                int finalTranslationY = (int) Math.ceil(ViewState.getFinalTranslationY(firstView));
-                if (alreadyAnimating || section.isTargetTop(finalTranslationY)) {
-                    // we're ending up at the same location as we are now, let's just skip the
-                    // animation
-                    top = finalTranslationY;
-                } else {
-                    top = (int) Math.ceil(firstView.getTranslationY());
-                }
+        for (NotificationSection section : mSections) {
+            int minBottomPosition = minTopPosition;
+            if (section == lastSection) {
+                // We need to make sure the section goes all the way to the shelf
+                minBottomPosition = (int) (mShelf.getTranslationY() + mShelf.getIntrinsicHeight());
             }
+            minTopPosition = section.updateVerticalBounds(minTopPosition, minBottomPosition);
         }
-        return top;
-    }
-
-    private int getSectionBottomOrFinalBottom(
-            @Nullable NotificationSection section, boolean alreadyAnimating) {
-        return section == null ? 0
-                : getSectionBottomOrFinalBottom(
-                        section, section.getLastVisibleChild(), alreadyAnimating);
-    }
-
-    private int getSectionBottomOrFinalBottom(
-            NotificationSection section,
-            ActivatableNotificationView lastView,
-            boolean alreadyAnimating) {
-        int bottom = 0;
-        if (lastView != null) {
-            float finalTranslationY;
-            if (lastView == mShelf) {
-                finalTranslationY = mShelf.getTranslationY();
-            } else {
-                finalTranslationY = ViewState.getFinalTranslationY(lastView);
-            }
-            int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
-            // Round Y down to avoid seeing the background during animation
-            int finalBottom = (int) Math.floor(
-                    finalTranslationY + finalHeight - lastView.getClipBottomAmount());
-            if (alreadyAnimating || section.isTargetBottom(finalBottom)) {
-                // we're ending up at the same location as we are now, lets just skip the animation
-                bottom = finalBottom;
-            } else {
-                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight()
-                        - lastView.getClipBottomAmount());
-            }
-        }
-        return bottom;
-    }
-
-    private void setSectionBoundsByPriority(int left, int right, int top, int bottom,
-            NotificationSection highPrioritySection, NotificationSection lowPrioritySection) {
-        if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            // TODO(kprevas): can we use section boundary indices from mAmbientState instead?
-            ActivatableNotificationView lastChildAboveGap = getLastHighPriorityChild();
-            ActivatableNotificationView firstChildBelowGap = getFirstLowPriorityChild();
-            if (lastChildAboveGap != null && firstChildBelowGap != null) {
-                int gapTop = getSectionBottomOrFinalBottom(
-                        highPrioritySection, mAnimateNextSectionBoundsChange);
-                gapTop = Math.max(top, Math.min(gapTop, bottom));
-
-                int gapBottom = getSectionTopOrFinalTop(
-                        lowPrioritySection, mAnimateNextSectionBoundsChange);
-                gapBottom = Math.max(top, Math.min(gapBottom, bottom));
-
-                highPrioritySection.getBounds().set(left, top, right, gapTop);
-                lowPrioritySection.getBounds().set(left, gapBottom, right, bottom);
-            } else if (lastChildAboveGap != null) {
-                highPrioritySection.getBounds().set(left, top, right, bottom);
-                lowPrioritySection.getBounds().set(left, bottom, right, bottom);
-            } else {
-                highPrioritySection.getBounds().set(left, top, right, top);
-                lowPrioritySection.getBounds().set(left, top, right, bottom);
-            }
-        } else {
-            highPrioritySection.getBounds().set(left, top, right, bottom);
-            lowPrioritySection.getBounds().set(left, bottom, right, bottom);
-        }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    private ActivatableNotificationView getFirstPinnedHeadsUp() {
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE
-                    && child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (row.isPinned()) {
-                    return row;
-                }
-            }
-        }
-        return null;
     }
 
     private NotificationSection getFirstVisibleSection() {
