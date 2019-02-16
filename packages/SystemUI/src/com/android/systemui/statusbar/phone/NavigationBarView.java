@@ -89,7 +89,7 @@ public class NavigationBarView extends FrameLayout implements
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
 
-    private static final String NAVIGATION_BAR_MENU_ARROW_KEYS =
+    public static final String NAVIGATION_BAR_MENU_ARROW_KEYS =
             "system:" + Settings.System.NAVIGATION_BAR_MENU_ARROW_KEYS;
 
     // slippery nav bar when everything is disabled, e.g. during setup
