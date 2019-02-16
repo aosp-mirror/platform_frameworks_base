@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.IBinder;
@@ -735,7 +736,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
    * @see {@link android.content.pm.ServiceInfo} for the set of FOREGROUND_SERVICE_TYPE flags.
    */
     public final void startForeground(int id, @NonNull Notification notification,
-            int foregroundServiceType) {
+            @ForegroundServiceType int foregroundServiceType) {
         try {
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, id,
