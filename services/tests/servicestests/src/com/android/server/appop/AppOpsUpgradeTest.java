@@ -107,8 +107,8 @@ public class AppOpsUpgradeTest {
                 }
                 final AppOpsService.Op _op1 = ops.get(op1);
                 final AppOpsService.Op _op2 = ops.get(op2);
-                final int mode1 = (_op1 == null) ? defaultModeOp1 : _op1.mode;
-                final int mode2 = (_op2 == null) ? defaultModeOp2 : _op2.mode;
+                final int mode1 = (_op1 == null) ? defaultModeOp1 : _op1.getMode();
+                final int mode2 = (_op2 == null) ? defaultModeOp2 : _op2.getMode();
                 assertEquals(mode1, mode2);
                 if (mode1 != defaultModeOp1) {
                     numberOfNonDefaultOps++;

@@ -17,6 +17,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import android.util.LongSparseLongArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -153,6 +154,13 @@ public class RecentLocationAppsTest {
     }
 
     private OpEntry createOpEntryWithTime(int op, long time, int duration) {
-        return new OpEntry(op, AppOpsManager.MODE_ALLOWED, time, 0L, duration, 0, "");
+        final LongSparseLongArray accessTimes = new LongSparseLongArray();
+        accessTimes.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
+            AppOpsManager.OP_FLAG_SELF), time);
+        final LongSparseLongArray durations = new LongSparseLongArray();
+        durations.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
+            AppOpsManager.OP_FLAG_SELF), duration);
+        return new OpEntry(op, false, AppOpsManager.MODE_ALLOWED, accessTimes,
+            null /*rejectTimes*/, durations, null /* proxyUids */, null /* proxyPackages */);
     }
 }

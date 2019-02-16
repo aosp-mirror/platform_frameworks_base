@@ -45,21 +45,6 @@ public class AppOpsNotedWatcherTest {
 
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 5000;
 
-    public void testWatchNotedOpsRequiresPermission() {
-        // Create a mock listener
-        final OnOpNotedListener listener = mock(OnOpNotedListener.class);
-
-        // Try to start watching noted ops
-        final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
-        try {
-            appOpsManager.startWatchingNoted(new int[]{AppOpsManager.OP_FINE_LOCATION,
-                    AppOpsManager.OP_RECORD_AUDIO}, listener);
-            fail("Watching noted ops shoudl require " + Manifest.permission.WATCH_APPOPS);
-        } catch (SecurityException expected) {
-            /*ignored*/
-        }
-    }
-
     @Test
     public void testWatchNotedOps() {
         // Create a mock listener

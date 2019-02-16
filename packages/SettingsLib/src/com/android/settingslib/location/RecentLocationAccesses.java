@@ -48,6 +48,11 @@ public class RecentLocationAccesses {
     // Keep last 24 hours of location app information.
     private static final long RECENT_TIME_INTERVAL_MILLIS = DateUtils.DAY_IN_MILLIS;
 
+    /** The flags for querying ops that are trusted for showing in the UI. */
+    public static final int TRUSTED_STATE_FLAGS = AppOpsManager.OP_FLAG_SELF
+            | AppOpsManager.OP_FLAG_UNTRUSTED_PROXY
+            | AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
+
     @VisibleForTesting
     static final int[] LOCATION_OPS = new int[]{
             AppOpsManager.OP_FINE_LOCATION,
@@ -136,8 +141,7 @@ public class RecentLocationAccesses {
         // Earliest time for a location access to end and still be shown in list.
         long recentLocationCutoffTime = now - RECENT_TIME_INTERVAL_MILLIS;
         for (AppOpsManager.OpEntry entry : entries) {
-            locationAccessFinishTime = Math.max(entry.getLastAccessBackgroundTime(),
-                    entry.getLastAccessForegroundTime());
+            locationAccessFinishTime = entry.getLastAccessTime(TRUSTED_STATE_FLAGS);
         }
         // Bail out if the entry is out of date.
         if (locationAccessFinishTime < recentLocationCutoffTime) {
