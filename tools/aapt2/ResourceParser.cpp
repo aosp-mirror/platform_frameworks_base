@@ -1623,7 +1623,9 @@ bool ResourceParser::ParsePlural(xml::XmlPullParser* parser,
       if (!(plural->values[index] = ParseXml(
                 parser, android::ResTable_map::TYPE_STRING, kNoRawString))) {
         error = true;
+        continue;
       }
+
       plural->values[index]->SetSource(item_source);
 
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
