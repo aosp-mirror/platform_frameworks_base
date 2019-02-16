@@ -196,7 +196,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 }
                 performInitialGrantsIfNecessary(userId);
             }
-        }, UserHandle.SYSTEM, intentFilter, null /* broadcastPermission */, null /* handler */);
+        }, UserHandle.ALL, intentFilter, null, null);
 
         getContext().getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED), false,
