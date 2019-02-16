@@ -754,6 +754,7 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
         intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         mMonitorRotation = SystemProperties.getBoolean("ro.audio.monitorRotation", false);
@@ -5183,6 +5184,20 @@ public class AudioService extends IAudioService.Stub
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
                     action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
                 handleAudioEffectBroadcast(context, intent);
+            } else if (action.equals(Intent.ACTION_PACKAGES_SUSPENDED)) {
+                final int[] suspendedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
+                final String[] suspendedPackages =
+                        intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                if (suspendedPackages == null || suspendedUids == null
+                        || suspendedPackages.length != suspendedUids.length) {
+                    return;
+                }
+                for (int i = 0; i < suspendedUids.length; i++) {
+                    if (!TextUtils.isEmpty(suspendedPackages[i])) {
+                        mMediaFocusControl.noFocusForSuspendedApp(
+                                suspendedPackages[i], suspendedUids[i]);
+                    }
+                }
             }
         }
     } // end class AudioServiceBroadcastReceiver
@@ -5345,6 +5360,11 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
             }
+        }
+
+        if (callingPackageName == null || clientId == null || aa == null) {
+            Log.e(TAG, "Invalid null parameter to request audio focus");
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,

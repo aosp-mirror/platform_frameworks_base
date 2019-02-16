@@ -24,7 +24,6 @@ import android.media.AudioFocusInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioFocusDispatcher;
-import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.os.Binder;
 import android.os.Build;
@@ -35,6 +34,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
-import java.text.DateFormat;
 
 /**
  * @hide
@@ -137,6 +136,30 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
     private static final AudioEventLogger mEventLogger = new AudioEventLogger(50,
             "focus commands as seen by MediaFocusControl");
+
+    /*package*/ void noFocusForSuspendedApp(@NonNull String packageName, int uid) {
+        synchronized (mAudioFocusLock) {
+            final Iterator<FocusRequester> stackIterator = mFocusStack.iterator();
+            List<String> clientsToRemove = new ArrayList<>();
+            while (stackIterator.hasNext()) {
+                final FocusRequester focusOwner = stackIterator.next();
+                if (focusOwner.hasSameUid(uid) && focusOwner.hasSamePackage(packageName)) {
+                    clientsToRemove.add(focusOwner.getClientId());
+                    mEventLogger.log((new AudioEventLogger.StringEvent(
+                            "focus owner:" + focusOwner.getClientId()
+                                    + " in uid:" + uid + " pack: " + packageName
+                                    + " getting AUDIOFOCUS_LOSS due to app suspension"))
+                            .printLog(TAG));
+                    // make the suspended app lose focus through its focus listener (if any)
+                    focusOwner.dispatchFocusChange(AudioManager.AUDIOFOCUS_LOSS);
+                }
+            }
+            for (String clientToRemove : clientsToRemove) {
+                // update the stack but don't signal the change.
+                removeFocusStackEntry(clientToRemove, false, true);
+            }
+        }
+    }
 
     /**
      * Discard the current audio focus owner.
@@ -688,9 +711,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     }
 
     /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int, int) */
-    protected int requestAudioFocus(AudioAttributes aa, int focusChangeHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
-            int sdk, boolean forceDuck) {
+    protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
+            IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
+            int flags, int sdk, boolean forceDuck) {
         mEventLogger.log((new AudioEventLogger.StringEvent(
                 "requestAudioFocus() from uid/pid " + Binder.getCallingUid()
                     + "/" + Binder.getCallingPid()
