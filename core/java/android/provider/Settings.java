@@ -1657,6 +1657,30 @@ public final class Settings {
     public static final String ACTION_STORAGE_VOLUME_ACCESS_SETTINGS =
             "android.settings.STORAGE_VOLUME_ACCESS_SETTINGS";
 
+
+    /**
+     * Activity Action: Show screen that let user select enable (or disable) Content Capture.
+     * <p>
+     * Input: Nothing.
+     *
+     * <p>
+     * Output: {@link android.app.Activity#RESULT_OK} if user enabled Content Capture,
+     * {@link android.app.Activity#RESULT_CANCELED} if user disabled it, cancelled, or if the caller
+     * is not the Content Capture service associated with the user.
+     *
+     * <p>
+     * <b>NOTE: </b> Caller should call
+     * {@link android.view.contentcapture.ContentCaptureManager#isContentCaptureFeatureEnabled()}
+     * first to check whether the feature is already enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE =
+            "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
+
     // End of Intent actions for Settings
 
     /**
@@ -6103,7 +6127,7 @@ public final class Settings {
          * Indicates which clock face to show on lock screen and AOD while docked.
          * @hide
          */
-        private static final String DOCKED_CLOCK_FACE = "docked_clock_face";
+        public static final String DOCKED_CLOCK_FACE = "docked_clock_face";
 
         /**
          * Set by the system to track if the user needs to see the call to action for

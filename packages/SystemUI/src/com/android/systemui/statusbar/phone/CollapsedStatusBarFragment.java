@@ -191,7 +191,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     protected int adjustDisableFlags(int state) {
-        if (!mStatusBarComponent.isLaunchTransitionFadingAway()
+        if (!mKeyguardMonitor.isLaunchTransitionFadingAway()
                 && !mKeyguardMonitor.isKeyguardFadingAway()
                 && shouldHideNotificationIcons()) {
             state |= DISABLE_NOTIFICATION_ICONS;

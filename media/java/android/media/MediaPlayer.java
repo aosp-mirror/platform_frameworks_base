@@ -1180,13 +1180,8 @@ public class MediaPlayer extends PlayerBase
         }
 
         final File file = new File(path);
-        if (file.exists()) {
-            FileInputStream is = new FileInputStream(file);
-            FileDescriptor fd = is.getFD();
-            setDataSource(fd);
-            is.close();
-        } else {
-            throw new IOException("setDataSource failed.");
+        try (FileInputStream is = new FileInputStream(file)) {
+            setDataSource(is.getFD());
         }
     }
 
@@ -2868,15 +2863,9 @@ public class MediaPlayer extends PlayerBase
             throw new IllegalArgumentException(msg);
         }
 
-        File file = new File(path);
-        if (file.exists()) {
-            FileInputStream is = new FileInputStream(file);
-            FileDescriptor fd = is.getFD();
-            addTimedTextSource(fd, mimeType);
-            is.close();
-        } else {
-            // We do not support the case where the path is not a file.
-            throw new IOException(path);
+        final File file = new File(path);
+        try (FileInputStream is = new FileInputStream(file)) {
+            addTimedTextSource(is.getFD(), mimeType);
         }
     }
 

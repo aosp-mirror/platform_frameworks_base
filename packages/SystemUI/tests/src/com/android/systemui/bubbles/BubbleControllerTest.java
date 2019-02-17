@@ -82,6 +82,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     private BubbleController.BubbleExpandListener mBubbleExpandListener;
 
+    private BubbleData mBubbleData;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -104,7 +106,9 @@ public class BubbleControllerTest extends SysuiTestCase {
         when(mNotificationData.getChannel(mRow.getEntry().key)).thenReturn(mRow.getEntry().channel);
         when(mNotificationData.getChannel(mNoChannelRow.getEntry().key)).thenReturn(null);
 
-        mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController);
+        mBubbleData = new BubbleData();
+        mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController,
+                mBubbleData);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
@@ -112,9 +116,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mNotificationEntryManager, atLeastOnce())
                 .addNotificationEntryListener(mEntryListenerCaptor.capture());
         mEntryListener = mEntryListenerCaptor.getValue();
-
-        // Reset the data
-        BubbleData.getInstance().clear();
     }
 
     @Test
@@ -300,8 +301,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     static class TestableBubbleController extends BubbleController {
 
         TestableBubbleController(Context context,
-                StatusBarWindowController statusBarWindowController) {
-            super(context, statusBarWindowController);
+                StatusBarWindowController statusBarWindowController, BubbleData data) {
+            super(context, statusBarWindowController, data);
         }
 
         @Override

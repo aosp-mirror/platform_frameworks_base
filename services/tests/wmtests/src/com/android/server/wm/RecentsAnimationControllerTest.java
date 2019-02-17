@@ -112,8 +112,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         }
     }
 
-    @FlakyTest(bugId = 117117823)
     @Test
+    @FlakyTest(bugId = 117117823)
     public void testIncludedApps_expectTargetAndVisible() {
         mWm.setRecentsAnimationController(mController);
         final AppWindowToken homeAppWindow = createAppWindowToken(mDisplayContent,

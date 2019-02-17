@@ -184,8 +184,7 @@ public final class LocationRequest implements Parcelable {
      * @return a new location request
      */
     public static LocationRequest create() {
-        LocationRequest request = new LocationRequest();
-        return request;
+        return new LocationRequest();
     }
 
     /** @hide */
@@ -230,12 +229,10 @@ public final class LocationRequest implements Parcelable {
                 quality = ACCURACY_FINE;
                 break;
             default: {
-                switch (criteria.getPowerRequirement()) {
-                    case Criteria.POWER_HIGH:
-                        quality = POWER_HIGH;
-                        break;
-                    default:
-                        quality = POWER_LOW;
+                if (criteria.getPowerRequirement() == Criteria.POWER_HIGH) {
+                    quality = POWER_HIGH;
+                } else {
+                    quality = POWER_LOW;
                 }
             }
         }
@@ -288,7 +285,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @param quality an accuracy or power constant
      * @return the same object, so that setters can be chained
-     * @throws InvalidArgumentException if the quality constant is not valid
+     * @throws IllegalArgumentException if the quality constant is not valid
      */
     public LocationRequest setQuality(int quality) {
         checkQuality(quality);
@@ -331,7 +328,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @param millis desired interval in millisecond, inexact
      * @return the same object, so that setters can be chained
-     * @throws InvalidArgumentException if the interval is less than zero
+     * @throws IllegalArgumentException if the interval is less than zero
      */
     public LocationRequest setInterval(long millis) {
         checkInterval(millis);
@@ -433,7 +430,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @param millis fastest interval for updates in milliseconds, exact
      * @return the same object, so that setters can be chained
-     * @throws InvalidArgumentException if the interval is less than zero
+     * @throws IllegalArgumentException if the interval is less than zero
      */
     public LocationRequest setFastestInterval(long millis) {
         checkInterval(millis);
@@ -528,7 +525,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @param numUpdates the number of location updates requested
      * @return the same object, so that setters can be chained
-     * @throws InvalidArgumentException if numUpdates is 0 or less
+     * @throws IllegalArgumentException if numUpdates is 0 or less
      */
     public LocationRequest setNumUpdates(int numUpdates) {
         if (numUpdates <= 0) {
@@ -668,7 +665,7 @@ public final class LocationRequest implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void checkProvider(String name) {
         if (name == null) {
-            throw new IllegalArgumentException("invalid provider: " + name);
+            throw new IllegalArgumentException("invalid provider: null");
         }
     }
 
@@ -758,9 +755,11 @@ public final class LocationRequest implements Parcelable {
         if (mNumUpdates != Integer.MAX_VALUE) {
             s.append(" num=").append(mNumUpdates);
         }
-        s.append(" lowPowerMode=").append(mLowPowerMode);
+        if (mLowPowerMode) {
+            s.append(" lowPowerMode");
+        }
         if (mLocationSettingsIgnored) {
-            s.append(" ignoreSettings");
+            s.append(" locationSettingsIgnored");
         }
         s.append(']');
         return s.toString();

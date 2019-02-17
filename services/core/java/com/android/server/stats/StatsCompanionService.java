@@ -85,7 +85,9 @@ import android.os.SystemProperties;
 import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -1942,6 +1944,41 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullTimeZoneDataInfo(int tagId,
+            long elapsedNanos, long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        String tzDbVersion = "Unknown";
+        try {
+            tzDbVersion = android.icu.util.TimeZone.getTZDataVersion();
+        } catch (Exception e) {
+            Log.e(TAG, "Getting tzdb version failed: ", e);
+        }
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeString(tzDbVersion);
+        pulledData.add(e);
+    }
+
+    private void pullSDCardInfo(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        StorageManager storageManager = mContext.getSystemService(StorageManager.class);
+        if (storageManager != null) {
+            List<VolumeInfo> volumes = storageManager.getVolumes();
+            for (VolumeInfo vol : volumes) {
+                final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
+                final DiskInfo diskInfo = vol.getDisk();
+                if (diskInfo != null && diskInfo.isSd()) {
+                    if (envState.equals(Environment.MEDIA_MOUNTED)) {
+                        StatsLogEventWrapper e =
+                                new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                        e.writeInt(vol.getType() + 1);
+                        e.writeLong(diskInfo.size);
+                        pulledData.add(e);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -2128,6 +2165,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.DANGEROUS_PERMISSION_STATE: {
                 pullDangerousPermissionState(elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.TIME_ZONE_DATA_INFO: {
+                pullTimeZoneDataInfo(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.SDCARD_INFO: {
+                pullSDCardInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:

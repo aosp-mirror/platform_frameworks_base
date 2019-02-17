@@ -516,13 +516,20 @@ package android.content.pm {
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
     method public abstract String getPermissionControllerPackageName();
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method public String getWellbeingPackageName();
     method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract void updatePermissionFlags(String, String, int, int, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
+    field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
+    field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
+    field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80
+    field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
+    field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_KNOWN_PACKAGES = 4202496; // 0x402000
     field public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
@@ -802,6 +809,7 @@ package android.location {
 
   public class LocationManager {
     method public String[] getBackgroundThrottlingWhitelist();
+    method public String[] getIgnoreSettingsWhitelist();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, android.os.UserHandle);
@@ -936,7 +944,7 @@ package android.net {
   }
 
   public class ConnectivityManager {
-    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.os.Bundle);
+    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.net.Network, android.os.Bundle);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
   }
@@ -996,6 +1004,7 @@ package android.net {
     method public int[] getCapabilities();
     method public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(android.net.NetworkCapabilities);
+    field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
   public class NetworkStack {
@@ -1815,6 +1824,7 @@ package android.provider {
 
   public final class Settings {
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
+    field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
   }
 
@@ -2073,20 +2083,11 @@ package android.service.autofill.augmented {
   }
 
   public abstract class PresentationParams {
-    method public int getFlags();
-    method @Nullable public android.service.autofill.augmented.PresentationParams.Area getFullArea();
     method @Nullable public android.service.autofill.augmented.PresentationParams.Area getSuggestionArea();
-    field public static final int FLAG_HINT_GRAVITY_BOTTOM = 2; // 0x2
-    field public static final int FLAG_HINT_GRAVITY_LEFT = 4; // 0x4
-    field public static final int FLAG_HINT_GRAVITY_RIGHT = 8; // 0x8
-    field public static final int FLAG_HINT_GRAVITY_TOP = 1; // 0x1
-    field public static final int FLAG_HOST_IME = 16; // 0x10
-    field public static final int FLAG_HOST_SYSTEM = 32; // 0x20
   }
 
   public abstract static class PresentationParams.Area {
     method @NonNull public android.graphics.Rect getBounds();
-    method @Nullable public android.service.autofill.augmented.PresentationParams.Area getSubArea(@NonNull android.graphics.Rect);
   }
 
 }
@@ -2110,7 +2111,8 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
-    method public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method @Deprecated public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
   }
 
@@ -2699,7 +2701,8 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
-    method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method @Deprecated public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method public void setAugmentedAutofillWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES = "smart_suggestion_supported_modes";
     field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
@@ -2725,6 +2728,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.view.contentcapture.ContentCaptureContext getContentCaptureContext();
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
     method @Nullable public java.util.List<android.view.autofill.AutofillId> getIds();
@@ -2733,6 +2737,7 @@ package android.view.contentcapture {
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
+    field public static final int TYPE_CONTEXT_UPDATED = 6; // 0x6
     field public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4; // 0x4
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
@@ -2743,7 +2748,15 @@ package android.view.contentcapture {
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
     method public void setContentCaptureFeatureEnabled(boolean);
+    field public static final String DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY = "idle_flush_frequency";
+    field public static final String DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL = "logging_level";
+    field public static final String DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE = "log_history_size";
+    field public static final String DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE = "max_buffer_size";
     field public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED = "service_explicitly_enabled";
+    field public static final String DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY = "text_change_flush_frequency";
+    field public static final int LOGGING_LEVEL_DEBUG = 1; // 0x1
+    field public static final int LOGGING_LEVEL_OFF = 0; // 0x0
+    field public static final int LOGGING_LEVEL_VERBOSE = 2; // 0x2
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {

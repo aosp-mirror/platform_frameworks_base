@@ -238,7 +238,6 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
-import android.permission.PermissionControllerManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings.Global;
@@ -291,7 +290,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
@@ -315,9 +313,9 @@ import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
-import com.android.server.pm.permission.PermissionManagerInternal;
-import com.android.server.pm.permission.PermissionManagerInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionManagerService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
@@ -371,7 +369,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -444,8 +441,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final boolean ENABLE_FREE_CACHE_V2 =
             SystemProperties.getBoolean("fw.free_cache_v2", true);
-
-    private static final long BACKUP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(60);
 
     private static final String PRECOMPILE_LAYOUTS = "pm.precompile_layouts";
 
@@ -940,7 +935,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // TODO remove this and go through mPermissonManager directly
     final DefaultPermissionGrantPolicy mDefaultPermissionPolicy;
-    private final PermissionManagerInternal mPermissionManager;
+    private final PermissionManagerServiceInternal mPermissionManager;
 
     private final ComponentResolver mComponentResolver;
     // List of packages names to keep cached, even if they are uninstalled for all users
@@ -984,6 +979,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
+
+    @GuardedBy("mPackages")
+    private PackageManagerInternal.DefaultHomeProvider mDefaultHomeProvider;
 
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
         private Context mContext;
@@ -1349,7 +1347,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
-    final String mRequiredPermissionControllerPackage;
+    final @NonNull String mRequiredPermissionControllerPackage;
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mSystemTextClassifierPackage;
@@ -1937,9 +1935,14 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
 
-                        // We may also need to apply pending (restored) runtime
-                        // permission grants within these users.
-                        mSettings.applyPendingPermissionGrantsLPw(packageName, userId);
+                        // We may also need to apply pending (restored) runtime permission grants
+                        // within these users.
+                        mPermissionManager.restoreDelayedRuntimePermissions(packageName,
+                                UserHandle.of(userId));
+
+                        // Persistent preferred activity might have came into effect due to this
+                        // install.
+                        updateDefaultHomeLPw(userId);
                     }
                 }
             }
@@ -3306,7 +3309,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // feature flags should cause us to invalidate any caches.
         final String cacheName = SystemProperties.digestOf(
                 "ro.build.fingerprint",
-                "persist.sys.isolated_storage");
+                StorageManager.PROP_ISOLATED_STORAGE,
+                StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT);
 
         // Reconcile cache directories, keeping only what we'd actually use.
         for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
@@ -12803,7 +12807,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public String[] setDistractingPackageRestrictionsAsUser(String[] packageNames,
             int restrictionFlags, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
-                "setPackagesSuspendedAsUser");
+                "setDistractingPackageRestrictionsAsUser");
 
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
@@ -18817,7 +18821,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // permission as requiring a review as this is the initial state.
             int flags = 0;
             if (ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M && bp.isRuntime()) {
-                flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+                flags |= FLAG_PERMISSION_REVIEW_REQUIRED | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
             }
             if (permissionsState.updatePermissionFlags(bp, userId, userSettableMask, flags)) {
                 if (hasInstallState) {
@@ -19076,6 +19080,7 @@ public class PackageManagerService extends IPackageManager.Stub
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
             postPreferredActivityChangedBroadcast(userId);
+            updateDefaultHomeLPw(userId);
         }
     }
 
@@ -19226,6 +19231,13 @@ public class PackageManagerService extends IPackageManager.Stub
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     @GuardedBy("mPackages")
     boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
+        return clearPackagePreferredActivitiesLPw(packageName, false, userId);
+    }
+
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
+    private boolean clearPackagePreferredActivitiesLPw(String packageName,
+            boolean skipUpdateDefaultHome, int userId) {
         ArrayList<PreferredActivity> removed = null;
         boolean changed = false;
         for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
@@ -19254,6 +19266,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     pir.removeFilter(pa);
                 }
                 changed = true;
+                if (!skipUpdateDefaultHome) {
+                    updateDefaultHomeLPw(thisUserId);
+                }
             }
         }
         if (changed) {
@@ -19313,8 +19328,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         try {
             synchronized (mPackages) {
-                clearPackagePreferredActivitiesLPw(null, userId);
+                clearPackagePreferredActivitiesLPw(null, true, userId);
                 mSettings.applyDefaultPreferredAppsLPw(userId);
+                updateDefaultHomeLPw(userId);
                 // TODO: We have to reset the default SMS and Phone. This requires
                 // significant refactoring to keep all default apps in the package
                 // manager (cleaner but more work) or have the services provide
@@ -19383,6 +19399,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     new PersistentPreferredActivity(filter, activity));
             scheduleWritePackageRestrictionsLocked(userId);
             postPreferredActivityChangedBroadcast(userId);
+            updateDefaultHomeLPw(userId);
         }
     }
 
@@ -19426,6 +19443,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (changed) {
                 scheduleWritePackageRestrictionsLocked(userId);
                 postPreferredActivityChangedBroadcast(userId);
+                updateDefaultHomeLPw(userId);
             }
         }
     }
@@ -19513,6 +19531,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     (readParser, readUserId) -> {
                         synchronized (mPackages) {
                             mSettings.readPreferredActivitiesLPw(readParser, readUserId);
+                            updateDefaultHomeLPw(readUserId);
                         }
                     });
         } catch (Exception e) {
@@ -19568,8 +19587,17 @@ public class PackageManagerService extends IPackageManager.Stub
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
             restoreFromXml(parser, userId, TAG_DEFAULT_APPS,
                     (parser1, userId1) -> {
+                        String defaultBrowser;
                         synchronized (mPackages) {
                             mSettings.readDefaultAppsLPw(parser1, userId1);
+                            defaultBrowser = mSettings.removeDefaultBrowserPackageNameLPw(userId1);
+                        }
+                        if (defaultBrowser != null) {
+                            PackageManagerInternal.DefaultBrowserProvider provider;
+                            synchronized (mPackages) {
+                                provider = mDefaultBrowserProvider;
+                            }
+                            provider.setDefaultBrowser(defaultBrowser, userId1);
                         }
                     });
         } catch (Exception e) {
@@ -19630,139 +19658,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
             }
         }
-    }
-
-    @Override
-    public byte[] getPermissionGrantBackup(int userId) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call getPermissionGrantBackup()");
-        }
-
-        AtomicReference<byte[]> backup = new AtomicReference<>();
-        mContext.getSystemService(PermissionControllerManager.class).getRuntimePermissionBackup(
-                UserHandle.of(userId), mContext.getMainExecutor(), (b) -> {
-                    synchronized (backup) {
-                        backup.set(b);
-                        backup.notifyAll();
-                    }
-                });
-
-        long start = System.currentTimeMillis();
-        synchronized (backup) {
-            while (backup.get() == null) {
-                long timeLeft = start + BACKUP_TIMEOUT_MILLIS - System.currentTimeMillis();
-                if (timeLeft <= 0) {
-                    return null;
-                }
-
-                try {
-                    backup.wait(timeLeft);
-                } catch (InterruptedException ignored) {
-                    return null;
-                }
-            }
-        }
-
-        return backup.get();
-    }
-
-    @Override
-    public void restorePermissionGrants(byte[] backup, int userId) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call restorePermissionGrants()");
-        }
-
-        try {
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
-            restoreFromXml(parser, userId, TAG_PERMISSION_BACKUP,
-                    (parser1, userId1) -> {
-                        synchronized (mPackages) {
-                            processRestoredPermissionGrantsLPr(parser1, userId1);
-                        }
-                    });
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
-            }
-        }
-    }
-
-    @GuardedBy("mPackages")
-    private void processRestoredPermissionGrantsLPr(XmlPullParser parser, int userId)
-            throws XmlPullParserException, IOException {
-        String pkgName = null;
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            final String tagName = parser.getName();
-            if (tagName.equals(TAG_GRANT)) {
-                pkgName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                if (DEBUG_BACKUP) {
-                    Slog.v(TAG, "+++ Restoring grants for package " + pkgName);
-                }
-            } else if (tagName.equals(TAG_PERMISSION)) {
-
-                final boolean isGranted = "true".equals(parser.getAttributeValue(null, ATTR_IS_GRANTED));
-                final String permName = parser.getAttributeValue(null, ATTR_PERMISSION_NAME);
-
-                int newFlagSet = 0;
-                if ("true".equals(parser.getAttributeValue(null, ATTR_USER_SET))) {
-                    newFlagSet |= FLAG_PERMISSION_USER_SET;
-                }
-                if ("true".equals(parser.getAttributeValue(null, ATTR_USER_FIXED))) {
-                    newFlagSet |= FLAG_PERMISSION_USER_FIXED;
-                }
-                if ("true".equals(parser.getAttributeValue(null, ATTR_REVOKE_ON_UPGRADE))) {
-                    newFlagSet |= FLAG_PERMISSION_REVOKE_ON_UPGRADE;
-                }
-                if (DEBUG_BACKUP) {
-                    Slog.v(TAG, "  + Restoring grant:"
-                            + " pkg=" + pkgName
-                            + " perm=" + permName
-                            + " granted=" + isGranted
-                            + " bits=0x" + Integer.toHexString(newFlagSet));
-                }
-                final PackageSetting ps = mSettings.mPackages.get(pkgName);
-                if (ps != null) {
-                    // Already installed so we apply the grant immediately
-                    if (DEBUG_BACKUP) {
-                        Slog.v(TAG, "        + already installed; applying");
-                    }
-                    PermissionsState perms = ps.getPermissionsState();
-                    BasePermission bp =
-                            (BasePermission) mPermissionManager.getPermissionTEMP(permName);
-                    if (bp != null) {
-                        if (isGranted) {
-                            perms.grantRuntimePermission(bp, userId);
-                        }
-                        if (newFlagSet != 0) {
-                            perms.updatePermissionFlags(
-                                    bp, userId, USER_RUNTIME_GRANT_MASK, newFlagSet);
-                        }
-                    }
-                } else {
-                    // Need to wait for post-restore install to apply the grant
-                    if (DEBUG_BACKUP) {
-                        Slog.v(TAG, "        - not yet installed; saving for later");
-                    }
-                    mSettings.processRestoredPermissionGrantLPr(pkgName, permName,
-                            isGranted, newFlagSet, userId);
-                }
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Unknown element under <" + TAG_PERMISSION_BACKUP + ">: " + tagName);
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-
-        scheduleWriteSettingsLocked();
-        mSettings.writeRuntimePermissionsForUserLPr(userId, false);
     }
 
     @Override
@@ -19927,19 +19822,59 @@ public class PackageManagerService extends IPackageManager.Stub
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
             int userId) {
         Intent intent  = getHomeIntent();
-        List<ResolveInfo> list = queryIntentActivitiesInternal(intent, null,
+        List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, userId);
-        ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
-                true, false, false, userId);
-
         allHomeCandidates.clear();
-        if (list != null) {
-            allHomeCandidates.addAll(list);
+        if (resolveInfos == null) {
+            return null;
         }
-        return (preferred == null || preferred.activityInfo == null)
-                ? null
-                : new ComponentName(preferred.activityInfo.packageName,
-                        preferred.activityInfo.name);
+        allHomeCandidates.addAll(resolveInfos);
+
+        PackageManagerInternal.DefaultHomeProvider provider;
+        synchronized (mPackages) {
+            provider = mDefaultHomeProvider;
+        }
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultHomeProvider is null");
+            return null;
+        }
+        String packageName = provider.getDefaultHome(userId);
+        if (packageName == null) {
+            return null;
+        }
+        int resolveInfosSize = resolveInfos.size();
+        for (int i = 0; i < resolveInfosSize; i++) {
+            ResolveInfo resolveInfo = resolveInfos.get(i);
+
+            if (resolveInfo.activityInfo != null && TextUtils.equals(
+                    resolveInfo.activityInfo.packageName, packageName)) {
+                return new ComponentName(resolveInfo.activityInfo.packageName,
+                        resolveInfo.activityInfo.name);
+            }
+        }
+        return null;
+    }
+
+    private void updateDefaultHomeLPw(int userId) {
+        Intent intent = getHomeIntent();
+        List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
+                PackageManager.GET_META_DATA, userId);
+        ResolveInfo preferredResolveInfo = findPreferredActivity(intent, null, 0, resolveInfos,
+                0, true, false, false, userId);
+        String packageName = preferredResolveInfo != null
+                && preferredResolveInfo.activityInfo != null
+                ? preferredResolveInfo.activityInfo.packageName : null;
+        String currentPackageName = mDefaultHomeProvider.getDefaultHome(userId);
+        if (TextUtils.equals(currentPackageName, packageName)) {
+            return;
+        }
+        String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
+        if (callingPackages != null && ArrayUtils.contains(callingPackages,
+                mRequiredPermissionControllerPackage)) {
+            // PermissionController manages default home directly.
+            return;
+        }
+        mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId);
     }
 
     @Override
@@ -21211,10 +21146,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 }
-            }
-
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS) && packageName == null) {
-                mSettings.dumpRestoredPermissionGrantsLPr(pw, dumpState);
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_FROZEN) && packageName == null) {
@@ -23827,6 +23758,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
             synchronized (mPackages) {
                 mDefaultBrowserProvider = provider;
+            }
+        }
+
+        @Override
+        public void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider) {
+            synchronized (mPackages) {
+                mDefaultHomeProvider = provider;
             }
         }
     }

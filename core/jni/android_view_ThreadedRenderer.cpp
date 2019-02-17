@@ -33,7 +33,6 @@
 
 #include <private/EGL/cache.h>
 
-#include <utils/Looper.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 #include <utils/Timers.h>
@@ -144,52 +143,22 @@ private:
     uint32_t mRequestId;
 };
 
-class RenderingException : public MessageHandler {
+class FrameCompleteWrapper : public LightRefBase<FrameCompleteWrapper> {
 public:
-    RenderingException(JavaVM* vm, const std::string& message)
-            : mVm(vm)
-            , mMessage(message) {
-    }
-
-    virtual void handleMessage(const Message&) {
-        throwException(mVm, mMessage);
-    }
-
-    static void throwException(JavaVM* vm, const std::string& message) {
-        JNIEnv* env = getenv(vm);
-        jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
-    }
-
-private:
-    JavaVM* mVm;
-    std::string mMessage;
-};
-
-class FrameCompleteWrapper : public MessageHandler {
-public:
-    FrameCompleteWrapper(JNIEnv* env, jobject jobject) {
-        mLooper = Looper::getForThread();
-        LOG_ALWAYS_FATAL_IF(!mLooper.get(), "Must create runnable on a Looper thread!");
+    explicit FrameCompleteWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
         mObject = env->NewGlobalRef(jobject);
         LOG_ALWAYS_FATAL_IF(!mObject, "Failed to make global ref");
     }
 
-    virtual ~FrameCompleteWrapper() {
+    ~FrameCompleteWrapper() {
         releaseObject();
     }
 
-    void postFrameComplete(int64_t frameNr) {
+    void onFrameComplete(int64_t frameNr) {
         if (mObject) {
-            mFrameNr = frameNr;
-            mLooper->sendMessage(this, 0);
-        }
-    }
-
-    virtual void handleMessage(const Message&) {
-        if (mObject) {
-            ATRACE_FORMAT("frameComplete %" PRId64, mFrameNr);
-            getenv(mVm)->CallVoidMethod(mObject, gFrameCompleteCallback.onFrameComplete, mFrameNr);
+            ATRACE_FORMAT("frameComplete %" PRId64, frameNr);
+            getenv(mVm)->CallVoidMethod(mObject, gFrameCompleteCallback.onFrameComplete, frameNr);
             releaseObject();
         }
     }
@@ -197,8 +166,6 @@ public:
 private:
     JavaVM* mVm;
     jobject mObject;
-    sp<Looper> mLooper;
-    int64_t mFrameNr = -1;
 
     void releaseObject() {
         if (mObject) {
@@ -211,16 +178,14 @@ private:
 class RootRenderNode : public RenderNode, ErrorHandler {
 public:
     explicit RootRenderNode(JNIEnv* env) : RenderNode() {
-        mLooper = Looper::getForThread();
-        LOG_ALWAYS_FATAL_IF(!mLooper.get(),
-                "Must create RootRenderNode on a thread with a looper!");
         env->GetJavaVM(&mVm);
     }
 
     virtual ~RootRenderNode() {}
 
     virtual void onError(const std::string& message) override {
-        mLooper->sendMessage(new RenderingException(mVm, message), 0);
+        JNIEnv* env = getenv(mVm);
+        jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
     }
 
     virtual void prepareTree(TreeInfo& info) override {
@@ -247,14 +212,6 @@ public:
         RenderNode::prepareTree(info);
         info.updateWindowPositions = false;
         info.errorHandler = nullptr;
-    }
-
-    void sendMessage(const sp<MessageHandler>& handler) {
-        mLooper->sendMessage(handler, 0);
-    }
-
-    void sendMessageDelayed(const sp<MessageHandler>& handler, nsecs_t delayInMs) {
-        mLooper->sendMessageDelayed(ms2ns(delayInMs), handler, 0);
     }
 
     void attachAnimatingNode(RenderNode* animatingNode) {
@@ -404,7 +361,6 @@ public:
     }
 
 private:
-    sp<Looper> mLooper;
     JavaVM* mVm;
     std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
     std::set< sp<PropertyValuesAnimatorSet> > mPendingVectorDrawableAnimators;
@@ -435,7 +391,9 @@ private:
             // the onFinished callback will then be ignored.
             sp<FinishAndInvokeListener> message
                     = new FinishAndInvokeListener(anim);
-            sendMessageDelayed(message, remainingTimeInMs);
+            auto looper = Looper::getForThread();
+            LOG_ALWAYS_FATAL_IF(looper == nullptr, "Not on a looper thread?");
+            looper->sendMessageDelayed(ms2ns(remainingTimeInMs), message, 0);
             anim->clearOneShotListener();
         }
     }
@@ -463,7 +421,6 @@ public:
     virtual void runRemainingAnimations(TreeInfo& info) {
         AnimationContext::runRemainingAnimations(info);
         mRootNode->runVectorDrawableAnimators(this, info);
-        postOnFinishedEvents();
     }
 
     virtual void pauseAnimators() override {
@@ -471,27 +428,16 @@ public:
     }
 
     virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
-        OnFinishedEvent event(animator, listener);
-        mOnFinishedEvents.push_back(event);
+        listener->onAnimationFinished(animator);
     }
 
     virtual void destroy() {
         AnimationContext::destroy();
         mRootNode->detachAnimators();
-        postOnFinishedEvents();
     }
 
 private:
     sp<RootRenderNode> mRootNode;
-    std::vector<OnFinishedEvent> mOnFinishedEvents;
-
-    void postOnFinishedEvents() {
-        if (mOnFinishedEvents.size()) {
-            sp<InvokeAnimationListeners> message
-                    = new InvokeAnimationListeners(mOnFinishedEvents);
-            mRootNode->sendMessage(message);
-        }
-    }
 };
 
 class ContextFactoryImpl : public IContextFactory {
@@ -958,7 +904,7 @@ static void android_view_ThreadedRenderer_setFrameCompleteCallback(JNIEnv* env,
     } else {
         sp<FrameCompleteWrapper> wrapper = new FrameCompleteWrapper{env, callback};
         proxy->setFrameCompleteCallback([wrapper](int64_t frameNr) {
-            wrapper->postFrameComplete(frameNr);
+            wrapper->onFrameComplete(frameNr);
         });
     }
 }

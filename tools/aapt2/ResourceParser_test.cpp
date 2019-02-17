@@ -894,8 +894,10 @@ TEST_F(ResourceParserTest, ParsePlatformIndependentNewline) {
 TEST_F(ResourceParserTest, ParseOverlayable) {
   std::string input = R"(
       <overlayable name="Name" actor="overlay://theme">
-        <item type="string" name="foo" />
-        <item type="drawable" name="bar" />
+          <policy type="signature">
+            <item type="string" name="foo" />
+            <item type="drawable" name="bar" />
+          </policy>
       </overlayable>)";
   ASSERT_TRUE(TestParse(input));
 
@@ -906,7 +908,7 @@ TEST_F(ResourceParserTest, ParseOverlayable) {
   OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
   EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
 
   search_result = table_.FindResource(test::ParseNameOrDie("drawable/bar"));
   ASSERT_TRUE(search_result);
@@ -915,7 +917,7 @@ TEST_F(ResourceParserTest, ParseOverlayable) {
   result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
   EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
 }
 
 TEST_F(ResourceParserTest, ParseOverlayableRequiresName) {
@@ -931,7 +933,6 @@ TEST_F(ResourceParserTest, ParseOverlayableBadActorFail) {
 TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
   std::string input = R"(
       <overlayable name="Name">
-        <item type="string" name="foo" />
         <policy type="product">
           <item type="string" name="bar" />
         </policy>
@@ -944,22 +945,17 @@ TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
         <policy type="public">
           <item type="string" name="faz" />
         </policy>
+        <policy type="signature">
+          <item type="string" name="foz" />
+        </policy>
       </overlayable>)";
   ASSERT_TRUE(TestParse(input));
 
-  auto search_result = table_.FindResource(test::ParseNameOrDie("string/foo"));
+  auto search_result = table_.FindResource(test::ParseNameOrDie("string/bar"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
   ASSERT_TRUE(search_result.value().entry->overlayable_item);
   OverlayableItem result_overlayable_item = search_result.value().entry->overlayable_item.value();
-  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
-
-  search_result = table_.FindResource(test::ParseNameOrDie("string/bar"));
-  ASSERT_TRUE(search_result);
-  ASSERT_THAT(search_result.value().entry, NotNull());
-  ASSERT_TRUE(search_result.value().entry->overlayable_item);
-  result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
   EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct));
 
@@ -986,6 +982,30 @@ TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
   result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
   EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/foz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayableNoPolicyError) {
+  std::string input = R"(
+      <overlayable name="Name">
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy>
+          <item name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
 }
 
 TEST_F(ResourceParserTest, ParseOverlayableBadPolicyError) {

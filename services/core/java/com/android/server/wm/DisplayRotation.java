@@ -38,6 +38,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.DisplayCutout;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -69,6 +70,8 @@ public class DisplayRotation {
     private final int mCarDockRotation;
     private final int mDeskDockRotation;
     private final int mUndockedHdmiRotation;
+
+    private final float mCloseToSquareMaxAspectRatio;
 
     private OrientationListener mOrientationListener;
     private StatusBarManagerInternal mStatusBarManagerInternal;
@@ -131,6 +134,9 @@ public class DisplayRotation {
                 com.android.internal.R.integer.config_deskDockRotation);
         mUndockedHdmiRotation = readRotation(
                 com.android.internal.R.integer.config_undockedHdmiRotation);
+
+        mCloseToSquareMaxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_closeToSquareDisplayMaxAspectRatio);
 
         if (isDefaultDisplay) {
             final Handler uiHandler = UiThread.getHandler();
@@ -212,10 +218,12 @@ public class DisplayRotation {
         // so if the orientation is forced, we need to respect that no matter what.
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
+        final boolean isCloseToSquare =
+                isNonDecorDisplayCloseToSquare(Surface.ROTATION_0, width, height);
         final boolean forceDefaultOrientationInRes =
                 res.getBoolean(com.android.internal.R.bool.config_forceDefaultOrientation);
         final boolean forceDefaultOrienation =
-                ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar || isTv)
+                ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar || isTv || isCloseToSquare)
                         && forceDefaultOrientationInRes
                         // For debug purposes the next line turns this feature off with:
                         // $ adb shell setprop config.override_forced_orient true
@@ -225,6 +233,18 @@ public class DisplayRotation {
         // rotation to only user rotation. As long as OEM doesn't change user rotation then the
         // rotation of this display is effectively stuck at 0 deg.
         setFixedToUserRotation(forceDefaultOrienation);
+    }
+
+    private boolean isNonDecorDisplayCloseToSquare(int rotation, int width, int height) {
+        final DisplayCutout displayCutout =
+                mDisplayContent.calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
+        final int uiMode = mService.mPolicy.getUiMode();
+        final int w = mDisplayPolicy.getNonDecorDisplayWidth(
+                width, height, rotation, uiMode, displayCutout);
+        final int h = mDisplayPolicy.getNonDecorDisplayHeight(
+                width, height, rotation, uiMode, displayCutout);
+        final float aspectRatio = Math.max(w, h) / (float) Math.min(w, h);
+        return aspectRatio <= mCloseToSquareMaxAspectRatio;
     }
 
     void setRotation(int rotation) {

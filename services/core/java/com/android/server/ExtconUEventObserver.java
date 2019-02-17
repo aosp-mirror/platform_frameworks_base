@@ -49,7 +49,7 @@ public abstract class ExtconUEventObserver extends UEventObserver {
     private static final String TAG = "ExtconUEventObserver";
     private static final boolean LOG = false;
     private static final String SELINUX_POLICIES_NEED_TO_BE_CHANGED =
-            "This probably mean the selinux policies need to be changed.";
+            "This probably means the selinux policies need to be changed.";
 
     private final Map<String, ExtconInfo> mExtconInfos = new ArrayMap<>();
 
@@ -68,7 +68,7 @@ public abstract class ExtconUEventObserver extends UEventObserver {
      * Subclasses of ExtconUEventObserver should override this method to handle UEvents.
      *
      * @param extconInfo that matches the {@code DEVPATH} of {@code event}
-     * @param event the event
+     * @param event      the event
      */
     protected abstract void onUEvent(ExtconInfo extconInfo, UEvent event);
 
@@ -91,6 +91,9 @@ public abstract class ExtconUEventObserver extends UEventObserver {
 
         /** Returns a new list of all external connections whose name matches {@code regex}. */
         public static List<ExtconInfo> getExtconInfos(@Nullable String regex) {
+            if (!extconExists()) {
+                return new ArrayList<>(0);  // Always return a new list.
+            }
             Pattern p = regex == null ? null : Pattern.compile(regex);
             File file = new File("/sys/class/extcon");
             File[] files = file.listFiles();
@@ -159,6 +162,15 @@ public abstract class ExtconUEventObserver extends UEventObserver {
     /** Does the {@link /sys/class/extcon} directory exist */
     public static boolean extconExists() {
         File extconDir = new File("/sys/class/extcon");
-        return extconDir.exists() && extconDir.isDirectory();
+        boolean retVal = extconDir.exists() && extconDir.isDirectory();
+        // TODO(b/124364409): return the correct value after selinux policy is updated.
+        if (retVal) {
+            Slog.w(TAG, extconDir + " exists " + extconDir.exists() + " isDir "
+                    + extconDir.isDirectory()
+                    + " but reporting it does not exist until selinux policies are updated."
+                    + " see b/124364409"
+            );
+        }
+        return false;
     }
 }

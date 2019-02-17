@@ -35,7 +35,12 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
+import org.hamcrest.Matchers.hasItem
+import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.nullValue
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThat
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -239,5 +244,27 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         testableLooper.processAllMessages()
         verify(callback, never()).privacyChanged(anyList())
         verify(otherCallback).privacyChanged(anyList())
+    }
+
+    @Test
+    fun testListShouldNotHaveNull() {
+        doReturn(listOf(AppOpItem(AppOpsManager.OP_ACTIVATE_VPN, TEST_UID, "", 0),
+                        AppOpItem(AppOpsManager.OP_COARSE_LOCATION, TEST_UID, "", 0)))
+                .`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+        privacyItemController.addCallback(callback)
+        testableLooper.processAllMessages()
+
+        verify(callback).privacyChanged(capture(argCaptor))
+        assertEquals(1, argCaptor.value.size)
+        assertThat(argCaptor.value, not(hasItem(nullValue())))
+    }
+
+    @Test
+    fun testListShouldBeCopy() {
+        val list = listOf(PrivacyItem(PrivacyType.TYPE_CAMERA,
+                PrivacyApplication("", TEST_UID, mContext)))
+        privacyItemController.privacyList = list
+        assertEquals(list, privacyItemController.privacyList)
+        assertTrue(list !== privacyItemController.privacyList)
     }
 }

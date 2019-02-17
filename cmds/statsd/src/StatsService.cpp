@@ -31,6 +31,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/PermissionController.h>
+#include <cutils/multiuser.h>
 #include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <private/android_filesystem_config.h>
@@ -47,6 +48,7 @@ using namespace android;
 
 using android::base::StringPrintf;
 using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
 
 namespace android {
@@ -62,6 +64,8 @@ constexpr const char* kOpUsage = "android:get_usage_stats";
 
 // for StatsDataDumpProto
 const int FIELD_ID_REPORTS_LIST = 1;
+// for TrainInfo experiment id serialization
+const int FIELD_ID_EXPERIMENT_ID = 1;
 
 static binder::Status ok() {
     return binder::Status::ok();
@@ -155,7 +159,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
            }
 
       }))  {
-    mUidMap = new UidMap();
+    mUidMap = UidMap::getInstance();
     mPullerManager = new StatsPullerManager();
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
@@ -1164,6 +1168,56 @@ Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& p
 
     VLOG("StatsService::unregisterPullerCallback called.");
     mPullerManager->UnregisterPullerCallback(atomTag);
+    return Status::ok();
+}
+
+Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainName,
+                                                    int64_t trainVersionCode, int options,
+                                                    int32_t state,
+                                                    const std::vector<int64_t>& experimentIds) {
+    uid_t uid = IPCThreadState::self()->getCallingUid();
+    // For testing
+    if (uid == AID_ROOT || uid == AID_SYSTEM || uid == AID_SHELL) {
+        return ok();
+    }
+
+    // Caller must be granted these permissions
+    if (!checkCallingPermission(String16(kPermissionDump))) {
+        return exception(binder::Status::EX_SECURITY,
+                         StringPrintf("UID %d lacks permission %s", uid, kPermissionDump));
+    }
+    if (!checkCallingPermission(String16(kPermissionUsage))) {
+        return exception(binder::Status::EX_SECURITY,
+                         StringPrintf("UID %d lacks permission %s", uid, kPermissionUsage));
+    }
+    // TODO: add verifier permission
+
+    userid_t userId = multiuser_get_user_id(uid);
+
+    bool requiresStaging = options | IStatsManager::FLAG_REQUIRE_STAGING;
+    bool rollbackEnabled = options | IStatsManager::FLAG_ROLLBACK_ENABLED;
+    bool requiresLowLatencyMonitor = options | IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
+
+    ProtoOutputStream proto;
+    for (const auto& expId : experimentIds) {
+        proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
+                    (long long)expId);
+    }
+
+    vector<uint8_t> buffer;
+    buffer.resize(proto.size());
+    size_t pos = 0;
+    auto iter = proto.data();
+    while (iter.readBuffer() != NULL) {
+        size_t toRead = iter.currentToRead();
+        std::memcpy(&(buffer[pos]), iter.readBuffer(), toRead);
+        pos += toRead;
+        iter.rp()->move(toRead);
+    }
+    LogEvent event(std::string(String8(trainName).string()), trainVersionCode, requiresStaging,
+                   rollbackEnabled, requiresLowLatencyMonitor, state, buffer, userId);
+    mProcessor->OnLogEvent(&event);
+    StorageManager::writeTrainInfo(trainVersionCode, buffer);
     return Status::ok();
 }
 

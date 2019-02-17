@@ -24,6 +24,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -47,6 +48,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final NotificationEntryManager mEntryManager;
     private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
     private final StatusBarStateController mStatusBarStateController;
+    private final NotificationMediaManager mMediaManager;
     @VisibleForTesting
     final NotificationListener.NotificationSettingsListener mSettingsListener =
             new NotificationListener.NotificationSettingsListener() {
@@ -93,13 +95,15 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     public NotificationIconAreaController(Context context, StatusBar statusBar,
             StatusBarStateController statusBarStateController,
-            NotificationListener notificationListener) {
+            NotificationListener notificationListener,
+            NotificationMediaManager notificationMediaManager) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mEntryManager = Dependency.get(NotificationEntryManager.class);
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(this);
+        mMediaManager = notificationMediaManager;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
 
         initializeNotificationAreaViews(context);
@@ -192,8 +196,11 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     protected boolean shouldShowNotificationIcon(NotificationEntry entry,
             boolean showAmbient, boolean showLowPriority, boolean hideDismissed,
-            boolean hideRepliedMessages) {
+            boolean hideRepliedMessages, boolean hideCurrentMedia) {
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
+            return false;
+        }
+        if (hideCurrentMedia && entry.key.equals(mMediaManager.getMediaNotificationKey())) {
             return false;
         }
         if (!showLowPriority && !entry.isHighPriority()) {
@@ -235,14 +242,16 @@ public class NotificationIconAreaController implements DarkReceiver,
     private void updateShelfIcons() {
         updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
                 true /* showAmbient */, !mFullyDark /* showLowPriority */,
-                false /* hideDismissed */, mFullyDark /* hideRepliedMessages */);
+                false /* hideDismissed */, mFullyDark /* hideRepliedMessages */,
+                mFullyDark /* hideCurrentMedia */);
     }
 
     public void updateStatusBarIcons() {
         updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
                 false /* showAmbient */, mShowLowPriority /* showLowPriority */,
                 true /* hideDismissed */,
-                true /* hideRepliedMessages */);
+                true /* hideRepliedMessages */,
+                false /* hideCurrentMedia */);
     }
 
     @VisibleForTesting
@@ -261,7 +270,7 @@ public class NotificationIconAreaController implements DarkReceiver,
      */
     private void updateIconsForLayout(Function<NotificationEntry, StatusBarIconView> function,
             NotificationIconContainer hostLayout, boolean showAmbient, boolean showLowPriority,
-            boolean hideDismissed, boolean hideRepliedMessages) {
+            boolean hideDismissed, boolean hideRepliedMessages, boolean hideCurrentMedia) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -271,7 +280,7 @@ public class NotificationIconAreaController implements DarkReceiver,
             if (view instanceof ExpandableNotificationRow) {
                 NotificationEntry ent = ((ExpandableNotificationRow) view).getEntry();
                 if (shouldShowNotificationIcon(ent, showAmbient, showLowPriority, hideDismissed,
-                        hideRepliedMessages)) {
+                        hideRepliedMessages, hideCurrentMedia)) {
                     toShow.add(function.apply(ent));
                 }
             }

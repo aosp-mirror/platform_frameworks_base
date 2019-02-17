@@ -209,6 +209,7 @@ java_defaults {
         "core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl",
         "core/java/android/hardware/usb/IUsbManager.aidl",
         "core/java/android/hardware/usb/IUsbSerialReader.aidl",
+        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/IConnectivityManager.aidl",
         "core/java/android/hardware/ISensorPrivacyListener.aidl",
         "core/java/android/hardware/ISensorPrivacyManager.aidl",
@@ -772,8 +773,8 @@ java_defaults {
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
         "android.hardware.wifi-V1.0-java-constants",
-        "networkstack-aidl-interfaces-java",
-        "netd_aidl_interface-java",
+        "networkstack-aidl-framework-java",
+        "netd_aidl_parcelables-java",
         "devicepolicyprotosnano",
     ],
 
@@ -893,10 +894,8 @@ aidl_interface {
     srcs: [
         "core/java/android/net/ApfCapabilitiesParcelable.aidl",
         "core/java/android/net/DhcpResultsParcelable.aidl",
-        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/INetworkMonitor.aidl",
         "core/java/android/net/INetworkMonitorCallbacks.aidl",
-        "core/java/android/net/IIpMemoryStore.aidl",
         "core/java/android/net/INetworkStackConnector.aidl",
         "core/java/android/net/INetworkStackStatusCallback.aidl",
         "core/java/android/net/InitialConfigurationParcelable.aidl",
@@ -915,6 +914,16 @@ aidl_interface {
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
         "core/java/android/net/ip/IIpClient.aidl",
         "core/java/android/net/ip/IIpClientCallbacks.aidl",
+    ],
+    api_dir: "aidl/networkstack",
+}
+
+aidl_interface {
+    name: "networkstack-aidl-framework",
+    local_include_dir: "core/java",
+    srcs: [
+        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
+        "core/java/android/net/IIpMemoryStore.aidl",
         "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
@@ -1186,6 +1195,15 @@ packages_to_document = [
     "org/apache/http/conn",
     "org/apache/http/params",
 ]
+
+// Make the api/current.txt file available for use by modules in other
+// directories.
+filegroup {
+    name: "frameworks-base-api-current.txt",
+    srcs: [
+        "api/current.txt",
+    ],
+}
 
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
      "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +

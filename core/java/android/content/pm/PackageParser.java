@@ -4848,7 +4848,7 @@ public class PackageParser {
     }
 
     /**
-     * Sets every the max aspect ratio of every child activity that doesn't already have an aspect
+     * Sets every the min aspect ratio of every child activity that doesn't already have an aspect
      * ratio set.
      */
     private void setMinAspectRatio(Package owner) {

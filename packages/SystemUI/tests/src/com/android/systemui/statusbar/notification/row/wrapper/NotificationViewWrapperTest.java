@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification;
+package com.android.systemui.statusbar.notification.row.wrapper;
+
+import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.support.test.filters.SmallTest;
@@ -22,13 +24,15 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.util.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,12 +41,26 @@ import org.junit.runner.RunWith;
 @RunWithLooper
 public class NotificationViewWrapperTest extends SysuiTestCase {
 
-    @Test
-    public void constructor_doesntUseViewContext() throws Exception {
+    private View mView;
+    private ExpandableNotificationRow mRow;
+    private TestableNotificationViewWrapper mNotificationViewWrapper;
+
+    @Before
+    public void setup() throws Exception {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        new TestableNotificationViewWrapper(mContext,
-                new View(mContext),
-                new NotificationTestHelper(getContext()).createRow());
+        mView = mock(View.class);
+        mRow = new NotificationTestHelper(getContext()).createRow();
+        mNotificationViewWrapper = new TestableNotificationViewWrapper(mContext, mView, mRow);
+    }
+
+    @Test
+    public void childrenNeedInversion_doesntCrash_whenOpacity() {
+        LinearLayout viewGroup = new LinearLayout(mContext);
+        TextView textView = new TextView(mContext);
+        textView.setTextColor(0xcc000000);
+        viewGroup.addView(textView);
+
+        mNotificationViewWrapper.childrenNeedInversion(0xcc000000, viewGroup);
     }
 
     static class TestableNotificationViewWrapper extends NotificationViewWrapper {

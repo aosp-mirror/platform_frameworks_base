@@ -1230,9 +1230,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * Ensures that the drop down is not obscuring the IME.
      * @param visible whether the ime should be in front. If false, the ime is pushed to
      * the background.
+     *
+     * This method is deprecated. Please use the following methods instead.
+     * Use {@link #setInputMethodMode} to ensure that the drop down is not obscuring the IME.
+     * Use {@link #showDropDown()} to show the drop down immediately
+     * A combination of {@link #isDropDownAlwaysVisible()} and {@link #enoughToFilter()} to decide
+     * whether to manually trigger {@link #showDropDown()} or not.
+     *
      * @hide internal used only here and SearchDialog
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768913)
     public void ensureImeVisible(boolean visible) {
         mPopup.setInputMethodMode(visible
                 ? ListPopupWindow.INPUT_METHOD_NEEDED : ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
@@ -1242,11 +1249,36 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     /**
-     * @hide internal used only here and SearchDialog
+     * This method is deprecated. Please use {@link #getInputMethodMode()} instead.
+     *
+     * @hide This API is not being used and can be removed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean isInputMethodNotNeeded() {
         return mPopup.getInputMethodMode() == ListPopupWindow.INPUT_METHOD_NOT_NEEDED;
+    }
+
+    /**
+     * Returns the input method mode used by the auto complete dropdown.
+     */
+    public int getInputMethodMode() {
+        return mPopup.getInputMethodMode();
+    }
+
+    /**
+     * Use this method to specify when the IME should be displayed. This function can be used to
+     * prevent the dropdown from obscuring the IME.
+     *
+     * @param mode speficies the input method mode. use one of the following values:
+     *
+     * {@link ListPopupWindow#INPUT_METHOD_FROM_FOCUSABLE} IME Displayed if the auto-complete box is
+     * focusable.
+     * {@link ListPopupWindow#INPUT_METHOD_NEEDED} Always display the IME.
+     * {@link ListPopupWindow#INPUT_METHOD_NOT_NEEDED}. The auto-complete suggestions are always
+     * displayed, even if the suggestions cover/hide the input method.
+     */
+    public void setInputMethodMode(int mode) {
+        mPopup.setInputMethodMode(mode);
     }
 
     /**

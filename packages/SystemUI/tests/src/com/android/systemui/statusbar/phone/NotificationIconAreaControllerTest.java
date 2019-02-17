@@ -29,6 +29,7 @@ import android.testing.TestableLooper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationMediaManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,8 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     StatusBar mStatusBar;
     @Mock
     StatusBarStateController mStatusBarStateController;
+    @Mock
+    private NotificationMediaManager mMediaManager;
     private NotificationIconAreaController mController;
 
     @Before
@@ -54,7 +57,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mController = new NotificationIconAreaController(mContext, mStatusBar,
-                mStatusBarStateController, mListener);
+                mStatusBarStateController, mListener, mMediaManager);
     }
 
     @Test

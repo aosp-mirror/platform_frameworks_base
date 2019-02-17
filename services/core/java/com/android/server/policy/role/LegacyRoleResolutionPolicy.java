@@ -17,10 +17,13 @@
 package com.android.server.policy.role;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.os.Debug;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
@@ -33,6 +36,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
 import com.android.server.role.RoleManagerService;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -54,19 +58,44 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
     @NonNull
     private final Context mContext;
 
-    public LegacyRoleResolutionPolicy(Context context) {
+    public LegacyRoleResolutionPolicy(@NonNull Context context) {
         mContext = context;
     }
 
+    @NonNull
     @Override
-    public List<String> getRoleHolders(String roleName, int userId) {
+    public List<String> getRoleHolders(@NonNull String roleName, @UserIdInt int userId) {
         switch (roleName) {
+            case RoleManager.ROLE_ASSISTANT: {
+                String legacyAssistant = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(), Settings.Secure.ASSISTANT, userId);
+                if (legacyAssistant == null || legacyAssistant.isEmpty()) {
+                    return Collections.emptyList();
+                } else {
+                    return Collections.singletonList(
+                            ComponentName.unflattenFromString(legacyAssistant).getPackageName());
+                }
+            }
+            case RoleManager.ROLE_BROWSER: {
+                PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                        PackageManagerInternal.class);
+                String packageName = packageManagerInternal.removeLegacyDefaultBrowserPackageName(
+                        userId);
+                return CollectionUtils.singletonOrEmpty(packageName);
+            }
+            case RoleManager.ROLE_DIALER: {
+                String setting = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.DIALER_DEFAULT_APPLICATION, userId);
+                return CollectionUtils.singletonOrEmpty(!TextUtils.isEmpty(setting)
+                        ? setting
+                        : mContext.getSystemService(TelecomManager.class).getSystemDialerPackage());
+            }
             case RoleManager.ROLE_SMS: {
                 // Moved over from SmsApplication#getApplication
                 String result = Settings.Secure.getStringForUser(
                         mContext.getContentResolver(),
                         Settings.Secure.SMS_DEFAULT_APPLICATION, userId);
-
                 // TODO: STOPSHIP: Remove the following code once we read the value of
                 //  config_defaultSms in RoleControllerService.
                 if (result == null) {
@@ -92,34 +121,13 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
                     SmsApplication.SmsApplicationData app = applicationData;
                     result = app == null ? null : app.mPackageName;
                 }
-
                 return CollectionUtils.singletonOrEmpty(result);
             }
-            case RoleManager.ROLE_ASSISTANT: {
-                String legacyAssistant = Settings.Secure.getStringForUser(
-                        mContext.getContentResolver(), Settings.Secure.ASSISTANT, userId);
-
-                if (legacyAssistant == null || legacyAssistant.isEmpty()) {
-                    return Collections.emptyList();
-                } else {
-                    return Collections.singletonList(
-                            ComponentName.unflattenFromString(legacyAssistant).getPackageName());
-                }
-            }
-            case RoleManager.ROLE_DIALER: {
-                String setting = Settings.Secure.getStringForUser(
-                        mContext.getContentResolver(),
-                        Settings.Secure.DIALER_DEFAULT_APPLICATION, userId);
-
-                return CollectionUtils.singletonOrEmpty(!TextUtils.isEmpty(setting)
-                        ? setting
-                        : mContext.getSystemService(TelecomManager.class).getSystemDialerPackage());
-            }
-            case RoleManager.ROLE_BROWSER: {
-                PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                        PackageManagerInternal.class);
-                String packageName = packageManagerInternal.removeLegacyDefaultBrowserPackageName(
-                        userId);
+            case RoleManager.ROLE_HOME: {
+                PackageManager packageManager = mContext.getPackageManager();
+                List<ResolveInfo> resolveInfos = new ArrayList<>();
+                ComponentName componentName = packageManager.getHomeActivities(resolveInfos);
+                String packageName = componentName != null ? componentName.getPackageName() : null;
                 return CollectionUtils.singletonOrEmpty(packageName);
             }
             default: {

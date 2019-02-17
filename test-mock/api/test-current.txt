@@ -9,10 +9,12 @@ package android.test.mock {
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method public String[] getNamesForUids(int[]);
     method public String getPermissionControllerPackageName();
+    method public int getPermissionFlags(String, String, android.os.UserHandle);
     method @NonNull public String getServicesSystemSharedLibraryPackageName();
     method @NonNull public String getSharedSystemSharedLibraryPackageName();
     method public void grantRuntimePermission(String, String, android.os.UserHandle);
     method public void revokeRuntimePermission(String, String, android.os.UserHandle);
+    method public void updatePermissionFlags(String, String, int, int, android.os.UserHandle);
   }
 
 }

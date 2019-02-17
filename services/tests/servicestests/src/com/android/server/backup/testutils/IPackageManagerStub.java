@@ -556,16 +556,6 @@ public class IPackageManagerStub implements IPackageManager {
     }
 
     @Override
-    public byte[] getPermissionGrantBackup(int userId) throws RemoteException {
-        return new byte[0];
-    }
-
-    @Override
-    public void restorePermissionGrants(byte[] backup, int userId) throws RemoteException {
-
-    }
-
-    @Override
     public ComponentName getHomeActivities(List<ResolveInfo> outHomeCandidates)
         throws RemoteException {
         return null;

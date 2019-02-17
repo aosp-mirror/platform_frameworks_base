@@ -45,7 +45,8 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
                            &dimensionKeysInCondition);
         condition = (conditionState == ConditionState::kTrue);
     } else {
-        condition = mCondition;
+        // TODO: The unknown condition state is not handled here, we should fix it.
+        condition = mCondition == ConditionState::kTrue;
     }
 
     if (mDimensionsInCondition.empty() && condition) {
@@ -107,7 +108,8 @@ void MetricProducer::activateLocked(int activationTrackerIndex, int64_t elapsedT
     if (it == mEventActivationMap.end()) {
         return;
     }
-    if (mActivationType == MetricActivation::ACTIVATE_ON_BOOT) {
+    if (mActivationType == MetricActivation::ACTIVATE_ON_BOOT &&
+        it->second.state == ActivationState::kNotActive) {
         it->second.state = ActivationState::kActiveOnBoot;
         return;
     }

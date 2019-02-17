@@ -92,6 +92,8 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.NotificationChannels;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Locale;
 
@@ -793,6 +795,15 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         boolean showMicrophone = false;
         boolean showLocation = false;
         for (PrivacyItem item : items) {
+            if (item == null /* b/124234367 */) {
+                if (DEBUG) {
+                    Log.e(TAG, "updatePrivacyItems - null item found");
+                    StringWriter out = new StringWriter();
+                    mPrivacyItemController.dump(null, new PrintWriter(out), null);
+                    Log.e(TAG, out.toString());
+                }
+                continue;
+            }
             switch (item.getPrivacyType()) {
                 case TYPE_CAMERA:
                     showCamera = true;

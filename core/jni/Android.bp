@@ -230,6 +230,7 @@ cc_library_shared {
     ],
 
     static_libs: [
+        "libasync_safe",
         "libgif",
         "libseccomp_policy",
         "libgrallocusage",

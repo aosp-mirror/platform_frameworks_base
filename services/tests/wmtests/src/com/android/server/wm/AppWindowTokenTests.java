@@ -51,7 +51,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -142,7 +141,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mToken.removeImmediately();
     }
 
-    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     @Test
     public void testLandscapeSeascapeRotationByApp() {
         // Some plumbing to get the service ready for rotation updates.
@@ -303,7 +301,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(detail = "Promote once confirmed non-flaky")
     public void testStuckExitingWindow() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
@@ -346,7 +343,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertNoStartingWindow(mToken);
     }
 
-    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     @Test
     public void testAddRemoveRace() {
         // There was once a race condition between adding and removing starting windows

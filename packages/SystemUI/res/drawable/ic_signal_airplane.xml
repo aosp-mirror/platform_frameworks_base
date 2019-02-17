@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2017 The Android Open Source Project
+     Copyright (C) 2019 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,16 +15,12 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp"
-    android:height="48dp"
-    android:viewportWidth="20.5"
-    android:viewportHeight="20.5">
-    <group
-        android:translateX="1.75"
-        android:translateY="1.4">
-        <path
-            android:pathData="M16.01,9.87l-6.24,-3.9v-4.7C9.77,0.57 9.21,0 8.5,0S7.23,0.57 7.23,1.28v4.7L0.99,9.88c-0.37,0.23 -0.6,0.64 -0.6,1.08v0.41c0,0.29 0.29,0.5 0.55,0.41l6.27,-1.97v4.7l-1.37,1.02c-0.21,0.16 -0.34,0.41 -0.34,0.68v0.57c0,0.15 0.12,0.23 0.27,0.2 1.67,-0.47 1.12,-0.31 2.73,-0.78 1.03,0.3 1.7,0.49 2.72,0.78 0.15,0.03 0.27,-0.06 0.27,-0.2v-0.57c0,-0.27 -0.13,-0.52 -0.34,-0.68l-1.37,-1.02v-4.7l6.27,1.97c0.28,0.09 0.55,-0.12 0.55,-0.41v-0.41c0.01,-0.45 -0.23,-0.87 -0.59,-1.09z"
-            android:fillColor="#FFF"/>
-    </group>
-</vector>
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
 
+<path
+    android:fillColor="#FFFFFF"
+    android:pathData="M21,16v-2l-8-5V3.5C13,2.67,12.33,2,11.5,2S10,2.67,10,3.5V9l-8,5v2l8-2.5V19l-2,1.5V22l3.5-1l3.5,1v-1.5L13,19v-5.5L21,16z" />
+</vector>

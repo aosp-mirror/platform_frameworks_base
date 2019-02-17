@@ -18,7 +18,7 @@ android_app {
     name: "CaptivePortalLogin",
     srcs: ["src/**/*.java"],
     sdk_version: "system_current",
-    certificate: "platform",
+    certificate: "networkstack",
     static_libs: [
         "androidx.legacy_legacy-support-v4",
         "metrics-constants-protos",

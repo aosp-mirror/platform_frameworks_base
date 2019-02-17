@@ -20,6 +20,8 @@
 #include "stats_log_util.h"
 #include "statslog.h"
 
+#include <binder/IPCThreadState.h>
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -180,6 +182,25 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
     }
 }
 
+LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requiresStaging,
+                   bool rollbackEnabled, bool requiresLowLatencyMonitor, int32_t state,
+                   const std::vector<uint8_t>& experimentIds, int32_t userId) {
+    mLogdTimestampNs = getWallClockNs();
+    mElapsedTimestampNs = getElapsedRealtimeNs();
+    mTagId = android::util::BINARY_PUSH_STATE_CHANGED;
+    mLogUid = android::IPCThreadState::self()->getCallingUid();
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)), Value(trainName)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainVersionCode)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)), Value((int)requiresStaging)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value((int)rollbackEnabled)));
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(5)), Value((int)requiresLowLatencyMonitor)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(6)), Value(state)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(7)), Value(experimentIds)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(8)), Value(userId)));
+}
+
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                    const SpeakerImpedance& speakerImpedance) {
     mLogdTimestampNs = wallClockTimestampNs;
@@ -338,6 +359,16 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                 break;
         }
     }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const InstallTrainInfo& trainInfo) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::TRAIN_INFO;
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(1)), Value(trainInfo.trainVersionCode)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainInfo.experimentIds)));
 }
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}

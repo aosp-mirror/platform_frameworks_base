@@ -46,6 +46,8 @@
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_microphone</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
@@ -55,8 +57,6 @@
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_microphone</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
     </string-array>
 
@@ -868,6 +868,9 @@
          to get a smaller screen and opening the lid causes the device to enter the unfolded state
          which means to get a larger screen. -->
     <bool name="config_lidControlsDisplayFold">false</bool>
+
+    <!-- Indicate the display area rect for foldable devices in folded state. -->
+    <string name="config_foldedArea"></string>
 
     <!-- Desk dock behavior -->
 
@@ -3252,7 +3255,7 @@
          skinny aspect ratio that is not expected to be widely used. -->
     <item name="config_pictureInPictureMinAspectRatio" format="float" type="dimen">0.41841004184</item>
 
-    <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture. Any
+    <!-- The maximum aspect ratio (width/height) that is supported for picture-in-picture. Any
          ratio larger than this is considered to wide and short to be usable. Currently 2.39:1. -->
     <item name="config_pictureInPictureMaxAspectRatio" format="float" type="dimen">2.39</item>
 
@@ -3272,6 +3275,11 @@
              2 - 1 snap target: 1:1
     -->
     <integer name="config_dockedStackDividerSnapMode">0</integer>
+
+    <!-- The maximum aspect ratio (longerSide/shorterSide) that is treated as close-to-square. If
+         config_forceDefaultOrientation is set to true, the rotation on a close-to-square display
+         will be fixed. -->
+    <item name="config_closeToSquareDisplayMaxAspectRatio" format="float" type="dimen">1.333</item>
 
     <!-- List of comma separated package names for which we the system will not show crash, ANR,
          etc. dialogs. -->
@@ -3906,19 +3914,19 @@
 
     <!-- See DisplayWhiteBalanceController.
          A float array containing a list of ambient color temperatures, in Kelvin. This array,
-         together with config_displayWhiteBalanceDisplayTemperatureValues, is used to generate a
+         together with config_displayWhiteBalanceDisplayColorTemperatures, is used to generate a
          lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
          ambient color temperature readings to a target color temperature for the display.
          This table is optional. If used, this array must,
          1) Contain at least two entries
-         2) Be the same length as config_displayWhiteBalanceDisplayTemperatureValues. -->
-    <array name="config_displayWhiteBalanceAmbientTemperatureValues">
+         2) Be the same length as config_displayWhiteBalanceDisplayColorTemperatures. -->
+    <array name="config_displayWhiteBalanceAmbientColorTemperatures">
     </array>
 
     <!-- See DisplayWhiteBalanceController.
          An array containing a list of display color temperatures, in Kelvin. See
-         config_displayWhiteBalanceAmbientTemperatureValues for additional details.
+         config_displayWhiteBalanceAmbientColorTemperatures for additional details.
          The same restrictions apply to this array. -->
-    <array name="config_displayWhiteBalanceDisplayTemperatureValues">
+    <array name="config_displayWhiteBalanceDisplayColorTemperatures">
     </array>
 </resources>

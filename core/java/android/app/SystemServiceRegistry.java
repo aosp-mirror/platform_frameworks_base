@@ -101,13 +101,11 @@ import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
 import android.net.IIpMemoryStore;
 import android.net.IIpSecService;
-import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.IpMemoryStore;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
-import android.net.NetworkStack;
 import android.net.NetworkWatchlistManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
@@ -330,20 +328,12 @@ final class SystemServiceRegistry {
                 return new ConnectivityManager(context, service);
             }});
 
-        registerService(Context.NETD_SERVICE, INetd.class, new StaticServiceFetcher<INetd>() {
+        registerService(Context.NETD_SERVICE, IBinder.class, new StaticServiceFetcher<IBinder>() {
             @Override
-            public INetd createService() throws ServiceNotFoundException {
-                return INetd.Stub.asInterface(
-                        ServiceManager.getServiceOrThrow(Context.NETD_SERVICE));
+            public IBinder createService() throws ServiceNotFoundException {
+                return ServiceManager.getServiceOrThrow(Context.NETD_SERVICE);
             }
         });
-
-        registerService(Context.NETWORK_STACK_SERVICE, NetworkStack.class,
-                new StaticServiceFetcher<NetworkStack>() {
-                    @Override
-                    public NetworkStack createService() {
-                        return new NetworkStack();
-                    }});
 
         registerService(Context.IP_MEMORY_STORE_SERVICE, IpMemoryStore.class,
                 new CachedServiceFetcher<IpMemoryStore>() {
@@ -1139,7 +1129,11 @@ final class SystemServiceRegistry {
                     IBinder b = ServiceManager
                             .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
                     IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(b);
-                    return new ContentCaptureManager(outerContext, service);
+                    if (service != null) {
+                        // When feature is disabled, we return a null manager to apps so the
+                        // performance impact is practically zero
+                        return new ContentCaptureManager(outerContext, service);
+                    }
                 }
                 return null;
             }});

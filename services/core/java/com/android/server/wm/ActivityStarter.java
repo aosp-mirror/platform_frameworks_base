@@ -830,12 +830,25 @@ class ActivityStarter {
                         new String[]{resolvedType}, PendingIntent.FLAG_CANCEL_CURRENT
                                 | PendingIntent.FLAG_ONE_SHOT, null);
 
-                final int flags = intent.getFlags();
                 Intent newIntent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
-                newIntent.setFlags(flags
-                        | FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+                int flags = intent.getFlags();
+                flags |= Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+
+                /*
+                 * Prevent reuse of review activity: Each app needs their own review activity. By
+                 * default activities launched with NEW_TASK or NEW_DOCUMENT try to reuse activities
+                 * with the same launch parameters (extras are ignored). Hence to avoid possible
+                 * reuse force a new activity via the MULTIPLE_TASK flag.
+                 *
+                 * Activities that are not launched with NEW_TASK or NEW_DOCUMENT are not re-used,
+                 * hence no need to add the flag in this case.
+                 */
+                if ((flags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NEW_DOCUMENT)) != 0) {
+                    flags |= Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+                }
+                newIntent.setFlags(flags);
+
                 newIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
                 newIntent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
                 if (resultRecord != null) {

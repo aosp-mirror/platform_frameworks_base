@@ -87,8 +87,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"የሲም መዳረሻ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"ኤችዲ ኦዲዮ፦ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"ኤችዲ ኦዲዮ"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"መስሚያ አጋዥ መሣሪያ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"ከመስሚያ አጋዥ መሣሪያ ጋር ተገናኝቷል"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"አጋዥ መስሚያዎች"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"ከአጋዥ መስሚያዎች ጋር ተገናኝቷል"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"ወደ ማህደረ  መረጃ  አውዲዮ ተያይዟል"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ወደ ስልክ አውዲዮ ተያይዟል"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ወደ ፋይል ዝውውር አገልጋይ ተያይዟል"</string>
@@ -105,7 +105,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ለስልክ ድምፅ ተጠቀም"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ለፋይል ዝውውር ተጠቀም"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ለውፅአት ተጠቀም"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"ለመስሚያ አጋዥ መሣሪያ ተጠቀም"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"ለአጋዥ መስሚያዎች ይጠቀሙ"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"አጣምር"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"አጣምር"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ይቅር"</string>
@@ -136,6 +136,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android  ስርዓተ ክወና"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"የተወገዱ መተግበሪያዎች"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"የተወገዱ መተግበሪያዎች እና ተጠቃሚዎች"</string>
+    <string name="data_usage_ota" msgid="5377889154805560860">"የሥርዓት ዝማኔዎች"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB መሰካት"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ተጓጓዥ ድረስ ነጥቦች"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ብሉቱዝ ማያያዝ"</string>

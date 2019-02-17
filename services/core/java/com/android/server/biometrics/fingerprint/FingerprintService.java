@@ -24,8 +24,13 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -46,21 +51,25 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.util.StatsLog;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
 import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.Metrics;
+import com.android.server.biometrics.RemovalClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -85,20 +94,30 @@ public class FingerprintService extends BiometricServiceBase {
 
     protected static final String TAG = "FingerprintService";
     private static final boolean DEBUG = true;
-    private static final boolean CLEANUP_UNUSED_FP = true;
     private static final String FP_DATA_DIR = "fpdata";
     private static final String ACTION_LOCKOUT_RESET =
             "com.android.server.biometrics.fingerprint.ACTION_LOCKOUT_RESET";
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 5;
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 20;
+    private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30 * 1000;
+    private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
 
-    // TODO: This should be refactored into BiometricService
-    private final class UserFingerprint {
-        Fingerprint f;
-        int userId;
-        public UserFingerprint(Fingerprint f, int userId) {
-            this.f = f;
-            this.userId = userId;
+    private final class ResetFailedAttemptsForUserRunnable implements Runnable {
+        @Override
+        public void run() {
+            resetFailedAttemptsForUser(true /* clearAttemptCounter */,
+                    ActivityManager.getCurrentUser());
+        }
+    }
+
+    private final class LockoutReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Slog.v(getTag(), "Resetting lockout: " + intent.getAction());
+            if (getLockoutResetIntent().equals(intent.getAction())) {
+                final int user = intent.getIntExtra(KEY_LOCKOUT_RESET_USER, 0);
+                resetFailedAttemptsForUser(false /* clearAttemptCounter */, user);
+            }
         }
     }
 
@@ -120,6 +139,30 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         protected int statsModality() {
             return FingerprintService.this.statsModality();
+        }
+
+        @Override
+        public void resetFailedAttempts() {
+            resetFailedAttemptsForUser(true /* clearAttemptCounter */,
+                    ActivityManager.getCurrentUser());
+        }
+
+        @Override
+        public boolean shouldFrameworkHandleLockout() {
+            return true;
+        }
+
+        @Override
+        public int handleFailedAttempt() {
+            final int currentUser = ActivityManager.getCurrentUser();
+            mFailedAttempts.put(currentUser, mFailedAttempts.get(currentUser, 0) + 1);
+            mTimedLockoutCleared.put(ActivityManager.getCurrentUser(), false);
+
+            if (getLockoutMode() != AuthenticationClient.LOCKOUT_NONE) {
+                scheduleLockoutResetForUser(currentUser);
+            }
+
+            return super.handleFailedAttempt();
         }
     }
 
@@ -241,15 +284,14 @@ public class FingerprintService extends BiometricServiceBase {
             }
 
             final boolean restricted = isRestricted();
-            final RemovalClientImpl client = new RemovalClientImpl(getContext(), mDaemonWrapper,
-                    mHalDeviceId, token, new ServiceListenerImpl(receiver), fingerId, groupId,
-                    userId, restricted, token.toString()) {
+            final RemovalClient client = new RemovalClient(getContext(), getMetrics(),
+                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
+                    fingerId, groupId, userId, restricted, token.toString(), getBiometricUtils()) {
                 @Override
                 protected int statsModality() {
                     return FingerprintService.this.statsModality();
                 }
             };
-            client.setShouldNotifyUserActivity(true);
             removeInternal(client);
         }
 
@@ -259,9 +301,9 @@ public class FingerprintService extends BiometricServiceBase {
             checkPermission(MANAGE_FINGERPRINT);
 
             final boolean restricted = isRestricted();
-            final EnumerateClientImpl client = new EnumerateClientImpl(getContext(), mDaemonWrapper,
-                    mHalDeviceId, token, new ServiceListenerImpl(receiver), userId, userId,
-                    restricted, getContext().getOpPackageName()) {
+            final EnumerateClient client = new EnumerateClient(getContext(), getMetrics(),
+                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver), userId,
+                    userId, restricted, getContext().getOpPackageName()) {
                 @Override
                 protected int statsModality() {
                     return FingerprintService.this.statsModality();
@@ -339,7 +381,7 @@ public class FingerprintService extends BiometricServiceBase {
                 return Collections.emptyList();
             }
 
-            return FingerprintService.this.getEnrolledFingerprints(userId);
+            return FingerprintService.this.getEnrolledTemplates(userId);
         }
 
         @Override // Binder call
@@ -445,7 +487,6 @@ public class FingerprintService extends BiometricServiceBase {
         public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining)
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
-                // TODO: Pass up the fp directly instead
                 final Fingerprint fp = (Fingerprint) identifier;
                 mFingerprintServiceReceiver.onEnrollResult(fp.getDeviceId(), fp.getBiometricId(),
                         fp.getGroupId(), remaining);
@@ -493,7 +534,6 @@ public class FingerprintService extends BiometricServiceBase {
         public void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining)
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
-                // TODO: Pass up the fp directly instead
                 final Fingerprint fp = (Fingerprint) identifier;
                 mFingerprintServiceReceiver.onRemoved(fp.getDeviceId(), fp.getBiometricId(),
                         fp.getGroupId(), remaining);
@@ -511,105 +551,18 @@ public class FingerprintService extends BiometricServiceBase {
         }
     }
 
-    /**
-     * An internal class to help clean up unknown fingerprints in the hardware and software.
-     */
-    private final class InternalEnumerateClient extends BiometricServiceBase.EnumerateClientImpl {
-
-        private List<Fingerprint> mEnrolledList;
-        private List<Fingerprint> mUnknownFingerprints = new ArrayList<>(); // list of fp to delete
-
-        public InternalEnumerateClient(Context context, DaemonWrapper daemon, long halDeviceId,
-                IBinder token, ServiceListener listener, int groupId, int userId,
-                boolean restricted, String owner, List<Fingerprint> enrolledList) {
-            super(context, daemon, halDeviceId, token, listener, groupId, userId, restricted,
-                    owner);
-            mEnrolledList = enrolledList;
-        }
-
-        private void handleEnumeratedFingerprint(
-                BiometricAuthenticator.Identifier identifier, int remaining) {
-            boolean matched = false;
-            for (int i = 0; i < mEnrolledList.size(); i++) {
-                if (mEnrolledList.get(i).getBiometricId() == identifier.getBiometricId()) {
-                    mEnrolledList.remove(i);
-                    matched = true;
-                    break;
-                }
-            }
-
-            // fingerId 0 means no fingerprints are in hardware
-            if (!matched && identifier.getBiometricId() != 0) {
-                mUnknownFingerprints.add((Fingerprint) identifier);
-            }
-        }
-
-        private void doFingerprintCleanup() {
-            if (mEnrolledList == null) {
-                return;
-            }
-
-            for (Fingerprint f : mEnrolledList) {
-                Slog.e(TAG, "doFingerprintCleanup(): Removing dangling enrolled fingerprint: "
-                        + f.getName() + " " + f.getBiometricId() + " " + f.getGroupId()
-                        + " " + f.getDeviceId());
-                FingerprintUtils.getInstance().removeBiometricForUser(getContext(),
-                        getTargetUserId(), f.getBiometricId());
-                StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
-                        BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK);
-            }
-            mEnrolledList.clear();
-        }
-
-        public List<Fingerprint> getUnknownFingerprints() {
-            return mUnknownFingerprints;
-        }
-
-        @Override
-        public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
-                int remaining) {
-            handleEnumeratedFingerprint(identifier, remaining);
-            if (remaining == 0) {
-                doFingerprintCleanup();
-            }
-            return remaining == 0;
-        }
-
-        @Override
-        protected int statsModality() {
-            return FingerprintService.this.statsModality();
-        }
-    }
-
-    /**
-     * An internal class to help clean up unknown fingerprints in hardware and software.
-     */
-    private final class InternalRemovalClient extends BiometricServiceBase.RemovalClientImpl {
-        public InternalRemovalClient(Context context,
-                DaemonWrapper daemon, long halDeviceId, IBinder token,
-                ServiceListener listener, int fingerId, int groupId, int userId, boolean restricted,
-                String owner) {
-            super(context, daemon, halDeviceId, token, listener, fingerId, groupId, userId,
-                    restricted,
-                    owner);
-        }
-
-        @Override
-        protected int statsModality() {
-            return FingerprintService.this.statsModality();
-        }
-    }
-
     private final FingerprintMetrics mFingerprintMetrics = new FingerprintMetrics();
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
             new CopyOnWriteArrayList<>();
 
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;
-
-    private long mHalDeviceId;
-    private IBinder mToken = new Binder(); // used for internal FingerprintService enumeration
-    private ArrayList<UserFingerprint> mUnknownFingerprints = new ArrayList<>(); // hw fingerprints
+    private final SparseBooleanArray mTimedLockoutCleared;
+    private final SparseIntArray mFailedAttempts;
+    private final AlarmManager mAlarmManager;
+    private final LockoutReceiver mLockoutReceiver = new LockoutReceiver();
+    protected final ResetFailedAttemptsForUserRunnable mResetFailedAttemptsForCurrentUserRunnable =
+            new ResetFailedAttemptsForUserRunnable();
 
     /**
      * Receives callbacks from the HAL.
@@ -646,13 +599,7 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         public void onError(final long deviceId, final int error, final int vendorCode) {
             mHandler.post(() -> {
-                ClientMonitor client = getCurrentClient();
-                if (client instanceof InternalRemovalClient
-                        || client instanceof InternalEnumerateClient) {
-                    clearEnumerateState();
-                }
                 FingerprintService.super.handleError(deviceId, error, vendorCode);
-
                 // TODO: this chunk of code should be common to all biometric services
                 if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
                     // If we get HW_UNAVAILABLE, try to connect again later...
@@ -673,11 +620,6 @@ public class FingerprintService extends BiometricServiceBase {
                 ClientMonitor client = getCurrentClient();
                 final Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
                 FingerprintService.super.handleRemoved(fp, remaining);
-                if (client instanceof InternalRemovalClient && !mUnknownFingerprints.isEmpty()) {
-                    cleanupUnknownFingerprints();
-                } else if (client instanceof InternalRemovalClient){
-                    clearEnumerateState();
-                }
             });
         }
 
@@ -685,9 +627,8 @@ public class FingerprintService extends BiometricServiceBase {
         public void onEnumerate(final long deviceId, final int fingerId, final int groupId,
                 final int remaining) {
             mHandler.post(() -> {
-                // TODO: factor out common enumerate logic if possible
                 final Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
-                FingerprintService.this.handleEnumerate(fp, remaining);
+                FingerprintService.super.handleEnumerate(fp, remaining);
             });
 
         }
@@ -748,10 +689,22 @@ public class FingerprintService extends BiometricServiceBase {
             }
             return daemon.enroll(cryptoToken, groupId, timeout);
         }
+
+        @Override
+        public void resetLockout(byte[] token) throws RemoteException {
+            // TODO: confirm security token when we move timeout management into the HAL layer.
+            Slog.e(TAG, "Not supported");
+            return;
+        }
     };
 
     public FingerprintService(Context context) {
         super(context);
+        mTimedLockoutCleared = new SparseBooleanArray();
+        mFailedAttempts = new SparseIntArray();
+        mAlarmManager = context.getSystemService(AlarmManager.class);
+        context.registerReceiver(mLockoutReceiver, new IntentFilter(getLockoutResetIntent()),
+                getLockoutBroadcastPermission(), null /* handler */);
     }
 
     @Override
@@ -767,18 +720,13 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
+    protected DaemonWrapper getDaemonWrapper() {
+        return mDaemonWrapper;
+    }
+
+    @Override
     protected BiometricUtils getBiometricUtils() {
         return FingerprintUtils.getInstance();
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutTimed() {
-        return MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED;
-    }
-
-    @Override
-    protected int getFailedAttemptsLockoutPermanent() {
-        return MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT;
     }
 
     @Override
@@ -790,7 +738,7 @@ public class FingerprintService extends BiometricServiceBase {
     protected boolean hasReachedEnrollmentLimit(int userId) {
         final int limit = getContext().getResources().getInteger(
                 com.android.internal.R.integer.config_fingerprintMaxTemplatesPerUser);
-        final int enrolled = FingerprintService.this.getEnrolledFingerprints(userId).size();
+        final int enrolled = FingerprintService.this.getEnrolledTemplates(userId).size();
         if (enrolled >= limit) {
             Slog.w(TAG, "Too many fingerprints registered");
             return true;
@@ -866,19 +814,6 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
-    protected void handleUserSwitching(int userId) {
-        if (getCurrentClient() instanceof InternalRemovalClient
-                || getCurrentClient() instanceof InternalEnumerateClient) {
-            Slog.w(TAG, "User switched while performing cleanup");
-            removeClient(getCurrentClient());
-            clearEnumerateState();
-        }
-        updateActiveGroup(userId, null);
-        doFingerprintCleanupForUser(userId);
-    }
-
-
-    @Override
     protected boolean hasEnrolledBiometrics(int userId) {
         if (userId != UserHandle.getCallingUserId()) {
             checkPermission(INTERACT_ACROSS_USERS);
@@ -913,6 +848,11 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
+    protected List<Fingerprint> getEnrolledTemplates(int userId) {
+        return getBiometricUtils().getBiometricsForUser(getContext(), userId);
+    }
+
+    @Override
     protected void notifyClientActiveCallbacks(boolean isActive) {
         List<IFingerprintClientActiveCallback> callbacks = mClientActiveCallbacks;
         for (int i = 0; i < callbacks.size(); i++) {
@@ -928,6 +868,20 @@ public class FingerprintService extends BiometricServiceBase {
     @Override
     protected int statsModality() {
         return BiometricsProtoEnums.MODALITY_FINGERPRINT;
+    }
+
+    @Override
+    protected int getLockoutMode() {
+        final int currentUser = ActivityManager.getCurrentUser();
+        final int failedAttempts = mFailedAttempts.get(currentUser, 0);
+        if (failedAttempts >= MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT) {
+            return AuthenticationClient.LOCKOUT_PERMANENT;
+        } else if (failedAttempts > 0
+                && !mTimedLockoutCleared.get(currentUser, false)
+                && (failedAttempts % MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED == 0)) {
+            return AuthenticationClient.LOCKOUT_TIMED;
+        }
+        return AuthenticationClient.LOCKOUT_NONE;
     }
 
     /** Gets the fingerprint daemon */
@@ -959,7 +913,7 @@ public class FingerprintService extends BiometricServiceBase {
             if (mHalDeviceId != 0) {
                 loadAuthenticatorIds();
                 updateActiveGroup(ActivityManager.getCurrentUser(), null);
-                doFingerprintCleanupForUser(ActivityManager.getCurrentUser());
+                doTemplateCleanupForUser(ActivityManager.getCurrentUser());
             } else {
                 Slog.w(TAG, "Failed to open Fingerprint HAL!");
                 MetricsLogger.count(getContext(), "fingerprintd_openhal_error", 1);
@@ -967,79 +921,6 @@ public class FingerprintService extends BiometricServiceBase {
             }
         }
         return mDaemon;
-    }
-
-    /**
-     * This method should be called upon connection to the daemon, and when user switches.
-     * @param userId
-     */
-    private void doFingerprintCleanupForUser(int userId) {
-        if (CLEANUP_UNUSED_FP) {
-            enumerateUser(userId);
-        }
-    }
-
-    private void clearEnumerateState() {
-        if (DEBUG) Slog.v(TAG, "clearEnumerateState()");
-        mUnknownFingerprints.clear();
-    }
-
-    private void enumerateUser(int userId) {
-        if (DEBUG) Slog.v(TAG, "Enumerating user(" + userId + ")");
-
-        final boolean restricted = !hasPermission(MANAGE_FINGERPRINT);
-        final List<Fingerprint> enrolledList = getEnrolledFingerprints(userId);
-
-        InternalEnumerateClient client = new InternalEnumerateClient(getContext(), mDaemonWrapper,
-                mHalDeviceId, mToken, new ServiceListenerImpl(null), userId, userId, restricted,
-                getContext().getOpPackageName(), enrolledList);
-        enumerateInternal(client);
-    }
-
-    // Remove unknown fingerprints from hardware
-    private void cleanupUnknownFingerprints() {
-        if (!mUnknownFingerprints.isEmpty()) {
-            UserFingerprint uf = mUnknownFingerprints.get(0);
-            mUnknownFingerprints.remove(uf);
-            boolean restricted = !hasPermission(MANAGE_FINGERPRINT);
-            InternalRemovalClient client = new InternalRemovalClient(getContext(), mDaemonWrapper,
-                    mHalDeviceId, mToken, new ServiceListenerImpl(null), uf.f.getBiometricId(),
-                    uf.f.getGroupId(), uf.userId, restricted, getContext().getOpPackageName());
-            removeInternal(client);
-            StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED, statsModality(),
-                    BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
-        } else {
-            clearEnumerateState();
-        }
-    }
-
-    private void handleEnumerate(Fingerprint fingerprint, int remaining) {
-        ClientMonitor client = getCurrentClient();
-
-        if ( !(client instanceof InternalRemovalClient) && !(client instanceof EnumerateClient) ) {
-            return;
-        }
-        client.onEnumerationResult(fingerprint, remaining);
-
-        // All fingerprints in hardware for this user were enumerated
-        if (remaining == 0) {
-            if (client instanceof InternalEnumerateClient) {
-                List<Fingerprint> unknownFingerprints =
-                        ((InternalEnumerateClient) client).getUnknownFingerprints();
-
-                if (!unknownFingerprints.isEmpty()) {
-                    Slog.w(TAG, "Adding " + unknownFingerprints.size() +
-                            " fingerprints for deletion");
-                }
-                for (Fingerprint f : unknownFingerprints) {
-                    mUnknownFingerprints.add(new UserFingerprint(f, client.getTargetUserId()));
-                }
-                removeClient(client);
-                cleanupUnknownFingerprints();
-            } else {
-                removeClient(client);
-            }
-        }
     }
 
     private long startPreEnroll(IBinder token) {
@@ -1070,8 +951,38 @@ public class FingerprintService extends BiometricServiceBase {
         return 0;
     }
 
-    private List<Fingerprint> getEnrolledFingerprints(int userId) {
-        return getBiometricUtils().getBiometricsForUser(getContext(), userId);
+    // Attempt counter should only be cleared when Keyguard goes away or when
+    // a biometric is successfully authenticated. Lockout should eventually be done below the HAL.
+    // See AuthenticationClient#shouldFrameworkHandleLockout().
+    private void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {
+        if (DEBUG && getLockoutMode() != AuthenticationClient.LOCKOUT_NONE) {
+            Slog.v(getTag(), "Reset biometric lockout, clearAttemptCounter=" + clearAttemptCounter);
+        }
+        if (clearAttemptCounter) {
+            mFailedAttempts.put(userId, 0);
+        }
+        mTimedLockoutCleared.put(userId, true);
+        // If we're asked to reset failed attempts externally (i.e. from Keyguard),
+        // the alarm might still be pending; remove it.
+        cancelLockoutResetForUser(userId);
+        notifyLockoutResetMonitors();
+    }
+
+
+    private void cancelLockoutResetForUser(int userId) {
+        mAlarmManager.cancel(getLockoutResetIntentForUser(userId));
+    }
+
+    private void scheduleLockoutResetForUser(int userId) {
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + FAIL_LOCKOUT_TIMEOUT_MS,
+                getLockoutResetIntentForUser(userId));
+    }
+
+    private PendingIntent getLockoutResetIntentForUser(int userId) {
+        return PendingIntent.getBroadcast(getContext(), userId,
+                new Intent(getLockoutResetIntent()).putExtra(KEY_LOCKOUT_RESET_USER, userId),
+                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private void dumpInternal(PrintWriter pw) {

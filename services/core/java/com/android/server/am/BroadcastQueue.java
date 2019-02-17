@@ -898,6 +898,11 @@ public final class BroadcastQueue {
         for (int i = perms.length-1; i >= 0; i--) {
             try {
                 PermissionInfo pi = pm.getPermissionInfo(perms[i], "android", 0);
+                if (pi == null) {
+                    // a required permission that no package has actually
+                    // defined cannot be signature-required.
+                    return false;
+                }
                 if ((pi.protectionLevel & (PermissionInfo.PROTECTION_MASK_BASE
                         | PermissionInfo.PROTECTION_FLAG_PRIVILEGED))
                         != PermissionInfo.PROTECTION_SIGNATURE) {
@@ -923,8 +928,8 @@ public final class BroadcastQueue {
 
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "processNextBroadcast ["
                 + mQueueName + "]: "
-                + mParallelBroadcasts.size() + " parallel broadcasts, "
-                + mDispatcher.totalUndelivered() + " ordered broadcasts");
+                + mParallelBroadcasts.size() + " parallel broadcasts; "
+                + mDispatcher.describeStateLocked());
 
         mService.updateCpuStats();
 
@@ -1822,9 +1827,22 @@ public final class BroadcastQueue {
                 record.intent == null ? "" : record.intent.getAction());
     }
 
-    final boolean isIdle() {
+    boolean isIdle() {
         return mParallelBroadcasts.isEmpty() && mDispatcher.isEmpty()
                 && (mPendingBroadcast == null);
+    }
+
+    // Used by wait-for-broadcast-idle : fast-forward all current deferrals to
+    // be immediately deliverable.
+    void cancelDeferrals() {
+        mDispatcher.cancelDeferrals();
+    }
+
+    String describeState() {
+        synchronized (mService) {
+            return mParallelBroadcasts.size() + " parallel; "
+                    + mDispatcher.describeStateLocked();
+        }
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {

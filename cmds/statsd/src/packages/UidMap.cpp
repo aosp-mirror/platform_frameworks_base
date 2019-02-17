@@ -73,6 +73,11 @@ UidMap::UidMap() : mBytesUsed(0) {}
 
 UidMap::~UidMap() {}
 
+sp<UidMap> UidMap::getInstance() {
+    static sp<UidMap> sInstance = new UidMap();
+    return sInstance;
+}
+
 bool UidMap::hasApp(int uid, const string& packageName) const {
     lock_guard<mutex> lock(mMutex);
 
@@ -336,6 +341,61 @@ size_t UidMap::getBytesUsed() const {
     return mBytesUsed;
 }
 
+void UidMap::writeUidMapSnapshot(int64_t timestamp, bool includeVersionStrings,
+                                 bool includeInstaller, const std::set<int32_t>& interestingUids,
+                                 std::set<string>* str_set, ProtoOutputStream* proto) {
+    lock_guard<mutex> lock(mMutex);
+
+    writeUidMapSnapshotLocked(timestamp, includeVersionStrings, includeInstaller, interestingUids,
+                              str_set, proto);
+}
+
+void UidMap::writeUidMapSnapshotLocked(int64_t timestamp, bool includeVersionStrings,
+                                       bool includeInstaller,
+                                       const std::set<int32_t>& interestingUids,
+                                       std::set<string>* str_set, ProtoOutputStream* proto) {
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP, (long long)timestamp);
+    for (const auto& kv : mMap) {
+        if (!interestingUids.empty() &&
+            interestingUids.find(kv.first.first) == interestingUids.end()) {
+            continue;
+        }
+        uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                      FIELD_ID_SNAPSHOT_PACKAGE_INFO);
+        if (str_set != nullptr) {
+            str_set->insert(kv.first.second);
+            proto->write(FIELD_TYPE_UINT64 | FIELD_ID_SNAPSHOT_PACKAGE_NAME_HASH,
+                         (long long)Hash64(kv.first.second));
+            if (includeVersionStrings) {
+                str_set->insert(kv.second.versionString);
+                proto->write(FIELD_TYPE_UINT64 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION_STRING_HASH,
+                             (long long)Hash64(kv.second.versionString));
+            }
+            if (includeInstaller) {
+                str_set->insert(kv.second.installer);
+                proto->write(FIELD_TYPE_UINT64 | FIELD_ID_SNAPSHOT_PACKAGE_INSTALLER_HASH,
+                             (long long)Hash64(kv.second.installer));
+            }
+        } else {
+            proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, kv.first.second);
+            if (includeVersionStrings) {
+                proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_VERSION_STRING,
+                             kv.second.versionString);
+            }
+            if (includeInstaller) {
+                proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_INSTALLER,
+                             kv.second.installer);
+            }
+        }
+
+        proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
+                     (long long)kv.second.versionCode);
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, kv.first.first);
+        proto->write(FIELD_TYPE_BOOL | FIELD_ID_SNAPSHOT_PACKAGE_DELETED, kv.second.deleted);
+        proto->end(token);
+    }
+}
+
 void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key, std::set<string>* str_set,
                           bool includeVersionStrings, bool includeInstaller,
                           ProtoOutputStream* proto) {
@@ -381,43 +441,9 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key, std::s
     // Write snapshot from current uid map state.
     uint64_t snapshotsToken =
             proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SNAPSHOTS);
-    proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP, (long long)timestamp);
-    for (const auto& kv : mMap) {
-        uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
-                                      FIELD_ID_SNAPSHOT_PACKAGE_INFO);
-
-        if (str_set != nullptr) {
-            str_set->insert(kv.first.second);
-            proto->write(FIELD_TYPE_UINT64 | FIELD_ID_SNAPSHOT_PACKAGE_NAME_HASH,
-                         (long long)Hash64(kv.first.second));
-            if (includeVersionStrings) {
-                str_set->insert(kv.second.versionString);
-                proto->write(FIELD_TYPE_UINT64 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION_STRING_HASH,
-                             (long long)Hash64(kv.second.versionString));
-            }
-            if (includeInstaller) {
-                str_set->insert(kv.second.installer);
-                proto->write(FIELD_TYPE_UINT64 | FIELD_ID_SNAPSHOT_PACKAGE_INSTALLER_HASH,
-                             (long long)Hash64(kv.second.installer));
-            }
-        } else {
-            proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, kv.first.second);
-            if (includeVersionStrings) {
-                proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_VERSION_STRING,
-                             kv.second.versionString);
-            }
-            if (includeInstaller) {
-                proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_INSTALLER,
-                             kv.second.installer);
-            }
-        }
-
-        proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
-                     (long long)kv.second.versionCode);
-        proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, kv.first.first);
-        proto->write(FIELD_TYPE_BOOL | FIELD_ID_SNAPSHOT_PACKAGE_DELETED, kv.second.deleted);
-        proto->end(token);
-    }
+    writeUidMapSnapshotLocked(timestamp, includeVersionStrings, includeInstaller,
+                              std::set<int32_t>() /*empty uid set means including every uid*/,
+                              str_set, proto);
     proto->end(snapshotsToken);
 
     int64_t prevMin = getMinimumTimestampNs();

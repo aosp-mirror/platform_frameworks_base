@@ -1,6 +1,10 @@
 java_library_static {
     name: "services.net",
     srcs: ["java/**/*.java"],
+    static_libs: [
+        "netd_aidl_interface-java",
+        "networkstack-aidl-interfaces-java",
+    ]
 }
 
 filegroup {

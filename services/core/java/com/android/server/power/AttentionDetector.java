@@ -123,6 +123,9 @@ public class AttentionDetector {
     public AttentionDetector(Runnable onUserAttention, Object lock) {
         mOnUserAttention = onUserAttention;
         mLock = lock;
+
+        // Device starts with an awake state upon boot.
+        mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
     }
 
     public void systemReady(Context context) {
@@ -145,7 +148,7 @@ public class AttentionDetector {
             if (DEBUG) {
                 Slog.d(TAG, "Do not check for attention yet, wait " + (whenToCheck - now));
             }
-            return nextScreenDimming;
+            return whenToCheck;
         } else if (whenToStopExtending < whenToCheck) {
             if (DEBUG) {
                 Slog.d(TAG, "Let device sleep to avoid false results and improve security "

@@ -285,9 +285,11 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void forceStopPackage(String);
     method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public static int getCurrentUser();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getPackageImportance(String);
+    method @NonNull public java.util.Collection<java.util.Locale> getSupportedLocales();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
     method @RequiresPermission(android.Manifest.permission.KILL_UID) public void killUid(int, String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
+    method public void setDeviceLocales(@NonNull android.os.LocaleList);
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
   }
@@ -307,11 +309,13 @@ package android.app {
     method @Deprecated @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, String, int[]);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable java.lang.String...);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[]);
+    method public int noteProxyOpNoThrow(@NonNull String, @Nullable String, int);
     method public static int opToDefaultMode(@NonNull String);
     method @Nullable public static String opToPermission(@NonNull String);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(String, int, String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
+    field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
     field public static final String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
@@ -545,15 +549,17 @@ package android.app {
   }
 
   public class StatusBarManager {
-    method public android.util.Pair<java.lang.Integer,java.lang.Integer> getDisableFlags();
+    method public android.app.StatusBarManager.DisableInfo getDisableInfo();
     method public void setDisabledForSetup(boolean);
-    field public static final int DISABLE2_NONE = 0; // 0x0
-    field public static final int DISABLE_EXPAND = 65536; // 0x10000
-    field public static final int DISABLE_HOME = 2097152; // 0x200000
-    field public static final int DISABLE_NONE = 0; // 0x0
-    field public static final int DISABLE_NOTIFICATION_ALERTS = 262144; // 0x40000
-    field public static final int DISABLE_RECENT = 16777216; // 0x1000000
-    field public static final int DISABLE_SEARCH = 33554432; // 0x2000000
+  }
+
+  public static final class StatusBarManager.DisableInfo {
+    method public boolean areNoComponentsDisabled();
+    method public boolean isNavigateToHomeDisabled();
+    method public boolean isNotificationPeekingDisabled();
+    method public boolean isRecentsDisabled();
+    method public boolean isSearchDisabled();
+    method public boolean isStatusBarExpansionDisabled();
   }
 
   public final class Vr2dDisplayProperties implements android.os.Parcelable {
@@ -1366,6 +1372,7 @@ package android.content {
     field public static final String ACTION_INSTALL_INSTANT_APP_PACKAGE = "android.intent.action.INSTALL_INSTANT_APP_PACKAGE";
     field public static final String ACTION_INSTANT_APP_RESOLVER_SETTINGS = "android.intent.action.INSTANT_APP_RESOLVER_SETTINGS";
     field public static final String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
+    field @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public static final String ACTION_MANAGE_APP_PERMISSION = "android.intent.action.MANAGE_APP_PERMISSION";
     field public static final String ACTION_MANAGE_APP_PERMISSIONS = "android.intent.action.MANAGE_APP_PERMISSIONS";
     field @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public static final String ACTION_MANAGE_DEFAULT_APP = "android.intent.action.MANAGE_DEFAULT_APP";
     field public static final String ACTION_MANAGE_PERMISSIONS = "android.intent.action.MANAGE_PERMISSIONS";
@@ -1376,6 +1383,7 @@ package android.content {
     field public static final String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
+    field public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES = "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
     field @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public static final String ACTION_REVIEW_APP_PERMISSION_USAGE = "android.intent.action.REVIEW_APP_PERMISSION_USAGE";
     field public static final String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
     field public static final String ACTION_REVIEW_PERMISSION_USAGE = "android.intent.action.REVIEW_PERMISSION_USAGE";
@@ -1580,7 +1588,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
     method @RequiresPermission(allOf={android.Manifest.permission.SET_PREFERRED_APPLICATIONS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public abstract boolean setDefaultBrowserPackageNameAsUser(String, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setDistractingPackageRestrictions(@NonNull String[], @android.content.pm.PackageManager.DistractionRestriction int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setDistractingPackageRestrictions(@NonNull String[], int);
     method @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public void setHarmfulAppWarning(@NonNull String, @Nullable CharSequence);
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable String);
     method @Nullable @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable android.content.pm.SuspendDialogInfo);
@@ -1656,9 +1664,6 @@ package android.content.pm {
   public abstract static class PackageManager.DexModuleRegisterCallback {
     ctor public PackageManager.DexModuleRegisterCallback();
     method public abstract void onDexModuleRegistered(String, boolean, String);
-  }
-
-  @IntDef(flag=true, prefix={"RESTRICTION_"}, value={android.content.pm.PackageManager.RESTRICTION_NONE, android.content.pm.PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.DistractionRestriction {
   }
 
   public static interface PackageManager.OnPermissionsChangedListener {
@@ -3405,13 +3410,13 @@ package android.media {
 
   public final class AudioFocusInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public android.media.AudioAttributes getAttributes();
-    method public String getClientId();
+    method @NonNull public android.media.AudioAttributes getAttributes();
+    method @NonNull public String getClientId();
     method public int getClientUid();
     method public int getFlags();
     method public int getGainRequest();
     method public int getLossReceived();
-    method public String getPackageName();
+    method @NonNull public String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.media.AudioFocusInfo> CREATOR;
   }
@@ -3471,7 +3476,7 @@ package android.media {
     field public static final int PLAYER_TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
-  public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting {
+  public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
     ctor public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
   }
 
@@ -3929,7 +3934,7 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementValue(int, boolean, @NonNull android.net.ConnectivityManager.TetheringEntitlementValueListener, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void setAirplaneMode(boolean);
-    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.os.Bundle);
+    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.net.Network, android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
@@ -5305,6 +5310,10 @@ package android.os {
     field public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
   }
 
+  public final class LocaleList implements android.os.Parcelable {
+    method public static boolean isPseudoLocale(@Nullable android.icu.util.ULocale);
+  }
+
   public final class NativeHandle implements java.io.Closeable {
     ctor public NativeHandle();
     ctor public NativeHandle(@NonNull java.io.FileDescriptor, boolean);
@@ -5783,8 +5792,10 @@ package android.provider {
   }
 
   public static interface DeviceConfig.Rollback {
+    field public static final String BOOT_NAMESPACE = "rollback_boot";
     field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
     field public static final String NAMESPACE = "rollback";
+    field public static final String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
   }
 
   public static interface DeviceConfig.Runtime {
@@ -5946,6 +5957,7 @@ package android.provider {
   public final class Settings {
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
+    field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
   }
 
@@ -6301,20 +6313,11 @@ package android.service.autofill.augmented {
   }
 
   public abstract class PresentationParams {
-    method public int getFlags();
-    method @Nullable public android.service.autofill.augmented.PresentationParams.Area getFullArea();
     method @Nullable public android.service.autofill.augmented.PresentationParams.Area getSuggestionArea();
-    field public static final int FLAG_HINT_GRAVITY_BOTTOM = 2; // 0x2
-    field public static final int FLAG_HINT_GRAVITY_LEFT = 4; // 0x4
-    field public static final int FLAG_HINT_GRAVITY_RIGHT = 8; // 0x8
-    field public static final int FLAG_HINT_GRAVITY_TOP = 1; // 0x1
-    field public static final int FLAG_HOST_IME = 16; // 0x10
-    field public static final int FLAG_HOST_SYSTEM = 32; // 0x20
   }
 
   public abstract static class PresentationParams.Area {
     method @NonNull public android.graphics.Rect getBounds();
-    method @Nullable public android.service.autofill.augmented.PresentationParams.Area getSubArea(@NonNull android.graphics.Rect);
   }
 
 }
@@ -6348,7 +6351,8 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
-    method public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method @Deprecated public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
   }
 
@@ -6518,6 +6522,15 @@ package android.service.euicc {
 }
 
 package android.service.notification {
+
+  public final class Adjustment implements android.os.Parcelable {
+    ctor protected Adjustment(android.os.Parcel);
+    field public static final String KEY_PEOPLE = "key_people";
+  }
+
+  public final class NotificationStats implements android.os.Parcelable {
+    ctor protected NotificationStats(android.os.Parcel);
+  }
 
   public final class SnoozeCriterion implements android.os.Parcelable {
     ctor public SnoozeCriterion(String, CharSequence, CharSequence);
@@ -6974,6 +6987,7 @@ package android.telecom {
     field public static final String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
+    field public static final String EXTRA_IS_USER_INTENT_EMERGENCY_CALL = "android.telecom.extra.IS_USER_INTENT_EMERGENCY_CALL";
     field public static final int TTY_MODE_FULL = 1; // 0x1
     field public static final int TTY_MODE_HCO = 2; // 0x2
     field public static final int TTY_MODE_OFF = 0; // 0x0
@@ -7860,7 +7874,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
-    method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
+    method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestNumberVerification(@NonNull android.telephony.PhoneNumberRange, long, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.NumberVerificationCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean resetRadioConfig();
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
@@ -8248,6 +8262,7 @@ package android.telephony.ims {
     method public int getServiceType();
     method public static int getVideoStateFromCallType(int);
     method public static int getVideoStateFromImsCallProfile(android.telephony.ims.ImsCallProfile);
+    method public boolean hasKnownUserIntentEmergency();
     method public boolean isEmergencyCallTesting();
     method public boolean isVideoCall();
     method public boolean isVideoPaused();
@@ -8260,6 +8275,7 @@ package android.telephony.ims {
     method public void setEmergencyCallTesting(boolean);
     method public void setEmergencyServiceCategories(int);
     method public void setEmergencyUrns(java.util.List<java.lang.String>);
+    method public void setHasKnownUserIntentEmergency(boolean);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
@@ -9302,7 +9318,8 @@ package android.view.accessibility {
 package android.view.autofill {
 
   public final class AutofillManager {
-    method public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method @Deprecated public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
+    method public void setAugmentedAutofillWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
   }
 
 }
@@ -9324,6 +9341,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.view.contentcapture.ContentCaptureContext getContentCaptureContext();
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
     method @Nullable public java.util.List<android.view.autofill.AutofillId> getIds();
@@ -9332,6 +9350,7 @@ package android.view.contentcapture {
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
+    field public static final int TYPE_CONTEXT_UPDATED = 6; // 0x6
     field public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4; // 0x4
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1

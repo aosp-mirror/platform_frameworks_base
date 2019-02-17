@@ -47,6 +47,7 @@
         android:gravity="center"
         android:textSize="12sp"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:singleLine="true"
     />
 
     <TextView
@@ -57,5 +58,6 @@
         android:gravity="center"
         android:textColor="?android:attr/textColorTertiary"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:singleLine="true"
     />
 </LinearLayout>

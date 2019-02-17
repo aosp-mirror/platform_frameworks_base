@@ -34,6 +34,7 @@ oneway interface INetworkMonitor {
 
     void start();
     void launchCaptivePortalApp();
+    void notifyCaptivePortalAppFinished(int response);
     void forceReevaluation(int uid);
     void notifyPrivateDnsChanged(in PrivateDnsConfigParcel config);
     void notifyDnsResponse(int returnCode);

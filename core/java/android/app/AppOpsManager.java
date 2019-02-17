@@ -848,6 +848,7 @@ public class AppOpsManager {
     /** @hide Has a legacy (non-isolated) view of storage. */
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
     /** @hide Interact with accessibility. */
+    @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
 
     // Warning: If an permission is added here it also has to be added to
@@ -4290,9 +4291,32 @@ public class AppOpsManager {
     /**
      * Like {@link #noteProxyOp(String, String)} but instead
      * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     *
+     * <p>This API requires the package with the {@code proxiedPackageName} to belongs to
+     * {@link Binder#getCallingUid()}.
      */
     public int noteProxyOpNoThrow(String op, String proxiedPackageName) {
         return noteProxyOpNoThrow(strOpToOp(op), proxiedPackageName);
+    }
+
+    /**
+     * Like {@link #noteProxyOp(String, String)} but instead
+     * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     *
+     * <p>This API requires package with the {@code proxiedPackageName} to belong to
+     * {@code proxiedUid}.
+     *
+     * @param op The op to note
+     * @param proxiedPackageName The package to note the op for or {@code null} if the op should be
+     *                           noted for the "android" package
+     * @param proxiedUid The uid the package belongs to
+     *
+     * @hide
+     */
+    @SystemApi
+    public int noteProxyOpNoThrow(@NonNull String op, @Nullable String proxiedPackageName,
+            int proxiedUid) {
+        return noteProxyOpNoThrow(strOpToOp(op), proxiedPackageName, proxiedUid);
     }
 
     /**
@@ -4494,14 +4518,27 @@ public class AppOpsManager {
      * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
      * @hide
      */
-    public int noteProxyOpNoThrow(int op, String proxiedPackageName) {
+    public int noteProxyOpNoThrow(int op, String proxiedPackageName, int proxiedUid) {
         logOperationIfNeeded(op, mContext.getOpPackageName(), proxiedPackageName);
         try {
             return mService.noteProxyOperation(op, Process.myUid(), mContext.getOpPackageName(),
-                    Binder.getCallingUid(), proxiedPackageName);
+                    proxiedUid, proxiedPackageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Like {@link #noteProxyOp(int, String)} but instead
+     * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     *
+     * <p>This API requires the package with {@code proxiedPackageName} to belongs to
+     * {@link Binder#getCallingUid()}.
+     *
+     * @hide
+     */
+    public int noteProxyOpNoThrow(int op, String proxiedPackageName) {
+        return noteProxyOpNoThrow(op, proxiedPackageName, Binder.getCallingUid());
     }
 
     /**

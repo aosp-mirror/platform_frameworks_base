@@ -92,6 +92,9 @@ struct OverlayableItem {
 
     // The resource can be overlaid by any overlay on the product partition.
     kProduct = 0x08,
+
+    // The resource can be overlaid by any overlay signed with the same signature as its actor.
+    kSignature = 0x010,
   };
 
   std::shared_ptr<Overlayable> overlayable;

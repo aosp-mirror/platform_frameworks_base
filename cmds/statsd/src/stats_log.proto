@@ -425,6 +425,7 @@ message StatsdStatsReport {
       optional int64 bucket_dropped = 8;
       optional int64 min_bucket_boundary_delay_ns = 9;
       optional int64 max_bucket_boundary_delay_ns = 10;
+      optional int64 bucket_unknown_condition = 11;
     }
     repeated AtomMetricStats atom_metric_stats = 17;
 
@@ -455,4 +456,18 @@ message StatsdStatsReport {
         optional int32 last_error = 3;
     }
     repeated LogLossStats detected_log_loss = 16;
+}
+
+message AlertTriggerDetails {
+    message MetricValue {
+        optional int64 metric_id = 1;
+        optional DimensionsValue dimension_in_what = 2;
+        optional DimensionsValue dimension_in_condition = 3;
+        optional int64 value = 4;
+    }
+    oneof value {
+        MetricValue trigger_metric = 1;
+        EventMetricData trigger_event = 2;
+    }
+    optional UidMapping.PackageInfoSnapshot package_info = 3;
 }

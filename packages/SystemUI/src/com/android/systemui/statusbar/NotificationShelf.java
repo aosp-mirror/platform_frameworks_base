@@ -348,15 +348,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
             if (notGoneIndex == 0) {
                 StatusBarIconView icon = row.getEntry().expandedIcon;
                 NotificationIconContainer.IconState iconState = getIconState(icon);
+                // The icon state might be null in rare cases where the notification is actually
+                // added to the layout, but not to the shelf. An example are replied messages, since
+                // they don't show up on AOD
                 if (iconState != null && iconState.clampedAppearAmount == 1.0f) {
                     // only if the first icon is fully in the shelf we want to clip to it!
                     backgroundTop = (int) (row.getTranslationY() - getTranslationY());
                     firstElementRoundness = row.getCurrentTopRoundness();
-                } else if (iconState == null) {
-                    Log.wtf(TAG, "iconState is null. ExpandedIcon: " + row.getEntry().expandedIcon
-                            + (row.getEntry().expandedIcon != null
-                            ? "\n icon parent: " + row.getEntry().expandedIcon.getParent() : "")
-                            + " \n number of notifications: " + mHostLayout.getChildCount() );
                 }
             }
             if (row.isFirstInSection() && previousRow != null && previousRow.isLastInSection()) {

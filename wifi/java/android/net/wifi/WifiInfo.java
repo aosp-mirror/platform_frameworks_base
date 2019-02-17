@@ -276,14 +276,19 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the service set identifier (SSID) of the current 802.11 network.
+     * <p>
      * If the SSID can be decoded as UTF-8, it will be returned surrounded by double
-     * quotation marks. Otherwise, it is returned as a string of hex digits. The
-     * SSID may be &lt;unknown ssid&gt; if there is no network currently connected,
-     * or if the caller has insufficient permissions to access the SSID.
-     *
+     * quotation marks. Otherwise, it is returned as a string of hex digits.
+     * The SSID may be
+     * <lt>&lt;unknown ssid&gt;, if there is no network currently connected or if the caller has
+     * insufficient permissions to access the SSID.<lt>
+     * </p>
+     * <p>
      * Prior to {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method
      * always returned the SSID with no quotes around it.
-     * @return the SSID
+     * </p>
+     *
+     * @return the SSID.
      */
     public String getSSID() {
         if (mWifiSsid != null) {
@@ -312,7 +317,13 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Return the basic service set identifier (BSSID) of the current access point.
-     * The BSSID may be {@code null} if there is no network currently connected.
+     * <p>
+     * The BSSID may be
+     * <lt>{@code null}, if there is no network currently connected.</lt>
+     * <lt>{@code "02:00:00:00:00:00"}, if the caller has insufficient permissions to access the
+     * BSSID.<lt>
+     * </p>
+     *
      * @return the BSSID, in the form of a six-byte MAC address: {@code XX:XX:XX:XX:XX:XX}
      */
     public String getBSSID() {
@@ -511,9 +522,13 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Each configured network has a unique small integer ID, used to identify
-     * the network when performing operations on the supplicant. This method
-     * returns the ID for the currently connected network.
-     * @return the network ID, or -1 if there is no currently connected network
+     * the network. This method returns the ID for the currently connected network.
+     * <p>
+     * The networkId may be {@code -1} if there is no currently connected network or if the caller
+     * has insufficient permissions to access the network ID.
+     * </p>
+     *
+     * @return the network ID.
      */
     public int getNetworkId() {
         return mNetworkId;

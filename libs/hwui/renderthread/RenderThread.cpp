@@ -173,10 +173,10 @@ void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
-    mVkManager = new VulkanManager(*this);
+    mVkManager = new VulkanManager();
     mCacheManager = new CacheManager(mDisplayInfo);
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        mVkManager->initialize();
+        requireVkContext();
     }
 }
 
@@ -195,14 +195,32 @@ void RenderThread::requireGlContext() {
     LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
     GrContextOptions options;
-    options.fPreferExternalImagesOverES3 = true;
-    options.fDisableDistanceFieldPaths = true;
+    initGrContextOptions(options);
     auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     auto size = glesVersion ? strlen(glesVersion) : -1;
     cacheManager().configureContext(&options, glesVersion, size);
     sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
+}
+
+void RenderThread::requireVkContext() {
+    if (mVkManager->hasVkContext()) {
+        return;
+    }
+    mVkManager->initialize();
+    GrContextOptions options;
+    initGrContextOptions(options);
+    // TODO: get a string describing the SPIR-V compiler version and use it here
+    cacheManager().configureContext(&options, nullptr, 0);
+    sk_sp<GrContext> grContext = mVkManager->createContext(options);
+    LOG_ALWAYS_FATAL_IF(!grContext.get());
+    setGrContext(grContext);
+}
+
+void RenderThread::initGrContextOptions(GrContextOptions& options) {
+    options.fPreferExternalImagesOverES3 = true;
+    options.fDisableDistanceFieldPaths = true;
 }
 
 void RenderThread::destroyRenderingContext() {

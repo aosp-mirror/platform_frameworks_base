@@ -24,10 +24,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
+import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.StatsLog;
@@ -70,7 +73,7 @@ class GnssVisibilityControl {
     private final Handler mHandler;
     private final Context mContext;
 
-    private boolean mIsMasterLocationSettingsEnabled = true;
+    private boolean mIsDeviceLocationSettingsEnabled;
 
     // Number of non-framework location access proxy apps is expected to be small (< 5).
     private static final int HASH_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
@@ -88,13 +91,9 @@ class GnssVisibilityControl {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mPackageManager = mContext.getPackageManager();
 
-        // Set to empty proxy app list initially until the configuration properties are loaded.
-        updateNfwLocationAccessProxyAppsInGnssHal();
-
-        // Listen for proxy app package installation, removal events.
-        listenForProxyAppsPackageUpdates();
-
-        // TODO(b/122855984): Handle global location settings on/off.
+        // Complete initialization as the first event to run in mHandler thread. After that,
+        // all object state read/update events run in the mHandler thread.
+        runOnHandler(this::handleInitialize);
     }
 
     void updateProxyApps(List<String> nfwLocationAccessProxyApps) {
@@ -105,10 +104,6 @@ class GnssVisibilityControl {
         runOnHandler(() -> handleUpdateProxyApps(nfwLocationAccessProxyApps));
     }
 
-    void masterLocationSettingsUpdated(boolean enabled) {
-        runOnHandler(() -> handleMasterLocationSettingsUpdated(enabled));
-    }
-
     void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
             String otherProtocolStackName, byte requestor, String requestorId, byte responseType,
             boolean inEmergencyMode, boolean isCachedLocation) {
@@ -117,7 +112,19 @@ class GnssVisibilityControl {
                         requestor, requestorId, responseType, inEmergencyMode, isCachedLocation)));
     }
 
+    private void handleInitialize() {
+        disableNfwLocationAccess(); // Disable until config properties are loaded.
+        listenForProxyAppsPackageUpdates();
+        listenForDeviceLocationSettingsUpdate();
+        mIsDeviceLocationSettingsEnabled = getDeviceLocationSettings();
+    }
+
+    private boolean getDeviceLocationSettings() {
+        return mContext.getSystemService(LocationManager.class).isLocationEnabled();
+    }
+
     private void listenForProxyAppsPackageUpdates() {
+        // Listen for proxy apps package installation, removal events.
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -143,11 +150,22 @@ class GnssVisibilityControl {
         }, UserHandle.ALL, intentFilter, null, mHandler);
     }
 
+    private void listenForDeviceLocationSettingsUpdate() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
+                true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        handleDeviceLocationSettingsUpdated();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
     private void handleProxyAppPackageUpdate(String pkgName, String action) {
         final Boolean locationPermission = mProxyAppToLocationPermissions.get(pkgName);
-        // pkgName is not one of the proxy apps in our list.
         if (locationPermission == null) {
-            return;
+            return; // ignore, pkgName is not one of the proxy apps in our list.
         }
 
         Log.i(TAG, "Proxy app " + pkgName + " package changed: " + action);
@@ -197,15 +215,33 @@ class GnssVisibilityControl {
                 return true;
             }
         }
-
         return false;
     }
 
-    private void handleMasterLocationSettingsUpdated(boolean enabled) {
-        mIsMasterLocationSettingsEnabled = enabled;
-        Log.i(TAG, "Master location settings switch changed to "
-                + (enabled ? "enabled" : "disabled"));
-        updateNfwLocationAccessProxyAppsInGnssHal();
+    private void handleDeviceLocationSettingsUpdated() {
+        final boolean enabled = getDeviceLocationSettings();
+        Log.i(TAG, "Device location settings enabled: " + enabled);
+
+        if (mIsDeviceLocationSettingsEnabled == enabled) {
+            return;
+        }
+
+        mIsDeviceLocationSettingsEnabled = enabled;
+        if (!mIsDeviceLocationSettingsEnabled) {
+            disableNfwLocationAccess();
+            return;
+        }
+
+        // When device location settings was disabled, we already set the proxy app list
+        // to empty in GNSS HAL. Update only if the proxy app list is not empty.
+        String[] locationPermissionEnabledProxyApps = getLocationPermissionEnabledProxyApps();
+        if (locationPermissionEnabledProxyApps.length != 0) {
+            setNfwLocationAccessProxyAppsInGnssHal(locationPermissionEnabledProxyApps);
+        }
+    }
+
+    private void disableNfwLocationAccess() {
+        setNfwLocationAccessProxyAppsInGnssHal(NO_LOCATION_ENABLED_PROXY_APPS);
     }
 
     // Represents NfwNotification structure in IGnssVisibilityControlCallback.hal
@@ -316,8 +352,7 @@ class GnssVisibilityControl {
             return mPackageManager.getApplicationInfo(pkgName, 0).uid;
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) {
-                Log.d(TAG, "Non-framework location access proxy app "
-                        + pkgName + " is not found.");
+                Log.d(TAG, "Non-framework location access proxy app " + pkgName + " is not found.");
             }
             return null;
         }
@@ -329,8 +364,14 @@ class GnssVisibilityControl {
     }
 
     private void updateNfwLocationAccessProxyAppsInGnssHal() {
-        final String[] locationPermissionEnabledProxyApps = shouldDisableNfwLocationAccess()
-                ? NO_LOCATION_ENABLED_PROXY_APPS : getLocationPermissionEnabledProxyApps();
+        if (!mIsDeviceLocationSettingsEnabled) {
+            return; // Keep non-framework location access disabled.
+        }
+        setNfwLocationAccessProxyAppsInGnssHal(getLocationPermissionEnabledProxyApps());
+    }
+
+    private void setNfwLocationAccessProxyAppsInGnssHal(
+            String[] locationPermissionEnabledProxyApps) {
         final String proxyAppsStr = Arrays.toString(locationPermissionEnabledProxyApps);
         Log.i(TAG, "Updating non-framework location access proxy apps in the GNSS HAL to: "
                 + proxyAppsStr);
@@ -341,12 +382,8 @@ class GnssVisibilityControl {
         }
     }
 
-    private boolean shouldDisableNfwLocationAccess() {
-        return !mIsMasterLocationSettingsEnabled;
-    }
-
     private String[] getLocationPermissionEnabledProxyApps() {
-        // Get a count of proxy apps with location permission enabled to array creation size.
+        // Get a count of proxy apps with location permission enabled for array creation size.
         int countLocationPermissionEnabledProxyApps = 0;
         for (Boolean hasLocationPermissionEnabled : mProxyAppToLocationPermissions.values()) {
             if (hasLocationPermissionEnabled) {

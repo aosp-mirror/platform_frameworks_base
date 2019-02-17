@@ -109,7 +109,13 @@ public:
      */
     static sk_sp<SkColorSpace> getNativeColorSpace(jlong colorSpaceHandle);
 
-    static jobject getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
+    /**
+     * Return the android.graphics.ColorSpace Java object that corresponds to decodeColorSpace
+     * and decodeColorType.
+     *
+     * This may create a new object if none of the Named ColorSpaces match.
+     */
+    static jobject getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
             SkColorType decodeColorType);
 
     /**

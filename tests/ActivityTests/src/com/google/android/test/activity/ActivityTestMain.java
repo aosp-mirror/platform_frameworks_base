@@ -439,6 +439,14 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Require unknown permission").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                final Intent intent = new Intent(SLOW_RECEIVER_ACTION);
+                intent.putExtra(SLOW_RECEIVER_EXTRA, 5038);
+                sendOrderedBroadcast(intent, "com.google.android.test.activity.permission.UNDEFINED");
+                return true;
+            }
+        });
         menu.add("Stack Doc").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 ActivityManager.AppTask task = findDocTask();

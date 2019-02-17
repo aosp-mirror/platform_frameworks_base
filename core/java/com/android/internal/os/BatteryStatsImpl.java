@@ -187,6 +187,8 @@ public class BatteryStatsImpl extends BatteryStats {
     static final int MSG_REPORT_RESET_STATS = 4;
     static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
 
+    private static final double MILLISECONDS_IN_HOUR = 3600 * 1000;
+
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
 
@@ -252,6 +254,9 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final long RPM_STATS_UPDATE_FREQ_MS = 1000;
     /** Last time that RPM stats were updated by updateRpmStatsLocked. */
     private long mLastRpmStatsUpdateTimeMs = -RPM_STATS_UPDATE_FREQ_MS;
+
+    /** Container for Rail Energy Data stats. */
+    private final RailStats mTmpRailStats = new RailStats();
     /**
      * Use a queue to delay removing UIDs from {@link KernelCpuUidUserSysTimeReader},
      * {@link KernelCpuUidActiveTimeReader}, {@link KernelCpuUidClusterTimeReader},
@@ -327,6 +332,15 @@ public class BatteryStatsImpl extends BatteryStats {
         public String getSubsystemLowPowerStats();
     }
 
+    /** interface to update rail information for power monitor */
+    public interface RailEnergyDataCallback {
+        /** Function to fill the map for the rail data stats
+         * Used for power monitoring feature
+         * @param railStats
+         */
+        void fillRailDataStats(RailStats railStats);
+    }
+
     public static abstract class UserInfoProvider {
         private int[] userIds;
         protected abstract @Nullable int[] getUserIds();
@@ -360,6 +374,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
     };
+
+    public final RailEnergyDataCallback mRailEnergyDataCallback;
 
     /**
      * This handler is running on {@link BackgroundThread}.
@@ -593,7 +609,9 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_RADIO = 0x04;
         int UPDATE_BT = 0x08;
         int UPDATE_RPM = 0x10; // 16
-        int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM;
+        int UPDATE_RAIL = 0x20; // 32
+        int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM
+                | UPDATE_RAIL;
 
         Future<?> scheduleSync(String reason, int flags);
         Future<?> scheduleCpuSyncDueToRemovedUid(int uid);
@@ -1078,6 +1096,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBatteryStatsHistory = null;
         mHandler = null;
         mPlatformIdleStateCallback = null;
+        mRailEnergyDataCallback = null;
         mUserInfoProvider = null;
         mConstants = new Constants(mHandler);
         clearHistoryLocked();
@@ -3005,6 +3024,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private final LongSamplingCounter mRxTimeMillis;
         private final LongSamplingCounter[] mTxTimeMillis;
         private final LongSamplingCounter mPowerDrainMaMs;
+        private final LongSamplingCounter mMonitoredRailChargeConsumedMaMs;
 
         public ControllerActivityCounterImpl(TimeBase timeBase, int numTxStates) {
             mIdleTimeMillis = new LongSamplingCounter(timeBase);
@@ -3016,6 +3036,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mTxTimeMillis[i] = new LongSamplingCounter(timeBase);
             }
             mPowerDrainMaMs = new LongSamplingCounter(timeBase);
+            mMonitoredRailChargeConsumedMaMs = new LongSamplingCounter(timeBase);
         }
 
         public ControllerActivityCounterImpl(TimeBase timeBase, int numTxStates, Parcel in) {
@@ -3033,6 +3054,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mTxTimeMillis[i] = new LongSamplingCounter(timeBase, in);
             }
             mPowerDrainMaMs = new LongSamplingCounter(timeBase, in);
+            mMonitoredRailChargeConsumedMaMs = new LongSamplingCounter(timeBase, in);
         }
 
         public void readSummaryFromParcel(Parcel in) {
@@ -3048,6 +3070,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 counter.readSummaryFromParcelLocked(in);
             }
             mPowerDrainMaMs.readSummaryFromParcelLocked(in);
+            mMonitoredRailChargeConsumedMaMs.readSummaryFromParcelLocked(in);
         }
 
         @Override
@@ -3065,6 +3088,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 counter.writeSummaryFromParcelLocked(dest);
             }
             mPowerDrainMaMs.writeSummaryFromParcelLocked(dest);
+            mMonitoredRailChargeConsumedMaMs.writeSummaryFromParcelLocked(dest);
         }
 
         @Override
@@ -3078,6 +3102,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 counter.writeToParcel(dest);
             }
             mPowerDrainMaMs.writeToParcel(dest);
+            mMonitoredRailChargeConsumedMaMs.writeToParcel(dest);
         }
 
         public void reset(boolean detachIfReset) {
@@ -3089,6 +3114,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 counter.reset(detachIfReset);
             }
             mPowerDrainMaMs.reset(detachIfReset);
+            mMonitoredRailChargeConsumedMaMs.reset(detachIfReset);
         }
 
         public void detach() {
@@ -3100,6 +3126,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 counter.detach();
             }
             mPowerDrainMaMs.detach();
+            mMonitoredRailChargeConsumedMaMs.detach();
         }
 
         /**
@@ -3153,6 +3180,15 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public LongSamplingCounter getPowerCounter() {
             return mPowerDrainMaMs;
+        }
+
+        /**
+         * @return a LongSamplingCounter, measuring actual monitored rail energy consumed
+         * milli-ampere milli-seconds (mAmS).
+         */
+        @Override
+        public LongSamplingCounter getMonitoredRailChargeConsumedMaMs() {
+            return mMonitoredRailChargeConsumedMaMs;
         }
     }
 
@@ -3497,6 +3533,8 @@ public class BatteryStatsImpl extends BatteryStats {
             if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryChargeUAh=" + cur.batteryChargeUAh);
             dest.writeInt(cur.batteryChargeUAh);
         }
+        dest.writeDouble(cur.modemRailChargeMah);
+        dest.writeDouble(cur.wifiRailChargeMah);
     }
 
     private int buildBatteryLevelInt(HistoryItem h) {
@@ -3747,6 +3785,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if ((firstToken&DELTA_BATTERY_CHARGE_FLAG) != 0) {
             cur.batteryChargeUAh = src.readInt();
         }
+        cur.modemRailChargeMah = src.readDouble();
+        cur.wifiRailChargeMah = src.readDouble();
     }
 
     @Override
@@ -10111,12 +10151,12 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(File systemDir, Handler handler, PlatformIdleStateCallback cb,
-            UserInfoProvider userInfoProvider) {
-        this(new SystemClocks(), systemDir, handler, cb, userInfoProvider);
+            RailEnergyDataCallback railStatsCb, UserInfoProvider userInfoProvider) {
+        this(new SystemClocks(), systemDir, handler, cb, railStatsCb, userInfoProvider);
     }
 
     private BatteryStatsImpl(Clocks clocks, File systemDir, Handler handler,
-            PlatformIdleStateCallback cb,
+            PlatformIdleStateCallback cb, RailEnergyDataCallback railStatsCb,
             UserInfoProvider userInfoProvider) {
         init(clocks);
 
@@ -10218,6 +10258,7 @@ public class BatteryStatsImpl extends BatteryStats {
         clearHistoryLocked();
         updateDailyDeadlineLocked();
         mPlatformIdleStateCallback = cb;
+        mRailEnergyDataCallback = railStatsCb;
         mUserInfoProvider = userInfoProvider;
     }
 
@@ -10238,6 +10279,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBatteryStatsHistory = new BatteryStatsHistory(this, mHistoryBuffer);
         readFromParcel(p);
         mPlatformIdleStateCallback = null;
+        mRailEnergyDataCallback = null;
     }
 
     public void setPowerProfileLocked(PowerProfile profile) {
@@ -10934,6 +10976,8 @@ public class BatteryStatsImpl extends BatteryStats {
             mWakeupReasonStats.clear();
         }
 
+        mTmpRailStats.reset();
+
         mLastHistoryStepDetails = null;
         mLastStepCpuUserTime = mLastStepCpuSystemTime = 0;
         mCurStepCpuUserTime = mCurStepCpuSystemTime = 0;
@@ -11321,6 +11365,16 @@ public class BatteryStatsImpl extends BatteryStats {
                     mWifiActivity.getPowerCounter().addCountLocked(
                             (long) (info.getControllerEnergyUsed() / opVolt));
                 }
+                // Converting uWs to mAms.
+                // Conversion: (uWs * (1000ms / 1s) * (1mW / 1000uW)) / mV = mAms
+                long monitoredRailChargeConsumedMaMs =
+                        (long) (mTmpRailStats.getWifiTotalEnergyUseduWs() / opVolt);
+                mWifiActivity.getMonitoredRailChargeConsumedMaMs().addCountLocked(
+                        monitoredRailChargeConsumedMaMs);
+                mHistoryCur.wifiRailChargeMah +=
+                        (monitoredRailChargeConsumedMaMs / MILLISECONDS_IN_HOUR);
+                addHistoryRecordLocked(mClocks.elapsedRealtime(), mClocks.uptimeMillis());
+                mTmpRailStats.resetWifiTotalEnergyUsed();
             }
         }
     }
@@ -11411,9 +11465,18 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     // We store the power drain as mAms.
                     mModemActivity.getPowerCounter().addCountLocked((long) energyUsed);
+                    // Converting uWs to mAms.
+                    // Conversion: (uWs * (1000ms / 1s) * (1mW / 1000uW)) / mV = mAms
+                    long monitoredRailChargeConsumedMaMs =
+                            (long) (mTmpRailStats.getCellularTotalEnergyUseduWs() / opVolt);
+                    mModemActivity.getMonitoredRailChargeConsumedMaMs().addCountLocked(
+                            monitoredRailChargeConsumedMaMs);
+                    mHistoryCur.modemRailChargeMah +=
+                            (monitoredRailChargeConsumedMaMs / MILLISECONDS_IN_HOUR);
+                    addHistoryRecordLocked(mClocks.elapsedRealtime(), mClocks.uptimeMillis());
+                    mTmpRailStats.resetCellularTotalEnergyUsed();
                 }
             }
-
             final long elapsedRealtimeMs = mClocks.elapsedRealtime();
             long radioTime = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000);
@@ -11809,6 +11872,16 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         }
+    }
+
+    /**
+     * Read and record Rail Energy data.
+     */
+    public void updateRailStatsLocked() {
+        if (mRailEnergyDataCallback == null || !mTmpRailStats.isRailStatsAvailable()) {
+            return;
+        }
+        mRailEnergyDataCallback.fillRailDataStats(mTmpRailStats);
     }
 
     /**
@@ -12950,6 +13023,8 @@ public class BatteryStatsImpl extends BatteryStats {
         final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(which);
         final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(which);
         final long energyConsumedMaMs = counter.getPowerCounter().getCountLocked(which);
+        final long monitoredRailChargeConsumedMaMs =
+                counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which);
         long[] timeInRatMs = new long[BatteryStats.NUM_DATA_CONNECTION_TYPES];
         for (int i = 0; i < timeInRatMs.length; i++) {
            timeInRatMs[i] = getPhoneDataConnectionTime(i, rawRealTime, which) / 1000;
@@ -12979,58 +13054,62 @@ public class BatteryStatsImpl extends BatteryStats {
         s.setTimeInRatMs(timeInRatMs);
         s.setTimeInRxSignalStrengthLevelMs(timeInRxSignalStrengthLevelMs);
         s.setTxTimeMs(txTimeMs);
+        s.setMonitoredRailChargeConsumedMaMs(monitoredRailChargeConsumedMaMs);
         return s;
     }
 
-     /*@hide */
-     public WifiBatteryStats getWifiBatteryStats() {
-         WifiBatteryStats s = new WifiBatteryStats();
-         final int which = STATS_SINCE_CHARGED;
-         final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
-         final ControllerActivityCounter counter = getWifiControllerActivity();
-         final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(which);
-         final long scanTimeMs = counter.getScanTimeCounter().getCountLocked(which);
-         final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(which);
-         final long txTimeMs = counter.getTxTimeCounters()[0].getCountLocked(which);
-         final long totalControllerActivityTimeMs
-             = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which) / 1000;
-         final long sleepTimeMs
-             = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + txTimeMs);
-         final long energyConsumedMaMs = counter.getPowerCounter().getCountLocked(which);
-         long numAppScanRequest = 0;
-         for (int i = 0; i < mUidStats.size(); i++) {
-             numAppScanRequest += mUidStats.valueAt(i).mWifiScanTimer.getCountLocked(which);
-         }
-         long[] timeInStateMs = new long[NUM_WIFI_STATES];
-         for (int i=0; i<NUM_WIFI_STATES; i++) {
+    /*@hide */
+    public WifiBatteryStats getWifiBatteryStats() {
+        WifiBatteryStats s = new WifiBatteryStats();
+        final int which = STATS_SINCE_CHARGED;
+        final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
+        final ControllerActivityCounter counter = getWifiControllerActivity();
+        final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(which);
+        final long scanTimeMs = counter.getScanTimeCounter().getCountLocked(which);
+        final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(which);
+        final long txTimeMs = counter.getTxTimeCounters()[0].getCountLocked(which);
+        final long totalControllerActivityTimeMs
+                = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which) / 1000;
+        final long sleepTimeMs
+                = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + txTimeMs);
+        final long energyConsumedMaMs = counter.getPowerCounter().getCountLocked(which);
+        final long monitoredRailChargeConsumedMaMs =
+                counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which);
+        long numAppScanRequest = 0;
+        for (int i = 0; i < mUidStats.size(); i++) {
+            numAppScanRequest += mUidStats.valueAt(i).mWifiScanTimer.getCountLocked(which);
+        }
+        long[] timeInStateMs = new long[NUM_WIFI_STATES];
+        for (int i=0; i<NUM_WIFI_STATES; i++) {
             timeInStateMs[i] = getWifiStateTime(i, rawRealTime, which) / 1000;
-         }
-         long[] timeInSupplStateMs = new long[NUM_WIFI_SUPPL_STATES];
-         for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
-             timeInSupplStateMs[i] = getWifiSupplStateTime(i, rawRealTime, which) / 1000;
-         }
-         long[] timeSignalStrengthTimeMs = new long[NUM_WIFI_SIGNAL_STRENGTH_BINS];
-         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
-             timeSignalStrengthTimeMs[i] = getWifiSignalStrengthTime(i, rawRealTime, which) / 1000;
-         }
-         s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
-         s.setKernelActiveTimeMs(getWifiActiveTime(rawRealTime, which) / 1000);
-         s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which));
-         s.setNumBytesTx(getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which));
-         s.setNumPacketsRx(getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which));
-         s.setNumBytesRx(getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which));
-         s.setSleepTimeMs(sleepTimeMs);
-         s.setIdleTimeMs(idleTimeMs);
-         s.setRxTimeMs(rxTimeMs);
-         s.setTxTimeMs(txTimeMs);
-         s.setScanTimeMs(scanTimeMs);
-         s.setEnergyConsumedMaMs(energyConsumedMaMs);
-         s.setNumAppScanRequest(numAppScanRequest);
-         s.setTimeInStateMs(timeInStateMs);
-         s.setTimeInSupplicantStateMs(timeInSupplStateMs);
-         s.setTimeInRxSignalStrengthLevelMs(timeSignalStrengthTimeMs);
-         return s;
-     }
+        }
+        long[] timeInSupplStateMs = new long[NUM_WIFI_SUPPL_STATES];
+        for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
+            timeInSupplStateMs[i] = getWifiSupplStateTime(i, rawRealTime, which) / 1000;
+        }
+        long[] timeSignalStrengthTimeMs = new long[NUM_WIFI_SIGNAL_STRENGTH_BINS];
+        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+            timeSignalStrengthTimeMs[i] = getWifiSignalStrengthTime(i, rawRealTime, which) / 1000;
+        }
+        s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
+        s.setKernelActiveTimeMs(getWifiActiveTime(rawRealTime, which) / 1000);
+        s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which));
+        s.setNumBytesTx(getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which));
+        s.setNumPacketsRx(getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which));
+        s.setNumBytesRx(getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which));
+        s.setSleepTimeMs(sleepTimeMs);
+        s.setIdleTimeMs(idleTimeMs);
+        s.setRxTimeMs(rxTimeMs);
+        s.setTxTimeMs(txTimeMs);
+        s.setScanTimeMs(scanTimeMs);
+        s.setEnergyConsumedMaMs(energyConsumedMaMs);
+        s.setNumAppScanRequest(numAppScanRequest);
+        s.setTimeInStateMs(timeInStateMs);
+        s.setTimeInSupplicantStateMs(timeInSupplStateMs);
+        s.setTimeInRxSignalStrengthLevelMs(timeSignalStrengthTimeMs);
+        s.setMonitoredRailChargeConsumedMaMs(monitoredRailChargeConsumedMaMs);
+        return s;
+    }
 
     /*@hide */
     public GpsBatteryStats getGpsBatteryStats() {

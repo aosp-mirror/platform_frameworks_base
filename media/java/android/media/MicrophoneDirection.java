@@ -16,38 +16,46 @@
 
 package android.media;
 
-/**
- * @hide
- */
+import android.annotation.FloatRange;
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public interface MicrophoneDirection {
     /**
-     * @hide
+     * Don't do any directionality processing of the activated microphone(s).
      */
     int MIC_DIRECTION_UNSPECIFIED = 0;
-
     /**
-     * @hide
+     * Optimize capture for audio coming from the screen-side of the device.
      */
     int MIC_DIRECTION_FRONT = 1;
-
     /**
-     * @hide
+     * Optimize capture for audio coming from the side of the device opposite the screen.
      */
     int MIC_DIRECTION_BACK = 2;
-
     /**
-     * @hide
+     * Optimize capture for audio coming from an off-device microphone.
      */
     int MIC_DIRECTION_EXTERNAL = 3;
 
+    /** @hide */
+    @IntDef({
+            MIC_DIRECTION_UNSPECIFIED,
+            MIC_DIRECTION_FRONT,
+            MIC_DIRECTION_BACK,
+            MIC_DIRECTION_EXTERNAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Directionmode{};
     /**
      * Specifies the logical microphone (for processing).
      *
-     * @param direction Direction constant (MicrophoneDirection.MIC_DIRECTION_*)
-     * @return retval OK if the call is successful, an error code otherwise.
-     * @hide
+     * @param direction Direction constant.
+     * @return true if sucessful.
      */
-    int setMicrophoneDirection(int direction);
+    boolean setMicrophoneDirection(@Directionmode int direction);
 
     /**
      * Specifies the zoom factor (i.e. the field dimension) for the selected microphone
@@ -55,8 +63,7 @@ public interface MicrophoneDirection {
      *
      * @param zoom the desired field dimension of microphone capture. Range is from -1 (wide angle),
      * though 0 (no zoom) to 1 (maximum zoom).
-     * @return retval OK if the call is successful, an error code otherwise.
-     * @hide
+     * @return true if sucessful.
      */
-    int setMicrophoneFieldDimension(float zoom);
+    boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom);
 }

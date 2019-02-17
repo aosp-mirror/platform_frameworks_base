@@ -38,9 +38,12 @@ using std::map;
 
 #define STATS_DATA_DIR "/data/misc/stats-data"
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
+#define TRAIN_INFO_DIR "/data/misc/train-info"
 
 // for ConfigMetricsReportList
 const int FIELD_ID_REPORTS = 2;
+
+std::mutex StorageManager::sTrainInfoMutex;
 
 using android::base::StringPrintf;
 using std::unique_ptr;
@@ -90,6 +93,71 @@ void StorageManager::writeFile(const char* file, const void* buffer, int numByte
     }
 
     close(fd);
+}
+
+bool StorageManager::writeTrainInfo(int64_t trainVersionCode,
+                                    const std::vector<uint8_t>& experimentIds) {
+    std::lock_guard<std::mutex> lock(sTrainInfoMutex);
+
+    deleteAllFiles(TRAIN_INFO_DIR);
+
+    string file_name = StringPrintf("%s/%lld", TRAIN_INFO_DIR, (long long)trainVersionCode);
+
+    int fd = open(file_name.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR);
+    if (fd == -1) {
+        VLOG("Attempt to access %s but failed", file_name.c_str());
+        return false;
+    }
+
+    size_t result = write(fd, experimentIds.data(), experimentIds.size());
+    if (result == experimentIds.size()) {
+        VLOG("Successfully wrote %s", file_name.c_str());
+    } else {
+        VLOG("Failed to write %s", file_name.c_str());
+        return false;
+    }
+
+    result = fchown(fd, AID_STATSD, AID_STATSD);
+    if (result) {
+        VLOG("Failed to chown %s to statsd", file_name.c_str());
+        return false;
+    }
+
+    close(fd);
+    return true;
+}
+
+bool StorageManager::readTrainInfo(InstallTrainInfo& trainInfo) {
+    std::lock_guard<std::mutex> lock(sTrainInfoMutex);
+
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(TRAIN_INFO_DIR), closedir);
+
+    if (dir == NULL) {
+        VLOG("Directory does not exist: %s", TRAIN_INFO_DIR);
+        return false;
+    }
+
+    dirent* de;
+    while ((de = readdir(dir.get()))) {
+        char* name = de->d_name;
+        if (name[0] == '.') {
+            continue;
+        }
+        trainInfo.trainVersionCode = StrToInt64(name);
+        string fullPath = StringPrintf("%s/%s", TRAIN_INFO_DIR, name);
+        int fd = open(fullPath.c_str(), O_RDONLY | O_CLOEXEC);
+        if (fd != -1) {
+            string str;
+            if (android::base::ReadFdToString(fd, &str)) {
+                close(fd);
+                std::copy(str.begin(), str.end(), std::back_inserter(trainInfo.experimentIds));
+                VLOG("Read train info file successful: %s", fullPath.c_str());
+                return true;
+            }
+        }
+        close(fd);
+    }
+    return false;
 }
 
 void StorageManager::deleteFile(const char* file) {

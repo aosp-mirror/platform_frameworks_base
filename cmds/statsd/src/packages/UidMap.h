@@ -91,6 +91,8 @@ public:
     UidMap();
     ~UidMap();
     static const std::map<std::string, uint32_t> sAidToUidMapping;
+
+    static sp<UidMap> getInstance();
     /*
      * All three inputs must be the same size, and the jth element in each array refers to the same
      * tuple, ie. uid[j] corresponds to packageName[j] with versionCode[j].
@@ -152,11 +154,24 @@ public:
 
     std::set<int32_t> getAppUid(const string& package) const;
 
+    // Write current PackageInfoSnapshot to ProtoOutputStream.
+    // interestingUids: If not empty, only write the package info for these uids. If empty, write
+    //                  package info for all uids.
+    // str_set: if not null, add new string to the set and write str_hash to proto
+    //          if null, write string to proto.
+    void writeUidMapSnapshot(int64_t timestamp, bool includeVersionStrings, bool includeInstaller,
+                             const std::set<int32_t>& interestingUids, std::set<string>* str_set,
+                             ProtoOutputStream* proto);
+
 private:
     std::set<string> getAppNamesFromUidLocked(const int32_t& uid, bool returnNormalized) const;
     string normalizeAppName(const string& appName) const;
 
     void getListenerListCopyLocked(std::vector<wp<PackageInfoListener>>* output);
+
+    void writeUidMapSnapshotLocked(int64_t timestamp, bool includeVersionStrings,
+                                   bool includeInstaller, const std::set<int32_t>& interestingUids,
+                                   std::set<string>* str_set, ProtoOutputStream* proto);
 
     mutable mutex mMutex;
     mutable mutex mIsolatedMutex;

@@ -22,7 +22,6 @@ import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.net.util.NetworkConstants.asByte;
 
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetworkStackStatusCallback;
@@ -31,7 +30,7 @@ import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.NetworkStack;
+import android.net.NetworkStackClient;
 import android.net.RouteInfo;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -132,10 +131,6 @@ public class IpServer extends StateMachine {
     }
 
     public static class Dependencies {
-        private final Context mContext;
-        public Dependencies(Context context) {
-            mContext = context;
-        }
         public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
             return new RouterAdvertisementDaemon(ifParams);
         }
@@ -153,7 +148,7 @@ public class IpServer extends StateMachine {
          */
         public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
                 DhcpServerCallbacks cb) {
-            mContext.getSystemService(NetworkStack.class).makeDhcpServer(ifName, params, cb);
+            NetworkStackClient.getInstance().makeDhcpServer(ifName, params, cb);
         }
     }
 

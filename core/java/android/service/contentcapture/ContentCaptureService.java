@@ -34,6 +34,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
@@ -49,7 +50,9 @@ import com.android.internal.os.IResultReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A service used to capture the content of the screen to provide contextual data in other areas of
@@ -164,6 +167,19 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
+     * @deprecated use {@link #setContentCaptureWhitelist(Set, Set)} instead
+     */
+    @Deprecated
+    public final void setContentCaptureWhitelist(@Nullable List<String> packages,
+            @Nullable List<ComponentName> activities) {
+        setContentCaptureWhitelist(toSet(packages), toSet(activities));
+    }
+
+    private <T> ArraySet<T> toSet(@Nullable List<T> set) {
+        return set == null ? null : new ArraySet<T>(set);
+    }
+
+    /**
      * Explicitly limits content capture to the given packages and activities.
      *
      * <p>To reset the whitelist, call it passing {@code null} to both arguments.
@@ -171,22 +187,27 @@ public abstract class ContentCaptureService extends Service {
      * <p>Useful when the service wants to restrict content capture to a category of apps, like
      * chat apps. For example, if the service wants to support view captures on all activities of
      * app {@code ChatApp1} and just activities {@code act1} and {@code act2} of {@code ChatApp2},
-     * it would call: {@code setContentCaptureWhitelist(Arrays.asList("ChatApp1"),
-     * Arrays.asList(new ComponentName("ChatApp2", "act1"),
+     * it would call: {@code setContentCaptureWhitelist(Sets.newArraySet("ChatApp1"),
+     * Sets.newArraySet(new ComponentName("ChatApp2", "act1"),
      * new ComponentName("ChatApp2", "act2")));}
      */
-    public final void setContentCaptureWhitelist(@Nullable List<String> packages,
-            @Nullable List<ComponentName> activities) {
+    public final void setContentCaptureWhitelist(@Nullable Set<String> packages,
+            @Nullable Set<ComponentName> activities) {
         final IContentCaptureServiceCallback callback = mCallback;
         if (callback == null) {
             Log.w(TAG, "setContentCaptureWhitelist(): no server callback");
             return;
         }
+
         try {
-            callback.setContentCaptureWhitelist(packages, activities);
+            callback.setContentCaptureWhitelist(toList(packages), toList(activities));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    private <T> ArrayList<T> toList(@Nullable Set<T> set) {
+        return set == null ? null : new ArrayList<T>(set);
     }
 
     /**
@@ -339,7 +360,7 @@ public abstract class ContentCaptureService extends Service {
             }
             switch (event.getType()) {
                 case ContentCaptureEvent.TYPE_SESSION_STARTED:
-                    final ContentCaptureContext clientContext = event.getClientContext();
+                    final ContentCaptureContext clientContext = event.getContentCaptureContext();
                     clientContext.setParentSessionId(event.getParentSessionId());
                     mSessionUids.put(sessionIdString, uid);
                     onCreateContentCaptureSession(clientContext, sessionId);
@@ -383,8 +404,8 @@ public abstract class ContentCaptureService extends Service {
         }
         final Integer rightUid = mSessionUids.get(sessionId);
         if (rightUid == null) {
-            if (DEBUG) {
-                Log.d(TAG, "handleIsRightCallerFor(" + event + "): no session for " + sessionId
+            if (VERBOSE) {
+                Log.v(TAG, "handleIsRightCallerFor(" + event + "): no session for " + sessionId
                         + ": " + mSessionUids);
             }
             // Just ignore, as the session could have been finished already

@@ -3404,21 +3404,25 @@ public final class ViewRootImpl implements ViewParent,
                     .captureFrameCommitCallbacks();
             if (mReportNextDraw) {
                 usingAsyncReport = true;
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
-                    // TODO: Use the frame number
-                    pendingDrawFinished();
-                    if (commitCallbacks != null) {
-                        for (int i = 0; i < commitCallbacks.size(); i++) {
-                            commitCallbacks.get(i).run();
-                        }
-                    }
-                });
+                final Handler handler = mAttachInfo.mHandler;
+                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
+                        handler.post(() -> {
+                            // TODO: Use the frame number
+                            pendingDrawFinished();
+                            if (commitCallbacks != null) {
+                                for (int i = 0; i < commitCallbacks.size(); i++) {
+                                    commitCallbacks.get(i).run();
+                                }
+                            }
+                        }));
             } else if (commitCallbacks != null && commitCallbacks.size() > 0) {
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
-                    for (int i = 0; i < commitCallbacks.size(); i++) {
-                        commitCallbacks.get(i).run();
-                    }
-                });
+                final Handler handler = mAttachInfo.mHandler;
+                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
+                        handler.post(() -> {
+                            for (int i = 0; i < commitCallbacks.size(); i++) {
+                                commitCallbacks.get(i).run();
+                            }
+                        }));
             }
         }
 

@@ -45,8 +45,8 @@ public class FocusRequester {
     private AudioFocusDeathHandler mDeathHandler; // may be null
     private IAudioFocusDispatcher mFocusDispatcher; // may be null
     private final IBinder mSourceRef; // may be null
-    private final String mClientId;
-    private final String mPackageName;
+    private final @NonNull String mClientId;
+    private final @NonNull String mPackageName;
     private final int mCallingUid;
     private final MediaFocusControl mFocusController; // never null
     private final int mSdkTarget;
@@ -72,7 +72,7 @@ public class FocusRequester {
     /**
      * the audio attributes associated with the focus request
      */
-    private final AudioAttributes mAttributes;
+    private final @NonNull AudioAttributes mAttributes;
 
     /**
      * Class constructor
@@ -87,9 +87,10 @@ public class FocusRequester {
      * @param uid
      * @param ctlr cannot be null
      */
-    FocusRequester(AudioAttributes aa, int focusRequest, int grantFlags,
-            IAudioFocusDispatcher afl, IBinder source, String id, AudioFocusDeathHandler hdlr,
-            String pn, int uid, @NonNull MediaFocusControl ctlr, int sdk) {
+    FocusRequester(@NonNull AudioAttributes aa, int focusRequest, int grantFlags,
+            IAudioFocusDispatcher afl, IBinder source, @NonNull String id,
+            AudioFocusDeathHandler hdlr, @NonNull String pn, int uid,
+            @NonNull MediaFocusControl ctlr, int sdk) {
         mAttributes = aa;
         mFocusDispatcher = afl;
         mSourceRef = source;
@@ -124,11 +125,7 @@ public class FocusRequester {
     }
 
     boolean hasSameClient(String otherClient) {
-        try {
-            return mClientId.compareTo(otherClient) == 0;
-        } catch (NullPointerException e) {
-            return false;
-        }
+        return mClientId.compareTo(otherClient) == 0;
     }
 
     boolean isLockedFocusOwner() {
@@ -143,12 +140,8 @@ public class FocusRequester {
         return (mFocusDispatcher != null) && mFocusDispatcher.equals(fd);
     }
 
-    boolean hasSamePackage(String pack) {
-        try {
-            return mPackageName.compareTo(pack) == 0;
-        } catch (NullPointerException e) {
-            return false;
-        }
+    boolean hasSamePackage(@NonNull String pack) {
+        return mPackageName.compareTo(pack) == 0;
     }
 
     boolean hasSameUid(int uid) {

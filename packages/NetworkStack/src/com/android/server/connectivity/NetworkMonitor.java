@@ -39,9 +39,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
-import android.net.ICaptivePortal;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.LinkProperties;
@@ -67,15 +65,9 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.telephony.CellIdentityCdma;
-import android.telephony.CellIdentityGsm;
-import android.telephony.CellIdentityLte;
-import android.telephony.CellIdentityWcdma;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationState;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -466,6 +458,13 @@ public class NetworkMonitor extends StateMachine {
         sendMessage(CMD_LAUNCH_CAPTIVE_PORTAL_APP);
     }
 
+    /**
+     * Notify that the captive portal app was closed with the provided response code.
+     */
+    public void notifyCaptivePortalAppFinished(int response) {
+        sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
+    }
+
     @Override
     protected void log(String s) {
         if (DBG) Log.d(TAG + "/" + mNetwork.toString(), s);
@@ -677,29 +676,8 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_LAUNCH_CAPTIVE_PORTAL_APP:
                     final Bundle appExtras = new Bundle();
                     // OneAddressPerFamilyNetwork is not parcelable across processes.
-                    appExtras.putParcelable(
-                            ConnectivityManager.EXTRA_NETWORK, new Network(mNetwork));
-                    appExtras.putParcelable(ConnectivityManager.EXTRA_CAPTIVE_PORTAL,
-                            new CaptivePortal(new ICaptivePortal.Stub() {
-                                @Override
-                                public void appResponse(int response) {
-                                    if (response == APP_RETURN_WANTED_AS_IS) {
-                                        mContext.enforceCallingPermission(
-                                                PERMISSION_NETWORK_SETTINGS,
-                                                "CaptivePortal");
-                                    }
-                                    sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
-                                }
-
-                                @Override
-                                public void logEvent(int eventId, String packageName)
-                                        throws RemoteException {
-                                    mContext.enforceCallingPermission(
-                                            PERMISSION_NETWORK_SETTINGS,
-                                            "CaptivePortal");
-                                    mCallback.logCaptivePortalLoginEvent(eventId, packageName);
-                                }
-                            }));
+                    final Network network = new Network(mNetwork);
+                    appExtras.putParcelable(ConnectivityManager.EXTRA_NETWORK, network);
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
                     appExtras.putString(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
                     if (probeRes.probeSpec != null) {
@@ -708,7 +686,7 @@ public class NetworkMonitor extends StateMachine {
                     }
                     appExtras.putString(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT,
                             mCaptivePortalUserAgent);
-                    mCm.startCaptivePortalApp(appExtras);
+                    mCm.startCaptivePortalApp(network, appExtras);
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
@@ -1312,6 +1290,7 @@ public class NetworkMonitor extends StateMachine {
             urlConnection.setInstanceFollowRedirects(probeType == ValidationProbeEvent.PROBE_PAC);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
+            urlConnection.setRequestProperty("Connection", "close");
             urlConnection.setUseCaches(false);
             if (mCaptivePortalUserAgent != null) {
                 urlConnection.setRequestProperty("User-Agent", mCaptivePortalUserAgent);
@@ -1485,10 +1464,6 @@ public class NetworkMonitor extends StateMachine {
      */
     private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
             long requestTimestampMs, long responseTimestampMs) {
-        if (!mWifiManager.isScanAlwaysAvailable()) {
-            return;
-        }
-
         if (!mSystemReady) {
             return;
         }
@@ -1496,6 +1471,10 @@ public class NetworkMonitor extends StateMachine {
         Intent latencyBroadcast =
                 new Intent(NetworkMonitorUtils.ACTION_NETWORK_CONDITIONS_MEASURED);
         if (mNetworkCapabilities.hasTransport(TRANSPORT_WIFI)) {
+            if (!mWifiManager.isScanAlwaysAvailable()) {
+                return;
+            }
+
             WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
             if (currentWifiInfo != null) {
                 // NOTE: getSSID()'s behavior changed in API 17; before that, SSIDs were not
@@ -1515,39 +1494,21 @@ public class NetworkMonitor extends StateMachine {
             }
             latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CONNECTIVITY_TYPE, TYPE_WIFI);
         } else if (mNetworkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            // TODO(b/123893112): Support multi-sim.
             latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_NETWORK_TYPE,
                     mTelephonyManager.getNetworkType());
-            List<CellInfo> info = mTelephonyManager.getAllCellInfo();
-            if (info == null) return;
-            int numRegisteredCellInfo = 0;
-            for (CellInfo cellInfo : info) {
-                if (cellInfo.isRegistered()) {
-                    numRegisteredCellInfo++;
-                    if (numRegisteredCellInfo > 1) {
-                        if (VDBG) {
-                            logw("more than one registered CellInfo."
-                                    + " Can't tell which is active.  Bailing.");
-                        }
-                        return;
-                    }
-                    if (cellInfo instanceof CellInfoCdma) {
-                        CellIdentityCdma cellId = ((CellInfoCdma) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else if (cellInfo instanceof CellInfoGsm) {
-                        CellIdentityGsm cellId = ((CellInfoGsm) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else if (cellInfo instanceof CellInfoLte) {
-                        CellIdentityLte cellId = ((CellInfoLte) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else if (cellInfo instanceof CellInfoWcdma) {
-                        CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
-                        latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CELL_ID, cellId);
-                    } else {
-                        if (VDBG) logw("Registered cellinfo is unrecognized");
-                        return;
-                    }
-                }
+            final ServiceState dataSs = mTelephonyManager.getServiceState();
+            if (dataSs == null) {
+                logw("failed to retrieve ServiceState");
+                return;
             }
+            // See if the data sub is registered for PS services on cell.
+            final NetworkRegistrationState nrs = dataSs.getNetworkRegistrationState(
+                    NetworkRegistrationState.DOMAIN_PS,
+                    AccessNetworkConstants.TransportType.WWAN);
+            latencyBroadcast.putExtra(
+                    NetworkMonitorUtils.EXTRA_CELL_ID,
+                    nrs == null ? null : nrs.getCellIdentity());
             latencyBroadcast.putExtra(NetworkMonitorUtils.EXTRA_CONNECTIVITY_TYPE, TYPE_MOBILE);
         } else {
             return;

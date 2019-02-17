@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.os.IBinder;
 import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.SnapshotData;
+import android.util.LocalLog;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureSessionId;
@@ -37,6 +38,9 @@ final class ContentCaptureServerSession {
     final IBinder mActivityToken;
     private final ContentCapturePerUserService mService;
     private final RemoteContentCaptureService mRemoteService;
+
+    // NOTE: this is the "internal" context (like package and taskId), not the explicit content
+    // set by apps - those are only send to the ContentCaptureService.
     private final ContentCaptureContext mContentCaptureContext;
 
     /**
@@ -83,7 +87,10 @@ final class ContentCaptureServerSession {
      */
     @GuardedBy("mLock")
     public void sendActivitySnapshotLocked(@NonNull SnapshotData snapshotData) {
-        mService.getMaster().logRequestLocked("snapshot: id=" + mId);
+        final LocalLog logHistory = mService.getMaster().mRequestsHistory;
+        if (logHistory != null) {
+            logHistory.log("snapshot: id=" + mId);
+        }
 
         mRemoteService.onActivitySnapshotRequest(mId, snapshotData);
     }

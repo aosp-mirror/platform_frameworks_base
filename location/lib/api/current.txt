@@ -31,6 +31,7 @@ package com.android.location.provider {
     method public long getInterval();
     method public int getQuality();
     method public float getSmallestDisplacement();
+    method public boolean isLocationSettingsIgnored();
     field public static final int ACCURACY_BLOCK = 102; // 0x66
     field public static final int ACCURACY_CITY = 104; // 0x68
     field public static final int ACCURACY_FINE = 100; // 0x64
@@ -44,10 +45,10 @@ package com.android.location.provider {
   }
 
   public final class ProviderRequestUnbundled {
-    method public boolean getForceLocation();
     method public long getInterval();
     method public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
     method public boolean getReportLocation();
+    method public boolean isLocationSettingsIgnored();
   }
 
 }

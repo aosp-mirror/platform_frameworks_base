@@ -207,7 +207,8 @@ bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum,
            getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
 }
 
-void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDimensionKey& key) {
+void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, int64_t metricId,
+                                    const MetricDimensionKey& key, int64_t metricValue) {
     // TODO(b/110563466): Why receive timestamp? RefractoryPeriod should always be based on
     // real time right now.
     if (isInRefractoryPeriod(timestampNs, key)) {
@@ -225,7 +226,7 @@ void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDime
     if (!mSubscriptions.empty()) {
         ALOGI("An anomaly (%lld) %s has occurred! Informing subscribers.",
                 mAlert.id(), key.toString().c_str());
-        informSubscribers(key);
+        informSubscribers(key, metricId, metricValue);
     } else {
         ALOGI("An anomaly has occurred! (But no subscriber for that alert.)");
     }
@@ -238,11 +239,11 @@ void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDime
 }
 
 void AnomalyTracker::detectAndDeclareAnomaly(const int64_t& timestampNs,
-                                             const int64_t& currBucketNum,
+                                             const int64_t& currBucketNum, int64_t metricId,
                                              const MetricDimensionKey& key,
                                              const int64_t& currentBucketValue) {
     if (detectAnomaly(currBucketNum, key, currentBucketValue)) {
-        declareAnomaly(timestampNs, key);
+        declareAnomaly(timestampNs, metricId, key, currentBucketValue);
     }
 }
 
@@ -255,8 +256,9 @@ bool AnomalyTracker::isInRefractoryPeriod(const int64_t& timestampNs,
     return false;
 }
 
-void AnomalyTracker::informSubscribers(const MetricDimensionKey& key) {
-    triggerSubscribers(mAlert.id(), key, mConfigKey, mSubscriptions);
+void AnomalyTracker::informSubscribers(const MetricDimensionKey& key, int64_t metric_id,
+                                       int64_t metricValue) {
+    triggerSubscribers(mAlert.id(), metric_id, key, metricValue, mConfigKey, mSubscriptions);
 }
 
 }  // namespace statsd

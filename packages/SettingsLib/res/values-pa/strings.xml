@@ -38,27 +38,20 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s ਰਾਹੀਂ ਆਪਣੇ-ਆਪ ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ਨੈੱਟਵਰਕ ਰੇਟਿੰਗ ਪ੍ਰਦਾਨਕ ਰਾਹੀਂ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
-    <!-- no translation found for connected_via_app (5571999941988929520) -->
-    <skip />
+    <string name="connected_via_app" msgid="5571999941988929520">"<xliff:g id="NAME">%1$s</xliff:g> ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
-    <!-- no translation found for tap_to_sign_up (6449724763052579434) -->
-    <skip />
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"ਸਾਈਨ-ਅੱਪ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"ਕਨੈਕਟ ਕੀਤਾ, ਕੋਈ ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ਸਾਈਨ-ਇਨ ਲੋੜੀਂਦਾ ਹੈ"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ਐਕਸੈੱਸ ਪੁਆਇੰਟ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਸੰਪੂਰਨ ਰੁਝੇਂਵੇਂ ਵਿੱਚ ਹੈ"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
-    <!-- no translation found for osu_opening_provider (5488997661548640424) -->
-    <skip />
-    <!-- no translation found for osu_connect_failed (2187750899158158934) -->
-    <skip />
-    <!-- no translation found for osu_completing_sign_up (9037638564719197082) -->
-    <skip />
-    <!-- no translation found for osu_sign_up_failed (7296159750352873260) -->
-    <skip />
-    <!-- no translation found for osu_sign_up_complete (8207626049093289203) -->
-    <skip />
+    <string name="osu_opening_provider" msgid="5488997661548640424">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"ਸਾਈਨ-ਅੱਪ ਮੁਕੰਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"ਸਾਈਨ-ਅੱਪ ਮੁਕੰਮਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"ਸਾਈਨ-ਅੱਪ ਮੁਕੰਮਲ ਹੋਇਆ ਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"ਬਹੁਤ ਹੌਲੀ"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ਹੌਲੀ"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ਠੀਕ ਹੈ"</string>
@@ -94,8 +87,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ਸਿਮ ਪਹੁੰਚ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ਆਡੀਓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ਆਡੀਓ"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"ਸੁਣਨ ਦਾ ਸਾਧਨ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"ਸੁਣਨ ਦੇ ਸਾਧਨ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"ਸੁਣਨ ਦੇ ਸਾਧਨਾਂ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"ਮੀਡੀਆ  ਆਡੀਓ  ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ਫ਼ੋਨ ਔਡੀਓ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ਫਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਸਰਵਰ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
@@ -112,7 +105,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ਫ਼ੋਨ ਔਡੀਓ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ਇਨਪੁਟ ਲਈ ਵਰਤੋ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"ਸੁਣਨ ਦੇ ਸਾਧਨ ਲਈ ਵਰਤੋ"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"ਸੁਣਨ ਦੇ ਸਾਧਨਾਂ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ਪੇਅਰ ਕਰੋ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ਪੇਅਰ ਕਰੋ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ਰੱਦ ਕਰੋ"</string>
@@ -143,6 +136,8 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ਹਟਾਏ ਗਏ ਐਪਸ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ਹਟਾਏ ਗਏ ਐਪਸ ਅਤੇ ਉਪਭੋਗਤਾ"</string>
+    <!-- no translation found for data_usage_ota (5377889154805560860) -->
+    <skip />
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB ਟੈਦਰਿੰਗ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ਪੋਰਟੇਬਲ ਹੌਟਸਪੌਟ"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ਬਲੂਟੁੱਥ ਟੈਦਰਿੰਗ"</string>

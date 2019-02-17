@@ -28,16 +28,13 @@ import android.widget.LinearLayout;
  *
  * * Try to maintain a 'square' grid (equal number of columns and rows) based on the expected item
  *   count.
+ * * Determine the position and parent of any item by its index and the total item count.
  * * Display and hide sub-lists as needed, depending on the expected item count.
- * * Favor bias toward having more rows or columns depending on the orientation of the device
- *   (TODO(123344999): Implement this, currently always favors adding more rows.)
- * * Change the orientation (horizontal vs. vertical) of the container and sub-lists to act as rows
- *   or columns depending on the orientation of the device.
- *   (TODO(123344999): Implement this, currently always columns.)
  *
  * While we could implement this behavior with a GridLayout, it would take significantly more
  * time and effort, and would require more substantial refactoring of the existing code in
- * GlobalActionsDialog, since it would require manipulation of the child items themselves.
+ * GlobalActionsDialog, since it would require manipulation of layout properties on the child items
+ * themselves.
  *
  */
 
@@ -65,14 +62,25 @@ public class ListGridLayout extends LinearLayout {
     /**
      * Get the parent view associated with the item which should be placed at the given position.
      */
-    public ViewGroup getParentView(int index) {
-        ViewGroup firstParent = (ViewGroup) getChildAt(0);
+    public ViewGroup getParentView(int index, boolean reverseSublists) {
         if (mRows == 0) {
-            return firstParent;
+            return null;
         }
+        int column = getParentViewIndex(index, reverseSublists);
+        return (ViewGroup) getChildAt(column);
+    }
+
+    private int reverseSublistIndex(int index) {
+        return getChildCount() - (index + 1);
+    }
+
+    private int getParentViewIndex(int index, boolean reverseSublists) {
         int column = (int) Math.floor(index / mRows);
-        ViewGroup parent = (ViewGroup) getChildAt(column);
-        return parent != null ? parent : firstParent;
+        int columnCount = getChildCount();
+        if (reverseSublists) {
+            column = reverseSublistIndex(column);
+        }
+        return column;
     }
 
     /**

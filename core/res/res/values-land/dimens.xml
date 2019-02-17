@@ -76,4 +76,6 @@
      <!-- Floating toolbar dimensions -->
      <dimen name="floating_toolbar_preferred_width">544dp</dimen>
 
+    <dimen name="chooser_preview_width">480dp</dimen>
+
 </resources>

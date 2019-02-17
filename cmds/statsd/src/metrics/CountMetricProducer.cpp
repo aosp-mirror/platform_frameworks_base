@@ -250,7 +250,7 @@ void CountMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
 void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
-    mCondition = conditionMet;
+    mCondition = conditionMet ? ConditionState::kTrue : ConditionState::kFalse;
 }
 
 bool CountMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
@@ -303,7 +303,7 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
         if (prev != mCurrentFullCounters->end()) {
             countWholeBucket += prev->second;
         }
-        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey,
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, mMetricId, eventKey,
                                          countWholeBucket);
     }
 

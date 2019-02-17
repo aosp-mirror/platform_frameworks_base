@@ -297,7 +297,8 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
 
     // Setup a simple config, no activation
     StatsdConfig config1;
-    config1.set_id(12341);
+    int64_t cfgId1 = 12341;
+    config1.set_id(cfgId1);
     config1.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
     auto wakelockAcquireMatcher = CreateAcquireWakelockAtomMatcher();
     *config1.add_atom_matcher() = wakelockAcquireMatcher;
@@ -314,14 +315,12 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     countMetric2->set_what(wakelockAcquireMatcher.id());
     countMetric2->set_bucket(FIVE_MINUTES);
 
-    ConfigKey cfgKey1(uid, 12341);
-    long timeBase1 = 1;
-    sp<StatsLogProcessor> processor =
-            CreateStatsLogProcessor(timeBase1, timeBase1, config1, cfgKey1);
+    ConfigKey cfgKey1(uid, cfgId1);
 
     // Add another config, with two metrics, one with activation
     StatsdConfig config2;
-    config2.set_id(12342);
+    int64_t cfgId2 = 12342;
+    config2.set_id(cfgId2);
     config2.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
     *config2.add_atom_matcher() = wakelockAcquireMatcher;
 
@@ -344,11 +343,12 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     metric3ActivationTrigger->set_atom_matcher_id(wakelockAcquireMatcher.id());
     metric3ActivationTrigger->set_ttl_seconds(100);
 
-    ConfigKey cfgKey2(uid, 12342);
+    ConfigKey cfgKey2(uid, cfgId2);
 
     // Add another config, with two metrics, both with activations
     StatsdConfig config3;
-    config3.set_id(12342);
+    int64_t cfgId3 = 12343;
+    config3.set_id(cfgId3);
     config3.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
     *config3.add_atom_matcher() = wakelockAcquireMatcher;
 
@@ -376,14 +376,37 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     metric6ActivationTrigger->set_atom_matcher_id(wakelockAcquireMatcher.id());
     metric6ActivationTrigger->set_ttl_seconds(200);
 
-    ConfigKey cfgKey3(uid, 12343);
+    ConfigKey cfgKey3(uid, cfgId3);
 
-    processor->OnConfigUpdated(2, cfgKey2, config2);
-    processor->OnConfigUpdated(3, cfgKey3, config3);
+    sp<UidMap> m = new UidMap();
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
+    vector<int64_t> activeConfigsBroadcast;
 
-    EXPECT_EQ(3, processor->mMetricsManagers.size());
-    auto it = processor->mMetricsManagers.find(cfgKey1);
-    EXPECT_TRUE(it != processor->mMetricsManagers.end());
+    long timeBase1 = 1;
+    int broadcastCount = 0;
+    StatsLogProcessor processor(m, pullerManager, anomalyAlarmMonitor, subscriberAlarmMonitor,
+            timeBase1, [](const ConfigKey& key) { return true; },
+            [&uid, &broadcastCount, &activeConfigsBroadcast](const int& broadcastUid,
+                    const vector<int64_t>& activeConfigs) {
+                broadcastCount++;
+                EXPECT_EQ(broadcastUid, uid);
+                activeConfigsBroadcast.clear();
+                activeConfigsBroadcast.insert(activeConfigsBroadcast.end(),
+                        activeConfigs.begin(), activeConfigs.end());
+                return true;
+            });
+
+    processor.OnConfigUpdated(1, cfgKey1, config1);
+    processor.OnConfigUpdated(2, cfgKey2, config2);
+    processor.OnConfigUpdated(3, cfgKey3, config3);
+
+    EXPECT_EQ(3, processor.mMetricsManagers.size());
+
+    // Expect the first config and both metrics in it to be active.
+    auto it = processor.mMetricsManagers.find(cfgKey1);
+    EXPECT_TRUE(it != processor.mMetricsManagers.end());
     auto& metricsManager1 = it->second;
     EXPECT_TRUE(metricsManager1->isActive());
 
@@ -407,8 +430,9 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     auto& metricProducer2 = *metricIt;
     EXPECT_TRUE(metricProducer2->isActive());
 
-    it = processor->mMetricsManagers.find(cfgKey2);
-    EXPECT_TRUE(it != processor->mMetricsManagers.end());
+    // Expect config 2 to be active. Metric 3 shouldn't be active, metric 4 should be active.
+    it = processor.mMetricsManagers.find(cfgKey2);
+    EXPECT_TRUE(it != processor.mMetricsManagers.end());
     auto& metricsManager2 = it->second;
     EXPECT_TRUE(metricsManager2->isActive());
 
@@ -432,8 +456,9 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     auto& metricProducer4 = *metricIt;
     EXPECT_TRUE(metricProducer4->isActive());
 
-    it = processor->mMetricsManagers.find(cfgKey3);
-    EXPECT_TRUE(it != processor->mMetricsManagers.end());
+    // Expect the third config and both metrics in it to be inactive.
+    it = processor.mMetricsManagers.find(cfgKey3);
+    EXPECT_TRUE(it != processor.mMetricsManagers.end());
     auto& metricsManager3 = it->second;
     EXPECT_FALSE(metricsManager3->isActive());
 
@@ -457,10 +482,30 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     auto& metricProducer6 = *metricIt;
     EXPECT_FALSE(metricProducer6->isActive());
 
+    // No broadcast for active configs should have happened yet.
+    EXPECT_EQ(broadcastCount, 0);
+
+    // Activate all 3 metrics that were not active.
     std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1")};
     auto event = CreateAcquireWakelockEvent(attributions1, "wl1", 100 + timeBase1);
-    processor->OnLogEvent(event.get());
+    processor.OnLogEvent(event.get());
 
+    // Assert that all 3 configs are active.
+    EXPECT_TRUE(metricsManager1->isActive());
+    EXPECT_TRUE(metricsManager2->isActive());
+    EXPECT_TRUE(metricsManager3->isActive());
+
+    // A broadcast should have happened, and all 3 configs should be active in the broadcast.
+    EXPECT_EQ(broadcastCount, 1);
+    EXPECT_EQ(activeConfigsBroadcast.size(), 3);
+    EXPECT_TRUE(std::find(activeConfigsBroadcast.begin(), activeConfigsBroadcast.end(), cfgId1)
+            != activeConfigsBroadcast.end());
+    EXPECT_TRUE(std::find(activeConfigsBroadcast.begin(), activeConfigsBroadcast.end(), cfgId2)
+            != activeConfigsBroadcast.end());
+    EXPECT_TRUE(std::find(activeConfigsBroadcast.begin(), activeConfigsBroadcast.end(), cfgId3)
+            != activeConfigsBroadcast.end());
+
+    // When we shut down, metrics 3 & 5 have 100ns remaining, metric 6 has 100s + 100ns.
     int64_t shutDownTime = timeBase1 + 100 * NS_PER_SEC;
     EXPECT_TRUE(metricProducer3->isActive());
     int64_t ttl3 = metricProducer3->getRemainingTtlNs(shutDownTime);
@@ -472,8 +517,9 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     int64_t ttl6 = metricProducer6->getRemainingTtlNs(shutDownTime);
     EXPECT_EQ(100 + 100 * NS_PER_SEC, ttl6);
 
-    processor->WriteMetricsActivationToDisk(timeBase1 + 100 * NS_PER_SEC);
+    processor.WriteMetricsActivationToDisk(shutDownTime);
 
+    // Create a second StatsLogProcessor and push the same 3 configs.
     long timeBase2 = 1000;
     sp<StatsLogProcessor> processor2 =
             CreateStatsLogProcessor(timeBase2, timeBase2, config1, cfgKey1);
@@ -481,6 +527,8 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     processor2->OnConfigUpdated(timeBase2, cfgKey3, config3);
 
     EXPECT_EQ(3, processor2->mMetricsManagers.size());
+
+    // First config and both metrics are active.
     it = processor2->mMetricsManagers.find(cfgKey1);
     EXPECT_TRUE(it != processor2->mMetricsManagers.end());
     auto& metricsManager1001 = it->second;
@@ -506,6 +554,7 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     auto& metricProducer1002 = *metricIt;
     EXPECT_TRUE(metricProducer1002->isActive());
 
+    // Second config is active. Metric 3 is inactive, metric 4 is active.
     it = processor2->mMetricsManagers.find(cfgKey2);
     EXPECT_TRUE(it != processor2->mMetricsManagers.end());
     auto& metricsManager1002 = it->second;
@@ -531,6 +580,7 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     auto& metricProducer1004 = *metricIt;
     EXPECT_TRUE(metricProducer1004->isActive());
 
+    // Config 3 is inactive. both metrics are inactive.
     it = processor2->mMetricsManagers.find(cfgKey3);
     EXPECT_TRUE(it != processor2->mMetricsManagers.end());
     auto& metricsManager1003 = it->second;
@@ -557,6 +607,7 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     auto& metricProducer1006 = *metricIt;
     EXPECT_FALSE(metricProducer1006->isActive());
 
+    // Assert that all 3 metrics with activation are inactive and that the ttls were properly set.
     EXPECT_FALSE(metricProducer1003->isActive());
     const auto& activation1003 = metricProducer1003->mEventActivationMap.begin()->second;
     EXPECT_EQ(100 * NS_PER_SEC, activation1003.ttl_ns);
@@ -572,12 +623,16 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
 
     processor2->LoadMetricsActivationFromDisk();
 
+    // After loading activations from disk, assert that all 3 metrics are active.
     EXPECT_TRUE(metricProducer1003->isActive());
     EXPECT_EQ(timeBase2 + ttl3 - activation1003.ttl_ns, activation1003.activation_ns);
     EXPECT_TRUE(metricProducer1005->isActive());
     EXPECT_EQ(timeBase2 + ttl5 - activation1005.ttl_ns, activation1005.activation_ns);
     EXPECT_TRUE(metricProducer1006->isActive());
     EXPECT_EQ(timeBase2 + ttl6 - activation1006.ttl_ns, activation1003.activation_ns);
+
+    // Make sure no more broadcasts have happened.
+    EXPECT_EQ(broadcastCount, 1);
 }
 
 TEST(StatsLogProcessorTest, TestActivationOnBoot) {

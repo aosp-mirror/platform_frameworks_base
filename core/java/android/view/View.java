@@ -9487,7 +9487,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Gets the session used to notify Content Capture events.
      *
      * @return session explicitly set by {@link #setContentCaptureSession(ContentCaptureSession)},
-     * inherited by ancestore, default session or {@code null} if content capture is disabled for
+     * inherited by ancestors, default session or {@code null} if content capture is disabled for
      * this view.
      */
     @Nullable

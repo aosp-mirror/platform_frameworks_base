@@ -54,8 +54,8 @@ import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
-import com.android.systemui.statusbar.notification.row.NotificationInflater;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -515,7 +515,7 @@ public final class NotificationEntry {
         if (row != null) row.resetUserExpansion();
     }
 
-    public void freeContentViewWhenSafe(@NotificationInflater.InflationFlag int inflationFlag) {
+    public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
         if (row != null) row.freeContentViewWhenSafe(inflationFlag);
     }
 

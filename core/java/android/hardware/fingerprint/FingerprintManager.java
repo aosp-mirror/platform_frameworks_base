@@ -18,7 +18,6 @@ package android.hardware.fingerprint;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
-import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
@@ -721,26 +720,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             Slog.w(TAG, "getAuthenticatorId(): Service not connected!");
         }
         return 0;
-    }
-
-    /**
-     * Reset the lockout timer when asked to do so by keyguard.
-     *
-     * @param token an opaque token returned by password confirmation.
-     *
-     * @hide
-     */
-    @RequiresPermission(RESET_FINGERPRINT_LOCKOUT)
-    public void resetTimeout(byte[] token) {
-        if (mService != null) {
-            try {
-                mService.resetTimeout(token);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "resetTimeout(): Service not connected!");
-        }
     }
 
     /**

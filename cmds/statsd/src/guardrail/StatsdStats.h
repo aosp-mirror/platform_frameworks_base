@@ -409,6 +409,11 @@ public:
     void noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs);
 
     /**
+     * Number of buckets with unknown condition.
+     */
+    void noteBucketUnknownCondition(int64_t metricId);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -458,6 +463,7 @@ public:
         long bucketDropped = 0;
         int64_t minBucketBoundaryDelayNs = 0;
         int64_t maxBucketBoundaryDelayNs = 0;
+        long bucketUnknownCondition = 0;
     } AtomMetricStats;
 
 private:
@@ -488,7 +494,7 @@ private:
     std::map<int, PulledAtomStats> mPulledAtomStats;
 
     // Maps metric ID to its stats. The size is capped by the number of metrics.
-    std::map<int, AtomMetricStats> mAtomMetricStats;
+    std::map<int64_t, AtomMetricStats> mAtomMetricStats;
 
     struct LogLossStats {
         LogLossStats(int32_t sec, int32_t count, int32_t error)
@@ -532,7 +538,7 @@ private:
      * Get a reference to AtomMetricStats for a metric. If none exists, create it. The reference
      * will live as long as `this`.
      */
-    StatsdStats::AtomMetricStats& getAtomMetricStats(int metricId);
+    StatsdStats::AtomMetricStats& getAtomMetricStats(int64_t metricId);
 
     FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);

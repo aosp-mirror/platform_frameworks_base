@@ -31,8 +31,6 @@ import android.view.autofill.AutofillValue;
 @SystemApi
 // TODO(b/123100811): pass a requestId and/or sessionId?
 @TestApi
-// TODO(b/122654591): @TestApi is needed because CtsAutoFillServiceTestCases hosts the service
-// in the same package as the test, and that module is compiled with SDK=test_current
 public final class FillRequest {
 
     final AutofillProxy mProxy;

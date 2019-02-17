@@ -721,4 +721,5 @@
     <dimen name="chooser_edge_margin_thin">16dp</dimen>
     <dimen name="chooser_edge_margin_normal">24dp</dimen>
     <dimen name="chooser_preview_image_font_size">20sp</dimen>
+    <dimen name="chooser_preview_width">-1px</dimen>
 </resources>

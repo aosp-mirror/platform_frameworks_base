@@ -107,8 +107,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private ActivityView.StateCallback mStateCallback = new ActivityView.StateCallback() {
         @Override
         public void onActivityViewReady(ActivityView view) {
-            mActivityViewReady = true;
-            mActivityView.startActivity(mBubbleIntent);
+            if (!mActivityViewReady) {
+                mActivityViewReady = true;
+                mActivityView.startActivity(mBubbleIntent);
+            }
         }
 
         @Override
@@ -262,6 +264,12 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         updateHeaderView();
         updatePermissionView();
         updateExpandedView();
+    }
+
+    /**
+     * Lets activity view know it should be shown / populated.
+     */
+    public void populateActivityView() {
         mActivityView.setCallback(mStateCallback);
     }
 

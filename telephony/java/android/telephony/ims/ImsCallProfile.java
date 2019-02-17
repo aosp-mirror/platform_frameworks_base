@@ -266,6 +266,11 @@ public final class ImsCallProfile implements Parcelable {
     public static final String EXTRA_DISPLAY_TEXT = "DisplayText";
     public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     public static final String EXTRA_IS_CALL_PULL = "CallPull";
+
+    /**
+     * String extra property
+     *  Containing fields from the SIP INVITE message for an IMS call
+     */
     public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS =
                                   "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
 
@@ -349,6 +354,9 @@ public final class ImsCallProfile implements Parcelable {
 
     /** Indicates if the call is for testing purpose */
     private boolean mEmergencyCallTesting = false;
+
+    /** Indicates if we have known the intent of the user for the call is emergency */
+    private boolean mHasKnownUserIntentEmergency = false;
 
     /**
      * Extras associated with this {@link ImsCallProfile}.
@@ -789,12 +797,13 @@ public final class ImsCallProfile implements Parcelable {
      *
      * @hide
      */
-    public void setEmergencyCallInfo(EmergencyNumber num) {
+    public void setEmergencyCallInfo(EmergencyNumber num, boolean hasKnownUserIntentEmergency) {
         setEmergencyServiceCategories(num.getEmergencyServiceCategoryBitmaskInternalDial());
         setEmergencyUrns(num.getEmergencyUrns());
         setEmergencyCallRouting(num.getEmergencyCallRouting());
         setEmergencyCallTesting(num.getEmergencyNumberSourceBitmask()
                 == EmergencyNumber.EMERGENCY_NUMBER_SOURCE_TEST);
+        setHasKnownUserIntentEmergency(hasKnownUserIntentEmergency);
     }
 
     /**
@@ -860,6 +869,19 @@ public final class ImsCallProfile implements Parcelable {
     }
 
     /**
+     * Set if we have known the user intent of the call is emergency.
+     *
+     * This is only used to specify when the dialed number is ambiguous when it can be identified
+     * as both emergency number and any other non-emergency number; e.g. in some situation, 611
+     * could be both an emergency number in a country and a non-emergency number of a carrier's
+     * customer service hotline.
+     */
+    @VisibleForTesting
+    public void setHasKnownUserIntentEmergency(boolean hasKnownUserIntentEmergency) {
+        mHasKnownUserIntentEmergency = hasKnownUserIntentEmergency;
+    }
+
+    /**
      * Get the emergency service categories, only valid if {@link #getServiceType} returns
      * {@link #SERVICE_TYPE_EMERGENCY}
      *
@@ -915,5 +937,17 @@ public final class ImsCallProfile implements Parcelable {
      */
     public boolean isEmergencyCallTesting() {
         return mEmergencyCallTesting;
+    }
+
+    /**
+     * Checks if we have known the user intent of the call is emergency.
+     *
+     * This is only used to specify when the dialed number is ambiguous when it can be identified
+     * as both emergency number and any other non-emergency number; e.g. in some situation, 611
+     * could be both an emergency number in a country and a non-emergency number of a carrier's
+     * customer service hotline.
+     */
+    public boolean hasKnownUserIntentEmergency() {
+        return mHasKnownUserIntentEmergency;
     }
 }

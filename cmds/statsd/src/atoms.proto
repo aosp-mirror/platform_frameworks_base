@@ -302,6 +302,8 @@ message Atom {
         RoleHolder role_holder = 10049;
         DangerousPermissionState dangerous_permission_state = 10050;
         TrainInfo train_info = 10051;
+        TimeZoneDataInfo time_zone_data_info = 10052;
+        SDCardInfo sdcard_info = 10053;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3156,6 +3158,13 @@ message FlagFlipUpdateOccurred {
     optional int64 order_id = 2;
 }
 
+/**
+ * Potential experiment ids that goes with a train install.
+ */
+message TrainExperimentIds {
+    repeated int64 experiment_id = 1;
+}
+
 /*
  * Logs when a binary push state changes.
  * Logged by the installer via public api.
@@ -3182,8 +3191,14 @@ message BinaryPushStateChanged {
         INSTALL_FAILURE = 6;
         INSTALL_CANCELLED = 7;
         INSTALLER_ROLLBACK_REQUESTED = 8;
+        INSTALLER_ROLLBACK_SUCCESS = 9;
+        INSTALLER_ROLLBACK_FAILURE = 10;
     }
     optional State state = 6;
+    // Possible experiment ids for monitoring this push.
+    optional TrainExperimentIds experiment_ids = 7 [(log_mode) = MODE_BYTES];
+    // user id
+    optional int32 user_id = 8;
 }
 
 /** Represents USB port overheat event. */
@@ -3215,6 +3230,28 @@ message UsbPortOverheatEvent {
 message BatteryCycleCount {
     /* Number of total charge and discharge cycles on the system battery. */
     optional int32 cycle_count = 1;
+}
+
+/**
+ * Logs that an SD card is mounted and information about it, its type (public or private) and the
+ * size in bytes.
+ * Pulled from:
+ *   StatsCompanionService
+ */
+
+message SDCardInfo {
+
+    enum Type {
+        UNKNOWN = 0;
+        TYPE_PUBLIC = 1;
+        TYPE_PRIVATE = 2;
+        OTHERS = 3;
+    }
+
+    // Type of the SD card: TYPE_PUBLIC if portable and TYPE_PRIVATE if internal.
+    optional Type type = 1;
+    // Total size of the sd card in bytes.
+    optional int64 size_bytes = 2;
 }
 
 /*
@@ -5511,13 +5548,6 @@ message DeviceIdentifierAccessDenied {
 }
 
 /**
- * Potential experiment ids that goes with a train install.
- */
-message TrainExperimentIds {
-    repeated int64 experiment_id = 1;
-}
-
-/**
  * Pulls the ongoing mainline install train version code.
  * Pulled from StatsCompanionService
  */
@@ -5557,4 +5587,12 @@ message AssistGestureFeedbackReported {
 message AssistGestureProgressReported {
   // [0,100] progress for the assist gesture.
   optional int32 progress = 1;
+}
+
+/*
+ * Information about the time zone data on a device.
+ */
+message TimeZoneDataInfo {
+    // A version identifier for the data set on device. e.g. "2018i"
+    optional string tzdb_version = 1;
 }

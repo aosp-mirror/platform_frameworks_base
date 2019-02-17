@@ -478,6 +478,11 @@ void StatsdStats::noteBucketDropped(int64_t metricId) {
     getAtomMetricStats(metricId).bucketDropped++;
 }
 
+void StatsdStats::noteBucketUnknownCondition(int64_t metricId) {
+    lock_guard<std::mutex> lock(mLock);
+    getAtomMetricStats(metricId).bucketUnknownCondition++;
+}
+
 void StatsdStats::noteConditionChangeInNextBucket(int64_t metricId) {
     lock_guard<std::mutex> lock(mLock);
     getAtomMetricStats(metricId).conditionChangeInNextBucket++;
@@ -497,7 +502,7 @@ void StatsdStats::noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayN
             std::min(pullStats.minBucketBoundaryDelayNs, timeDelayNs);
 }
 
-StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int metricId) {
+StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int64_t metricId) {
     auto atomMetricStatsIter = mAtomMetricStats.find(metricId);
     if (atomMetricStatsIter != mAtomMetricStats.end()) {
         return atomMetricStatsIter->second;

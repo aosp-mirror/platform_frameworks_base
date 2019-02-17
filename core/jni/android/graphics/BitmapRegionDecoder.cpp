@@ -215,7 +215,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         env->SetObjectField(options, gOptions_outConfigFieldID, config);
 
         env->SetObjectField(options, gOptions_outColorSpaceFieldID,
-                GraphicsJNI::getColorSpace(env, decodeColorSpace, decodeColorType));
+                GraphicsJNI::getColorSpace(env, decodeColorSpace.get(), decodeColorType));
     }
 
     // If we may have reused a bitmap, we need to indicate that the pixels have changed.

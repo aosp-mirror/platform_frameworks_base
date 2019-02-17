@@ -45,6 +45,7 @@ import android.provider.Settings;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.view.contentcapture.ContentCaptureHelper;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
 import android.view.contentcapture.UserDataRemovalRequest;
@@ -79,7 +80,8 @@ public final class ContentCaptureManagerService extends
 
     private final LocalService mLocalService = new LocalService();
 
-    private final LocalLog mRequestsHistory = new LocalLog(20);
+    @Nullable
+    final LocalLog mRequestsHistory;
 
     @GuardedBy("mLock")
     private ActivityManagerInternal mAm;
@@ -105,15 +107,19 @@ public final class ContentCaptureManagerService extends
                 UserManager.DISALLOW_CONTENT_CAPTURE);
         DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ActivityThread.currentApplication().getMainExecutor(),
-                (namespace, key, value) -> {
-                    if (!ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED
-                            .equals(key)) {
-                        Slog.i(mTag, "Ignoring change on " + key);
-                        return;
-                    }
-                    setDisabledByDeviceConfig(value);
-                });
-        setDisabledByDeviceConfig();
+                (namespace, key, value) -> onDeviceConfigChange(key, value));
+        setLoggingLevelFromDeviceConfig();
+        setDisabledFromDeviceConfig();
+
+        final int loggingSize = ContentCaptureHelper.getIntDeviceConfigProperty(
+                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE, 20);
+        if (loggingSize > 0) {
+            if (debug) Slog.d(mTag, "log history size: " + loggingSize);
+            mRequestsHistory = new LocalLog(loggingSize);
+        } else {
+            if (debug) Slog.d(mTag, "disabled log history because size is " + loggingSize);
+            mRequestsHistory = null;
+        }
 
         // Sets which services are disabled
         final UserManager um = getContext().getSystemService(UserManager.class);
@@ -213,7 +219,33 @@ public final class ContentCaptureManagerService extends
         return false;
     }
 
-    private void setDisabledByDeviceConfig() {
+    private void onDeviceConfigChange(@NonNull String key, @Nullable String value) {
+        switch (key) {
+            case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED:
+                setDisabledByDeviceConfig(value);
+                return;
+            case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL:
+                setLoggingLevelFromDeviceConfig();
+                return;
+            case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE:
+            case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY:
+            case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE:
+            case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY:
+                // TODO(b/123096662): implement it
+                Slog.d(mTag, "changes on " + key + " not supported yet");
+                return;
+            default:
+                Slog.i(mTag, "Ignoring change on " + key);
+        }
+    }
+
+    private void setLoggingLevelFromDeviceConfig() {
+        ContentCaptureHelper.setLoggingLevel();
+        verbose = ContentCaptureHelper.sVerbose;
+        debug = ContentCaptureHelper.sDebug;
+    }
+
+    private void setDisabledFromDeviceConfig() {
         final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED);
         setDisabledByDeviceConfig(value);
@@ -325,13 +357,6 @@ public final class ContentCaptureManagerService extends
         } catch (RemoteException e) {
             // Just ignore it...
         }
-    }
-
-    /**
-     * Logs a request so it's dumped later...
-     */
-    void logRequestLocked(@NonNull String historyItem) {
-        mRequestsHistory.log(historyItem);
     }
 
     private ActivityManagerInternal getAmInternal() {
@@ -527,9 +552,13 @@ public final class ContentCaptureManagerService extends
             synchronized (mLock) {
                 dumpLocked("", pw);
             }
-            if (showHistory) {
-                pw.println(); pw.println("Requests history:"); pw.println();
+            pw.print("Requests history: ");
+            if (mRequestsHistory == null) {
+                pw.println("disabled by device config");
+            } else if (showHistory) {
+                pw.println();
                 mRequestsHistory.reverseDump(fd, pw, args);
+                pw.println();
             }
         }
 

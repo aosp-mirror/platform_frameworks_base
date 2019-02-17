@@ -17,7 +17,7 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_CONTRACTED;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;

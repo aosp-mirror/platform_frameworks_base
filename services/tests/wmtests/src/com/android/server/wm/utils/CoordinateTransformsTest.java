@@ -31,6 +31,7 @@ import static org.junit.Assert.*;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 
 import org.junit.Before;
@@ -42,6 +43,7 @@ import org.junit.rules.ErrorCollector;
  * Build/Install/Run:
  *  atest WmTests:CoordinateTransformsTest
  */
+@Presubmit
 public class CoordinateTransformsTest {
 
     private static final int W = 200;

@@ -15,6 +15,7 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_CONTEXT_UPDATED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARING;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_FINISHED;
@@ -22,9 +23,13 @@ import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_START
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_DISAPPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
-import static android.view.contentcapture.ContentCaptureHelper.DEBUG;
-import static android.view.contentcapture.ContentCaptureHelper.VERBOSE;
+import static android.view.contentcapture.ContentCaptureHelper.getIntDeviceConfigProperty;
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
+import static android.view.contentcapture.ContentCaptureHelper.sDebug;
+import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,6 +68,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     private static final String TAG = MainContentCaptureSession.class.getSimpleName();
 
+    // For readability purposes...
     private static final boolean FORCE_FLUSH = true;
 
     /**
@@ -70,17 +76,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      */
     private static final int MSG_FLUSH = 1;
 
-    /**
-     * Maximum number of events that are buffered before sent to the app.
-     */
-    // TODO(b/121044064): use settings
-    private static final int MAX_BUFFER_SIZE = 100;
-
-    /**
-     * Frequency the buffer is flushed if stale.
-     */
-    // TODO(b/121044064): use settings
-    private static final int FLUSHING_FREQUENCY_MS = 5_000;
+    private static final int DEFAULT_MAX_BUFFER_SIZE = 100;
+    private static final int DEFAULT_FLUSHING_FREQUENCY_MS = 5_000;
+    private static final int DEFAULT_LOG_HISTORY_SIZE = 10;
 
     /**
      * Name of the {@link IResultReceiver} extra used to pass the binder interface to the service.
@@ -104,14 +102,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * Interface to the system_server binder object - it's only used to start the session (and
      * notify when the session is finished).
      */
-    @Nullable // TODO(b/122959591): shoul never be null, we should make main session null instead
+    @NonNull
     private final IContentCaptureManager mSystemServerInterface;
 
     /**
      * Direct interface to the service binder object - it's used to send the events, including the
      * last ones (when the session is finished)
      */
-    @Nullable
+    @NonNull
     private IContentCaptureDirectManager mDirectServiceInterface;
     @Nullable
     private DeathRecipient mDirectServiceVulture;
@@ -130,20 +128,42 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Nullable
     private ArrayList<ContentCaptureEvent> mEvents;
 
+    /**
+     * Maximum number of events that are buffered before sent to the app.
+     */
+    private final int mMaxBufferSize;
+
+    /**
+     * Frequency the buffer is flushed if idle.
+     */
+    private final int mIdleFlushingFrequencyMs;
+
     // Used just for debugging purposes (on dump)
     private long mNextFlush;
 
-    // TODO(b/121044064): use settings to set size
-    private final LocalLog mFlushHistory = new LocalLog(10);
+    @Nullable
+    private final LocalLog mFlushHistory;
 
     /** @hide */
     protected MainContentCaptureSession(@NonNull Context context,
             @NonNull ContentCaptureManager manager, @NonNull Handler handler,
-            @Nullable IContentCaptureManager systemServerInterface) {
+            @NonNull IContentCaptureManager systemServerInterface) {
         mContext = context;
         mManager = manager;
         mHandler = handler;
         mSystemServerInterface = systemServerInterface;
+
+        // TODO(b/123096662): right now we're reading the device config values here, but ideally
+        // it should be read on ContentCaptureManagerService and passed back when the activity
+        // started.
+        mMaxBufferSize = getIntDeviceConfigProperty(DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE,
+                DEFAULT_MAX_BUFFER_SIZE);
+        mIdleFlushingFrequencyMs = getIntDeviceConfigProperty(
+                DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY, DEFAULT_FLUSHING_FREQUENCY_MS);
+        final int logHistorySize = getIntDeviceConfigProperty(
+                DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE, DEFAULT_LOG_HISTORY_SIZE);
+
+        mFlushHistory = logHistorySize > 0 ? new LocalLog(logHistorySize) : null;
     }
 
     @Override
@@ -168,14 +188,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             int flags) {
         if (!isContentCaptureEnabled()) return;
 
-        if (VERBOSE) {
+        if (sVerbose) {
             Log.v(TAG, "start(): token=" + token + ", comp="
                     + ComponentName.flattenToShortString(component));
         }
 
         if (hasStarted()) {
             // TODO(b/122959591): make sure this is expected (and when), or use Log.w
-            if (DEBUG) {
+            if (sDebug) {
                 Log.d(TAG, "ignoring handleStartSession(" + token + "/"
                         + ComponentName.flattenToShortString(component) + " while on state "
                         + getStateAsString(mState));
@@ -186,14 +206,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         mApplicationToken = token;
         mComponentName = component;
 
-        if (VERBOSE) {
+        if (sVerbose) {
             Log.v(TAG, "handleStartSession(): token=" + token + ", act="
                     + getDebugState() + ", id=" + mId);
         }
 
         try {
-            if (mSystemServerInterface == null) return;
-
             mSystemServerInterface.startSession(mApplicationToken, component, mId, flags,
                     new IResultReceiver.Stub() {
                         @Override
@@ -253,7 +271,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             mState = resultCode;
             mDisabled.set(false);
         }
-        if (VERBOSE) {
+        if (sVerbose) {
             Log.v(TAG, "handleSessionStarted() result: id=" + mId + " resultCode=" + resultCode
                     + ", state=" + getStateAsString(mState) + ", disabled=" + mDisabled.get()
                     + ", binder=" + binder + ", events=" + (mEvents == null ? 0 : mEvents.size()));
@@ -268,26 +286,27 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @UiThread
     private void sendEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
         final int eventType = event.getType();
-        if (VERBOSE) Log.v(TAG, "handleSendEvent(" + getDebugState() + "): " + event);
-        if (!hasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED) {
+        if (sVerbose) Log.v(TAG, "handleSendEvent(" + getDebugState() + "): " + event);
+        if (!hasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED
+                && eventType != ContentCaptureEvent.TYPE_CONTEXT_UPDATED) {
             // TODO(b/120494182): comment when this could happen (dialogs?)
             Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
                     + ContentCaptureEvent.getTypeAsString(eventType)
-                    + "): session not started yet");
+                    + "): dropping because session not started yet");
             return;
         }
         if (mDisabled.get()) {
             // This happens when the event was queued in the handler before the sesison was ready,
             // then handleSessionStarted() returned and set it as disabled - we need to drop it,
             // otherwise it will keep triggering handleScheduleFlush()
-            if (VERBOSE) Log.v(TAG, "handleSendEvent(): ignoring when disabled");
+            if (sVerbose) Log.v(TAG, "handleSendEvent(): ignoring when disabled");
             return;
         }
         if (mEvents == null) {
-            if (VERBOSE) {
-                Log.v(TAG, "handleSendEvent(): creating buffer for " + MAX_BUFFER_SIZE + " events");
+            if (sVerbose) {
+                Log.v(TAG, "handleSendEvent(): creating buffer for " + mMaxBufferSize + " events");
             }
-            mEvents = new ArrayList<>(MAX_BUFFER_SIZE);
+            mEvents = new ArrayList<>(mMaxBufferSize);
         }
 
         // Some type of events can be merged together
@@ -299,7 +318,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             // TODO(b/121045053): check if flags match
             if (lastEvent.getType() == TYPE_VIEW_TEXT_CHANGED
                     && lastEvent.getId().equals(event.getId())) {
-                if (VERBOSE) {
+                if (sVerbose) {
                     Log.v(TAG, "Buffering VIEW_TEXT_CHANGED event, updated text="
                             + getSanitizedString(event.getText()));
                 }
@@ -313,7 +332,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
             if (lastEvent.getType() == TYPE_VIEW_DISAPPEARED
                     && event.getSessionId().equals(lastEvent.getSessionId())) {
-                if (VERBOSE) {
+                if (sVerbose) {
                     Log.v(TAG, "Buffering TYPE_VIEW_DISAPPEARED events for session "
                             + lastEvent.getSessionId());
                 }
@@ -328,20 +347,20 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         final int numberEvents = mEvents.size();
 
-        final boolean bufferEvent = numberEvents < MAX_BUFFER_SIZE;
+        final boolean bufferEvent = numberEvents < mMaxBufferSize;
 
         if (bufferEvent && !forceFlush) {
             scheduleFlush(FLUSH_REASON_IDLE_TIMEOUT, /* checkExisting= */ true);
             return;
         }
 
-        if (mState != STATE_ACTIVE && numberEvents >= MAX_BUFFER_SIZE) {
+        if (mState != STATE_ACTIVE && numberEvents >= mMaxBufferSize) {
             // Callback from startSession hasn't been called yet - typically happens on system
             // apps that are started before the system service
             // TODO(b/122959591): try to ignore session while system is not ready / boot
             // not complete instead. Similarly, the manager service should return right away
             // when the user does not have a service set
-            if (DEBUG) {
+            if (sDebug) {
                 Log.d(TAG, "Closing session for " + getDebugState()
                         + " after " + numberEvents + " delayed events");
             }
@@ -396,12 +415,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @UiThread
     private void scheduleFlush(@FlushReason int reason, boolean checkExisting) {
-        if (VERBOSE) {
+        if (sVerbose) {
             Log.v(TAG, "handleScheduleFlush(" + getDebugState(reason)
                     + ", checkExisting=" + checkExisting);
         }
         if (!hasStarted()) {
-            if (VERBOSE) Log.v(TAG, "handleScheduleFlush(): session not started yet");
+            if (sVerbose) Log.v(TAG, "handleScheduleFlush(): session not started yet");
             return;
         }
 
@@ -416,19 +435,19 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             // "Renew" the flush message by removing the previous one
             mHandler.removeMessages(MSG_FLUSH);
         }
-        mNextFlush = System.currentTimeMillis() + FLUSHING_FREQUENCY_MS;
-        if (VERBOSE) {
+        mNextFlush = System.currentTimeMillis() + mIdleFlushingFrequencyMs;
+        if (sVerbose) {
             Log.v(TAG, "handleScheduleFlush(): scheduled to flush in "
-                    + FLUSHING_FREQUENCY_MS + "ms: " + TimeUtils.logTimeOfDay(mNextFlush));
+                    + mIdleFlushingFrequencyMs + "ms: " + TimeUtils.logTimeOfDay(mNextFlush));
         }
         // Post using a Runnable directly to trim a few μs from PooledLambda.obtainMessage()
-        mHandler.postDelayed(() -> flushIfNeeded(reason), MSG_FLUSH, FLUSHING_FREQUENCY_MS);
+        mHandler.postDelayed(() -> flushIfNeeded(reason), MSG_FLUSH, mIdleFlushingFrequencyMs);
     }
 
     @UiThread
     private void flushIfNeeded(@FlushReason int reason) {
         if (mEvents == null || mEvents.isEmpty()) {
-            if (VERBOSE) Log.v(TAG, "Nothing to flush");
+            if (sVerbose) Log.v(TAG, "Nothing to flush");
             return;
         }
         flush(reason);
@@ -446,7 +465,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         if (mDirectServiceInterface == null) {
-            if (VERBOSE) {
+            if (sVerbose) {
                 Log.v(TAG, "handleForceFlush(" + getDebugState(reason) + "): hold your horses, "
                         + "client not ready: " + mEvents);
             }
@@ -458,14 +477,16 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         final int numberEvents = mEvents.size();
         final String reasonString = getflushReasonAsString(reason);
-        if (DEBUG) {
+        if (sDebug) {
             Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason));
         }
-        // Logs reason, size, max size, idle timeout
-        final String logRecord = "r=" + reasonString + " s=" + numberEvents
-                + " m=" + MAX_BUFFER_SIZE + " i=" + FLUSHING_FREQUENCY_MS;
-        try {
+        if (mFlushHistory != null) {
+            // Logs reason, size, max size, idle timeout
+            final String logRecord = "r=" + reasonString + " s=" + numberEvents
+                    + " m=" + mMaxBufferSize + " i=" + mIdleFlushingFrequencyMs;
             mFlushHistory.log(logRecord);
+        }
+        try {
             mHandler.removeMessages(MSG_FLUSH);
 
             final ParceledListSlice<ContentCaptureEvent> events = clearEvents();
@@ -474,6 +495,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             Log.w(TAG, "Error sending " + numberEvents + " for " + getDebugState()
                     + ": " + e);
         }
+    }
+
+    @Override
+    public void updateContentCaptureContext(@Nullable ContentCaptureContext context) {
+        notifyContextUpdated(mId, context);
     }
 
     /**
@@ -493,15 +519,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @UiThread
     private void destroySession() {
-        if (DEBUG) {
+        if (sDebug) {
             Log.d(TAG, "Destroying session (ctx=" + mContext + ", id=" + mId + ") with "
                     + (mEvents == null ? 0 : mEvents.size()) + " event(s) for "
                     + getDebugState());
         }
 
         try {
-            if (mSystemServerInterface == null) return;
-
             mSystemServerInterface.finishSession(mId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error destroying system-service session " + mId + " for "
@@ -513,7 +537,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // clearings out.
     @UiThread
     private void resetSession(int newState) {
-        if (VERBOSE) {
+        if (sVerbose) {
             Log.v(TAG, "handleResetSession(" + getActivityName() + "): from "
                     + getStateAsString(mState) + " to " + getStateAsString(newState));
         }
@@ -613,14 +637,19 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
     }
 
+    void notifyContextUpdated(@NonNull String sessionId,
+            @Nullable ContentCaptureContext context) {
+        sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
+                .setClientContext(context));
+    }
+
     @Override
     void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
+        super.dump(prefix, pw);
+
         pw.print(prefix); pw.print("mContext: "); pw.println(mContext);
         pw.print(prefix); pw.print("user: "); pw.println(mContext.getUserId());
-        if (mSystemServerInterface != null) {
-            pw.print(prefix); pw.print("mSystemServerInterface: ");
-            pw.println(mSystemServerInterface);
-        }
+        pw.print(prefix); pw.print("mSystemServerInterface: ");
         if (mDirectServiceInterface != null) {
             pw.print(prefix); pw.print("mDirectServiceInterface: ");
             pw.println(mDirectServiceInterface);
@@ -638,8 +667,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (mEvents != null && !mEvents.isEmpty()) {
             final int numberEvents = mEvents.size();
             pw.print(prefix); pw.print("buffered events: "); pw.print(numberEvents);
-            pw.print('/'); pw.println(MAX_BUFFER_SIZE);
-            if (VERBOSE && numberEvents > 0) {
+            pw.print('/'); pw.println(mMaxBufferSize);
+            if (sVerbose && numberEvents > 0) {
                 final String prefix3 = prefix + "  ";
                 for (int i = 0; i < numberEvents; i++) {
                     final ContentCaptureEvent event = mEvents.get(i);
@@ -647,13 +676,17 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     pw.println();
                 }
             }
-            pw.print(prefix); pw.print("flush frequency: "); pw.println(FLUSHING_FREQUENCY_MS);
+            pw.print(prefix); pw.print("flush frequency: "); pw.println(mIdleFlushingFrequencyMs);
             pw.print(prefix); pw.print("next flush: ");
             TimeUtils.formatDuration(mNextFlush - System.currentTimeMillis(), pw);
             pw.print(" ("); pw.print(TimeUtils.logTimeOfDay(mNextFlush)); pw.println(")");
         }
-        pw.print(prefix); pw.println("flush history:");
-        mFlushHistory.reverseDump(/* fd= */ null, pw, /* args= */ null); pw.println();
+        if (mFlushHistory != null) {
+            pw.print(prefix); pw.println("flush history:");
+            mFlushHistory.reverseDump(/* fd= */ null, pw, /* args= */ null); pw.println();
+        } else {
+            pw.print(prefix); pw.println("not logging flush history");
+        }
 
         super.dump(prefix, pw);
     }

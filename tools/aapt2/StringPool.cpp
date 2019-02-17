@@ -165,13 +165,12 @@ StringPool::Ref StringPool::MakeRef(const StringPiece& str) {
   return MakeRefImpl(str, Context{}, true);
 }
 
-StringPool::Ref StringPool::MakeRef(const StringPiece& str, const Context& context,
-                                    Maybe<size_t> index) {
-  return MakeRefImpl(str, context, true, index);
+StringPool::Ref StringPool::MakeRef(const StringPiece& str, const Context& context) {
+  return MakeRefImpl(str, context, true);
 }
 
 StringPool::Ref StringPool::MakeRefImpl(const StringPiece& str, const Context& context,
-                                        bool unique, Maybe<size_t> index) {
+                                        bool unique) {
   if (unique) {
     auto range = indexed_strings_.equal_range(str);
     for (auto iter = range.first; iter != range.second; ++iter) {
@@ -181,26 +180,15 @@ StringPool::Ref StringPool::MakeRefImpl(const StringPiece& str, const Context& c
     }
   }
 
-  const size_t size = strings_.size();
-  // Insert the string at the end of the string vector if no index is specified
-  const size_t insertion_index = index ? index.value() : size;
-
   std::unique_ptr<Entry> entry(new Entry());
   entry->value = str.to_string();
   entry->context = context;
-  entry->index_ = insertion_index;
+  entry->index_ = strings_.size();
   entry->ref_ = 0;
   entry->pool_ = this;
 
   Entry* borrow = entry.get();
-  if (insertion_index == size) {
-    strings_.emplace_back(std::move(entry));
-  } else {
-    // Allocate enough space for the string at the index
-    strings_.resize(std::max(insertion_index + 1, size));
-    strings_[insertion_index] = std::move(entry);
-  }
-
+  strings_.emplace_back(std::move(entry));
   indexed_strings_.insert(std::make_pair(StringPiece(borrow->value), borrow));
   return Ref(borrow);
 }

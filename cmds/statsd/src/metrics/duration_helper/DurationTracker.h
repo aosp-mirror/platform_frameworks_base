@@ -155,8 +155,8 @@ protected:
                                  const int64_t& currentBucketValue) {
         for (auto& anomalyTracker : mAnomalyTrackers) {
             if (anomalyTracker != nullptr) {
-                anomalyTracker->detectAndDeclareAnomaly(timestamp, currBucketNum, mEventKey,
-                                                        currentBucketValue);
+                anomalyTracker->detectAndDeclareAnomaly(timestamp, currBucketNum, mTrackerId,
+                                                        mEventKey, currentBucketValue);
             }
         }
     }

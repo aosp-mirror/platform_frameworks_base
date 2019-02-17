@@ -16,8 +16,8 @@
 -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#4a4a4a" />
+    <solid android:color="#242424" /> <!-- 14% of white -->
     <padding android:paddingTop="@dimen/ongoing_appops_chip_bg_padding"
-        android:paddingBottom="@dimen/ongoing_appops_chip_bg_padding"/>
+        android:paddingBottom="@dimen/ongoing_appops_chip_bg_padding" />
     <corners android:radius="@dimen/ongoing_appops_chip_bg_corner_radius" />
 </shape>

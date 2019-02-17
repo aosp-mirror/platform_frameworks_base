@@ -115,6 +115,7 @@ public:
     };
 
     explicit BootAnimation(sp<Callbacks> callbacks);
+    virtual ~BootAnimation();
 
     sp<SurfaceComposerClient> session() const;
 
@@ -155,6 +156,8 @@ private:
     void releaseAnimation(Animation*) const;
     bool parseAnimationDesc(Animation&);
     bool preloadZip(Animation &animation);
+    void findBootAnimationFile();
+    bool preloadAnimation();
 
     void checkExit();
 
@@ -182,6 +185,7 @@ private:
     SortedVector<String8> mLoadedFiles;
     sp<TimeCheckThread> mTimeCheckThread = nullptr;
     sp<Callbacks> mCallbacks;
+    Animation* mAnimation = nullptr;
 };
 
 // ---------------------------------------------------------------------------

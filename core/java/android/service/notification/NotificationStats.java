@@ -16,6 +16,7 @@
 package android.service.notification;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.app.RemoteInput;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -98,7 +99,11 @@ public final class NotificationStats implements Parcelable {
     public NotificationStats() {
     }
 
-    private NotificationStats(Parcel in) {
+    /**
+     * @hide
+     */
+    @SystemApi
+    protected NotificationStats(Parcel in) {
         mSeen = in.readByte() != 0;
         mExpanded = in.readByte() != 0;
         mDirectReplied = in.readByte() != 0;

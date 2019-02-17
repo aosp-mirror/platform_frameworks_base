@@ -721,7 +721,7 @@ public final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackage(
                         RingtoneManager.ACTION_RINGTONE_PICKER, userId),
-                userId, STORAGE_PERMISSIONS);
+                userId, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
 
         // TextClassifier Service
         String textClassifierPackageName =

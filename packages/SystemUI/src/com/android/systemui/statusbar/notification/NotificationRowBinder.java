@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.notification;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -42,8 +42,8 @@ import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -78,7 +78,7 @@ public class NotificationRowBinder {
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
     private HeadsUpManager mHeadsUpManager;
-    private NotificationInflater.InflationCallback mInflationCallback;
+    private NotificationContentInflater.InflationCallback mInflationCallback;
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
@@ -105,7 +105,7 @@ public class NotificationRowBinder {
     public void setUpWithPresenter(NotificationPresenter presenter,
             NotificationListContainer listContainer,
             HeadsUpManager headsUpManager,
-            NotificationInflater.InflationCallback inflationCallback,
+            NotificationContentInflater.InflationCallback inflationCallback,
             BindRowCallback bindRowCallback) {
         mPresenter = presenter;
         mListContainer = listContainer;

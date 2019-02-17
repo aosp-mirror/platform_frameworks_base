@@ -138,10 +138,10 @@ message AllowNew {
 
 // Represents a set of overlayable resources.
 message Overlayable {
-  // The name of the <overlyabale>.
+  // The name of the <overlayable>.
   string name = 1;
 
-  // The location of the <overlyabale> declaration in the source.
+  // The location of the <overlayable> declaration in the source.
   Source source = 2;
 
   // The component responsible for enabling and disabling overlays targeting this <overlayable>.

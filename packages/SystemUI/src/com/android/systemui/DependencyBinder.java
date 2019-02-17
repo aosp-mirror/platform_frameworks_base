@@ -21,11 +21,13 @@ import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
@@ -190,6 +192,12 @@ public abstract class DependencyBinder {
     @Binds
     public abstract DarkIconDispatcher provideDarkIconDispatcher(
             DarkIconDispatcherImpl controllerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract StatusBarStateController provideStatusBarStateController(
+            StatusBarStateControllerImpl controllerImpl);
 
     /**
      */

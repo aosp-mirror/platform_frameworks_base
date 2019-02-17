@@ -342,37 +342,17 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
-     * Requests that the voice state UI indicate the given state.
+     * Provide hints to be reflected in the system UI.
      *
-     * @param state value indicating whether the assistant is listening, fulfilling, etc.
+     * @param hints Arguments used to show UI.
      */
-    public final void setVoiceState(int state) {
-        try {
-            mSystemService.setVoiceState(mInterface, state);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+    public final void setUiHints(@NonNull Bundle hints) {
+        if (hints == null) {
+            throw new IllegalArgumentException("Hints must be non-null");
         }
-    }
 
-    /**
-     * Displays the given voice transcription contents.
-     */
-    public final void setTranscription(@NonNull String transcription) {
         try {
-            mSystemService.setTranscription(mInterface, transcription);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Hides transcription.
-     *
-     * @param immediate if {@code true}, remove before transcription animation completes.
-     */
-    public final void clearTranscription(boolean immediate) {
-        try {
-            mSystemService.clearTranscription(mInterface, immediate);
+            mSystemService.setUiHints(mInterface, hints);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -20,6 +20,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.SystemApi;
 import android.content.LocaleProto;
 import android.icu.util.ULocale;
 import android.util.proto.ProtoOutputStream;
@@ -322,6 +323,15 @@ public final class LocaleList implements Parcelable {
      */
     public static boolean isPseudoLocale(Locale locale) {
         return LOCALE_EN_XA.equals(locale) || LOCALE_AR_XB.equals(locale);
+    }
+
+    /**
+     * Returns true if locale is a pseudo-locale, false otherwise.
+     * {@hide}
+     */
+    @SystemApi
+    public static boolean isPseudoLocale(@Nullable ULocale locale) {
+        return isPseudoLocale(locale != null ? locale.toLocale() : null);
     }
 
     @IntRange(from=0, to=1)

@@ -1227,10 +1227,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     .getSystemService(Context.WINDOW_SERVICE);
             int width = mPrototypeController.getEdgeSensitivityWidth();
             int height = mPrototypeController.getEdgeSensitivityHeight();
+            // Explicitly left and right, not start and end as this is device relative.
             mLeftEdgePanel = NavigationBarEdgePanel.create(getContext(), width, height,
-                    Gravity.START | Gravity.BOTTOM);
+                    Gravity.LEFT | Gravity.BOTTOM);
             mRightEdgePanel = NavigationBarEdgePanel.create(getContext(), width, height,
-                    Gravity.END | Gravity.BOTTOM);
+                    Gravity.RIGHT | Gravity.BOTTOM);
             mLeftEdgePanel.setOnTouchListener(mEdgePanelTouchListener);
             mRightEdgePanel.setOnTouchListener(mEdgePanelTouchListener);
             wm.addView(mLeftEdgePanel, mLeftEdgePanel.getLayoutParams());
@@ -1252,15 +1253,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mButtonDispatchers.valueAt(i).onDestroy();
         }
 
-        if (mPrototypeController.isEnabled()) {
-            WindowManager wm = (WindowManager) getContext()
-                    .getSystemService(Context.WINDOW_SERVICE);
-            if (mLeftEdgePanel != null) {
-                wm.removeView(mLeftEdgePanel);
-            }
-            if (mRightEdgePanel != null) {
-                wm.removeView(mRightEdgePanel);
-            }
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        if (mLeftEdgePanel != null) {
+            wm.removeView(mLeftEdgePanel);
+        }
+        if (mRightEdgePanel != null) {
+            wm.removeView(mRightEdgePanel);
         }
     }
 

@@ -1019,7 +1019,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mDisplayWhiteBalanceController != null) {
             if (state == Display.STATE_ON && mDisplayWhiteBalanceSettings.isEnabled()) {
                 mDisplayWhiteBalanceController.setEnabled(true);
-                mDisplayWhiteBalanceController.updateScreenColorTemperature();
+                mDisplayWhiteBalanceController.updateDisplayColorTemperature();
             } else {
                 mDisplayWhiteBalanceController.setEnabled(false);
             }

@@ -681,6 +681,19 @@ public final class MediaSession {
         }
 
         /**
+         * Override to handle the playback speed change.
+         * To update the new playback speed, create a new {@link PlaybackState} by using {@link
+         * PlaybackState.Builder#setState(int, long, float)}, and set it with
+         * {@link #setPlaybackState(PlaybackState)}.
+         *
+         * @param speed the playback speed
+         * @see #setPlaybackState(PlaybackState)
+         * @see PlaybackState.Builder#setState(int, long, float)
+         */
+        public void onSetPlaybackSpeed(float speed) {
+        }
+
+        /**
          * Called when a {@link MediaController} wants a {@link PlaybackState.CustomAction} to be
          * performed.
          *
