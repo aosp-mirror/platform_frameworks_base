@@ -403,7 +403,8 @@ public class UserControllerTest {
         protected int broadcastIntent(Intent intent, String resolvedType,
                 IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
                 String[] requiredPermissions, int appOp, Bundle bOptions, boolean ordered,
-                boolean sticky, int callingPid, int callingUid, int userId) {
+                boolean sticky, int callingPid, int callingUid, int realCallingUid,
+                int realCallingPid, int userId) {
             Log.i(TAG, "broadcastIntentLocked " + intent);
             mSentIntents.add(intent);
             return 0;
