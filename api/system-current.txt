@@ -1478,6 +1478,7 @@ package android.content.om {
   }
 
   public class OverlayManager {
+    method @Nullable public android.content.om.OverlayInfo getOverlayInfo(@NonNull String, @NonNull android.os.UserHandle);
     method public java.util.List<android.content.om.OverlayInfo> getOverlayInfosForTarget(@Nullable String, int);
     method public boolean setEnabled(@Nullable String, boolean, int);
     method public boolean setEnabledExclusiveInCategory(@Nullable String, int);
