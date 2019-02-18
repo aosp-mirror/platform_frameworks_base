@@ -30,6 +30,7 @@
         android:maxHeight="3dp"
         android:paddingTop="24dp"
         android:paddingBottom="24dp"
+        android:clickable="true"
         android:layout_marginBottom="-24dp"
         android:layout_marginTop="-12dp"
         android:splitTrack="false"
