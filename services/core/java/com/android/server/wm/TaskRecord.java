@@ -2134,7 +2134,7 @@ class TaskRecord extends ConfigurationContainer {
             if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
                 final int overrideScreenHeightDp = (int) (mTmpStableBounds.height() / density);
                 inOutConfig.screenHeightDp = insideParentBounds
-                        ? Math.min(overrideScreenHeightDp, parentConfig.screenWidthDp)
+                        ? Math.min(overrideScreenHeightDp, parentConfig.screenHeightDp)
                         : overrideScreenHeightDp;
             }
 

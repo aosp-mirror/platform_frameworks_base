@@ -24,6 +24,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -305,6 +306,41 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertEquals(root, task.getRootActivity());
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getRootActivity().getOrientation());
         assertEquals(fullScreenBounds, task.getBounds());
+    }
+
+    @Test
+    public void testComputeConfigResourceOverrides() {
+        final TaskRecord task = new TaskBuilder(mSupervisor).build();
+        final Configuration inOutConfig = new Configuration();
+        final Configuration parentConfig = new Configuration();
+        final int longSide = 1200;
+        final int shortSide = 600;
+        parentConfig.densityDpi = 400;
+        parentConfig.screenHeightDp = 200; // 200 * 400 / 160 = 500px
+        parentConfig.screenWidthDp = 100; // 100 * 400 / 160 = 250px
+
+        // Portrait bounds.
+        inOutConfig.windowConfiguration.getBounds().set(0, 0, shortSide, longSide);
+        // By default, the parent bounds should limit the existing input bounds.
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig);
+
+        assertEquals(parentConfig.screenHeightDp, inOutConfig.screenHeightDp);
+        assertEquals(parentConfig.screenWidthDp, inOutConfig.screenWidthDp);
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, inOutConfig.orientation);
+
+        inOutConfig.setToDefaults();
+        // Landscape bounds.
+        inOutConfig.windowConfiguration.getBounds().set(0, 0, longSide, shortSide);
+        // Without limiting to be inside the parent bounds, the out screen size should keep relative
+        // to the input bounds.
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig,
+                false /* insideParentBounds */);
+
+        assertEquals(shortSide * DENSITY_DEFAULT / parentConfig.densityDpi,
+                inOutConfig.screenHeightDp);
+        assertEquals(longSide * DENSITY_DEFAULT / parentConfig.densityDpi,
+                inOutConfig.screenWidthDp);
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, inOutConfig.orientation);
     }
 
     /** Ensures that the alias intent won't have target component resolved. */
