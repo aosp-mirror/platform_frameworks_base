@@ -2373,6 +2373,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             pw.decreaseIndent();
         }
+
+        pw.println();
+        pw.println("NetworkStackClient logs:");
+        pw.increaseIndent();
+        NetworkStackClient.getInstance().dump(pw);
     }
 
     private void dumpNetworks(IndentingPrintWriter pw) {
