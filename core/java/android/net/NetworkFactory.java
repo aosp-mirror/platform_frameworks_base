@@ -212,7 +212,7 @@ public class NetworkFactory extends Handler {
      * Called for every request every time a new NetworkRequest is seen
      * and whenever the filterScore or filterNetworkCapabilities change.
      *
-     * acceptRequest can be overriden to provide complex filter behavior
+     * acceptRequest can be overridden to provide complex filter behavior
      * for the incoming requests
      *
      * For output, this class will call {@link #needNetworkFor} and

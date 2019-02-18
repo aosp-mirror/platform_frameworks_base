@@ -637,7 +637,7 @@ public class ContentProviderOperation implements Parcelable {
 
         /**
          * The selection and arguments to use. An occurrence of '?' in the selection will be
-         * replaced with the corresponding occurence of the selection argument. Any of the
+         * replaced with the corresponding occurrence of the selection argument. Any of the
          * selection arguments may be overwritten by a selection argument back reference as
          * specified by {@link #withSelectionBackReference}.
          * This can only be used with builders of type update, delete, or assert.

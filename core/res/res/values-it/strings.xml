@@ -1117,7 +1117,7 @@
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Upgrade dell\'app <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
-    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio applicazioni."</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio app."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Conclusione dell\'avvio."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
     <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Tocca per tornare al gioco"</string>
@@ -1744,7 +1744,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Comprimi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Non disturbare"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo di inattività"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo di riposo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Notte di un giorno feriale"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>

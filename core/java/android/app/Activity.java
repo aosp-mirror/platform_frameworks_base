@@ -392,7 +392,7 @@ import java.util.List;
  *         <td>The final call you receive before your
  *             activity is destroyed.  This can happen either because the
  *             activity is finishing (someone called {@link Activity#finish} on
- *             it, or because the system is temporarily destroying this
+ *             it), or because the system is temporarily destroying this
  *             instance of the activity to save space.  You can distinguish
  *             between these two scenarios with the {@link
  *             Activity#isFinishing} method.</td>
@@ -543,12 +543,12 @@ import java.util.List;
  * <a name="SavingPersistentState"></a>
  * <h3>Saving Persistent State</h3>
  *
- * <p>There are generally two kinds of persistent state than an activity
+ * <p>There are generally two kinds of persistent state that an activity
  * will deal with: shared document-like data (typically stored in a SQLite
  * database using a {@linkplain android.content.ContentProvider content provider})
  * and internal state such as user preferences.</p>
  *
- * <p>For content provider data, we suggest that activities use a
+ * <p>For content provider data, we suggest that activities use an
  * "edit in place" user model.  That is, any edits a user makes are effectively
  * made immediately without requiring an additional confirmation step.
  * Supporting this model is generally a simple matter of following two rules:</p>
@@ -1372,6 +1372,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
         mActivityTransitionState.onResume(this, isTopOfTask());
+        enableAutofillCompatibilityIfNeeded();
         if (mAutoFillResetNeeded) {
             if (!mAutoFillIgnoreFirstResumePause) {
                 View focus = getCurrentFocus();
@@ -1967,7 +1968,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Perform any final cleanup before an activity is destroyed.  This can
      * happen either because the activity is finishing (someone called
-     * {@link #finish} on it, or because the system is temporarily destroying
+     * {@link #finish} on it), or because the system is temporarily destroying
      * this instance of the activity to save space.  You can distinguish
      * between these two scenarios with the {@link #isFinishing} method.
      *
@@ -2933,7 +2934,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Use with {@link #setDefaultKeyMode} to specify that unhandled keystrokes
      * will start an application-defined search.  (If the application or activity does not
-     * actually define a search, the the keys will be ignored.)
+     * actually define a search, the keys will be ignored.)
      *
      * <p>See {@link android.app.SearchManager android.app.SearchManager} for more details.
      *
@@ -3233,7 +3234,7 @@ public class Activity extends ContextThemeWrapper
      * interacted with the device in some way while your activity is running.
      * This callback and {@link #onUserLeaveHint} are intended to help
      * activities manage status bar notifications intelligently; specifically,
-     * for helping activities determine the proper time to cancel a notfication.
+     * for helping activities determine the proper time to cancel a notification.
      *
      * <p>All calls to your activity's {@link #onUserLeaveHint} callback will
      * be accompanied by calls to {@link #onUserInteraction}.  This
@@ -7148,7 +7149,6 @@ public class Activity extends ContextThemeWrapper
         mWindow.setColorMode(info.colorMode);
 
         setAutofillCompatibilityEnabled(application.isAutofillCompatibilityEnabled());
-        enableAutofillCompatibilityIfNeeded();
     }
 
     private void enableAutofillCompatibilityIfNeeded() {
@@ -7848,7 +7848,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Specifies whether an {@link Activity} should be shown on top of the the lock screen whenever
+     * Specifies whether an {@link Activity} should be shown on top of the lock screen whenever
      * the lockscreen is up and the activity is resumed. Normally an activity will be transitioned
      * to the stopped state if it is started while the lockscreen is up, but with this flag set the
      * activity will remain in the resumed state visible on-top of the lock screen. This value can

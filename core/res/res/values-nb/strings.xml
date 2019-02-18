@@ -499,7 +499,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Deler av fingeravtrykket er registrert. Prøv på nytt."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Kunne ikke registrere fingeravtrykket. Prøv på nytt."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingeravtrykksensoren er skitten. Rengjør den og prøv på nytt."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Du flyttet fingeren for kjapt. Prøv på nytt."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Du flyttet fingeren for raskt. Prøv på nytt."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Du flyttet fingeren for sakte. Prøv på nytt."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -510,7 +510,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tidsavbrudd for fingeravtrykk er nådd. Prøv på nytt."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingeravtrykk-operasjonen ble avbrutt."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Fingeravtrykk-operasjonen ble avbrutt av brukeren."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"For mange forsøk. Prøve på nytt senere."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"For mange forsøk. Prøv på nytt senere."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"For mange forsøk. Fingeravtrykkssensoren er slått av."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Prøv igjen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Ingen fingeravtrykk er registrert."</string>

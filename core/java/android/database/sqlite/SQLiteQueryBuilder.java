@@ -16,9 +16,9 @@
 
 package android.database.sqlite;
 
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -44,7 +44,8 @@ import java.util.regex.Pattern;
  * This is a convenience class that helps build SQL queries to be sent to
  * {@link SQLiteDatabase} objects.
  */
-public class SQLiteQueryBuilder {
+public class SQLiteQueryBuilder
+{
     private static final String TAG = "SQLiteQueryBuilder";
     private static final Pattern sLimitPattern =
             Pattern.compile("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");

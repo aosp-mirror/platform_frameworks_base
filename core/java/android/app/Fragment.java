@@ -2259,7 +2259,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Sets whether the the exit transition and enter transition overlap or not.
+     * Sets whether the exit transition and enter transition overlap or not.
      * When true, the enter transition will start as soon as possible. When false, the
      * enter transition will wait until the exit transition completes before starting.
      *
@@ -2272,7 +2272,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Returns whether the the exit transition and enter transition overlap or not.
+     * Returns whether the exit transition and enter transition overlap or not.
      * When true, the enter transition will start as soon as possible. When false, the
      * enter transition will wait until the exit transition completes before starting.
      *
@@ -2286,7 +2286,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Sets whether the the return transition and reenter transition overlap or not.
+     * Sets whether the return transition and reenter transition overlap or not.
      * When true, the reenter transition will start as soon as possible. When false, the
      * reenter transition will wait until the return transition completes before starting.
      *
@@ -2299,7 +2299,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Returns whether the the return transition and reenter transition overlap or not.
+     * Returns whether the return transition and reenter transition overlap or not.
      * When true, the reenter transition will start as soon as possible. When false, the
      * reenter transition will wait until the return transition completes before starting.
      *

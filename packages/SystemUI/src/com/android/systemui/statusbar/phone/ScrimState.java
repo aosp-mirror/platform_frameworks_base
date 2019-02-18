@@ -105,7 +105,6 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
             mBlankScreen = mDisplayRequiresBlanking;
-            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
             mCurrentInFrontAlpha = alwaysOnEnabled ? mAodFrontScrimAlpha : 1f;
             mCurrentInFrontTint = Color.BLACK;
             mCurrentBehindTint = Color.BLACK;
@@ -113,6 +112,11 @@ public enum ScrimState {
             // DisplayPowerManager may blank the screen for us,
             // in this case we just need to set our state.
             mAnimateChange = mDozeParameters.shouldControlScreenOff();
+        }
+
+        @Override
+        public float getBehindAlpha(float busyness) {
+            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
         }
 
         @Override
@@ -129,9 +133,13 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mCurrentInFrontAlpha = 0;
             mCurrentInFrontTint = Color.BLACK;
-            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
             mCurrentBehindTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
+        }
+
+        @Override
+        public float getBehindAlpha(float busyness) {
+            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
         }
     },
 

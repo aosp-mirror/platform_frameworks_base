@@ -287,7 +287,7 @@ public class UrlQuerySanitizer {
         /**
          * Sanitize a value.
          * <ol>
-         * <li>If script URLs are not OK, the will be removed.
+         * <li>If script URLs are not OK, they will be removed.
          * <li>If neither spaces nor other white space is OK, then
          * white space will be trimmed from the beginning and end of
          * the URL. (Just the actual white space characters are trimmed, not
@@ -563,7 +563,7 @@ public class UrlQuerySanitizer {
     }
 
     /**
-     * Constructs a UrlQuerySanitizer and parse a URL.
+     * Constructs a UrlQuerySanitizer and parses a URL.
      * This constructor is provided for convenience when the
      * default parsing behavior is acceptable.
      * <p>
@@ -644,7 +644,7 @@ public class UrlQuerySanitizer {
     }
 
     /**
-     * An array list of all of the parameter value pairs in the sanitized
+     * An array list of all of the parameter-value pairs in the sanitized
      * query, in the order they appeared in the query. May contain duplicate
      * parameters.
      * <p class="note"><b>Note:</b> Do not modify this list. Treat it as a read-only list.</p>
@@ -656,7 +656,7 @@ public class UrlQuerySanitizer {
     /**
      * Check if a parameter exists in the current sanitized query.
      * @param parameter the unencoded name of a parameter.
-     * @return true if the paramater exists in the current sanitized queary.
+     * @return true if the parameter exists in the current sanitized queary.
      */
     public boolean hasParameter(String parameter) {
         return mEntries.containsKey(parameter);
@@ -766,7 +766,7 @@ public class UrlQuerySanitizer {
      * the value. If all goes well then addSanitizedValue is called with
      * the unescaped parameter and the sanitized unescaped value.
      * @param parameter an escaped parameter
-     * @param value an unsanitzied escaped value
+     * @param value an unsanitized escaped value
      */
     protected void parseEntry(String parameter, String value) {
         String unescapedParameter = unescape(parameter);
@@ -812,7 +812,7 @@ public class UrlQuerySanitizer {
     /**
      * Get the effective value sanitizer for a parameter. Like getValueSanitizer,
      * except if there is no value sanitizer registered for a parameter, and
-     * unregistered paramaters are allowed, then the default value sanitizer is
+     * unregistered parameters are allowed, then the default value sanitizer is
      * returned.
      * @param parameter an unescaped parameter
      * @return the effective value sanitizer for a parameter.
