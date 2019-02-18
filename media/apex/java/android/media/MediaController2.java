@@ -317,7 +317,9 @@ public class MediaController2 implements AutoCloseable {
                 isCanceled = !mRequestedCommandSeqNumbers.remove(seq);
             }
             if (isCanceled) {
-                resultReceiver.send(RESULT_INFO_SKIPPED, null);
+                if (resultReceiver != null) {
+                    resultReceiver.send(RESULT_INFO_SKIPPED, null);
+                }
                 return;
             }
             Session2Command.Result result = mCallback.onSessionCommand(
