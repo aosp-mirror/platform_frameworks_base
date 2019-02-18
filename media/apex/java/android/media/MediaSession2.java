@@ -353,6 +353,7 @@ public class MediaSession2 implements AutoCloseable {
                     }
                     mConnectedControllers.put(controller, controllerInfo);
                 }
+                mCallback.onPostConnect(MediaSession2.this, controllerInfo);
                 connected = true;
             } finally {
                 if (!connected) {
@@ -741,6 +742,17 @@ public class MediaSession2 implements AutoCloseable {
         public Session2CommandGroup onConnect(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller) {
             return null;
+        }
+
+        /**
+         * Called immediately after a controller is connected. This is a convenient method to add
+         * custom initialization between the session and a controller.
+         *
+         * @param session the session for this event
+         * @param controller controller information.
+         */
+        public void onPostConnect(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller) {
         }
 
         /**
